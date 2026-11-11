@@ -65,6 +65,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -180,6 +181,11 @@ let serie = 0;
 
 LS.spiel({
   id: "einmaleins-blitz",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "punktfeld", ziele: { s1: { zeilen: 3, spalten: 5, rechnung: [3, "×", 5] },
+    s2: { zeilen: 7, spalten: 8, rechnung: [7, "×", 8] }, s3: { zeilen: 7, spalten: 8, rechnung: [56, ":", 8] },
+    s4: { zeilen: 7, spalten: 3, einheit: 10, rechnung: [30, "×", 7] }, s5: { zeilen: 6, spalten: 7, einheit: 10, rechnung: [70, "×", 6], luecke: 0 },
+    s6: { zeilen: 4, spalten: 6, einheit: 100, rechnung: [40, "×", 60] } } },
   einleitung: "Blitzschnell rechnen! Löse die Malaufgaben — je mehr du hintereinander richtig hast, desto länger wird deine Blitz-Serie.",
   hilfe: "Rechne die Aufgabe im Kopf und tippe das Ergebnis mit den Zifferntasten ein. Steht ein „?“ in der Mitte, tippst du die fehlende Zahl. Je mehr Aufgaben du hintereinander richtig hast, desto länger wird deine Blitz-Serie ⚡.",
   anzahl: 10,

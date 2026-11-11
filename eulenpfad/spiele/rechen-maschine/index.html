@@ -64,6 +64,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -410,6 +411,11 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "rechen-maschine",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "maschine", ziele: { s1: { start: 15, kaesten: [["+", 7]] },
+    s2: { start: 8, kaesten: [["·", 2], ["−", 3]] }, s3: { start: 36, kaesten: [[":", 4], ["·", 7]] },
+    s4: { start: 12, kaesten: [[":", 3], ["·", 5], ["+", 15]] }, s5: { start: 2400, kaesten: [["+", 600], ["·", 2], ["−", 500]] },
+    s6: { start: 14, weiche: { ja: [":", 2], nein: ["·", 3] }, kaesten: [["+", 9]] } } },
   einleitung: "Die Rechen-Maschine rechnet Schritt für Schritt. Was kommt heraus — und was ging hinein?",
   hilfe: "Die Zahl geht vorne hinein, jeder Kasten rechnet einen Schritt. Tippe die Zahl ein, die herauskommt oder hineinging. Fehlt ein Kasten, tippst du die passende Regel an.",
   anzahl: 8,

@@ -27,6 +27,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -108,6 +109,9 @@ function tippsFuer(a, stufe) {
 
 LS.spiel({
   id: "doppel-spiegel",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "wachsen", bilder: "spiegel", ziele: { s1: { zahl: 3 }, s2: { zahl: 5 }, s3: { zahl: 8, halb: true }, s4: { zahl: 9 },
+    s5: { zahl: 35 }, s6: { zahl: 374 } } },
   hilfe: "Rechne und tippe das Ergebnis mit den Zifferntasten ein. Der Spiegel zeigt dir die Punkte doppelt.",
   einleitung: "Der Spiegel zeigt alles doppelt! Verdoppeln heisst: noch einmal gleich viel dazu. Halbieren heisst: in zwei gleiche Teile teilen.",
   anzahl: 10,

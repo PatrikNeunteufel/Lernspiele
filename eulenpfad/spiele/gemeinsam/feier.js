@@ -1735,6 +1735,643 @@ var LS_FEIER = (function () {
   Object.assign(BILDER.sammeln, { tafel, spuernase, blitz: punkteBlitz, korb, haende });
   Object.assign(BILDER.bauen, { kette, beweis });
 
+  // ---------- Bilder Block M3: Rechnen (AR1 a, LERN_Session28) ----------
+  // Wie M2: jedes Bild folgt den Stufen seines Spiels und rechnet nach, was es zeigt; ohne stimmige Angabe kein Bild.
+
+  /** Wert einer Rechnung aus Zahlen und Zeichen, Punkt vor Strich (× · : vor + − -): [9, "×", 6, "−", 6] → 48. */
+  function wertVon(teile) {
+    if (!Array.isArray(teile) || teile.length % 2 === 0 || teile.some((x, i) => (i % 2 ? typeof x !== "string" : !Number.isFinite(x)))) return NaN;
+    const stapel = [teile[0]];
+    for (let i = 1; i < teile.length; i += 2) {
+      const op = teile[i], b = teile[i + 1];
+      if (op === "×" || op === "·") stapel[stapel.length - 1] *= b;
+      else if (op === ":") stapel[stapel.length - 1] /= b;
+      else if (op === "+" || op === "−" || op === "-") stapel.push(op, b);
+      else return NaN;
+    }
+    let w = stapel[0];
+    for (let i = 1; i < stapel.length; i += 2) w = stapel[i] === "+" ? w + stapel[i + 1] : w - stapel[i + 1];
+    return w;
+  }
+  /** Rechnung als Text: Zahlen wie im Lehrmittel, „-“ als Minuszeichen. */
+  const termText = teile => teile.map(x => (typeof x === "number" ? ganzText(x) : x === "-" ? "−" : x)).join(" ");
+  /** Guetzli um x, y. */
+  const guetzli = (x, y, r = 4.6) => s("g", {}, s("circle", { cx: x, cy: y, r, fill: "#d9a35b", stroke: "#8a5a2b", "stroke-width": 0.8 }),
+    ...[[-1.6, -1.2], [1.5, -0.4], [-0.3, 1.8]].map(([dx, dy]) => s("circle", { cx: x + dx * r / 4.6, cy: y + dy * r / 4.6, r: r * 0.17, fill: "#5e3417" })));
+
+  // ----- Einmaleins-Blitz (BAUEN · punktfeld) -----
+  /**
+   * Punktefeld Reihe um Reihe wie im Spiel (3 × 5, 7 × 8; 56 : 8 = 7 sind 7 Reihen zu 8); mit einheit 10 Zehnerstangen
+   * (30 × 7: 7 Reihen zu 3 Stangen), mit einheit 100 Hunderterplatten (40 × 60: 4 Reihen zu 6 Platten). Die Rechnung muss
+   * zum Feld passen. luecke: die gesuchte Zahl (Stufe 5) leuchtet in der Rechnung.
+   */
+  function punktfeld(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || ![z.zeilen, z.spalten].every(v => Number.isInteger(v) && v >= 1 && v <= 10) || !Array.isArray(z.rechnung) || z.rechnung.length !== 3) return null;
+    const einheit = z.einheit || 1, gesamt = z.zeilen * z.spalten * einheit;
+    if (![1, 10, 100].includes(einheit)) return null;
+    const [a, op, b] = z.rechnung, c = wertVon(z.rechnung);
+    if (!Number.isInteger(c) || (op === ":" ? a !== gesamt : c !== gesamt)) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "punktfeld", "data-anzahl": z.zeilen * z.spalten });
+    svg.appendChild(tagGrund());
+    const zw = einheit === 1 ? Math.min(14, 104 / z.zeilen, 250 / z.spalten) : einheit === 10 ? 11 : 22;
+    const sw = einheit === 1 ? zw : einheit === 10 ? Math.min(46, 284 / z.spalten) : 22, sl = sw - 6; // sl: Länge einer Zehnerstange
+    const x0 = (BREITE - z.spalten * sw) / 2 + sw / 2, y0 = 14 + (108 - z.zeilen * zw) / 2 + zw / 2;
+    const je = (DAUER * 0.65) / z.zeilen;
+    for (let r = 0; r < z.zeilen; r++) {
+      const reihe = s("g", {});
+      for (let c0 = 0; c0 < z.spalten; c0++) {
+        const x = x0 + c0 * sw, y = y0 + r * zw;
+        let e;
+        if (einheit === 1) e = s("circle", { cx: x, cy: y, r: zw * 0.36, style: "fill:var(--deko-6)" });
+        else if (einheit === 10) e = s("g", {}, s("rect", { x: x - sl / 2, y: y - 3.5, width: sl, height: 7, rx: 1, style: "fill:var(--st-Z)" }),
+          s("path", { d: Array.from({ length: 9 }, (_, i) => `M${(x - sl / 2 + ((i + 1) * sl) / 10).toFixed(2)},${y - 3.5} v7`).join(" "), stroke: "#ffffff", "stroke-width": 0.5, "stroke-opacity": 0.8 }));
+        else e = s("g", {}, s("rect", { x: x - 9.5, y: y - 9.5, width: 19, height: 19, rx: 1, style: "fill:var(--st-H)" }),
+          s("path", { d: Array.from({ length: 9 }, (_, i) => `M${x - 9.5 + (i + 1) * 1.9},${y - 9.5} v19 M${x - 9.5},${y - 9.5 + (i + 1) * 1.9} h19`).join(" "), stroke: "#ffffff", "stroke-width": 0.3, "stroke-opacity": 0.8 }));
+        e.setAttribute("data-stueck", einheit === 1 ? "punkt" : einheit === 10 ? "Z" : "H");
+        reihe.appendChild(e);
+      }
+      svg.appendChild(erscheine(reihe, r * je, ruhig, 0.2));
+    }
+    // Rechnung; die gesuchte Zahl in Farbe
+    const teile = [ganzText(a), OP_TEXT[op] || op, ganzText(b), "=", ganzText(c)];
+    const zeile = s("text", { x: BREITE / 2, y: 140, fill: "#2d3047", "font-size": 14, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle", "data-zeile": "unten" });
+    teile.forEach((t0, i) => zeile.appendChild(s("tspan", i === z.luecke ? { style: "fill:var(--deko-2)" } : {}, (i ? " " : "") + t0)));
+    svg.appendChild(erscheine(zeile, DAUER * 0.75, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 30, 22, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 24, ruhig));
+    return svg;
+  }
+
+  // ----- Rest-Rätsel (SAMMELN · reste) -----
+  /**
+   * Die Dinge werden reihum auf die Teller verteilt (eins je Teller und Runde), was nicht mehr für alle reicht, kommt ins
+   * Glas: 7 : 2 = 3 Rest 1. Kommen mehr als sechs auf einen Teller (grosse Zahlen), steht die Zahl auf dem Teller.
+   */
+  function reste(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.zahl) || !Number.isInteger(z.teiler) || z.teiler < 2 || z.teiler > 8 || z.zahl < z.teiler) return null;
+    const q = Math.floor(z.zahl / z.teiler), r = z.zahl % z.teiler, n = z.teiler, mitDingen = q <= 6;
+    if (r > 12) return null;
+    const ding = z.ding === "apfel" ? (x, y) => apfel(x, y + 2) : (x, y) => guetzli(x, y, 5.6);
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "reste", "data-anzahl": (mitDingen ? q * n : 0) + r, "data-wert": `${q},${r}` });
+    svg.appendChild(tagGrund());
+    const pw = Math.min(76, 236 / n), xs = Array.from({ length: n }, (_, i) => 12 + pw / 2 + i * pw), ty = 104, sp = 13;
+    xs.forEach(x => svg.appendChild(s("ellipse", { cx: x, cy: ty + 9, rx: pw / 2 - 3, ry: 8, fill: "#ffffff", stroke: "#b8a98a", "stroke-width": 1.2 })));
+    // Glas rechts, gross genug für den Rest
+    const gx = 284;
+    svg.appendChild(s("path", { d: `M${gx - 22},${ty - 52} L${gx - 18},${ty + 16} L${gx + 18},${ty + 16} L${gx + 22},${ty - 52}`, fill: "#e8f4fb", stroke: "#8ab4cc", "stroke-width": 1.6 }));
+    const spaltenJe = Math.max(2, Math.min(3, Math.floor((pw - 4) / sp)));
+    const platz = (k, x, spalten = spaltenJe) => [x + ((k % spalten) - (spalten - 1) / 2) * sp, ty + 2 - Math.floor(k / spalten) * sp];
+    const runden = mitDingen ? q : 1, je = (DAUER * 0.7) / (runden * n + 1);
+    if (mitDingen) {
+      for (let k = 0; k < q; k++) for (let i = 0; i < n; i++) {
+        const [x, y] = platz(k, xs[i]), e = ding(x, y);
+        e.setAttribute("data-stueck", "ding");
+        svg.appendChild(vonOben(e, (k * n + i) * je, ruhig, 50, 0.3));
+      }
+    } else xs.forEach((x, i) => svg.appendChild(erscheine(text(x, ty + 3, ganzText(q), { gross: pw < 40 ? 13 : 16 }), i * je, ruhig, 0.2)));
+    for (let k = 0; k < r; k++) {
+      const [x, y] = [gx + ((k % 3) - 1) * sp, ty + 6 - Math.floor(k / 3) * sp], e = ding(x, y);
+      e.setAttribute("data-stueck", "ding");
+      svg.appendChild(vonOben(e, DAUER * 0.72 + k * 0.08, ruhig, 50, 0.3));
+    }
+    svg.appendChild(erscheine(zeileUnten(`${ganzText(z.zahl)} : ${n} = ${ganzText(q)} Rest ${r}`, 138), DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(gx + 14, ty - 40, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Zehner-Ergänzer (BAUEN · ergaenzen) -----
+  /**
+   * Was da ist (blau) und was zur runden Zahl fehlt (orange, kommt dazu): im Zehnerfeld (bis 20), in Hunderterfeldern
+   * (bis 400, je Feld 100) oder auf einem Rechenstrich von von bis ziel (grosse Zahlen).
+   */
+  function ergaenzen(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.start) || !Number.isInteger(z.ziel) || !(z.start > 0 && z.start < z.ziel)) return null;
+    const dazu = z.ziel - z.start;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "ergaenzen", "data-wert": dazu });
+    svg.appendChild(tagGrund());
+    const DA = "var(--deko-6)", NEU = "var(--deko-3)";
+    if (z.art === "zehnerfeld" || z.art === "hunderter") {
+      const proFeld = z.art === "zehnerfeld" ? 10 : 100, felder = Math.ceil(z.ziel / proFeld), spalten = z.art === "zehnerfeld" ? 5 : 10;
+      if (felder > 4 || z.ziel % (z.art === "zehnerfeld" ? 10 : 10)) return null;
+      const zeilen = proFeld / spalten, c = z.art === "zehnerfeld" ? 18 : Math.min(9.5, 270 / (felder * 10 + (felder - 1) * 1.5));
+      const fb = spalten * c, abst = z.art === "zehnerfeld" ? 14 : c * 1.5, x0 = (BREITE - felder * fb - (felder - 1) * abst) / 2, y0 = z.art === "zehnerfeld" ? 40 : 14;
+      const neuJe = (DAUER * 0.6) / dazu;
+      for (let f = 0; f < felder; f++) {
+        const fx = x0 + f * (fb + abst);
+        svg.appendChild(s("rect", { x: fx - 2, y: y0 - 2, width: fb + 4, height: zeilen * c + 4, rx: 3, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.2 }));
+        for (let i = 0; i < proFeld; i++) {
+          const n = f * proFeld + i, x = fx + (i % spalten) * c + c / 2, y = y0 + Math.floor(i / spalten) * c + c / 2;
+          if (n >= z.ziel) { svg.appendChild(s("circle", { cx: x, cy: y, r: c * 0.36, fill: "none", stroke: "#dfe3ef", "stroke-width": 0.8 })); continue; }
+          const p = s("circle", { cx: x, cy: y, r: c * 0.38, style: `fill:${n < z.start ? DA : NEU}`, ...(n >= z.start ? { "data-stueck": "dazu" } : {}) });
+          svg.appendChild(n < z.start ? erscheine(p, 0, ruhig, 0.3) : erscheine(p, 0.4 + (n - z.start) * neuJe, ruhig, 0.12));
+        }
+      }
+      svg.setAttribute("data-anzahl", dazu);
+    } else if (z.art === "balken") {
+      const von = z.von ?? 0;
+      if (!(von <= z.start)) return null;
+      const L = 30, R = 290, px = v => L + ((v - von) / (z.ziel - von)) * (R - L), y = 64;
+      svg.append(s("rect", { x: L, y: y - 12, width: R - L, height: 24, rx: 4, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.2 }),
+        erscheine(s("rect", { x: L, y: y - 12, width: px(z.start) - L, height: 24, rx: 4, style: `fill:${DA}` }), 0, ruhig));
+      const neu = s("rect", { x: px(z.start), y: y - 12, width: R - px(z.start), height: 24, rx: 4, style: `fill:${NEU}`, "data-stueck": "dazu" });
+      if (!ruhig) neu.appendChild(s("animate", { attributeName: "width", from: 0, to: R - px(z.start), begin: t(0.5), dur: `${DAUER * 0.6}s`, fill: "freeze" }));
+      svg.appendChild(neu);
+      for (const [v, gross] of [[von, 10], [z.start, 11], [z.ziel, 11]]) svg.appendChild(text(px(v), y + 30, ganzText(v), { gross }));
+      svg.setAttribute("data-anzahl", 1);
+    } else return null;
+    const zeile = s("text", { x: BREITE / 2, y: 140, fill: "#2d3047", "font-size": 14, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle", "data-zeile": "unten" },
+      `${ganzText(z.start)} + `, s("tspan", { style: `fill:${NEU}` }, ganzText(dazu)), ` = ${ganzText(z.ziel)}`);
+    svg.appendChild(erscheine(zeile, DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 24, 18, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 20, ruhig));
+    return svg;
+  }
+
+  // ----- Zahlenhaus (BAUEN · haus) -----
+  /** Das Dach trägt die Zahl, Stockwerk um Stockwerk kommen ihre Zerlegungen dazu (zwei oder drei Zahlen, wie im Spiel). */
+  function haus(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.dach) || !Array.isArray(z.stockwerke) || !z.stockwerke.length || z.stockwerke.length > 5) return null;
+    if (z.stockwerke.some(w => !Array.isArray(w) || w.length < 2 || w.length > 3 || w.reduce((a, b) => a + b, 0) !== z.dach || w.some(v => !Number.isInteger(v) || v < 0))) return null;
+    const n = z.stockwerke.length, hb = 156, sh = Math.min(22, 92 / n), x0 = (BREITE - hb) / 2, unten = 140, dachH = 34;
+    const oben = unten - n * sh;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "haus", "data-anzahl": n });
+    svg.append(tagGrund(), boden());
+    svg.appendChild(erscheine(s("g", {}, s("path", { d: `M${x0 - 8},${oben} L${BREITE / 2},${oben - dachH} L${x0 + hb + 8},${oben} Z`, style: "fill:var(--deko-2)" }),
+      text(BREITE / 2, oben - 9, ganzText(z.dach), { gross: 15, farbe: "#ffffff" })), 0, ruhig));
+    const je = (DAUER * 0.75) / n;
+    z.stockwerke.forEach((w, i) => {
+      const y = oben + i * sh, g = s("g", { "data-stueck": "stockwerk", "data-wert": w.join("+") },
+        s("rect", { x: x0, y, width: hb, height: sh, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 2 }));
+      w.forEach((v, k) => {
+        const cw = hb / w.length;
+        if (k) g.appendChild(s("line", { x1: x0 + k * cw, y1: y, x2: x0 + k * cw, y2: y + sh, stroke: "#2d3047", "stroke-width": 1.4 }));
+        g.appendChild(text(x0 + k * cw + cw / 2, y + sh / 2 + 4.5, ganzText(v), { gross: 13 }));
+      });
+      svg.appendChild(vonOben(g, 0.3 + i * je, ruhig, 30, 0.3));
+    });
+    if (sterne >= 2) svg.appendChild(erscheine(s("g", { "data-schmuck": "2" }, s("rect", { x: x0 + hb - 30, y: oben - dachH + 4, width: 10, height: 18, fill: "#8a5a32" }),
+      s("circle", { cx: x0 + hb - 22, cy: oben - dachH - 4, r: 5, fill: "#dfe3ef", opacity: 0.8 })), DAUER, ruhig));
+    if (sterne >= 3) {
+      const e = euleSitzend(0.26);
+      e.setAttribute("transform", `translate(${x0 + 30} ${oben - dachH * 0.45})`);
+      e.setAttribute("data-schmuck", "3");
+      svg.append(erscheine(e, DAUER, ruhig), funken(BREITE - 34, 24, ruhig));
+    }
+    return svg;
+  }
+
+  // ----- Doppel-Spiegel (WACHSEN · spiegel) -----
+  /**
+   * Links liegen die Dinge, rechts erscheint ihr Spiegelbild: zusammen das Doppelte (3 + 3 = 6). halb: alles liegt da, der
+   * Spiegel teilt es in zwei gleiche Hälften (16 : 2 = 8). Bis 20 je Seite Punkte in Fünferreihen, darüber
+   * Dienes-Material in den Stellenfarben.
+   */
+  function spiegel(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.zahl) || z.zahl < 1 || z.zahl > 999 || (z.halb && z.zahl % 2)) return null;
+    const n = z.halb ? z.zahl / 2 : z.zahl, punkte = n <= 20, mx = BREITE / 2;
+    const svg = neuesBild("wachsen", stufe, { "data-bilder": "spiegel", "data-anzahl": punkte ? 2 * n : 0 });
+    svg.appendChild(tagGrund());
+    const links = s("g", {});
+    if (punkte) {
+      // in der Mitte der Spiegelhöhe, Fünferreihen
+      const reihen = Math.ceil(n / 5);
+      for (let i = 0; i < n; i++) links.appendChild(s("circle", { cx: mx - 18 - (i % 5) * 16, cy: 62 - (reihen - 1) * 8 + Math.floor(i / 5) * 16, r: 6, style: "fill:var(--deko-6)", "data-stueck": "punkt" }));
+    } else {
+      // Dienes von der Mitte weg: Einer nahe am Spiegel, dann Zehner, Hunderter; so gross, wie der Platz erlaubt
+      const d = ziffernJeStelle(n), gross = s("g", {});
+      let x = mx - 14;
+      for (const k of ["E", "Z", "H"]) {
+        if (!d[k]) continue;
+        const versatz = k === "H" ? 5 : 9, breite = BAUSTEIN_BREITE[k] + (d[k] - 1) * versatz;
+        x -= breite;
+        for (let i = 0; i < d[k]; i++) gross.appendChild(baustein(k, x + i * versatz, k === "H" ? 80 - i * 4 : 80));
+        x -= 12;
+      }
+      const k = Math.min(1.4, (mx - 8) / (mx - x));
+      if (k < 0.6) return null;
+      gross.setAttribute("transform", `translate(${mx} 80) scale(${k.toFixed(3)}) translate(${-mx} -80)`);
+      links.appendChild(gross);
+    }
+    const rechts = links.cloneNode(true);
+    rechts.setAttribute("transform", `translate(${2 * mx} 0) scale(-1 1)`);
+    const spiegelG = s("g", {}, s("rect", { x: mx - 3, y: 14, width: 6, height: 98, rx: 2, fill: "#cfe9f8", stroke: "#8ab4cc", "stroke-width": 1 }),
+      s("line", { x1: mx - 1, y1: 20, x2: mx - 1, y2: 60, stroke: "#ffffff", "stroke-width": 1.4 }));
+    if (z.halb) {
+      // das Ganze liegt da, der Spiegel kommt dazwischen: zwei gleiche Hälften
+      svg.append(erscheine(links, 0, ruhig, 0.3), erscheine(rechts, 0, ruhig, 0.3), vonOben(spiegelG, DAUER * 0.35, ruhig, 100, 0.5));
+    } else {
+      svg.append(spiegelG, erscheine(links, 0, ruhig, 0.4));
+      // das Spiegelbild taucht langsam auf
+      const bild = s("g", {}, rechts);
+      if (!ruhig) {
+        bild.setAttribute("opacity", "0");
+        bild.appendChild(s("animate", { attributeName: "opacity", from: 0, to: 1, begin: t(DAUER * 0.35), dur: `${DAUER * 0.45}s`, fill: "freeze" }));
+      }
+      svg.appendChild(bild);
+    }
+    svg.appendChild(erscheine(zeileUnten(z.halb ? `${ganzText(z.zahl)} : 2 = ${ganzText(n)}` : `${ganzText(n)} + ${ganzText(n)} = ${ganzText(2 * n)}`, 138), DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(mx + 8, 18, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 28, 24, ruhig));
+    return svg;
+  }
+
+  // ----- Zahlen-Waage (BAUEN · waage) -----
+  /**
+   * Links kommt die erste Rechnung in die Schale, die Waage neigt sich; rechts die zweite, und die Waage steht wieder
+   * gerade: beide Seiten sind gleich viel (6 + 3 = 5 + 4). Die Gleichheit wird nachgerechnet.
+   */
+  function waage(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.links) || !Array.isArray(z.rechts)) return null;
+    const lw = wertVon(z.links), rw = wertVon(z.rechts);
+    if (!Number.isFinite(lw) || lw !== rw) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "waage", "data-wert": lw });
+    svg.appendChild(tagGrund());
+    const px = 160, py = 46, arm = 104, neig = 10, sinN = Math.sin((neig * Math.PI) / 180) * arm;
+    svg.append(s("path", { d: `M${px},${py} L${px - 22},${118} L${px + 22},${118} Z`, fill: "#8a94a6" }), s("rect", { x: px - 40, y: 118, width: 80, height: 6, rx: 3, fill: "#6b7089" }));
+    // Zeitplan: links landet (0.25), Waage neigt sich links (bis 0.4), rechts landet (0.6), Waage gerade (bis 0.8)
+    const kt = "0;0.25;0.4;0.6;0.8;1", werte = d => `0 0;0 0;0 ${d};0 ${d};0 0;0 0`;
+    const balken = s("g", {}, s("rect", { x: px - arm - 4, y: py - 3, width: 2 * arm + 8, height: 6, rx: 3, fill: "#4f5668" }), s("circle", { cx: px, cy: py, r: 5, fill: "#2d3047" }));
+    if (!ruhig) balken.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: `0 ${px} ${py};0 ${px} ${py};${-neig} ${px} ${py};${-neig} ${px} ${py};0 ${px} ${py};0 ${px} ${py}`, keyTimes: kt, begin: t(0), dur: `${DAUER}s`, fill: "freeze" }));
+    const schale = (x, teile, dy, ab) => {
+      const g = s("g", {}, s("path", { d: `M${x},${py} L${x - 30},${py + 44} M${x},${py} L${x + 30},${py + 44}`, stroke: "#8a8fa8", "stroke-width": 1 }),
+        s("path", { d: `M${x - 38},${py + 44} Q${x},${py + 64} ${x + 38},${py + 44} Z`, fill: "#c9ccd3", stroke: "#6b7089", "stroke-width": 1.2 }));
+      const karte = s("g", {}, s("rect", { x: x - 36, y: py + 18, width: 72, height: 24, rx: 5, fill: "#ffffff", stroke: "#6b7089", "stroke-width": 1.2 }),
+        text(x, py + 35, termText(teile), { gross: 13 }));
+      g.appendChild(vonOben(karte, ab, ruhig, 60, 0.35));
+      if (!ruhig) g.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", values: werte(dy), keyTimes: kt, begin: t(0), dur: `${DAUER}s`, fill: "freeze" }));
+      return g;
+    };
+    svg.append(schale(px - arm, z.links, sinN, 0.1), schale(px + arm, z.rechts, -sinN, DAUER * 0.45), balken);
+    svg.appendChild(erscheine(zeileUnten(`${termText(z.links)} = ${termText(z.rechts)}`, 142), DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(px + 14, py - 12, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(px, 18, ruhig));
+    return svg;
+  }
+
+  // ----- Schriftlich-Werkstatt (BAUEN · schriftlich) -----
+  /**
+   * Die Rechnung untereinander; von rechts nach links kommt Spalte um Spalte die Ziffer des Ergebnisses, ein Übertrag
+   * klein über dem Strich in der Spalte links davon — beim Minus wie im Spiel ergänzend (der Übertrag kommt unten dazu).
+   * Über den Spalten ihre Stelle in der Stellenfarbe.
+   */
+  function schriftlich(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.zahlen) || z.zahlen.length < 2 || z.zahlen.some(v => !Number.isInteger(v) || v < 0) || !["+", "−", "×"].includes(z.op)) return null;
+    if (z.op !== "+" && z.zahlen.length !== 2) return null;
+    if (z.op === "×" && z.zahlen[1] > 9) return null;
+    const ziff = (v, i) => Math.floor(v / 10 ** i) % 10;
+    const ergebnis = z.op === "+" ? z.zahlen.reduce((a, b) => a + b, 0) : z.op === "−" ? z.zahlen[0] - z.zahlen[1] : z.zahlen[0] * z.zahlen[1];
+    if (ergebnis < 0) return null;
+    const spalten = Math.max(...z.zahlen.map(v => String(v).length), String(ergebnis).length);
+    if (spalten > 7) return null;
+    // je Spalte Ziffer und Übertrag in die nächste
+    const ueber = [0], erg = [];
+    for (let i = 0; i < spalten; i++) {
+      let w;
+      if (z.op === "+") w = z.zahlen.reduce((a, v) => a + ziff(v, i), 0) + ueber[i];
+      else if (z.op === "×") w = ziff(z.zahlen[0], i) * z.zahlen[1] + ueber[i];
+      else { w = ziff(z.zahlen[0], i) - ziff(z.zahlen[1], i) - ueber[i]; if (w < 0) { erg.push(w + 10); ueber.push(1); continue; } erg.push(w); ueber.push(0); continue; }
+      erg.push(w % 10); ueber.push(Math.floor(w / 10));
+    }
+    if (ueber[spalten] || erg.reduce((a, d, i) => a + d * 10 ** i, 0) !== ergebnis) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "schriftlich", "data-wert": ergebnis });
+    svg.appendChild(tagGrund());
+    const cw = 26, rechts = BREITE / 2 + ((spalten - 1) * cw) / 2 + 8, xs = i => rechts - i * cw, zeilen = z.zahlen.length, zh = 22, y0 = 44;
+    // Spaltenköpfe in Stellenfarben
+    for (let i = 0; i < spalten; i++) {
+      const k = GANZE[GANZE.length - 1 - i];
+      svg.appendChild(s("rect", { x: xs(i) - cw / 2 + 1, y: 8, width: cw - 2, height: 14, rx: 2, style: `fill:${stellenFarbe(k)}` }));
+      svg.appendChild(text(xs(i), 19, k, { gross: 9, farbe: "#ffffff" }));
+    }
+    z.zahlen.forEach((v, r) => {
+      const y = y0 + r * zh;
+      [...String(v)].reverse().forEach((d, i) => svg.appendChild(text(xs(i), y, d, { gross: 18 })));
+      if (r === zeilen - 1) svg.appendChild(text(xs(spalten) - 2, y, z.op, { gross: 18 }));
+    });
+    const linie = y0 + (zeilen - 1) * zh + 12;
+    svg.appendChild(s("line", { x1: xs(spalten) - 14, y1: linie, x2: rechts + cw / 2, y2: linie, stroke: "#2d3047", "stroke-width": 1.8 }));
+    const je = (DAUER * 0.8) / String(ergebnis).length;
+    for (let i = 0; i < String(ergebnis).length; i++) {
+      svg.appendChild(erscheine(text(xs(i), linie + 23, erg[i], { gross: 18, farbe: "#1f5fbf" }), i * je, ruhig, 0.2));
+      if (ueber[i + 1]) svg.appendChild(erscheine(text(xs(i + 1) + 7, linie - 3, ueber[i + 1], { gross: 10, farbe: "#c0392b" }), i * je + 0.1, ruhig, 0.2));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(rechts + 26, linie + 12, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 40, 30, ruhig));
+    return svg;
+  }
+
+  // ----- Malkreuz (BAUEN · malkreuz) -----
+  /** Zahl nach Stellen zerlegt: 254 → [200, 50, 4] (ohne Nullen). */
+  const stellenteile = v => [...String(v)].map((d, i, a) => Number(d) * 10 ** (a.length - 1 - i)).filter(Boolean);
+  /**
+   * Das Malkreuz der Stufe füllt sich Feld um Feld (Zeile mal Spalte), darunter das Ergebnis. raetsel (Stufe 6): eine
+   * Randzahl steht erst als „?“ und wird dann gefunden.
+   */
+  function malkreuz(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.a) || !Number.isInteger(z.b) || z.a < 2 || z.b < 2) return null;
+    const oben = stellenteile(z.a), links = stellenteile(z.b);
+    if (oben.length > 3 || links.length > 3) return null;
+    const cw = Math.min(66, 280 / (oben.length + 1)), ch = 30, x0 = (BREITE - cw * (oben.length + 1)) / 2, y0 = (122 - ch * (links.length + 1)) / 2;
+    const summe = oben.reduce((a, o) => a + links.reduce((b, l) => b + o * l, 0), 0);
+    if (summe !== z.a * z.b) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "malkreuz", "data-anzahl": oben.length * links.length, "data-wert": summe });
+    svg.appendChild(tagGrund());
+    const zelle = (c, r, inhalt, art) => {
+      const g = s("g", {}, s("rect", { x: x0 + c * cw + 1, y: y0 + r * ch + 1, width: cw - 2, height: ch - 2, rx: 3,
+        fill: art === "kopf" ? "#fff3d6" : art === "ecke" ? "#eef0fa" : "#ffffff", stroke: "#b8a98a", "stroke-width": 1 }));
+      if (inhalt !== null) g.appendChild(text(x0 + c * cw + cw / 2, y0 + r * ch + ch / 2 + 5, inhalt, { gross: 15 }));
+      return g;
+    };
+    svg.appendChild(zelle(0, 0, "×", "ecke"));
+    oben.forEach((o, c) => {
+      if (z.raetsel && c === oben.length - 1) {
+        svg.appendChild(zelle(c + 1, 0, null, "kopf"));
+        svg.appendChild(kurz(text(x0 + (c + 1) * cw + cw / 2, y0 + ch / 2 + 5, "?", { gross: 15, farbe: "#c0392b" }), 0, DAUER * 0.75, ruhig));
+        svg.appendChild(erscheine(text(x0 + (c + 1) * cw + cw / 2, y0 + ch / 2 + 5, ganzText(o), { gross: 15 }), DAUER * 0.78, ruhig));
+      } else svg.appendChild(zelle(c + 1, 0, ganzText(o), "kopf"));
+    });
+    links.forEach((l, r) => svg.appendChild(zelle(0, r + 1, ganzText(l), "kopf")));
+    const je = (DAUER * 0.65) / (oben.length * links.length);
+    let k = 0;
+    links.forEach((l, r) => oben.forEach((o, c) => {
+      const g = zelle(c + 1, r + 1, ganzText(o * l), "feld");
+      g.setAttribute("data-stueck", "feld");
+      g.setAttribute("data-wert", o * l);
+      svg.appendChild(erscheine(g, 0.2 + k++ * je, ruhig, 0.2));
+    }));
+    svg.appendChild(erscheine(zeileUnten(`${ganzText(z.a)} × ${ganzText(z.b)} = ${ganzText(summe)}`, 138), DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(x0 + cw * (oben.length + 1) + 6, y0 + 4, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 120, ruhig));
+    return svg;
+  }
+
+  // ----- Rechentrick-Detektiv (SAMMELN · trick) -----
+  /**
+   * Die Lupe untersucht die Rechnung, darunter erscheint der Trick (Tauschen, Nachbaraufgabe, Verdoppeln und Halbieren,
+   * anders Zusammenfassen) und das Ergebnis. Jede Zeile wird nachgerechnet: alle gleich viel.
+   */
+  function trick(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.zeilen) || z.zeilen.length < 2 || z.zeilen.length > 3) return null;
+    const werte = z.zeilen.map(wertVon);
+    if (!werte.every(w => Number.isFinite(w) && w === werte[0])) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "trick", "data-wert": werte[0] });
+    svg.appendChild(tagGrund());
+    const ys = [40, 76, 116];
+    z.zeilen.forEach((teile, i) => {
+      const letzte = i === z.zeilen.length - 1;
+      const zeile = text(BREITE / 2, ys[i], (i ? "= " : "") + termText(teile), { gross: letzte && i ? 22 : 18, farbe: i === 1 && !letzte ? "#2f7a50" : "#2d3047" });
+      svg.appendChild(i ? erscheine(zeile, 1.0 + (i - 1) * 0.7, ruhig) : zeile);
+    });
+    // die Lupe fährt über die Rechnung
+    svg.appendChild(bewege(lupe(), `M60,${ys[0] - 4} L${BREITE - 60},${ys[0] - 4}`, { x: BREITE - 60, y: ys[0] - 4, winkel: 0 }, ruhig, { drehen: false, dauer: 0.95 }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 34, ys[0] - 22, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 126, ruhig));
+    return svg;
+  }
+
+  // ----- Rechen-Maschine (BAUEN · maschine) -----
+  const rechne1 = (w, [op, b]) => (op === "+" ? w + b : op === "−" || op === "-" ? w - b : op === "·" || op === "×" ? w * b : op === ":" ? w / b : NaN);
+  /**
+   * Eine Zahl läuft durch die Kästen der Maschine und kommt verändert heraus (15 → + 7 → 22). weiche (Stufe 6): erst die
+   * Frage „gerade?“, dann der Weg ✓ oder ✗ mit seinem Kasten. Alle Zwischenzahlen ganz.
+   */
+  function maschine(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Number.isInteger(z.start) || !Array.isArray(z.kaesten) || !z.kaesten.length) return null;
+    let kaesten = z.kaesten, w = z.start, zweig = null;
+    if (z.weiche) {
+      const gerade = z.start % 2 === 0;
+      zweig = gerade ? "ja" : "nein";
+      kaesten = [z.weiche[zweig], ...z.kaesten];
+    }
+    const zahlen = [w];
+    for (const k of kaesten) { w = rechne1(w, k); if (!Number.isInteger(w) || w < 0) return null; zahlen.push(w); }
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "maschine", "data-wert": w, "data-anzahl": kaesten.length });
+    svg.appendChild(tagGrund());
+    // Grössen: Kästen so breit, wie Platz ist; die Weiche hat ihren eigenen Plan
+    const n = kaesten.length, y = 70, kh = 46, ein = 20, aus = BREITE - 22;
+    const kw = z.weiche ? 56 : Math.min(70, 200 / n - 10);
+    const yWeg = zweig === "ja" ? 36 : 112;
+    const xsK = z.weiche ? kaesten.map((_, i) => 168 + i * 66) : kaesten.map((_, i) => 62 + ((i + 0.5) * 196) / n);
+    const ysK = z.weiche ? kaesten.map(() => yWeg) : kaesten.map(() => y);
+    const kasten = (x, yy, inhalt, stueck = true, breit = kw) => {
+      const zx = x + breit / 2 - 9, zy = yy - kh / 2 + 9;
+      const zahnrad = s("g", {}, s("circle", { cx: zx, cy: zy, r: 5, fill: "none", stroke: "#8a94a6", "stroke-width": 2.4, "stroke-dasharray": "2.4 1.8" }));
+      if (!ruhig) zahnrad.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${zx} ${zy}`, to: `360 ${zx} ${zy}`, begin: t(0), dur: `${DAUER}s`, fill: "freeze" }));
+      return s("g", stueck ? { "data-stueck": "kasten" } : {}, s("rect", { x: x - breit / 2, y: yy - kh / 2, width: breit, height: kh, rx: 7, fill: "#e3e6f3", stroke: "#4f5668", "stroke-width": 1.8 }),
+        zahnrad, text(x, yy + 6, inhalt, { gross: 16 }));
+    };
+    // Förderband vom Eingang zum Ausgang
+    const band = d => s("path", { d, fill: "none", stroke: "#c4c9dc", "stroke-width": 7, "stroke-linecap": "round", "stroke-linejoin": "round" });
+    if (z.weiche) {
+      // Weiche: die Frage, zwei Wege (✓ gerade, ✗ ungerade); der gewählte trägt die Kästen, der andere ist blass
+      const wx = 84;
+      svg.append(band(`M${ein},${y} H${wx}`), band(`M${wx},${y} L${xsK[0] - 34},${yWeg} H${aus}`),
+        s("path", { d: `M${wx},${y} L${xsK[0] - 34},${zweig === "ja" ? 112 : 36} H${xsK[0] + 30}`, fill: "none", stroke: "#e3e6f3", "stroke-width": 7, "stroke-linecap": "round" }),
+        kasten(wx, y, "gerade?", false, 76),
+        text(xsK[0] - 44, 30, "✓", { gross: 14, farbe: "#2fb36b" }), text(xsK[0] - 44, 132, "✗", { gross: 14, farbe: "#c0392b" }));
+      const anders = zweig === "ja" ? "nein" : "ja";
+      svg.appendChild(s("g", { opacity: 0.35 }, kasten(xsK[0], anders === "ja" ? 36 : 112, termText(z.weiche[anders]), false)));
+    } else svg.appendChild(band(`M${ein},${y} H${aus}`));
+    kaesten.forEach((k, i) => svg.appendChild(kasten(xsK[i], ysK[i], termText(k))));
+    // die Zahl reist: vor jedem Kasten, dahinter mit dem neuen Wert; die Startzahl bleibt am Eingang stehen
+    const punkte = z.weiche ? [[ein, y], [84, y], ...xsK.map((x, i) => [x, ysK[i]]), [aus, yWeg]] : [[ein, y], ...xsK.map(x => [x, y]), [aus, y]];
+    const werteAn = z.weiche ? [zahlen[0], zahlen[0], ...zahlen.slice(1)] : zahlen;
+    const marke = (wert, x, yy, attr = {}) => s("g", { "data-zahl": wert, ...attr }, s("circle", { cx: x, cy: yy, r: 17, fill: "#ffffff", stroke: "var(--knopf)", "stroke-width": 2.2 }),
+      text(x, yy + 5, ganzText(wert), { gross: String(wert).length >= 4 ? 11 : 15 }));
+    svg.appendChild(marke(z.start, ein, y, { opacity: 0.55 }));
+    const strecken = punkte.length - 1, je = (DAUER * 0.9) / strecken;
+    for (let i = 0; i < strecken; i++) {
+      const [x1, y1] = punkte[i], [x2, y2] = punkte[i + 1];
+      const m = marke(werteAn[i], 0, 0), letzte = i === strecken - 1;
+      // die letzte Strecke trägt das Ergebnis zum Ausgang und bleibt dort stehen
+      if (ruhig) { if (letzte) { m.setAttribute("transform", `translate(${x2} ${y2})`); svg.appendChild(m); } continue; }
+      m.setAttribute("opacity", "0");
+      m.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(i * je), fill: "freeze" }));
+      m.appendChild(s("animateMotion", { path: `M${x1},${y1} L${x2},${y2}`, begin: t(i * je), dur: `${je}s`, fill: "freeze" }));
+      if (!letzte) m.appendChild(s("set", { attributeName: "opacity", to: 0, begin: t((i + 1) * je), fill: "freeze" }));
+      svg.appendChild(m);
+    }
+    svg.appendChild(erscheine(zeileUnten([z.start, ...kaesten.map(k => termText(k))].map((v, i) => (i ? v : ganzText(v))).join(" → ") + ` → ${ganzText(w)}`, 144), DAUER * 0.85, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(aus, ysK[ysK.length - 1] - 26, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 18, ruhig));
+    return svg;
+  }
+
+  // ----- Zielzahl-Jagd (ZOOM · zielscheibe) -----
+  /**
+   * Die Karten legen sich zur Rechnung (die nicht gebrauchten bleiben blass liegen), dann trifft der Pfeil die
+   * Zielscheibe mit der Zielzahl. alle: jede Karte muss in die Rechnung (Stufe 6). Nachgerechnet, jede Karte höchstens einmal.
+   */
+  function zielscheibe(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.karten) || !Array.isArray(z.rechnung) || wertVon(z.rechnung) !== z.ziel) return null;
+    const zahlen = z.rechnung.filter((_, i) => i % 2 === 0), frei = [...z.karten];
+    for (const v of zahlen) { const i = frei.indexOf(v); if (i < 0) return null; frei.splice(i, 1); }
+    if (z.alle && frei.length) return null;
+    const svg = neuesBild("zoom", z.ziel, { "data-bilder": "zielscheibe", "data-wert": z.ziel });
+    svg.appendChild(tagGrund());
+    // Zielscheibe rechts oben
+    const cx = 258, cy = 50;
+    [[40, "#e5484d"], [31, "#ffffff"], [22, "#e5484d"], [14, "#ffffff"]].forEach(([r, f]) => svg.appendChild(s("circle", { cx, cy, r, fill: f, stroke: "#c0392b", "stroke-width": 0.8 })));
+    svg.appendChild(text(cx, cy + 5, ganzText(z.ziel), { gross: z.ziel >= 100 ? 11 : 13 }));
+    // Karten oben links, dann in die Zeile der Rechnung
+    const kb = 28, ky0 = 20, zeileY = 100;
+    const teile = z.rechnung.map(x => (typeof x === "number" ? ganzText(x) : x === "-" ? "−" : x));
+    const breite = teile.map(t0 => (/^\d/.test(t0) ? kb + 4 : 14));
+    const gesamt = breite.reduce((a, b) => a + b, 0) + 52;
+    let x = (BREITE - gesamt) / 2;
+    const benutzt = new Set();
+    const kartenX = z.karten.map((_, i) => 16 + i * (kb + 6) + kb / 2);
+    z.rechnung.forEach((v, i) => {
+      const w = breite[i];
+      const mx = x + w / 2;
+      if (typeof v === "number") {
+        const k = z.karten.findIndex((q, j) => q === v && !benutzt.has(j));
+        benutzt.add(k);
+        const karte = s("g", { "data-stueck": "karte" }, s("rect", { x: mx - kb / 2, y: zeileY - 22, width: kb, height: 32, rx: 4, fill: "#ffffff", stroke: "#6b7089", "stroke-width": 1.4 }),
+          text(mx, zeileY, teile[i], { gross: v >= 100 ? 10 : 13 }));
+        // die Karte liegt zuerst oben bei den Karten und fliegt an ihren Platz in der Rechnung
+        if (!ruhig) {
+          karte.setAttribute("transform", `translate(${kartenX[k] - mx} ${ky0 + 22 - zeileY})`);
+          karte.appendChild(s("animateTransform", { attributeName: "transform", type: "translate", from: `${kartenX[k] - mx} ${ky0 + 22 - zeileY}`, to: "0 0", begin: t(0.2 + (i / 2) * 0.3), dur: "0.5s", fill: "freeze" }));
+        }
+        svg.appendChild(karte);
+      } else svg.appendChild(erscheine(text(mx, zeileY, teile[i], { gross: 14 }), 0.5 + (i / 2) * 0.3, ruhig));
+      x += w;
+    });
+    // nicht gebrauchte Karten bleiben blass oben liegen
+    z.karten.forEach((v, j) => { if (!benutzt.has(j)) svg.appendChild(s("g", { opacity: 0.35 }, s("rect", { x: kartenX[j] - kb / 2, y: ky0, width: kb, height: 32, rx: 4, fill: "#ffffff", stroke: "#6b7089", "stroke-width": 1.4 }), text(kartenX[j], ky0 + 22, ganzText(v), { gross: 13 }))); });
+    svg.appendChild(erscheine(text(x + 26, zeileY, `= ${ganzText(z.ziel)}`, { gross: 14 }), DAUER * 0.6, ruhig));
+    // der Pfeil trifft den inneren Ring knapp neben der Zahl (sonst verdeckte er sie)
+    const tx = cx - 13, ty0 = cy - 10, kx = cx - 70, ky = cy - 40;
+    svg.appendChild(bewege(pfeil(), `M${cx - 130},${cy + 50} Q${kx},${ky} ${tx},${ty0}`, { x: tx, y: ty0, winkel: (Math.atan2(ty0 - ky, tx - kx) * 180) / Math.PI }, ruhig,
+      { ab: DAUER * 0.65, dauer: DAUER * 0.35 }));
+    if (sterne >= 2) svg.appendChild(glanz(cx + 30, cy - 34, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(cx, cy, ruhig));
+    return svg;
+  }
+
+  // ----- Probe-Stempel (SAMMELN · probe) -----
+  const UMKEHR = { "+": "−", "−": "+", "-": "+", "·": ":", "×": ":", ":": "·" };
+  /**
+   * Im Heft steht die Rechnung, darunter die Probe der Stufe — Umkehraufgabe, Endziffer oder Überschlag —, dann kommt der
+   * Stempel. Alles nachgerechnet; bei der Endziffer leuchten die letzten Ziffern.
+   */
+  function probe(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.rechnung) || z.rechnung.length !== 3) return null;
+    const [a, op, b] = z.rechnung, c = wertVon(z.rechnung);
+    if (!Number.isInteger(c) || c < 0) return null;
+    let zeile2;
+    if (z.art === "umkehr") {
+      const zurueck = [c, UMKEHR[op], b];
+      if (wertVon(zurueck) !== a) return null;
+      zeile2 = [termText(zurueck), "=", ganzText(a)];
+    } else if (z.art === "endziffer") {
+      if (!["+", "·", "×"].includes(op)) return null;
+      const e = wertVon([a % 10, op, b % 10]);
+      if (e % 10 !== c % 10) return null;
+      zeile2 = [termText([a % 10, op, b % 10]), "=", ganzText(e)];
+    } else if (z.art === "ueberschlag") {
+      const u = wertVon([z.ra, op, z.rb]);
+      if (!Number.isFinite(u) || Math.abs(c - u) > 0.15 * u) return null;
+      zeile2 = ["≈", termText([z.ra, op, z.rb]), "=", ganzText(u)];
+    } else return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "probe", "data-wert": c });
+    svg.appendChild(tagGrund());
+    // Heftseite: Linien, roter Rand
+    svg.append(s("rect", { x: 34, y: 10, width: 252, height: 126, rx: 4, fill: "#fffdf6", stroke: "#d8d2c0", "stroke-width": 1 }),
+      ...[40, 66, 92, 118].map(y => s("line", { x1: 34, y1: y, x2: 286, y2: y, stroke: "#cfe2f7", "stroke-width": 1 })),
+      s("line", { x1: 58, y1: 10, x2: 58, y2: 136, stroke: "#f0a0a0", "stroke-width": 1.2 }));
+    const endF = "#e5484d";
+    // Rechnung, bei der Endziffer die letzte Ziffer farbig
+    const zeile1 = s("text", { x: 70, y: 36, fill: "#2d3047", "font-size": 15, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "start" });
+    const mitEnde = (v, farbig) => { const t0 = ganzText(v); return farbig ? [t0.slice(0, -1), s("tspan", { fill: endF }, t0.slice(-1))] : [t0]; };
+    const endz = z.art === "endziffer";
+    [...mitEnde(a, endz), ` ${OP_TEXT[op] || op} `, ...mitEnde(b, endz), " = ", ...mitEnde(c, endz)].forEach(x => zeile1.appendChild(typeof x === "string" ? document.createTextNode(x) : x));
+    svg.appendChild(zeile1);
+    const z2 = text(70, 62, zeile2.join(" "), { gross: 15, anker: "start", farbe: "#2f7a50" });
+    svg.appendChild(erscheine(z2, DAUER * 0.35, ruhig));
+    // Stempel: kommt von oben und drückt auf
+    const stempel = s("g", { "data-teil": "stempel" }, s("circle", { cx: 242, cy: 100, r: 22, fill: "none", stroke: "#2fb36b", "stroke-width": 3 }),
+      s("path", { d: "M231,100 l8,8 l14,-16", stroke: "#2fb36b", "stroke-width": 4, fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }));
+    // um die Mitte des Stempels skaliert: aussen an die Mitte verschoben, innen zurück, dazwischen die Skalierung
+    const druck = s("g", {}, s("g", { transform: "translate(-242 -100)" }, stempel));
+    if (!ruhig) {
+      stempel.setAttribute("opacity", "0");
+      stempel.appendChild(s("set", { attributeName: "opacity", to: 1, begin: t(DAUER * 0.75), fill: "freeze" }));
+      druck.appendChild(s("animateTransform", { attributeName: "transform", type: "scale", values: "1.5;0.95;1", keyTimes: "0;0.7;1", begin: t(DAUER * 0.75), dur: "0.4s", fill: "freeze" }));
+    }
+    svg.appendChild(s("g", { transform: "translate(242 100)" }, druck));
+    if (sterne >= 2) svg.appendChild(glanz(272, 72, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(160, 120, ruhig));
+    return svg;
+  }
+
+  // ----- Gerecht-Teiler (SAMMELN · teller) -----
+  /**
+   * Die Guetzli wandern von vollen Tellern zu leeren, bis alle gleich viel haben; was nicht aufgeht, liegt in der Schale
+   * (ab Stufe 5; in Stufe 6 kommen auch Guetzli aus der Schale auf die Teller). Unter jedem Teller zum Schluss seine Zahl.
+   */
+  function teller(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.teller) || z.teller.length < 2 || z.teller.length > 4 || z.teller.some(v => !Number.isInteger(v) || v < 0)) return null;
+    const mitSchale = Number.isInteger(z.schale), schale0 = mitSchale ? z.schale : 0, n = z.teller.length;
+    const gesamt = z.teller.reduce((a, b) => a + b, 0) + schale0, ziel = Math.floor(gesamt / n), rest = gesamt % n;
+    if (rest && !mitSchale) return null;
+    if (Math.max(...z.teller, ziel) > 15) return null;
+    // Züge: je ein Guetzli von einem Überschuss (Teller über dem Ziel, Schale über dem Rest) zu einem Mangel
+    const stand = [...z.teller, schale0], soll = [...Array(n).fill(ziel), rest], zuege = [];
+    for (;;) {
+      const von = stand.findIndex((v, i) => v > soll[i]), nach = stand.findIndex((v, i) => v < soll[i]);
+      if (von < 0 || nach < 0) break;
+      zuege.push([von, nach, stand[von] - 1, stand[nach]]);
+      stand[von]--; stand[nach]++;
+    }
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "teller", "data-anzahl": gesamt, "data-wert": ziel });
+    svg.appendChild(tagGrund());
+    const breiteT = mitSchale ? 236 : 290, tw = breiteT / n, xs = [...Array.from({ length: n }, (_, i) => 15 + tw / 2 + i * tw), 280], ty = 96;
+    xs.slice(0, n).forEach(x => svg.appendChild(s("ellipse", { cx: x, cy: ty + 12, rx: Math.min(46, tw / 2 - 4), ry: 10, fill: "#ffffff", stroke: "#b8a98a", "stroke-width": 1.4 })));
+    if (mitSchale) svg.appendChild(s("path", { d: `M252,${ty - 6} Q280,${ty + 30} 308,${ty - 6} Z`, fill: "#fff6d6", style: "stroke:var(--deko-4)", "stroke-width": 2.5 }));
+    // grosse Guetzli, in Reihen zu höchstens fünf: zählbar wie im Spiel
+    const sp = 13, spalten = i => (i === n ? 3 : Math.max(2, Math.min(5, Math.floor((tw - 8) / sp))));
+    const platz = (i, k) => [xs[i] + ((k % spalten(i)) - (spalten(i) - 1) / 2) * sp, ty + 4 - Math.floor(k / spalten(i)) * sp];
+    // Guetzli an ihren Plätzen; die wandernden bekommen ihren Weg
+    const wandert = new Map(zuege.map(([von, nach, kVon, kNach], j) => [`${von}:${kVon}`, { nach, kNach, j }]));
+    const je = zuege.length ? (DAUER * 0.75) / zuege.length : 0;
+    [...z.teller, schale0].forEach((anzahl, i) => {
+      for (let k = 0; k < anzahl; k++) {
+        const [x, y] = platz(i, k), g = guetzli(x, y, 6.2);
+        g.setAttribute("data-stueck", "guetzli");
+        const w = wandert.get(`${i}:${k}`);
+        if (w) {
+          const [x2, y2] = platz(w.nach, w.kNach);
+          svg.appendChild(schiebe(g, x2 - x, y2 - y, 0.2 + w.j * je, ruhig, { dauer: Math.max(0.35, je), bogen: 26 }));
+        } else svg.appendChild(g);
+      }
+    });
+    xs.slice(0, n).forEach(x => svg.appendChild(erscheine(text(x, ty + 40, ziel, { gross: 16 }), DAUER * 0.9, ruhig)));
+    if (rest) svg.appendChild(erscheine(text(280, ty + 40, rest, { gross: 14, farbe: "#6b7089" }), DAUER * 0.9, ruhig));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 18, 20, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE / 2, 22, ruhig));
+    return svg;
+  }
+
+  BILDER.zoom.zielscheibe = zielscheibe;
+  Object.assign(BILDER.sammeln, { reste, trick, probe, teller });
+  Object.assign(BILDER.bauen, { punktfeld, ergaenzen, haus, waage, schriftlich, malkreuz, maschine });
+  BILDER.wachsen = { spiegel };
+
   const MUSTER = {
     /** REISE (Konzept 5): je Stufe ein Ziel weiter. */
     reise(feier, opt) {
@@ -1891,7 +2528,9 @@ var LS_FEIER = (function () {
     },
 
     /** WACHSEN (Konzept 5, Wortfamilien-Baum): der Baum wächst Teil um Teil bis zum Teil der Stufe. */
-    wachsen(feier, { stufe, sterne, ruhig }) {
+    wachsen(feier, opt) {
+      if (feier.bilder && BILDER.wachsen?.[feier.bilder]) return BILDER.wachsen[feier.bilder](feier, opt);
+      const { stufe, sterne, ruhig } = opt;
       const ziel = feier.ziele?.[stufe], bis = BAUM_TEILE.indexOf(ziel);
       if (feier.bilder !== "baum" || bis < 0) return null;
       const teile = BAUM_TEILE.slice(0, bis + 1);

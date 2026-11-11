@@ -26,6 +26,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -173,6 +174,10 @@ function tippsFuer(x) {
 
 LS.spiel({
   id: "schriftlich-werkstatt",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "schriftlich", ziele: { s1: { zahlen: [345, 231], op: "+" }, s2: { zahlen: [812, 347], op: "−" },
+    s3: { zahlen: [4785, 2368], op: "+" }, s4: { zahlen: [40005, 2678], op: "−" }, s5: { zahlen: [347, 6], op: "×" },
+    s6: { zahlen: [48357, 27815, 9468], op: "+" } } },
   einleitung: "Willkommen in der Werkstatt! Rechne schriftlich: Fang rechts bei den Einern an und arbeite Stelle für Stelle nach links. Den Übertrag schreibe ich klein über den Strich — oder du selbst, wie auf dem Blatt.",
   hilfe: "Tippe für das blaue Feld eine Ziffer ein und drück OK — Spalte für Spalte, von rechts nach links. Schreibst du den Übertrag selbst, kommt danach das Bläschen über dem Strich dran: Ziffer eintippen, kein Übertrag heisst 0.",
   anzahl: 5,

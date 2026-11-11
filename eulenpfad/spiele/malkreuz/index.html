@@ -87,6 +87,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -246,6 +247,9 @@ function tippsFuer(raetsel, mehr) {
 
 LS.spiel({
   id: "malkreuz",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "malkreuz", ziele: { s1: { a: 23, b: 4 }, s2: { a: 67, b: 8 }, s3: { a: 14, b: 14 }, s4: { a: 47, b: 36 },
+    s5: { a: 254, b: 37 }, s6: { a: 368, b: 45, raetsel: true } } },
   einleitung: "Grosse Malrechnungen werden klein: Zerlege die Zahlen im Malkreuz, rechne jedes Feld aus und zähl alles zusammen!",
   hilfe: "Tippe auf ein Feld mit ? und tippe die Zahl ein. Ist sie richtig, springt das Malkreuz von selbst zum nächsten Feld. Fertig ist es, wenn kein ? mehr da ist.",
   anzahl: 5,

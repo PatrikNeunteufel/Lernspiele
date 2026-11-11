@@ -210,7 +210,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 |---|---|---|---|
 | M1 | Stellenwert, Dezimal | 10 | abgenommen 10.11.2026 (Patrik, LERN_Session27); Tresor danach nachgebessert, dessen Abnahme offen |
 | M2 | Zahlen, Teiler, Begründen | 12 | in Arbeit seit 11.11.2026 (LERN_Session28, M2): gebaut, Abnahme offen |
-| M3 | Rechnen | 13 | offen |
+| M3 | Rechnen | 13 | in Arbeit seit 11.11.2026 (LERN_Session28, M3): gebaut, Abnahme offen |
 | M4 | Sachrechnen, Grössen | 12 | offen |
 | M5 | Geometrie | 13 | offen |
 | M6 | Daten, Kombinatorik, Brüche | 9 | offen |
@@ -275,6 +275,35 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
   (die übrigen Steine werden ein Paar), ein Vielfaches von 6 ist eines von 3, 4 · 6 = 2 · 12 (verdoppeln und
   halbieren), drei Nachbarzahlen ausgleichen, doppelte Seite gibt vierfache Fläche, die drei Winkel eines Dreiecks
   füllen die Gerade (180°).
+
+**Block M3 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
+
+- **Einmaleins-Blitz:** Punktefeld statt Blumenbeet, Reihen der Stufen: 3 × 5, 7 × 8, 56 : 8 (7 Reihen zu 8),
+  30 × 7 in Zehnerstangen, s5 die Lücke 70 × 6 = 420 (die gesuchte 70 in Farbe), 40 × 60 in Hunderterplatten.
+- **Rest-Rätsel:** Teller und Glas statt Guetzli im Glas allein; s1 Äpfel wie im Spiel, ab 35 je Teller die Zahl auf
+  dem Teller (250 : 7, 59 : 7, 5000 : 7). Das Wort „Rest“ in der Rechnung, wie im Spiel.
+- **Zehner-Ergänzer:** Zehnerfeld (13 + 7 = 20), Hunderterfelder (60 + 40, 37 + 3, 37 + 63, 365 + 35) und ein
+  Rechenstrich (4750 + 250 = 5000) statt eines Turms; das Ergänzte in einer zweiten Farbe, nicht in den Stellenfarben.
+- **Zahlenhaus:** Häuser der Stufen (Dach 5, 7, 10 mit allen Zehnerfreunden, 15, 60, 700 mit drei Zahlen je Stockwerk);
+  2★ Kamin statt Licht, 3★ die Eule auf dem Dach.
+- **Doppel-Spiegel:** Spiegel mit Punkten (3, 5, 9; s3 halbiert 8) und Dienes (35, 374) statt Zahlen.
+- **Zahlen-Waage:** Rechnungen der Stufen auf Karten in den Schalen (2 + 3 = 5 … 4 · 6 = 3 · 8); die Waage neigt sich,
+  solange nur eine Seite belegt ist. 2★ Glanz statt Wippen.
+- **Schriftlich-Werkstatt:** Rechnungen der Stufen untereinander mit Überträgen über dem Strich, beim Minus wie im Spiel
+  ergänzend (812 − 347, 40 005 − 2678), s5 347 × 6, s6 drei Zahlen (48 357 + 27 815 + 9468); Spaltenköpfe in den
+  Stellenfarben. Ohne Werkzeug und Eule.
+- **Malkreuz:** das Kreuz statt eines Rechtecks aus Teilen, Faktoren der Stufen (23 × 4 … 254 × 37); s6 als Rätsel mit
+  „?“ am Rand, bis das Feld darunter es verrät.
+- **Rechentrick-Detektiv:** Lupe, Trick und Ergebnis je Stufe (9 × 6 = 10 × 6 − 6, 5 × 86 = 10 × 43, 298 + 145 =
+  300 + 143, 4 × 37 × 25 = 100 × 37, 999 × 46, 125 × 4072 = 1000 × 509) statt eines Werkzeugkastens.
+- **Rechen-Maschine:** Förderband und Kästen der Stufen statt wachsender Zahnräder (15 + 7; zwei, drei Kästen;
+  2400 → 5500); s6 die Weiche „gerade?“ wie im Spiel (das Wort steht so dort), 14 → : 2 → + 9 → 16.
+- **Zielzahl-Jagd:** Karten der Stufen legen sich zur Rechnung (8 + 4 + 3 = 15 … 25 × 8 + 7 × 3 = 221 mit allen
+  Karten), der Pfeil trifft den inneren Ring neben der Zielzahl; statt Ring um Ring je Stufe.
+- **Probe-Stempel:** Proben der Stufen: Umkehraufgabe (s1, s2, s5, s6), Endziffer (s3, die letzten Ziffern rot),
+  Überschlag (s4); ein Stempel statt mehrerer.
+- **Gerecht-Teiler:** Teller der Stufen (4 und 2, 7 und 3, drei Teller, 8 und 4, s5 15 halbiert mit 1 in der Schale,
+  s6 vier Teller und Guetzli aus der Schale); die Guetzli wandern im Bogen, darunter je Teller die Zahl.
 
 ## 8. Ideen je Spiel
 

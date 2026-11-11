@@ -37,6 +37,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -154,6 +155,12 @@ function pruefeAufgabe(a, stufe) {
 
 LS.spiel({
   id: "zielzahl-jagd",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "zoom", bilder: "zielscheibe", ziele: { s1: { karten: [3, 8, 4], rechnung: [8, "+", 4, "+", 3], ziel: 15 },
+    s2: { karten: [3, 5, 7], rechnung: [3, "×", 5, "+", 7], ziel: 22 }, s3: { karten: [2, 9, 6, 4], rechnung: [9, "×", 4, "−", 6], ziel: 30 },
+    s4: { karten: [7, 3, 8, 5], rechnung: [7, "×", 8, "+", 5, "×", 3], ziel: 71 },
+    s5: { karten: [4, 6, 9, 75], rechnung: [75, "×", 4, "+", 9, "×", 6], ziel: 354 },
+    s6: { karten: [25, 3, 7, 8], rechnung: [25, "×", 8, "+", 7, "×", 3], ziel: 221, alle: true } } },
   einleitung: "Triff die Zielzahl! Nimm zwei Karten und ein Rechenzeichen — das Ergebnis wird eine neue Karte. Jeder richtige Weg gilt.",
   hilfe: "Tipp eine Karte, dann ein Rechenzeichen, dann eine zweite Karte. Das Ergebnis wird eine neue Karte, und die Rechnung erscheint unten in der Liste. So rechnest du weiter, bis die Zielzahl da ist. Mit „↺ Von vorn“ fängst du neu an.",
   anzahl: 6,

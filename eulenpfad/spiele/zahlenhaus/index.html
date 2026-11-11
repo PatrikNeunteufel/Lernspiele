@@ -37,6 +37,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -110,6 +111,11 @@ function pruefeAufgabe(a, stufe) {
 
 LS.spiel({
   id: "zahlenhaus",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "haus", ziele: { s1: { dach: 5, stockwerke: [[1, 4], [2, 3], [3, 2]] },
+    s2: { dach: 7, stockwerke: [[1, 6], [2, 5], [3, 4]] }, s3: { dach: 10, stockwerke: [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5]] },
+    s4: { dach: 15, stockwerke: [[10, 5], [8, 7], [9, 6]] }, s5: { dach: 60, stockwerke: [[40, 20], [25, 35], [50, 10]] },
+    s6: { dach: 700, stockwerke: [[230, 320, 150], [400, 200, 100]] } } },
   einleitung: "Im Zahlenhaus wohnt oben die Dachzahl. In jedem Stockwerk wohnen zwei Zahlen, die zusammen die Dachzahl ergeben.",
   hilfe: "Oben im Dach steht die Dachzahl. In einem Stockwerk fehlt eine Zahl — dort steht „?“. Tipp die fehlende Zahl ein und drück OK.",
   anzahl: 10,

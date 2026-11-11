@@ -1708,3 +1708,18 @@
   Halbkreis in „Stimmt immer?“ grösser.
 - `tools/feier_vorschau.html`: „Nebeneinander“ (drei Stufen je Zeile) und „Anhalten bei“ einer Sekunde, damit der
   Ablauf Bild um Bild geprüft werden kann, nicht nur das Endbild (Anweisung Patrik, LERN_Session27).
+- Abschluss-Animationen Block M3 (Rechnen; AR1 a): Einmaleins-Blitz, Rest-Rätsel, Zehner-Ergänzer, Zahlenhaus,
+  Doppel-Spiegel, Zahlen-Waage, Schriftlich-Werkstatt, Malkreuz, Rechentrick-Detektiv, Rechen-Maschine, Zielzahl-Jagd,
+  Probe-Stempel, Gerecht-Teiler — `feier.js` mit dreizehn Bildern nach den Stufen der Spiele; Rechnungen als Liste aus
+  Zahlen und Zeichen, die jedes Bild nachrechnet (`wertVon`, Punkt vor Strich): Feld und Produkt, Rest kleiner als der
+  Teiler, Zerlegungen im Haus, beide Seiten der Waage, Ziffern und Überträge der schriftlichen Rechnung (Minus
+  ergänzend wie im Spiel), Teilprodukte im Malkreuz, alle Zeilen eines Tricks gleich, Kette der Maschine ganzzahlig,
+  Karten höchstens einmal, Probe passend, Guetzli gleich verteilt. WACHSEN nimmt eigene Bilder (Doppel-Spiegel).
+  Abweichungen vom Entwurf im Konzept, Abschnitt 7 (zur Abnahme); Doku rahmen.md 24.
+- Im Browser alle 78 Endbilder in 375 px angesehen, dazu den Ablauf (Waage geneigt, Malkreuz halb gefüllt mit „?“,
+  wandernde Guetzli); dabei verbessert: Zehnerstangen in s5 des Einmaleins ragten seitlich hinaus; Rest-Rätsel, Malkreuz,
+  Schriftlich-Werkstatt, Rechentrick und Guetzli grösser; Rechen-Maschine neu mit Förderband, Startzahl am Eingang und
+  lesbarer Weiche; der Pfeil der Zielzahl-Jagd verdeckte die Zielzahl; Punkte im Doppel-Spiegel mittig, Dienes so gross
+  wie Platz ist. Beim Bauen gefunden: doppelt eingehängte Karten, ein Stempel, der um die Bildecke statt um seine Mitte
+  gewachsen wäre, ein doppeltes Ergebnis am Ausgang der Maschine, eine Breitenprüfung ohne die Verkleinerung (374 im
+  Spiegel gab kein Bild).

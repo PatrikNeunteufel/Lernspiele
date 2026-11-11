@@ -61,6 +61,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -136,6 +137,10 @@ function zehnerfelder(a) {
 
 LS.spiel({
   id: "zehner-ergaenzer",
+  // Abschluss-Animation (feier.js, Block M3, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "ergaenzen", ziele: { s1: { start: 13, ziel: 20, art: "zehnerfeld" },
+    s2: { start: 60, ziel: 100, art: "hunderter" }, s3: { start: 37, ziel: 40, art: "hunderter" }, s4: { start: 37, ziel: 100, art: "hunderter" },
+    s5: { start: 365, ziel: 400, art: "hunderter" }, s6: { start: 4750, ziel: 5000, art: "balken", von: 4000 } } },
   einleitung: "Wie viel fehlt bis zur runden Zahl? Ergänze bis zum nächsten Zehner — und später bis zum Hunderter, Tausender und zur Million.",
   hilfe: "Tipp ein, wie viel von der ersten Zahl bis zur runden Zahl fehlt. Deine Zahl erscheint gleich im „?“ der Rechnung. Dann drückst du OK.",
   anzahl: 10,

@@ -1126,6 +1126,25 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | SAMMELN · `haende` | `{ n, vergleich?, rest?, blitz? }`: Finger strecken sich ab dem Daumen; Würfel und Zehnerfeld daneben, fehlende Finger bis 10, Blitz mit Decke | Finger-Zähler |
   | BAUEN · `beweis` | `{ art: "paare" \| "gruppen" \| "verdoppeln" \| "ausgleich" \| "quadrat" \| "winkel", … }`: je Stufe eine Begründung aus dem Spiel mit Steinen und Figuren | Stimmt immer? |
 
+  Block M3 (Rechnen; LERN_Session28) — Rechnungen als Liste aus Zahlen und Zeichen (`[9, "×", 6, "−", 6]`, Punkt vor
+  Strich), die das Bild nachrechnet (`wertVon`):
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | BAUEN · `punktfeld` | `{ zeilen, spalten, einheit?, rechnung, luecke? }`: Punktefeld Reihe um Reihe, `einheit` 10 Zehnerstangen, 100 Hunderterplatten; die Rechnung muss zum Feld passen | Einmaleins-Blitz |
+  | SAMMELN · `reste` | `{ zahl, teiler, ding? }`: reihum auf die Teller, der Rest ins Glas; ab 7 je Teller die Zahl auf dem Teller | Rest-Rätsel |
+  | BAUEN · `ergaenzen` | `{ start, ziel, art: "zehnerfeld" \| "hunderter" \| "balken", von? }`: was da ist und was dazukommt | Zehner-Ergänzer |
+  | BAUEN · `haus` | `{ dach, stockwerke }`: Dach mit der Zahl, Stockwerke mit zwei oder drei Zahlen (Summe geprüft) | Zahlenhaus |
+  | WACHSEN · `spiegel` | `{ zahl, halb? }`: Punkte oder Dienes und ihr Spiegelbild; `halb` teilt am Spiegel | Doppel-Spiegel |
+  | BAUEN · `waage` | `{ links, rechts }`: Waage neigt sich und steht gerade, beide Seiten gleich (geprüft) | Zahlen-Waage |
+  | BAUEN · `schriftlich` | `{ zahlen, op: "+" \| "−" \| "×" }`: untereinander, Ziffern und Überträge von rechts (Minus ergänzend) | Schriftlich-Werkstatt |
+  | BAUEN · `malkreuz` | `{ a, b, raetsel? }`: Malkreuz Feld um Feld; `raetsel`: eine Randzahl erst „?“ | Malkreuz |
+  | SAMMELN · `trick` | `{ zeilen }`: Rechnung, Trick, Ergebnis — alle gleich viel; die Lupe untersucht | Rechentrick-Detektiv |
+  | BAUEN · `maschine` | `{ start, kaesten, weiche? }`: die Zahl läuft über das Förderband durch die Kästen; Weiche „gerade?“ mit ✓ und ✗ | Rechen-Maschine |
+  | ZOOM · `zielscheibe` | `{ karten, rechnung, ziel, alle? }`: Karten legen sich zur Rechnung, der Pfeil trifft | Zielzahl-Jagd |
+  | SAMMELN · `probe` | `{ rechnung, art: "umkehr" \| "endziffer" \| "ueberschlag", ra?, rb? }`: Heft, Probe, Stempel | Probe-Stempel |
+  | SAMMELN · `teller` | `{ teller, schale? }`: Guetzli wandern, bis alle Teller gleich viel haben, der Rest in die Schale | Gerecht-Teiler |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 
