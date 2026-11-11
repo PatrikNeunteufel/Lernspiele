@@ -1212,6 +1212,39 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | REISE · `tastatur` | Tasten `[reihe, nr]`, Reihe 4 der Leerschlag | Tipp-Trainer |
   | BAUEN · `bildstreifen` | Zahl der Bilder 3–6 | Geschichten-Ordner |
 
+  Block B (Deutsch Teil 2, NMG Teil 1; LERN_Session30) — Deutsch wie Block A ohne Lesetext; Zeichen nur, wo sie selbst
+  der Inhalt sind (Satzzeichen, Kommas, Zeichen der wörtlichen Rede, Fragewörter, Hilfsverben, Reimschema). Was eine
+  Figur abfährt (Lupe, Stift), leuchtet nach der Weglänge auf (`ankunft`: `animateMotion` fährt gleichmässig). Farben
+  der Spiele: Korb Nomen deko-6, Verb deko-3, Adjektiv deko-5; Zielband deko-1; gefunden gelb, repariert grün:
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | BAUEN · `satzzug` | `[{ woerter, zeichen, gross? }]` (bis drei Sätze): Wortwagen, grosse Wörter mit Dach, Schlusswagen mit . ? ! | Satz-Reparatur |
+  | SAMMELN · `girlande` | Zahl der Wörter 2–16: die Schlange wird geschnitten, die Wörter hängen als Fähnchen | Wörter-Trenner |
+  | ZOOM · `fehlersuche` | `[{ woerter, fehler }]` (`fehler: null` = fehlerfreier Satz): Lupe, gelb, grün | Fehler-Lupe |
+  | SAMMELN · `kommas` | `[{ woerter, kommas: [Stellen] }]`: die Kommas fliegen in die Lücken | Komma-Jagd |
+  | AUFTRITT · `rede` | `[{ art: "vorne" \| "hinten" \| "mitte", zeichen }]` oder `{ art: "erkennen", woerter, rede }`: Begleitsatz und Rede mit „ “ : , . ? ! | Rede-Zeichen |
+  | BAUEN · `korrektur` | `{ saetze, fehler }`: Text im Kasten, der Stift verbessert | Korrektur-Stift |
+  | SAMMELN · `wortkoerbe` | `{ koerbe: [N, V, A], aus: "karte" \| "satz", jeSatz? }` | Wortarten-Sortierer |
+  | BAUEN · `wortpuzzle` | `{ teile, art: "zusammen" \| "zerlegen" \| "legen", fuge?, artikel?, ganz? }` (Artikel des Ganzen = der des letzten Teils, geprüft) | Nomen-Puzzle |
+  | REISE · `zeitband` | `{ ziel, von?, hilfsverb?, wahl? }` (Präsens, Präteritum, Perfekt) | Zeitreise-Verben |
+  | BAUEN · `faecher` | `{ fragen, falsch?, zeit? }`: der Fächer öffnet sich mit Wer? Wen? Wem? Wo? Wohin? | Verben-Fächer |
+  | SAMMELN · `labor` | `{ wortart, proben: 3 \| 5, art? }`: genau die passende Probe trifft (🏷️ 👤 📈 📋 🔒) | Wortarten-Probe |
+  | BAUEN · `gedicht` | `{ schema: "aa" \| "aabb" \| "abab" \| "abba", strophen?, ordnen?, zaehlen?, luecke? }` | Gedicht-Baukasten |
+  | SAMMELN · `regal` | `{ buecher, gut?, fremd? }` (🏰 ⛰️ 🦊 📜 📰 📖 🎭) | Gattungs-Kenner |
+  | AUFTRITT · `reporter` | `{ fragen }` (wer, wo, wann, was, warum, schluss 💡, zahl 🔢, kern 🎯) | Hör-Reporter |
+  | AUFTRITT · `gefuehle` | `{ gefuehle, paar? }`: Gesichter auf dem Radar | Gefühle-Radar |
+  | AUFTRITT · `lagerfeuer` | `{ zuhoerer, titel? }` | Hör-Geschichte |
+  | ZYKLUS · `jahresrad` | `{ ring: "tage" \| "monate", von, schritt }` oder `{ ring, ordnen }`; Jahreszeit nur bei den eindeutigen Monaten wie im Spiel | Jahreskreis-Ordner |
+  | REISE · `zeitreise` | `{ reihe, rueck? }`, `{ korb: { frueher, heute } }` oder `{ jahr, ja, nein }` | Früher und heute |
+  | WACHSEN · `lebenslinie` | `{ reihe }` oder `{ von, bis, klein, gross, marken, alter?, jahrhundert? }` (Marken mindestens ein Bild auseinander, geprüft) | Zeitstrahl-Sortierer |
+  | REISE · `erdleiter` | `{ ereignisse: [[Jahre, Bild]], zahlen? }` (Leiter logarithmisch 10⁹ bis 10⁴ Jahre, die Bilder gleichmässig mit einer Linie an ihre Stelle) oder `{ tag: [Jahre, Bild] }` (die Erdgeschichte als ein Tag) | Erdzeit-Leiter |
+  | ZYKLUS · `sonnenbogen` | `{ zeiten, bilder, fremd? }` (links auf, rechts unter, die Nacht unter dem Horizont) oder `{ woche: ±1, ±2 }` | Tageslauf-Sonne |
+  | SAMMELN · `koffer` | `{ faecher: [{ kultur, dinge }], zu? }` oder `{ gab: { kultur, dinge: [[Bild, ja]] } }`; Dinge gegen die Liste des Spiels geprüft | Kulturen-Koffer |
+  | SAMMELN · `wolkenschloss` | `{ echt, erfunden: [Bild \| [Bild, Merkmal]] }` (spricht, bewegt, fabelwesen, zauber, unmoeglich) | Echt oder erfunden? |
+  | KARTE · `dorfplan` | `{ orte, notruf? }`, `{ ebenen: true }` oder `{ ablauf: [fünf Bilder] }` | Gemeinde-Helfer |
+  | KARTE · `schulweg` | Teile aus `trottoir`, `randstein`, `streifen`, `auto`, `ampel`, `velo`, `schule` | Schulweg-Profi |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 

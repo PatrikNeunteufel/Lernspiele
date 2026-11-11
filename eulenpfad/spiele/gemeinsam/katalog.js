@@ -113,7 +113,7 @@ const SPIELE = [
     beschreibung: "Im Kopf rechnen mit Wertziffern: 402 + 90, 320 000 + 38 000",
     lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }] },
   { id: "wortarten-sortierer", art: ["markieren"], klasse: 3, bild: "🧺", name: "Wortarten-Sortierer", thema: "wortarten", farbe: "var(--deko-3)",
-    pfad: "spiele/wortarten-sortierer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/wortarten-sortierer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Wörter in die Körbe Nomen, Verb und Adjektiv sortieren",
     listen: {
       "einzelwoerter": { name: "Einzelwörter: Nomen, Verben, Adjektive" },
@@ -177,7 +177,7 @@ const SPIELE = [
     beschreibung: "Weg und Zeit in Wertetabellen: wie weit, wie lange, wer ist schneller?",
     lernziele: [{ lz: "MA.3.A.3", stufen: ALLE_STUFEN }, { lz: "NMG.3.1", stufen: ["s5"] }] },
   { id: "jahreskreis", art: ["antippen", "reihenfolge"], klasse: 2, bild: "📅", name: "Jahreskreis-Ordner", thema: "zeit", farbe: "var(--deko-5)",
-    pfad: "spiele/jahreskreis/index.html", einstellungen: ["notizen"], stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 20, s5: 25, s6: 31 },
+    pfad: "spiele/jahreskreis/index.html", einstellungen: ["notizen", "feier"], stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 20, s5: 25, s6: 31 },
     beschreibung: "Gestern, morgen, Wochentage, Monate und Jahreszeiten",
     lernziele: [{ lz: "NMG.9.1", stufen: ALLE_STUFEN }] },
   { id: "uhr-werkstatt", art: ["eintippen"], klasse: 2, bild: "🕰️", name: "Uhr-Werkstatt", thema: "groessen", farbe: "var(--deko-6)",
@@ -205,7 +205,7 @@ const SPIELE = [
     beschreibung: "Das Krokodil frisst die grössere Zahl: <, > oder =",
     lernziele: [{ lz: "MA.1.A.2", stufen: ["s1", "s2", "s3", "s4"] }, { lz: "MA.1.A.1", stufen: ALLE_STUFEN }] },
   { id: "satz-reparatur", art: ["markieren"], klasse: 2, bild: "🔧", name: "Satz-Reparatur", thema: "saetze", farbe: "var(--deko-3)",
-    pfad: "spiele/satz-reparatur/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 40, s5: 45, s6: 56 },
+    pfad: "spiele/satz-reparatur/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 40, s5: 45, s6: 56 },
     beschreibung: "Satzanfang und Nomen gross, Punkt, Frage- und Ausrufezeichen",
     listen: {
       "satzanfang": { name: "Sätze ohne Nomen: Satzanfang und Punkt" },
@@ -216,7 +216,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.4.F.1", stufen: ALLE_STUFEN }] },
   { id: "woerter-trenner", art: ["markieren"], klasse: 2, bild: "✂️", name: "Wörter-Trenner", thema: "saetze", farbe: "var(--deko-1)",
-    pfad: "spiele/woerter-trenner/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 40, s5: 50, s6: 63 },
+    pfad: "spiele/woerter-trenner/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 40, s5: 50, s6: 63 },
     beschreibung: "ERLACHTLAUT — wo hört ein Wort auf?",
     listen: {
       "satzanfang": { von: "satz-reparatur/satzanfang" },
@@ -411,7 +411,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.A.1", stufen: ALLE_STUFEN }] },
   { id: "nomen-puzzle", art: ["reihenfolge", "antippen"], klasse: 3, bild: "🧩", name: "Nomen-Puzzle", thema: "wortarten", farbe: "var(--deko-5)",
-    pfad: "spiele/nomen-puzzle/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 12, s2: 15, s3: 15, s4: 12, s5: 20, s6: 25 },
+    pfad: "spiele/nomen-puzzle/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 12, s5: 20, s6: 25 },
     beschreibung: "Haus + Tür = Haustür: Nomen zusammensetzen und zerlegen",
     listen: {
       "zwei-teile": { name: "Zusammengesetzte Nomen aus zwei Teilen ohne Fugenlaut" },
@@ -554,7 +554,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
   { id: "zeitreise-verben", art: ["antippen"], klasse: 4, neu: "LERN_Session3", bild: "⏳", name: "Zeitreise-Verben", thema: "wortarten", farbe: "var(--deko-1)",
-    pfad: "spiele/zeitreise-verben/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 20, s4: 25, s5: 25, s6: 40 },
+    pfad: "spiele/zeitreise-verben/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 20, s4: 25, s5: 25, s6: 40 },
     beschreibung: "Präsens, Präteritum, Perfekt: erkennen und bilden — er geht, ging, ist gegangen",
     listen: {
       "regelmaessig": { name: "Regelmässige Verben mit Beispielsätzen (spielen – spielte – gespielt)" },
@@ -562,7 +562,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
   { id: "fehler-lupe", art: ["antippen"], klasse: 4, neu: "LERN_Session3", bild: "🔍", name: "Fehler-Lupe", thema: "saetze", farbe: "var(--deko-3)",
-    pfad: "spiele/fehler-lupe/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 25, s2: 25, s3: 30, s4: 40, s5: 35, s6: 50 },
+    pfad: "spiele/fehler-lupe/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 25, s2: 25, s3: 30, s4: 40, s5: 35, s6: 50 },
     beschreibung: "Das falsch geschriebene Wort im Satz finden und reparieren",
     listen: {
       "nomen-gross": { name: "Nomen gross, auch Gefühle (Hund, Angst)" },
@@ -643,7 +643,7 @@ const SPIELE = [
     lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }] },
   // LERN_Session3, Gruppe nmg1 (NMG)
   { id: "frueher-heute", art: ["sortieren", "reihenfolge", "antippen"], klasse: 2, neu: "LERN_Session3", bild: "🕰️", name: "Früher und heute", thema: "zeit", farbe: "var(--deko-3)",
-    pfad: "spiele/frueher-heute/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 12, s3: 20, s4: 15, s5: 10, s6: 20 },
+    pfad: "spiele/frueher-heute/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 12, s3: 20, s4: 15, s5: 10, s6: 20 },
     beschreibung: "Öllampe oder Lampe mit Strom? Alte und neue Dinge vergleichen und ordnen",
     listen: {
       "paare": { name: "Paare: Ding von früher und Ding von heute (Waschbrett – Waschmaschine)" },
@@ -652,7 +652,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.9.2", stufen: ALLE_STUFEN }] },
   { id: "schulweg-profi", art: ["sortieren", "reihenfolge", "antippen"], klasse: 2, neu: "LERN_Session3", bild: "🚸", name: "Schulweg-Profi", thema: "verkehr", farbe: "var(--deko-4)",
-    pfad: "spiele/schulweg-profi/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 12, s3: 15, s4: 12, s5: 15, s6: 20 },
+    pfad: "spiele/schulweg-profi/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 12, s3: 15, s4: 12, s5: 15, s6: 20 },
     beschreibung: "Sicher über die Strasse: Lichtsignal, Fussgängerstreifen, Signale und Velo",
     listen: {
       "sicher-gefaehrlich": { name: "Sicher oder gefährlich? (Situationen auf dem Schulweg)" },
@@ -672,7 +672,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.4.4", stufen: ALLE_STUFEN }] },
   { id: "zeitstrahl-sortierer", art: ["reihenfolge", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "📏", name: "Zeitstrahl-Sortierer", thema: "zeit", farbe: "var(--deko-1)",
-    pfad: "spiele/zeitstrahl-sortierer/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 20, s4: 25, s5: 25, s6: 30 },
+    pfad: "spiele/zeitstrahl-sortierer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 20, s4: 25, s5: 25, s6: 30 },
     beschreibung: "Lebensabschnitte, drei Generationen und Ereignisse auf dem Zeitstrahl ordnen",
     listen: {
       "lebensabschnitte": { name: "Lebensabschnitte und Ereignisse im Leben (Kindergarten mit 4, 1. Klasse mit 6)" },
@@ -701,7 +701,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.8.5", stufen: ALLE_STUFEN }] },
   { id: "echt-oder-erfunden", art: ["sortieren", "antippen"], klasse: 2, neu: "LERN_Session3", bild: "🦄", name: "Echt oder erfunden?", thema: "geschichten", farbe: "var(--deko-2)",
-    pfad: "spiele/echt-oder-erfunden/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 25, s4: 20, s5: 35, s6: 45 },
+    pfad: "spiele/echt-oder-erfunden/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 10, s2: 12, s3: 25, s4: 20, s5: 35, s6: 45 },
     beschreibung: "Kann es das geben, oder ist es erfunden? Märchen, Sage, Fabel und Sachtext",
     listen: {
       "aussagen": { name: "Kurze Sätze mit Bild: kann es geben oder erfunden" },
@@ -711,7 +711,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.9.4", stufen: ALLE_STUFEN }] },
   { id: "gedicht-baukasten", art: ["reihenfolge", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "📜", name: "Gedicht-Baukasten", thema: "gedichte", farbe: "var(--deko-1)",
-    pfad: "spiele/gedicht-baukasten/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 45, s5: 35, s6: 50 },
+    pfad: "spiele/gedicht-baukasten/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 45, s5: 35, s6: 50 },
     beschreibung: "Reimwörter ergänzen, Verse ordnen, Vers, Strophe und Reimschema erkennen",
     listen: {
       "reimpaare": { name: "Zweizeiler zum Ergänzen des Reimworts" },
@@ -788,7 +788,7 @@ const SPIELE = [
     beschreibung: "Die Wippe ins Gleichgewicht bringen: Gewicht mal Abstand — und mit einem langen Hebel Kraft sparen",
     lernziele: [{ lz: "NMG.5.1", stufen: ALLE_STUFEN }] },
   { id: "komma-jagd", art: ["markieren"], klasse: 5, neu: "LERN_Session8", bild: "✒️", name: "Komma-Jagd", thema: "saetze", farbe: "var(--deko-7)",
-    pfad: "spiele/komma-jagd/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 40, s6: 50 },
+    pfad: "spiele/komma-jagd/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 40, s6: 50 },
     beschreibung: "Kommas setzen: bei Aufzählungen und zwischen zwei Verbgruppen",
     listen: {
       "aufzaehlung": { name: "Sätze mit Aufzählungen" },
@@ -806,7 +806,7 @@ const SPIELE = [
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }, { lz: "D.5.E.1", stufen: ["s4", "s5", "s6"] }] },
   // LERN_Session8, Runde 2 der 5./6. Klasse (docs/eulenpfad/lernziele/lehrplan_sg_session8.md)
   { id: "rede-zeichen", art: ["markieren"], klasse: 5, neu: "LERN_Session8", bild: "💬", name: "Rede-Zeichen", thema: "saetze", farbe: "var(--deko-2)",
-    pfad: "spiele/rede-zeichen/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 40, s6: 60 },
+    pfad: "spiele/rede-zeichen/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 40, s6: 60 },
     beschreibung: "Doppelpunkt und Anführungszeichen der direkten Rede setzen — Begleitsatz vorne, hinten oder in der Mitte",
     listen: {
       "vorne": { name: "Direkte Rede mit vorangestelltem Begleitsatz" },
@@ -821,7 +821,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.E.1", stufen: ALLE_STUFEN }] },
   { id: "verben-faecher", art: ["antippen"], klasse: 5, neu: "LERN_Session8", bild: "🪭", name: "Verben-Fächer", thema: "wortarten", farbe: "var(--deko-6)",
-    pfad: "spiele/verben-faecher/index.html", stufen: ALLE_STUFEN, endlos: ["s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 20, s6: 44 },
+    pfad: "spiele/verben-faecher/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 20, s6: 44 },
     beschreibung: "Zu einem Verb die passenden Fragen finden: Wer? Wen? Wem? Wo? — und Sätze ergänzen",
     listen: {
       "verben": { name: "Verben mit ihren Ergänzungen (wer, wen, wem, wo, wohin)" },
@@ -856,7 +856,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.2.2", stufen: ALLE_STUFEN }] },
   { id: "erdzeit-leiter", art: ["sortieren", "reihenfolge", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "🦕", name: "Erdzeit-Leiter", thema: "zeit", farbe: "var(--deko-4)",
-    pfad: "spiele/erdzeit-leiter/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/erdzeit-leiter/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
     beschreibung: "Die Erdgeschichte ordnen: von den ersten Lebewesen über die Dinosaurier bis zum Menschen",
     listen: {
       "ereignisse": { name: "Ereignisse der Erdgeschichte mit ungefährer Zeit" },
@@ -987,7 +987,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MA.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "tageslauf-sonne", art: ["reihenfolge", "antippen"], klasse: 1, neu: "LERN_Session8", bild: "🌞", name: "Tageslauf-Sonne", thema: "zeit", farbe: "var(--deko-4)",
-    pfad: "spiele/tageslauf-sonne/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/tageslauf-sonne/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
     beschreibung: "Morgen, Mittag, Nachmittag, Abend und Nacht: Was macht man wann? Gestern, heute, morgen",
     listen: {
       "taetigkeiten": { name: "Tätigkeiten im Tageslauf mit Bild (dazu der Wochenplan für gestern, heute, morgen)" },
@@ -1051,21 +1051,21 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.B.1", stufen: ALLE_STUFEN }] },
   { id: "korrektur-stift", art: ["antippen"], klasse: 6, neu: "LERN_Session9", bild: "✏️", name: "Korrektur-Stift", thema: "saetze", farbe: "var(--deko-7)",
-    pfad: "spiele/korrektur-stift/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], vorlesen: false, zeiten: { s1: 40, s2: 50, s3: 60, s4: 70, s5: 90, s6: 100 },
+    pfad: "spiele/korrektur-stift/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s5", "s6"], vorlesen: false, zeiten: { s1: 40, s2: 50, s3: 60, s4: 70, s5: 90, s6: 100 },
     beschreibung: "Den eigenen Text prüfen: Fehler ohne Markierung finden und verbessern",
     listen: {
       "texte": { name: "Kurze Texte mit Fehlern" },
     },
     lernziele: [{ lz: "D.4.F.1", stufen: ALLE_STUFEN }, { lz: "D.5.E.1", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "hoer-reporter", art: ["antippen", "hoeren"], klasse: 6, neu: "LERN_Session9", bild: "🎧", name: "Hör-Reporter", thema: "zuhoeren", farbe: "var(--deko-2)",
-    pfad: "spiele/hoer-reporter/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 15, s2: 25, s3: 30, s4: 35, s5: 35, s6: 45 },
+    pfad: "spiele/hoer-reporter/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], vorlesen: false, zeiten: { s1: 15, s2: 25, s3: 30, s4: 35, s5: 35, s6: 45 },
     beschreibung: "Die Eule liest einen kurzen Bericht vor: gut zuhören und die Fragen beantworten",
     listen: {
       "berichte": { name: "Kurze Berichte zum Vorlesen mit Fragen" },
     },
     lernziele: [{ lz: "D.1.B.1", stufen: ALLE_STUFEN }] },
   { id: "wortarten-probe", art: ["antippen"], klasse: 6, neu: "LERN_Session9", bild: "🧪", name: "Wortarten-Probe", thema: "wortarten", farbe: "var(--deko-5)",
-    pfad: "spiele/wortarten-probe/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 25, s6: 30 },
+    pfad: "spiele/wortarten-probe/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 25, s6: 30 },
     beschreibung: "Nomen, Verb oder Adjektiv? Mit der richtigen Probe sicher entscheiden",
     listen: {
       "woerter": { name: "Wörter und Sätze für die Wortarten-Proben" },
@@ -1098,14 +1098,14 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.4.3", stufen: ALLE_STUFEN }] },
   { id: "gemeinde-helfer", art: ["sortieren", "reihenfolge", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "🏛️", name: "Gemeinde-Helfer", thema: "gemeinschaft", farbe: "var(--deko-1)",
-    pfad: "spiele/gemeinde-helfer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 18, s4: 20, s5: 25, s6: 45 },
+    pfad: "spiele/gemeinde-helfer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 10, s2: 12, s3: 18, s4: 20, s5: 25, s6: 45 },
     beschreibung: "Wer hilft bei welchem Anliegen? Feuerwehr, Spital, Gemeindehaus, Bibliothek und Werkhof — dazu Notrufnummern, öffentlich oder privat, und wer wofür zuständig ist",
     listen: {
       "anliegen": { name: "Anliegen, Einrichtungen, Notrufnummern, zuständige Stellen und Abläufe" },
     },
     lernziele: [{ lz: "NMG.10.3", stufen: ALLE_STUFEN }] },
   { id: "gefuehle-radar", art: ["antippen", "hoeren"], klasse: 3, neu: "LERN_Session10", bild: "🎭", name: "Gefühle-Radar", thema: "zuhoeren", farbe: "var(--deko-5)",
-    pfad: "spiele/gefuehle-radar/index.html", stufen: ALLE_STUFEN, knoepfeVorlesen: true, zeiten: { s1: 8, s2: 10, s3: 15, s4: 20, s5: 30, s6: 30 },
+    pfad: "spiele/gefuehle-radar/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], knoepfeVorlesen: true, zeiten: { s1: 8, s2: 10, s3: 15, s4: 20, s5: 30, s6: 30 },
     beschreibung: "Wie fühlt sich das Kind? Gesichter, Sätze und Situationen deuten — fast ohne Lesen",
     listen: {
       "situationen": { name: "Gesichter, Sätze und Situationen mit Gefühl" },
@@ -1119,7 +1119,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.4.D.1", stufen: ALLE_STUFEN }, { lz: "D.3.B.1", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "hoer-geschichte", art: ["reihenfolge", "antippen", "hoeren"], klasse: 3, neu: "LERN_Session10", bild: "👂", name: "Hör-Geschichte", thema: "zuhoeren", farbe: "var(--deko-2)",
-    pfad: "spiele/hoer-geschichte/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 15, s2: 20, s3: 30, s4: 35, s5: 35, s6: 45 },
+    pfad: "spiele/hoer-geschichte/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], vorlesen: false, zeiten: { s1: 15, s2: 20, s3: 30, s4: 35, s5: 35, s6: 45 },
     beschreibung: "Die Eule erzählt eine kurze Geschichte: Wer? Wo? Was passiert?",
     listen: {
       "geschichten": { name: "Kurze Geschichten zum Vorlesen mit Fragen" },
@@ -1138,7 +1138,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MA.3.A.1", stufen: ALLE_STUFEN }, { lz: "MA.3.C.1", stufen: ["s1", "s3", "s4", "s5", "s6"] }] },
   { id: "gattungs-kenner", art: ["sortieren", "antippen"], klasse: 6, neu: "LERN_Session10", bild: "📜", name: "Gattungs-Kenner", thema: "gedichte", farbe: "var(--deko-4)",
-    pfad: "spiele/gattungs-kenner/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], vorlesen: false, zeiten: { s1: 45, s2: 45, s3: 70, s4: 60, s5: 80, s6: 90 },
+    pfad: "spiele/gattungs-kenner/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], vorlesen: false, zeiten: { s1: 45, s2: 45, s3: 70, s4: 60, s5: 80, s6: 90 },
     beschreibung: "Märchen, Sage, Fabel, Gedicht oder Bericht? Kurze Auszüge lesen und das Merkmal finden",
     listen: {
       "texte": { name: "Kurze Textauszüge je Gattung mit Merkmalen" },
@@ -1152,7 +1152,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.C.1", stufen: ALLE_STUFEN }] },
   { id: "kulturen-koffer", art: ["sortieren", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "🧳", name: "Kulturen-Koffer", thema: "zeit", farbe: "var(--deko-3)",
-    pfad: "spiele/kulturen-koffer/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 20, s5: 25, s6: 40 },
+    pfad: "spiele/kulturen-koffer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 20, s5: 25, s6: 40 },
     beschreibung: "Pyramide, Amphore oder Pfahlbau? Dinge und Bauten den alten Kulturen zuordnen",
     listen: {
       "dinge": { name: "Gegenstände, Bauten und Fakten zu Ägypten, Römern und Pfahlbauern — ab Stufe 5 auch China und Griechen" },

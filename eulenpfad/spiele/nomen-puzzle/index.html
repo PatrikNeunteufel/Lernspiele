@@ -27,6 +27,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -144,6 +145,10 @@ function tippsFuer(a, stufe) {
 
 LS.spiel({
   id: "nomen-puzzle",
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "wortpuzzle", ziele: { s1: { teile: ["🏠", "🚪"], art: "zusammen" }, s2: { teile: ["❄️", "🧑"], art: "legen" }, s3: { teile: ["🍎", "🌳"], art: "zerlegen" },
+    s4: { teile: ["🏠", "🚪"], art: "zusammen", artikel: ["das", "die"], ganz: "die" }, s5: { teile: ["☀️", "🌸"], fuge: "n", art: "zusammen" },
+    s6: { teile: ["🦶", "⚽", "👟"], art: "legen", ganz: "der" } } },
   einleitung: "Aus zwei Nomen wird ein neues: Haus + Tür = Haustür. Das hintere Wort sagt, was es ist — eine Tür!",
   hilfe: "Schau die Wortteile an und tippe die passende Antwort an. Beim Legen tippst du die Teile in der richtigen Reihenfolge an.",
   anzahl: 8,

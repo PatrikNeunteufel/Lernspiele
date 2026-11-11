@@ -45,6 +45,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -202,6 +203,9 @@ function tippsFuer(a, p) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "labor", ziele: { s1: { wortart: "N", proben: 3 }, s2: { wortart: "V", proben: 3 }, s3: { wortart: "A", proben: 3 }, s4: { wortart: "V", proben: 3 },
+    s5: { wortart: "P", proben: 5 }, s6: { wortart: "T", proben: 5, art: "praeposition" } } },
   id: ID,
   einleitung: "Nomen, Verb oder Adjektiv? Raten gilt nicht! Im Labor prüfst du jedes Wort mit einer Probe — und die Probe verrät die Wortart.",
   hilfe: stufe => "Zuerst tippst du die Probe an, die beim farbigen Wort in diesem Satz klappt. Das Ergebnis erscheint unter dem Satz. Dann tippst du die Wortart an, die die Probe zeigt."

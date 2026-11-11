@@ -51,6 +51,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -304,6 +305,9 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "zeitreise-verben",
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "zeitband", ziele: { s1: { ziel: "praeteritum" }, s2: { ziel: "perfekt", hilfsverb: "hat" }, s3: { von: "praesens", ziel: "praeteritum" },
+    s4: { von: "praesens", ziel: "perfekt", hilfsverb: "ist" }, s5: { ziel: "perfekt", hilfsverb: "ist", wahl: true }, s6: { von: "praeteritum", ziel: "perfekt", hilfsverb: "hat" } } },
   einleitung: "Steig ein in die Zeitmaschine! Verben verraten, wann etwas passiert: jetzt oder früher.",
   hilfe: stufe => (stufe === "s6"
     ? "Lies den Satz mit dem gelben Verb. Zuerst tippst du an, in welcher Zeitform er steht. Dann tippst du den Satz an, der in der neuen Zeit richtig ist."

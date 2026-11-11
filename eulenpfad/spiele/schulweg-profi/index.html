@@ -43,6 +43,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -219,6 +220,9 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "karte", bilder: "schulweg", ziele: { s1: ["trottoir"], s2: ["trottoir", "randstein", "streifen"], s3: ["trottoir", "randstein", "streifen", "auto"],
+    s4: ["trottoir", "randstein", "streifen", "ampel"], s5: ["trottoir", "velo"], s6: ["trottoir", "randstein", "streifen", "auto", "schule"] } },
   id: ID,
   einleitung: "Auf dem Schulweg gibt es viel zu beachten. Weisst du, wie du sicher ankommst?",
   hilfe: "Schau das Bild oder das Signal genau an und lies die Frage. Dann wählst du, was auf dem Schulweg richtig und sicher ist. Beim Merksatz kommen die vier Schritte in die richtige Reihenfolge.",

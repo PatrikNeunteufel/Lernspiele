@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 10.11.2026 (LERN_Session27) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); in Arbeit: Piloten P1–P8 und Ruhezeiten gebaut, alle acht Piloten von Patrik abgenommen; Ausrollen nach AR1 a in Arbeit (Block M1 abgenommen).**
+Stand: 11.11.2026 (LERN_Session30) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); Piloten P1–P8 und Ruhezeiten gebaut und abgenommen; Ausrollen nach AR1 a in Arbeit: M1 abgenommen, M2 bis M5, A und B gebaut (116 von 169 Spielen), Abnahme offen; C und D offen.**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -214,7 +214,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | M4 | Sachrechnen, Grössen | 12 | in Arbeit seit 11.11.2026 (LERN_Session29, M4): gebaut, Abnahme offen |
 | M5 | Geometrie | 13 | in Arbeit seit 11.11.2026 (LERN_Session29, M5): gebaut, Abnahme offen |
 | A | Mathe M6 (Daten, Kombinatorik, Brüche) und Deutsch Teil 1 (Laute, Lesen, Schreiben, Rechtschreibung, Erzählen) | 23 | in Arbeit seit 11.11.2026 (LERN_Session29, A): gebaut, Abnahme offen |
-| B | Deutsch Teil 2 (Sätze, Wortarten, Gedichte, Zuhören) und NMG Teil 1 (Zeit, Geschichten, Gemeinschaft, Verkehr) | 25 | offen |
+| B | Deutsch Teil 2 (Sätze, Wortarten, Gedichte, Zuhören) und NMG Teil 1 (Zeit, Geschichten, Gemeinschaft, Verkehr) | 25 | in Arbeit seit 11.11.2026 (LERN_Session30, B): gebaut, Abnahme offen |
 | C | NMG Rest (Forschen, Körper, Orientierung, Tiere, Wetter, Wirtschaft) | 24 | offen |
 | D | Englisch, Französisch, Musik, Medien und Informatik | 29 | offen |
 
@@ -420,6 +420,63 @@ im ruhigen Bild (vorher bewegt voll deckend; dieselbe Lesart wie beim Stellen-De
 - **Quader-Volumen:** Schicht um Schicht wie vorgeschlagen (3 · 2 · 2, 4 · 3 · 2 mit den fehlenden Würfeln, 5 cm · 3 cm
   · 2 cm), s4 1 dm³ = 1000 cm³ = 1 l, s5 Quader mit 0.5 m (10 dm³ = 10 l), s6 Aquarium 40 cm · 20 cm · 25 cm füllt sich
   (20 000 cm³ = 20 l).
+
+**Block B — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme).
+Deutsch ohne Lesetext wie Block A; Zeichen nur, wo sie der Inhalt sind (Satzzeichen, Kommas, „ “ : , der wörtlichen
+Rede, Fragewörter des Verben-Fächers, hat und ist, Reimschema a und b). Bildzeichen aus den Listen der Spiele. Schmuck
+überall 2★ Glanz und 3★ Funken (Hör-Geschichte: Sterne und Sternschnuppe am Nachthimmel).
+
+- **Satz-Reparatur:** je Satz ein Zug aus leeren Wortwagen, gross geschriebene Wörter mit Dach, der Schlusswagen trägt
+  das Zeichen: s1 und s2 Punkt (s2 mit Nomen), s3 Fragezeichen, s4 langer Satz, s5 zwei Sätze, s6 drei Sätze mit . ? !
+  — statt Lok mit wachsendem Zug.
+- **Wörter-Trenner:** die Schlange ohne Lücken wird an den Wortgrenzen geschnitten (orange wie im Spiel), die Wörter
+  hängen als Fähnchen, so viele wie die Stufe Wörter hat (3, 4, 5, 7, 10, 16) statt 2 bis 6.
+- **Fehler-Lupe:** statt Sand, Muschel und Kristall die Sätze des Spiels mit genau einem Fehler: die Lupe geht Wort um
+  Wort, der Fehler leuchtet gelb und wird grün; s4 langer Satz, s6 dazu ein fehlerfreier Satz mit Haken.
+- **Komma-Jagd:** statt Netz und Glas die Sätze mit den kleinen Lücken des Spiels, die Kommas fliegen hinein: s1 ein
+  Komma, s2 zwei, s3 dazu ein Satz ohne Komma (Haken), s4 Verbgruppe, s5 gemischt, s6 drei Kommas.
+- **Rede-Zeichen:** Begleitsatz und Rede als Kästchen wie im Spiel statt Sprechblasen: s1 die gesprochenen Wörter, s2
+  Begleitsatz vorne, s3 hinten (Komma nach dem schliessenden Zeichen), s4 beide, s5 mit Frage und Ausruf, s6 der
+  Begleitsatz in der Mitte.
+- **Korrektur-Stift:** statt eines Bilds zum Ausmalen der Text im Kasten mit den Fehlern der Stufen (2, 3, 3, 4, 4, 5),
+  der Stift verbessert, unten die Zahl.
+- **Wortarten-Sortierer:** die drei Körbe des Spiels mit ihren Bildzeichen und Farben; s1 und s2 Wortkarten, ab s3 das
+  markierte Wort aus dem Satz, s6 drei Wörter aus einem Satz; die Zahl je Korb (zusammen bis zehn, eine Runde).
+- **Nomen-Puzzle:** statt eines Hauses die Bildkarten der Liste: s1 🏠 + 🚪 zusammensetzen, s2 legen, s3 zerlegen, s4 mit
+  den Artikeln (das Grundwort bestimmt den Artikel), s5 Fugenlaut (Sonne-n-blume), s6 drei Teile.
+- **Zeitreise-Verben:** statt Spuren auf dem Pfad das Zielband des Spiels (Präteritum, Perfekt, Präsens): das gelbe Verb
+  reist in seine Zeit, im Perfekt kommt hat oder ist dazu; s5 zur Wahl, s6 zwei Schritte.
+- **Verben-Fächer:** die Blätter tragen die Fragen der Stufe (s2 Wer? Wen?, s3 Wem?, s4 alle fünf); s1 wird das Verb im
+  Satz gefunden, s5 die Zeitform am Griff; falsche Karten fallen weg.
+- **Wortarten-Probe:** je Glas eine Probe des Spiels (🏷️ 👤 📈, ab s5 📋 🔒), genau die passende trifft, darunter die
+  Wortart, s6 Partikel: Präposition — statt Gläser zu zählen.
+- **Gedicht-Baukasten:** wie vorgeschlagen; s1 mit Lücke im Reimwort, s2 Zweizeiler, s3 gezählt, s4 und s5 geordnet.
+- **Gattungs-Kenner:** Bücher mit den Bildzeichen der Gattungen der Stufe (1, 3, 5, 5, 7); s1 mit gut 😇 und böse 😈,
+  s6 fällt das Buch hinaus, das nicht passt. s3 und s4 zeigen dieselben fünf Gattungen (s4 übt ihre Merkmale).
+- **Hör-Reporter:** statt Publikum die Fragekarten der Stufe (Wer? Wo? … 💡 Schluss, 🔢 Zahl, 🎯 Kern), die Eule mit
+  Kopfhörern.
+- **Gefühle-Radar:** statt eines Kreises von Kindern der Radarschirm mit den Gesichtern der Liste (Grundgefühle, ab s4
+  feine), s6 ein Gefühlspaar.
+- **Hör-Geschichte:** statt Tieren die Figuren der Antworten im Spiel am Lagerfeuer; s6 dazu das Buch mit dem Titel.
+- **Jahreskreis-Ordner:** statt der vier Jahreszeiten das Rad der Wochentage oder Monate, gerechnet wie die Stufen (Mi
+  + 1, Fr + 2, März bis Juli ordnen, November + 5, Di − 10, April + 20); Jahreszeit nur bei den eindeutigen Monaten.
+- **Früher und heute:** statt der Telefone die Dinge der Listen des Spiels: s1 Körbe 🕰️ und ✨, s2 und s3 Reihen, s4
+  von heute zurück, s5 vor 60 Jahren (1966) ✅ oder ❌, s6 die Reihe zu Fuss bis Flugzeug.
+- **Zeitstrahl-Sortierer:** s1 Lebensabschnitte und s2 Generationen ohne Zahlen, ab s3 der Strahl mit Jahreszahlen wie
+  im Spiel: Generationen, Alter (2026 − 2016 = 10), Ereignisse, s6 das Jahrhundert (1291 → 13. Jahrhundert).
+- **Erdzeit-Leiter:** die Leiter quer und logarithmisch wie im Spiel, die Ereignisse der Liste gleichmässig mit einer
+  Linie an ihre Stelle (dicht beieinander wären sie nicht zu lesen); s3 mit Zahlen, s5 die Erdgeschichte als ein Tag
+  (die ersten Dinosaurier 22:48 Uhr).
+- **Tageslauf-Sonne:** die Tageszeiten der Stufen mit Bildern der Tätigkeiten (s1 Tag und Nacht, s3 alle fünf), s5 der
+  Wochenplan (übermorgen), s6 das Bild, das nicht passt.
+- **Kulturen-Koffer:** je Kultur ein Fach mit ihrem Zeichen; s4 Gab es das bei den Römern? (Rad, Münzen, Glas ja, Strom
+  nein); s6 klappt der Koffer zu.
+- **Echt oder erfunden?:** s5 mit dem Merkmal des Erfundenen, s6 Textsorten mit den Bildzeichen der Gattungen (Märchen
+  und Fabel erfunden, Bericht echt; die Sage nicht, sie kann einen wahren Kern haben).
+- **Gemeinde-Helfer:** die Einrichtungen der Stufen auf dem Dorfplan, s3 mit Notruf 118, s4 mit privatem Betrieb, s5
+  Gemeinde, Kanton und Bund als Ringe, s6 der Ablauf zum Spielplatz in fünf Schritten.
+- **Schulweg-Profi:** wie vorgeschlagen; der Fussgängerstreifen gelb, s3 ein Auto von links hält an, s4 Lichtsignal am
+  Streifen, s5 Velo rechts auf der Strasse.
 
 ## 8. Ideen je Spiel
 

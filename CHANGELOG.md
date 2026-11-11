@@ -1821,3 +1821,22 @@
 - Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe glace-kombinator
   abc-sortierer „Keine Fehler.“ — letzter voller Lauf weiter auf `6055527`.
+- Abschluss-Animationen Block B (Deutsch Teil 2, NMG Teil 1; 25 Spiele, jetzt 116 von 169): `spiele/gemeinsam/feier.js`
+  mit 25 Bildern nach den Stufen der Spiele — Satz-Reparatur (Züge aus Wortwagen mit Satzzeichen), Wörter-Trenner
+  (Girlande), Fehler-Lupe (Lupe, gelb, grün), Komma-Jagd (Kommas in die Lücken), Rede-Zeichen (Begleitsatz, Rede und
+  Zeichen vorne, hinten, in der Mitte), Korrektur-Stift, Wortarten-Sortierer (Körbe des Spiels), Nomen-Puzzle (Bildkarten
+  der Liste, Artikel des Grundworts geprüft, Fugenlaut), Zeitreise-Verben (Zielband), Verben-Fächer, Wortarten-Probe
+  (genau eine Probe trifft), Gedicht-Baukasten (Reimschema), Gattungs-Kenner (Bücherregal), Hör-Reporter, Gefühle-Radar,
+  Hör-Geschichte (Lagerfeuer), Jahreskreis-Ordner (Rad der Wochentage und Monate, gerechnet), Früher und heute,
+  Zeitstrahl-Sortierer (Strahl mit Jahreszahlen, Alter, Jahrhundert), Erdzeit-Leiter (logarithmisch, Erdgeschichte als
+  Tag), Tageslauf-Sonne, Kulturen-Koffer (Dinge gegen die Liste geprüft), Echt oder erfunden?, Gemeinde-Helfer
+  (Dorfplan, Notruf, Ebenen, Ablauf), Schulweg-Profi. Neu `ankunft`: was eine Figur abfährt, leuchtet nach der Weglänge
+  auf (animateMotion fährt gleichmässig). Katalog `einstellungen: ["feier"]` für die 25 Spiele.
+- Im Browser alle Endbilder in Handybreite und den Ablauf bei 1.2 und 1.6 s angesehen; dabei verbessert: Zug mittig und
+  grösser, Kommas grösser mit breiteren Lücken, Lupe hebt am Ende ab, Körbe vor den Karten gezeichnet, Textkasten so hoch
+  wie der Text, Fächer so weit offen wie er Blätter hat, Zeitstrahl s6 mit Ereignissen, die sich nicht überdecken,
+  Erdzeit-Leiter mit Linien an die Stelle, Morgen- und Abendrot als Bögen, Koffer klappt ganz zu, Notruf-Schild und
+  Ebenen im Gemeinde-Helfer, Lichtsignal neben dem Streifen; Funken und Strassen ganz im Bild (Prüfung Lage und Schrift).
+- Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die 25 Spiele von
+  Block B, stellen-detektiv, instrumente, uhr-werkstatt „Keine Fehler.“ — letzter voller Lauf weiter auf `6055527`.

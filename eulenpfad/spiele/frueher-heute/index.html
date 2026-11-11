@@ -27,6 +27,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -227,6 +228,9 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "zeitreise", ziele: { s1: { korb: { frueher: ["🪔", "🐎"], heute: ["💡", "🚗"] } }, s2: { reihe: ["☎️", "📱"] }, s3: { reihe: ["🔥", "🕯️", "💡"] },
+    s4: { reihe: ["🐎", "🚗"], rueck: true }, s5: { jahr: 1966, ja: ["🚗", "📺"], nein: ["📱", "💻"] }, s6: { reihe: ["🚶", "🐎", "🚂", "✈️"] } } },
   id: ID,
   einleitung: "Wie hat man früher Licht gemacht, Wäsche gewaschen, telefoniert? Finde heraus, was sich verändert hat!",
   hilfe: "Schau das Ding genau an und überleg, wozu man es braucht und wie alt es ist. Bei einer Reihe tippst du die Dinge vom ältesten zum neusten an.",

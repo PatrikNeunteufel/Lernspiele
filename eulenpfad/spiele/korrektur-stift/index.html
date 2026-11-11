@@ -35,6 +35,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -327,6 +328,9 @@ function tippsFuer(a, p) {
 let rundeTexte = new Map();
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "korrektur", ziele: { s1: { saetze: 3, fehler: 2 }, s2: { saetze: 3, fehler: 3 }, s3: { saetze: 5, fehler: 3 }, s4: { saetze: 5, fehler: 4 },
+    s5: { saetze: 7, fehler: 4 }, s6: { saetze: 7, fehler: 5 } } },
   id: ID,
   hilfe: stufe => "Tipp auf ein Wort, das falsch ist, und wähl dann, wie man es richtig schreibt. Fehlt ein Komma oder ein Satzzeichen, tippst du auf das Wort davor."
     + (STUFE[stufe].zaehlen ? "" : " Hast du alle Fehler verbessert, tipp auf „✓ Prüfen“."),

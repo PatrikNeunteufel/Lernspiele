@@ -33,6 +33,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -253,6 +254,9 @@ function gedichtKasten(a, opt = {}) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "gedicht", ziele: { s1: { schema: "aa", luecke: true }, s2: { schema: "aa" }, s3: { schema: "aabb", zaehlen: true }, s4: { schema: "aabb", ordnen: true },
+    s5: { schema: "abab", ordnen: true }, s6: { schema: "abba", strophen: 2, zaehlen: true } } },
   id: ID,
   einleitung: "Reime, Verse, Strophen: Bau mit mir Gedichte! Lies die Verse ruhig laut vor.",
   hilfe: "Lies die Verse halblaut vor, dann hörst du die Reime. Sollst du einen Vers suchen, tippst du die Zeile direkt im Gedicht an.",

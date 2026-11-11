@@ -26,6 +26,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -186,6 +187,10 @@ const TIPPS = {
 };
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block B, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "wolkenschloss", ziele: { s1: { echt: ["🐶"], erfunden: ["🦄"] }, s2: { echt: ["🐄", "🐝"], erfunden: ["🐸", "🌳"] },
+    s3: { echt: ["🐦", "🐌"], erfunden: ["🐘", "⛄"] }, s4: { echt: ["🐴", "🍎", "🚲"], erfunden: ["🦄", "🐱", "🌧️"] },
+    s5: { echt: ["🐝"], erfunden: [["🐶", "spricht"], ["🚌", "bewegt"], ["🦉", "zauber"]] }, s6: { echt: ["📰"], erfunden: ["🏰", "🦊"] } } },
   id: ID,
   hilfe: "Lies oder hör den Satz oder die Geschichte. Dann legst du die Karte in den passenden Korb oder tippst die passende Antwort an.",
   einleitung: "Manche Geschichten könnten wirklich passieren, andere sind erfunden. Findest du heraus, was echt ist?",
