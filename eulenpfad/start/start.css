@@ -267,13 +267,33 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .spielkarte .karten-bild { aspect-ratio: 320 / 150; margin: -2px -4px 2px; border-radius: 14px; background: #eef4fb; overflow: hidden; }
 .spielkarte .karten-bild .feier { margin: 0; max-width: none; cursor: inherit; pointer-events: none; }
 .spielkarte.mit-bild .kopfzeile .spiel-bild { display: none; }
-/* Rahmen wie von Hand gezeichnet (Einstellung kartenrahmen „hand“): statt des glatten Streifens ein SVG über der Karte
-   (start/spiele.js handPfad), dick auf der Kopfseite, sonst dünn, in der Farbe --f; der Platz des Streifens bleibt */
-.rahmen-hand .spielkarte { border-top: none; padding-top: 26px; }
-.rahmen-hand .spiele.kompakt .spielkarte { border-left: none; padding-top: 8px; padding-left: 20px; }
-.spielkarte > svg.hand-rahmen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
-.spielkarte > svg.hand-rahmen path { fill: var(--f, var(--knopf)); }
-body:not(.rahmen-hand) .spielkarte > svg.hand-rahmen { display: none; }
+/* ---------- Stil „wie von Hand gezeichnet“ (Einstellung stil „hand“, start/stil.js; Wunsch Patrik LERN_Session32) ----------
+   Farben wie glatt. Rahmen: ein SVG über dem Element (svg.hand-rahmen) statt des glatten Streifens oder Randes, der Platz
+   des Streifens bleibt. Raster: Spielkarten in den Kacheln leicht verschoben und skaliert (--rx, --ry, --rs, --rm aus
+   STIL), ab und zu eine Lücke. Knöpfe, Chips, Tabs, Felder: unregelmässige Ecken und Linien, im Wechsel nach Stelle. */
+.stil-hand .spielkarte { border-top: none; padding-top: 26px; }
+.stil-hand .spiele.kompakt .spielkarte { border-left: none; padding-top: 8px; padding-left: 20px; }
+.stil-hand .weiter-karte { border-left: none; padding-left: 14px; position: relative; }
+.stil-hand .filter-klapp { border-color: transparent; position: relative; }
+.stil-hand #inhalt .karte { position: relative; }
+svg.hand-rahmen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
+svg.hand-rahmen path { fill: var(--f, #cfd3e6); }
+body:not(.stil-hand) svg.hand-rahmen { display: none; }
+/* Raster: nicht ganz in Reih und Glied; höchstens 4 px seitlich und 2 % grösser, damit sich keine Karten berühren */
+.stil-hand .spiele:not(.kompakt) > .spielkarte { transform: translate(var(--rx, 0), var(--ry, 0)) scale(var(--rs, 1)); margin-top: var(--rm, 0); }
+.raster-luecke { display: none; }
+@media (min-width: 640px) { .stil-hand .spiele:not(.kompakt) > .raster-luecke { display: block; } }
+/* Knöpfe, Chips, Tabs: Ecken ungleich, im Wechsel nach der Stelle in der Reihe */
+.stil-hand :is(.chip, .tab, .karten-info, .weiter-stufe) { border-radius: 20px 26px 18px 28px / 26px 18px 28px 20px; }
+.stil-hand :is(.chip, .tab, .karten-info, .weiter-stufe):nth-child(3n+2) { border-radius: 28px 18px 26px 20px / 18px 28px 20px 26px; }
+.stil-hand :is(.chip, .tab, .karten-info, .weiter-stufe):nth-child(3n) { border-radius: 22px 30px 20px 16px / 30px 22px 16px 24px; }
+.stil-hand :is(.knopf, .stufenknopf, .weiter-karte) { border-radius: 14px 20px 12px 22px / 20px 12px 22px 14px; }
+.stil-hand :is(.knopf, .stufenknopf):nth-child(3n+2) { border-radius: 22px 12px 20px 14px / 12px 22px 14px 20px; }
+.stil-hand :is(.knopf, .stufenknopf):nth-child(3n) { border-radius: 16px 24px 18px 10px / 24px 16px 10px 18px; }
+/* Felder: Linie ungleich dick, Ecken ungleich */
+.stil-hand :is(input.suche, .feld, .pin-zeile input, select, textarea) {
+  border-style: solid; border-width: 2px 3px 2.5px 2px; border-radius: 12px 18px 10px 16px / 16px 10px 18px 12px; }
+.stil-hand :is(input.suche, .feld, select):nth-of-type(2n) { border-width: 3px 2px 2px 2.5px; border-radius: 18px 10px 16px 12px / 10px 16px 12px 18px; }
 /* ⓘ zeigt dem Kind die Beschreibung (GS2 a) */
 .karten-info { flex: none; width: 40px; height: 40px; border: none; border-radius: 999px; background: #f0f2fb; color: var(--text-leise);
   font: inherit; font-size: 22px; font-weight: 900; line-height: 1; cursor: pointer; }

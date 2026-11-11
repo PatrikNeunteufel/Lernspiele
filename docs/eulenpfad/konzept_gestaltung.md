@@ -2,7 +2,7 @@
 
 Stand: 11.11.2026 (LERN_Session32) · **GS0 a, GS1 a, GS2 a, SK1 a entschieden und gebaut** (Patrik, LERN_Session32;
 Umsetzung docs/eulenpfad/rahmen.md 6, „Kartenbild und Kinderkarte“); GS3 (Schrift) mit gemessenen Zahlen vorgelegt;
-dazu ein umschaltbarer Rahmen wie von Hand gezeichnet (Wunsch Patrik, Einstellung `kartenrahmen`, Standard glatt);
+dazu ein umschaltbarer Stil wie von Hand gezeichnet für die ganze Startseite (Wunsch Patrik, Einstellung `stil`, Standard glatt: Rahmen, Raster, Knöpfe, Felder; rahmen.md 6);
 offen Druckknöpfe, Versuch mit Kindern und der Lehrperson.
 
 **Kipppunkt GS1 gemessen** (Desktop, lokaler Server): `feier.js` 28 ms übertragen, 2 ms ausgeführt, ein Kartenbild

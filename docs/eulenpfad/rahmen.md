@@ -374,12 +374,20 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
 - Ein Kind sieht je Karte Bild, Name und Stufenknöpfe. Die Beschreibung zeigt ⓘ (`.karten-info`) und liest langes
   Drücken vor; Lernziel-Kürzel und Sperrmarken sieht nur die Aufsicht, den Grund eines Suchtreffers alle. Die
   Zufallskarten tragen für ein Kind nur den Titel; „🎯 Zufälliges Spiel“ heisst für ein Kind „🎯 Überrasch mich“.
-- **Rahmen wie von Hand gezeichnet** (Einstellung `kartenrahmen`: `glatt` Standard, `hand`; Wunsch Patrik LERN_Session32):
-  `start/spiele.js` legt über jede Spielkarte ein SVG (`svg.hand-rahmen`, `handPfad`): eine gefüllte Fläche zwischen
-  zwei leicht krummen Linien, auf der Kopfseite 7–11 px dick (in den Kacheln oben, kompakt links), sonst 2–4 px, in
-  `--f` wie der glatte Streifen. Die Form hängt am Spiel (Zufall mit der Id als Startwert) und wird neu gerechnet, wenn
-  sich die Grösse der Karte ändert (ResizeObserver). Umgeschaltet über die Klasse `rahmen-hand` an `body` in
-  `start/start.css`; glatt bleibt alles wie zuvor.
+- **Stil der Startseite** (Einstellung `stil`: `glatt` Standard, `hand` „wie von Hand gezeichnet“; Wunsch Patrik
+  LERN_Session32; Code `start/stil.js`, Stile `start/start.css` unter `.stil-hand`). Gilt in den Tabs Spiele, Profil,
+  Erfolge und Statistik, in denselben Farben wie glatt; umgeschaltet über die Klasse `stil-hand` an `body`
+  (`STIL.anwenden()` nach jedem Zeichnen in `zeichneStart`).
+  - Rahmen: Über Spielkarten, Weiterspielen, den Filter und die Karten der Tabs (`#inhalt .karte`) legt `STIL` ein SVG
+    (`svg.hand-rahmen`, `STIL.pfad`): eine gefüllte Fläche zwischen zwei leicht krummen Linien, auf der Kopfseite 7–11 px
+    dick (Spielkarte oben, kompakt und Weiterspielen links), sonst 2–4 px; Farbe `--f`, sonst eine helle Linie. Die Form
+    hängt an der Kennung (Zufall mit Startwert) und wird neu gerechnet, wenn sich die Grösse ändert (ResizeObserver);
+    neue Elemente bindet ein MutationObserver ein.
+  - Raster: Spielkarten in den Kacheln bis 4 px verschoben, 0–12 px tiefer, 97,5–102 % gross (`--rx`, `--ry`, `--rm`,
+    `--rs`), je Spiel gleich; nach etwa jeder zwölften Karte eine Lücke (`.raster-luecke`, `STIL.luecke`), ab 640 px
+    Breite. Gemessen LERN_Session32: keine Karte überdeckt eine andere, kleinster Abstand 7,4 px (1024 px) und 6,4 px
+    (375 px).
+  - Knöpfe, Chips, Tabs und Felder: unregelmässige Ecken, Felder mit ungleich dicker Linie, im Wechsel nach der Stelle.
 - **Schrift** (Entscheid GS3 a): Die Startseite lädt Nunito aus `eulenpfad/schriften/Nunito.woff2` (`@font-face` in
   `start/start.css`, variabel 200–1000, Lizenz `schriften/OFL.txt`); Spiele laden sie nicht und zeigen weiter die Schrift
   des Geräts. Zugeschnitten auf die Zeichen des Eulenpfads und ganz Latin-1 und Latin Extended-A mit

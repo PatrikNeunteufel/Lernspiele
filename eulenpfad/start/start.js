@@ -74,6 +74,7 @@ function zeichneStart(mitAufsicht = null) {
     "aria-label": "Anleitung", "data-vorlesen": "Anleitung", text: "📖" }));
   abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);
+  STIL.anwenden(); // Stil der Startseite (Einstellung stil, start/stil.js)
   if (!LS.istAufsicht(ich) && LS.neuerAufstieg(ich)) aufstiegFeier(ich);
 }
 
