@@ -1723,3 +1723,6 @@
   wie Platz ist. Beim Bauen gefunden: doppelt eingehängte Karten, ein Stempel, der um die Bildecke statt um seine Mitte
   gewachsen wäre, ein doppeltes Ergebnis am Ausgang der Maschine, eine Breitenprüfung ohne die Verkleinerung (374 im
   Spiegel gab kein Bild).
+- Session-Abschluss LERN_Session28: Report docs/eulenpfad/report/LERN_Session28_2026-11-11.md mit der Liste der 43
+  Spiele mit Abschluss-Animation (dieselben, die die Vorschau aus dem Katalog zeigt; Katalog und Spielseiten geprüft
+  gleich), Handover (Stand nach LERN_Session28). Keine Code-Änderung.

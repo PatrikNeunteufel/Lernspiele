@@ -1,6 +1,22 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-11, nach LERN_Session28** ([Report](report/LERN_Session28_2026-11-11.md)):
+- **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
+- **Eulenpfad:** Bemerkungen 33–35 behoben (Finger-Zähler s6 blitzte ein leeres Feld, Hilfslinien in der
+  Diagramm-Wahl); Entscheid H1 a — jede Grösse nach der Bildhöhe mit Untergrenze ([rahmen.md](rahmen.md) 20),
+  geprüft von `tools/pruefe_skripte.js` (Punkt 5) und `tools/bildhoehe.js` (Fenster `mix`, `handy-quer`).
+  Abschluss-Animationen in **43 Spielen** (Liste im Report): Piloten und M1 abgenommen, **M2 und M3 gebaut, Abnahme
+  offen**; Vorschau mit „Nebeneinander“ und „Anhalten bei“.
+- **Tests:** Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Skripte „Keine Fehler.“; Eulenpfad Stichproben „Keine
+  Fehler.“, Bildhöhe aller Spiele ohne geschrumpfte Grafik — **letzter voller Lauf auf `6055527`**. Commits bis
+  `e9097c0` und dieser Abschluss nicht gepusht.
+- **Weiter mit:** Block M4 (Sachrechnen, Grössen; 12 Spiele) wie M2 und M3; Abnahme von M2, M3 und dem Tresor durch
+  Patrik in `tools/feier_vorschau.html`; voller Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push;
+  Prüfer-Kandidat (Teile ausserhalb der viewBox, zu kleine Texte im Haken `schluss`); dann M5, M6, die übrigen
+  Fächer, Rückmeldung zur Gestaltung als Konzept.
+
 **2026-11-10, nach LERN_Session27** ([Report](report/LERN_Session27_2026-11-10.md)):
 - **Kern:** 1.39.0 (1.35 Verbindung prüfen, 1.36 Versionen, 1.37 zugelassene Aufsichten, 1.38 Unterschrift, 1.39
   Meldungsserver im Netz; Plan C12 im Code fertig, Inbetriebnahme bei Patrik zu Hause offen).
