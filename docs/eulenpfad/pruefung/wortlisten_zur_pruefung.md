@@ -2379,7 +2379,7 @@ Jahrzahlen bitte nachprüfen.
 | 1492 | 1492 | svg:karavelle | Kolumbus erreicht Amerika | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
 | 1803 | 1803 | 🏛️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
 | 1847 | 1847 | 🚂 | Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden | Neuzeit | ☐ |
-| 1848 | 1848 | 🇨🇭 | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
+| 1848 | 1848 | svg:schweiz | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
 | 1886 | 1886 | svg:motorwagen | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
 | 1903 | 1903 | svg:wright-flyer | Die Brüder Wright fliegen mit dem ersten Motorflugzeug | Neuzeit | ☐ |
 | 1969 | 1969 | svg:mondlandung | Die ersten Menschen landen auf dem Mond | Neuzeit | ☐ |

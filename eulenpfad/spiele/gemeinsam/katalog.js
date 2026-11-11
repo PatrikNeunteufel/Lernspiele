@@ -348,7 +348,7 @@ const SPIELE = [
     feier: { muster: "reise", bilder: "tastatur", ziele: { s1: [[2, 7], [3, 6], [2, 10]], s2: [[2, 5], [1, 6], [3, 5], [2, 2]],
       s3: [[1, 2], [2, 8], [1, 2], [2, 3], [2, 0], [3, 5], [1, 4]], s4: [[1, 7], [3, 2], [2, 5], [4, 0], [2, 8], [1, 2], [2, 1], [1, 2], [3, 8]],
       s5: [[2, 6], [2, 0], [3, 7], [4, 0], [2, 4], [1, 2], [1, 3], [3, 5], [3, 8]], s6: [[2, 6], [2, 0], [3, 8], [4, 0], [1, 2], [2, 1], [4, 0], [1, 4], [1, 6], [1, 4], [3, 8]] } } },
-  { id: "word-match", art: ["antippen", "reihenfolge"], klasse: 4, bild: "🇬🇧", name: "English Word-Match", thema: "englisch", farbe: "var(--deko-6)",
+  { id: "word-match", art: ["antippen", "reihenfolge"], klasse: 4, bild: "🔤", name: "English Word-Match", thema: "englisch", farbe: "var(--deko-6)",
     pfad: "spiele/word-match/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s6"], zeiten: { s1: 10, s2: 10, s3: 12, s4: 15, s5: 30, s6: 38 },
     beschreibung: "Englische Wörter zu Bildern, auf Deutsch und zurück — und buchstabieren",
     listen: {
@@ -986,8 +986,8 @@ const SPIELE = [
       s4: { von: 1900, bis: 2040, klein: 5, gross: 20, marken: [[2016, "🧒"]], alter: [2016, 2026] },
       // s5 und s6 mit bekannten Ereignissen und einem Anker der Gegenwart (ZS1 a, Bemerkung 42): auf dem Strahl von s6
       // brauchen zwei Marken 147 Jahre Abstand, darum dort nur eines nach 1900; die Mondlandung gezeichnet (ZS2 a)
-      s5: { von: 1200, bis: 2100, klein: 50, gross: 100, marken: [[1291, "📜"], [1848, "🇨🇭"], [1969, "svg:mondlandung"]] },
-      s6: { von: 600, bis: 2100, klein: 50, gross: 300, marken: [[1291, "📜"], [1492, "svg:karavelle"], [1848, "🇨🇭"], [2007, "📱"]], jahrhundert: 1291 } } } },
+      s5: { von: 1200, bis: 2100, klein: 50, gross: 100, marken: [[1291, "📜"], [1848, "svg:schweiz"], [1969, "svg:mondlandung"]] },
+      s6: { von: 600, bis: 2100, klein: 50, gross: 300, marken: [[1291, "📜"], [1492, "svg:karavelle"], [1848, "svg:schweiz"], [2007, "📱"]], jahrhundert: 1291 } } } },
   { id: "stromkreis-bauer", art: ["sortieren", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "💡", name: "Stromkreis-Bauer", thema: "forschen", farbe: "var(--deko-4)",
     pfad: "spiele/stromkreis-bauer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s6"], zeiten: { s1: 12, s2: 12, s3: 15, s4: 25, s5: 25, s6: 35 },
     beschreibung: "Brennt die Lampe? Stromkreis, Schalter, Leiter, Kurzschluss, Serie und parallel",

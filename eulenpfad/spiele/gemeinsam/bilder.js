@@ -563,6 +563,12 @@ const BILDER = (() => {
         + `<path d="M34 30 H66 L70 50 H30 Z" fill="#d7dade" stroke="#7b7f88" stroke-width="1.6"/>`
         + `<path d="M42 36 L48 36 L46 44 L40 44 Z M52 36 L58 36 L60 44 L54 44 Z" fill="#2a2d45"/>`
         + `<path d="M50 30 V20 M44 22 H56" stroke="#7b7f88" stroke-width="1.8"/><circle cx="50" cy="19" r="2.4" fill="#d7dade" stroke="#7b7f88" stroke-width="1.2"/>` },
+    // Windows zeichnet keine Flaggen-Emoji (🇨🇭 erscheint als „CH“, LERN_Session32). Masse des Kreuzes: Arme 6 von 32
+    // Teilen breit und je 7 über die Mitte hinaus — aus dem Gedächtnis (Anhang zum Wappengesetz), beim Prüfen belegen.
+    schweiz: { name: "Schweizer Fahne (rotes Quadrat mit weissem Kreuz)", box: "0 0 100 100",
+      svg: `<rect x="4" y="4" width="92" height="92" fill="#da291c"/>`
+        + `<rect x="41.38" y="21.25" width="17.25" height="57.50" fill="#ffffff"/>`
+        + `<rect x="21.25" y="41.38" width="57.50" height="17.25" fill="#ffffff"/>` },
     "wright-flyer": { name: "Flugzeug der Brüder Wright (zwei lange Flügel übereinander, aus Holz und Stoff, Pilot liegt)", box: "0 0 100 100",
       svg: `<path d="M0 86 Q30 78 60 84 Q80 88 100 82 V100 H0 Z" fill="#e8d6a0"/>`
         + `<rect x="18" y="24" width="70" height="8" rx="2" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.6"/>`

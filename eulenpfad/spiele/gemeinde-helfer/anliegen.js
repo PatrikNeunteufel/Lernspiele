@@ -200,7 +200,7 @@ const GEMEINDE_EBENEN = [
 const GEMEINDE_EBENE_TEXT = {
   gemeinde: { name: "Gemeinde", bild: "🏘️", erklaerung: "dein Dorf oder deine Stadt" },
   kanton: { name: "Kanton", bild: "🏞️", erklaerung: "ein grösseres Gebiet mit vielen Gemeinden" },
-  bund: { name: "Bund", bild: "🇨🇭", erklaerung: "die ganze Schweiz" },
+  bund: { name: "Bund", bild: "svg:schweiz", erklaerung: "die ganze Schweiz" },
 };
 
 /** Der Weg eines Anliegens durch die Gemeinde (Stufe 6, Königsstufe) — vereinfacht, ZU PRÜFEN. */

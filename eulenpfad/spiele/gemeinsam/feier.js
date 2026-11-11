@@ -6014,7 +6014,7 @@ var LS_FEIER = (function () {
       const svg = neuesBild("karte", stufe, { "data-bilder": "dorfplan", "data-anzahl": 3 });
       svg.appendChild(tagGrund());
       // die Ringe von aussen nach innen, das Zeichen je Ebene in ihrem Ring rechts der Mitte
-      [["🇨🇭", 140, 64, "#fbe3e3", 280], ["🏞️", 96, 44, "#e3f1dc", 236], ["🏘️", 52, 24, "#fff1c2", 192]].forEach(([b, rx, ry, farbe, bx], i) =>
+      [["svg:schweiz", 140, 64, "#fbe3e3", 280], ["🏞️", 96, 44, "#e3f1dc", 236], ["🏘️", 52, 24, "#fff1c2", 192]].forEach(([b, rx, ry, farbe, bx], i) =>
         svg.appendChild(erscheine(s("g", { "data-stueck": "ebene" }, s("ellipse", { cx: 160, cy: 76, rx, ry, fill: farbe, stroke: "#8a8fa8", "stroke-width": 1.4 }), bildzeichen(bx, 76, b, 16)), (i * T) / 3, ruhig, 0.4)));
       svg.appendChild(bildzeichen(160, 80, "🏛️", 18));
       if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
@@ -7388,7 +7388,7 @@ var LS_FEIER = (function () {
         svg.appendChild(erscheine(karte, z.fehlt === i ? T * 0.8 : zeiten[k], ruhig, 0.25));
         if (z.wer && KAKAO_WER[i]) svg.appendChild(erscheine(bildzeichen(x + 14, y - 13, KAKAO_WER[i], 11), zeiten[k] + 0.2, ruhig));
       });
-      if (z.herkunft) svg.append(erscheine(bildzeichen(28, 24, "🌍", 18), 0.2, ruhig), erscheine(bildzeichen(300, 22, "🇨🇭", 16), T, ruhig), erscheine(s("path", { d: "M44,24 Q160,4 284,22", fill: "none", stroke: "#6b7089", "stroke-width": 1.2, "stroke-dasharray": "4 3" }), 0.4, ruhig));
+      if (z.herkunft) svg.append(erscheine(bildzeichen(28, 24, "🌍", 18), 0.2, ruhig), erscheine(bildzeichen(300, 22, "svg:schweiz", 16), T, ruhig), erscheine(s("path", { d: "M44,24 Q160,4 284,22", fill: "none", stroke: "#6b7089", "stroke-width": 1.2, "stroke-dasharray": "4 3" }), 0.4, ruhig));
       const [ex, ey] = pts[pts.length - 1];
       svg.appendChild(bewege(s("g", {}, bildzeichen(0, -18, "🫘", 12)), "M" + pts.map(p => p.join(",")).join(" L"), { x: ex, y: ey, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
     }

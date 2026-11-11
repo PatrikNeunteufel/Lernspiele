@@ -38,6 +38,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script>
 "use strict";
 // Lehrplan SG FS2F.3.A.1 (2. Zyklus): sich in Alltagssituationen verständigen — Zahlen beim Bestellen,
@@ -261,7 +262,7 @@ LS.spielMitStimme({
       const lob = `Richtig: ${text} = ${zahlText(a.n)}${a.region ? "" : info ? ` · ${info}` : ""}`;
       if (a.art === "lesenTippen") {
         f.append(el("div", { class: "frage", text: "Lies das Wort. Welche Zahl ist das?" }), el("div", { class: "wortkarte", text: text }));
-        if (a.region) f.append(el("div", { class: "nr-region", text: "🇨🇭 so sagt man in der Westschweiz" }));
+        if (a.region) f.append(el("div", { class: "nr-region" }, LS.bild("svg:schweiz"), " so sagt man in der Westschweiz"));
       } else {
         f.append(el("div", { class: "frage", text: a.region ? "Hör zu (so sagt man in der Westschweiz). Welche Zahl hörst du?" : "Hör zu: Welche Zahl hörst du?" }), hoerKnopf(text));
         sprich(text, ctx.uhrWarten());
