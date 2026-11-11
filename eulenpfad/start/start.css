@@ -1,5 +1,16 @@
 /* Startseite: Anmeldung, Tabs (Spiele, Profil, Statistik, Verwaltung). Spiele laden diese Datei nicht. */
 
+/* Schrift der Startseite (Entscheid GS3 a, LERN_Session32): Nunito als Datei im App-Ordner (LERN-1), variabel 200–1000,
+   zugeschnitten mit tools/schrift_zuschneiden.py, Lizenz SIL OFL in schriften/OFL.txt. --schrift in stil.css nennt
+   Nunito zuerst; was die Datei nicht hat (U+202F), kommt aus der nächsten Schrift. Spiele laden die Datei nicht (GS0 a). */
+@font-face {
+  font-family: "Nunito";
+  src: url("../schriften/Nunito.woff2") format("woff2");
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Statistik: eine Farbe, hell → dunkel — Anteil der Aufgaben, die auf Anhieb richtig waren. */
   --seq-1: #e8eeff; --seq-2: #c5d3ff; --seq-3: #9db2fb; --seq-4: #6f8bf3; --seq-5: #4a63d8;

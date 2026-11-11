@@ -133,7 +133,7 @@ macht aus 169 Karten wieder eine Textwand. a gilt für alle Klassen gleich, Vorl
 Für b spricht, dass Ältere am Text ein Spiel schneller finden — dafür ist die Suche da (SU1 a). Kippen würde die
 Empfehlung, wenn Kinder ab der 4. Klasse im Versuch Spiele am Bild allein nicht wiederfinden.
 
-### GS3 — Welche Schrift?
+### GS3 — Welche Schrift? → **a** (Patrik, 11.11.2026; gebaut: `eulenpfad/schriften/Nunito.woff2` 43,7 KB mit Latin Extended-A für Vornamen, `@font-face` in `start/start.css`, `tools/schrift_zuschneiden.py`, Prüfung „schrift“ in den kurzen Tests)
 
 **Ort:** `spiele/gemeinsam/stil.css` `--schrift`; nach GS0 a gilt sie zuerst auf der Startseite (`start/start.css`).
 **Heute:** `"Nunito", "Segoe UI Rounded", "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif` — Nunito liegt

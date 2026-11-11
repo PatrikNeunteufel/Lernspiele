@@ -27,9 +27,11 @@ const TREIBER = {
   lernsteig: { was: "Übungen, Seiten im Ersatz-DOM, Konten, Sichern und Einlesen", befehl: args => node("pruefe_uebungen.js", args) },
   gratwanderung: { was: "Grundgerüst: Kern-Kopie und Startseite", befehl: () => null, selbst: pruefeGratwanderung },
   feier: { was: "Abschluss-Animationen aller Spiele ohne Runden: Lage, Schrift, Schmuck, bewegt gegen ruhig, Animationen", befehl: args => node("pruefe_feier.js", args) },
+  schrift: { was: "Schrift der Startseite zugeschnitten und aktuell, Lizenz dabei (GS3 a)",
+    befehl: () => ["python", [path.join(__dirname, "schrift_zuschneiden.py"), "--pruefe"]] },
   eulenpfad: { was: "Spiele im Ersatz-DOM", befehl: args => node("pruefe_spiele.js", args) },
 };
-const KURZ = ["skripte", "kern", "server", "lernsteig", "gratwanderung", "feier"];
+const KURZ = ["skripte", "kern", "server", "lernsteig", "gratwanderung", "feier", "schrift"];
 
 /** Gratwanderung hat noch kein Gerüst (Plan C8): die Kopie des Kerns stimmt, die Startseite ist da. Mit C8 ein eigener Treiber. */
 function pruefeGratwanderung() {

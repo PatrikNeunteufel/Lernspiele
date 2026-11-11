@@ -377,6 +377,11 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
   `--f` wie der glatte Streifen. Die Form hängt am Spiel (Zufall mit der Id als Startwert) und wird neu gerechnet, wenn
   sich die Grösse der Karte ändert (ResizeObserver). Umgeschaltet über die Klasse `rahmen-hand` an `body` in
   `start/start.css`; glatt bleibt alles wie zuvor.
+- **Schrift** (Entscheid GS3 a): Die Startseite lädt Nunito aus `eulenpfad/schriften/Nunito.woff2` (`@font-face` in
+  `start/start.css`, variabel 200–1000, Lizenz `schriften/OFL.txt`); Spiele laden sie nicht und zeigen weiter die Schrift
+  des Geräts. Zugeschnitten auf die Zeichen des Eulenpfads und ganz Latin-1 und Latin Extended-A mit
+  `python tools/schrift_zuschneiden.py` aus dem Original in `tools/schriften/`; neue Zeichen im Eulenpfad meldet die
+  kurze Prüfung „schrift“ (`--pruefe`), dann neu zuschneiden.
 - Gemessen (LERN_Session32, Desktop, lokaler Server): `feier.js` 739 KB ausgeliefert (gepackt 204 KB), Ausführen 2 ms,
   ein Kartenbild 0,17 ms; geprüft in `tools/eulenpfad_seiten.js` (Tab Spiele).
 
