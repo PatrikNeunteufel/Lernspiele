@@ -163,13 +163,8 @@ function zeichneSpiele(box, neu) {
         el("span", {}, el("b", { text: `Freigeschaltet — ${teile.join(" · ")}!` }), el("span", { class: "leise-text", text: " Im Profil wählbar." }))));
     }
   }
-  // Wochenziel des Lernplans (Entscheid L1 a, LERN_Session10): kompakt ganz oben, nur wenn die Aufsicht eines gesetzt hat.
-  if (!aufsicht && p.lernplan?.tage > 0) {
-    const w = wochenKarte(ERFOLGE.lernplan(p, protokoll.filter(e => !e.test)), true);
-    w.addEventListener("click", () => { location.hash = "#erfolge"; });
-    w.title = "Antippen: zu den Erfolgen";
-    box.append(w);
-  }
+  // Wochenziel des Lernplans: seit WO1 a (LERN_Session32) als kleine Marke in der Kopfzeile (start.js wochenMarke), die
+  // ganze Karte nur im Tab Erfolge — vorher stand sie hier ganz oben (L1 a) und schob die Spiele nach unten.
   const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
   const meineKlasse = !aufsicht && klasse !== null ? chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)) : null;
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.
