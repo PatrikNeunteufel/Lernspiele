@@ -166,6 +166,27 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 .chip.klein { font-size: 15px; min-height: 38px; padding: 6px 12px; }
 .chip .tipp { font-size: 12px; font-weight: 800; margin-left: 4px; opacity: .8; }
 .werkzeuge { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 12px; }
+/* Fach-Reiter (FB1 a, LERN_Session32): eine Zeile bunter Knöpfe über den Spielen, auf dem Handy wischbar */
+.fach-reiter-zeile { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; margin: 0 0 6px; scrollbar-width: thin; }
+.fach-reiter { flex: none; display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 16px; padding: 8px 14px; min-height: 48px;
+  font: inherit; font-size: 17px; font-weight: 900; color: var(--text); background: #fff; cursor: pointer;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--f) 45%, #cdd2ea); border-top: 4px solid var(--f); transition: transform .08s, box-shadow .08s; }
+.fach-reiter-bild { font-size: 22px; line-height: 1; }
+.fach-reiter[aria-pressed="true"] { background: var(--f); color: #fff; box-shadow: 0 4px 0 color-mix(in srgb, var(--f) 60%, #000); }
+.fach-reiter:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--f) 45%, #cdd2ea); }
+.fach-reiter:focus-visible, .filter-knopf:focus-visible { outline: 3px solid var(--knopf); outline-offset: 2px; }
+/* Knopf „Filter“ mit drei Schiebereglern; daneben, was gerade gilt */
+.filter-knopf { display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 14px; padding: 6px 14px; min-height: 44px;
+  font: inherit; font-size: 16px; font-weight: 800; color: var(--text); background: #fff; cursor: pointer; box-shadow: 0 4px 0 #cdd2ea; }
+.filter-knopf[aria-expanded="true"] { background: var(--knopf); color: #fff; box-shadow: 0 4px 0 var(--knopf-dunkel); }
+.filter-knopf[aria-expanded="true"] .filter-symbol circle { fill: var(--knopf); }
+.filter-knopf .filter-aktiv { font-size: 14px; font-weight: 700; opacity: .85; }
+.filter-symbol { display: inline-flex; }
+.filter-feld { margin-bottom: 12px; padding-top: 10px; }
+.filter-ansicht { border-top: 1px solid var(--rand); padding-top: 8px; }
+.stil-hand .fach-reiter { border-radius: 14px 20px 12px 22px / 20px 12px 22px 14px; }
+.stil-hand .fach-reiter:nth-child(2n) { border-radius: 22px 12px 20px 14px / 12px 22px 14px 20px; }
+.stil-hand .filter-knopf { border-radius: 16px 22px 14px 24px / 22px 14px 24px 16px; }
 /* Suchfeld (Tab Spiele, Freigabe) */
 input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit; font-size: 16px; padding: 6px 12px;
   border: 3px solid var(--rand); border-radius: 12px; background: #fff; }

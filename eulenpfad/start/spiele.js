@@ -36,6 +36,10 @@ function schalterSymbol(art, an) {
 
 // Suche im Tab Spiele (Wunsch Patrik, LERN_Session6): bleibt beim Neuzeichnen erhalten, nicht gespeichert.
 const SPIEL_SUCHE = UE.suche();
+/** Symbol des Filters: drei Schieberegler („einstellen“; ein Trichter ist eine Metapher für Erwachsene, FB1 a). */
+const SCHIEBEREGLER = `<svg viewBox="0 0 24 24" width="22" height="22"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none">`
+  + `<path d="M4 6h16M4 12h16M4 18h16"/></g><g fill="#fff" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="2.6"/>`
+  + `<circle cx="16" cy="12" r="2.6"/><circle cx="7" cy="18" r="2.6"/></g></svg>`;
 
 // ----- Kartenbild (Entscheid GS1 a, LERN_Session32; docs/eulenpfad/konzept_gestaltung.md) -----
 // Das ruhige Endbild der Abschluss-Animation (Stufe 3, 1 Stern: ohne Schmuck) aus der Angabe feier im Katalog — dieselbe Quelle wie
@@ -132,9 +136,16 @@ function zeichneSpiele(box, neu) {
     return d;
   };
   const empfohlen = LS.empfohleneStufe(name);
-  const faecher = filterGruppe("fach", "Fach", filter.fach === "alle" ? "alle" : filter.fach,
-    chip("Alle", filter.fach === "alle", setze("fach", "alle")),
-    ...FAECHER.map(f => chip(f, filter.fach === f, setze("fach", f))));
+  // Fach als bunte Reiter über den Spielen (FB1 a, LERN_Session32): die häufigste Wahl mit einem Tipp, selbsterklärend
+  const FACH_BILD = { Mathe: "➕", Deutsch: "📖", NMG: "🌍", Englisch: "🔤", Französisch: "🥖", Musik: "🎵", "Medien und Informatik": "💻" };
+  const reiter = (text, bild, an, onclick, farbe) => {
+    const b = el("button", { type: "button", class: "fach-reiter", "aria-pressed": String(an), onclick }, el("span", { class: "fach-reiter-bild", text: bild }), text);
+    b.style.setProperty("--f", farbe);
+    return b;
+  };
+  const fachReiter = el("nav", { class: "fach-reiter-zeile", "aria-label": "Fach" },
+    reiter("Alle", "🌟", filter.fach === "alle", setze("fach", "alle"), "var(--knopf)"),
+    ...FAECHER.map((f, i) => reiter(f, FACH_BILD[f] || "📚", filter.fach === f, setze("fach", f), `var(--deko-${(i % 6) + 1})`)));
   // Gruppe „Nur“ für Fokus und, bei der Aufsicht, Zu prüfen — das sind keine Fächer (Hinweis Patrik, LERN_Session10);
   // Meine Klasse steht seit LERN_Session32 in der Gruppe Klasse.
   const nur = [];
@@ -189,7 +200,8 @@ function zeichneSpiele(box, neu) {
     [nurKlasse ? "🎒 Meine Klasse" : null, filter.klasse.length ? filter.klasse.map(LS.klasseText).join(", ") : null].filter(Boolean).join(" · ") || "alle",
     meineKlasse, alleChip("klasse", basisklassen),
     ...basisklassen.map(k => chip(LS.klasseText(k), filter.klasse.includes(k), schalte("klasse", k))));
-  const zeilen = [faecher, klassen];
+  // Das Fach wählen die Reiter über den Spielen (FB1 a); im Filter stehen die übrigen Gruppen
+  const zeilen = [klassen];
   if (nur.length) zeilen.push(filterGruppe("nur", "Nur",
     [filter.fokus && fokus.length ? "⭐ Mein Fokus" : null, nurZuPruefen ? "🔍 Zu prüfen" : null].filter(Boolean).join(" · ") || "—", ...nur));
   if (filter.fach !== "alle") {
@@ -201,17 +213,13 @@ function zeichneSpiele(box, neu) {
   zeilen.push(filterGruppe("stufe", "Stufe", filter.stufe.length ? `Stufe ${filter.stufe.map(id => LS.SKALA.find(s => s.id === id)?.nr).join(", ")}` : "alle",
     alleChip("stufe", LS.SKALA.map(s => s.id)),
     ...LS.SKALA.map(s => chip(`${s.icon} ${s.nr} ${s.name}`, filter.stufe.includes(s.id), schalte("stufe", s.id), s.id === empfohlen ? "👍" : ""))));
-  // Einklappbar (Wunsch Patrik, LERN_Session14: auf dem Handy wird der Filter schnell unübersichtlich). Zugeklappt nennt
-  // die Kopfzeile, was gerade gilt. Gemerkt je Person im Profil (filterZu); ohne Wahl auf dem Handy zu, sonst offen.
+  // Was im Filter gilt, steht zugeklappt am Knopf „Filter“ (das Fach zeigen die Reiter)
   const aktiv = [
-    filter.fach !== "alle" ? filter.fach : null,
     filter.thema.length ? `${filter.thema.length} Thema${filter.thema.length === 1 ? "" : "en"}` : null,
     filter.klasse.length ? filter.klasse.map(LS.klasseText).join(", ") : null,
     filter.stufe.length ? `Stufe ${filter.stufe.map(id => LS.SKALA.find(s => s.id === id)?.nr).join(", ")}` : null,
     nurKlasse ? "🎒 Meine Klasse" : null, filter.fokus && fokus.length ? "⭐ Fokus" : null, nurZuPruefen ? "🔍 Zu prüfen" : null,
   ].filter(Boolean);
-  box.append(UE.filterBlock({ titel: "🔎 Filter", aktiv, leer: "alle Spiele", zeilen, zu: p.filterZu,
-    merke: filterZu => LS.speichereProfil(name, { filterZu }) }));
 
   // ----- Spiele auswählen -----
   // Ruhezeit (Zusatz Patrik zu AN3-K): Spiele mit Ton fehlen, wenn die Aufsicht sie dann ausblendet
@@ -259,13 +267,28 @@ function zeichneSpiele(box, neu) {
   // ----- Werkzeuge: Ansicht und alle auf/zu (nur mit Gruppen: nicht bei Suche, Ähnlichen oder flacher Liste) -----
   const gruppenIds = ["favoriten", ...FAECHER.map(f => "fach:" + f), ...THEMEN.map(t => "thema:" + t.id)];
   const gegliedert = !treffer && !flach;
-  box.append(el("div", { class: "werkzeuge" },
-    SPIEL_SUCHE.feld({ neu, beiEingabe: UE.aehnlich.schliessen, attr: suchAttr("🔍 Spiel suchen") }),
+  // Über den Spielen nur Fach-Reiter, Suche und „Filter“ (FB1 a, LERN_Session32): Klasse, Nur, Thema, Stufe,
+  // Sortierung, Ansicht und Alle auf/zu klappt der Knopf auf. Offen merkt das Profil (filterZu: false), vorgegeben zu.
+  const filterOffen = p.filterZu === false;
+  const ansicht = el("div", { class: "filter-zeile filter-ansicht" },
     sortWahl,
     chip("▦ Kacheln", p.ansicht !== "kompakt", () => speichere({ ansicht: "kacheln" }), null, "klein"),
     chip("☰ Kompakt", p.ansicht === "kompakt", () => speichere({ ansicht: "kompakt" }), null, "klein"),
     gegliedert ? chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein") : null,
-    gegliedert ? chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein") : null));
+    gegliedert ? chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein") : null);
+  const filterFeld = el("div", { class: "filter-klapp filter-feld", id: "filter-feld", ...(filterOffen ? {} : { hidden: true }) },
+    el("div", { class: "filter" }, ...zeilen, ansicht));
+  const filterKnopf = el("button", { type: "button", class: "filter-knopf", "aria-expanded": String(filterOffen), "aria-controls": "filter-feld",
+    onclick: () => {
+      const auf = filterFeld.hidden;
+      filterFeld.hidden = !auf;
+      filterKnopf.setAttribute("aria-expanded", String(auf));
+      LS.speichereProfil(name, { filterZu: !auf });
+    } },
+    el("span", { class: "filter-symbol", "aria-hidden": "true", html: SCHIEBEREGLER }), el("span", { text: "Filter" }),
+    aktiv.length ? el("span", { class: "filter-aktiv", text: aktiv.join(" · ") }) : null);
+  box.append(fachReiter, el("div", { class: "werkzeuge" },
+    SPIEL_SUCHE.feld({ neu, beiEingabe: UE.aehnlich.schliessen, attr: suchAttr("🔍 Spiel suchen") }), filterKnopf), filterFeld);
 
   // ----- Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, ohne Thema (Wunsch Patrik, LERN_Session10) -----
   // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.

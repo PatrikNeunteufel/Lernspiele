@@ -187,9 +187,11 @@ function pruefeTabSpiele(melde) {
     const karten = s.gibt(".spielkarte[data-spiel]");
     pruefe(karten > 0, ort, "keine Spielkarte");
     pruefe(s.gibt('details.gruppe[data-gruppe^="fach:"]') > 0 && s.gibt('details.gruppe[data-gruppe^="thema:"]') > 0, ort, "keine Gruppen nach Fach und Thema");
-    pruefe(s.gibt("details.filter-klapp") === 1, ort, "kein Filter-Block");
+    // Über den Spielen nur Fach-Reiter, Suche und „Filter“ (FB1 a, LERN_Session32); das Feld des Filters vorgegeben zu
+    pruefe(s.gibt("button.fach-reiter") >= 3 && s.gibt(".filter-knopf") === 1 && s.lauf(`document.getElementById("filter-feld").hidden`) === true,
+      ort, "Fach-Reiter oder Knopf „Filter“ fehlen, oder der Filter ist offen");
     // Gruppen des Filters (LERN_Session32): je für sich einklappbar, vorgegeben zu, Aufklappen merkt das Profil
-    pruefe(s.gibt("details.filter-gruppe") >= 3 && s.lauf(`[...document.querySelectorAll("details.filter-gruppe")].every(d => !d.open)`), ort, "Gruppen des Filters fehlen oder sind nicht zu");
+    pruefe(s.gibt("details.filter-gruppe") >= 2 && s.lauf(`[...document.querySelectorAll("details.filter-gruppe")].every(d => !d.open)`), ort, "Gruppen des Filters fehlen oder sind nicht zu");
     s.klappe('details.filter-gruppe[data-gruppe="stufe"]', true);
     pruefe((s.profil("Mia").filterOffen || []).includes("stufe"), ort, "aufgeklappte Gruppe Stufe nicht im Profil");
     s.lauf("zeichneStart()"); ruhe(s);
@@ -252,11 +254,17 @@ function pruefeTabSpiele(melde) {
     s.klick("button", "Kompakt"); ruhe(s);
     pruefe(s.profil("Mia").ansicht === "kompakt" && s.gibt(".spiele.kompakt") > 0, ort, "Ansicht kompakt nicht gemerkt");
     s.klick("button", "Kacheln"); ruhe(s);
-    // Filter-Block: Zuklappen im Profil (filterZu)
-    s.klappe("details.filter-klapp", false);
-    pruefe(s.profil("Mia").filterZu === true, ort, "Filter zugeklappt, aber filterZu nicht gemerkt");
-    s.klappe("details.filter-klapp", true);
-    pruefe(s.profil("Mia").filterZu === false, ort, "Filter aufgeklappt, aber filterZu nicht gemerkt");
+    // Knopf „Filter“ (FB1 a): Aufklappen im Profil (filterZu false), Zuklappen wieder true
+    s.klick(".filter-knopf"); ruhe(s);
+    pruefe(s.profil("Mia").filterZu === false && s.lauf(`document.getElementById("filter-feld").hidden`) === false, ort, "Filter aufgeklappt, aber nicht gemerkt");
+    s.klick(".filter-knopf"); ruhe(s);
+    pruefe(s.profil("Mia").filterZu === true && s.lauf(`document.getElementById("filter-feld").hidden`) === true, ort, "Filter zugeklappt, aber nicht gemerkt");
+    // Fach-Reiter: „Mathe“ wählt das Fach, „Alle“ hebt es auf
+    s.klick("button.fach-reiter", "Mathe"); ruhe(s);
+    const fachGruppen = () => s.lauf(`[...document.querySelectorAll("details.gruppe")].map(d => d.dataset.gruppe).filter(g => g && g.startsWith("fach:"))`);
+    pruefe(s.lauf(`LS.lies("filter", {}).fach`) === "Mathe" && JSON.stringify(fachGruppen()) === '["fach:Mathe"]', ort,
+      `Fach-Reiter Mathe filtert nicht (Fach ${s.lauf(`LS.lies("filter", {}).fach`)}, Gruppen ${fachGruppen().join(", ")})`);
+    s.klick("button.fach-reiter", "Alle"); ruhe(s);
     // Favorit wieder weg (sonst steht die Karte zweimal in der Liste)
     s.klick(`[data-gruppe="favoriten"] .spielkarte[data-spiel="${erste}"] [data-favorit]`); ruhe(s);
     pruefe((s.profil("Mia").favoriten || []).length === 0 && s.gibt('[data-gruppe="favoriten"]') === 0, ort, "Favorit nicht zurückgenommen");

@@ -335,9 +335,12 @@ Klasse im Profil nur Spiele, deren Basisklasse höchstens eine Klasse daneben li
 Stufe genau für seine Klasse haben. Er ist vorgegeben an, das Kind darf ihn ausschalten (Profil-Feld
 `meineKlasse`); er ordnet nur die Anzeige, sichtbar macht weiterhin die Freigabe. Seit LERN_Session32 steht er vorne in
 der Gruppe **Klasse**; die Gruppe **Nur** trägt „⭐ Mein Fokus“ und für die Aufsicht „🔍 Zu prüfen“ (Hinweis Patrik,
-LERN_Session10: das sind keine Fächer). **Gruppen des Filters** (Wunsch Patrik, LERN_Session32): Fach, Klasse, Nur,
-Thema und Stufe klappen je für sich auf und zu, vorgegeben zu; zugeklappt nennt der Kopf die Wahl der Gruppe. Welche offen
-sind, merkt das Profil (`filterOffen`, Liste der Gruppen).
+LERN_Session10: das sind keine Fächer). **Über den Spielen** (Entscheid FB1 a, LERN_Session32) stehen nur eine Zeile bunter
+**Fach-Reiter** („🌟 Alle“, je Fach ein Knopf mit Bild und der Deko-Farbe; auf dem Handy wischbar), das Suchfeld und der
+Knopf **„Filter“** mit drei Schiebereglern (kein Trichter, kein Zahnrad); daneben steht, was im Filter gilt. Der Knopf
+klappt das Feld auf (`#filter-feld`, vorgegeben zu, offen merkt das Profil mit `filterZu: false`): die **Gruppen**
+Klasse, Nur, Thema und Stufe, je für sich auf- und zuklappbar, vorgegeben zu, zugeklappt mit ihrer Wahl im Kopf (offene im
+Profil, `filterOffen`), darunter Sortierung, Kacheln/Kompakt und Alle auf/zu.
 **Klassen-Rand** (Entscheid G1 a, LERN_Session14): Ist „🎒 Meine Klasse“ aus, bekommt jede Karte eines Kindes mit Klasse
 einen Glow nach aussen und links oben ein Zeichen: ✓ Türkis (`--deko-5`) Basisklasse tiefer als die eigene, ● Gold
 (`--deko-4`) die eigene, ▲ Violett (`--deko-1`) höher, „Herausforderung“. Nie Stellenfarben; das Zeichen trägt die
