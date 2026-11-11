@@ -241,6 +241,15 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .spielkarte .spiel-bild { font-size: 44px; line-height: 1; }
 .spielkarte b.name { font-size: 22px; }
 .spielkarte .ziel { font-size: 15px; color: var(--text-leise); }
+/* Kartenbild (GS1 a): das ruhige Endbild der Abschluss-Animation, Fläche schon vor dem Zeichnen in seiner Grösse */
+.spielkarte .karten-bild { aspect-ratio: 320 / 150; margin: -2px -4px 2px; border-radius: 14px; background: #eef4fb; overflow: hidden; }
+.spielkarte .karten-bild .feier { margin: 0; max-width: none; cursor: inherit; pointer-events: none; }
+.spielkarte.mit-bild .kopfzeile .spiel-bild { display: none; }
+/* ⓘ zeigt dem Kind die Beschreibung (GS2 a) */
+.karten-info { flex: none; width: 40px; height: 40px; border: none; border-radius: 999px; background: #f0f2fb; color: var(--text-leise);
+  font: inherit; font-size: 22px; font-weight: 900; line-height: 1; cursor: pointer; }
+.karten-info[aria-expanded="true"] { background: var(--knopf); color: #fff; }
+.karten-info:focus-visible { outline: 3px solid var(--knopf); }
 .spielkarte.gesperrt { opacity: .7; border-top-style: dashed; }
 /* Schalter oben rechts: ⏱ Timer, ♾ Endlos, ☆ Favorit — aus = blass, an = leuchtet */
 .karten-schalter-zeile { display: flex; justify-content: flex-end; gap: 0; margin: -12px -10px -10px 0; }

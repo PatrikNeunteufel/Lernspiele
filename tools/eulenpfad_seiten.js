@@ -185,6 +185,19 @@ function pruefeTabSpiele(melde) {
     pruefe(s.gibt("details.filter-klapp") === 1, ort, "kein Filter-Block");
     pruefe(s.gibt("button", "Alle auf") === 1 && s.gibt("button", "Alle zu") === 1, ort, "„Alle auf“ / „Alle zu“ fehlen bei Gruppen");
     textPruefen(ort, s);
+    // Kinderkarte (GS2 a) und Kartenbild (GS1 a, LERN_Session32): Bild aus feier im Katalog, keine Lernziel-Kürzel,
+    // Beschreibung verborgen, bis ⓘ sie zeigt; mit Bild ohne Emoji im Kopf
+    {
+      const id = s.lauf(`document.querySelector(".spielkarte[data-spiel]").dataset.spiel`), k = `.spielkarte[data-spiel="${id}"]`;
+      ruhe(s);
+      pruefe(s.gibt(`${k} .karten-bild .feier svg`) === 1 && s.gibt(`${k}.mit-bild`) === 1, ort, `kein Kartenbild auf der Karte ${id}`);
+      pruefe(s.gibt(".spielkarte[data-spiel] .karten-bild") === karten, ort, "nicht jede Spielkarte hat eine Fläche fürs Kartenbild");
+      pruefe(s.gibt(".spielkarte[data-spiel] .marke.tipp") === 0, ort, "Lernziel-Kürzel auf der Karte eines Kindes");
+      pruefe(s.lauf(`document.querySelector('${k} .ziel').hidden`) === true, ort, "Beschreibung auf der Karte eines Kindes sichtbar");
+      s.klick(`${k} .karten-info`); ruhe(s);
+      pruefe(s.lauf(`document.querySelector('${k} .ziel').hidden`) === false && s.lauf(`location.hash`) === "#spiele", ort, "ⓘ zeigt die Beschreibung nicht (oder öffnet das Spiel)");
+      s.klick(`${k} .karten-info`); ruhe(s);
+    }
     const erste = s.lauf(`document.querySelector(".spielkarte[data-spiel]").dataset.spiel`);
     // Favorit: Stern antippen → im Profil, Karte in der Gruppe Favoriten (doppelt), Stern an
     s.klick(`.spielkarte[data-spiel="${erste}"] [data-favorit]`); ruhe(s);

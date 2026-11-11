@@ -36,6 +36,54 @@ function schalterSymbol(art, an) {
 
 // Suche im Tab Spiele (Wunsch Patrik, LERN_Session6): bleibt beim Neuzeichnen erhalten, nicht gespeichert.
 const SPIEL_SUCHE = UE.suche();
+
+// ----- Kartenbild (Entscheid GS1 a, LERN_Session32; docs/eulenpfad/konzept_gestaltung.md) -----
+// Das ruhige Endbild der Abschluss-Animation (Stufe 3, 3 Sterne) aus der Angabe feier im Katalog — dieselbe Quelle wie
+// im Spiel. Gezeichnet erst, wenn die Karte ins Bild kommt; Daten eines Spiels (feier.daten, Schweiz-Karte) lädt es
+// einmal nach. Ohne feier.js oder ohne Bild bleibt die Fläche leer und klappt zu.
+const KARTENBILD_STUFEN = ["s3", "s2", "s4", "s1", "s5", "s6"];
+const KARTEN_DATEN_GELADEN = {};
+/** Dateien eines Spiels (feier.daten) einmal laden; → Promise. */
+function ladeKartenDaten(s) {
+  const ordner = s.pfad.replace(/[^/]*$/, "");
+  return Promise.all((s.feier?.daten || []).map(datei => (KARTEN_DATEN_GELADEN[ordner + datei] ||= new Promise((fertig, fehler) => {
+    const sk = document.createElement("script");
+    sk.async = false; // in der Reihenfolge von feier.daten: orte.js braucht KARTE aus karte.js
+    sk.src = ordner + datei;
+    sk.onload = fertig;
+    sk.onerror = () => fehler(new Error(`${ordner + datei} lädt nicht`));
+    document.head.appendChild(sk);
+  }))));
+}
+/** Das Bild in die Fläche zeichnen (erste Stufe mit Bild aus KARTENBILD_STUFEN). */
+function zeichneKartenBild(flaeche, s) {
+  const zeichne = () => {
+    for (const stufe of KARTENBILD_STUFEN) {
+      const bild = LS_FEIER.zeige(s.feier, { stufe, sterne: 3, ruhig: true });
+      if (bild) { flaeche.replaceChildren(bild); flaeche.dataset.stufe = stufe; return; }
+    }
+    ohneBild(flaeche);
+  };
+  // ohne Daten des Spiels sofort, sonst nach dem Nachladen
+  if (!s.feier.daten?.length) return zeichne();
+  ladeKartenDaten(s).then(zeichne).catch(e => { console.error(e.message); ohneBild(flaeche); });
+}
+/** Kein Bild: Fläche weg, das Emoji im Kopf kommt zurück. */
+function ohneBild(flaeche) {
+  flaeche.closest(".spielkarte")?.classList.remove("mit-bild");
+  flaeche.remove();
+}
+const KARTENBILD_BEOBACHTER = typeof IntersectionObserver === "function" ? new IntersectionObserver(eintraege => {
+  for (const e of eintraege) if (e.isIntersecting) { KARTENBILD_BEOBACHTER.unobserve(e.target); zeichneKartenBild(e.target, e.target.spiel); }
+}, { rootMargin: "300px 0px" }) : null;
+/** Fläche für das Kartenbild einer Spielkarte; null, wenn das Spiel keine Animation hat. */
+function kartenBild(s) {
+  if (!s.feier || typeof LS_FEIER === "undefined") return null;
+  const flaeche = LS.el("div", { class: "karten-bild", "aria-hidden": "true" });
+  flaeche.spiel = s;
+  if (KARTENBILD_BEOBACHTER) KARTENBILD_BEOBACHTER.observe(flaeche); else zeichneKartenBild(flaeche, s);
+  return flaeche;
+}
 /** Suchfeld im Aussehen des Eulenpfads (auch die Freigabe in der Verwaltung). */
 const suchAttr = platzhalter => ({ class: "feld suche", placeholder: platzhalter, "aria-label": platzhalter });
 // Spiel-Id aus „?aehnlich=<id>“ (Knopf „🔗 Ähnliche Spiele“ im Spiel): UE.aehnlich.id(); verlassen UE.aehnlich.schliessen()
@@ -210,8 +258,9 @@ function zeichneSpiele(box, neu) {
     k.addEventListener("click", e => { if (!e.target.closest("a, button")) beiTipp(); });
     if (schalter) k.append(el("div", { class: "karten-schalter-zeile" }, el("button", { type: "button", class: "karten-schalter" + (schalter.an ? " an" : ""),
       "aria-pressed": String(schalter.an), "aria-label": schalter.text, title: schalter.text, onclick: schalter.onclick }, schalterSymbol("endlos", schalter.an))));
+    // ein Kind sieht nur den Titel (GS2 a); den Satz liest langes Drücken vor, die Aufsicht sieht ihn
     k.append(el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: bild }), el("b", { class: "name", text: titel })),
-      el("div", { class: "ziel", text: ziel }), el("div", { class: "stufenknoepfe" }, ...knoepfe));
+      aufsicht ? el("div", { class: "ziel", text: ziel }) : "", el("div", { class: "stufenknoepfe" }, ...knoepfe));
     return k;
   }
   // Bedarf (Wunsch Patrik, LERN_Session10): der Zufall wählt, wo die Statistik Bedarf zeigt — AUSWERTUNG.bedarf,
@@ -266,7 +315,7 @@ function zeichneSpiele(box, neu) {
     titelText: "Antippen: zur Mix-Seite", beiTipp: () => { location.href = "mix.html"; },
     knoepfe: [el("a", { class: "stufenknopf gross", href: "mix.html", "data-vorlesen": "Zufallsmix einstellen und los." }, el("span", { class: "stufen-text", text: "🎲 Einstellen und los" }))] }));
   // Die Karte bleibt auch mit ♾ ohne passendes Spiel stehen, damit der Schalter erreichbar ist.
-  if (zufallsKnoepfe.length || (zufallEndlos && zufallAuswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: "Zufälliges Spiel", farbe: "var(--deko-6)",
+  if (zufallsKnoepfe.length || (zufallEndlos && zufallAuswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: aufsicht ? "Zufälliges Spiel" : "Überrasch mich", farbe: "var(--deko-6)",
     ziel: zufallEndlos ? "Die Eule zieht ein Endlos-Spiel aus deiner Auswahl: so viele Aufgaben wie möglich ohne Fehler."
       : "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
     titelText: "Antippen: Startbild eines zufälligen Spiels",
@@ -304,6 +353,10 @@ function zeichneSpiele(box, neu) {
     ...Object.entries({ tiefer: "leichter", gleich: "meine Klasse", hoeher: "Herausforderung" }).map(([lage, wort]) =>
       el("span", { class: `klassen-legende-teil klasse-${lage}` }, el("span", { class: "klassen-marke", text: KLASSEN_LAGE[lage].zeichen }), ` ${wort}`))));
 
+  // Text der Karte (Entscheid GS2 a, LERN_Session32): Ein Kind sieht Kartenbild, Name und Stufenknöpfe; die Beschreibung
+  // zeigt ⓘ und liest langes Drücken vor. Lernziel-Kürzel und Sperrmarken sieht nur die Aufsicht; der Grund eines
+  // Suchtreffers bleibt, damit klar ist, warum das Spiel dasteht.
+  const kompakt = p.ansicht === "kompakt";
   function karte(s) {
     const favorit = p.favoriten.includes(s.id);
     const frei = LS.fuerKinderSichtbar(s.id);
@@ -346,11 +399,22 @@ function zeichneSpiele(box, neu) {
           () => speichere({ endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] })) : null,
         schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
           () => speichere({ favoriten: UE.umschalten(p.favoriten, s.id) }), { "data-favorit": s.id }));
-    k.append(
+    const beschreibung = el("div", { class: "ziel", text: s.beschreibung, ...(aufsicht ? {} : { hidden: true }) });
+    const info = aufsicht ? null : el("button", { type: "button", class: "karten-info", "aria-expanded": "false", "aria-label": `Worum geht es bei ${s.name}?`,
+      title: "Worum geht es?", text: "ⓘ", onclick: () => {
+        beschreibung.hidden = !beschreibung.hidden;
+        info.setAttribute("aria-expanded", String(!beschreibung.hidden));
+      } });
+    const sichtbareMarken = aufsicht ? marken : marken.filter(m => m.classList.contains("such-grund"));
+    // mit Kartenbild ohne das Emoji im Kopf: das Bild trägt die Erkennung, der Name hat Platz
+    const bild = kompakt ? null : kartenBild(s);
+    if (bild) k.classList.add("mit-bild");
+    k.append(...[
       schalterZeile,
-      el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name })),
-      el("div", { class: "ziel", text: s.beschreibung }),
-      el("div", { class: "marken" }, ...marken));
+      bild,
+      el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name }), info),
+      beschreibung,
+      sichtbareMarken.length ? el("div", { class: "marken" }, ...sichtbareMarken) : null].filter(Boolean));
     const knoepfe = el("div", { class: "stufenknoepfe" });
     const empf = LS.empfohleneStufe(name, s.id);
     // Endlos an: nur die Endlos-Stufen, mit dem Rekord statt der Sterne. Stufenfilter: nur die gewählten.

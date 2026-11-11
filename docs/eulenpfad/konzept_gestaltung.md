@@ -1,7 +1,13 @@
 # Konzept: Gestaltung der Startseite (Kinder-Bühne, Kartenbilder, Schrift)
 
-Stand: 11.11.2026 (LERN_Session32) · **GS0 a, GS1 a, GS2 a entschieden** (Patrik, LERN_Session32), Umsetzung in Arbeit;
-GS3 offen (Zahlen fehlen). Eingang: [rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md).
+Stand: 11.11.2026 (LERN_Session32) · **GS0 a, GS1 a, GS2 a, SK1 a entschieden und gebaut** (Patrik, LERN_Session32;
+Umsetzung docs/eulenpfad/rahmen.md 6, „Kartenbild und Kinderkarte“); offen GS3 (Schrift, Zahlen fehlen), Druckknöpfe,
+Versuch mit Kindern und der Lehrperson.
+
+**Kipppunkt GS1 gemessen** (Desktop, lokaler Server): `feier.js` 28 ms übertragen, 2 ms ausgeführt, ein Kartenbild
+0,17 ms; die Seite ist nach 83 ms fertig. Für das Handy übers Mobilnetz nur gerechnet, nicht gemessen: 204 KB gepackt
+beim ersten Besuch etwa 0,2 s (4G) bis 1 s (langsames 3G), danach aus dem Zwischenspeicher. Die Empfehlung kippt damit
+nicht; am Gerät nachmessen, wenn ein Handy zur Hand ist. Eingang: [rueckmeldung_gestaltung.md](rueckmeldung_gestaltung.md).
 
 ## Auslöser
 

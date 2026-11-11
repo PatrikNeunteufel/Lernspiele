@@ -698,6 +698,38 @@ const PRUEFSTAND = {
       "am": "2026-11-06",
       "von": "Patrik"
     },
+    "fehler-lupe/ae-aeu": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/dehnungs-h": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/ie-i": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/komma": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/kurzer-vokal": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/nomen-gross": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/sp-st-sch": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "fehler-lupe/verben-als-nomen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "fledermaus-forscher/anpassungen": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -718,6 +750,14 @@ const PRUEFSTAND = {
       "am": "2026-11-05",
       "von": "Patrik"
     },
+    "frueher-heute/paare": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "frueher-heute/reihen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "gegenteil-wippe/gegenteile": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -726,7 +766,19 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "hello-dialog/dialoge": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "koenig-falle/stellungen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "komma-jagd/aufzaehlung": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "komma-jagd/verbgruppen": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -772,6 +824,10 @@ const PRUEFSTAND = {
     },
     "lebenszyklus/zyklus-mensch": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "listen-tap/wo-ist": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "magnet-labor/dinge": {
@@ -830,6 +886,34 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "rede-zeichen/hinten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "rede-zeichen/vorne": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "satz-reparatur/lange-saetze": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "satz-reparatur/nomen-abstrakt": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "satz-reparatur/nomen-konkret": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "satz-reparatur/satzanfang": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "satz-reparatur/satzpaare": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "schaetz-waage/gewicht": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -854,12 +938,36 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "sentence-builder/er-sie-saetze": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sentence-builder/fragen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sentence-builder/ich-saetze": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sentence-builder/verneinung": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sound-sorter/woerter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "tageslauf-sonne/taetigkeiten": {
       "am": "2026-11-05",
       "von": "Patrik"
     },
     "taschengeld-planer/waren": {
       "am": "2026-11-08",
+      "von": "Patrik"
+    },
+    "weather-report/durchsagen": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "word-match/essen": {
@@ -874,11 +982,47 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "word-match/schule": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "word-match/tiere": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "word-match/wendungen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "word-match/wetter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "word-match/zahlen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wort-zwillinge/falsche-freunde": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wort-zwillinge/gleich": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-sortierer/einzelwoerter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-sortierer/saetze-einfach": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-sortierer/saetze-nominal": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-sortierer/saetze-zeiten": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -968,6 +1112,10 @@ const PRUEFSTAND = {
       "am": "2026-11-05",
       "von": "Patrik"
     },
+    "fehler-lupe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "finger-zaehler": {
       "am": "2026-11-02",
       "von": "Patrik"
@@ -1012,6 +1160,10 @@ const PRUEFSTAND = {
       "am": "2026-11-06",
       "von": "Patrik"
     },
+    "komma-jagd": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "komma-messband": {
       "am": "2026-11-05",
       "von": "Patrik"
@@ -1026,6 +1178,10 @@ const PRUEFSTAND = {
     },
     "lebensraum": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "listen-tap": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "magnet-labor": {
@@ -1096,8 +1252,16 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "rede-zeichen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "sachaufgaben-kompass": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "satz-reparatur": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "schaetz-waage": {
@@ -1108,12 +1272,24 @@ const PRUEFSTAND = {
       "am": "2026-11-01",
       "von": "Patrik"
     },
+    "sentence-builder": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "sortier-kiste": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sound-sorter": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "speicher-leiter": {
       "am": "2026-11-07",
+      "von": "Patrik"
+    },
+    "spelling-bee": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "stein-duell": {
@@ -1152,6 +1328,10 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "tipp-trainer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "ueberschlags-blitz": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1162,6 +1342,22 @@ const PRUEFSTAND = {
     },
     "vergleichs-krokodil": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "weather-report": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "word-match": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wort-zwillinge": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wortarten-sortierer": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "wuerfel-kipper": {
