@@ -48,6 +48,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -310,6 +311,10 @@ function tippsFuer(a, p) {
 
 LS.spiel({
   id: "flaechenmass-treppe",
+  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "treppe", ziele: { s1: { auslegen: ["dm²", "cm²"] }, s2: { von: [[3, "m²"]], nach: "dm²" },
+    s3: { von: [[3, "m²"], [25, "dm²"]], nach: "dm²" }, s4: { von: [[4, "m²"], [7, "dm²"]], nach: "dm²" }, s5: { von: [[3, "ha"]], nach: "a" },
+    s6: { von: [[2.5, "m²"]], nach: "cm²" } } },
   hilfe: "Rechne die Fläche in die verlangte Einheit um und tippe die Zahl mit den Zifferntasten ein; die Einheit steht schon daneben. Beim Vergleichen tippst du <, = oder > an. Die Treppe zeigt dir die Einheiten von gross nach klein.",
   einleitung: "Flächen messen wir mit kleinen Quadraten. Auf der Flächenmass-Treppe ist jede Stufe ×100 — denn ein Quadrat ist 10 lang und 10 breit!",
   anzahl: 8,

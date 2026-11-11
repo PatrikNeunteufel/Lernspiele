@@ -1145,6 +1145,25 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | SAMMELN · `probe` | `{ rechnung, art: "umkehr" \| "endziffer" \| "ueberschlag", ra?, rb? }`: Heft, Probe, Stempel | Probe-Stempel |
   | SAMMELN · `teller` | `{ teller, schale? }`: Guetzli wandern, bis alle Teller gleich viel haben, der Rest in die Schale | Gerecht-Teiler |
 
+  Block M4 (Sachrechnen, Grössen; LERN_Session29) — Uhrzeiten, Geld, Umwandlungen und Gleichungen rechnet jedes Bild
+  nach (Einheiten je Familie wie die Treppen der Spiele: Längen bis km, Hohlmasse, Gewichte bis t, Zeit, Geld,
+  Flächenmasse bis km²). Dinge, die das Spiel als Bildzeichen (Emoji) zeigt, zeigt das Bild ebenso. ZYKLUS nimmt
+  eigene Bilder (`BILDER.zyklus`). Geld schreibt die Klasse der Stufe (`feier.klasse` = Basisklasse des Spiels, wie
+  `LS.geldText`):
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | ZYKLUS · `uhr` | `{ von, zeit, digital? }` (Zeiger drehen zur Uhrzeit), `{ von, dauer, zerlegen? }`, `{ von, bis }` (Zeitspanne, bis 60 min als Torte), `{ sekunden }` oder `{ minuten }` (Stoppuhr) | Uhr-Werkstatt, Zeit-Schätzer |
+  | SAMMELN · `kasse` | `{ legen }` (Stücke in Rappen) oder `{ preise, menge?, bezahlt, zurueck, wenig? }`: Münzen und Noten wie im Spiel fallen in die Kasse; Rückgeld nachgerechnet, `wenig`: so wenige Stücke wie möglich | Kiosk-Kasse |
+  | BAUEN · `treppe` | `{ von: [[3, "m"], [25, "cm"]], nach }`: Einheiten-Treppe, die Karte springt Stufe um Stufe mit dem Faktor; `{ auslegen: ["dm²", "cm²"] }` (10 × 10 Quadrate); `{ lineal: [35, 27] }` (Längen in mm auf dem Lineal) | Masse-Umwandler, Flächenmass-Treppe |
+  | ZOOM · `messband` | `{ wert, einheit, nach, rueck?, plus? }`: Messband, je Stelle nach dem Komma eine Lupe tiefer, der Zeiger landet; darunter die Umwandlung | Komma-Messband |
+  | REISE · `zug` | `{ halte, summe?, formate?, in?, dezimal? }`: Halte mit Zeiten (beim Umsteigen zwei), je Fahrt ein Zug, über Mitternacht Nachthimmel; Zeitspanne oder Summe der Fahrzeiten, auch in Dezimalstunden | Fahrplan-Rechner |
+  | REISE · `kompass` | `{ schritte: [{ r, e }], unwichtig?, saeulen? }`: der Kompass geht den Rechenweg Karte um Karte ab, am Ziel das Ergebnis mit Einheit; unwichtige Angabe durchgestrichen, Säulendiagramm als Quelle | Sachaufgaben-Kompass |
+  | SAMMELN · `buch` | `{ art: "dazu" \| "weg" \| "mal" \| "luecke" \| "teilen" \| "angaben", bild, gleichung, wert }`: links die Geschichte mit Bildzeichen, rechts die Rechnung, „?“ wird zur Zahl | Rechengeschichten |
+  | SAMMELN · `platzhalter` | `{ gleichungen: [{ gl, wert, umkehr? }] }`: die Karte mit „?“ dreht sich um, darunter die Probe mit der Umkehrrechnung | Platzhalter-Geschichten |
+  | BAUEN · `schaetzen` | `{ waage }`, `{ reihe }` oder `{ ding, wert, einheit, mass: "lineal" \| "waage" }`: Wippe, Dinge von leicht zu schwer, Lineal oder Waage mit Anzeige | Schätz-Waage |
+  | SAMMELN · `wippe` | `{ wippe }`, `{ paar, merkmal: "lang" \| "schnell" \| "gross" }`, `{ reihe, hervor? }`, `{ pakete }`: Wippe, Balken, Wettlauf, Reihe nach Grösse, zwei Wippen mit Paketen wie im Spiel | Gegenteil-Wippe |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 

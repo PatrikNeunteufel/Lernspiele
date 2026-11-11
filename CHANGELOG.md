@@ -1726,3 +1726,28 @@
 - Session-Abschluss LERN_Session28: Report docs/eulenpfad/report/LERN_Session28_2026-11-11.md mit der Liste der 43
   Spiele mit Abschluss-Animation (dieselben, die die Vorschau aus dem Katalog zeigt; Katalog und Spielseiten geprüft
   gleich), Handover (Stand nach LERN_Session28). Keine Code-Änderung.
+
+## 2026-11-11 — LERN_Session29
+- Abschluss-Animationen Block M4 (Sachrechnen, Grössen; AR1 a): Uhr-Werkstatt, Kiosk-Kasse, Masse-Umwandler,
+  Schätz-Waage, Rechengeschichten, Flächenmass-Treppe, Gegenteil-Wippe, Sachaufgaben-Kompass, Fahrplan-Rechner,
+  Komma-Messband, Platzhalter-Geschichten, Zeit-Schätzer — `feier.js` mit zehn Bildern nach den Stufen der Spiele (Uhr
+  und Stoppuhr, Kasse mit Münzen und Noten wie im Spiel, Einheiten-Treppe mit Auslegen und Lineal, Messband mit Lupen,
+  Zug mit Fahrplantafeln, Kompass auf dem Rechenweg, Bilderbuch, Gleichungskarten mit Probe, Schätz-Waage, Wippe und
+  Pakete). Jedes Bild rechnet nach, was es zeigt: Uhrzeiten und Zeitspannen (auch über Mitternacht), Rückgeld und
+  wenigste Stücke, Umwandlungen über die Einheiten der Spiele, Dezimalstunden, Gleichungen mit Lücke und
+  Umkehrrechnung, Rechenwege mit Einheit; Geld nach der Klasse der Stufe (`LS.geldText`). ZYKLUS nimmt eigene Bilder.
+  Neu: Bildzeichen (Emoji) wie in den Inhaltslisten der Spiele (Schätz-Waage, Gegenteil-Wippe, Rechengeschichten).
+  Abweichungen vom Entwurf im Konzept, Abschnitt 7 (zur Abnahme); Doku rahmen.md 24.
+- Im Browser alle 72 Endbilder in Handybreite (rund 390 px) angesehen, den Ablauf mitten drin (Zug unterwegs, Karte
+  halb umgedreht, Treppe halb, Geld im Fallen); dabei verbessert: unterste Treppenstufe zu flach („ml“ abgeschnitten),
+  gemischte Grössen auf der Treppe als „300 + 25“ statt eines Sprungs 30 → 325 mit „×10“, Wippe stand waagrecht
+  (keySplines über 1 verwirft der Browser still), Nähte in der vollen Torte der Stoppuhr, Eierreihen ragten aus der
+  Buchseite, Guetzli auf zwei Tellerreihen, Säulendiagramm mit Werten, grössere Schrift im Kompass, Mond vor der
+  Fahrplantafel, Lupenzeilen des Messbands enger beschriftet, doppelte Gewichtsangabe an der Waage. Beim Bauen
+  gefunden: Transformationen, die eine Bewegung überschrieben hätte (Dinge auf der Wippe, auf Lineal und Waage),
+  `animateTransform` mit der Art `matrix` (ungültig), Namenskonflikt `zeitText`, weggeflogene Ballone als Stücke
+  gezählt.
+- Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die zwölf
+  Spiele von M4 „Keine Fehler.“, dazu himmels-forscher, rechen-rakete, dezimal-rakete (ZYKLUS, REISE, ZOOM) „Keine
+  Fehler.“ — letzter voller Lauf weiter auf `6055527`.

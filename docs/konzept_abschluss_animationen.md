@@ -211,7 +211,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | M1 | Stellenwert, Dezimal | 10 | abgenommen 10.11.2026 (Patrik, LERN_Session27); Tresor danach nachgebessert, dessen Abnahme offen |
 | M2 | Zahlen, Teiler, Begründen | 12 | in Arbeit seit 11.11.2026 (LERN_Session28, M2): gebaut, Abnahme offen |
 | M3 | Rechnen | 13 | in Arbeit seit 11.11.2026 (LERN_Session28, M3): gebaut, Abnahme offen |
-| M4 | Sachrechnen, Grössen | 12 | offen |
+| M4 | Sachrechnen, Grössen | 12 | in Arbeit seit 11.11.2026 (LERN_Session29, M4): gebaut, Abnahme offen |
 | M5 | Geometrie | 13 | offen |
 | M6 | Daten, Kombinatorik, Brüche | 9 | offen |
 | D, N, F | Deutsch (30), NMG (33), danach Englisch (8), Französisch (8), Musik (6), Medien und Informatik (7) | 92 | offen |
@@ -304,6 +304,45 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
   Überschlag (s4); ein Stempel statt mehrerer.
 - **Gerecht-Teiler:** Teller der Stufen (4 und 2, 7 und 3, drei Teller, 8 und 4, s5 15 halbiert mit 1 in der Schale,
   s6 vier Teller und Guetzli aus der Schale); die Guetzli wandern im Bogen, darunter je Teller die Zahl.
+
+**Block M4 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme).
+Neu für alle: **Bildzeichen (Emoji)** in drei Bildern (Schätz-Waage, Gegenteil-Wippe, Rechengeschichten), dieselben wie
+in den Inhaltslisten der Spiele — bisher war jedes Bild gezeichnet; das Aussehen hängt von der Schrift des Geräts ab.
+
+- **Uhr-Werkstatt:** die Zeiger drehen zur Uhrzeit der Stufe (3:30, 4:45, 7:25 und 8:43 mit Digitalanzeige wie s3
+  und s4), s5 „7:50 + 35 min = 8:25“ mit der überstrichenen Zeit als Torte, s6 „8:47 → 11:20 = 2 h 33 min“ statt
+  eines ganzen Tages; Zifferblatt und Zeigerfarben wie im Spiel. 2★ Glanz statt Kuckuck-Eule.
+- **Kiosk-Kasse:** Münzen und Noten wie im Spiel (Grösse, 5 Rp. golden, Farben der Noten, nur der Wert) fallen in die
+  Kasse: 17 Fr., 87 Fr., 7 Fr. 40 Rp., s4 Rückgeld „20 Fr. − 13 Fr. 60 Rp. = 6 Fr. 40 Rp.“, s5 drei Preise, s6
+  „10 Fr. − 4 × 2 Fr. 35 Rp. = 60 Rp.“ mit so wenigen Stücken wie möglich; Beträge nach der Klasse der Stufe
+  (`LS.geldText`). 2★ Glanz statt Klingeln, 3★ Funken ohne Fähnchen.
+- **Masse-Umwandler:** die Einheiten-Treppe des Spiels statt eines wachsenden Messbands: die Karte springt mit dem
+  Faktor Stufe um Stufe (2 m = 200 cm über dm, 2000 g = 2 kg aufwärts, 3 m 25 cm mit „300 + 25“, 5 l = 5000 ml,
+  3 km = 300 000 cm); s5 zwei Längen auf dem Lineal (3 cm 5 mm + 2 cm 7 mm = 62 mm), wie s5 im Spiel ohne Treppe.
+- **Flächenmass-Treppe:** s1 das Quadrat füllt sich mit 10 × 10 cm² (Auslegen wie im Spiel), dann die Treppe mit ×100:
+  3 m² = 300 dm², 3 m² 25 dm², s4 die Falle 4 m² 7 dm² = 407 dm² („400 + 7“), 3 ha = 300 a, 2.5 m² = 25 000 cm².
+- **Schätz-Waage:** Wippe mit Elefant und Maus, Reihen auf wachsenden Sockeln (Feder, Apfel, Melone; Ameise,
+  Bleistift, Velo, Bus), Bleistift 18 cm auf dem Lineal, Apfel 150 g und Auto 1.5 t auf der Waage mit Anzeige — Werte
+  aus den Schätzfragen des Spiels; statt einer Reihe bis zur Kuh.
+- **Rechengeschichten:** Bilderbuch, links die Geschichte mit Bildzeichen (3 + 2 Äpfel, 12 − 5 Ballone fliegen weg,
+  4 · 6 Eier, 18 + ? = 25 Fische mit leeren Plätzen, 30 : 6 Guetzli auf sechs Tellern), rechts die Rechnung, „?“ wird
+  zur Zahl; s6 drei Angaben, die unwichtige (12) durchgestrichen. Ohne Blättern.
+- **Gegenteil-Wippe:** Stein und Feder auf der Wippe, Schlange und Raupe mit Balken (lang – kurz), Wettlauf Hase und
+  Schildkröte, drei Dinge mit dem grössten im Ring, vier Dinge der Grösse nach, s6 zwei Wippen mit den Paketen des
+  Spiels, das schwerste leuchtet — statt eines Regals; die Wippe neigt sich nur dort, wo sie wiegt.
+- **Sachaufgaben-Kompass:** REISE statt KARTE: der Kompass geht den Rechenweg Karte um Karte ab (24 · 12 Fr., Rückgeld
+  in zwei Schritten, Dreisatz 21.60 Fr. : 3, Säulendiagramm als Quelle, Taxi 6 Fr. + 8 · 3 Fr., s6 drei Schritte), am
+  Ziel das Ergebnis mit Einheit; unwichtige Angaben (45 min, 3 h) durchgestrichen. Fähnchen am Ziel bei 2★.
+- **Fahrplan-Rechner:** Zeiten der Stufen auf Tafeln über den Halten, beim Umsteigen Ankunft und Abfahrt, je Fahrt ein
+  Zug; s3 „45 min + 45 min = 90 min = 1.5 h“, s4 über Mitternacht (Nachthimmel), s5 „= 1.2 h“, s6 „1.75 h + 50 min +
+  1 h 20 min = 3 h 55 min“ in der Nacht. Ohne Pfeifen und Winken.
+- **Komma-Messband:** Messband in der Einheit, je Stelle nach dem Komma eine Lupe tiefer, der Zeiger landet; darunter
+  die Umwandlung (3.25 m = 325 cm, 75 cm = 0.75 m, 0.75 l = 7.5 dl, 0.05 m = 5 cm, 1.25 kg + 750 g = 2 kg,
+  0.035 km = 3500 cm — die Stufen des Spiels statt 2 m bis 2.457 m). Fähnchen am Zeiger, Funken um die Landestelle.
+- **Platzhalter-Geschichten:** wie vorgeschlagen, mit den Gleichungen der Stufen (7 + 5 = ?, 28 + ? = 50, ? − 15 = 27,
+  ? · 8 = 320, 945 : ? = 7) und der Probe mit Haken; s6 zwei Lücken nacheinander (3 · ? = 240, ? + 80 = 500).
+- **Zeit-Schätzer:** Stoppuhr für s1–s4 (1 s, 60 s = 1 min, 10 min, 60 min = 1 h), dann die Uhr: s5 „9:45 → 10:20 =
+  35 min“, s6 „135 min = 2 h 15 min“ — die Stufen des Spiels statt Tag, Woche und Jahr.
 
 ## 8. Ideen je Spiel
 

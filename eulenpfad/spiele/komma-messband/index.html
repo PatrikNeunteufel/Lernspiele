@@ -42,6 +42,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -324,6 +325,10 @@ const antwortZiffern = a => String(antwortWert(a));
 
 LS.spiel({
   id: "komma-messband",
+  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "zoom", bilder: "messband", ziele: { s1: { wert: 3.25, einheit: "m", nach: "cm" },
+    s2: { wert: 0.75, einheit: "m", nach: "cm", rueck: true }, s3: { wert: 0.75, einheit: "l", nach: "dl" }, s4: { wert: 0.05, einheit: "m", nach: "cm" },
+    s5: { wert: 1.25, einheit: "kg", nach: "kg", plus: [750, "g"] }, s6: { wert: 0.035, einheit: "km", nach: "cm" } } },
   hilfe: stufe => (stufe === "s6" ? "Tipp das Ergebnis mit den Zifferntasten ein, das Dezimalzeichen hat eine eigene Taste. Bei «am grössten» oder «am kleinsten» wählst du eine Angabe."
     : "Tipp das Ergebnis mit den Zifferntasten ein, das Dezimalzeichen hat eine eigene Taste. Das Messband zeigt dir, in welcher Spalte jede Ziffer steht."),
   einleitung: "Meter, Kilo, Liter und Franken mit Komma: Wandle die Grössen um. Das Messband zeigt dir, wo jede Ziffer steht!",

@@ -25,6 +25,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -154,6 +155,11 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "rechengeschichten",
+  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "buch", ziele: { s1: { art: "dazu", bild: "🍎", gleichung: [3, "+", 2, "=", "?"], wert: 5 },
+    s2: { art: "weg", bild: "🎈", gleichung: [12, "−", 5, "=", "?"], wert: 7 }, s3: { art: "mal", bild: "🥚", gleichung: [4, "·", 6, "=", "?"], wert: 24 },
+    s4: { art: "luecke", bild: "🐟", gleichung: [18, "+", "?", "=", 25], wert: 7 }, s5: { art: "teilen", bild: "🍪", gleichung: [30, ":", 6, "=", "?"], wert: 5 },
+    s6: { art: "angaben", gleichung: [250, "+", 130, "=", "?"], wert: 380, zahlen: [250, 12, 130], unwichtig: 12 } } },
   einleitung: "In jeder Geschichte steckt eine Rechnung. Findest du sie?",
   hilfe: "Lies oder hör die Geschichte. Dann tippst du die Rechnung an, die dazu passt — oder du rechnest aus und tippst das Ergebnis ein.",
   anzahl: 8,

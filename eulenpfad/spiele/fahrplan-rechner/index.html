@@ -58,6 +58,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -594,6 +595,10 @@ function eingabe(ctx, a, loesung, notiz = null) {
 
 LS.spiel({
   id: "fahrplan-rechner",
+  // Abschluss-Animation (feier.js, Block M4, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "zug", ziele: { s1: { halte: ["7:42", "8:19"] }, s2: { halte: ["7:42", ["8:19", "8:31"], "9:05"] },
+    s3: { halte: ["9:10", "9:55", "10:40"], summe: true, in: "min", dezimal: true }, s4: { halte: ["23:48", "0:21"] },
+    s5: { halte: ["8:00", "9:12"], dezimal: true }, s6: { halte: ["21:30", "23:15", "0:05", "1:25"], summe: true, formate: ["dez"] } } },
   hilfe: "Lies den Fahrplan und rechne. Die Zeit tippst du ohne Doppelpunkt ein: Die letzten zwei Ziffern sind die Minuten. Bei Dezimalstunden hat das Zeichen nach den Ganzen eine eigene Taste. Stehen Züge auf Knöpfen, tippst du den passenden an.",
   einleitung: "Fahrpläne lesen und mit Zeiten rechnen: Wie lange dauert die Reise, wie lange wartest du beim Umsteigen, und wie viele Minuten sind anderthalb Stunden?",
   anzahl: 8,
