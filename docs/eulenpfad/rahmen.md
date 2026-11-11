@@ -1184,6 +1184,34 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | BAUEN · `zaehler` | `{ plaene, dazu? }` oder `{ kiste: [l, b, h], da }`: Gebäude vergleichen, gleich viele bauen, Kiste füllen | Würfel-Zähler |
   | BAUEN · `quader` | `{ masse, einheit?, da? }` oder `{ gross: [[w, e] × 3], in, gitter? \| wasser? \| liter?, zeile? }`: Quader aus Würfeln, grosse Quader mit Massen, Liter | Quader-Volumen |
 
+  Block A (Mathe M6, Deutsch Teil 1; LERN_Session29) — Brüche übereinander (`bruchBild`, `zeileMitBruechen`); in
+  Deutsch ohne Lesetext. AUFTRITT und KARTE nehmen eigene Bilder (`BILDER.auftritt`, `BILDER.karte`). `erscheine`
+  blendet bis zur eigenen Deckkraft eines Teils (`opacity`), sonst bis 1:
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | BAUEN · `pizza` | `{ brueche, gleich? }`: Pizzen, Zeichen dazwischen nachgerechnet | Bruch-Pizzeria |
+  | BAUEN · `schoggi` | `{ a, op: "+" \| "−", b }`: Tafel mit gemeinsamem Nenner, gekürzt, gemischte Zahl | Schoggi-Brüche |
+  | BAUEN · `prozent` | `{ bruch, feld?, folge? }`, `{ von: [p, rp] }`, `{ teil: [k, n] }`: Bruch, Dezimalzahl, Prozent | Prozent-Brücke |
+  | BAUEN · `mittelwert` | `{ werte, art: "spanne" \| "ausgleich" \| "mittel", fehlt?, mittel? }` | Mittelwert-Türme |
+  | WACHSEN · `diagramm` | `{ art: "strich" \| "saeulen" \| "kreis" \| "linie", … }`: Strichliste, Säulen (fehlt, differenz, mittel, gruppen, total), Kreis (prozent), Linie | Daten-Detektiv, Diagramm-Wahl |
+  | SAMMELN · `zufall` | `{ sack \| rad, ziel, fuenf?, zahl? }`, `{ vergleich }`, `{ summe }`: Skala mit den Stufen des Spiels | Zufalls-Skala |
+  | SAMMELN · `sortieren` | `{ regel, kisten, teile, ziel?, zaehlen? }`: jeder Klotz in genau eine Kiste (geprüft) | Sortier-Kiste |
+  | SAMMELN · `kombinationen` | `{ art: "kleider", anzahl }` oder `{ art: "glace", sorten, kugeln, reihenfolge?, wiederholung?, gefaess }`, `zahl` geprüft | Möglichkeiten-Finder |
+  | AUFTRITT · `silben` | `{ bild, silben, ordnen? }`: Silbenbögen und Klatschen | Silben-Klatscher |
+  | SAMMELN · `reime` | `{ paare, nicht? }` | Reim-Paare |
+  | SAMMELN · `zwillinge` | `{ paare }`: Gross- und Kleinbuchstabe je Sockenpaar | Buchstaben-Zwillinge |
+  | SAMMELN · `laternen` | Zahl 1–6 | Blitzlesen |
+  | ZOOM · `lupenzoom` | Ziel im Bild (`szene: "fern"`: Fernglas) | Lese-Detektiv, Sachtext-Spurensuche |
+  | KARTE · `spurweg` | Zahl 1–6 | Wort-Spürnase |
+  | AUFTRITT · `theater` | Gefühle als Bildzeichen | Figuren-Spiegel |
+  | BAUEN · `steg` | Zahl 1–6 | Regel-Lücke |
+  | REISE · `abc` | Buchstabe als Zahl 1–26 | ABC-Sortierer |
+  | BAUEN · `morphem` | Wörter aus `v`, `s`, `e` | Morphem-Schere |
+  | SAMMELN · `streifen` | Zahl der Teile | Trenn-Schere |
+  | REISE · `tastatur` | Tasten `[reihe, nr]`, Reihe 4 der Leerschlag | Tipp-Trainer |
+  | BAUEN · `bildstreifen` | Zahl der Bilder 3–6 | Geschichten-Ordner |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 

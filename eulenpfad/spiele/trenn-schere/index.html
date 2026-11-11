@@ -49,6 +49,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -291,6 +292,8 @@ const nurAngebotene = texte => Object.fromEntries(Object.entries(texte).filter((
 
 LS.spiel({
   id: ID,
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "streifen", ziele: { s1: 2, s2: 3, s3: 4, s4: 5, s5: 6, s6: 7 } },
   hilfe: stufe => "Tippe zwischen zwei Buchstaben, dann setzt die Schere dort einen Trennstrich; nochmal tippen nimmt ihn weg. Sind alle gesetzt, tippst du „Prüfen ✓“."
     + (STUFE[stufe]?.zeile ? " Am Zeilenende tippst du die eine Stelle an, wo du trennst — oder „Ganzes Wort auf die neue Zeile“." : ""),
   einleitung: "Am Ende der Zeile ist kein Platz mehr? Dann trennst du das Wort — aber nur an den richtigen Stellen! Tippe zwischen zwei Buchstaben, dann setzt die Schere einen Trennstrich.",

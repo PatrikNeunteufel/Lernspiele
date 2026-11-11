@@ -123,7 +123,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
   { id: "regel-luecke", art: ["antippen"], klasse: 3, bild: "✏️", name: "Regel-Lücke", thema: "rechtschreibung", farbe: "var(--deko-2)",
-    pfad: "spiele/regel-luecke/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 8, s2: 8, s3: 10, s4: 10, s5: 12, s6: 15 },
+    pfad: "spiele/regel-luecke/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 8, s2: 8, s3: 10, s4: 10, s5: 12, s6: 15 },
     beschreibung: "Die richtige Schreibweise einsetzen: sp/st, ie, ck/tz, f/v, e/ä",
     listen: {
       "sp-st": { name: "Regel sp/st am Wortanfang" },
@@ -157,7 +157,7 @@ const SPIELE = [
     beschreibung: "Teilen mit Rest — und mit der Umkehraufgabe zeigen, dass es stimmt",
     lernziele: [{ lz: "MA.1.B.2", stufen: ALLE_STUFEN }] },
   { id: "bruch-werkstatt", art: ["reihenfolge", "antippen"], klasse: 5, neu: "LERN_Session7", bild: "🍕", name: "Bruch-Pizzeria", thema: "brueche", farbe: "var(--deko-2)",
-    pfad: "spiele/bruch-werkstatt/index.html", einstellungen: ["notizen"], stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 20, s4: 25, s5: 25, s6: 35 },
+    pfad: "spiele/bruch-werkstatt/index.html", einstellungen: ["notizen", "feier"], stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 20, s4: 25, s5: 25, s6: 35 },
     beschreibung: "Brüche an Pizza und Streifen ablesen, färben, vergleichen und ordnen — bis zum Erweitern und Kürzen",
     lernziele: [{ lz: "MA.1.C.2", stufen: ["s1", "s2", "s3", "s4"] }, { lz: "MA.1.A.2", stufen: ["s4", "s5", "s6"] }, { lz: "MA.1.A.3", stufen: ["s5", "s6"] }] },
   { id: "teiler-detektiv", art: ["sortieren", "antippen"], klasse: 6, neu: "LERN_Session7", bild: "🐶", name: "Teiler-Spürnase", thema: "teiler", farbe: "var(--deko-5)",
@@ -169,7 +169,7 @@ const SPIELE = [
     beschreibung: "Ungefähr wie gross? Ergebnisse überschlagen, Stellenzahl bestimmen, falsche Rechnungen entlarven",
     lernziele: [{ lz: "MA.1.A.2", stufen: ALLE_STUFEN }, { lz: "MA.1.B.2", stufen: ["s4", "s6"] }] },
   { id: "mittelwert-waage", art: ["eintippen", "antippen"], klasse: 5, neu: "LERN_Session7", bild: "🏰", name: "Mittelwert-Türme", thema: "daten", farbe: "var(--deko-3)",
-    pfad: "spiele/mittelwert-waage/index.html", einstellungen: ["notizen"], stufen: ALLE_STUFEN, endlos: ["s1", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 45, s3: 40, s4: 50, s5: 50, s6: 60 },
+    pfad: "spiele/mittelwert-waage/index.html", einstellungen: ["notizen", "feier"], stufen: ALLE_STUFEN, endlos: ["s1", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 45, s3: 40, s4: 50, s5: 50, s6: 60 },
     beschreibung: "Säulen ausgleichen, Mittelwert, Maximum und Minimum bestimmen, fehlende Werte finden",
     lernziele: [{ lz: "MA.3.C.1", stufen: ALLE_STUFEN }] },
   { id: "velo-tabelle", art: ["eintippen", "antippen"], klasse: 6, neu: "LERN_Session7", bild: "🚲", name: "Velo-Tabelle", thema: "zahlen", farbe: "var(--deko-6)",
@@ -227,7 +227,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.4.F.1", stufen: ALLE_STUFEN }] },
   { id: "tipp-trainer", art: ["eintippen"], klasse: 3, neu: "LERN_Session6", bild: "⌨️", name: "Tipp-Trainer", thema: "schreiben", farbe: "var(--deko-6)",
-    pfad: "spiele/tipp-trainer/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 15, s3: 20, s4: 40, s5: 60, s6: 90 },
+    pfad: "spiele/tipp-trainer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 15, s3: 20, s4: 40, s5: 60, s6: 90 },
     beschreibung: "Buchstaben, Wörter und Sätze auf der Tastatur tippen — mit ⇧ für Grossbuchstaben",
     // Inhalte aus anderen Spielen: Nomen des ABC-Sortierers, Sätze der Satz-Reparatur (Stufe 1 braucht keine Liste).
     listen: {
@@ -262,7 +262,7 @@ const SPIELE = [
     beschreibung: "Wie viel fehlt bis zur runden Zahl? 37 + ? = 40, 365 + ? = 1000",
     lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }] },
   { id: "silben-klatscher", art: ["reihenfolge", "antippen"], klasse: 1, bild: "👏", name: "Silben-Klatscher", thema: "laute", farbe: "var(--deko-2)",
-    pfad: "spiele/silben-klatscher/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/silben-klatscher/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s5"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
     beschreibung: "Silben klatschen und zählen: Ba-na-ne hat drei Silben",
     listen: {
       "eine-silbe": { name: "Wörter mit einer Silbe" },
@@ -273,7 +273,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.C.1", stufen: ALLE_STUFEN }] },
   { id: "reim-paare", art: ["antippen"], klasse: 1, bild: "🎵", name: "Reim-Paare", thema: "laute", farbe: "var(--deko-1)",
-    pfad: "spiele/reim-paare/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 40, s4: 40, s5: 20, s6: 50 },
+    pfad: "spiele/reim-paare/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 40, s4: 40, s5: 20, s6: 50 },
     beschreibung: "Maus und Haus — welche Wörter reimen sich?",
     listen: {
       "reimgruppen": { name: "Reimgruppen mit Bild (Maus – Haus)" },
@@ -281,7 +281,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.C.1", stufen: ALLE_STUFEN }] },
   { id: "abc-sortierer", art: ["reihenfolge", "antippen"], klasse: 2, bild: "🔤", name: "ABC-Sortierer", thema: "rechtschreibung", farbe: "var(--deko-6)",
-    pfad: "spiele/abc-sortierer/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 15, s3: 30, s4: 40, s5: 40, s6: 50 },
+    pfad: "spiele/abc-sortierer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 15, s3: 30, s4: 40, s5: 40, s6: 50 },
     beschreibung: "Das ABC kennen und Wörter ordnen wie im Wörterbuch",
     listen: {
       "nomen-bild": { name: "Nomen mit Bild zum Ordnen nach dem ABC" },
@@ -393,7 +393,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.1.A.1", stufen: ALLE_STUFEN }, { lz: "D.4.A.1", stufen: ["s5"] }] },
   { id: "buchstaben-zwillinge", art: ["reihenfolge", "antippen"], klasse: 1, bild: "🔡", name: "Buchstaben-Zwillinge", thema: "lesen", farbe: "var(--deko-1)",
-    pfad: "spiele/buchstaben-zwillinge/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 10, s4: 20, s5: 30, s6: 38 },
+    pfad: "spiele/buchstaben-zwillinge/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 10, s3: 10, s4: 20, s5: 30, s6: 38 },
     beschreibung: "A und a, b und d — und Wörter aus Buchstaben legen",
     listen: {
       "verwechsler": { name: "Leicht verwechselbare Buchstaben (b d p q …)" },
@@ -402,7 +402,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.A.1", stufen: ALLE_STUFEN }, { lz: "D.4.A.1", stufen: ["s4", "s5"] }] },
   { id: "blitzlesen", art: ["antippen"], klasse: 2, bild: "⚡", name: "Blitzlesen", thema: "lesen", farbe: "var(--deko-3)",
-    pfad: "spiele/blitzlesen/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 8, s3: 8, s4: 8, s5: 10, s6: 13 },
+    pfad: "spiele/blitzlesen/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 8, s3: 8, s4: 8, s5: 10, s6: 13 },
     beschreibung: "Ein Wort blitzt auf — welches Bild passt?",
     listen: {
       "einzelwoerter": { von: "anlaut-angel/anlaut" },
@@ -420,7 +420,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
   { id: "lese-detektiv", art: ["antippen"], klasse: 2, bild: "🕵️", name: "Lese-Detektiv", thema: "lesen", farbe: "var(--deko-6)",
-    pfad: "spiele/lese-detektiv/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 15, s2: 25, s3: 40, s4: 45, s5: 60, s6: 75 },
+    pfad: "spiele/lese-detektiv/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], vorlesen: false, zeiten: { s1: 15, s2: 25, s3: 40, s4: 45, s5: 60, s6: 75 },
     beschreibung: "Lesen und verstehen: vom Satz bis zum Sachtext",
     listen: {
       "bildsaetze": { name: "Ein Satz und passendes Bild" },
@@ -499,7 +499,7 @@ const SPIELE = [
   // LERN_Session3: Lücken im Orientierungspunkt der 4. Klasse (Entscheid Patrik T3 a). neu: für Kinder
   // gesperrt, bis das Spiel angesehen ist (Prüfstand in pruefstand.js)
   { id: "diagramm-detektiv", art: ["eintippen", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "🔎", name: "Daten-Detektiv", thema: "daten", farbe: "var(--deko-6)",
-    pfad: "spiele/diagramm-detektiv/index.html", einstellungen: ["notizen"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 15, s3: 25, s4: 30, s5: 45, s6: 56 },
+    pfad: "spiele/diagramm-detektiv/index.html", einstellungen: ["notizen", "feier"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 15, s3: 25, s4: 30, s5: 45, s6: 56 },
     beschreibung: "Strichlisten, Tabellen und Säulendiagramme lesen: Wie viele mehr? Wo am meisten?",
     listen: {
       "umfragen": { name: "Umfragen und Zählungen (Titel, Fragen, Kategorien)" },
@@ -630,7 +630,7 @@ const SPIELE = [
     beschreibung: "Aus Zahlenkarten mit +, −, ×, : die Zielzahl bilden — jeder richtige Weg gilt",
     lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }] },
   { id: "glace-kombinator", art: ["eintippen"], klasse: 4, neu: "LERN_Session3", bild: "🧩", name: "Möglichkeiten-Finder", thema: "kombinatorik", farbe: "var(--deko-2)",
-    pfad: "spiele/glace-kombinator/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 40, s2: 50, s3: 50, s4: 60, s5: 50, s6: 60 },
+    pfad: "spiele/glace-kombinator/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 40, s2: 50, s3: 50, s4: 60, s5: 50, s6: 60 },
     beschreibung: "Glace, Kleider und Türme: alle Möglichkeiten systematisch finden — und zählen, wie viele es gibt",
     listen: {
       "sorten": { name: "Glacesorten (Name, Farbe, Buchstabe auf der Kugel)" },
@@ -747,7 +747,7 @@ const SPIELE = [
     beschreibung: "Dezimalzahlen runden: auf Ganze, Zehntel und Hundertstel",
     lernziele: [{ lz: "MA.1.A.4", stufen: ALLE_STUFEN }] },
   { id: "bruch-rechteck", art: ["eintippen", "antippen"], klasse: 6, neu: "LERN_Session8", bild: "🍫", name: "Schoggi-Brüche", thema: "brueche", farbe: "var(--deko-5)",
-    pfad: "spiele/bruch-rechteck/index.html", einstellungen: ["notizen"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 45, s6: 56 },
+    pfad: "spiele/bruch-rechteck/index.html", einstellungen: ["notizen", "feier"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 20, s2: 25, s3: 30, s4: 35, s5: 45, s6: 56 },
     beschreibung: "Brüche an der Schokoladentafel gleichnamig machen, addieren und subtrahieren",
     lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }, { lz: "MA.1.C.2", stufen: ["s1", "s2", "s3"] }] },
   { id: "rechenprobe", art: ["eintippen", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "✅", name: "Probe-Stempel", thema: "rechnen", farbe: "var(--deko-2)",
@@ -755,7 +755,7 @@ const SPIELE = [
     beschreibung: "Stimmt das Ergebnis? Mit der Umkehraufgabe, dem Überschlag oder der Endziffer prüfen",
     lernziele: [{ lz: "MA.1.B.2", stufen: ALLE_STUFEN }] },
   { id: "zufalls-skala", art: ["eintippen", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "🎲", name: "Zufalls-Skala", thema: "daten", farbe: "var(--deko-7)",
-    pfad: "spiele/zufalls-skala/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
+    pfad: "spiele/zufalls-skala/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
     beschreibung: "Unmöglich, möglich oder sicher? Mit Würfel, Glücksrad und Säckchen Wahrscheinlichkeiten einschätzen",
     lernziele: [{ lz: "MA.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "rechteck-labor", art: ["markieren"], klasse: 5, neu: "LERN_Session8", bild: "📐", name: "Rechteck-Labor", thema: "geometrie", farbe: "var(--deko-3)",
@@ -797,7 +797,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.4.F.1", stufen: ALLE_STUFEN }, { lz: "D.5.E.1", stufen: ALLE_STUFEN }] },
   { id: "morphem-schere", art: ["markieren", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "✂️", name: "Morphem-Schere", thema: "rechtschreibung", farbe: "var(--deko-1)",
-    pfad: "spiele/morphem-schere/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/morphem-schere/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s5"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
     beschreibung: "Wörter in Vorsilbe, Stamm und Endung schneiden — und mit dem Stamm e oder ä richtig schreiben",
     listen: {
       "bausteine": { name: "Wörter aus Vorsilbe, Stamm und Endung" },
@@ -814,7 +814,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.4.F.1", stufen: ALLE_STUFEN }] },
   { id: "trenn-schere", art: ["markieren"], klasse: 5, neu: "LERN_Session8", bild: "📄", name: "Trenn-Schere", thema: "rechtschreibung", farbe: "var(--deko-4)",
-    pfad: "spiele/trenn-schere/index.html", stufen: ALLE_STUFEN, endlos: ["s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 20, s6: 25 },
+    pfad: "spiele/trenn-schere/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 20, s5: 20, s6: 25 },
     beschreibung: "Wörter am Zeilenende richtig trennen: nach Silben, ck, st, Vorsilben",
     listen: {
       "woerter": { name: "Wörter zum Trennen am Zeilenende" },
@@ -828,7 +828,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.D.1", stufen: ALLE_STUFEN }] },
   { id: "wort-spuernase", art: ["antippen"], klasse: 5, neu: "LERN_Session8", bild: "👃", name: "Wort-Spürnase", thema: "lesen", farbe: "var(--deko-3)",
-    pfad: "spiele/wort-spuernase/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 20, s2: 25, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/wort-spuernase/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 20, s2: 25, s3: 25, s4: 30, s5: 35, s6: 44 },
     beschreibung: "Ein unbekanntes Wort im Satz: Was bedeutet es? Der Zusammenhang verrät es",
     listen: {
       "saetze": { name: "Sätze mit einem schwierigen Wort und drei Bedeutungen" },
@@ -976,7 +976,7 @@ const SPIELE = [
     beschreibung: "Wo ist der Teddy? Auf, unter, neben, vor, hinter, zwischen, links und rechts",
     lernziele: [{ lz: "NMG.8.4", stufen: ["s1", "s2", "s3", "s4"] }, { lz: "MA.2.A.1", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "sortier-kiste", art: ["antippen"], klasse: 1, neu: "LERN_Session8", bild: "🧺", name: "Sortier-Kiste", thema: "daten", farbe: "var(--deko-5)",
-    pfad: "spiele/sortier-kiste/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/sortier-kiste/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 20, s6: 25 },
     beschreibung: "Sachen nach Farbe, Form und Grösse sortieren — und zählen, wie viele es sind",
     lernziele: [{ lz: "MA.3.C.1", stufen: ALLE_STUFEN }, { lz: "MA.2.A.1", stufen: ["s2", "s3", "s4"] }] },
   { id: "gegenteil-wippe", art: ["antippen"], klasse: 1, neu: "LERN_Session8", bild: "⚖️", name: "Gegenteil-Wippe", thema: "groessen", farbe: "var(--deko-3)",
@@ -1032,7 +1032,7 @@ const SPIELE = [
     beschreibung: "Masse mit Dezimalzahlen umwandeln und damit rechnen: Meter, Kilogramm, Liter und Franken mit Komma",
     lernziele: [{ lz: "MA.3.A.2", stufen: ALLE_STUFEN }, { lz: "MA.3.A.1", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "prozent-bruecke", art: ["reihenfolge", "eintippen", "antippen"], klasse: 6, neu: "LERN_Session9", bild: "🌉", name: "Prozent-Brücke", thema: "brueche", farbe: "var(--deko-6)",
-    pfad: "spiele/prozent-bruecke/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal", "notizen"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 15, s3: 20, s4: 25, s5: 25, s6: 30 },
+    pfad: "spiele/prozent-bruecke/index.html", stufen: ALLE_STUFEN, einstellungen: ["dezimal", "notizen", "feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 15, s3: 20, s4: 25, s5: 25, s6: 30 },
     beschreibung: "Bruch, Dezimalzahl und Prozent: Was ist gleich viel?",
     lernziele: [{ lz: "MA.1.A.1", stufen: ALLE_STUFEN }, { lz: "MA.1.A.2", stufen: ["s3", "s4", "s6"] }, { lz: "MA.1.A.3", stufen: ["s5", "s6"] }] },
   { id: "stufenzahl-schieber", art: ["eintippen", "antippen"], klasse: 6, neu: "LERN_Session9", bild: "🔟", name: "Stufenzahl-Schieber", thema: "dezimal", farbe: "var(--deko-1)",
@@ -1044,7 +1044,7 @@ const SPIELE = [
     beschreibung: "Aussagen über Zahlen und Figuren: immer, manchmal oder nie wahr — und ein Gegenbeispiel",
     lernziele: [{ lz: "MA.1.B.2", stufen: ALLE_STUFEN }, { lz: "MA.2.B.2", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "sachtext-spurensuche", art: ["antippen"], klasse: 6, neu: "LERN_Session9", bild: "🔎", name: "Sachtext-Spurensuche", thema: "lesen", farbe: "var(--deko-4)",
-    pfad: "spiele/sachtext-spurensuche/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 40, s2: 50, s3: 60, s4: 70, s5: 80, s6: 90 },
+    pfad: "spiele/sachtext-spurensuche/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], vorlesen: false, zeiten: { s1: 40, s2: 50, s3: 60, s4: 70, s5: 80, s6: 90 },
     beschreibung: "Kurze Sachtexte lesen: Was steht drin, was nicht, und welcher Titel passt?",
     listen: {
       "texte": { name: "Kurze Sachtexte mit Fragen" },
@@ -1112,7 +1112,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.1.C.1", stufen: ALLE_STUFEN }] },
   { id: "geschichten-ordner", art: ["reihenfolge", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "📚", name: "Geschichten-Ordner", thema: "erzaehlen", farbe: "var(--deko-7)",
-    pfad: "spiele/geschichten-ordner/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 15, s2: 20, s3: 40, s4: 55, s5: 55, s6: 75 },
+    pfad: "spiele/geschichten-ordner/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 15, s2: 20, s3: 40, s4: 55, s5: 55, s6: 75 },
     beschreibung: "Bilder und Sätze einer Geschichte in die richtige Reihenfolge bringen: zuerst, dann, am Schluss",
     listen: {
       "geschichten": { name: "Kurze Geschichten in Schritten" },
@@ -1131,7 +1131,7 @@ const SPIELE = [
     beschreibung: "Quader aus Würfeln zählen und berechnen: Länge mal Breite mal Höhe, cm³, dm³ und Liter",
     lernziele: [{ lz: "MA.2.A.3", stufen: ALLE_STUFEN }, { lz: "MA.3.A.1", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "diagramm-wahl", art: ["antippen"], klasse: 6, neu: "LERN_Session10", bild: "🥧", name: "Diagramm-Wahl", thema: "daten", farbe: "var(--deko-5)",
-    pfad: "spiele/diagramm-wahl/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 35, s5: 45, s6: 50 },
+    pfad: "spiele/diagramm-wahl/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 35, s5: 45, s6: 50 },
     beschreibung: "Welches Diagramm passt zur Frage? Kreis-, Säulen- und Liniendiagramme lesen und wählen",
     listen: {
       "daten": { name: "Datensätze mit Fragen zu Diagrammen" },
@@ -1145,7 +1145,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.6.C.1", stufen: ALLE_STUFEN }] },
   { id: "figuren-spiegel", art: ["antippen"], klasse: 6, neu: "LERN_Session10", bild: "🪞", name: "Figuren-Spiegel", thema: "lesen", farbe: "var(--deko-6)",
-    pfad: "spiele/figuren-spiegel/index.html", stufen: ALLE_STUFEN, vorlesen: false, zeiten: { s1: 35, s2: 40, s3: 50, s4: 75, s5: 60, s6: 110 },
+    pfad: "spiele/figuren-spiegel/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], vorlesen: false, zeiten: { s1: 35, s2: 40, s3: 50, s4: 75, s5: 60, s6: 110 },
     beschreibung: "Kurze Szenen lesen: Warum handelt die Figur so, was fühlt sie, was will sie?",
     listen: {
       "szenen": { name: "Szenen mit Fragen zu den Figuren" },

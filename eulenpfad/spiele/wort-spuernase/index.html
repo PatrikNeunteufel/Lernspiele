@@ -36,6 +36,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -172,6 +173,8 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: ID,
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "karte", bilder: "spurweg", ziele: { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 } },
   einleitung: "Ein Wort ist schwierig — aber der Text verrät, was es bedeutet. Schnüffle wie eine Spürnase nach dem Hinweis!",
   hilfe: stufe => (STUFE[stufe].tippen
     ? "Lies den Text und tipp die Bedeutung an, die zum farbigen Wort passt. Danach tippst du im Text das Wort an, das dir geholfen hat."

@@ -69,6 +69,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -492,6 +493,9 @@ function tippsFuer(a, p) {
 
 LS.spiel({
   id: "bruch-rechteck",
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "schoggi", ziele: { s1: { a: [2, 8], op: "+", b: [3, 8] }, s2: { a: [1, 3], op: "+", b: [1, 4] },
+    s3: { a: [1, 4], op: "+", b: [1, 5] }, s4: { a: [2, 5], op: "+", b: [3, 10] }, s5: { a: [3, 4], op: "+", b: [1, 2] }, s6: { a: [7, 20], op: "−", b: [3, 25] } } },
   hilfe: "Tippe den Zähler mit den Zifferntasten ein. Fehlt auch der Nenner, tippst du zuerst den Zähler, dann OK, dann den Nenner. Die Schoggi-Tafeln zeigen dir die Brüche als Stückchen; bei Knöpfen tippst du die passende Antwort an.",
   einleitung: "Willkommen in der Schoggi-Fabrik! Teilst du eine Tafel in Spalten und Zeilen, werden die Stückchen gleich gross — dann kannst du Brüche zusammenzählen und abziehen.",
   anzahl: 8,

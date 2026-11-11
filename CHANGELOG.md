@@ -1787,3 +1787,28 @@
   Stellentafel des Spiels (Entscheid Patrik, Variante a, nach Vergleich im Browser). Vorher wurden sie bewegt voll
   farbig und dunkle Ziffern standen auf kräftigem Rot und Blau, im ruhigen Bild zart — `erscheine` bewegte die opacity
   0.18 auf 1; jetzt fill-opacity. Tests: Skripte „Keine Fehler.“, Eulenpfad stellen-detektiv „Keine Fehler.“
+- Ausrollen in vier Blöcken statt fachweise (Auftrag Patrik): A Mathe M6 und Deutsch Teil 1 (23), B Deutsch Teil 2 und
+  NMG Teil 1 (25), C NMG Rest (24), D Englisch, Französisch, Musik, Medien und Informatik (29); Konzept, Abschnitt 7.
+- Abschluss-Animationen Block A: Bruch-Pizzeria, Schoggi-Brüche, Prozent-Brücke, Mittelwert-Türme, Daten-Detektiv,
+  Diagramm-Wahl, Zufalls-Skala, Sortier-Kiste, Möglichkeiten-Finder, Silben-Klatscher, Reim-Paare,
+  Buchstaben-Zwillinge, Blitzlesen, Lese-Detektiv, Wort-Spürnase, Sachtext-Spurensuche, Figuren-Spiegel, Regel-Lücke,
+  ABC-Sortierer, Morphem-Schere, Trenn-Schere, Tipp-Trainer, Geschichten-Ordner — `feier.js` mit 21 Bildern nach den
+  Stufen der Spiele; nachgerechnet: Bruchvergleiche, gemeinsamer Nenner, gekürzt und gemischt, Prozent und Anteile,
+  Mittelwert und Ausgleich, Diagrammwerte, Stufen der Zufalls-Skala nach den Regeln des Spiels, Sortierung, alle
+  Kombinationen. Deutsch ohne Lesetext (leere Kärtchen, Silbenbögen), Bildzeichen aus den Inhaltslisten der Spiele.
+  AUFTRITT und KARTE nehmen eigene Bilder. Abweichungen im Konzept, Abschnitt 7 (zur Abnahme); Doku rahmen.md 24.
+- Rahmen: `erscheine` blendet bis zur eigenen Deckkraft eines Teils statt immer bis 1. Im Browser über alle 91 Spiele
+  gesucht: betroffen waren nur der neue Figuren-Spiegel und der Scheinwerfer im Instrumenten-Kenner (P6, abgenommen),
+  der bewegt voll deckend war und jetzt zart ist wie im ruhigen Bild — dieselbe Lesart wie beim Stellen-Detektiv.
+- Im Browser alle Endbilder angesehen und den Ablauf mitten drin; dabei verbessert: Steg mit sechs statt fünf Lücken,
+  Fernglas mit freier Mitte, Zoom des Lese-Detektivs mit deutlich verschiedenen Stufen, Silbenkärtchen bei fünf Silben im
+  Bild, Mittelwert-Klötze grösser und „?“ verschwindet vor der Zahl, Fähnchen auf der höchsten Säule statt Funken im
+  Diagramm, Rechnung über dem Brückenbogen, Würfelpaare der Augensumme als Paare, Cornet-Türme ohne Überlappen,
+  Tastatur ganz im Bild, gemischte Zahl bei den Schoggi-Brüchen. Gegenprüfung im Browser über alle 91 Spiele mit
+  Animation: nichts über dem Rand, kein Text unter 9 Einheiten.
+- Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die 23 Spiele von
+  Block A, instrumente und stellen-detektiv „Keine Fehler.“ — letzter voller Lauf weiter auf `6055527`.
+- Session-Abschluss LERN_Session29: Report docs/eulenpfad/report/LERN_Session29_2026-11-11.md (Blöcke M4, M5, A,
+  Prüfung Lage und Schrift, `erscheine`, Liste der 91 Spiele mit Animation und der 78 offenen je Block B, C, D,
+  Stolperfallen, Plan), Handover (Stand nach LERN_Session29, weiter mit Block B).

@@ -7,6 +7,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "diagramm-detektiv/umfragen": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "diagramm-wahl/daten": {
       "am": "2026-11-07",
       "von": "Patrik"
@@ -37,6 +41,10 @@ const PRUEFSTAND = {
     },
     "gegenteil-wippe/gegenteile": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "glace-kombinator/kleider": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "kulturen-koffer/dinge": {
@@ -209,6 +217,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "bruch-rechteck": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "bruch-werkstatt": {
       "am": "2026-11-03",
       "von": "Patrik"
@@ -231,6 +243,10 @@ const PRUEFSTAND = {
     },
     "dezimal-rutsche": {
       "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "diagramm-detektiv": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "diagramm-wahl": {
@@ -271,6 +287,10 @@ const PRUEFSTAND = {
     },
     "gerecht-teiler": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "glace-kombinator": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "hello-dialog": {
@@ -381,6 +401,10 @@ const PRUEFSTAND = {
       "am": "2026-11-01",
       "von": "Patrik"
     },
+    "sortier-kiste": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "speicher-leiter": {
       "am": "2026-11-07",
       "von": "Patrik"
@@ -401,6 +425,10 @@ const PRUEFSTAND = {
       "am": "2026-11-06",
       "von": "Patrik"
     },
+    "stufenzahl-schieber": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "tageslauf-sonne": {
       "am": "2026-11-05",
       "von": "Patrik"
@@ -414,7 +442,11 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "tier-sortierer": {
-      "am": "2026-11-06",
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "ueberschlags-blitz": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "velo-tabelle": {
@@ -435,6 +467,10 @@ const PRUEFSTAND = {
     },
     "wuerfelbau-blick": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "zehntel-lupe": {
+      "am": "2026-11-11",
       "von": "Patrik"
     },
     "zeit-schaetzer": {

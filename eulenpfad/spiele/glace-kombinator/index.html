@@ -68,6 +68,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -535,6 +536,11 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: ID,
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "kombinationen", ziele: { s1: { art: "kleider", anzahl: [2, 3], zahl: 6, rechnung: "2 · 3 = 6" },
+    s2: { art: "glace", sorten: 3, kugeln: 2, gefaess: "becher", zahl: 3 }, s3: { art: "glace", sorten: 3, kugeln: 2, gefaess: "beides", zahl: 6, rechnung: "2 · 3 = 6" },
+    s4: { art: "glace", sorten: 3, kugeln: 2, wiederholung: true, gefaess: "becher", zahl: 6 }, s5: { art: "glace", sorten: 4, kugeln: 2, reihenfolge: true, gefaess: "cornet", zahl: 12, rechnung: "4 · 3 = 12" },
+    s6: { art: "glace", sorten: 4, kugeln: 3, reihenfolge: true, gefaess: "cornet", zahl: 24, rechnung: "4 · 3 · 2 = 24" } } },
   einleitung: "Wie viele verschiedene Glace kannst du machen? Probier alle Möglichkeiten — aber keine doppelt!",
   hilfe: "Beim Finden tippst du Sorten oder Kleider an — jede fertige Glace und jedes Set kommt zu deinen Funden. Beim Zählen tippst du die Anzahl ein.",
   anzahl: 6,

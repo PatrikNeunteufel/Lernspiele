@@ -24,6 +24,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -116,6 +117,8 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "blitzlesen",
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "laternen", ziele: { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 } },
   hilfe: "Ein Wort blitzt kurz auf der Tafel auf. Lies es und tippe das passende Bild oder Wort an. Mit «⚡ Nochmal blitzen» siehst du es noch einmal.",
   einleitung: "Ein Wort blitzt auf — und ist gleich wieder weg! Lies schnell und tipp auf das passende Bild.",
   anzahl: 10,

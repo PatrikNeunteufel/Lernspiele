@@ -71,6 +71,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -170,6 +171,8 @@ function tippsFuer(a, p) {
 
 LS.spiel({
   id: "regel-luecke",
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "steg", ziele: { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 } },
   einleitung: "In jedem Wort fehlt etwas. Welche Schreibweise ist richtig? Die Regel hilft dir!",
   hilfe: "Schau das Bild an und lies das Wort mit der Lücke. Tippe unten die Schreibweise an, die in die Lücke gehört.",
   anzahl: 10,

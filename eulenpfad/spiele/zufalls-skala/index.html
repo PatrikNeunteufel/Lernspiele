@@ -55,6 +55,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -461,6 +462,10 @@ const begruendung = ({ k, n }) => `${k} von ${n} ${k === 1 ? "passt" : "passen"}
 
 LS.spiel({
   id: "zufalls-skala",
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "zufall", ziele: { s1: { sack: ["b", "b", "b", "b", "b"], ziel: "b" }, s2: { rad: ["g", "b", "y", "g", "b", "y"], ziel: "r" },
+    s3: { sack: ["r", "b", "b", "b", "b", "b", "b", "b", "b", "b"], ziel: "r", fuenf: true }, s4: { vergleich: [["g", "g", "g", "b"], ["g", "b", "g", "b"]], ziel: "g" },
+    s5: { sack: ["r", "r", "r", "b", "b", "b", "b", "b", "b", "b"], ziel: "r", zahl: true }, s6: { summe: 7 } } },
   einleitung: "Würfel, Glücksrad, Säckchen und Karten: Was kommt heraus? Das weiss niemand genau — aber du kannst sagen, wie wahrscheinlich es ist!",
   hilfe: "Schau den Würfel, das Glücksrad, das Säckchen oder die Karten an und lies die Frage. Dann tippst du an, wie wahrscheinlich es ist — oder tippst die Anzahl ein, die passt.",
   anzahl: 8,

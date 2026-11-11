@@ -1,6 +1,20 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-11, nach LERN_Session29** ([Report](report/LERN_Session29_2026-11-11.md)):
+- **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
+- **Eulenpfad:** Abschluss-Animationen in **91 von 169 Spielen**: Blöcke M4, M5 und A (Mathe M6, Deutsch Teil 1) neu;
+  Prüfung Lage und Schrift (`tools/feier_geometrie.js` in `tools/pruefe_spiele.js`); `erscheine` blendet bis zur
+  eigenen Deckkraft (Stellen-Detektiv nach Entscheid a, Scheinwerfer im Instrumenten-Kenner). Ausrollen der übrigen
+  78 Spiele in den Blöcken B, C, D (Konzept, Abschnitt 7; Listen im Report).
+- **Tests:** Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Skripte „Keine Fehler.“; Eulenpfad Stichproben je Block „Keine
+  Fehler.“, im Browser alle 91 Spiele ohne Teil über dem Rand — **letzter voller Lauf auf `6055527`**. Commits bis
+  `b9dcdf6` nicht gepusht; Block A und dieser Abschluss noch zu committen.
+- **Weiter mit:** Block B (Deutsch Teil 2, NMG Teil 1; 25 Spiele), dann C und D; Abnahme von M2 bis M5, Block A,
+  Tresor, Stellen-Detektiv und Scheinwerfer durch Patrik in `tools/feier_vorschau.html`; voller Eulenpfad-Lauf auf
+  Patriks Entscheid vor dem nächsten Push; Prüfer-Kandidaten (bewegt gegen ruhig, `keySplines`, `attributeName`).
+
 **2026-11-11, nach LERN_Session28** ([Report](report/LERN_Session28_2026-11-11.md)):
 - **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
 - **Eulenpfad:** Bemerkungen 33–35 behoben (Finger-Zähler s6 blitzte ein leeres Feld, Hilfslinien in der

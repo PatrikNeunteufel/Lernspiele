@@ -213,8 +213,10 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | M3 | Rechnen | 13 | in Arbeit seit 11.11.2026 (LERN_Session28, M3): gebaut, Abnahme offen |
 | M4 | Sachrechnen, Grössen | 12 | in Arbeit seit 11.11.2026 (LERN_Session29, M4): gebaut, Abnahme offen |
 | M5 | Geometrie | 13 | in Arbeit seit 11.11.2026 (LERN_Session29, M5): gebaut, Abnahme offen |
-| M6 | Daten, Kombinatorik, Brüche | 9 | offen |
-| D, N, F | Deutsch (30), NMG (33), danach Englisch (8), Französisch (8), Musik (6), Medien und Informatik (7) | 92 | offen |
+| A | Mathe M6 (Daten, Kombinatorik, Brüche) und Deutsch Teil 1 (Laute, Lesen, Schreiben, Rechtschreibung, Erzählen) | 23 | in Arbeit seit 11.11.2026 (LERN_Session29, A): gebaut, Abnahme offen |
+| B | Deutsch Teil 2 (Sätze, Wortarten, Gedichte, Zuhören) und NMG Teil 1 (Zeit, Geschichten, Gemeinschaft, Verkehr) | 25 | offen |
+| C | NMG Rest (Forschen, Körper, Orientierung, Tiere, Wetter, Wirtschaft) | 24 | offen |
+| D | Englisch, Französisch, Musik, Medien und Informatik | 29 | offen |
 
 **Block M1 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
 
@@ -344,6 +346,44 @@ in den Inhaltslisten der Spiele — bisher war jedes Bild gezeichnet; das Ausseh
   ? · 8 = 320, 945 : ? = 7) und der Probe mit Haken; s6 zwei Lücken nacheinander (3 · ? = 240, ? + 80 = 500).
 - **Zeit-Schätzer:** Stoppuhr für s1–s4 (1 s, 60 s = 1 min, 10 min, 60 min = 1 h), dann die Uhr: s5 „9:45 → 10:20 =
   35 min“, s6 „135 min = 2 h 15 min“ — die Stufen des Spiels statt Tag, Woche und Jahr.
+
+**Block A — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme).
+Deutsch ohne Lesetext wie der Wortfamilien-Baum (Wörter als leere Kärtchen, Silben als Bögen); Buchstaben nur, wo sie
+selbst der Inhalt sind (ABC, Gross und klein). Neu im Rahmen: `erscheine` blendet bis zur eigenen Deckkraft eines
+Teils, nicht mehr immer bis 1 — dadurch ist der **Scheinwerfer im Instrumenten-Kenner (P6)** jetzt auch bewegt zart wie
+im ruhigen Bild (vorher bewegt voll deckend; dieselbe Lesart wie beim Stellen-Detektiv, Entscheid a).
+
+- **Bruch-Pizzeria:** Pizzen der Stufen statt Halbe bis Kürzen: 3/4, 5/8, 1/2 < 2/3, drei geordnet, 1/2 = 2/4 = 4/8,
+  vier geordnet — Zeichen nachgerechnet.
+- **Schoggi-Brüche:** Tafel mit dem gemeinsamen Nenner, der erste Bruch dunkel, der zweite hell dazu oder weggegessen:
+  2/8 + 3/8, 1/3 + 1/4 = 4/12 + 3/12, 1/4 + 1/5, 2/5 + 3/10, 3/4 + 1/2 = 5/4 = 1 1/4 (zwei Tafeln), 7/20 − 3/25 = 23/100.
+- **Prozent-Brücke:** Streifen oder Hunderterfeld, darunter Bruch = Dezimalzahl = Prozent auf einer Brücke (3/10,
+  37 % = 37/100, 1/2 = 50 %, 3/20 = 0.15 = 15 %), s5 25 % von 80 Fr. = 20 Fr., s6 12 von 40 = 30 % — statt Pfeilern.
+- **Mittelwert-Türme:** s1 der Unterschied (7 − 3 = 4), s2 Klötze wandern, bis alle gleich sind, s3 und s4 die Linie des
+  Mittelwerts mit der Rechnung, s5 und s6 der fehlende Turm (erst „?“, dann die Zahl).
+- **Daten-Detektiv:** Strichliste, Säulen, der Unterschied zweier Säulen, eine fehlende Säule, der Durchschnitt, zwei
+  Klassen mit dem Total; 3★ Fähnchen auf der höchsten Säule.
+- **Diagramm-Wahl:** Säulen, Kreis in Hälfte und Vierteln, Kreis mit Achteln, Liniendiagramm, Kreis mit Prozent,
+  Durchschnitt — statt einer Sonnenblume.
+- **Zufalls-Skala:** Säckchen oder Glücksrad, der Zeiger fällt auf die Stufe der Skala mit den Bildzeichen des Spiels
+  (drei Stufen, ab s3 fünf, Regeln des Spiels), s4 zwei Räder, s5 „3 von 10“, s6 alle Paare zur Augensumme 7.
+- **Sortier-Kiste:** nach Farbe, Form, Grösse, mit Zahl, gelbe Dreiecke, Regel finden.
+- **Möglichkeiten-Finder:** alle Möglichkeiten erzeugt und gezählt wie im Spiel: 2 · 3 Kleider, Glace im Becher, Becher
+  oder Cornet, mit Wiederholung, Cornet-Türme 4 · 3 und 4 · 3 · 2.
+- **Silben-Klatscher:** statt klatschender Tiere das Bild des Worts mit Silbenbögen und Klatschen (2 bis 5 Silben),
+  s5 und s6 rutschen die Silben in ihre Reihenfolge.
+- **Reim-Paare:** Paare aus der Liste des Spiels, s4 und s5 ein durchgestrichenes Bild, das sich nicht reimt.
+- **Buchstaben-Zwillinge:** Sockenpaare mit Gross- und Kleinbuchstaben (b und d in s2).
+- **Lese-Detektiv:** wie vorgeschlagen, ein Bild, in das je Stufe tiefer gezoomt wird, am Ende ein Lupenring.
+- **Sachtext-Spurensuche:** wie vorgeschlagen bis zum geschlüpften Vogel, im Fernglas.
+- **Figuren-Spiegel:** Puppentheater mit Gesichtern als Gefühle (😊 😢 😠 😮 🤔 😏), 2★ Scheinwerfer statt Vorhang.
+- **Wort-Spürnase:** Spürnase der Teiler-Spürnase auf der Fährte, s6 bis zum Buch.
+- **Regel-Lücke:** Steg mit sechs Lücken, wie vorgeschlagen.
+- **ABC-Sortierer:** Steine mit den Buchstaben (statt ohne), die Eule hüpft bis D, H, M, R, V, Z.
+- **Morphem-Schere:** leere Bausteine Vorsilbe, Stamm, Endung, je Stufe mehr Wörter.
+- **Trenn-Schere:** der Streifen wird geschnitten, 2 bis 7 Teile; ohne Kette um den Bildrand.
+- **Tipp-Trainer:** Tastatur ohne Beschriftung, die Tasten der Wörter und Sätze der Stufen leuchten nach.
+- **Geschichten-Ordner:** Bildstreifen mit 3 bis 6 Bildern wie die Stufen, der Schneemann wächst Bild um Bild.
 
 **Block M5 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
 

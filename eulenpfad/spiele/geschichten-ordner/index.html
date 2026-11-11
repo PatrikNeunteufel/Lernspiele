@@ -50,6 +50,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -202,6 +203,8 @@ const ordnungsTipps = (a, lesearm) => [
 
 LS.spiel({
   id: ID,
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "bildstreifen", ziele: { s1: 3, s2: 3, s3: 4, s4: 5, s5: 5, s6: 6 } },
   einleitung: "Jede Geschichte hat einen Anfang, eine Mitte und einen Schluss. Bring die Teile in die richtige Reihenfolge: Was passiert zuerst, was dann, was am Schluss?",
   hilfe: stufe => ({
     s1: "Tippe die Bilder der Reihe nach an: zuerst das, was am Anfang passiert, dann das Nächste. Jedes richtige Bild wandert nach oben in die Ablage.",

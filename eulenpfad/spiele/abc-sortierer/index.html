@@ -25,6 +25,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -183,6 +184,8 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "abc-sortierer",
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "abc", ziele: { s1: 4, s2: 8, s3: 13, s4: 18, s5: 22, s6: 26 } },
   hilfe: "Fehlt ein Buchstabe, tippst du den passenden an. Beim Ordnen tippst du die Wörter der Reihe nach an — das Wort, das im ABC zuerst kommt, zuerst. Bei der Wörterbuch-Seite tippst du das Wort an, das zwischen dem ersten und dem letzten Wort steht.",
   einleitung: "A, B, C, D … Kennst du das ABC? Dann kannst du Wörter ordnen wie im Wörterbuch!",
   anzahl: 8,

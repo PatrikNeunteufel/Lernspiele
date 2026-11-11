@@ -57,6 +57,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -289,6 +290,10 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "mittelwert-waage",
+  // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "bauen", bilder: "mittelwert", ziele: { s1: { werte: [3, 7, 5], art: "spanne" }, s2: { werte: [2, 6, 4], art: "ausgleich" },
+    s3: { werte: [6, 9, 12, 13], art: "mittel" }, s4: { werte: [40, 70, 55, 75], art: "mittel" }, s5: { werte: [8, 12, 10], art: "mittel", fehlt: 2, mittel: 10 },
+    s6: { werte: [300, 450, 600, 650], art: "mittel", fehlt: 2, mittel: 500 } } },
   einleitung: "Bei den Mittelwert-Türmen wird ausgeglichen: Wie hoch wären alle Säulen, wenn jede gleich viel hätte? Das ist der Mittelwert.",
   hilfe: "Lies die Frage und schau dir die Säulen oder die Tabelle an. Beim Ausgleichen tippst du zuerst eine hohe Säule an und dann eine niedrige: Ein Klotz wandert hinüber. Mit „↺ von vorn“ fängst du neu an.",
   anzahl: 8,
