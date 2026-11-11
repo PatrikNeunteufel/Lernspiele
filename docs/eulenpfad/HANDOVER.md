@@ -1,6 +1,21 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-11, nach LERN_Session32** ([Report](report/LERN_Session32_2026-11-11.md)):
+- **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
+- **Eulenpfad:** Startseite nach der Rückmeldung zur Gestaltung überarbeitet ([Konzept](konzept_gestaltung.md), GS0–GS3,
+  SK1, SP1, FB1–FB3, WO1, GR1, FB2-K): Kartenbilder aus den Abschluss-Animationen (Feier-Angaben jetzt im Katalog),
+  Kinderkarte mit ⓘ, Schrift Nunito, Stil „wie von Hand gezeichnet“ (Standard) mit variiertem Raster auf der Startseite
+  und um jede Runde, Avatar-Formen, Fach-Reiter und Knopf „Filter“, Stufen als Level, Fach- und Themenblöcke, Einstellungen
+  in Blöcken, Schweizer Fahne als Bild. Bemerkungen 41–49 erledigt.
+- **Tests:** Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Feier „169 Spiele, 6084 Bilder, keine
+  Fehler.“, Schrift „Keine Fehler.“; Eulenpfad Stichproben „Keine Fehler.“ — **letzter voller Lauf auf `6055527`**.
+  Commits bis `67514d6` von Patrik, nicht gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit:** Wunsch Patrik — Erfolge und Statistik im Stil, Statistik kindgerechter (Aufsicht ausführlich), Marke
+  des Wochenziels in der Kopfzeile wieder entfernen, Personen-Dropdown im Stil; dann FB2-K a (Stichworte der Stufen),
+  FB3 a (Boden der Karten), Bilder der Anleitungen; voller Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push.
+
 **2026-11-11, nach LERN_Session31** ([Report](report/LERN_Session31_2026-11-11.md)):
 - **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
 - **Eulenpfad:** Abschluss-Animationen in **allen 169 Spielen** (Block D: Englisch, Französisch, Musik, Medien und

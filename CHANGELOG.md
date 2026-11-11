@@ -1892,3 +1892,30 @@
   gerundet wird, in der Stellenfarbe und die entscheidende Ziffer gross in ihrer Farbe, s2 und s5 runden jetzt ab.
 - Session-Abschluss: Report docs/eulenpfad/report/LERN_Session31_2026-11-11.md, Handover (weiter mit der Überarbeitung
   der Kacheln und der Gestaltung).
+
+## 2026-11-11 — LERN_Session32
+- **Bemerkungen 41–49** aus der Abnahme der Abschluss-Animationen: Dezimal-Rutsche (dezimal-rutsche) mit Kopf der
+  Rundungsstelle, entscheidender Ziffer und Stufen-Eigenheiten (Münze, Eingabefeld, Band); Echt oder erfunden?
+  (echt-oder-erfunden) mit der Wendung aus dem Satz in einer Blase; Zeitstrahl-Sortierer (zeitstrahl-sortierer) mit
+  Jahrhundert-Band, Ereignissen der Gegenwart (1991, 2007, 2022; ZS1 a) und gezeichneter Mondlandung (ZS2 a).
+- **Konzept Gestaltung** (`docs/eulenpfad/konzept_gestaltung.md`) mit Entscheiden GS0–GS3, SK1, SP1, FB1–FB3, WO1, GR1,
+  FB2-K; Grundsatz im Plan Angleich der Reihe neu gefasst (GS0 a: Startseite wird überarbeitet, Spiele bleiben).
+- **Feier-Angaben im Katalog** (GS1 a, SK1 a): alle 169 Spiele, `spiel.js` nimmt sie nur von dort; Schweiz-Karte mit
+  Karte und Auswahl beim Namen (`LS_FEIER.kartenDaten`); Gegenprobe: gleiches Markup wie vorher in allen Stufen.
+- **Startseite:** Kartenbilder (Endbild Stufe 3, 1 Stern, verzögert gezeichnet), Kinderkarte mit ⓘ (GS2 a), Schrift
+  Nunito als Datei (GS3 a, `tools/schrift_zuschneiden.py`, Prüfung „schrift“), Druckknöpfe, Fach-Reiter und Knopf
+  „Filter“ mit Schiebereglern (FB1 a), Filtergruppen einklappbar, Fach- und Themenblöcke mit Bild (GR1 a, `THEMEN[].bild`),
+  Wochenziel als Marke in der Kopfzeile (WO1 a, am Ende zurückgenommen, noch umzubauen).
+- **Stil „wie von Hand gezeichnet“** (Einstellung `stil`, Standard hand; `STIL` in `spiel.js`): krumme Rahmen, variiertes
+  Raster mit Lücken, ungleiche Ecken bei Knöpfen und Feldern; auf der Startseite und um jede Runde (Stufenwahl,
+  Ranglisten, Schlussbild; SP1); Avatare verformt, Form des Rahmens wählbar (rund, Quadrat, Dreiecke, Fünfeck).
+- **Stufenwahl als Level** (FB2 a): grosse Zahl, drei Sterne, Untertitel, Lehrplantext hinter ⓘ; Timer und Endlos mit
+  Symbol und Wort (`LS.schalterSymbol`).
+- **Verwaltung → Einstellungen** in Blöcken (`LS.EINSTELLUNG_BLOECKE`).
+- **Bilder:** `svg:mondlandung`, `svg:schweiz` (Flaggen-Emoji ersetzt in gemeinde-helfer, kakao-weg, nombres-rallye,
+  zeitstrahl-sortierer und zwei Abschlussbildern; word-match 🔤 statt 🇬🇧); `feier.js` zeichnet Bilder der Sammlung.
+- **Prüfungen:** Kinder-Statistik ohne Konzentration (ST1 a); `pruefe_skripte.js` prüft auch `<link>`, `@import`,
+  `url()` von aussen; `tools/eulenpfad_seiten.js` prüft Kinderkarte, Kartenbild, Stil, Filter, Reiter, Blöcke,
+  Einstellungs-Blöcke und Wochenmarke.
+- Session-Abschluss: Report docs/eulenpfad/report/LERN_Session32_2026-11-11.md, Handover (weiter mit Erfolge und
+  Statistik im Stil, Statistik kindgerechter, Wochenmarke entfernen, Personen-Dropdown, FB2-K, FB3).
