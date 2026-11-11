@@ -221,6 +221,13 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .gruppe .thema-block > summary { padding-left: 4px; }
 .thema-block > summary .thema-info { margin-left: 2px; width: 34px; height: 34px; font-size: 19px; }
 .thema-titel { margin: 0 0 8px; font-size: 15px; }
+/* In den Blöcken fehlen ihre Innenabstände (rund 44 px): mit 300 px je Kachel passten bei 1024 px Fensterbreite nur noch
+   zwei statt drei Kacheln (904 px Platz, drei brauchen 932); 280 px brauchen 872 (Hinweis Patrik, LERN_Session32) */
+/* Höchstens drei Kacheln nebeneinander (Patrik: vier ist zu viel): jede mindestens ein Drittel der Zeile und 280 px */
+.spiele:not(.kompakt) { grid-template-columns: repeat(auto-fill, minmax(max(min(280px, 100%), calc((100% - 32px) / 3)), 1fr)); }
+/* Die Startseite darf breiter sein als ein Spiel (980 px in stil.css): die Blöcke und Kacheln wachsen mit (Hinweis
+   Patrik, LERN_Session32). Nur die Startseite: die Bühne mit #inhalt; Spiele und Mix bleiben schmal */
+.buehne:has(> #inhalt), .buehne:has(> #inhalt) ~ .kopf { max-width: 1320px; }
 .thema-titel[hidden] { display: none; }
 /* im Stil „hand“ ungleiche Ecken (kein SVG-Rahmen: zugeklappt zeigt ein details nur seinen Kopf) */
 .stil-hand .fach-block { border-radius: 18px 26px 16px 28px / 26px 16px 28px 18px; }
@@ -338,7 +345,7 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .spielkarte.gesperrt { opacity: .7; border-top-style: dashed; }
 /* Schalter oben rechts: ⏱ Timer, ♾ Endlos, ☆ Favorit — aus = blass, an = leuchtet */
 .karten-schalter-zeile { display: flex; justify-content: flex-end; gap: 0; margin: -12px -10px -10px 0; }
-.stufen-text { display: inline-flex; align-items: center; gap: 1px; }
+.stufen-text { display: inline-flex; align-items: center; gap: 1px; white-space: nowrap; } /* Symbol und Zahl bleiben zusammen */
 .stufen-text .symbol { width: 18px; height: 18px; }
 .karten-schalter { border: none; background: none; cursor: pointer; line-height: 0; padding: 5px; border-radius: 10px; }
 .karten-schalter:focus-visible { outline: 3px solid var(--knopf); }

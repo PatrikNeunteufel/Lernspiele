@@ -346,7 +346,9 @@ Farbe aus `FACH_BILD` und `fachFarbe` in `start/spiele.js`, für Reiter und Bloc
 (`.thema-block`) mit dem Bild des Themas (`THEMEN[].bild` im Katalog), dem kurzen Namen und ⓘ, das den langen Titel
 zeigt, ohne den Block zuzuklappen; der Titel steht auch beim Darüberfahren (`title`) und beim langen Drücken. Auf- und
 Zuklappen wie bisher (`KERN.uebersicht.gruppen`). Im Stil „hand“ haben die Blöcke ungleiche Ecken statt eines
-SVG-Rahmens, weil ein zugeklapptes `details` nur seinen Kopf zeigt.
+SVG-Rahmens, weil ein zugeklapptes `details` nur seinen Kopf zeigt. Eine Kachel ist mindestens 280 px und mindestens ein
+Drittel der Zeile breit — höchstens drei nebeneinander (Patrik: vier ist zu viel) —, und die Startseite ist bis 1320 px
+breit (Spiele 980 px; `.buehne:has(> #inhalt)`): auf breiten Bildschirmen werden Blöcke und Kacheln grösser, nicht mehr.
 **Klassen-Rand** (Entscheid G1 a, LERN_Session14): Ist „🎒 Meine Klasse“ aus, bekommt jede Karte eines Kindes mit Klasse
 einen Glow nach aussen und links oben ein Zeichen: ✓ Türkis (`--deko-5`) Basisklasse tiefer als die eigene, ● Gold
 (`--deko-4`) die eigene, ▲ Violett (`--deko-1`) höher, „Herausforderung“. Nie Stellenfarben; das Zeichen trägt die

@@ -76,6 +76,13 @@ Feier-Angaben gegen den Altstand verglichen: alle 169 Spiele × 6 Stufen ruhig u
 voller Eulenpfad-Lauf weiter auf `6055527`.** Im Browser angesehen: Startseite (Desktop, 375 px), Stufenwahl, Avatare,
 Abschlussbilder; nicht: Ansicht der Aufsicht (PIN), Schlussbild einer echten Runde.
 
+## Nachtrag nach dem Abschluss (12.11.2026)
+In den Fach-Blöcken standen nur noch zwei statt drei Kacheln nebeneinander: Die Innenabstände der Blöcke liessen bei
+1024 px 904 px Platz, drei Kacheln zu 300 px brauchen 932. Jetzt je Kachel mindestens 280 px und ein Drittel der Zeile
+(höchstens drei Spalten; vier fand Patrik zu viel); die Startseite darf bis 1320 px breit werden (Hinweis Patrik: „die
+Blöcke können grösser werden“), dort wachsen die Kacheln auf rund 400 px; Symbol und Zahl der Stufenknöpfe brechen nicht
+mehr um. Gemessen: 3 Spalten bei 1024 und 1600, 1 bei 375, keine Überdeckung, kein seitliches Scrollen.
+
 ## Offen / Plan für die nächste Session
 1. **Wunsch Patrik am Ende:** Erfolge und Statistik im Stil „hand“ vollständig; die **Statistik kindgerechter** (nur die
    Aufsicht sieht weiter alles ausführlich, etwa „In den letzten 4 Aufgaben nur 25 % …“); die **Marke des Wochenziels in
