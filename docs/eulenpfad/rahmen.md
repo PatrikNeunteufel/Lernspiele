@@ -308,7 +308,12 @@ Grenzen in `AUSWERTUNG.FAZIT` (Annahmen bis zu Erfahrungen mit Kindern). Abschni
 
 **Startseite** (`index.html`, Code in `start/`): Ohne Anmeldung zeigt sie die Anmeldung, danach
 die Tabs Spiele, Profil, Statistik und, nur für die Aufsicht, Verwaltung mit den Untertabs Konten,
-Freigabe, Abgleich, Einstellungen (für alle auf diesem Gerät, „↺ Alles auf Standard“) und Entwicklung. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
+Freigabe, Abgleich, Einstellungen (für alle auf diesem Gerät, „↺ Alles auf Standard“) und Entwicklung. Die Einstellungen
+stehen in zusammengehörenden Blöcken, je Block eine Karte (Wunsch Patrik LERN_Session32; `LS.EINSTELLUNG_BLOECKE` in
+`spiel.js`, jede Einstellung in genau einem Block, geprüft in `tools/eulenpfad_seiten.js`): 🎨 Aussehen (Stil),
+🎮 In den Spielen (Dezimalzeichen, Notizen, Notizblock, Abschluss-Animation), 🧒 Kinder (selbst anlegen, Fehler melden,
+Sortierung, Sortierung selbst wählen), 🔊 Ton und Ruhezeiten (Kopfhörer, Spiele mit Ton, Ruhezeiten); danach Meldeweg,
+Speicher und „↺ Alles auf Standard“ je für sich. Der Tab steht in der Adresse (`#statistik`, Untertab `#verwaltung/abgleich`;
 ohne Untertab Konten). `#anmelden` meldet ab und führt zur Anmeldung; dorthin verweist auch
 „wechseln“ im Spiel. Gruppen, Filter-Block, Suchfeld, Sortierwahl und Favoriten des Tabs Spiele (und das Suchfeld der
 Freigabe) kommen aus `KERN.uebersicht` (KT1 a, docs/kern/rahmen.md 4.26). Die **Suche** im Tab Spiele und in der

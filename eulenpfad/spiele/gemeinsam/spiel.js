@@ -165,9 +165,19 @@ const LS = (() => {
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",
       werte: { ja: "ja", nein: "nein, nur die Aufsicht" },
-      erklaerung: "Auf der Anmeldung steht „🐣 Ich bin neu“: Ein Kind gibt seinen Vornamen und die Klasse ein und spielt gleich los. Ausschalten, wenn sonst doppelte oder erfundene Namen die Übersicht stören (etwa in einer Klasse); dann legt nur die Aufsicht Kinder an (Verwaltung → Konten).",
+      erklaerung: "Auf der Anmeldung steht „🐣 Ich bin neu“: Ein Kind gibt seinen Vornamen und die Klasse ein undspielt gleich los. Ausschalten, wenn sonst doppelte oder erfundene Namen die Übersicht stören (etwa in einer Klasse); dann legt nur die Aufsicht Kinder an (Verwaltung → Konten).",
     },
   };
+
+  // Blöcke der Einstellungen in der Verwaltung (Wunsch Patrik LERN_Session32: zusammengehörende Blöcke, der Stil für
+  // sich): je Block eine Karte in dieser Reihenfolge. Jede Einstellung steht in genau einem Block (tools/eulenpfad_seiten.js).
+  // teil: ein Teil der Verwaltung, der im Block nach den Einstellungen steht (Ruhezeiten).
+  const EINSTELLUNG_BLOECKE = [
+    { id: "aussehen", titel: "🎨 Aussehen", text: "Wie die Startseite und die Seiten um die Spiele aussehen.", einstellungen: ["stil"] },
+    { id: "spiele", titel: "🎮 In den Spielen", text: "Was in jedem Spiel gilt, je Spiel auch abweichend.", einstellungen: ["dezimal", "notizen", "notizblock", "feier"] },
+    { id: "kinder", titel: "🧒 Kinder", text: "Was Kinder selbst dürfen und wie sie die Spiele finden.", einstellungen: ["selbstAnlegen", "melden", "sortierung", "sortierungWahl"] },
+    { id: "ton", titel: "🔊 Ton und Ruhezeiten", text: "Wann Spiele still sind und was mit Kopfhörern trotzdem geht.", einstellungen: ["kopfhoerer", "tonSpieleRuhe"], teil: "ruhezeiten" },
+  ];
 
   /** Id des Spiels dieser Seite (spiele/<id>/index.html), auch bevor eine Runde läuft; sonst null. */
   const seitenSpiel = () => (typeof location !== "undefined" ? location.pathname.match(/\/spiele\/([^/]+)\//)?.[1] ?? null : null);
@@ -3405,7 +3415,7 @@ const LS = (() => {
 
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
-    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
+    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
     RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,

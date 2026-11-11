@@ -356,9 +356,10 @@ function zeichneSpiele(box, neu) {
   const G = UE.gruppen({ zu: p.zu, merke: zu => LS.speichereProfil(name, { zu }) });
   const gruppe = (id, titel, anzahl, ...inhalt) => G.gruppe({ id, kopf: titel, anzahl }, ...inhalt);
 
-  // Im Stil „hand“ ab und zu eine Lücke nach einer Karte (STIL.luecke, je Spiel gleich; nicht nach der letzten, nicht kompakt)
+  // Im Stil „hand“ ab und zu eine Lücke vor einer Karte (STIL.luecke, je Spiel gleich; nicht kompakt). Vor der Karte,
+  // damit sie in jede Spalte fallen kann, auch in die erste der ersten Zeile (Wunsch Patrik LERN_Session32)
   const gitter = spiele => el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") },
-    ...spiele.flatMap((s, i) => [karte(s), !kompakt && i < spiele.length - 1 && STIL.luecke(s.id) ? el("div", { class: "raster-luecke", "aria-hidden": "true" }) : null]).filter(Boolean));
+    ...spiele.flatMap(s => [!kompakt && STIL.luecke(s.id) ? el("div", { class: "raster-luecke", "aria-hidden": "true" }) : null, karte(s)]).filter(Boolean));
 
   // Klassen-Rand (Entscheid G1 a, LERN_Session14): Ohne „🎒 Meine Klasse“ zeigt ein farbiger Rand mit Zeichen, wie die
   // Basisklasse des Spiels zur Klasse des Kindes steht. Farben aus --deko-*, nicht aus den Stellenfarben; das Zeichen

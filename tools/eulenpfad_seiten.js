@@ -130,6 +130,11 @@ async function pruefeSpeicher(melde) {
     await ruheAsync(s);
     pruefe(s.gibt("[data-erinnerung]") === 1, ort, "keine Erinnerung ans Sichern nach 30 Tagen ohne Sicherung");
     pruefe(s.gibt("[data-speicher]") === 1, ort, "keine Speicheranzeige unter Einstellungen");
+    // Blöcke (LERN_Session32): je Block eine Karte, der Stil für sich im Block Aussehen, Meldeweg und Speicher je eigene
+    pruefe(s.lauf(`LS.EINSTELLUNG_BLOECKE.every(b => document.querySelector('section[data-block="' + b.id + '"]'))`) === true
+      && s.gibt('section[data-block="meldeweg"]') === 1 && s.gibt('section[data-block="speicher"] [data-speicher]') === 1, ort, "Einstellungen nicht in Blöcken");
+    pruefe(s.lauf(`document.querySelector('section[data-block="aussehen"]').querySelectorAll(".einstellung").length`) === 1
+      && /Stil/.test(s.lauf(`document.querySelector('section[data-block="aussehen"] h3').textContent`)), ort, "Block Aussehen trägt nicht nur den Stil");
     pruefe(/Runden und Rekorde liegen in der Ablage/.test(s.text()), ort, "Speicheranzeige nennt die Ablage nicht");
     s.lauf(`LS.schreibe("letzteSicherung", new Date().toISOString()); zeichneStart()`);
     await ruheAsync(s, 50, 4);
@@ -208,6 +213,12 @@ function pruefeTabSpiele(melde) {
       // geschlossen und je Element gleich, Raster je Spiel verschoben, ab und zu eine Lücke; glatt ohne Klasse, ohne Lücke
       pruefe(s.lauf(`document.body.classList.contains("stil-hand")`) === true, ort, "Stil „hand“ ist nicht der Standard");
       pruefe(s.gibt(".raster-luecke") > 0, ort, "Stil „hand“ ohne Lücke im Raster");
+      // Blöcke der Einstellungen (LERN_Session32): jede Einstellung in genau einem Block, kein Block mit Unbekanntem
+      {
+        const fehlt = s.lauf(`(() => { const n = LS.EINSTELLUNG_BLOECKE.flatMap(b => b.einstellungen);
+          return [...Object.keys(LS.EINSTELLUNGEN).filter(e => n.filter(x => x === e).length !== 1), ...n.filter(e => !LS.EINSTELLUNGEN[e])]; })()`);
+        pruefe(fehlt.length === 0, ort, `Einstellungen nicht in genau einem Block: ${fehlt.join(", ")}`);
+      }
       pruefe(s.lauf(`(() => { const k = document.querySelector('${k}'); return k.dataset.stil === "1" && /px$/.test(k.style.getPropertyValue("--rx")); })()`), ort, "Spielkarte im Stil „hand“ nicht eingebunden (Raster)");
       const pfad = s.lauf(`[STIL.pfad(300, 420, "${id}", "oben"), STIL.pfad(300, 420, "${id}", "oben"), STIL.pfad(300, 420, "anders", null)]`);
       pruefe(/^M[\d.,\s L-]+Z M[\d.,\s L-]+Z$/.test(pfad[0]) && pfad[0] === pfad[1] && pfad[0] !== pfad[2], ort, "Handrahmen: Pfad ungültig oder nicht je Element gleich");

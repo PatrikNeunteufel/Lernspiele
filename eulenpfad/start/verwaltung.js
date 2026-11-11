@@ -477,7 +477,7 @@ function zeichneVerwaltung(box, neu) {
     const wahlKnoepfe = (wahlen, aktuell, setze) => el("div", { class: "zeile-knoepfe" }, ...wahlen.map(([wert, text]) =>
       el("button", { type: "button", class: "schalter" + (wert === aktuell ? " frei" : ""), "aria-pressed": String(wert === aktuell),
         text: (wert === aktuell ? "✓ " : "") + text, onclick: () => { setze(wert); neu(); } })));
-    const zeilen = Object.entries(LS.EINSTELLUNGEN).map(([name, e]) => {
+    const zeile1 = ([name, e]) => {
       const global = LS.einstellung(name, null);
       // Spiele, die die Einstellung nutzen (Katalog, Feld einstellungen): je Spiel „wie global“ oder ein eigener Wert
       // spieleWie: gilt in denselben Spielen wie eine andere Einstellung (Notizblock wie Notizen, NB2 a)
@@ -492,15 +492,23 @@ function zeichneVerwaltung(box, neu) {
             el("span", { text: `${s.bild} ${s.name}` }),
             wahlKnoepfe([[null, `wie global (${e.werte[global].split(":")[0]})`], ...Object.entries(e.werte).map(([w, t]) => [w, t.split(":")[0]])],
               LS.einstellungSpiel(name, s.id), w => LS.setzeEinstellung(name, w, s.id))))) : null);
-    });
-    seite.append(karte(
-      el("h2", { text: "Einstellungen" }),
-      el("p", { class: "leise-text", style: "margin-top:0", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend. „Alles auf Standard“ setzt auch die Spiele zurück." }),
-      // die Ruhezeiten gleich nach den beiden Einstellungen, die von ihnen handeln (Kopfhörer, Spiele mit Ton)
-      ...(() => { const n = Object.keys(LS.EINSTELLUNGEN).indexOf("tonSpieleRuhe") + 1; return [...zeilen.slice(0, n), ruhezeitenTeil(wahlKnoepfe), ...zeilen.slice(n)]; })(),
+    };
+    // Zusammengehörende Blöcke (Wunsch Patrik LERN_Session32): je Block eine Karte (LS.EINSTELLUNG_BLOECKE), danach
+    // Meldeweg und Speicher je für sich, zuletzt „Alles auf Standard“ und die Hinweise
+    const TEILE = { ruhezeiten: () => ruhezeitenTeil(wahlKnoepfe) };
+    const block = (attr, ...inhalt) => el("section", { class: "karte einstellung-block", ...attr }, ...inhalt);
+    seite.append(el("p", { class: "leise-text", style: "margin:0 0 12px", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend." }));
+    for (const b of LS.EINSTELLUNG_BLOECKE) {
+      seite.append(block({ "data-block": b.id },
+        el("h2", { text: b.titel }),
+        el("p", { class: "leise-text", style: "margin-top:0", text: b.text }),
+        ...b.einstellungen.filter(n => LS.EINSTELLUNGEN[n]).map(n => zeile1([n, LS.EINSTELLUNGEN[n]])),
+        b.teil ? TEILE[b.teil]() : null));
+    }
+    seite.append(block({ "data-block": "meldeweg" }, meldewegTeil()), block({ "data-block": "speicher" }, speicherTeil()));
+    seite.append(block({ "data-block": "standard" },
       zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); })),
-      meldewegTeil(),
-      speicherTeil(),
+      el("p", { class: "leise-text", style: "margin:6px 0 0", text: "Setzt alle Einstellungen oben zurück, auch die je Spiel." }),
       // Freiwillige Beiträge (LERN-50): nur hier für die Aufsicht und nur, wenn ein Link eingetragen ist
       typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length
         ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/unterstuetzen.html", text: "☕ Eulenpfad unterstützen" }),
