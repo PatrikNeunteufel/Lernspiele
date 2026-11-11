@@ -374,10 +374,14 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
 - Ein Kind sieht je Karte Bild, Name und Stufenknöpfe. Die Beschreibung zeigt ⓘ (`.karten-info`) und liest langes
   Drücken vor; Lernziel-Kürzel und Sperrmarken sieht nur die Aufsicht, den Grund eines Suchtreffers alle. Die
   Zufallskarten tragen für ein Kind nur den Titel; „🎯 Zufälliges Spiel“ heisst für ein Kind „🎯 Überrasch mich“.
-- **Stil der Startseite** (Einstellung `stil`: `glatt` Standard, `hand` „wie von Hand gezeichnet“; Wunsch Patrik
-  LERN_Session32; Code `start/stil.js`, Stile `start/start.css` unter `.stil-hand`). Gilt in den Tabs Spiele, Profil,
-  Erfolge und Statistik, in denselben Farben wie glatt; umgeschaltet über die Klasse `stil-hand` an `body`
-  (`STIL.anwenden()` nach jedem Zeichnen in `zeichneStart`).
+- **Stil** (Einstellung `stil`: `hand` „wie von Hand gezeichnet“ Standard, `glatt`; Wunsch Patrik LERN_Session32; Code
+  `STIL` am Ende von `spiele/gemeinsam/spiel.js`, Stile unter `.stil-hand` in `spiele/gemeinsam/stil.css` und
+  `start/start.css`). Gilt in den Tabs Spiele, Profil, Erfolge und Statistik und auf jeder Spielseite um die Runde
+  herum: Stufenwahl mit Timer, Endlos und Ranglisten, Schlussbild ohne die Abschluss-Animation (SP1, Patrik) — diese
+  Karten tragen `data-stil-bereich`; die laufende Runde bleibt glatt (GS0 a). Farben wie glatt; umgeschaltet über die
+  Klasse `stil-hand` an `body` (`STIL.anwenden()` nach jedem Zeichnen der Startseite und beim Start eines Spiels).
+  Auf der Spielseite: die Stufen mit dem Farbstreifen links als dicker Seite (`--farbe`), Raster der Stufen wie die
+  Spielkarten (ohne Lücken), Knöpfe und Schalter im Bereich mit ungleichen Ecken.
   - Rahmen: Über Spielkarten, Weiterspielen, den Filter und die Karten der Tabs (`#inhalt .karte`) legt `STIL` ein SVG
     (`svg.hand-rahmen`, `STIL.pfad`): eine gefüllte Fläche zwischen zwei leicht krummen Linien, auf der Kopfseite 7–11 px
     dick (Spielkarte oben, kompakt und Weiterspielen links), sonst 2–4 px; Farbe `--f`, sonst eine helle Linie. Die Form

@@ -204,17 +204,16 @@ function pruefeTabSpiele(melde) {
       s.klick(`${k} .karten-info`); ruhe(s);
       pruefe(s.lauf(`document.querySelector('${k} .ziel').hidden`) === false && s.lauf(`location.hash`) === "#spiele", ort, "ⓘ zeigt die Beschreibung nicht (oder öffnet das Spiel)");
       s.klick(`${k} .karten-info`); ruhe(s);
-      // Stil „wie von Hand gezeichnet“ (Einstellung stil, start/stil.js, LERN_Session32): umschaltbar, Pfad geschlossen
-      // und je Element gleich, Raster je Spiel verschoben, ab und zu eine Lücke; glatt ohne Klasse, ohne Lücke
-      pruefe(s.lauf(`document.body.classList.contains("stil-hand")`) === false && s.gibt(".raster-luecke") === 0, ort, "Stil „hand“ ohne Einstellung an");
-      s.lauf(`LS.setzeEinstellung("stil", "hand"); zeichneStart()`); ruhe(s);
-      pruefe(s.lauf(`document.body.classList.contains("stil-hand")`) === true, ort, "Einstellung „hand“ schaltet den Stil nicht ein");
+      // Stil „wie von Hand gezeichnet“ (Einstellung stil, Standard hand; STIL in spiel.js, LERN_Session32): Pfad
+      // geschlossen und je Element gleich, Raster je Spiel verschoben, ab und zu eine Lücke; glatt ohne Klasse, ohne Lücke
+      pruefe(s.lauf(`document.body.classList.contains("stil-hand")`) === true, ort, "Stil „hand“ ist nicht der Standard");
       pruefe(s.gibt(".raster-luecke") > 0, ort, "Stil „hand“ ohne Lücke im Raster");
       pruefe(s.lauf(`(() => { const k = document.querySelector('${k}'); return k.dataset.stil === "1" && /px$/.test(k.style.getPropertyValue("--rx")); })()`), ort, "Spielkarte im Stil „hand“ nicht eingebunden (Raster)");
       const pfad = s.lauf(`[STIL.pfad(300, 420, "${id}", "oben"), STIL.pfad(300, 420, "${id}", "oben"), STIL.pfad(300, 420, "anders", null)]`);
       pruefe(/^M[\d.,\s L-]+Z M[\d.,\s L-]+Z$/.test(pfad[0]) && pfad[0] === pfad[1] && pfad[0] !== pfad[2], ort, "Handrahmen: Pfad ungültig oder nicht je Element gleich");
+      s.lauf(`LS.setzeEinstellung("stil", "glatt"); zeichneStart()`); ruhe(s);
+      pruefe(s.lauf(`document.body.classList.contains("stil-hand")`) === false && s.gibt(".raster-luecke") === 0, ort, "Stil „glatt“ schaltet den Stil nicht aus");
       s.lauf(`LS.setzeEinstellung("stil", null); zeichneStart()`); ruhe(s);
-      pruefe(s.lauf(`document.body.classList.contains("stil-hand")`) === false && s.gibt(".raster-luecke") === 0, ort, "Stil „hand“ bleibt nach dem Zurückstellen");
     }
     const erste = s.lauf(`document.querySelector(".spielkarte[data-spiel]").dataset.spiel`);
     // Favorit: Stern antippen → im Profil, Karte in der Gruppe Favoriten (doppelt), Stern an

@@ -276,9 +276,7 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .stil-hand .weiter-karte { border-left: none; padding-left: 14px; position: relative; }
 .stil-hand .filter-klapp { border-color: transparent; position: relative; }
 .stil-hand #inhalt .karte { position: relative; }
-svg.hand-rahmen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
-svg.hand-rahmen path { fill: var(--f, #cfd3e6); }
-body:not(.stil-hand) svg.hand-rahmen { display: none; }
+/* svg.hand-rahmen selbst und die Spielseite: spiele/gemeinsam/stil.css („Stil wie von Hand gezeichnet“) */
 /* Raster: nicht ganz in Reih und Glied; höchstens 4 px seitlich und 2 % grösser, damit sich keine Karten berühren */
 .stil-hand .spiele:not(.kompakt) > .spielkarte { transform: translate(var(--rx, 0), var(--ry, 0)) scale(var(--rs, 1)); margin-top: var(--rm, 0); }
 .raster-luecke { display: none; }
