@@ -376,6 +376,17 @@ button.stufenknopf { border: none; border-bottom: 4px solid var(--sf); font-fami
 .stufenknopf.empfohlen { outline: 3px solid var(--knopf); outline-offset: 1px; }
 .stufenknopf.gross { grid-column: 1 / -1; flex-direction: row; gap: 10px; min-height: 56px; background: var(--knopf); color: #fff; border-bottom-color: var(--knopf-dunkel); font-size: 20px; }
 .stufenknopf.gross .s { font-size: 16px; }
+/* Druckknöpfe (Konzept Gestaltung, Reihenfolge 4; LERN_Session32): Chips, Tabs, ⓘ und Stufenknöpfe mit sichtbarer Tiefe
+   wie .knopf in den Spielen — ein dunklerer Rand unten, beim Drücken sinkt der Knopf ein */
+.chip, .tab { box-shadow: 0 4px 0 #cdd2ea; transition: transform .08s, box-shadow .08s; }
+.chip[aria-pressed="true"], .tab[aria-selected="true"] { box-shadow: 0 4px 0 var(--knopf-dunkel); }
+.karten-info { box-shadow: 0 3px 0 #cdd2ea; transition: transform .08s, box-shadow .08s; }
+.karten-info[aria-expanded="true"] { box-shadow: 0 3px 0 var(--knopf-dunkel); }
+.stufenknopf { border-bottom-width: 6px; transition: transform .08s, border-bottom-width .08s; }
+button.stufenknopf { border-bottom-width: 6px; }
+.chip:active, .tab:active, .karten-info:active { transform: translateY(3px); box-shadow: 0 1px 0 #cdd2ea; }
+.chip[aria-pressed="true"]:active, .tab[aria-selected="true"]:active { box-shadow: 0 1px 0 var(--knopf-dunkel); }
+.stufenknopf:active { transform: translateY(4px); border-bottom-width: 2px; }
 
 /* Kompakt: eine Zeile je Spiel */
 .spiele.kompakt { grid-template-columns: 1fr; gap: 8px; }

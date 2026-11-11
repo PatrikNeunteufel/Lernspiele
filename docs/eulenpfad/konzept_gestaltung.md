@@ -3,8 +3,8 @@
 Stand: 11.11.2026 (LERN_Session32) · **GS0 a, GS1 a, GS2 a, SK1 a entschieden und gebaut** (Patrik, LERN_Session32;
 Umsetzung docs/eulenpfad/rahmen.md 6, „Kartenbild und Kinderkarte“); GS3 a (Schrift Nunito) gebaut; dazu der Stil wie
 von Hand gezeichnet (Wunsch Patrik, Einstellung `stil`, Standard hand: Rahmen, Raster, Knöpfe, Felder) auf der
-Startseite und um die Runde jedes Spiels herum (SP1: Stufenwahl, Ranglisten, Schlussbild; rahmen.md 6); offen
-Druckknöpfe, Blöcke der Verwaltung, Versuch mit Kindern und der Lehrperson.
+Startseite und um die Runde jedes Spiels herum (SP1: Stufenwahl, Ranglisten, Schlussbild; rahmen.md 6), Blöcke der
+Verwaltung, Form des Avatar-Rahmens wählbar, Druckknöpfe; offen der Versuch mit Kindern und der Lehrperson.
 
 **Kipppunkt GS1 gemessen** (Desktop, lokaler Server): `feier.js` 28 ms übertragen, 2 ms ausgeführt, ein Kartenbild
 0,17 ms; die Seite ist nach 83 ms fertig. Für das Handy übers Mobilnetz nur gerechnet, nicht gemessen: 204 KB gepackt
@@ -178,5 +178,6 @@ Lesetext, Nunito für Titel und Knöpfe.
 1. GS1: Feier-Angaben in den Katalog, Kartenbild auf der Startseite, Ladezeit messen.
 2. GS2: Text der Kinderkarte.
 3. GS3: Schrift messen, entscheiden, als Datei im App-Ordner.
-4. Druckknöpfe auf der Startseite (`.chip`, `.tab`, Stufenknöpfe) wie `.knopf` im Rahmen — Retusche, ohne eigene Frage.
+4. Druckknöpfe auf der Startseite (`.chip`, `.tab`, Stufenknöpfe) wie `.knopf` im Rahmen — Retusche, ohne eigene Frage
+   (gebaut LERN_Session32: Rand unten 4–6 px, beim Drücken sinkt der Knopf ein; `start/start.css`).
 5. Versuch mit Kindern und der Lehrperson, die die Rückmeldung gab.
