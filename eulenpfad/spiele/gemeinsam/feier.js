@@ -489,10 +489,12 @@ var LS_FEIER = (function () {
 
   const KARTENFARBEN_DEKO = ["var(--deko-1)", "var(--deko-2)", "var(--deko-3)", "var(--deko-5)", "var(--deko-6)", "var(--deko-4)", "var(--deko-7)"];
 
+  /** Frosch, hellgrün mit dunklem Rand: auf der Seerose (#4f9d47) gut zu sehen (Bemerkung 39, LERN_Session31). */
   function frosch() {
+    const haut = { fill: "#a6dd55", stroke: "#2d5a27", "stroke-width": 1 };
     return s("g", { "data-figur": "frosch" },
-      s("ellipse", { cx: 0, cy: -5, rx: 9, ry: 6, fill: "#4f9d47" }), s("ellipse", { cx: 0, cy: -3, rx: 5.5, ry: 3.5, fill: "#b8e08a" }),
-      s("circle", { cx: -4, cy: -11, r: 3, fill: "#4f9d47" }), s("circle", { cx: 4, cy: -11, r: 3, fill: "#4f9d47" }),
+      s("ellipse", { cx: 0, cy: -5, rx: 9, ry: 6, ...haut }), s("ellipse", { cx: 0, cy: -3, rx: 5.5, ry: 3.5, fill: "#f1f8d8" }),
+      s("circle", { cx: -4, cy: -11, r: 3, ...haut }), s("circle", { cx: 4, cy: -11, r: 3, ...haut }),
       s("circle", { cx: -4, cy: -11.5, r: 1.3, fill: "#2d3047" }), s("circle", { cx: 4, cy: -11.5, r: 1.3, fill: "#2d3047" }));
   }
   function libelle(x, y, ruhig) {
@@ -627,6 +629,11 @@ var LS_FEIER = (function () {
         zahlen.forEach((n, i) => svg.appendChild(s("g", { "data-stueck": "seerose", "data-wert": n },
           s("ellipse", { cx: xs[i], cy: y, rx: 25, ry: 8, fill: "#4f9d47" }), s("path", { d: `M${xs[i]},${y} l18,-5 l0,6 Z`, fill: "#5aa9dc" }),
           s("text", { x: xs[i], y: y + 22, fill: "#ffffff", "font-size": 10, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, ganzText(n)))));
+        // das Schild des Spiels mit dem Schritt der Stufe (orange wie --hinweis): so zeigt das Bild, was die Stufe ändert —
+        // die Zahl der Sprünge ist im Spiel immer gleich (Bemerkung 37, Entscheid Patrik a, LERN_Session31)
+        const schild = `${z.schritt < 0 ? "−" : "+"} ${ganzText(Math.abs(z.schritt))}`, sb = schild.length * 8.6 + 18;
+        svg.appendChild(s("g", { "data-schild": z.schritt }, s("rect", { x: BREITE / 2 - sb / 2, y: 10, width: sb, height: 26, rx: 8, fill: HINWEIS }),
+          s("text", { x: BREITE / 2, y: 28.5, fill: "#ffffff", "font-size": 15, "font-weight": "900", "font-family": SCHRIFT, "text-anchor": "middle" }, schild)));
         const weg = "M" + xs[0] + "," + y + xs.slice(1).map((x, i) => ` Q${(xs[i] + x) / 2},${y - 46} ${x},${y}`).join("");
         svg.appendChild(bewege(frosch(), weg, { x: xs[anzahl], y, winkel: 0 }, ruhig, { drehen: false }));
         if (sterne >= 2) svg.appendChild(libelle(xs[anzahl] - 30, 40, ruhig));
@@ -668,10 +675,29 @@ var LS_FEIER = (function () {
         // landen zwei Wagen im selben Tal (s6: 4.45 und 4.54 ≈ 4.5), bleibt jeder auf seiner Seite stehen
         const imTal = v => faelle.filter(q => q.ziel === v).length;
         const gezeigt = new Set();
+        // ganze Zahlen (Bemerkung 40, LERN_Session31): oben links der Kopf der Stelle, auf die gerundet wird, in ihrer
+        // Stellenfarbe; in der Zahl leuchtet die Ziffer, die entscheidet (die Stelle rechts davon) — so zeigt jede Stufe,
+        // was gerundet wird und warum die Kugel rollt, nicht nur andere Zahlen
+        const auf = ganz ? STELLE_ZU[Math.round(Math.log10(z.auf))] : null, entscheidet = ganz ? STELLE_ZU[Math.round(Math.log10(z.auf)) - 1] : null;
+        if (auf && entscheidet && 10 ** EXPONENT[auf] === z.auf)
+          svg.appendChild(s("g", { "data-stelle": auf }, s("rect", { x: 12, y: 10, width: 34, height: 22, rx: 4, style: `fill:${stellenFarbe(auf)}` }),
+            s("text", { x: 29, y: 26, fill: "#ffffff", "font-size": 14, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle" }, auf)));
+        /** Zahl über dem Hang; ganz: die entscheidende Ziffer gross in ihrer Farbe. */
+        const wertText = (w, attr) => {
+          const t0 = s("text", attr);
+          if (!ganz || !entscheidet) { t0.appendChild(document.createTextNode(text(w, z.wertStellen ?? nachkomma(w)))); return t0; }
+          const zeichen = [...ganzText(w)];
+          let stelle = 0;
+          const stellen = zeichen.map(c => (/\d/.test(c) ? 1 : 0)).reverse().map(d => (d ? stelle++ : -1)).reverse();
+          zeichen.forEach((c, i) => t0.appendChild(stellen[i] === EXPONENT[entscheidet]
+            ? s("tspan", { style: `fill:${stellenFarbe(entscheidet)}`, "font-size": 15, "font-weight": "bold", "data-entscheidet": c }, c) : s("tspan", {}, c)));
+          if (z.einheit) t0.appendChild(s("tspan", {}, ` ${z.einheit}`));
+          return t0;
+        };
         faelle.forEach((f, i) => {
           const sx = x(f.w), sy = hoehe(f.w), ex = x(f.ziel) + (imTal(f.ziel) > 1 ? (f.w < f.ziel ? -11 : 11) : 0);
           svg.appendChild(s("g", {}, s("line", { x1: sx, y1: sy - 18, x2: sx, y2: sy - 4, stroke: "#6b7089", "stroke-width": 1, "stroke-dasharray": "2 2" }),
-            s("text", { x: sx, y: sy - 22, fill: "#2d3047", "font-size": 10, "font-family": SCHRIFT, "text-anchor": "middle" }, text(f.w, z.wertStellen ?? nachkomma(f.w)))));
+            wertText(f.w, { x: sx, y: sy - 22, fill: "#2d3047", "font-size": ganz ? 12 : 10, "font-family": SCHRIFT, "text-anchor": "middle" })));
           const wg = feier.figur === "kugel" ? kugel() : wagen();
           wg.setAttribute("data-stueck", "wagen");
           svg.appendChild(bewege(wg, `M${sx},${sy} L${ex},${grundY}`, { x: ex, y: grundY, winkel: 0 }, ruhig, { drehen: false, ab: i * 0.3, dauer: DAUER - i * 0.3 }));
@@ -1786,13 +1812,26 @@ var LS_FEIER = (function () {
     const zw = einheit === 1 ? Math.min(14, 104 / z.zeilen, 250 / z.spalten) : einheit === 10 ? 11 : 22;
     const sw = einheit === 1 ? zw : einheit === 10 ? Math.min(46, 284 / z.spalten) : 22, sl = sw - 6; // sl: Länge einer Zehnerstange
     const x0 = (BREITE - z.spalten * sw) / 2 + sw / 2, y0 = 14 + (108 - z.zeilen * zw) / 2 + zw / 2;
-    const je = (DAUER * 0.65) / z.zeilen;
+    // Division (Bemerkung 38, LERN_Session31): aufteilen statt malnehmen — die Punkte kommen grau als ein Haufen, dann
+    // bekommt jede Gruppe (eine Reihe zu b) ihren Rahmen in einer eigenen Farbe und ihre Nummer, die Punkte färben sich
+    // mit; die Zahl der Gruppen leuchtet in der Rechnung
+    const teilen = op === ":" && einheit === 1, GRUPPE = ["#8e5bd6", "#e0569a", "#f07c2a", "#e9b300", "#14b8a6", "#6366f1", "#64748b", "#2f8fe0", "#c8553d", "#2fb36b"];
+    const je = (DAUER * (teilen ? 0.3 : 0.65)) / z.zeilen, jeG = (DAUER * 0.45) / z.zeilen, abG = DAUER * 0.35;
     for (let r = 0; r < z.zeilen; r++) {
       const reihe = s("g", {});
+      if (teilen) {
+        const y = y0 + r * zw, ab = abG + r * jeG;
+        svg.appendChild(erscheine(s("rect", { x: x0 - sw / 2 - 1, y: y - zw / 2 + 0.5, width: z.spalten * sw + 2, height: zw - 1, rx: zw / 2, fill: GRUPPE[r], "fill-opacity": 0.18,
+          stroke: GRUPPE[r], "stroke-width": 1.4, "data-gruppe": r + 1 }), ab, ruhig, 0.2));
+        svg.appendChild(erscheine(text(x0 - sw / 2 - 10, y + 3.5, r + 1, { gross: 10, farbe: GRUPPE[r] }), ab, ruhig, 0.2));
+      }
       for (let c0 = 0; c0 < z.spalten; c0++) {
         const x = x0 + c0 * sw, y = y0 + r * zw;
         let e;
-        if (einheit === 1) e = s("circle", { cx: x, cy: y, r: zw * 0.36, style: "fill:var(--deko-6)" });
+        if (teilen) {
+          e = s("circle", { cx: x, cy: y, r: zw * 0.36, fill: ruhig ? GRUPPE[r] : "#9aa0b4" });
+          if (!ruhig) e.appendChild(s("animate", { attributeName: "fill", from: "#9aa0b4", to: GRUPPE[r], begin: t(abG + r * jeG), dur: "0.25s", fill: "freeze" }));
+        } else if (einheit === 1) e = s("circle", { cx: x, cy: y, r: zw * 0.36, style: "fill:var(--deko-6)" });
         else if (einheit === 10) e = s("g", {}, s("rect", { x: x - sl / 2, y: y - 3.5, width: sl, height: 7, rx: 1, style: "fill:var(--st-Z)" }),
           s("path", { d: Array.from({ length: 9 }, (_, i) => `M${(x - sl / 2 + ((i + 1) * sl) / 10).toFixed(2)},${y - 3.5} v7`).join(" "), stroke: "#ffffff", "stroke-width": 0.5, "stroke-opacity": 0.8 }));
         else e = s("g", {}, s("rect", { x: x - 9.5, y: y - 9.5, width: 19, height: 19, rx: 1, style: "fill:var(--st-H)" }),
@@ -1805,7 +1844,8 @@ var LS_FEIER = (function () {
     // Rechnung; die gesuchte Zahl in Farbe
     const teile = [ganzText(a), OP_TEXT[op] || op, ganzText(b), "=", ganzText(c)];
     const zeile = s("text", { x: BREITE / 2, y: 140, fill: "#2d3047", "font-size": 14, "font-weight": "bold", "font-family": SCHRIFT, "text-anchor": "middle", "data-zeile": "unten" });
-    teile.forEach((t0, i) => zeile.appendChild(s("tspan", i === z.luecke ? { style: "fill:var(--deko-2)" } : {}, (i ? " " : "") + t0)));
+    const leuchtet = z.luecke ?? (teilen ? 4 : undefined); // beim Aufteilen: die Zahl der Gruppen
+    teile.forEach((t0, i) => zeile.appendChild(s("tspan", i === leuchtet ? { style: "fill:var(--deko-2)" } : {}, (i ? " " : "") + t0)));
     svg.appendChild(erscheine(zeile, DAUER * 0.75, ruhig));
     if (sterne >= 2) svg.appendChild(glanz(BREITE - 30, 22, ruhig));
     if (sterne >= 3) svg.appendChild(funken(30, 24, ruhig));

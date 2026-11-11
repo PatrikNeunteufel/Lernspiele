@@ -1885,3 +1885,8 @@
   Hello-Dialog am Ende unsichtbar.
 - **Vorschau** weiter: Anmerkung zur ganzen Serie, Erklärung einklappbar, „Alle sechs ins Fenster“ (zwei Zeilen ohne
   Scrollen, auf die Animation zugeschnitten); Verwaltung → Entwicklung verlinkt sie (neuer Tab, über den Entwickler-Server).
+- **Bemerkungen 37–40** (Abnahme in der Vorschau): Zahlen-Hüpfer (zahlen-huepfer) mit dem Schild des Spiels für den
+  Schritt der Stufe — die Zahl der Sprünge ist im Spiel immer vier (Entscheid Patrik a) —, der Frosch hellgrün mit dunklem
+  Rand statt im Grün der Seerose; Einmaleins-Blitz (einmaleins-blitz) s3: Division als Aufteilen (grauer Haufen, Gruppen
+  mit Rahmen, Farbe und Nummer, die Zahl der Gruppen leuchtet); Runden-Rutsche (runden-rutsche): Kopf der Stelle, auf die
+  gerundet wird, in der Stellenfarbe und die entscheidende Ziffer gross in ihrer Farbe, s2 und s5 runden jetzt ab.

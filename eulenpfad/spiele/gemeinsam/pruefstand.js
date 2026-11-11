@@ -4,7 +4,35 @@
    Geschrieben vom Entwickler-Server (tools/entwickler_server.py) — nicht von Hand ändern. */
 const PRUEFSTAND = {
   "feier": {
+    "bruch-rechteck": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "bruch-werkstatt": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "dezimal-rakete": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "diagramm-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "doppel-spiegel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "flaechen-pixel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "formen-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "glace-kombinator": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -12,7 +40,43 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "kiosk-kasse": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "koordinaten-schatz": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "malkreuz": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "masse-umwandler": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "mittelwert-waage": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "muster-fortsetzer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "netz-falter": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "pentomino-puzzle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "preis-tabelle": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "punkte-blitz": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -20,11 +84,39 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "rechen-maschine": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "rechen-rakete": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "rechengeschichten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "rechenprobe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "rechentrick-detektiv": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "rest-raetsel": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "schaetz-waage": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "schriftlich-werkstatt": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "spiegel-raster": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -52,7 +144,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "vergleichs-krokodil": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wuerfelbau-blick": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "zahlen-baukasten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlen-waage": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zahlenhaus": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
@@ -68,7 +176,23 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "zehner-ergaenzer": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zehntel-lupe": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zielzahl-jagd": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
     "ziffernkarten": {
+      "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "zufalls-skala": {
       "am": "2026-11-11",
       "von": "Patrik"
     }
