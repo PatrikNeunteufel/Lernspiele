@@ -78,6 +78,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -459,6 +460,10 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "karte", bilder: "planweg", ziele: { s1: { finde: "kirche" }, s2: { zaehle: "baum" }, s3: { start: [0, 2], weg: [["o", 3]], massstab: 10 },
+    s4: { start: [0, 5], weg: [["n", 2], ["o", 3]], massstab: 20 }, s5: { start: [0, 0], weg: [["o", 2], ["s", 3], ["o", 2]], massstab: 50 },
+    s6: { start: [5, 5], weg: [["n", 2], ["w", 3], ["n", 2], ["w", 2]], massstab: 25 } } },
   id: ID,
   hilfe: "Schau dir den Plan und die Legende an und tippe die passende Antwort an. Heisst es „Tippe auf dem Plan“, tippst du direkt auf das Feld im Plan.",
   einleitung: "Ein Plan zeigt alles von oben. Die Legende verrät, was die Zeichen bedeuten. Kannst du den Plan lesen?",

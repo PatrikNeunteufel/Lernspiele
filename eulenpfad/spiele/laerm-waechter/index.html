@@ -59,6 +59,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -672,6 +673,9 @@ const HILFE = {
 };
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "schall", ziele: { s1: { leise: ["🤫", "🌧️"], laut: ["🚁"] }, s2: { skala: ["🤫", "🧹", "🎸"] }, s3: { quelle: "🎸", schutz: "👂" },
+    s4: { quelle: "🚜", schutz: "🙉" }, s5: { ohr: true }, s6: { echo: true } } },
   id: ID,
   einleitung: "Psst — hörst du das? Flüstern ist leise, ein Helikopter ist laut. Ich bin der Lärm-Wächter: Zusammen finden wir heraus, was deinen Ohren guttut und was sie schützt!",
   hilfe: stufe => HILFE[stufe],

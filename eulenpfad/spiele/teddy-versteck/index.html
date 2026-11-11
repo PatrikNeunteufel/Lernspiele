@@ -33,6 +33,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -437,6 +438,9 @@ const LOB = ["Gefunden! 🧸", "Genau dort! 🧸", "Super, der Teddy freut sich!
 
 LS.spiel({
   id: "teddy-versteck",
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "teddy", ziele: { s1: ["auf-tisch", "in-kiste"], s2: ["unter-tisch", "vor-kiste", "ueber-tisch"], s3: ["zwischen", "auf-stuhl"],
+    s4: ["links-tisch", "neben-kiste"], s5: ["neben-kiste", "zwischen", "in-kiste"], s6: { regal: [["⚽", 0], ["🚗", 4], ["🥁", 8], ["🦆", 2], ["🧸", 6]] } } },
   hilfe: stufe => (stufe === "s6" ? "Hör zu, in welches Fach der Teddy soll. Dann tippst du auf das Fach."
     : "Hör zu, wo der Teddy ist. Dann tippst du auf das Bild, das passt — oder auf den Platz, wohin der Teddy soll. Dort erscheint er dann."),
   einleitung: "Der Teddy spielt Verstecken! Hör gut zu, wo er ist. Dann tipp auf das richtige Bild oder auf den richtigen Platz.",

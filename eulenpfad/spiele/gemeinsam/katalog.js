@@ -288,7 +288,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.5.E.1", stufen: ALLE_STUFEN }] },
   { id: "tier-sortierer", art: ["sortieren", "antippen"], klasse: 3, bild: "🐾", name: "Tier-Sortierer", thema: "tiere", farbe: "var(--deko-3)",
-    pfad: "spiele/tier-sortierer/index.html", stufen: ALLE_STUFEN, endlos: ["s3"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/tier-sortierer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Wildtier oder Heimtier? Säugetier oder Vogel? Nager, Raubtier, Paarhufer …",
     listen: {
       "tierklassen": { name: "Tierklassen (Säugetier, Vogel, Fisch … Insekt, Spinnentier) inkl. knifflige Tiere" },
@@ -297,7 +297,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.2.4", stufen: ALLE_STUFEN }] },
   { id: "lebensraum", art: ["sortieren", "reihenfolge", "antippen"], klasse: 2, bild: "🌳", name: "Lebensraum-Zuordnung", thema: "tiere", farbe: "var(--deko-5)",
-    pfad: "spiele/lebensraum/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 10, s2: 12, s3: 15, s4: 30, s5: 30, s6: 30 },
+    pfad: "spiele/lebensraum/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 30, s5: 30, s6: 30 },
     beschreibung: "Wald, Wiese, Weiher oder Gebirge? Und wer frisst wen?",
     listen: {
       "wald": { name: "Lebensraum Wald (Tiere und Pflanzen)" },
@@ -308,7 +308,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.2.1", stufen: ALLE_STUFEN }] },
   { id: "fledermaus-forscher", art: ["reihenfolge", "antippen"], klasse: 2, bild: "🦇", name: "Fledermaus-Forscher", thema: "tiere", farbe: "var(--deko-1)",
-    pfad: "spiele/fledermaus-forscher/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 12, s2: 15, s3: 15, s4: 25, s5: 25, s6: 31 },
+    pfad: "spiele/fledermaus-forscher/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 12, s2: 15, s3: 15, s4: 25, s5: 25, s6: 31 },
     beschreibung: "Flughaut, Echo, Winterschlaf — alles über Fledermäuse",
     listen: {
       "aussagen": { name: "Aussagen „Stimmt das?“ (mit Erklärung)" },
@@ -432,7 +432,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "D.2.B.1", stufen: ALLE_STUFEN }] },
   { id: "lebenszyklus", art: ["sortieren", "reihenfolge", "antippen"], klasse: 2, bild: "🐛", name: "Lebenszyklus-Puzzle", thema: "tiere", farbe: "var(--deko-4)",
-    pfad: "spiele/lebenszyklus/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 15, s4: 25, s5: 20, s6: 25 },
+    pfad: "spiele/lebenszyklus/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 15, s2: 20, s3: 15, s4: 25, s5: 20, s6: 25 },
     beschreibung: "Ei → Küken → Huhn, Raupe → Schmetterling, Kaulquappe → Frosch",
     listen: {
       "zyklen-tiere": { name: "Lebenszyklen der Tiere (Huhn, Schmetterling, Frosch, Marienkäfer, Biene)" },
@@ -443,7 +443,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.2.3", stufen: ALLE_STUFEN }] },
   { id: "koerper-puzzle", art: ["reihenfolge", "antippen"], klasse: 2, bild: "🫀", name: "Körper-Puzzle", thema: "koerper", farbe: "var(--deko-2)",
-    pfad: "spiele/koerper-puzzle/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/koerper-puzzle/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 10, s3: 15, s4: 15, s5: 20, s6: 25 },
     beschreibung: "Körperteile, Sinne, Organe und der Weg des Essens",
     listen: {
       "koerperteile": { name: "Körperteile mit Artikel" },
@@ -455,7 +455,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.1.4", stufen: ALLE_STUFEN }] },
   { id: "znueni-teller", art: ["sortieren", "antippen"], klasse: 2, bild: "🍎", name: "Znüni-Teller", thema: "koerper", farbe: "var(--deko-5)",
-    pfad: "spiele/znueni-teller/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 8, s3: 10, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/znueni-teller/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 8, s3: 10, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Was ist gut für jeden Tag? Lebensmittel ordnen, ein feines Znüni",
     listen: {
       "lebensmittel": { name: "Lebensmittel und ihre Gruppen (mit Erklärungen)" },
@@ -465,7 +465,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.1.3", stufen: ALLE_STUFEN }] },
   { id: "magnet-labor", art: ["sortieren", "antippen"], klasse: 2, bild: "🧲", name: "Magnet-Labor", thema: "forschen", farbe: "var(--deko-1)",
-    pfad: "spiele/magnet-labor/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 10, s3: 15, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/magnet-labor/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 10, s3: 15, s4: 15, s5: 20, s6: 25 },
     beschreibung: "Was zieht der Magnet an? Nordpol, Südpol, Kompass und Strom",
     listen: {
       "dinge": { name: "Zieht der Magnet es an? (Dinge aus Eisen und andere)" },
@@ -475,7 +475,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.5.2", stufen: ALLE_STUFEN }] },
   { id: "schwimmt-sinkt", art: ["sortieren", "antippen"], klasse: 2, bild: "🛁", name: "Schwimmt oder sinkt?", thema: "forschen", farbe: "var(--deko-6)",
-    pfad: "spiele/schwimmt-sinkt/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 8, s2: 8, s3: 10, s4: 15, s5: 20, s6: 25 },
+    pfad: "spiele/schwimmt-sinkt/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 8, s3: 10, s4: 15, s5: 20, s6: 25 },
     beschreibung: "Holz, Stein, Kerze im Wasser — und aus welchem Material ist das?",
     listen: {
       "wasser": { name: "Schwimmt es oder sinkt es? (Dinge im Wasser)" },
@@ -526,7 +526,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.8.4", stufen: ALLE_STUFEN }] },
   { id: "kompass", art: ["antippen"], klasse: 4, neu: "LERN_Session3", bild: "🧭", name: "Kompass-Spiel", thema: "orientierung", farbe: "var(--deko-5)",
-    pfad: "spiele/kompass/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
+    pfad: "spiele/kompass/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
     beschreibung: "Norden, Osten, Süden, Westen: auf Kompass und Plan zeigen, Wege gehen, Karte drehen",
     listen: {
       "orte": { name: "Orte auf dem Dorfplan (Name mit Artikel)" },
@@ -662,7 +662,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.1.2", stufen: ALLE_STUFEN }] },
   { id: "wetter-jahreszeiten", art: ["sortieren", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "🌦️", name: "Wetter und Jahreszeiten", thema: "wetter", farbe: "var(--deko-6)",
-    pfad: "spiele/wetter-jahreszeiten/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s6"], zeiten: { s1: 8, s2: 12, s3: 15, s4: 25, s5: 15, s6: 25 },
+    pfad: "spiele/wetter-jahreszeiten/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s6"], zeiten: { s1: 8, s2: 12, s3: 15, s4: 25, s5: 15, s6: 25 },
     beschreibung: "Jahreszeiten, Kleidung, Wettersymbole, Thermometer und Wetterbericht",
     listen: {
       "jahreszeiten": { name: "Zu welcher Jahreszeit passt das? (Natur, Wetter, Tätigkeiten)" },
@@ -682,7 +682,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.9.1", stufen: ALLE_STUFEN }] },
   { id: "stromkreis-bauer", art: ["sortieren", "antippen"], klasse: 4, neu: "LERN_Session3", bild: "💡", name: "Stromkreis-Bauer", thema: "forschen", farbe: "var(--deko-4)",
-    pfad: "spiele/stromkreis-bauer/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s6"], zeiten: { s1: 12, s2: 12, s3: 15, s4: 25, s5: 25, s6: 35 },
+    pfad: "spiele/stromkreis-bauer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s6"], zeiten: { s1: 12, s2: 12, s3: 15, s4: 25, s5: 25, s6: 35 },
     beschreibung: "Brennt die Lampe? Stromkreis, Schalter, Leiter, Kurzschluss, Serie und parallel",
     listen: {
       "einfach": { name: "Schaltbilder: Batterie, Lampe, Drähte (geschlossen, Draht lose, gleicher Pol)" },
@@ -693,7 +693,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.5.2", stufen: ALLE_STUFEN }] },
   { id: "plan-leser", art: ["antippen"], klasse: 4, neu: "LERN_Session3", bild: "🗺️", name: "Plan-Leser", thema: "orientierung", farbe: "var(--deko-6)",
-    pfad: "spiele/plan-leser/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 30, s5: 40, s6: 50 },
+    pfad: "spiele/plan-leser/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 30, s5: 40, s6: 50 },
     beschreibung: "Pläne lesen: Legende, Zeichen, Lage, Massstab und Wege beschreiben",
     listen: {
       "schulzimmer": { name: "Plan Schulzimmer: Dinge und ihre Zeichen" },
@@ -784,7 +784,7 @@ const SPIELE = [
     listen: { "woerter": { name: "Geheimwörter (kurze Nomen)" } },
     lernziele: [{ lz: "MI.2.1", stufen: ALLE_STUFEN }] },
   { id: "hebel-wippe", art: ["eintippen", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "🪵", name: "Hebel-Wippe", thema: "forschen", farbe: "var(--deko-3)",
-    pfad: "spiele/hebel-wippe/index.html", einstellungen: ["notizen"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 40, s6: 50 },
+    pfad: "spiele/hebel-wippe/index.html", einstellungen: ["notizen", "feier"], stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 40, s6: 50 },
     beschreibung: "Die Wippe ins Gleichgewicht bringen: Gewicht mal Abstand — und mit einem langen Hebel Kraft sparen",
     lernziele: [{ lz: "NMG.5.1", stufen: ALLE_STUFEN }] },
   { id: "komma-jagd", art: ["markieren"], klasse: 5, neu: "LERN_Session8", bild: "✒️", name: "Komma-Jagd", thema: "saetze", farbe: "var(--deko-7)",
@@ -842,14 +842,14 @@ const SPIELE = [
     },
     lernziele: [{ lz: "FS1E.5.C.2", stufen: ALLE_STUFEN }] },
   { id: "taschengeld-planer", art: ["sortieren", "eintippen", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "👛", name: "Taschengeld-Planer", thema: "wirtschaft", farbe: "var(--deko-5)",
-    pfad: "spiele/taschengeld-planer/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], einstellungen: ["dezimal", "notizen"], zeiten: { s1: 25, s2: 30, s3: 35, s4: 40, s5: 50, s6: 63 },
+    pfad: "spiele/taschengeld-planer/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], einstellungen: ["dezimal", "notizen", "feier"], zeiten: { s1: 25, s2: 30, s3: 35, s4: 40, s5: 50, s6: 63 },
     beschreibung: "Mit dem Taschengeld planen: Was brauche ich, was wünsche ich mir, was kann ich mir leisten?",
     listen: {
       "waren": { name: "Waren mit Preisen und Bedarf oder Wunsch" },
     },
     lernziele: [{ lz: "NMG.6.5", stufen: ALLE_STUFEN }, { lz: "MA.3.A.2", stufen: ["s2", "s3", "s4", "s5", "s6"] }] },
   { id: "wassertropfen-reise", art: ["reihenfolge", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "💧", name: "Wassertropfen-Reise", thema: "forschen", farbe: "var(--deko-6)",
-    pfad: "spiele/wassertropfen-reise/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/wassertropfen-reise/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
     beschreibung: "Der Wasserkreislauf: verdunsten, kondensieren, Niederschlag, versickern — und was dabei passiert",
     listen: {
       "fragen": { name: "Fragen zum Wasserkreislauf und zu den Aggregatzuständen" },
@@ -863,35 +863,35 @@ const SPIELE = [
     },
     lernziele: [{ lz: "NMG.2.5", stufen: ALLE_STUFEN }] },
   { id: "pflanzen-bestimmer", art: ["sortieren", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "🌿", name: "Pflanzen-Bestimmer", thema: "tiere", farbe: "var(--deko-3)",
-    pfad: "spiele/pflanzen-bestimmer/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s4", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/pflanzen-bestimmer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s4", "s6"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
     beschreibung: "Pflanzen nach Blattform, Blattrand und Blüte bestimmen und ordnen",
     listen: {
       "pflanzen": { name: "Pflanzen mit Blattform und Blüte" },
     },
     lernziele: [{ lz: "NMG.2.4", stufen: ALLE_STUFEN }] },
   { id: "blutkreislauf-lotse", art: ["antippen"], klasse: 5, neu: "LERN_Session8", bild: "❤️", name: "Blutkreislauf-Lotse", thema: "koerper", farbe: "var(--deko-1)",
-    pfad: "spiele/blutkreislauf-lotse/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
+    pfad: "spiele/blutkreislauf-lotse/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 35, s6: 44 },
     beschreibung: "Ein Blutkörperchen durch Herz, Lunge und Körper lotsen: Arterie oder Vene, sauerstoffreich oder -arm?",
     listen: {
       "fragen": { name: "Fragen zu Herz, Lunge, Blut und Kreislauf" },
     },
     lernziele: [{ lz: "NMG.1.4", stufen: ALLE_STUFEN }] },
   { id: "energie-wandler", art: ["reihenfolge", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "⚡", name: "Energie-Wandler", thema: "forschen", farbe: "var(--deko-4)",
-    pfad: "spiele/energie-wandler/index.html", stufen: ALLE_STUFEN, endlos: ["s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
+    pfad: "spiele/energie-wandler/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
     beschreibung: "Welches Gerät wandelt welche Energie um? Bewegung, Wärme, Licht, Strom",
     listen: {
       "geraete": { name: "Geräte und Energieformen (von → zu)" },
     },
     lernziele: [{ lz: "NMG.3.2", stufen: ALLE_STUFEN }] },
   { id: "bionik-paare", art: ["antippen"], klasse: 5, neu: "LERN_Session8", bild: "🦎", name: "Bionik-Paare", thema: "forschen", farbe: "var(--deko-2)",
-    pfad: "spiele/bionik-paare/index.html", stufen: ALLE_STUFEN, endlos: ["s4", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
+    pfad: "spiele/bionik-paare/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s4", "s6"], zeiten: { s1: 12, s2: 15, s3: 20, s4: 25, s5: 30, s6: 38 },
     beschreibung: "Vorbild aus der Natur und Erfindung: Klette und Klettverschluss",
     listen: {
       "paare": { name: "Vorbild aus der Natur und Erfindung" },
     },
     lernziele: [{ lz: "NMG.5.3", stufen: ALLE_STUFEN }] },
   { id: "kakao-weg", art: ["sortieren", "reihenfolge", "antippen"], klasse: 5, neu: "LERN_Session8", bild: "🍫", name: "Kakao-Weg", thema: "wirtschaft", farbe: "var(--deko-7)",
-    pfad: "spiele/kakao-weg/index.html", stufen: ALLE_STUFEN, endlos: ["s1", "s2", "s3", "s5", "s6"], zeiten: { s1: 30, s2: 45, s3: 30, s4: 25, s5: 30, s6: 60 },
+    pfad: "spiele/kakao-weg/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s5", "s6"], zeiten: { s1: 30, s2: 45, s3: 30, s4: 25, s5: 30, s6: 60 },
     beschreibung: "Vom Kakao zur Schoggi: Wege der Waren ordnen — bis zum Wirtschaftskreislauf",
     listen: {
       "wege": { name: "Wege eines Produkts in Schritten" },
@@ -964,7 +964,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "MI.2.1", stufen: ALLE_STUFEN }, { lz: "MI.2.3", stufen: ["s5", "s6"] }] },
   { id: "braille-finger", art: ["antippen"], klasse: 5, neu: "LERN_Session8", bild: "⠃", name: "Braille-Finger", thema: "koerper", farbe: "var(--deko-5)",
-    pfad: "spiele/braille-finger/index.html", stufen: ALLE_STUFEN, zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 40, s6: 50 },
+    pfad: "spiele/braille-finger/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 15, s2: 20, s3: 25, s4: 30, s5: 40, s6: 50 },
     beschreibung: "Die Punktschrift für Blinde lesen und schreiben: sechs Punkte, viele Buchstaben",
     listen: {
       "woerter": { von: "geheimschrift-knacker/woerter" },
@@ -972,7 +972,7 @@ const SPIELE = [
     lernziele: [{ lz: "NMG.4.1", stufen: ALLE_STUFEN }] },
   // LERN_Session8, Runde 4: Kindergarten-Paket (Basisklasse 1, Stufe 1 = Kindergarten), ohne Lesen spielbar
   { id: "teddy-versteck", art: ["antippen"], klasse: 1, neu: "LERN_Session8", bild: "🧸", name: "Teddy-Versteck", thema: "orientierung", farbe: "var(--deko-2)",
-    pfad: "spiele/teddy-versteck/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
+    pfad: "spiele/teddy-versteck/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 10, s3: 12, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Wo ist der Teddy? Auf, unter, neben, vor, hinter, zwischen, links und rechts",
     lernziele: [{ lz: "NMG.8.4", stufen: ["s1", "s2", "s3", "s4"] }, { lz: "MA.2.A.1", stufen: ["s3", "s4", "s5", "s6"] }] },
   { id: "sortier-kiste", art: ["antippen"], klasse: 1, neu: "LERN_Session8", bild: "🧺", name: "Sortier-Kiste", thema: "daten", farbe: "var(--deko-5)",
@@ -1091,7 +1091,7 @@ const SPIELE = [
     beschreibung: "Welches Würfelgebäude hat mehr Würfel? Gleich gross bauen und Kisten füllen",
     lernziele: [{ lz: "MA.2.A.3", stufen: ALLE_STUFEN }, { lz: "MA.2.C.1", stufen: ["s5", "s6"] }] },
   { id: "auge-entdecker", art: ["sortieren", "reihenfolge", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "👁️", name: "Auge-Entdecker", thema: "koerper", farbe: "var(--deko-3)",
-    pfad: "spiele/auge-entdecker/index.html", stufen: ALLE_STUFEN, endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 25, s5: 25, s6: 40 },
+    pfad: "spiele/auge-entdecker/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 25, s5: 25, s6: 40 },
     beschreibung: "Augenlid, Wimpern, Iris, Pupille, Hornhaut und Bindehaut: Teile des Auges finden, benennen und ihre Aufgabe kennen",
     listen: {
       "teile": { name: "Teile des Auges mit Aufgabe und Fragen" },
@@ -1166,7 +1166,7 @@ const SPIELE = [
     },
     lernziele: [{ lz: "FS1E.3.A.1", stufen: ALLE_STUFEN }] },
   { id: "laerm-waechter", art: ["sortieren", "reihenfolge", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "🦻", name: "Lärm-Wächter", thema: "koerper", farbe: "var(--deko-7)",
-    pfad: "spiele/laerm-waechter/index.html", stufen: ALLE_STUFEN, endlos: ["s2", "s3", "s4", "s6"], zeiten: { s1: 10, s2: 20, s3: 20, s4: 25, s5: 20, s6: 30 },
+    pfad: "spiele/laerm-waechter/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s2", "s3", "s4", "s6"], zeiten: { s1: 10, s2: 20, s3: 20, s4: 25, s5: 20, s6: 30 },
     beschreibung: "Laut oder leise? Was schützt die Ohren? Dazu das Ohr und der Schall: Echo, Trichter, Dämmung",
     listen: {
       "geraeusche": { name: "Geräusche mit Lautstärke und Schutzmassnahmen" },

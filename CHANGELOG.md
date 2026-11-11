@@ -1840,3 +1840,22 @@
 - Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
   139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die 25 Spiele von
   Block B, stellen-detektiv, instrumente, uhr-werkstatt „Keine Fehler.“ — letzter voller Lauf weiter auf `6055527`.
+- Abschluss-Animationen Block C (NMG Rest; 24 Spiele, jetzt 140 von 169): `spiele/gemeinsam/feier.js` mit 24 Bildern nach
+  den Stufen der Spiele — Magnet-Labor (Pole rot und grün, anziehen oder abstossen nachgerechnet, Elektromagnet),
+  Schwimmt oder sinkt?, Stromkreis-Bauer (Schaltbild, Serie und parallel, überbrückte Lampe dunkel), Hebel-Wippe
+  (Momente nachgerechnet), Wassertropfen-Reise (Wege und Kläranlage), Energie-Wandler (Ketten des Spiels),
+  Bionik-Paare, Körper-Puzzle, Znüni-Teller, Blutkreislauf-Lotse (arm blau, ab der Lunge rot), Braille-Finger (Punkte
+  nach der Tafel), Auge-Entdecker, Lärm-Wächter, Kompass-Spiel (gedrehte Karte), Plan-Leser (Massstab, Länge
+  nachgerechnet), Teddy-Versteck, Tier-Sortierer (knifflige Tiere), Lebensraum-Zuordnung (Nahrungsnetze),
+  Fledermaus-Forscher, Lebenszyklus-Puzzle, Pflanzen-Bestimmer, Wetter und Jahreszeiten (Thermometer der Stufen),
+  Taschengeld-Planer (Beträge über LS.geldText), Kakao-Weg. Katalog `einstellungen: ["feier"]` für die 24 Spiele.
+- Im Browser alle Endbilder in Handybreite und den Ablauf bei 1.2 und 1.6 s angesehen; dabei verbessert: Gesicht im
+  Körper-Puzzle, Ohr im Schnitt, Fledermaus heller auf dem Nachthimmel, Finger über den Braille-Punkten, Münzen im
+  Kässeli in voller Grösse, Ziel und Funken frei von Münzen, Rechnungen und Pfeilen; Ballon, Hufeisen ganz im Bild.
+- Tests: Skripte „Keine Fehler.“, Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“; Eulenpfad Stichprobe: die 24 Spiele von
+  Block C, kiosk-kasse, sachaufgaben-kompass, satz-reparatur, instrumente „Keine Fehler.“ — letzter voller Lauf weiter
+  auf `6055527`.
+- Session-Abschluss LERN_Session30: Report docs/eulenpfad/report/LERN_Session30_2026-11-11.md (Bemerkung 36, Blöcke B
+  und C, `ankunft`, 140 von 169 Spielen mit Animation, Stolperfallen mit Prüfer-Kandidat „Schmuck über Inhalt“, Plan
+  Block D), Handover (Stand nach LERN_Session30, Haltepunkt aufgelöst).

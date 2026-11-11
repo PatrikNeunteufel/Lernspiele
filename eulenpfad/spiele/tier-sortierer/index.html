@@ -26,6 +26,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -214,6 +215,13 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "tier-sortierer",
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "album", ziele: { s1: { seiten: [["🌳", ["🦊", "🦌"]], ["🚜", ["🐄"]], ["🏠", ["🐈"]]] },
+    s2: { seiten: [["🍼", ["🦊"]], ["🪶", ["🦉"]], ["🫧", ["🐟"]], ["🛡️", ["🦎"]], ["💧", ["🐸"]]] },
+    s3: { seiten: [["🍼", ["🦊"]], ["🪶", ["🦉"]], ["🫧", ["🐟"]], ["🛡️", ["🦎"]], ["💧", ["🐸"]], ["6️⃣", ["🐝"]]] },
+    s4: { seiten: [["🦷", ["🐿️", "🐁"]], ["👂", ["🐇"]], ["🥩", ["🦊", "🦡"]], ["✌️", ["🦌", "🐄"]]] },
+    s5: { seiten: [["🍼", ["🦔"]], ["🪶", ["🦉"]], ["🫧", ["🐟"]]], falle: [["🦇", "🪶", "🍼"]] },
+    s6: { seiten: [["🍼", []], ["🪶", []], ["🫧", []], ["6️⃣", ["🐞"]], ["8️⃣", []]], falle: [["🦇", "🪶", "🍼"], ["🐋", "🫧", "🍼"], ["🕷️", "6️⃣", "8️⃣"]] } } },
   hilfe: "Schau das Tier an und tipp auf den Korb, in den es gehört. Unter jedem Korb steht, was die Tiere darin gemeinsam haben. Fragt die Eule nach einem Merkmal, tippst du auf das passende Tier.",
   einleitung: "Jedes Tier gehört in eine Gruppe. Schau genau: Hat es Fell, Federn oder Schuppen? Wie viele Beine?",
   anzahl: 10,

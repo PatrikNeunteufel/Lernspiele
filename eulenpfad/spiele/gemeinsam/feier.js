@@ -6017,6 +6017,1288 @@ var LS_FEIER = (function () {
   Object.assign(BILDER.wachsen, { lebenslinie });
   Object.assign(BILDER.karte, { dorfplan, schulweg });
 
+  // ---------- Bilder Block C: NMG Rest (Forschen, Körper, Orientierung, Tiere, Wetter, Wirtschaft; LERN_Session30) ----------
+  // Wie die Blöcke davor: jedes Bild folgt den Stufen seines Spiels und prüft, was es zeigt; Bildzeichen und Farben wie
+  // in den Spielen (Nordpol rot, Südpol grün; sauerstoffreiches Blut rot, armes blau; Braille-Punkte nach der Tafel).
+
+  // ----- Magnet-Labor (SAMMELN · magnet) -----
+  const POL_FARBE = { N: "#e5484d", S: "#2fbf71" }; // wie im Spiel: Nordpol rot, Südpol grün
+  const MAGNET_AN = ["📎", "🔩", "✂️", "🧷"], MAGNET_NICHT = ["🪵", "📄", "✏️", "🏀", "🪶", "🍎", "🧶", "🥛"];
+  /** Stabmagnet aus zwei Feldern (Pole a, b), Mitte bei x, y; „?“ = noch leeres Feld wie im Spiel. */
+  function stabmagnet(x, y, [a, b]) {
+    const feld = (dx, p) => s("g", {}, s("rect", { x: x + dx, y: y - 11, width: 30, height: 22, fill: p === "?" ? "#c9ccd6" : POL_FARBE[p], stroke: "#2d3047", "stroke-width": 0.8 }),
+      text(x + dx + 15, y + 4.5, p, { gross: 12, farbe: "#ffffff" }));
+    return s("g", { "data-pole": a + b }, feld(-30, a), feld(0, b));
+  }
+  /**
+   * { an: [Bild …], nicht: [Bild …] } — der Hufeisenmagnet zieht an, was aus Eisen ist (Liste des Spiels); { pole:
+   * [[a, b], [c, d]], wahl? } — zwei Stabmagnete: verschiedene Pole in der Mitte ziehen sich an, gleiche stossen sich
+   * ab (geprüft); wahl: das Feld rechts in der Mitte ist erst leer und wird zum Pol, der anzieht; { durch: Bild } — der
+   * Magnet wirkt durch Papier; { kompass: true } — die Nadel dreht nach Norden; { strom: true } — ein Elektromagnet.
+   */
+  function magnet(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "magnet" });
+    svg.appendChild(tagGrund());
+    const hufeisen = (x, y) => s("g", {}, s("path", { d: `M${x - 22},${y} V${y - 18} A22,22 0 0,1 ${x + 22},${y - 18} V${y}`, fill: "none", stroke: "#e5484d", "stroke-width": 10 }),
+      s("rect", { x: x - 27, y: y - 2, width: 10, height: 8, fill: "#c9ccd3" }), s("rect", { x: x + 17, y: y - 2, width: 10, height: 8, fill: "#c9ccd3" }));
+    if (Array.isArray(z.an) && Array.isArray(z.nicht)) {
+      if (!z.an.length || !z.an.every(d => MAGNET_AN.includes(d)) || !z.nicht.every(d => MAGNET_NICHT.includes(d)) || z.an.length + z.nicht.length > 6) return null;
+      svg.setAttribute("data-anzahl", z.an.length);
+      svg.append(s("rect", { x: 20, y: 120, width: 280, height: 8, rx: 3, fill: "#a8743f" }), hufeisen(160, 44));
+      const alle = [...z.an.map(d => [d, true]), ...z.nicht.map(d => [d, false])];
+      alle.forEach(([d, an], i) => {
+        const x = 50 + (i * 220) / Math.max(1, alle.length - 1), zx = 150 + (z.an.indexOf(d) * 20) - (z.an.length - 1) * 10 + 10, ab = 0.3 + (i * T * 0.6) / alle.length;
+        const g = s("g", an ? { "data-stueck": "zieht" } : {}, bildzeichen(an ? zx : x, an ? 60 : 108, d, 20));
+        svg.appendChild(an ? herein(g, x - zx, 48, ab, ruhig, 0.4) : g);
+        if (!an) svg.appendChild(erscheine(bildzeichen(x + 13, 96, "🚫", 10), T, ruhig));
+      });
+    } else if (Array.isArray(z.pole)) {
+      const ok = p => Array.isArray(p) && p.length === 2 && ((p[0] === "N" && p[1] === "S") || (p[0] === "S" && p[1] === "N"));
+      if (z.pole.length !== 2 || !ok(z.pole[0]) || !ok(z.pole[1])) return null;
+      const anziehen = z.pole[0][1] !== z.pole[1][0], rechts = z.wahl ? ["?", z.pole[1][1]] : z.pole[1];
+      svg.setAttribute("data-wert", anziehen ? "anziehen" : "abstossen");
+      const L = s("g", {}, stabmagnet(100, 76, z.pole[0])), Rg = s("g", {}, stabmagnet(222, 76, rechts));
+      if (z.wahl) Rg.appendChild(erscheine(s("g", {}, s("rect", { x: 192, y: 65, width: 30, height: 22, fill: POL_FARBE[z.pole[1][0]], stroke: "#2d3047", "stroke-width": 0.8 }),
+        text(207, 80.5, z.pole[1][0], { gross: 12, farbe: "#ffffff" })), T * 0.35, ruhig, 0.3));
+      // anziehen: beide rücken zusammen; abstossen: sie rücken auseinander
+      const d = anziehen ? 26 : -22;
+      svg.append(schiebe(L, d, 0, T * 0.5, ruhig, { dauer: 0.5 }), schiebe(Rg, -d, 0, T * 0.5, ruhig, { dauer: 0.5 }));
+      svg.appendChild(erscheine(bildzeichen(160, 122, anziehen ? "🤝" : "↔️", 22), T + 0.1, ruhig));
+    } else if (z.durch) {
+      if (z.durch !== "📄") return null;
+      svg.append(hufeisen(160, 52), s("rect", { x: 112, y: 70, width: 96, height: 6, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1 }),
+        herein(s("g", { "data-stueck": "zieht" }, bildzeichen(160, 88, "📎", 20)), 0, 28, 0.4, ruhig, 0.5), s("rect", { x: 20, y: 120, width: 280, height: 8, rx: 3, fill: "#a8743f" }));
+    } else if (z.kompass) {
+      svg.append(s("circle", { cx: 160, cy: 74, r: 50, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 2 }), text(160, 36, "N", { gross: 12 }), text(160, 122, "S", { gross: 12 }),
+        text(122, 78, "W", { gross: 12 }), text(198, 78, "O", { gross: 12 }));
+      const nadel = s("g", {}, s("path", { d: "M160,40 L166,74 L154,74 Z", fill: "#e5484d" }), s("path", { d: "M160,108 L166,74 L154,74 Z", fill: "#8a8fa8" }), s("circle", { cx: 160, cy: 74, r: 3, fill: "#2d3047" }));
+      if (ruhig) svg.appendChild(nadel);
+      else { nadel.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: "110 160 74;-25 160 74;12 160 74;0 160 74", keyTimes: "0;0.5;0.8;1", begin: t(0.2), dur: `${T}s`, fill: "freeze" })); svg.appendChild(nadel); }
+    } else if (z.strom) {
+      // Elektromagnet: Batterie, Draht um einen Nagel; mit Strom hängen Büroklammern am Nagel
+      svg.append(s("rect", { x: 40, y: 60, width: 30, height: 40, rx: 3, fill: "#2d3047" }), s("rect", { x: 49, y: 54, width: 12, height: 6, fill: "#8a8fa8" }),
+        s("rect", { x: 130, y: 66, width: 110, height: 10, rx: 2, fill: "#9aa1ab" }), s("path", { d: "M244,71 L254,71", stroke: "#9aa1ab", "stroke-width": 4 }));
+      for (let i = 0; i < 9; i++) svg.appendChild(s("ellipse", { cx: 140 + i * 11, cy: 71, rx: 3, ry: 9, fill: "none", stroke: "#c8553d", "stroke-width": 1.6 }));
+      svg.appendChild(zeichne(s("path", { d: "M55,54 V36 H140 V62 M232,80 V112 H55 V100", fill: "none", stroke: "#c8553d", "stroke-width": 2 }), 0.1, ruhig, 0.6));
+      for (let i = 0; i < 3; i++) svg.appendChild(herein(s("g", { "data-stueck": "zieht" }, bildzeichen(170 + i * 24, 92, "📎", 16)), 0, 30, 0.8 + i * 0.25, ruhig, 0.35));
+      svg.appendChild(erscheine(bildzeichen(55, 120, "⚡", 14), 0.6, ruhig));
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Schwimmt oder sinkt? (SAMMELN · wanne) -----
+  const SCHWIMMT = ["🪵", "🍎", "🍃", "🕯️", "🏓", "🪶", "🧊", "🍌"], SINKT = ["🪨", "🔩", "🔑", "🪙", "🥄", "🥔", "💍", "🔨"];
+  /**
+   * Die Dinge fallen in die Wanne: was schwimmt (Liste des Spiels), bleibt oben, was sinkt, geht zu Boden; 🛟 und ⬇️ wie
+   * die Körbe. Angabe: { dinge: [Bild …] } (2–8), schiff?: ein Schiff aus Metall schwimmt und trägt die Eule (s5).
+   */
+  function wanne(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.dinge) || z.dinge.length > 8 || !z.dinge.every(d => SCHWIMMT.includes(d) || SINKT.includes(d)) || (!z.dinge.length && !z.schiff)) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "wanne", "data-anzahl": z.dinge.length });
+    svg.append(tagGrund(), s("path", { d: "M26,52 L294,52 L280,134 Q278,142 268,142 L52,142 Q42,142 40,134 Z", fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 2 }),
+      s("path", { d: "M33,66 L287,66 L279,132 Q277,138 268,138 L52,138 Q43,138 41,132 Z", fill: "#7fc4ec", opacity: 0.85 }), bildzeichen(18, 66, "🛟", 12), bildzeichen(18, 128, "⬇️", 12));
+    const n = z.dinge.length, T = DAUER * 0.8;
+    z.dinge.forEach((d, i) => {
+      const oben = SCHWIMMT.includes(d), x = 60 + (n > 1 ? (i * (z.schiff ? 120 : 200)) / (n - 1) : 100), y = oben ? 64 : 126;
+      const g = s("g", { "data-stueck": oben ? "schwimmt" : "sinkt" }, bildzeichen(x, y, d, 20));
+      svg.appendChild(herein(g, 0, -(y - 20), 0.2 + (i * T * 0.7) / Math.max(1, n), ruhig, oben ? 0.5 : 0.9));
+    });
+    if (z.schiff) {
+      const schiff = s("g", { "data-schiff": "metall" }, s("path", { d: "M222,60 L290,60 L280,74 L232,74 Z", fill: "#8a8fa8", stroke: "#4f5668", "stroke-width": 1.2 }), s("g", { transform: "translate(256 60)" }, euleSitzend(0.18)));
+      svg.appendChild(herein(schiff, 60, 0, T * 0.6, ruhig, 0.6));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(40, 24, ruhig));
+    return svg;
+  }
+
+  // ----- Stromkreis-Bauer (BAUEN · stromkreis) -----
+  /** Glühlampe an x, y (Kreis mit Kreuz wie im Schaltbild des Spiels); brennt: gelb mit acht Strahlen. */
+  function lampe(x, y, brennt, ab, ruhig) {
+    const g = s("g", {}, s("circle", { cx: x, cy: y, r: 11, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 1.6 }),
+      s("path", { d: `M${x - 7.8},${y - 7.8} L${x + 7.8},${y + 7.8} M${x + 7.8},${y - 7.8} L${x - 7.8},${y + 7.8}`, stroke: "#2d3047", "stroke-width": 1.2 }));
+    if (brennt) g.appendChild(erscheine(s("g", { "data-stueck": "lampe" }, s("circle", { cx: x, cy: y, r: 11, fill: "#ffd43b", stroke: "#2d3047", "stroke-width": 1.6 }),
+      ...[...Array(8).keys()].map(i => { const w = (i * Math.PI) / 4; return s("line", { x1: x + 14 * Math.cos(w), y1: y + 14 * Math.sin(w), x2: x + 19 * Math.cos(w), y2: y + 19 * Math.sin(w), stroke: "#f5b301", "stroke-width": 2, "stroke-linecap": "round" }); })), ab, ruhig, 0.3));
+    return g;
+  }
+  /**
+   * Schaltbild wie im Spiel: Batterie links (lange Platte Plus), Drähte, Lampen. Was den Kreis schliesst, kommt zuletzt
+   * (Draht, Schalter, ein Gegenstand, der leitet), dann brennen die Lampen. Angabe: { lampen: 1–3, art?: "serie" |
+   * "parallel", schliesst?: "draht" | "schalter" | Bild, kurz?: Nummer der Lampe in Serie, die ein Draht überbrückt —
+   * sie bleibt dunkel, die anderen brennen (geprüft: nur in Serie, in parallel wäre es ein Kurzschluss der Batterie) }.
+   */
+  function stromkreis(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || ![1, 2, 3].includes(z.lampen) || !["serie", "parallel"].includes(z.art ?? "serie")) return null;
+    const parallel = z.art === "parallel";
+    if (z.kurz !== undefined && (parallel || !Number.isInteger(z.kurz) || z.kurz < 1 || z.kurz > z.lampen || z.lampen < 2)) return null;
+    const brennen = z.lampen - (z.kurz ? 1 : 0), svg = neuesBild("bauen", stufe, { "data-bilder": "stromkreis", "data-anzahl": brennen });
+    svg.appendChild(tagGrund());
+    const L = 60, R = 260, O = 30, U = 120, T = DAUER * 0.8, zu = T * 0.55, draht = { fill: "none", stroke: "#2d3047", "stroke-width": 2 };
+    // Batterie links in der Mitte: oben die lange dünne Platte (Plus), unten die kurze dicke (Minus)
+    svg.append(s("path", { d: `M${L},${O} V68 M${L},82 V${U}`, ...draht }), s("line", { x1: L - 14, y1: 70, x2: L + 14, y2: 70, stroke: "#2d3047", "stroke-width": 2 }),
+      s("line", { x1: L - 7, y1: 80, x2: L + 7, y2: 80, stroke: "#2d3047", "stroke-width": 5 }), text(L - 22, 66, "+", { gross: 11 }));
+    // unten und links der Draht; rechts schliesst sich der Kreis (Lücke y 64–86)
+    svg.appendChild(s("path", { d: `M${L},${U} H${R} V86`, ...draht }));
+    if (!parallel) {
+      const xs = [...Array(z.lampen).keys()].map(i => L + ((i + 1) * (R - L)) / (z.lampen + 1));
+      let d = `M${L},${O}`;
+      xs.forEach(x => { d += ` H${x - 11} M${x + 11},${O}`; });
+      svg.appendChild(s("path", { d: d + ` H${R} V64`, ...draht }));
+      xs.forEach((x, i) => {
+        svg.appendChild(lampe(x, O, z.kurz !== i + 1, zu + 0.3, ruhig));
+        if (z.kurz === i + 1) svg.appendChild(s("path", { d: `M${x - 18},${O} V${O + 18} H${x + 18} V${O}`, fill: "none", style: "stroke:var(--deko-3)", "stroke-width": 2.4, "data-kurz": i + 1 }));
+      });
+    } else {
+      // parallel: jede Lampe in einem eigenen Zweig zwischen dem Draht oben und unten
+      svg.appendChild(s("path", { d: `M${L},${O} H${R} V64`, ...draht }));
+      for (let i = 0; i < z.lampen; i++) {
+        const x = L + 50 + i * 60;
+        svg.append(s("path", { d: `M${x},${O} V${75 - 11} M${x},${75 + 11} V${U}`, ...draht }), s("circle", { cx: x, cy: O, r: 2.4, fill: "#2d3047" }), s("circle", { cx: x, cy: U, r: 2.4, fill: "#2d3047" }), lampe(x, 75, true, zu + 0.3, ruhig));
+      }
+    }
+    // was den Kreis schliesst
+    const schl = z.schliesst ?? "draht";
+    if (schl === "draht") svg.appendChild(zeichne(s("path", { d: `M${R},64 V86`, ...draht }), zu - 0.3, ruhig, 0.3));
+    else if (schl === "schalter") {
+      svg.append(s("circle", { cx: R, cy: 64, r: 2.6, fill: "#2d3047" }), s("circle", { cx: R, cy: 86, r: 2.6, fill: "#2d3047" }));
+      const hebelS = s("line", { x1: R, y1: 86, x2: R, y2: 64, stroke: "#2d3047", "stroke-width": 2.4, "data-schalter": "zu" });
+      if (ruhig) svg.appendChild(hebelS);
+      else { hebelS.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `40 ${R} 86`, to: `0 ${R} 86`, begin: t(zu - 0.4), dur: "0.4s", fill: "freeze" })); svg.appendChild(hebelS); }
+    } else {
+      // ein Gegenstand aus Metall überbrückt die Lücke (Klemmen deko-7 wie im Spiel)
+      svg.append(s("rect", { x: R - 5, y: 60, width: 10, height: 6, style: "fill:var(--deko-7)" }), s("rect", { x: R - 5, y: 84, width: 10, height: 6, style: "fill:var(--deko-7)" }),
+        herein(s("g", { "data-leiter": schl }, bildzeichen(R + 2, 75, schl, 20)), 40, 0, zu - 0.5, ruhig, 0.5));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(300, 120, ruhig));
+    return svg;
+  }
+
+  // ----- Hebel-Wippe (BAUEN · hebel) -----
+  /**
+   * Die Wippe des Spiels (Balken deko-3, Drehpunkt deko-7, Klötze deko-6) mit den Plätzen 1–5 je Seite; Moment = kg ×
+   * Platz, nachgerechnet: gleich → sie kommt waagrecht zur Ruhe, sonst sinkt die schwerere Seite (9° wie im Spiel).
+   * Angabe: { links: [[kg, Platz] …], rechts: [[kg, Platz] …] } oder { stein, a, b } (Stange: der Stein auf Platz a,
+   * das Kind drückt auf Platz b mit stein · a : b kg, ganzzahlig, s5).
+   */
+  function hebel(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    const seiteOk = a => Array.isArray(a) && a.length >= 1 && a.length <= 3 && a.every(([kg, p]) => Number.isInteger(kg) && kg > 0 && kg <= 30 && Number.isInteger(p) && p >= 1 && p <= 5);
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "hebel" });
+    svg.appendChild(tagGrund());
+    const cx = 160, cy = 100, ab = 24; // Abstand der Plätze
+    if (z && Number.isInteger(z.stein) && Number.isInteger(z.a) && Number.isInteger(z.b)) {
+      if (z.a < 1 || z.a > 3 || z.b < z.a + 2 || z.b > 10 || (z.stein * z.a) % z.b) return null;
+      const kraft = (z.stein * z.a) / z.b, sb = 14;
+      svg.setAttribute("data-wert", kraft);
+      const stange = s("g", {}, s("rect", { x: cx - z.a * sb - 10, y: cy - 4, width: (z.a + z.b) * sb + 20, height: 7, rx: 3, style: "fill:var(--deko-3)" }),
+        s("rect", { x: cx - z.a * sb - 18, y: cy - 30, width: 30, height: 26, rx: 12, style: "fill:var(--deko-7)" }), text(cx - z.a * sb - 3, cy - 13, `${z.stein} kg`, { gross: 9, farbe: "#ffffff" }),
+        s("path", { d: `M${cx + z.b * sb},${cy - 40} V${cy - 8} m-5,-7 l5,7 l5,-7`, fill: "none", style: "stroke:var(--deko-2)", "stroke-width": 2.6 }), text(cx + z.b * sb, cy - 46, `${kraft} kg`, { gross: 11, farbe: "#e0569a" }));
+      if (ruhig) svg.appendChild(stange);
+      else { stange.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: `-9 ${cx} ${cy};3 ${cx} ${cy};0 ${cx} ${cy}`, keyTimes: "0;0.7;1", begin: t(0.3), dur: `${T}s`, fill: "freeze" })); svg.appendChild(stange); }
+      svg.append(s("path", { d: `M${cx},${cy + 3} L${cx - 10},${cy + 22} L${cx + 10},${cy + 22} Z`, style: "fill:var(--deko-7)" }),
+        erscheine(text(cx, 140, `${z.stein} · ${z.a} = ${kraft} · ${z.b}`, { gross: 13, farbe: "#2fbf71" }), T + 0.1, ruhig));
+    } else {
+      if (!z || !seiteOk(z.links) || !seiteOk(z.rechts)) return null;
+      const ml = z.links.reduce((a, [kg, p]) => a + kg * p, 0), mr = z.rechts.reduce((a, [kg, p]) => a + kg * p, 0), neigung = ml === mr ? 0 : ml > mr ? -9 : 9;
+      svg.setAttribute("data-wert", ml === mr ? "gerade" : ml > mr ? "links" : "rechts");
+      const balken = s("g", {}, s("rect", { x: cx - 5.5 * ab, y: cy - 4, width: 11 * ab, height: 7, rx: 3, style: "fill:var(--deko-3)" }));
+      for (let p = 1; p <= 5; p++) for (const sg of [-1, 1]) balken.appendChild(s("line", { x1: cx + sg * p * ab, y1: cy + 3, x2: cx + sg * p * ab, y2: cy + 7, stroke: "#6b4a2b", "stroke-width": 1.2 }));
+      for (const [seite, sg] of [[z.links, -1], [z.rechts, 1]]) {
+        const hoehe = {};
+        seite.forEach(([kg, p]) => {
+          const h = Math.min(30, 10 + kg * 2.2), y0 = cy - 4 - (hoehe[p] || 0) - h;
+          hoehe[p] = (hoehe[p] || 0) + h;
+          balken.append(s("rect", { x: cx + sg * p * ab - 10, y: y0, width: 20, height: h, rx: 3, style: "fill:var(--deko-6)", "data-kg": kg, "data-platz": p * sg }), text(cx + sg * p * ab, y0 + h / 2 + 3.5, kg, { gross: 9, farbe: "#ffffff" }));
+        });
+      }
+      if (ruhig) { balken.setAttribute("transform", `rotate(${neigung} ${cx} ${cy})`); svg.appendChild(balken); }
+      else {
+        // erst schwankt die Wippe, dann kommt sie zur Ruhe (waagrecht oder auf der schwereren Seite)
+        balken.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", values: `${neigung ? -neigung * 0.6 : 7} ${cx} ${cy};${neigung ? neigung * 1.1 : -4} ${cx} ${cy};${neigung} ${cx} ${cy}`, keyTimes: "0;0.6;1", begin: t(0.3), dur: `${T}s`, fill: "freeze" }));
+        svg.appendChild(balken);
+      }
+      svg.append(s("path", { d: `M${cx},${cy + 3} L${cx - 10},${cy + 22} L${cx + 10},${cy + 22} Z`, style: "fill:var(--deko-7)" }));
+      const teil = seite => seite.map(([kg, p]) => `${kg} · ${p}`).join(" + ");
+      svg.appendChild(erscheine(text(cx, 142, `${teil(z.links)} ${ml === mr ? "=" : ml > mr ? ">" : "<"} ${teil(z.rechts)}`, { gross: 12, farbe: ml === mr ? "#2fbf71" : "#2d3047" }), T + 0.1, ruhig));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Wassertropfen-Reise (ZYKLUS · wasserkreis) -----
+  // Stationen der beiden Wege des Spiels (Kreise) mit ihrem Platz im Bild
+  const WASSER_WEG = {
+    boden: [["🌊", 40, 118], ["♨️", 52, 74], ["☁️", 128, 26], ["🌧️", 178, 52], ["🟫", 196, 128], ["⛲", 250, 108], ["🏞️", 120, 118]],
+    berg: [["🌊", 40, 118], ["♨️", 52, 74], ["☁️", 128, 26], ["🌨️", 236, 26], ["💧", 262, 70], ["🏔️", 222, 96], ["🏞️", 120, 118]],
+  };
+  const KLAERANLAGE = ["🗑️", "⏳", "🟤", "🦠", "🫧", "🏞️"];
+  /**
+   * { weg: "boden" | "berg", bis: 3–7, nummern? } — der Tropfen reist die Stationen des Wegs ab (Meer, Wasserdampf,
+   * Wolke, …), sie erscheinen der Reihe nach, nummern: mit Nummern; { zustaende: true } — Eis schmilzt bei 0 °C, Wasser
+   * verdunstet bei 100 °C (s1); { klaer: 3–6 } — die Kläranlage Stufe um Stufe, das Wasser wird klar.
+   */
+  function wasserkreis(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const tropfen = () => s("path", { d: "M0,-9 Q7,0 6,4 A6,6 0 0,1 -6,4 Q-7,0 0,-9 Z", fill: "#2f8fe0", stroke: "#ffffff", "stroke-width": 1 });
+    if (z.zustaende === true) {
+      const svg = neuesBild("zyklus", stufe, { "data-bilder": "wasserkreis", "data-anzahl": 3 });
+      svg.appendChild(tagGrund());
+      [["🧊", 60], ["💧", 160], ["♨️", 260]].forEach(([b, x], i) => {
+        svg.appendChild(erscheine(s("g", { "data-stueck": "zustand" }, bildzeichen(x, 64, b, 34)), (i * T) / 3, ruhig, 0.4));
+        if (i < 2) svg.appendChild(erscheine(s("g", {}, s("path", { d: `M${x + 26},64 h48 m-6,-5 l6,5 l-6,5`, fill: "none", stroke: "#6b7089", "stroke-width": 2 }), text(x + 50, 54, i ? "100 °C" : "0 °C", { gross: 11, farbe: "#e5484d" })), ((i + 0.6) * T) / 3, ruhig));
+      });
+      if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+      if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+      return svg;
+    }
+    if (Number.isInteger(z.klaer)) {
+      if (z.klaer < 3 || z.klaer > 6) return null;
+      const svg = neuesBild("zyklus", stufe, { "data-bilder": "wasserkreis", "data-anzahl": z.klaer });
+      svg.appendChild(tagGrund());
+      // die letzten Stufen der Anlage bis in den Fluss (bei weniger Stufen die ersten weggelassen, der Fluss bleibt)
+      const teile = [...KLAERANLAGE.slice(0, z.klaer - 1), "🏞️"], bw = 280 / teile.length;
+      teile.forEach((b, i) => {
+        const x = 20 + i * bw + bw / 2, klar = i / (teile.length - 1), farbe = `rgb(${Math.round(150 - 103 * klar)},${Math.round(110 + 33 * klar)},${Math.round(70 + 154 * klar)})`;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "stufe" }, s("rect", { x: x - bw / 2 + 3, y: 80, width: bw - 6, height: 36, rx: 4, fill: farbe, stroke: "#6b7089", "stroke-width": 1 }), bildzeichen(x, 60, b, 20), text(x, 134, i + 1, { gross: 10 })), (i * T * 0.8) / teile.length, ruhig, 0.3));
+      });
+      svg.appendChild(bewege(s("g", {}, tropfen()), `M${20 + bw / 2},92 H${20 + (teile.length - 0.5) * bw}`, { x: 20 + (teile.length - 0.5) * bw, y: 92, winkel: 0 }, ruhig, { drehen: false, linear: true }));
+      if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+      if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+      return svg;
+    }
+    const weg = WASSER_WEG[z.weg];
+    if (!weg || !Number.isInteger(z.bis) || z.bis < 3 || z.bis > 7) return null;
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "wasserkreis", "data-anzahl": z.bis, "data-ziel": z.weg });
+    // die Landschaft des Spiels: Himmel, Sonne, Berg, Meer, Boden mit Grundwasser
+    svg.append(s("rect", { x: 0, y: 0, width: BREITE, height: HOEHE, rx: 14, fill: "#cfe9ff" }), sonne(292, 26, 12),
+      s("path", { d: "M180,112 L240,40 L300,112 Z", fill: "#8d9aa8" }), s("path", { d: "M228,54 L240,40 L252,54 L246,58 L240,54 L234,58 Z", fill: "#ffffff" }),
+      s("path", { d: `M0,108 H${BREITE} V136 Q${BREITE},${HOEHE} ${BREITE - 14},${HOEHE} H14 Q0,${HOEHE} 0,136 Z`, fill: "#a0784f" }), s("rect", { x: 150, y: 124, width: 170, height: 10, fill: "#7fb0d6" }),
+      s("path", { d: `M0,108 H90 V136 Q90,140 80,140 H14 Q0,140 0,126 Z`, fill: "#3b82c4" }), s("rect", { x: 90, y: 104, width: 230, height: 5, fill: "#5cb85c" }));
+    const teil = weg.slice(0, z.bis), zeiten = ankunft(teil.map(([, x, y]) => [x, y]), T);
+    teil.forEach(([b, x, y], i) => {
+      svg.appendChild(erscheine(s("g", { "data-stueck": "station" }, s("circle", { cx: x, cy: y, r: 13, fill: "#ffffff", opacity: 0.75 }), bildzeichen(x, y, b, 18),
+        z.nummern ? text(x + 13, y - 9, i + 1, { gross: 10, farbe: "#e0569a" }) : null), zeiten[i], ruhig, 0.25));
+    });
+    const [lx, ly] = [teil[teil.length - 1][1], teil[teil.length - 1][2]];
+    svg.appendChild(bewege(s("g", {}, s("g", { transform: "translate(10 -12)" }, tropfen())), "M" + teil.map(([, x, y]) => `${x},${y}`).join(" L"), { x: lx, y: ly, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 46, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(176, 90, ruhig));
+    return svg;
+  }
+
+  // ----- Energie-Wandler (REISE · energiekette) -----
+  const ENERGIE_FORM = ["⚡", "🏃", "🔥", "🌟", "🧪", "⛰️", "⚛️"]; // elektrisch, Bewegung, Wärme, Licht, chemisch, Lage, Kern
+  /**
+   * Die Kette des Spiels: Energieform (Rahmen deko-4) → Wandler (Rahmen deko-6) → Energieform …; Glied um Glied, ein
+   * Funke läuft mit. Angabe: { kette: [Bild …] } — die Glieder abwechselnd Form und Wandler, die Formen geprüft gegen die
+   * sieben Formen des Spiels (lange Ketten in zwei Zeilen).
+   */
+  function energiekette(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.kette) || z.kette.length < 2 || z.kette.length > 10) return null;
+    const istForm = (b, i) => (i % 2 === 0) === ENERGIE_FORM.includes(b);
+    const start = ENERGIE_FORM.includes(z.kette[0]) ? 0 : 1;
+    if (!z.kette.every((b, i) => istForm(b, i + start))) return null;
+    const n = z.kette.length, svg = neuesBild("reise", stufe, { "data-bilder": "energiekette", "data-anzahl": n });
+    svg.appendChild(tagGrund());
+    // lange Ketten in zwei Zeilen als Schlange: die zweite läuft von rechts nach links zurück
+    const proZeile = n > 5 ? Math.ceil(n / 2) : n, gb = 40, abst = Math.min(62, 300 / proZeile), T = DAUER * 0.85;
+    const pts = z.kette.map((_, i) => {
+      const zeile = Math.floor(i / proZeile), k = i % proZeile, xk = zeile ? proZeile - 1 - k : k;
+      return [BREITE / 2 + (xk - (proZeile - 1) / 2) * abst, n > 5 ? 44 + zeile * 62 : 72];
+    });
+    z.kette.forEach((b, i) => {
+      const [x, y] = pts[i], form = ENERGIE_FORM.includes(b);
+      svg.appendChild(erscheine(s("g", { "data-stueck": form ? "form" : "wandler" }, s("rect", { x: x - gb / 2, y: y - gb / 2, width: gb, height: gb, rx: form ? 20 : 8, fill: "#ffffff", style: `stroke:var(${form ? "--deko-4" : "--deko-6"})`, "stroke-width": 2.4 }),
+        bildzeichen(x, y, b, 22)), (i * T) / n, ruhig, 0.25));
+      if (i < n - 1) {
+        // Pfeil zum nächsten Glied, an den Rahmen gekürzt
+        const [x2, y2] = pts[i + 1], l = Math.hypot(x2 - x, y2 - y), ux = (x2 - x) / l, uy = (y2 - y) / l, a = gb / 2 + 2, w = (Math.atan2(uy, ux) * 180) / Math.PI, ex = x2 - ux * a, ey = y2 - uy * a;
+        svg.appendChild(erscheine(s("g", {}, s("line", { x1: x + ux * a, y1: y + uy * a, x2: ex, y2: ey, stroke: "#6b7089", "stroke-width": 1.6 }), s("path", { d: `M${ex},${ey} l-6,-3.5 l0,7 Z`, fill: "#6b7089", transform: `rotate(${w} ${ex} ${ey})` })), ((i + 0.5) * T) / n, ruhig));
+      }
+    });
+    const funke = s("g", {}, s("circle", { cx: 0, cy: 0, r: 4, fill: "#ffd43b", stroke: "#f5b301", "stroke-width": 1 }));
+    const [ex, ey] = pts[n - 1];
+    svg.appendChild(bewege(funke, "M" + pts.map(p => p.map((v, j) => (j ? v - 24 : v)).join(",")).join(" L"), { x: ex, y: ey - 24, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Bionik-Paare (SAMMELN · bionik) -----
+  const BIONIK = [["🌿", "👟"], ["🪷", "🏠"], ["🦈", "🛩️"], ["🦉", "🌀"], ["🐦", "✈️"], ["🐦", "🚄"], ["🦎", "🩹"], ["🍁", "🚁"], ["🕷️", "🧵"], ["🐝", "⬢"],
+    ["⛰️", "🏢"], ["🍃", "🏛️"], ["🌱", "🧂"], ["🐙", "🦾"], ["🐘", "🤖"], ["🐟", "✋"], ["🐋", "🌬️"], ["🦪", "🧴"], ["🌲", "🏗️"], ["🐍", "🔎"]];
+  /**
+   * Album: je Paar das Vorbild aus der Natur (Rahmen deko-5) und die Erfindung (deko-6) klicken zusammen; mit
+   * abgeschaut (s3, s6) dazwischen die Lupe 🔍 wie die Karte im Spiel. Angabe: { paare: [[Vorbild, Erfindung] …],
+   * abgeschaut? } — jedes Paar aus der Liste des Spiels.
+   */
+  function bionik(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.paare) || !z.paare.length || z.paare.length > 4 || !z.paare.every(([a, b]) => BIONIK.some(([x, y]) => x === a && y === b))) return null;
+    const n = z.paare.length, svg = neuesBild("sammeln", stufe, { "data-bilder": "bionik", "data-anzahl": n });
+    svg.append(tagGrund(), s("rect", { x: 14, y: 10, width: 292, height: 130, rx: 8, fill: "#fffaf0", stroke: "#d9cdb0", "stroke-width": 1.4 }), s("line", { x1: 160, y1: 14, x2: 160, y2: 136, stroke: "#d9cdb0", "stroke-width": 1.4 }));
+    const T = DAUER * 0.8, spalten = n > 2 ? 2 : 1, zeilen = Math.ceil(n / spalten);
+    z.paare.forEach(([a, b], i) => {
+      const sp = i % spalten, ze = Math.floor(i / spalten), cx = spalten === 1 ? 160 : 87 + sp * 146, cy = 20 + ((ze + 0.5) * 120) / zeilen, k = 34, d = z.abgeschaut ? 26 : 20;
+      const karte = (x, bild, farbe) => s("g", {}, s("rect", { x: x - k / 2, y: cy - k / 2, width: k, height: k, rx: 6, fill: "#ffffff", style: `stroke:var(${farbe})`, "stroke-width": 2.2 }), bildzeichen(x, cy, bild, 20));
+      const ab = (i * T * 0.8) / n;
+      svg.appendChild(s("g", { "data-stueck": "paar" }, schiebe(karte(cx - d - 14, a, "--deko-5"), 14, 0, ab, ruhig, { dauer: 0.4 }), schiebe(karte(cx + d + 14, b, "--deko-6"), -14, 0, ab, ruhig, { dauer: 0.4 })));
+      if (z.abgeschaut) svg.appendChild(erscheine(s("g", {}, s("rect", { x: cx - 9, y: cy - 9, width: 18, height: 18, rx: 4, fill: "#ffffff", style: "stroke:var(--deko-3)", "stroke-width": 1.6 }), bildzeichen(cx, cy, "🔍", 11)), ab + 0.4, ruhig));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 128, ruhig));
+    return svg;
+  }
+
+  // ----- Körper-Puzzle (REISE · koerperweg) -----
+  const KOERPER_TEILE = { "👁️": [154, 30], "👂": [170, 34], "👃": [160, 38], "👄": [160, 44], "👅": [160, 46], "🦷": [156, 44], "✋": [118, 86], "💪": [130, 66], "🦵": [150, 112], "🦶": [146, 138] };
+  /**
+   * Ein Kind von vorn. { teile: [Bild …] } — die Körperteile der Stufe (Bilder des Spiels) kommen an ihren Platz und
+   * zeigen mit einer Linie hin; { gelenke: true } — Schulter, Ellbogen, Hüfte, Knie leuchten auf; { weg: "essen" |
+   * "luft" } — der Weg des Essens (Mund, Speiseröhre, Magen, Dünndarm, Dickdarm) oder der Luft (Nase, Luftröhre, Lunge),
+   * ein Apfel oder ein Lufthauch geht ihn ab.
+   */
+  function koerperweg(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "koerperweg" });
+    svg.appendChild(tagGrund());
+    const haut = { fill: "#f9d3b0", stroke: "#a8714a", "stroke-width": 1.2 };
+    // Kopf mit Gesicht (Augen, Nase, Mund, Ohren dort, wohin die Linien der Teile zeigen)
+    svg.append(s("circle", { cx: 144, cy: 36, r: 3.5, ...haut }), s("circle", { cx: 176, cy: 36, r: 3.5, ...haut }), s("circle", { cx: 160, cy: 36, r: 16, ...haut }),
+      s("circle", { cx: 154, cy: 31, r: 1.8, fill: "#2d3047" }), s("circle", { cx: 166, cy: 31, r: 1.8, fill: "#2d3047" }), s("path", { d: "M160,34 v5", stroke: "#a8714a", "stroke-width": 1.2 }),
+      s("path", { d: "M154,44 Q160,48 166,44", fill: "none", stroke: "#c8553d", "stroke-width": 1.4 }));
+    svg.append(s("rect", { x: 140, y: 54, width: 40, height: 50, rx: 10, fill: "#7fb6e6", stroke: "#4f86b8", "stroke-width": 1.2 }),
+      s("path", { d: "M140,60 L120,86 M180,60 L200,86", stroke: "#f9d3b0", "stroke-width": 9, "stroke-linecap": "round" }), s("path", { d: "M150,104 L148,136 M170,104 L172,136", stroke: "#4f5668", "stroke-width": 10, "stroke-linecap": "round" }));
+    if (Array.isArray(z.teile)) {
+      if (!z.teile.length || z.teile.length > 6 || !z.teile.every(b => KOERPER_TEILE[b])) return null;
+      svg.setAttribute("data-anzahl", z.teile.length);
+      z.teile.forEach((b, i) => {
+        const [px, py] = KOERPER_TEILE[b], links = i % 2 === 0, x = links ? 60 : 260, y = 24 + Math.floor(i / 2) * 44, ab = (i * T) / z.teile.length;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "teil" }, s("circle", { cx: x, cy: y, r: 16, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.2 }), bildzeichen(x, y, b, 20),
+          s("line", { x1: x + (links ? 17 : -17), y1: y, x2: px, y2: py, stroke: "#e0569a", "stroke-width": 1.2, "stroke-dasharray": "3 2" }), s("circle", { cx: px, cy: py, r: 2.4, fill: "#e0569a" })), ab, ruhig, 0.3));
+      });
+    } else if (z.gelenke === true) {
+      const G = [[140, 60], [180, 60], [128, 74], [192, 74], [150, 104], [170, 104], [149, 120], [171, 120]];
+      svg.setAttribute("data-anzahl", G.length);
+      G.forEach(([x, y], i) => svg.appendChild(erscheine(s("circle", { cx: x, cy: y, r: 5, fill: "#f5b301", stroke: "#ffffff", "stroke-width": 1.4, "data-stueck": "gelenk" }), (i * T) / G.length, ruhig, 0.25)));
+      svg.appendChild(erscheine(s("g", {}, s("path", { d: "M146,24 Q160,12 174,24", fill: "none", stroke: "#8a8fa8", "stroke-width": 3 })), T, ruhig));
+    } else if (z.weg === "essen" || z.weg === "luft") {
+      // die Organe als einfache Formen im Körper; der Weg führt hindurch
+      const organe = z.weg === "essen"
+        ? [["mund", "M152,44 h16", [160, 44]], ["speiseroehre", "M160,46 V66", [160, 58]], ["magen", "M156,66 q14,-2 14,8 q0,8 -12,6 q-6,-1 -2,-14 z", [163, 72]],
+          ["duenndarm", "M150,84 q10,-6 20,0 q-10,6 -20,0 q10,6 20,0", [160, 86]], ["dickdarm", "M146,96 V80 H174 V98", [174, 96]]]
+        : [["nase", "M160,34 v6", [160, 38]], ["luftroehre", "M160,52 V64", [160, 58]], ["lunge", "M150,64 q-8,4 -6,22 q8,2 12,-4 z M170,64 q8,4 6,22 q-8,2 -12,-4 z", [166, 76]]];
+      svg.setAttribute("data-anzahl", organe.length);
+      const zeiten = ankunft(organe.map(o => o[2]), T);
+      organe.forEach(([name, d, p], i) => svg.appendChild(erscheine(s("path", { d, fill: name === "magen" || name === "lunge" ? "#f4a8b5" : "none", stroke: "#c8553d", "stroke-width": 2, "data-stueck": name }), zeiten[i], ruhig, 0.25)));
+      const [ex, ey] = organe[organe.length - 1][2];
+      svg.appendChild(bewege(s("g", {}, bildzeichen(0, 0, z.weg === "essen" ? "🍎" : "💨", 11)), "M" + organe.map(o => o[2].join(",")).join(" L"), { x: ex, y: ey, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 140, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 128, ruhig));
+    return svg;
+  }
+
+  // ----- Znüni-Teller (SAMMELN · znueni) -----
+  const LEBENSMITTEL_BILD = ["💧", "🍵", "🍎", "🍐", "🍌", "🍒", "🍓", "🍇", "🍊", "🥕", "🥦", "🥬", "🧅", "🧄", "🍞", "🍝", "🍚", "🥔", "🥛", "🧀", "🥚", "🐟", "🍗", "🍫", "🍬", "🍩", "🥤", "🍪", "🍟"];
+  const AUSGEWOGEN = [["🍎", "🍞", "💧"], ["🥕", "🧀", "🍞"], ["🍌", "🥛"], ["🍐", "🥚", "💧"]]; // Teller des Spiels
+  /**
+   * { koerbe: [[Korbzeichen, [Bild …]] …] } — die Lebensmittel (Liste des Spiels) fallen in die Körbe (☀️ jeden Tag,
+   * 🎉 ab und zu, die Gruppen 💧 🍎 🥕 🍞 🥚 🍬); { teller: [Bild …] } — ein ausgewogener Teller des Spiels füllt sich
+   * (geprüft), mit Glas Wasser und Serviette.
+   */
+  function znueni(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "znueni" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.teller)) {
+      if (!AUSGEWOGEN.some(t0 => t0.length === z.teller.length && t0.every((b, i) => b === z.teller[i]))) return null;
+      svg.setAttribute("data-anzahl", z.teller.length);
+      svg.append(s("ellipse", { cx: 160, cy: 90, rx: 92, ry: 42, fill: "#eef0fa", stroke: "#c9cde0", "stroke-width": 1.4 }), s("ellipse", { cx: 160, cy: 88, rx: 70, ry: 30, fill: "#ffffff" }));
+      z.teller.forEach((b, i) => svg.appendChild(vonOben(s("g", { "data-stueck": "essen" }, bildzeichen(160 + (i - (z.teller.length - 1) / 2) * 42, 84, b, 30)), (i * T) / z.teller.length, ruhig, 60, 0.4)));
+    } else if (Array.isArray(z.koerbe)) {
+      if (!z.koerbe.length || z.koerbe.length > 6 || !z.koerbe.every(([k, d]) => typeof k === "string" && Array.isArray(d) && d.length >= 1 && d.length <= 3 && d.every(b => LEBENSMITTEL_BILD.includes(b)))) return null;
+      const n = z.koerbe.length, kb = Math.min(90, 296 / n), alle = z.koerbe.reduce((a, [, d]) => a + d.length, 0);
+      svg.setAttribute("data-anzahl", alle);
+      let k = 0;
+      z.koerbe.forEach(([zeichen, dinge], i) => {
+        const kx = BREITE / 2 + (i - (n - 1) / 2) * kb;
+        svg.append(s("path", { d: `M${kx - kb / 2 + 4},96 H${kx + kb / 2 - 4} L${kx + kb / 2 - 10},134 H${kx - kb / 2 + 10} Z`, fill: "#f3e3c3", stroke: "#a8743f", "stroke-width": 1.6 }), bildzeichen(kx, 120, zeichen, 14));
+        dinge.forEach((b, j) => {
+          const x = kx + (j - (dinge.length - 1) / 2) * Math.min(24, (kb - 8) / dinge.length), y = 88;
+          svg.appendChild(herein(s("g", { "data-stueck": "essen" }, bildzeichen(x, y, b, Math.min(20, kb / 3))), 160 - x, 20 - y, 0.2 + (k++ * T * 0.8) / alle, ruhig, 0.45));
+        });
+      });
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Blutkreislauf-Lotse (REISE · blut) -----
+  const BLUT_REICH = "#d62839", BLUT_ARM = "#2b59c3"; // Farben des Spiels
+  // Stationen des grossen und kleinen Kreislaufs wie im Spiel (Sicht von vorn: die rechte Herzhälfte links im Bild)
+  const BLUT_HAELFTEN = [["koerper", 160, 134, "arm"], ["hohlvene", 92, 104, "arm"], ["rechts", 148, 78, "arm"], ["lungenarterie", 100, 46, "arm"], ["lunge", 160, 20, "reich"],
+    ["lungenvene", 220, 46, "reich"], ["links", 172, 78, "reich"], ["aorta", 228, 104, "reich"]];
+  /**
+   * Herz in der Mitte (zwei Hälften, mit kammern: Vorhof und Kammer je Seite), oben die Lunge 🫁, unten der Körper;
+   * das Blutkörperchen geht die Stationen ab: arm blau, ab der Lunge reich rot, im Körper gibt es den Sauerstoff ab.
+   * Angabe: { bis: 3–8, kammern?, spaet? } (spaet: die Gefässe färben sich erst, wenn das Blut durchfliesst, s6) oder
+   * { organe: true } (Gehirn, Lunge, Herz, Magen, Darm, s1).
+   */
+  function blut(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.9;
+    if (!z) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "blut" });
+    svg.appendChild(tagGrund());
+    if (z.organe === true) {
+      const O = [["🧠", 160, 22], ["🫁", 160, 58], ["❤️", 172, 70], ["🍲", 160, 92], ["🌀", 160, 112]];
+      svg.append(s("circle", { cx: 160, cy: 24, r: 18, fill: "#f9d3b0" }), s("rect", { x: 128, y: 44, width: 64, height: 84, rx: 18, fill: "#f9d3b0" }));
+      svg.setAttribute("data-anzahl", O.length);
+      O.forEach(([b, x, y], i) => svg.appendChild(erscheine(s("g", { "data-stueck": "organ" }, bildzeichen(x, y, b, b === "❤️" ? 14 : 18)), (i * T) / O.length, ruhig, 0.3)));
+    } else {
+      if (!Number.isInteger(z.bis) || z.bis < 3 || z.bis > 8) return null;
+      svg.setAttribute("data-anzahl", z.bis);
+      const st = BLUT_HAELFTEN.slice(0, z.bis), weg = [...st.map(([, x, y]) => [x, y]), ...(z.bis === 8 ? [[160, 134]] : [])];
+      // Gefässe: arm blau, reich rot (bei spaet grau, bis das Blut sie erreicht)
+      for (let i = 0; i < weg.length - 1; i++) {
+        const farbe = st[i][3] === "reich" ? BLUT_REICH : BLUT_ARM; // das Gefäss trägt das Blut der Station, von der es kommt
+        const linie = s("path", { d: `M${weg[i].join(",")} L${weg[i + 1].join(",")}`, stroke: z.spaet ? "#b4b8cc" : farbe, "stroke-width": 4, "stroke-linecap": "round", fill: "none" });
+        svg.appendChild(linie);
+      }
+      const zeiten = ankunft(weg, T);
+      if (z.spaet) for (let i = 0; i < weg.length - 1; i++) {
+        const farbe = st[i][3] === "reich" ? BLUT_REICH : BLUT_ARM;
+        svg.appendChild(erscheine(s("path", { d: `M${weg[i].join(",")} L${weg[i + 1].join(",")}`, stroke: farbe, "stroke-width": 4, "stroke-linecap": "round", fill: "none" }), zeiten[i + 1], ruhig, 0.2));
+      }
+      // Herz: zwei Hälften, mit kammern je Vorhof und Kammer
+      svg.append(s("path", { d: "M160,92 C130,76 132,62 146,62 Q156,62 160,70 Q164,62 174,62 C188,62 190,76 160,92 Z", fill: "#f4a8b5", stroke: "#c8553d", "stroke-width": 1.4 }), s("line", { x1: 160, y1: 70, x2: 160, y2: 92, stroke: "#c8553d", "stroke-width": 1.2 }));
+      if (z.kammern) svg.appendChild(s("path", { d: "M140,72 H180", stroke: "#c8553d", "stroke-width": 1, "stroke-dasharray": "2 2" }));
+      svg.append(bildzeichen(160, 18, "🫁", 18), bildzeichen(160, 138, "💪", 14));
+      st.forEach(([name, x, y], i) => svg.appendChild(erscheine(s("circle", { cx: x, cy: y, r: 3.4, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 1, "data-stueck": name }), zeiten[i], ruhig, 0.2)));
+      // das Blutkörperchen: Farbe wechselt in der Lunge zu rot und im Körper zu blau
+      const zelle = s("circle", { cx: 0, cy: 0, r: 6, fill: BLUT_ARM, stroke: "#ffffff", "stroke-width": 1.4 });
+      const iLunge = st.findIndex(x => x[0] === "lunge");
+      const endeFarbe = z.bis === 8 ? BLUT_ARM : iLunge >= 0 ? BLUT_REICH : BLUT_ARM;
+      if (ruhig) zelle.setAttribute("fill", endeFarbe);
+      else {
+        if (iLunge >= 0) zelle.appendChild(s("set", { attributeName: "fill", to: BLUT_REICH, begin: t(zeiten[iLunge]), fill: "freeze" }));
+        if (z.bis === 8) zelle.appendChild(s("set", { attributeName: "fill", to: BLUT_ARM, begin: t(zeiten[zeiten.length - 1]), fill: "freeze" }));
+      }
+      const [ex, ey] = weg[weg.length - 1];
+      svg.appendChild(bewege(s("g", {}, zelle), "M" + weg.map(p => p.join(",")).join(" L"), { x: ex, y: ey, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 24, ruhig));
+    return svg;
+  }
+
+  // ----- Braille-Finger (BAUEN · braille) -----
+  // Punkte je Buchstabe nach der Tafel des Spiels (Punkt 1–3 links von oben, 4–6 rechts)
+  const BRAILLE = { a: "1", b: "12", c: "14", d: "145", e: "15", f: "124", g: "1245", h: "125", i: "24", j: "245", k: "13", l: "123", m: "134", n: "1345", o: "135",
+    p: "1234", q: "12345", r: "1235", s: "234", t: "2345", u: "136", v: "1236", w: "2456", x: "1346", y: "13456", z: "1356" };
+  /**
+   * Zelle um Zelle erscheinen die erhabenen Punkte (gesetzt deko-5 wie im Spiel), darunter der Buchstabe; zaehlen: die
+   * Punkte werden gezählt (s1); finger: ein Finger tastet über das Wort. Angabe: { text: "eule", zaehlen?, finger? }
+   * (Buchstaben a–z, 1–5).
+   */
+  function braille(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || typeof z.text !== "string" || z.text.length < 1 || z.text.length > 5 || ![...z.text].every(c => BRAILLE[c])) return null;
+    const n = z.text.length, punkte = [...z.text].reduce((a, c) => a + BRAILLE[c].length, 0);
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "braille", "data-anzahl": punkte, "data-wert": z.text });
+    svg.appendChild(tagGrund());
+    const zb = Math.min(46, 270 / n), zh = zb * 1.4, x0 = BREITE / 2 - (n * (zb + 8) - 8) / 2, y0 = 18, T = DAUER * 0.8, je = T / punkte;
+    let k = 0;
+    [...z.text].forEach((c, i) => {
+      const x = x0 + i * (zb + 8);
+      svg.appendChild(s("rect", { x, y: y0, width: zb, height: zh, rx: zb * 0.2, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.4 }));
+      for (let p = 1; p <= 6; p++) {
+        const px = x + (p <= 3 ? 0.3 : 0.7) * zb, py = y0 + (0.2 + 0.3 * ((p - 1) % 3)) * zh, an = BRAILLE[c].includes(String(p));
+        svg.appendChild(s("circle", { cx: px, cy: py, r: zb * 0.09, fill: "#e4e6ec" }));
+        if (an) {
+          svg.appendChild(erscheine(s("circle", { cx: px, cy: py, r: zb * 0.12, style: "fill:var(--deko-5)", "data-stueck": "punkt", "data-nr": p }), k * je, ruhig, 0.2));
+          if (z.zaehlen) svg.appendChild(erscheine(text(px + zb * 0.17, py - zb * 0.1, BRAILLE[c].indexOf(String(p)) + 1, { gross: 9, farbe: "#6b7089" }), k * je + 0.1, ruhig, 0.2));
+          k++;
+        }
+      }
+      svg.appendChild(erscheine(text(x + zb / 2, y0 + zh + 20, c.toUpperCase(), { gross: Math.min(18, zb * 0.45), farbe: "#14b8a6" }), T + 0.1 + i * 0.1, ruhig));
+    });
+    // der Finger tastet über die Punkte (die Spitze auf der Zelle), nicht über die Buchstaben darunter
+    if (z.finger) svg.appendChild(bewege(s("g", {}, bildzeichen(4, 12, "👆", 18)), `M${x0 + zb / 2},${y0 + zh * 0.55} H${x0 + (n - 1) * (zb + 8) + zb / 2}`, { x: x0 + (n - 1) * (zb + 8) + zb / 2, y: y0 + zh * 0.55, winkel: 0 }, ruhig, { drehen: false, linear: true }));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Auge-Entdecker (ZOOM · auge) -----
+  /**
+   * { teile: 1–8 } — das Auge von vorn wie im Spiel (Iris deko-5, Pupille), die Teile leuchten der Reihe nach auf
+   * (Augenbraue, Augenlid, Wimpern, Pupille, Iris, das Weisse, Tränen, Hornhaut); { pupille: "hell" | "dunkel" } — die
+   * Pupille wird im Hellen klein (r 14 → im Bild 7), im Dunkeln weit; { schnitt: 1–5 } — das Auge im Schnitt mit
+   * Hornhaut, Linse, Glaskörper, Netzhaut, Sehnerv; { lichtweg: true } — das Licht geht von links durch bis ins Gehirn 🧠.
+   */
+  function auge(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("zoom", stufe, { "data-bilder": "auge" });
+    svg.appendChild(tagGrund());
+    const ring = (el, ab) => erscheine(s("g", { "data-stueck": "teil" }, el), ab, ruhig, 0.3);
+    if (Number.isInteger(z.teile) || z.pupille) {
+      if (z.teile !== undefined && (z.teile < 1 || z.teile > 8)) return null;
+      if (z.pupille !== undefined && !["hell", "dunkel"].includes(z.pupille)) return null;
+      const cx = 160, cy = 80;
+      svg.append(s("path", { d: `M${cx - 80},${cy} Q${cx},${cy - 56} ${cx + 80},${cy} Q${cx},${cy + 56} ${cx - 80},${cy} Z`, fill: "#ffffff", stroke: "#a8714a", "stroke-width": 1.6 }),
+        s("circle", { cx, cy, r: 26, style: "fill:var(--deko-5)" }), s("path", { d: `M${cx - 74},${cy - 48} Q${cx},${cy - 76} ${cx + 74},${cy - 48}`, fill: "none", stroke: "#6b4a2b", "stroke-width": 6, "stroke-linecap": "round" }));
+      for (let i = 0; i < 9; i++) { const x = cx - 64 + i * 16, y = cy - 24 - 14 * (1 - ((i - 4) / 4) ** 2); svg.appendChild(s("line", { x1: x, y1: y, x2: x - 2, y2: y - 8, stroke: "#2d3047", "stroke-width": 1.4 })); }
+      const pupille = s("circle", { cx, cy, r: z.pupille === "hell" ? 7 : z.pupille === "dunkel" ? 16 : 11, fill: "#1d2140", "data-pupille": z.pupille || "mittel" });
+      if (z.pupille && !ruhig) pupille.appendChild(s("animate", { attributeName: "r", from: z.pupille === "hell" ? 16 : 7, to: z.pupille === "hell" ? 7 : 16, begin: t(0.4), dur: `${T * 0.6}s`, fill: "freeze" }));
+      svg.append(pupille, s("circle", { cx: cx + 9, cy: cy - 9, r: 4, fill: "#ffffff", opacity: 0.85 }));
+      if (z.pupille) svg.append(z.pupille === "hell" ? sonne(286, 30, 14) : s("g", {}, s("rect", { x: 0, y: 0, width: BREITE, height: HOEHE, rx: 14, fill: "#1d2140", opacity: 0.35 }), bildzeichen(290, 28, "🌙", 18)));
+      // die Teile des Spiels, die aufleuchten (deko-4): Augenbraue, Augenlid, Wimpern, Pupille, Iris, das Weisse, Tränen, Hornhaut
+      const TEILE = [s("path", { d: `M${cx - 74},${cy - 48} Q${cx},${cy - 76} ${cx + 74},${cy - 48}`, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 3 }),
+        s("path", { d: `M${cx - 80},${cy} Q${cx},${cy - 56} ${cx + 80},${cy}`, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 3 }),
+        s("path", { d: `M${cx - 66},${cy - 30} Q${cx},${cy - 66} ${cx + 66},${cy - 30}`, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2, "stroke-dasharray": "2 3" }),
+        s("circle", { cx, cy, r: 13, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.6 }), s("circle", { cx, cy, r: 28, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.6 }),
+        s("path", { d: `M${cx - 74},${cy} Q${cx - 50},${cy - 20} ${cx - 30},${cy} Q${cx - 50},${cy + 20} ${cx - 74},${cy} Z`, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.4 }),
+        s("ellipse", { cx: cx - 78, cy: cy + 4, rx: 3, ry: 5, fill: "#7fc4ec" }), s("path", { d: `M${cx - 30},${cy - 22} Q${cx},${cy - 34} ${cx + 30},${cy - 22}`, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2 })];
+      const n = z.teile ?? 0;
+      svg.setAttribute("data-anzahl", n);
+      TEILE.slice(0, n).forEach((el, i) => svg.appendChild(ring(el, (i * T) / Math.max(1, n))));
+    } else if (Number.isInteger(z.schnitt) || z.lichtweg === true) {
+      const n = z.lichtweg ? 5 : z.schnitt;
+      if (n < 1 || n > 5) return null;
+      svg.setAttribute("data-anzahl", n);
+      const cx = 150, cy = 76;
+      svg.append(s("circle", { cx, cy, r: 50, fill: "#ffffff", stroke: "#a8714a", "stroke-width": 1.6 }), s("path", { d: `M${cx + 46},${cy - 8} Q${cx + 80},${cy - 6} ${cx + 110},${cy + 6}`, fill: "none", stroke: "#f0c050", "stroke-width": 7 }), bildzeichen(286, 92, "🧠", 26));
+      // Hornhaut, Linse, Glaskörper, Netzhaut, Sehnerv (Licht kommt von links, wie im Schnitt des Spiels)
+      const INNEN = [s("path", { d: `M${cx - 44},${cy - 24} Q${cx - 64},${cy} ${cx - 44},${cy + 24}`, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 4 }),
+        s("ellipse", { cx: cx - 30, cy, rx: 7, ry: 17, style: "fill:var(--deko-4)", opacity: 0.8 }), s("circle", { cx: cx + 8, cy, r: 34, style: "fill:var(--deko-4)", opacity: 0.18 }),
+        s("path", { d: `M${cx + 20},${cy - 46} A50,50 0 0,1 ${cx + 20},${cy + 46}`, fill: "none", stroke: "#e5484d", "stroke-width": 4 }), s("path", { d: `M${cx + 50},${cy - 2} H${cx + 62}`, style: "stroke:var(--deko-4)", "stroke-width": 7 })];
+      INNEN.slice(0, n).forEach((el, i) => svg.appendChild(ring(el, (i * T) / n)));
+      if (z.lichtweg) {
+        // das Licht von der Lampe links: durch Hornhaut und Pupille, in der Linse gebündelt, auf die Netzhaut, dann ins Gehirn
+        svg.append(bildzeichen(22, cy, "💡", 20), zeichne(s("path", { d: `M36,${cy - 10} L${cx - 30},${cy - 8} L${cx + 48},${cy + 6} M36,${cy + 10} L${cx - 30},${cy + 8} L${cx + 48},${cy - 6}`, fill: "none", stroke: "#f5b301", "stroke-width": 2 }), T * 0.3, ruhig, T * 0.5),
+          zeichne(s("path", { d: `M${cx + 62},${cy - 2} Q${cx + 96},${cy} ${270},${cy + 10}`, fill: "none", stroke: "#f5b301", "stroke-width": 2, "stroke-dasharray": "4 3" }), T * 0.85, ruhig, 0.3));
+      }
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 130, ruhig));
+    return svg;
+  }
+
+  // ----- Lärm-Wächter (REISE · schall) -----
+  const LAERM = { "🤫": 1, "🌧️": 2, "🧹": 3, "🚜": 4, "🚁": 5, "🎸": 5 }; // Lärm-Skala 1–5 der Liste des Spiels
+  const SCHUTZ = { "👂": 2, "🎧": 2, "🔉": 2, "🚶": 2, "🪟": 2, "🧱": 2, "🙉": 1, "🕶️": 0, "🙈": 0, "🧤": 0 }; // wie gut es hilft
+  /** Schallbögen von x, y nach rechts (n Bögen, ab Zeitpunkt), Grösse g. */
+  function schallBoegen(x, y, n, ab, ruhig, { g = 14, farbe = "#6b7089", schritt = 9 } = {}) {
+    const e = s("g", {});
+    for (let i = 0; i < n; i++) e.appendChild(zeichne(s("path", { d: `M${x + i * schritt},${y - g / 2 - i * 2} Q${x + i * schritt + 6},${y} ${x + i * schritt},${y + g / 2 + i * 2}`, fill: "none", stroke: farbe, "stroke-width": 2, "stroke-linecap": "round" }), ab + i * 0.15, ruhig, 0.2));
+    return e;
+  }
+  /**
+   * { leise: [Bild …], laut: [Bild …] } — in die Körbe 🔈 und 🔊 (leise ≤ 2, laut ≥ 4 auf der Lärm-Skala, geprüft);
+   * { skala: [Bild …] } — die Geräusche auf der Skala 1–5 des Spiels (bis 2 deko-5, sonst deko-3); { quelle, schutz } —
+   * der Schall trifft auf den Schutz (💪 hilft gut: kein Bogen kommt durch, 🤏 hilft etwas: kleinere Bögen); { ohr: true }
+   * — der Schall läuft durch den Gehörgang, das Trommelfell schwingt; { echo: true } — der Ruf hallt von der Felswand zurück.
+   */
+  function schall(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "schall" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.leise) && Array.isArray(z.laut)) {
+      if (!z.leise.every(b => LAERM[b] <= 2) || !z.laut.every(b => LAERM[b] >= 4) || !z.leise.length || !z.laut.length || z.leise.length + z.laut.length > 6) return null;
+      svg.setAttribute("data-anzahl", z.leise.length + z.laut.length);
+      let k = 0;
+      [[z.leise, "🔈", 86], [z.laut, "🔊", 234]].forEach(([dinge, zeichen, kx]) => {
+        svg.append(s("path", { d: `M${kx - 56},84 H${kx + 56} L${kx + 46},136 H${kx - 46} Z`, fill: "#ffffff", stroke: "#a8743f", "stroke-width": 2.2 }), bildzeichen(kx, 124, zeichen, 14));
+        dinge.forEach((b, j) => { const x = kx + (j - (dinge.length - 1) / 2) * 32; svg.appendChild(herein(s("g", { "data-stueck": "geraeusch" }, bildzeichen(x, 100, b, 22)), 160 - x, -76, 0.2 + k++ * 0.5, ruhig, 0.5)); });
+      });
+    } else if (Array.isArray(z.skala)) {
+      if (!z.skala.length || z.skala.length > 5 || !z.skala.every(b => LAERM[b])) return null;
+      svg.setAttribute("data-anzahl", z.skala.length);
+      const fx = w => 30 + (w - 1) * 54;
+      for (let w = 1; w <= 5; w++) svg.append(s("rect", { x: fx(w), y: 100, width: 50, height: 22, rx: 4, style: `fill:var(${w <= 2 ? "--deko-5" : "--deko-3"})`, opacity: 0.35 + w * 0.13 }), text(fx(w) + 25, 116, w, { gross: 12, farbe: "#ffffff" }));
+      [...z.skala].sort((a, b) => LAERM[a] - LAERM[b]).forEach((b, i) => {
+        const x = fx(LAERM[b]) + 25;
+        svg.appendChild(vonOben(s("g", { "data-stueck": "geraeusch", "data-wert": LAERM[b] }, bildzeichen(x, 70, b, 26), s("path", { d: `M${x},86 V98`, stroke: "#6b7089", "stroke-width": 1.4 })), (i * T) / z.skala.length, ruhig, 40, 0.35));
+      });
+    } else if (z.quelle && z.schutz) {
+      if (!LAERM[z.quelle] || SCHUTZ[z.schutz] === undefined) return null;
+      const w = SCHUTZ[z.schutz];
+      svg.setAttribute("data-wert", w);
+      svg.append(bildzeichen(46, 76, z.quelle, 32), schallBoegen(70, 76, 4, 0.1, ruhig, { g: 24 }), bildzeichen(268, 80, "🧒", 34));
+      svg.appendChild(herein(s("g", { "data-stueck": "schutz" }, bildzeichen(176, 76, z.schutz, 30)), 0, -60, 0.3, ruhig, 0.5));
+      if (w < 2) svg.appendChild(schallBoegen(206, 76, 3, T * 0.6, ruhig, { g: w ? 10 : 24, farbe: w ? "#a8adbf" : "#6b7089" }));
+      svg.appendChild(erscheine(bildzeichen(176, 122, w === 2 ? "💪" : w === 1 ? "🤏" : "🚫", 18), T, ruhig));
+    } else if (z.ohr === true) {
+      // das Ohr im Schnitt wie im Spiel: Ohrmuschel, Gehörgang als Tunnel, das Trommelfell am Ende
+      // der Kopf von der Seite (rechts), davor die Ohrmuschel, der Gehörgang führt hinein bis zum Trommelfell
+      svg.append(s("rect", { x: 150, y: 8, width: 160, height: 134, rx: 30, fill: "#f9d3b0" }),
+        s("path", { d: "M152,26 Q112,30 116,64 Q118,80 134,84 Q122,98 130,114 Q140,128 152,124", fill: "#f4c29a", stroke: "#a8714a", "stroke-width": 1.8 }),
+        s("path", { d: "M146,40 Q128,44 130,62", fill: "none", stroke: "#a8714a", "stroke-width": 1.2 }),
+        s("rect", { x: 150, y: 70, width: 110, height: 16, fill: "#fbe3cf" }), s("path", { d: "M150,70 H260 M150,86 H260", stroke: "#a8714a", "stroke-width": 1.6 }));
+      const fell = s("ellipse", { cx: 262, cy: 78, rx: 3, ry: 12, style: "fill:var(--deko-2)", "data-stueck": "trommelfell" });
+      if (!ruhig) fell.appendChild(s("animate", { attributeName: "rx", values: "3;6;2;5;3", begin: t(T * 0.75), dur: "0.6s", fill: "freeze" }));
+      svg.append(fell, schallBoegen(30, 78, 3, 0.1, ruhig, { g: 30 }), schallBoegen(170, 78, 4, T * 0.4, ruhig, { g: 8, schritt: 20 }), text(292, 82, "→", { gross: 14, farbe: "#6b7089" }));
+      svg.setAttribute("data-anzahl", 1);
+    } else if (z.echo === true) {
+      svg.append(s("path", { d: "M262,10 L300,14 L312,140 L250,140 L256,90 Z", fill: "#8a8f99" }), bildzeichen(40, 98, "🧒", 34), bildzeichen(66, 70, "🗣️", 16),
+        schallBoegen(80, 80, 6, 0.1, ruhig, { g: 20, schritt: 28 }));
+      // zurück: gespiegelte Bögen von der Wand zum Kind
+      const zurueck = s("g", { "data-stueck": "echo" });
+      for (let i = 0; i < 4; i++) zurueck.appendChild(zeichne(s("path", { d: `M${240 - i * 36},${70 - i * 2} Q${234 - i * 36},80 ${240 - i * 36},${90 + i * 2}`, fill: "none", stroke: "#a8adbf", "stroke-width": 2, "stroke-dasharray": "3 2" }), T * 0.55 + i * 0.2, ruhig, 0.2));
+      svg.appendChild(zurueck);
+      svg.setAttribute("data-anzahl", 1);
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Kompass-Spiel (KARTE · kompassweg) -----
+  const RICHTUNG = { N: [0, -1], NO: [1, -1], O: [1, 0], SO: [1, 1], S: [0, 1], SW: [-1, 1], W: [-1, 0], NW: [-1, -1] }; // O wie im Spiel
+  /**
+   * Plan 6 × 6 wie im Spiel; die Eule geht die Teilstücke von der Schule 🏫 zum Ziel, die Kompassrose daneben (mit acht
+   * Richtungen ab s4). dreh: die Karte ist um so viele Vierteldrehungen gedreht — der Nordpfeil und die Nadel zeigen
+   * weiter nach Norden der Karte. Angabe: { start: [Spalte, Zeile], schritte: [[Richtung, Felder] …], ziel, acht?, dreh? }.
+   */
+  function kompassweg(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || !Array.isArray(z.start) || !Array.isArray(z.schritte) || !z.schritte.length || z.schritte.length > 4 || typeof z.ziel !== "string" || ![0, 1, 2, 3].includes(z.dreh ?? 0)) return null;
+    let [c, r] = z.start;
+    const felder = [[c, r]];
+    for (const [ri, n] of z.schritte) {
+      if (!RICHTUNG[ri] || !Number.isInteger(n) || n < 1 || n > 4) return null;
+      c += RICHTUNG[ri][0] * n; r += RICHTUNG[ri][1] * n;
+      if (c < 0 || c > 5 || r < 0 || r > 5) return null;
+      felder.push([c, r]);
+    }
+    const svg = neuesBild("karte", stufe, { "data-bilder": "kompassweg", "data-wert": `${c},${r}`, "data-anzahl": z.schritte.length });
+    svg.appendChild(tagGrund());
+    const fz = 19, mx = 112, my = 76, k = z.dreh ?? 0, T = DAUER * 0.85;
+    // ein Feld in Bildkoordinaten; gedreht um k Vierteldrehungen im Uhrzeigersinn um die Mitte des Plans
+    const punkt = (cc, rr) => { let dx = (cc - 2.5) * fz, dy = (rr - 2.5) * fz; for (let i = 0; i < k; i++) [dx, dy] = [-dy, dx]; return [mx + dx, my + dy]; };
+    svg.appendChild(s("rect", { x: mx - 3 * fz, y: my - 3 * fz, width: 6 * fz, height: 6 * fz, fill: "#eef7e6", stroke: "#8a8fa8", "stroke-width": 1.2 }));
+    for (let i = 1; i < 6; i++) svg.append(s("line", { x1: mx - 3 * fz + i * fz, y1: my - 3 * fz, x2: mx - 3 * fz + i * fz, y2: my + 3 * fz, stroke: "#cfd8c4", "stroke-width": 0.8 }),
+      s("line", { x1: mx - 3 * fz, y1: my - 3 * fz + i * fz, x2: mx + 3 * fz, y2: my - 3 * fz + i * fz, stroke: "#cfd8c4", "stroke-width": 0.8 }));
+    const pts = felder.map(([cc, rr]) => punkt(cc, rr));
+    svg.append(bildzeichen(...pts[0], "🏫", 14), bildzeichen(...pts[pts.length - 1], z.ziel, 14));
+    // Nordpfeil der Karte (oben am Plan, mit der Karte gedreht)
+    const [nx, ny] = punkt(2.5, -0.9), winkel = k * 90;
+    svg.appendChild(s("g", { transform: `rotate(${winkel} ${nx} ${ny})` }, s("path", { d: `M${nx},${ny - 9} L${nx + 5},${ny + 3} L${nx - 5},${ny + 3} Z`, fill: "#e5484d" }), text(nx, ny + 12, "N", { gross: 9 })));
+    const zeiten = ankunft(pts, T);
+    for (let i = 1; i < pts.length; i++) svg.appendChild(zeichne(s("path", { d: `M${pts[i - 1].join(",")} L${pts[i].join(",")}`, fill: "none", stroke: "#e0569a", "stroke-width": 2.4, "stroke-linecap": "round", "data-stueck": "teilstueck" }), zeiten[i - 1], ruhig, zeiten[i] - zeiten[i - 1]));
+    const [ex, ey] = pts[pts.length - 1];
+    svg.appendChild(bewege(s("g", {}, euleSitzend(0.14)), "M" + pts.map(p => p.join(",")).join(" L"), { x: ex, y: ey - 6, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    // Kompassrose rechts: Buchstaben gedreht wie die Karte, die Nadel zeigt nach Norden der Karte
+    const rx = 252, ry = 76, RR = 40, namen = z.acht ? ["N", "NO", "O", "SO", "S", "SW", "W", "NW"] : ["N", "O", "S", "W"];
+    svg.append(s("circle", { cx: rx, cy: ry, r: RR, fill: "#ffffff", stroke: "#2d3047", "stroke-width": 1.6 }));
+    namen.forEach((nm, i) => { const w = ((winkel + (i * 360) / namen.length) * Math.PI) / 180; svg.appendChild(text(rx + (RR - 11) * Math.sin(w), ry - (RR - 11) * Math.cos(w) + 3.5, nm, { gross: nm.length > 1 ? 9 : 11, farbe: nm === "N" ? "#e5484d" : "#2d3047" })); });
+    const nadel = s("g", {}, s("path", { d: `M${rx},${ry - 22} L${rx + 5},${ry} L${rx - 5},${ry} Z`, fill: "#e5484d" }), s("path", { d: `M${rx},${ry + 22} L${rx + 5},${ry} L${rx - 5},${ry} Z`, fill: "#8a8fa8" }));
+    if (ruhig || !k) nadel.setAttribute("transform", `rotate(${winkel} ${rx} ${ry})`);
+    else nadel.appendChild(s("animateTransform", { attributeName: "transform", type: "rotate", from: `0 ${rx} ${ry}`, to: `${winkel} ${rx} ${ry}`, begin: t(0.2), dur: "0.8s", fill: "freeze" }));
+    svg.append(nadel, s("circle", { cx: rx, cy: ry, r: 3, fill: "#2d3047" }));
+    if (k) svg.appendChild(bildzeichen(rx + RR - 2, ry + RR - 4, "🔄", 12));
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 130, ruhig));
+    return svg;
+  }
+
+  // ----- Plan-Leser (KARTE · planweg) -----
+  // Quartierplan mit Legendenzeichen wie im Spiel (Form und Farbe), feste Plätze auf dem Plan 6 × 6
+  const PLAN_ZEICHEN = [["schule", "Schule", 1, 1], ["kirche", "Kirche", 4, 0], ["baeckerei", "Bäckerei", 5, 3], ["post", "Post", 2, 4], ["spielplatz", "Spielplatz", 0, 3],
+    ["baum", "Baum", 3, 2], ["baum", "Baum", 4, 5], ["baum", "Baum", 1, 5], ["haus", "Wohnhaus", 3, 4], ["haus", "Wohnhaus", 5, 1]];
+  function planZeichen(art, x, y, g = 6) {
+    if (art === "schule") return s("rect", { x: x - g, y: y - g, width: 2 * g, height: 2 * g, style: "fill:var(--deko-6)" });
+    if (art === "kirche") return s("path", { d: `M${x - g},${y} H${x + g} M${x},${y - g} V${y + g}`, style: "stroke:var(--deko-1)", "stroke-width": 3 });
+    if (art === "baeckerei") return s("circle", { cx: x, cy: y, r: g, style: "fill:var(--deko-3)" });
+    if (art === "post") return s("path", { d: [...Array(10).keys()].map(i => { const w = (i * Math.PI) / 5 - Math.PI / 2, rr = i % 2 ? g * 0.45 : g * 1.1; return `${i ? "L" : "M"}${x + rr * Math.cos(w)},${y + rr * Math.sin(w)}`; }).join(" ") + " Z", style: "fill:var(--deko-4)" });
+    if (art === "spielplatz") return s("path", { d: `M${x},${y - g} L${x + g},${y + g} L${x - g},${y + g} Z`, style: "fill:var(--deko-5)" });
+    if (art === "baum") return s("g", {}, s("circle", { cx: x, cy: y - 1.5, r: g * 0.8, style: "fill:var(--deko-5)" }), s("rect", { x: x - 1, y: y + 2, width: 2, height: g * 0.8, fill: "#6b4a2b" }));
+    return s("path", { d: `M${x - g},${y + g} V${y - 1} L${x},${y - g} L${x + g},${y - 1} V${y + g} Z`, style: "fill:var(--deko-7)" });
+  }
+  /**
+   * Plan mit Legende und Massstab „1 Feld = … m“ wie im Spiel. { finde: Zeichen } — das Zeichen leuchtet auf dem Plan und
+   * in der Legende (s1); { zaehle: Zeichen } — die Zeichen werden gezählt (s2); { start, weg: [[n | s | o | w, Felder] …],
+   * massstab } — der gestrichelte Weg mit Pfeil, darunter die Länge: Felder · Massstab (nachgerechnet).
+   */
+  function planweg(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("karte", stufe, { "data-bilder": "planweg" });
+    svg.appendChild(tagGrund());
+    const fz = 18, x0 = 16, y0 = 16, feld = (cc, rr) => [x0 + (cc + 0.5) * fz, y0 + (rr + 0.5) * fz];
+    svg.appendChild(s("rect", { x: x0, y: y0, width: 6 * fz, height: 6 * fz, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.2 }));
+    for (let i = 1; i < 6; i++) svg.append(s("line", { x1: x0 + i * fz, y1: y0, x2: x0 + i * fz, y2: y0 + 6 * fz, stroke: "#e4e6ec", "stroke-width": 0.8 }), s("line", { x1: x0, y1: y0 + i * fz, x2: x0 + 6 * fz, y2: y0 + i * fz, stroke: "#e4e6ec", "stroke-width": 0.8 }));
+    PLAN_ZEICHEN.forEach(([art, , cc, rr]) => svg.appendChild(planZeichen(art, ...feld(cc, rr))));
+    // Legende rechts: jedes Zeichen einmal
+    const arten = [...new Map(PLAN_ZEICHEN.map(([a, n]) => [a, n])).entries()];
+    svg.append(s("rect", { x: 140, y: 10, width: 166, height: 100, rx: 5, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1 }), text(150, 22, "Legende", { gross: 10, anker: "start" }));
+    const zeileY = i => 34 + i * 11;
+    arten.forEach(([a, n], i) => svg.append(planZeichen(a, 154, zeileY(i) - 3, 4), text(166, zeileY(i), n, { gross: 9, anker: "start", fett: false })));
+    if (z.finde || z.zaehle) {
+      const art = z.finde || z.zaehle, treffer = PLAN_ZEICHEN.filter(p => p[0] === art), li = arten.findIndex(([a]) => a === art);
+      if (!treffer.length || (z.finde && treffer.length !== 1)) return null;
+      svg.setAttribute("data-anzahl", treffer.length);
+      svg.appendChild(erscheine(s("rect", { x: 146, y: zeileY(li) - 10, width: 150, height: 12, rx: 3, fill: "none", stroke: "#f5b301", "stroke-width": 1.6 }), 0.2, ruhig));
+      treffer.forEach(([, , cc, rr], i) => { const [x, y] = feld(cc, rr); svg.appendChild(erscheine(s("g", { "data-stueck": "zeichen" }, s("circle", { cx: x, cy: y, r: 9, fill: "none", stroke: "#f5b301", "stroke-width": 2 }),
+        z.zaehle ? text(x + 9, y - 6, i + 1, { gross: 10, farbe: "#e0569a" }) : null), 0.4 + (i * T * 0.7) / treffer.length, ruhig, 0.25)); });
+      if (z.zaehle) svg.appendChild(erscheine(text(220, 132, treffer.length, { gross: 16, farbe: "#e0569a" }), T + 0.1, ruhig));
+    } else {
+      const SCHRITT = { n: [0, -1], s: [0, 1], o: [1, 0], w: [-1, 0] };
+      if (!Array.isArray(z.start) || !Array.isArray(z.weg) || !z.weg.length || z.weg.length > 4 || !Number.isInteger(z.massstab) || z.massstab < 1) return null;
+      let [c, r] = z.start;
+      const pts = [feld(c, r)];
+      for (const [ri, n] of z.weg) {
+        if (!SCHRITT[ri] || !Number.isInteger(n) || n < 1 || n > 3) return null;
+        c += SCHRITT[ri][0] * n; r += SCHRITT[ri][1] * n;
+        if (c < 0 || c > 5 || r < 0 || r > 5) return null;
+        pts.push(feld(c, r));
+      }
+      const felder = z.weg.reduce((a, [, n]) => a + n, 0), meter = felder * z.massstab;
+      svg.setAttribute("data-wert", meter);
+      svg.setAttribute("data-anzahl", z.weg.length);
+      const zeiten = ankunft(pts, T);
+      svg.appendChild(s("circle", { cx: pts[0][0], cy: pts[0][1], r: 6, fill: "none", stroke: "#e0569a", "stroke-width": 2 }));
+      for (let i = 1; i < pts.length; i++) svg.appendChild(erscheine(s("path", { d: `M${pts[i - 1].join(",")} L${pts[i].join(",")}`, fill: "none", stroke: "#e0569a", "stroke-width": 2.4, "stroke-dasharray": "4 3", "data-stueck": "wegstueck" }), zeiten[i - 1], ruhig, Math.max(0.2, zeiten[i] - zeiten[i - 1])));
+      const [ax, ay] = pts[pts.length - 1], [bx, by] = pts[pts.length - 2], w = (Math.atan2(ay - by, ax - bx) * 180) / Math.PI;
+      svg.appendChild(erscheine(s("path", { d: `M${ax},${ay} l-7,-4 l0,8 Z`, fill: "#e0569a", transform: `rotate(${w} ${ax} ${ay})` }), T, ruhig));
+      const teile = z.weg.map(([, n]) => n);
+      svg.append(s("rect", { x: 150, y: 116, width: 40, height: 4, fill: "#2d3047" }), text(196, 121, `1 Feld = ${z.massstab} m`, { gross: 9, anker: "start", fett: false }),
+        erscheine(text(BREITE / 2 + 66, 140, `${teile.length > 1 ? `(${teile.join(" + ")})` : teile[0]} · ${z.massstab} m = ${meter} m`, { gross: 12, farbe: "#e0569a" }), T + 0.2, ruhig));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(22, 22, ruhig)); // oben links im Plan, dort ist kein Zeichen
+    return svg;
+  }
+
+  // ----- Teddy-Versteck (REISE · teddy) -----
+  // Plätze im Zimmer (Tisch links, Kiste in der Mitte, Stuhl rechts): wo der Teddy sitzt
+  const TEDDY_PLATZ = { "auf-tisch": [80, 82], "unter-tisch": [80, 118], "ueber-tisch": [80, 64], "links-tisch": [34, 118], "zwischen": [132, 118], "in-kiste": [182, 106],
+    "vor-kiste": [182, 136], "neben-kiste": [226, 118], "auf-stuhl": [272, 94] };
+  /** Der Teddy (wie im Spiel gezeichnet), Füsse bei 0,0. */
+  const teddyFigur = () => s("g", { "data-figur": "teddy" }, s("circle", { cx: -6, cy: -24, r: 3.5, fill: "#a8743f" }), s("circle", { cx: 6, cy: -24, r: 3.5, fill: "#a8743f" }),
+    s("ellipse", { cx: 0, cy: -8, rx: 8, ry: 9, fill: "#a8743f" }), s("circle", { cx: 0, cy: -20, r: 7, fill: "#a8743f" }), s("ellipse", { cx: 0, cy: -18, rx: 3, ry: 2.2, fill: "#e8c79b" }),
+    s("circle", { cx: -2.5, cy: -22, r: 0.9, fill: "#2d3047" }), s("circle", { cx: 2.5, cy: -22, r: 0.9, fill: "#2d3047" }));
+  /**
+   * Der Teddy hüpft von Platz zu Platz (auf, unter, über dem Tisch, in der Kiste, zwischen Tisch und Kiste, links und
+   * rechts neben …), über dem Tisch mit Ballon (deko-2) wie im Spiel. Angabe: [Platz …] oder { regal: [[Bild, Fach 0–8] …] }
+   * — die Spielsachen kommen ins Regal 3 × 3 (s6).
+   */
+  function teddy(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "teddy" });
+    svg.append(tagGrund(), s("rect", { x: 0, y: 120, width: BREITE, height: 30, rx: 14, fill: "#eadfcb" }));
+    if (z.regal) {
+      if (!Array.isArray(z.regal) || !z.regal.length || z.regal.length > 9 || !z.regal.every(([b, f]) => typeof b === "string" && Number.isInteger(f) && f >= 0 && f <= 8) || new Set(z.regal.map(r => r[1])).size !== z.regal.length) return null;
+      svg.setAttribute("data-anzahl", z.regal.length);
+      const fz = 34, x0 = 160 - 1.5 * fz, y0 = 16;
+      svg.appendChild(s("rect", { x: x0 - 4, y: y0 - 4, width: 3 * fz + 8, height: 3 * fz + 8, rx: 4, fill: "#a8743f" }));
+      for (let f = 0; f < 9; f++) svg.appendChild(s("rect", { x: x0 + (f % 3) * fz + 2, y: y0 + Math.floor(f / 3) * fz + 2, width: fz - 4, height: fz - 4, fill: "#f3e3c3" }));
+      z.regal.forEach(([b, f], i) => { const x = x0 + (f % 3 + 0.5) * fz, y = y0 + (Math.floor(f / 3) + 0.5) * fz; svg.appendChild(vonOben(s("g", { "data-stueck": "ding", "data-fach": f }, bildzeichen(x, y, b, 20)), (i * T) / z.regal.length, ruhig, 40, 0.35)); });
+    } else {
+      if (!Array.isArray(z) || !z.length || z.length > 4 || !z.every(p => TEDDY_PLATZ[p])) return null;
+      svg.setAttribute("data-anzahl", z.length);
+      svg.setAttribute("data-wert", z[z.length - 1]);
+      // Tisch, Kiste (hinten), Stuhl
+      svg.append(s("rect", { x: 48, y: 84, width: 64, height: 6, fill: "#a8743f" }), s("path", { d: "M54,90 V120 M106,90 V120", stroke: "#6b4a2b", "stroke-width": 4 }),
+        s("rect", { x: 154, y: 92, width: 56, height: 28, fill: "#c08a4f" }), s("rect", { x: 258, y: 94, width: 30, height: 5, fill: "#a8743f" }),
+        s("path", { d: "M262,99 V120 M284,99 V120 M286,94 V66", stroke: "#6b4a2b", "stroke-width": 3 }));
+      const pts = z.map(p => TEDDY_PLATZ[p]), weg = pts.slice(1).reduce((d, [x, y], i) => { const [px, py] = pts[i]; return d + ` Q${(px + x) / 2},${Math.min(py, y) - 34} ${x},${y}`; }, `M${pts[0][0]},${pts[0][1] - 30} L${pts[0][0]},${pts[0][1]}`);
+      const [ex, ey] = pts[pts.length - 1], figur = s("g", {}, teddyFigur());
+      if (z[z.length - 1] === "ueber-tisch") figur.append(s("line", { x1: 5, y1: -14, x2: 12, y2: -38, stroke: "#6b7089", "stroke-width": 1 }), s("ellipse", { cx: 12, cy: -46, rx: 7, ry: 9, style: "fill:var(--deko-2)" }));
+      svg.appendChild(bewege(figur, weg, { x: ex, y: ey, winkel: 0 }, ruhig, { drehen: false, dauer: T }));
+      // die Vorderwand der Kiste: der Teddy in der Kiste schaut nur oben heraus
+      svg.appendChild(s("rect", { x: 154, y: 104, width: 56, height: 16, fill: "#a8743f" }));
+      z.forEach((p, i) => { const [x, y] = TEDDY_PLATZ[p]; svg.appendChild(erscheine(s("circle", { cx: x, cy: y + 1, r: 2.4, fill: "#e0569a", "data-stueck": "platz" }), (T * (i + 0.5)) / z.length, ruhig, 0.2)); });
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Tier-Sortierer (SAMMELN · album) -----
+  const TIER_BILD = ["🦌", "🐗", "🦊", "🦡", "🐺", "🐻", "🐿️", "🐁", "🐇", "🦔", "🦇", "🦫", "🐄", "🐑", "🐐", "🐖", "🐎", "🫏", "🦓", "🐕", "🐈", "🐰", "🐹", "🐀", "🐋", "🐬",
+    "🦉", "🦆", "🦢", "🦅", "🐦‍⬛", "🐔", "🦜", "🐧", "🐟", "🐠", "🦈", "🦎", "🐍", "🐢", "🐊", "🐸", "🐜", "🪲", "🦗", "🦋", "🐞", "🐝", "🪰", "🦟", "🕷️", "🐌", "🪱"];
+  /**
+   * Das Album füllt sich, je Korb des Spiels eine Spalte mit seinem Zeichen (🌳 🚜 🏠, 🍼 🪶 🫧 🛡️ 💧 6️⃣ 8️⃣, 🦷 👂 🥩 ✌️ …);
+   * falle: ein kniffliges Tier landet erst im falschen Korb (✗) und rückt dann in den richtigen (Fledermaus kein Vogel).
+   * Angabe: { seiten: [[Korbzeichen, [Tier …]] …], falle?: [[Tier, falsch, richtig] …] }.
+   */
+  function album(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z || !Array.isArray(z.seiten) || !z.seiten.length || z.seiten.length > 6 || !z.seiten.every(([k, t0]) => typeof k === "string" && Array.isArray(t0) && t0.length <= 3 && t0.every(b => TIER_BILD.includes(b)))) return null;
+    const korb = z.seiten.map(([k]) => k), falle = z.falle ?? [];
+    if (!falle.every(([b, f, r]) => TIER_BILD.includes(b) && korb.includes(f) && korb.includes(r) && f !== r)) return null;
+    const anzahl = z.seiten.reduce((a, [, t0]) => a + t0.length, 0) + falle.length;
+    if (!anzahl) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "album", "data-anzahl": anzahl });
+    svg.append(tagGrund(), s("rect", { x: 14, y: 8, width: 292, height: 134, rx: 8, fill: "#fffaf0", stroke: "#d9cdb0", "stroke-width": 1.4 }));
+    const n = korb.length, sb = 292 / n, spX = i => 14 + (i + 0.5) * sb, zeilen = z.seiten.map(([, t0]) => t0.length);
+    z.seiten.forEach(([k], i) => { svg.append(s("circle", { cx: spX(i), cy: 26, r: 13, fill: "#ffffff", style: `stroke:var(--deko-${(i % 6) + 1})`, "stroke-width": 2 }), bildzeichen(spX(i), 26, k, 14)); if (i) svg.appendChild(s("line", { x1: 14 + i * sb, y1: 14, x2: 14 + i * sb, y2: 136, stroke: "#ece3cc", "stroke-width": 1 })); });
+    let k = 0;
+    z.seiten.forEach(([, tiere], i) => tiere.forEach((b, j) => svg.appendChild(vonOben(s("g", { "data-stueck": "tier" }, bildzeichen(spX(i), 58 + j * 28, b, 22)), (k++ * T * 0.7) / anzahl, ruhig, 30, 0.35))));
+    falle.forEach(([b, f, r]) => {
+      const fi = korb.indexOf(f), ri = korb.indexOf(r), y = 58 + zeilen[ri]++ * 28, ab = (k++ * T * 0.7) / anzahl;
+      svg.appendChild(kurz(s("g", {}, bildzeichen(spX(fi), 58 + (zeilen[fi]) * 28, b, 22), kreuz(spX(fi) + 14, 50 + zeilen[fi] * 28, 12)), ab, ab + 0.6, ruhig));
+      svg.appendChild(erscheine(s("g", { "data-stueck": "tier", "data-falle": f }, bildzeichen(spX(ri), y, b, 22), haken(spX(ri) + 14, y - 8, 11)), ab + 0.6, ruhig, 0.25));
+    });
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 140, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(30, 128, ruhig));
+    return svg;
+  }
+
+  // ----- Lebensraum-Zuordnung (REISE · lebensraeume) -----
+  const RAUM = { wald: ["🌲", "#2f7d4f"], wiese: ["🌼", "#7cb342"], weiher: ["💧", "#2f8fe0"], gebirge: ["🏔️", "#7a6f9b"] }; // Farben des Spiels
+  /**
+   * { raeume: [[Raum, [Tier …]] …] } — die Eule fliegt über die Lebensräume (Farben und Zeichen des Spiels), die Tiere
+   * schauen hervor; { kette: [Bild …] } — Nahrungskette, der Pfeil heisst „wird gefressen von“ wie im Spiel; { netz:
+   * [[Futter, Fresser] …] } — mehrere Ketten zusammen (die Feldmaus fressen Fuchs und Waldkauz).
+   */
+  function lebensraeume(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "lebensraeume" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.raeume)) {
+      if (!z.raeume.length || z.raeume.length > 4 || !z.raeume.every(([r, t0]) => RAUM[r] && Array.isArray(t0) && t0.length >= 1 && t0.length <= 3 && t0.every(b => TIER_BILD.includes(b)))) return null;
+      const n = z.raeume.length, rb = 300 / n, anzahl = z.raeume.reduce((a, [, t0]) => a + t0.length, 0);
+      svg.setAttribute("data-anzahl", anzahl);
+      let k = 0;
+      z.raeume.forEach(([r, tiere], i) => {
+        const x = 10 + i * rb, [zeichen, farbe] = RAUM[r];
+        svg.append(s("rect", { x: x + 2, y: 40, width: rb - 4, height: 100, rx: 8, fill: farbe, opacity: 0.85 }), bildzeichen(x + rb / 2, 56, zeichen, 18));
+        tiere.forEach((b, j) => svg.appendChild(erscheine(s("g", { "data-stueck": "tier" }, bildzeichen(x + rb / 2 + (j - (tiere.length - 1) / 2) * Math.min(30, (rb - 10) / tiere.length), 104, b, 22)), 0.3 + ((i + j / 3) * T * 0.8) / n, ruhig, 0.3)));
+        k += tiere.length;
+      });
+      svg.appendChild(bewege(s("g", {}, euleSitzend(0.16)), `M10,24 L${10 + (n - 0.5) * rb},24`, { x: 10 + (n - 0.5) * rb, y: 24, winkel: 0 }, ruhig, { drehen: false, linear: true }));
+    } else {
+      // Kette als Netz mit einer Kante je Paar; die Ebenen von links nach rechts (Futter links, Fresser rechts)
+      const kanten = Array.isArray(z.kette) ? z.kette.slice(1).map((b, i) => [z.kette[i], b]) : z.netz;
+      if (!Array.isArray(kanten) || !kanten.length || kanten.length > 6 || !kanten.every(k0 => Array.isArray(k0) && k0.length === 2 && k0.every(b => typeof b === "string" && b.length))) return null;
+      const knoten = [...new Set(kanten.flat())], ebene = new Map(knoten.map(b => [b, 0]));
+      for (let r = 0; r < knoten.length; r++) for (const [a, b] of kanten) if (ebene.get(b) <= ebene.get(a)) ebene.set(b, ebene.get(a) + 1);
+      if ([...ebene.values()].some(e => e >= knoten.length)) return null; // kein Kreis in der Kette
+      const tiefe = Math.max(...ebene.values()) + 1, jeEbene = new Map();
+      const pos = new Map(knoten.map(b => { const e = ebene.get(b), i = jeEbene.get(e) || 0; jeEbene.set(e, i + 1); return [b, [e, i]]; }));
+      const xy = b => { const [e, i] = pos.get(b), m = jeEbene.get(e); return [40 + (tiefe > 1 ? (e * 240) / (tiefe - 1) : 120), 75 + (i - (m - 1) / 2) * 46]; };
+      svg.setAttribute("data-anzahl", kanten.length);
+      knoten.forEach(b => { const [x, y] = xy(b); svg.appendChild(erscheine(s("g", {}, s("circle", { cx: x, cy: y, r: 18, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), bildzeichen(x, y, b, 22)), (ebene.get(b) * T * 0.8) / tiefe, ruhig, 0.3)); });
+      kanten.forEach(([a, b]) => {
+        const [x1, y1] = xy(a), [x2, y2] = xy(b), l = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / l, uy = (y2 - y1) / l, w = (Math.atan2(uy, ux) * 180) / Math.PI;
+        const sx = x1 + ux * 20, sy = y1 + uy * 20, zx = x2 - ux * 21, zy = y2 - uy * 21;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "frisst" }, s("line", { x1: sx, y1: sy, x2: zx, y2: zy, stroke: "#2fbf71", "stroke-width": 2.2 }), s("path", { d: `M${zx},${zy} l-7,-4 l0,8 Z`, fill: "#2fbf71", transform: `rotate(${w} ${zx} ${zy})` })),
+          ((ebene.get(a) + 0.6) * T * 0.8) / tiefe, ruhig, 0.3));
+      });
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 130, ruhig));
+    return svg;
+  }
+
+  // ----- Fledermaus-Forscher (ZYKLUS · fledermaus) -----
+  /** Fledermaus mit ausgebreiteten Flügeln (Flughaut), Mitte bei 0,0, Grösse k. */
+  const fledermausFigur = (k = 1) => s("g", { transform: `scale(${k})`, "data-figur": "fledermaus" },
+    // heller als die Nacht, mit hellem Rand: auf dem Nachthimmel gut zu sehen
+    s("path", { d: "M0,-3 Q-8,-12 -24,-8 Q-19,-2 -22,5 Q-14,1 -9,7 Q-5,2 0,6 Q5,2 9,7 Q14,1 22,5 Q19,-2 24,-8 Q8,-12 0,-3 Z", fill: "#6b5a80", stroke: "#d9cdf0", "stroke-width": 0.6 }),
+    s("path", { d: "M-4,-5 L-6,-12 L-1,-7 Z M4,-5 L6,-12 L1,-7 Z", fill: "#6b5a80", stroke: "#d9cdf0", "stroke-width": 0.5 }), s("circle", { cx: -2, cy: -4, r: 0.9, fill: "#fff6c8" }), s("circle", { cx: 2, cy: -4, r: 0.9, fill: "#fff6c8" }));
+  // das Jahr der Fledermaus wie im Spiel; ohne Jahreszeit (s6) zeigt jede Station, was sie tut
+  const FLEDER_JAHR = [["❄️", "💤"], ["🌱", "🦟"], ["☀️", "🍼"], ["☀️", "🦇"], ["🍂", "🐛"]];
+  /**
+   * { echo: true } — sie ruft, das Echo kommt von der Mücke zurück (grosse Ohren, s1); { jagd: 1–4 } — sie fängt nachts
+   * Insekten; { wochenstube: true } — Mutter und Junges hängen kopfüber in der Wochenstube; { jahr: true, ohneZeit? } — das
+   * Jahr im Kreis (Winterschlaf, Aufwachen, Junges, Fliegen lernen, Fett anfressen); { anpassungen: 1–4 } — Ohren,
+   * Flughaut, Krallen, Zähne leuchten auf.
+   */
+  function fledermaus(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "fledermaus" });
+    svg.append(himmelGrund(), himmel());
+    if (z.echo === true) {
+      svg.append(s("g", { transform: "translate(80 70)" }, fledermausFigur(1.4)), bildzeichen(250, 70, "🦟", 16));
+      for (let i = 0; i < 4; i++) svg.appendChild(zeichne(s("path", { d: `M${112 + i * 30},${58 - i * 2} Q${120 + i * 30},70 ${112 + i * 30},${82 + i * 2}`, fill: "none", stroke: "#9fd8e0", "stroke-width": 2 }), 0.1 + i * 0.2, ruhig, 0.2));
+      const zurueck = s("g", { "data-stueck": "echo" });
+      for (let i = 0; i < 4; i++) zurueck.appendChild(zeichne(s("path", { d: `M${228 - i * 30},${62 + i * 1.5} Q${222 - i * 30},70 ${228 - i * 30},${78 - i * 1.5}`, fill: "none", stroke: "#f5b301", "stroke-width": 1.8, "stroke-dasharray": "3 2" }), T * 0.55 + i * 0.18, ruhig, 0.2));
+      svg.appendChild(zurueck);
+      svg.setAttribute("data-anzahl", 1);
+    } else if (Number.isInteger(z.jagd)) {
+      if (z.jagd < 1 || z.jagd > 4) return null;
+      svg.setAttribute("data-anzahl", z.jagd);
+      const pts = [[30, 100], ...[...Array(z.jagd).keys()].map(i => [80 + i * 60, i % 2 ? 90 : 46])], zeiten = ankunft(pts, T);
+      pts.slice(1).forEach(([x, y], i) => svg.append(kurz(bildzeichen(x, y, "🦟", 14), 0, zeiten[i + 1], ruhig), erscheine(s("circle", { cx: x, cy: y, r: 3, fill: "#f5b301", "data-stueck": "gefangen" }), zeiten[i + 1], ruhig, 0.2)));
+      const [ex, ey] = pts[pts.length - 1];
+      svg.appendChild(bewege(s("g", {}, fledermausFigur(1)), "M" + pts.map(p => p.join(",")).join(" L"), { x: ex, y: ey, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    } else if (z.wochenstube === true) {
+      svg.append(s("path", { d: "M40,10 H280 V22 Q160,30 40,22 Z", fill: "#5e4a3a" }));
+      const haengend = (x, k, ab) => herein(s("g", { "data-stueck": "fledermaus" }, s("line", { x1: x, y1: 22, x2: x, y2: 30, stroke: "#3a2f45", "stroke-width": 1.4 }), s("g", { transform: `translate(${x} ${30 + 14 * k}) rotate(180) scale(${k * 0.5} ${k})` }, fledermausFigur(1))), 0, -20, ab, ruhig, 0.4);
+      svg.append(haengend(130, 1, 0.2), haengend(160, 0.6, T * 0.5), haengend(200, 1, 0.5), erscheine(bildzeichen(160, 90, "🍼", 18), T, ruhig));
+      svg.setAttribute("data-anzahl", 3);
+    } else if (z.jahr === true) {
+      const cx = 160, cy = 76, R = 52;
+      svg.setAttribute("data-anzahl", FLEDER_JAHR.length);
+      svg.appendChild(s("circle", { cx, cy, r: R, fill: "none", stroke: "#5a607e", "stroke-width": 1.6, "stroke-dasharray": "3 3" }));
+      const pts = FLEDER_JAHR.map((_, i) => { const w = (i * 2 * Math.PI) / 5 - Math.PI / 2; return [cx + R * Math.cos(w), cy + R * Math.sin(w)]; });
+      FLEDER_JAHR.forEach(([zeit, tut], i) => svg.appendChild(erscheine(s("g", { "data-stueck": "station" }, s("circle", { cx: pts[i][0], cy: pts[i][1], r: 15, fill: "#2b2f52", stroke: "#9aa0c4", "stroke-width": 1 }),
+        bildzeichen(pts[i][0], pts[i][1], z.ohneZeit ? tut : zeit, 16)), (i * T) / 5, ruhig, 0.3)));
+      svg.appendChild(bewege(s("g", {}, fledermausFigur(0.6)), `M${pts[0][0]},${pts[0][1] - 22} A${R + 22},${R + 22} 0 1,1 ${pts[4][0] - 18},${pts[4][1] - 14}`, { x: pts[4][0] - 18, y: pts[4][1] - 14, winkel: 0 }, ruhig, { drehen: false, dauer: T }));
+    } else if (Number.isInteger(z.anpassungen)) {
+      if (z.anpassungen < 1 || z.anpassungen > 4) return null;
+      svg.setAttribute("data-anzahl", z.anpassungen);
+      svg.appendChild(s("g", { transform: "translate(160 80)" }, fledermausFigur(4)));
+      // grosse Ohren, Flughaut, Krallen, spitze Zähne (deko-4 wie die markierten Teile im Spiel)
+      const TEILE = [s("circle", { cx: 160, cy: 52, r: 16, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.4 }), s("ellipse", { cx: 228, cy: 76, rx: 30, ry: 22, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.4 }),
+        s("circle", { cx: 160, cy: 106, r: 12, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.4 }), s("circle", { cx: 160, cy: 72, r: 8, fill: "none", style: "stroke:var(--deko-4)", "stroke-width": 2.4 })];
+      TEILE.slice(0, z.anpassungen).forEach((e, i) => { e.setAttribute("data-stueck", "teil"); svg.appendChild(erscheine(e, (i * T) / z.anpassungen, ruhig, 0.3)); });
+    } else return null;
+    if (sterne >= 2) svg.appendChild(funkeln(ruhig));
+    if (sterne >= 3) svg.appendChild(sternschnuppe(ruhig));
+    return svg;
+  }
+
+  // ----- Lebenszyklus-Puzzle (ZYKLUS · lebenszyklus) -----
+  // Stadien ohne Bildzeichen im Spiel, hier gezeichnet (Mitte bei 0,0)
+  const STADIUM = {
+    puppe: () => s("g", {}, s("line", { x1: 0, y1: -14, x2: 0, y2: -9, stroke: "#6b4a2b", "stroke-width": 1 }), s("ellipse", { cx: 0, cy: 0, rx: 5, ry: 10, fill: "#a8743f" }), s("path", { d: "M-4,-3 h8 M-4,3 h8", stroke: "#6b4a2b", "stroke-width": 0.8 })),
+    larve: () => s("g", {}, ...[-8, -3, 2, 7].map(x => s("circle", { cx: x, cy: 0, r: 4, fill: "#4f5668" })), s("circle", { cx: -3, cy: -1, r: 1.1, fill: "#f07c2a" }), s("circle", { cx: 7, cy: -1, r: 1.1, fill: "#f07c2a" })),
+    kaulquappe: () => s("g", {}, s("ellipse", { cx: -4, cy: 0, rx: 6, ry: 5, fill: "#3a3f5c" }), s("path", { d: "M1,0 Q8,-4 13,1 Q8,2 1,2 Z", fill: "#3a3f5c" })),
+    beine: () => s("g", {}, s("ellipse", { cx: -4, cy: 0, rx: 6, ry: 5, fill: "#4f6b3a" }), s("path", { d: "M1,0 Q8,-4 13,1 Q8,2 1,2 Z", fill: "#4f6b3a" }), s("path", { d: "M-2,4 l-3,5 M2,4 l3,5", stroke: "#4f6b3a", "stroke-width": 1.6 })),
+    jungfrosch: () => s("g", {}, s("ellipse", { cx: -2, cy: 0, rx: 7, ry: 5, fill: "#6cc77c" }), s("path", { d: "M5,1 Q10,0 12,3", stroke: "#6cc77c", "stroke-width": 2, fill: "none" }), s("path", { d: "M-7,3 l-3,4 M2,4 l2,4 M-5,-3 l-4,-2", stroke: "#6cc77c", "stroke-width": 1.6 }), s("circle", { cx: -5, cy: -3, r: 1, fill: "#2d3047" })),
+  };
+  const GEBURT = { ei: "🥚", beutel: "👜", lebend: "🍼" };
+  /**
+   * { stadien: [Bild | Zeichnung …], kreis? } — die Stadien des Zyklus (Liste des Spiels) erscheinen im Kreis mit Pfeilen,
+   * kreis: der Pfeil führt vom letzten zurück zum ersten; { geburt: [[Tier, ei | beutel | lebend] …] } — die Tiere in die
+   * Körbe 🥚 👜 🍼.
+   */
+  function lebenszyklus(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "lebenszyklus" });
+    svg.appendChild(tagGrund());
+    if (Array.isArray(z.geburt)) {
+      if (!z.geburt.length || z.geburt.length > 6 || !z.geburt.every(([b, a]) => typeof b === "string" && GEBURT[a])) return null;
+      svg.setAttribute("data-anzahl", z.geburt.length);
+      const KX = { ei: 70, beutel: 160, lebend: 250 }, zaehl = { ei: 0, beutel: 0, lebend: 0 };
+      for (const [a, kx] of Object.entries(KX)) svg.append(s("path", { d: `M${kx - 40},84 H${kx + 40} L${kx + 32},134 H${kx - 32} Z`, fill: "#ffffff", stroke: "#a8743f", "stroke-width": 2 }), bildzeichen(kx, 122, GEBURT[a], 14));
+      z.geburt.forEach(([b, a], i) => { const x = KX[a] + (zaehl[a]++ - 0.5) * 26; svg.appendChild(herein(s("g", { "data-stueck": "tier", "data-geburt": a }, bildzeichen(x, 100, b, 22)), 160 - x, -76, 0.2 + i * 0.4, ruhig, 0.45)); });
+    } else {
+      if (!Array.isArray(z.stadien) || z.stadien.length < 3 || z.stadien.length > 6 || !z.stadien.every(b => typeof b === "string" && (STADIUM[b] || !/^[a-z]+$/.test(b)))) return null;
+      const n = z.stadien.length, cx = 160, cy = 76, R = 50;
+      svg.setAttribute("data-anzahl", n);
+      const pts = z.stadien.map((_, i) => { const w = (i * 2 * Math.PI) / n - Math.PI / 2; return [cx + R * Math.cos(w) * 1.6, cy + R * Math.sin(w)]; });
+      z.stadien.forEach((b, i) => {
+        const [x, y] = pts[i], bild = STADIUM[b] ? s("g", { transform: `translate(${x} ${y}) scale(1.3)` }, STADIUM[b]()) : bildzeichen(x, y, b, 24);
+        svg.appendChild(erscheine(s("g", { "data-stueck": "stadium" }, s("circle", { cx: x, cy: y, r: 19, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), bild), (i * T) / n, ruhig, 0.3));
+        if (i < n - 1 || z.kreis) {
+          const [x2, y2] = pts[(i + 1) % n], l = Math.hypot(x2 - x, y2 - y), ux = (x2 - x) / l, uy = (y2 - y) / l, w = (Math.atan2(uy, ux) * 180) / Math.PI, ax = x2 - ux * 22, ay = y2 - uy * 22;
+          svg.appendChild(erscheine(s("g", {}, s("line", { x1: x + ux * 22, y1: y + uy * 22, x2: ax, y2: ay, stroke: "#2fbf71", "stroke-width": 2 }), s("path", { d: `M${ax},${ay} l-6,-3.5 l0,7 Z`, fill: "#2fbf71", transform: `rotate(${w} ${ax} ${ay})` })), ((i + 0.6) * T) / n, ruhig, 0.25));
+        }
+      });
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 22, ruhig));
+    return svg;
+  }
+
+  // ----- Pflanzen-Bestimmer (WACHSEN · pflanze) -----
+  /** Blattform an x, y (Länge l): oval, herz, lanzett, gefingert (fünf Fingerblätter wie die Rosskastanie), gesägt? */
+  function blatt(form, x, y, l = 30, { gesaegt = false, farbe = "#4f9d47" } = {}) {
+    const f = { fill: farbe, stroke: "#2f6b2a", "stroke-width": 1 };
+    if (form === "gefingert") return s("g", {}, ...[-60, -30, 0, 30, 60].map(w => s("ellipse", { cx: x, cy: y - l * 0.35, rx: l * 0.12, ry: l * 0.35, ...f, transform: `rotate(${w} ${x} ${y})` })), s("line", { x1: x, y1: y, x2: x, y2: y + l * 0.4, stroke: "#2f6b2a", "stroke-width": 1.4 }));
+    const b = form === "lanzett" ? 0.18 : form === "herz" ? 0.42 : 0.32;
+    let d;
+    if (form === "herz") d = `M${x},${y + l / 2} C${x - l * 0.6},${y} ${x - l * 0.5},${y - l / 2} ${x},${y - l * 0.3} C${x + l * 0.5},${y - l / 2} ${x + l * 0.6},${y} ${x},${y + l / 2} Z`;
+    else if (gesaegt) { const pz = []; for (let i = 0; i <= 8; i++) { const v = -l / 2 + (i * l) / 8, r = b * l * Math.sqrt(Math.max(0, 1 - (2 * v / l) ** 2)) * (i % 2 ? 1.12 : 0.92); pz.push([x + r, y + v]); }
+      d = "M" + [...pz, ...pz.slice().reverse().map(([px, py]) => [2 * x - px, py])].map(p => p.join(",")).join(" L") + " Z"; }
+    else d = `M${x},${y - l / 2} Q${x + b * l * 1.4},${y} ${x},${y + l / 2} Q${x - b * l * 1.4},${y} ${x},${y - l / 2} Z`;
+    return s("g", {}, s("path", { d, ...f }), s("line", { x1: x, y1: y - l / 2, x2: x, y2: y + l / 2 + 4, stroke: "#2f6b2a", "stroke-width": 1 }));
+  }
+  const BLATTFORMEN = ["oval", "herz", "lanzett", "gefingert"];
+  /**
+   * { baeume: true } — Laubbaum und Nadelbaum wachsen (s1); { blaetter: [Form …] } — Blattformen des Spiels (s2); { rand:
+   * true } — Rand glatt und gesägt, Blätter gegenständig und wechselständig am Zweig (s3); { schluessel: true } — zwei
+   * Ja/Nein-Fragen, bis von vier Blättern eines bleibt (s4); { bluete: 4 | 9 } — Blüte im Längsschnitt wie im Spiel:
+   * Kelchblatt, Blütenblatt, Staubblatt, Stempel; mit 9 dazu Staubbeutel, Staubfaden, Narbe, Griffel, Fruchtknoten.
+   */
+  function pflanze(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("wachsen", stufe, { "data-bilder": "pflanze" });
+    svg.append(tagGrund(), boden());
+    // wächst aus dem Fusspunkt cx, cy: aussen dorthin verschieben, in der Mitte skalieren, innen zurück
+    const wachse = (e, ab, cx, cy) => {
+      if (ruhig) return e;
+      const mitte = s("g", { transform: "scale(0.05)" }, s("g", { transform: `translate(${-cx} ${-cy})` }, e));
+      mitte.appendChild(s("animateTransform", { attributeName: "transform", type: "scale", from: "0.05", to: "1", begin: t(ab), dur: "0.7s", fill: "freeze" }));
+      return s("g", { transform: `translate(${cx} ${cy})` }, mitte);
+    };
+    if (z.baeume === true) {
+      svg.setAttribute("data-anzahl", 2);
+      const laub = s("g", { "data-stueck": "laubbaum" }, s("rect", { x: 96, y: 86, width: 8, height: 44, fill: "#8a5a32" }), s("circle", { cx: 100, cy: 66, r: 30, fill: "#5aa84f" }), blatt("oval", 152, 70, 26));
+      const nadel = s("g", { "data-stueck": "nadelbaum" }, s("rect", { x: 216, y: 106, width: 8, height: 24, fill: "#8a5a32" }), s("path", { d: "M220,26 L250,108 L190,108 Z", fill: "#2f7d4f" }),
+        s("path", { d: "M262,60 l6,16 M268,60 l0,17 M274,60 l-6,16", stroke: "#2f7d4f", "stroke-width": 1.6 }));
+      svg.append(wachse(laub, 0.1, 100, 130), wachse(nadel, T * 0.5, 220, 130));
+    } else if (Array.isArray(z.blaetter)) {
+      if (!z.blaetter.length || z.blaetter.length > 4 || !z.blaetter.every(f => BLATTFORMEN.includes(f))) return null;
+      svg.setAttribute("data-anzahl", z.blaetter.length);
+      z.blaetter.forEach((f, i) => { const x = 160 + (i - (z.blaetter.length - 1) / 2) * 70; svg.appendChild(wachse(s("g", { "data-stueck": "blatt", "data-form": f }, blatt(f, x, 66, 56)), (i * T) / z.blaetter.length, x, 100)); });
+    } else if (z.rand === true) {
+      svg.setAttribute("data-anzahl", 4);
+      svg.append(wachse(s("g", { "data-stueck": "rand" }, blatt("oval", 50, 64, 54)), 0.1, 50, 96), wachse(s("g", { "data-stueck": "rand" }, blatt("oval", 110, 64, 54, { gesaegt: true })), T * 0.25, 110, 96));
+      // Zweige: gegenständig (Paare) und wechselständig (abwechselnd)
+      const zweig = (x, gegen, ab) => { const g = s("g", { "data-stueck": "stellung" }, s("line", { x1: x, y1: 120, x2: x, y2: 24, stroke: "#6b4a2b", "stroke-width": 2 }));
+        for (let i = 0; i < 3; i++) { const y = 104 - i * 30; for (const sg of gegen ? [-1, 1] : [i % 2 ? 1 : -1]) g.appendChild(s("g", { transform: `rotate(${sg * 60} ${x} ${y + (gegen ? 0 : sg * 5)})` }, blatt("oval", x, y - 12 + (gegen ? 0 : sg * 5), 22))); }
+        return wachse(g, ab, x, 120); };
+      svg.append(zweig(200, true, T * 0.5), zweig(270, false, T * 0.75));
+    } else if (z.schluessel === true) {
+      svg.setAttribute("data-anzahl", 1);
+      const xs = [70, 130, 190, 250], formen = ["oval", "herz", "lanzett", "gefingert"];
+      formen.forEach((f, i) => svg.appendChild(blatt(f, xs[i], 104, 34)));
+      // Frage 1 „gefingert oder gefiedert?“ streicht zwei, Frage 2 streicht noch eins
+      svg.append(s("path", { d: "M130,22 l10,-8 l10,8 l-10,8 Z", style: "fill:var(--deko-4)" }), text(140, 26, "?", { gross: 10 }), s("path", { d: "M190,48 l10,-8 l10,8 l-10,8 Z", style: "fill:var(--deko-4)" }), text(200, 52, "?", { gross: 10 }));
+      const streiche = (i, ab) => svg.appendChild(erscheine(s("path", { d: `M${xs[i] - 14},${90} l28,28 M${xs[i] + 14},${90} l-28,28`, stroke: "#ff9f1c", "stroke-width": 2.6 }), ab, ruhig, 0.2));
+      streiche(0, T * 0.3); streiche(1, T * 0.4); streiche(2, T * 0.75);
+      svg.appendChild(erscheine(s("g", { "data-stueck": "bestimmt" }, s("circle", { cx: 250, cy: 104, r: 24, fill: "none", stroke: "#2fbf71", "stroke-width": 2.4 }), haken(276, 84, 16)), T, ruhig));
+    } else if (z.bluete === 4 || z.bluete === 9) {
+      svg.setAttribute("data-anzahl", z.bluete);
+      // Längsschnitt: zwei Kelchblätter, zwei Blütenblätter (rosa), vier Staubblätter, in der Mitte der Stempel
+      svg.append(s("line", { x1: 120, y1: 132, x2: 120, y2: 92, stroke: "#2f6b2a", "stroke-width": 3 }), s("path", { d: "M120,92 Q100,92 92,78 Q108,84 120,86 Q132,84 148,78 Q140,92 120,92 Z", fill: "#5aa84f" }),
+        s("path", { d: "M118,86 Q80,70 82,36 Q104,52 116,80 Z M122,86 Q160,70 158,36 Q136,52 124,80 Z", fill: "#f5a3c7" }));
+      for (const x of [108, 114, 126, 132]) svg.append(s("line", { x1: 120 + (x - 120) * 0.3, y1: 86, x2: x, y2: 52, stroke: "#c9a43a", "stroke-width": 1.2 }), s("ellipse", { cx: x, cy: 50, rx: 2.4, ry: 3.4, fill: "#f5b301" }));
+      svg.append(s("ellipse", { cx: 120, cy: 80, rx: 6, ry: 7, fill: "#8ac46f" }), s("line", { x1: 120, y1: 73, x2: 120, y2: 46, stroke: "#8ac46f", "stroke-width": 2.4 }), s("ellipse", { cx: 120, cy: 44, rx: 4, ry: 2.4, fill: "#6ba35a" }));
+      const TEILE = [["Kelchblatt", 96, 84], ["Blütenblatt", 88, 46], ["Staubblatt", 132, 56], ["Stempel", 120, 60], ["Staubbeutel", 108, 50], ["Staubfaden", 111, 68], ["Narbe", 120, 44], ["Griffel", 120, 56], ["Fruchtknoten", 120, 80]];
+      TEILE.slice(0, z.bluete).forEach(([name, x, y], i) => {
+        const ty = 18 + i * (z.bluete > 4 ? 13 : 26);
+        svg.appendChild(erscheine(s("g", { "data-stueck": "teil" }, s("line", { x1: x, y1: y, x2: 196, y2: ty - 3, stroke: "#8a8fa8", "stroke-width": 0.8 }), s("circle", { cx: x, cy: y, r: 2, style: "fill:var(--deko-4)" }),
+          text(200, ty, name, { gross: z.bluete > 4 ? 9 : 11, anker: "start" })), (i * T) / z.bluete, ruhig, 0.25));
+      });
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(300, 108, ruhig));
+    return svg;
+  }
+
+  // ----- Wetter und Jahreszeiten (ZYKLUS · wetter) -----
+  const WETTER_SYMBOL = ["☀️", "⛅", "☁️", "🌧️", "⛈️", "🌨️", "🌫️", "🌬️"];
+  /** Thermometer wie im Spiel: rote Säule mit Kugel, Striche je strich, Zahl je 10, gestrichelte 0-Linie im Minus. */
+  function thermometer(svg, [von, bis, strich], werte, ruhig, T, x = 50) {
+    const oben = 18, unten = 118, Y = v => unten - ((v - von) / (bis - von)) * (unten - oben);
+    svg.append(s("rect", { x: x - 6, y: oben - 6, width: 12, height: unten - oben + 12, rx: 6, fill: "#ffffff", stroke: "#8a8fa8", "stroke-width": 1.4 }), s("circle", { cx: x, cy: unten + 12, r: 9, fill: "#e5322d" }));
+    for (let v = von; v <= bis; v += strich) {
+      const zahl = v % 10 === 0;
+      svg.appendChild(s("line", { x1: x + 7, y1: Y(v), x2: x + (zahl ? 15 : 11), y2: Y(v), stroke: "#2d3047", "stroke-width": zahl ? 1.2 : 0.6 }));
+      if (zahl) svg.appendChild(text(x + 18, Y(v) + 3, v, { gross: 9, anker: "start", fett: false }));
+    }
+    if (von < 0) svg.appendChild(s("line", { x1: x - 10, y1: Y(0), x2: x + 34, y2: Y(0), stroke: "#2f8fe0", "stroke-width": 1, "stroke-dasharray": "3 2" }));
+    const saeule = s("rect", { x: x - 3, y: Y(werte[0]), width: 6, height: unten + 6 - Y(werte[0]), fill: "#e5322d", "data-wert": werte[werte.length - 1] });
+    if (!ruhig) {
+      const ys = werte.map(Y);
+      saeule.setAttribute("y", unten); saeule.setAttribute("height", 6);
+      saeule.append(s("animate", { attributeName: "y", values: [unten, ...ys].join(";"), begin: t(0.2), dur: `${T}s`, fill: "freeze" }), s("animate", { attributeName: "height", values: [6, ...ys.map(y => unten + 6 - y)].join(";"), begin: t(0.2), dur: `${T}s`, fill: "freeze" }));
+    } else { saeule.setAttribute("y", Y(werte[werte.length - 1])); saeule.setAttribute("height", unten + 6 - Y(werte[werte.length - 1])); }
+    svg.appendChild(saeule);
+    return Y;
+  }
+  const gradText = v => `${v < 0 ? "−" : ""}${Math.abs(v)} °C`;
+  /**
+   * { jahr: true } — der Baum durchs Jahr mit den Körben des Spiels 🌼 🌞 🍁 🧊; { thermo: [von, bis, strich], wert,
+   * symbol?, kleidung? } — das Thermometer der Stufe steigt auf den Wert (auf dem Strich, geprüft); { thermo, differenz:
+   * [Morgen, Mittag] } — es steigt vom Morgen auf den Mittag, daneben der Unterschied; { bericht: [[Tag, Symbol, °C] …] }
+   * — der Wetterbericht über vier Tage.
+   */
+  function wetter(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8;
+    if (!z) return null;
+    const svg = neuesBild("zyklus", stufe, { "data-bilder": "wetter" });
+    svg.appendChild(tagGrund());
+    if (z.jahr === true) {
+      svg.appendChild(boden());
+      const ZEITEN = [["🌼", "#f8c8dc"], ["🌞", "#4f9d47"], ["🍁", "#e07a3f"], ["🧊", "#ffffff"]];
+      svg.setAttribute("data-anzahl", 4);
+      ZEITEN.forEach(([b, krone], i) => {
+        const x = 46 + i * 76;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "jahreszeit" }, s("rect", { x: x - 3, y: 96, width: 6, height: 34, fill: "#8a5a32" }), s("circle", { cx: x, cy: 80, r: 22, fill: krone, stroke: i === 3 ? "#c9cde0" : "none", "stroke-width": 1.2 }), bildzeichen(x, 28, b, 20)), (i * T) / 4, ruhig, 0.35));
+        if (i < 3) svg.appendChild(erscheine(s("path", { d: `M${x + 28},82 h18 m-4,-4 l4,4 l-4,4`, fill: "none", stroke: "#6b7089", "stroke-width": 1.6 }), ((i + 0.6) * T) / 4, ruhig));
+      });
+    } else if (Array.isArray(z.bericht)) {
+      if (z.bericht.length !== 4 || !z.bericht.every(([tag, sym, gr]) => typeof tag === "string" && WETTER_SYMBOL.includes(sym) && Number.isInteger(gr))) return null;
+      svg.setAttribute("data-anzahl", 4);
+      z.bericht.forEach(([tag, sym, gr], i) => {
+        const x = 46 + i * 76;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "tag" }, s("rect", { x: x - 32, y: 22, width: 64, height: 104, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), text(x, 42, tag, { gross: 12 }), bildzeichen(x, 74, sym, 30), text(x, 112, gradText(gr), { gross: 13, farbe: gr < 0 ? "#2f8fe0" : "#e5322d" })), (i * T) / 4, ruhig, 0.3));
+      });
+    } else if (Array.isArray(z.thermo)) {
+      const [von, bis, strich] = z.thermo, aufStrich = v => Number.isInteger(v) && v >= von && v <= bis && (v - von) % strich === 0;
+      if (![von, bis, strich].every(Number.isInteger) || bis <= von || strich < 1 || (bis - von) / strich > 60) return null;
+      if (z.differenz) {
+        const [a, b] = z.differenz;
+        if (!aufStrich(a) || !aufStrich(b) || b <= a) return null;
+        svg.setAttribute("data-wert", b - a);
+        const Y = thermometer(svg, z.thermo, [a, a, b], ruhig, T);
+        svg.append(erscheine(s("g", {}, s("line", { x1: 40, y1: Y(a), x2: 120, y2: Y(a), stroke: "#2f8fe0", "stroke-width": 1.4 }), bildzeichen(136, Y(a), "🌅", 14), text(156, Y(a) + 4, gradText(a), { gross: 11, anker: "start", farbe: "#2f8fe0" })), 0.4, ruhig),
+          erscheine(s("g", {}, s("line", { x1: 40, y1: Y(b), x2: 120, y2: Y(b), stroke: "#e5322d", "stroke-width": 1.4 }), bildzeichen(136, Y(b), "☀️", 14), text(156, Y(b) + 4, gradText(b), { gross: 11, anker: "start", farbe: "#e5322d" })), T, ruhig),
+          erscheine(s("g", { "data-stueck": "unterschied" }, s("path", { d: `M110,${Y(a) - 2} V${Y(b) + 6} m-4,4 l4,-4 l4,4`, fill: "none", stroke: "#2fbf71", "stroke-width": 2 }), text(250, (Y(a) + Y(b)) / 2 + 5, `+${b - a} °C`, { gross: 16, farbe: "#2fbf71" })), T + 0.2, ruhig));
+        svg.setAttribute("data-anzahl", 1);
+      } else {
+        if (!aufStrich(z.wert) || (z.symbol && !WETTER_SYMBOL.includes(z.symbol))) return null;
+        svg.setAttribute("data-wert", z.wert);
+        thermometer(svg, z.thermo, [z.wert], ruhig, T);
+        svg.appendChild(erscheine(text(160, 80, gradText(z.wert), { gross: 20, farbe: z.wert < 0 ? "#2f8fe0" : "#e5322d" }), T, ruhig));
+        if (z.symbol) svg.appendChild(erscheine(bildzeichen(240, 56, z.symbol, 40), 0.3, ruhig));
+        if (z.kleidung) svg.appendChild(herein(s("g", { "data-stueck": "kleidung" }, bildzeichen(240, 112, z.kleidung, 28)), 40, 0, T * 0.6, ruhig, 0.4));
+        svg.setAttribute("data-anzahl", z.kleidung ? 1 : 0);
+      }
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(BREITE - 30, 132, ruhig));
+    return svg;
+  }
+
+  // ----- Taschengeld-Planer (SAMMELN · kaesseli) -----
+  /**
+   * Beträge über LS.geldText wie im Spiel („25.60 Fr.“), nachgerechnet. { reicht: Budget, waren: [[Bild, Rp] …] } —
+   * 👛 genügt das Geld? 👍 oder ✋; { rest: Budget, waren } — was übrig bleibt; { woche: Budget, waren, wahl: [Stellen] }
+   * — aus fünf Waren die gewählten in den Korb, zusammen höchstens das Budget; { sparen: { ziel, rate, schon } } — das
+   * Kässeli 🐷 füllt sich Woche um Woche, bis das Ziel 🎯 erreicht ist; { bedarf: [Bild …], wunsch: [Bild …] } — 🧰 und
+   * 💭; { vergleich: [[Stück, Rp], [Stück, Rp]] } — der Preis je Stück, das günstigere Pack bekommt 🏷️.
+   */
+  function kaesseli(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.8, rp = x => Number.isInteger(x) && x >= 0 && x % 5 === 0;
+    if (!z) return null;
+    const svg = neuesBild("sammeln", stufe, { "data-bilder": "kaesseli" });
+    svg.appendChild(tagGrund());
+    const warenOk = w => Array.isArray(w) && w.length >= 1 && w.length <= 5 && w.every(([b, p]) => typeof b === "string" && rp(p) && p > 0);
+    const preisschild = (x, y, b, p, ab) => erscheine(s("g", { "data-stueck": "ware" }, bildzeichen(x, y, b, 26), s("rect", { x: x - 26, y: y + 16, width: 52, height: 15, rx: 4, fill: "#fff8e1", stroke: "#f5b301", "stroke-width": 1 }), text(x, y + 27, geld(p), { gross: 9 })), ab, ruhig, 0.3);
+    if (rp(z.reicht) || rp(z.rest)) {
+      if (!warenOk(z.waren)) return null;
+      const budget = z.reicht ?? z.rest, summe = z.waren.reduce((a, [, p]) => a + p, 0);
+      if (z.rest !== undefined && summe > budget) return null;
+      svg.setAttribute("data-wert", z.reicht !== undefined ? (summe <= budget ? "reicht" : "reicht-nicht") : budget - summe);
+      svg.setAttribute("data-anzahl", z.waren.length);
+      svg.append(bildzeichen(50, 56, "👛", 34), text(50, 92, geld(budget), { gross: 11 }));
+      z.waren.forEach(([b, p], i) => svg.appendChild(preisschild(140 + i * 70, 44, b, p, 0.2 + (i * T * 0.5) / z.waren.length)));
+      const zeile = z.reicht !== undefined ? `${z.waren.map(([, p]) => geld(p)).join(" + ")} ${summe <= budget ? "≤" : ">"} ${geld(budget)}` : `${geld(budget)} − ${z.waren.map(([, p]) => geld(p)).join(" − ")} = ${geld(budget - summe)}`;
+      svg.appendChild(erscheine(text(BREITE / 2, 116, zeile, { gross: 11 }), T * 0.7, ruhig));
+      if (z.reicht !== undefined) svg.appendChild(erscheine(bildzeichen(BREITE / 2, 136, summe <= budget ? "👍" : "✋", 18), T, ruhig));
+    } else if (rp(z.woche)) {
+      if (!warenOk(z.waren) || z.waren.length !== 5 || !Array.isArray(z.wahl) || z.wahl.length < 2 || z.wahl.length > 3 || !z.wahl.every(i => Number.isInteger(i) && i >= 0 && i < 5)) return null;
+      const summe = z.wahl.reduce((a, i) => a + z.waren[i][1], 0);
+      if (summe > z.woche) return null;
+      svg.setAttribute("data-anzahl", z.wahl.length);
+      svg.append(bildzeichen(28, 24, "📅", 16), text(48, 28, geld(z.woche), { gross: 11, anker: "start" }));
+      z.waren.forEach(([b, p], i) => { const x = 40 + i * 60, gew = z.wahl.includes(i); svg.appendChild(gew ? preisschild(x, 60, b, p, 0) : s("g", { opacity: 0.5 }, bildzeichen(x, 60, b, 26), text(x, 87, geld(p), { gross: 9 }))); if (gew) svg.appendChild(erscheine(haken(x + 18, 46, 13), 0.3 + (z.wahl.indexOf(i) * T * 0.6) / z.wahl.length, ruhig)); });
+      svg.appendChild(erscheine(text(BREITE / 2, 128, `${z.wahl.map(i => geld(z.waren[i][1])).join(" + ")} = ${geld(summe)}`, { gross: 12, farbe: "#2fbf71" }), T, ruhig));
+    } else if (z.sparen) {
+      const { ziel, rate, schon } = z.sparen;
+      if (!rp(ziel) || !rp(rate) || !rp(schon) || rate <= 0 || schon >= ziel || !GELD[rate]) return null;
+      const wochen = Math.ceil((ziel - schon) / rate);
+      if (wochen < 2 || wochen > 12) return null;
+      svg.setAttribute("data-wert", wochen);
+      svg.setAttribute("data-anzahl", wochen);
+      svg.append(bildzeichen(60, 84, "🐷", 60), bildzeichen(294, 30, "🎯", 20), text(292, 58, geld(ziel), { gross: 10 }), text(60, 136, geld(schon), { gross: 10, farbe: "#6b7089" }));
+      // je Woche ein Stück der Rate in voller Grösse (die Schrift auf der Münze bleibt lesbar), fünf je Reihe
+      for (let i = 0; i < wochen; i++) { const x = 118 + (i % 5) * 34, y = 36 + Math.floor(i / 5) * 34; svg.appendChild(erscheine(s("g", { "data-stueck": "woche", transform: `translate(${x} ${y})` }, geldStueck(rate)), (i * T) / wochen, ruhig, 0.2)); }
+      svg.appendChild(erscheine(text(200, 128, `${wochen} Wochen: ${geld(schon)} + ${wochen} · ${geld(rate)} ≥ ${geld(ziel)}`, { gross: 10, farbe: "#2fbf71" }), T + 0.1, ruhig));
+    } else if (Array.isArray(z.bedarf) && Array.isArray(z.wunsch)) {
+      const alle = [...z.bedarf.map(b => [b, "🧰", 86]), ...z.wunsch.map(b => [b, "💭", 234])];
+      if (!alle.length || alle.length > 6) return null;
+      svg.setAttribute("data-anzahl", alle.length);
+      for (const [k, kx] of [["🧰", 86], ["💭", 234]]) svg.append(s("path", { d: `M${kx - 56},84 H${kx + 56} L${kx + 46},136 H${kx - 46} Z`, fill: "#ffffff", stroke: "#a8743f", "stroke-width": 2 }), bildzeichen(kx, 124, k, 14));
+      const zaehl = { "🧰": 0, "💭": 0 };
+      alle.forEach(([b, k, kx], i) => { const x = kx - 30 + zaehl[k]++ * 30; svg.appendChild(herein(s("g", { "data-stueck": "ware" }, bildzeichen(x, 100, b, 22)), 160 - x, -76, 0.2 + i * 0.4, ruhig, 0.45)); });
+    } else if (Array.isArray(z.vergleich)) {
+      if (z.vergleich.length !== 2 || !z.vergleich.every(([n, p]) => Number.isInteger(n) && n >= 1 && n <= 10 && rp(p) && p > 0)) return null;
+      const je = z.vergleich.map(([n, p]) => p / n), besser = je[0] === je[1] ? -1 : je[0] < je[1] ? 0 : 1;
+      if (!z.vergleich.every(([n, p]) => (p / n) % 5 === 0)) return null; // der Preis je Stück in ganzen 5 Rappen
+      svg.setAttribute("data-wert", besser < 0 ? "gleich" : "AB"[besser]);
+      svg.setAttribute("data-anzahl", 2);
+      z.vergleich.forEach(([n, p], i) => {
+        const x = 90 + i * 140;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "pack" }, s("rect", { x: x - 50, y: 16, width: 100, height: 56, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), text(x - 38, 32, "AB"[i], { gross: 12, farbe: "#6366f1" }),
+          ...[...Array(n).keys()].map(j => bildzeichen(x - 24 + (j % 5) * 12, 40 + Math.floor(j / 5) * 14, "📓", 11)), text(x, 88, `${n} Stück: ${geld(p)}`, { gross: 10 }), text(x, 104, `1 Stück: ${geld(p / n)}`, { gross: 11, farbe: "#2fbf71" })), (i * T) / 2, ruhig, 0.3));
+      });
+      svg.appendChild(erscheine(bildzeichen(besser < 0 ? 160 : 90 + besser * 140, 128, besser < 0 ? "🤝" : "🏷️", 20), T, ruhig));
+    } else return null;
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 14, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(26, 130, ruhig));
+    return svg;
+  }
+
+  // ----- Kakao-Weg (REISE · kakao) -----
+  // die acht Schritte des Wegs der Schoggi wie im Spiel, mit ihrem Platz auf der Karte (Westafrika links, Meer, Schweiz rechts)
+  const KAKAO = [["🌳", 30, 110], ["☀️", 64, 84], ["🚢", 112, 116], ["🚆", 170, 78], ["🏭", 212, 52], ["🍫", 252, 74], ["🏬", 272, 108], ["🛍️", 300, 132]];
+  const KAKAO_WER = { 0: "🧑‍🌾", 3: "🚚", 4: "🏭", 6: "🏬", 7: "🏠" };
+  /**
+   * { schritte: [Stelle …], fehlt?, wer?, herkunft? } — der Weg Schritt um Schritt (Stellen aus den acht, in ihrer
+   * Reihenfolge), fehlt: ein Schritt ist erst ein „?“; wer: wer ihn macht (🧑‍🌾 🚚 🏭 🏬 🏠); herkunft: 🌍 am Anfang, 🇨🇭 am Ende;
+   * { kreislauf: true } — Haushalte und Unternehmen: Arbeit und Waren (deko-5), Lohn und Geld (deko-4) fliessen in der
+   * Reihenfolge des Spiels, das Geld immer in die andere Richtung.
+   */
+  function kakao(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe], T = DAUER * 0.85;
+    if (!z) return null;
+    const svg = neuesBild("reise", stufe, { "data-bilder": "kakao" });
+    svg.appendChild(tagGrund());
+    if (z.kreislauf === true) {
+      svg.setAttribute("data-anzahl", 4);
+      svg.append(s("rect", { x: 20, y: 46, width: 76, height: 58, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), bildzeichen(58, 75, "🏠", 30),
+        s("rect", { x: 224, y: 46, width: 76, height: 58, rx: 8, fill: "#ffffff", stroke: "#c9cde0", "stroke-width": 1.4 }), bildzeichen(262, 75, "🏭", 30));
+      // Arbeit (Haushalt → Unternehmen), Lohn (zurück), Waren (Unternehmen → Haushalt), Geld für Waren (zurück)
+      const FLUSS = [["🛠️", 1, 30, "--deko-5"], ["💵", -1, 58, "--deko-4"], ["📦", -1, 96, "--deko-5"], ["🪙", 1, 124, "--deko-4"]];
+      FLUSS.forEach(([b, richtung, y, farbe], i) => {
+        const x1 = richtung > 0 ? 100 : 220, x2 = richtung > 0 ? 220 : 100, ab = (i * T) / 4;
+        svg.appendChild(erscheine(s("g", { "data-stueck": "fluss" }, s("line", { x1, y1: y, x2: x2 - richtung * 8, y2: y, style: `stroke:var(${farbe})`, "stroke-width": 3 }),
+          s("path", { d: `M${x2},${y} l${-richtung * 9},-5 l0,10 Z`, style: `fill:var(${farbe})` }), bildzeichen(160, y - 2, b, 16), s("circle", { cx: 124, cy: y - 9, r: 6, fill: "#2d3047" }), text(124, y - 5.5, i + 1, { gross: 9, farbe: "#ffffff" })), ab, ruhig, 0.3));
+      });
+    } else {
+      if (!Array.isArray(z.schritte) || z.schritte.length < 3 || !z.schritte.every((i, k) => Number.isInteger(i) && i >= 0 && i < 8 && (!k || i > z.schritte[k - 1]))) return null;
+      if (z.fehlt !== undefined && !z.schritte.includes(z.fehlt)) return null;
+      svg.setAttribute("data-anzahl", z.schritte.length);
+      // Karte: Land in Westafrika, das Meer, Europa mit der Schweiz
+      svg.append(s("path", { d: "M0,90 Q40,80 90,96 L96,150 H14 Q0,150 0,136 Z", fill: "#cdb37a" }), s("path", { d: "M90,96 Q120,130 150,100 L160,150 H96 Z", fill: "#7fc4ec" }),
+        s("path", { d: "M150,100 Q170,40 230,30 Q300,30 320,70 V136 Q320,150 306,150 H160 Z", fill: "#b5d99c" }));
+      const pts = z.schritte.map(i => [KAKAO[i][1], KAKAO[i][2]]), zeiten = ankunft(pts, T);
+      for (let k = 1; k < pts.length; k++) svg.appendChild(erscheine(s("path", { d: `M${pts[k - 1].join(",")} L${pts[k].join(",")}`, stroke: "#8a5a32", "stroke-width": 1.6, "stroke-dasharray": "3 3", fill: "none" }), zeiten[k - 1], ruhig, 0.2));
+      z.schritte.forEach((i, k) => {
+        const [b, x, y] = KAKAO[i];
+        const karte = s("g", { "data-stueck": "schritt", "data-nr": i + 1 }, s("circle", { cx: x, cy: y, r: 13, fill: "#ffffff", stroke: "#8a5a32", "stroke-width": 1.4 }), bildzeichen(x, y, b, 16));
+        if (z.fehlt === i) svg.appendChild(kurz(s("g", {}, s("circle", { cx: x, cy: y, r: 13, fill: "#ffffff", stroke: "#8a5a32", "stroke-width": 1.4, "stroke-dasharray": "3 2" }), text(x, y + 4.5, "?", { gross: 13 })), 0, T * 0.8, ruhig));
+        svg.appendChild(erscheine(karte, z.fehlt === i ? T * 0.8 : zeiten[k], ruhig, 0.25));
+        if (z.wer && KAKAO_WER[i]) svg.appendChild(erscheine(bildzeichen(x + 14, y - 13, KAKAO_WER[i], 11), zeiten[k] + 0.2, ruhig));
+      });
+      if (z.herkunft) svg.append(erscheine(bildzeichen(28, 24, "🌍", 18), 0.2, ruhig), erscheine(bildzeichen(300, 22, "🇨🇭", 16), T, ruhig), erscheine(s("path", { d: "M44,24 Q160,4 284,22", fill: "none", stroke: "#6b7089", "stroke-width": 1.2, "stroke-dasharray": "4 3" }), 0.4, ruhig));
+      const [ex, ey] = pts[pts.length - 1];
+      svg.appendChild(bewege(s("g", {}, bildzeichen(0, -18, "🫘", 12)), "M" + pts.map(p => p.join(",")).join(" L"), { x: ex, y: ey, winkel: 0 }, ruhig, { drehen: false, linear: true, dauer: T }));
+    }
+    if (sterne >= 2) svg.appendChild(glanz(BREITE - 46, 14, ruhig));
+    if (sterne >= 3) svg.appendChild(z.kreislauf ? funken(298, 128, ruhig) : funken(160, 24, ruhig)); // im Kreislauf nicht auf den Pfeilen
+    return svg;
+  }
+
+  Object.assign(BILDER.sammeln, { magnet, wanne, bionik, znueni, album, kaesseli });
+  Object.assign(BILDER.bauen, { stromkreis, hebel, braille });
+  Object.assign(BILDER.zyklus, { wasserkreis, fledermaus, lebenszyklus, wetter });
+  Object.assign(BILDER.reise, { energiekette, koerperweg, blut, schall, teddy, lebensraeume, kakao });
+  Object.assign(BILDER.zoom, { auge });
+  Object.assign(BILDER.karte, { kompassweg, planweg });
+  Object.assign(BILDER.wachsen, { pflanze });
+
   const MUSTER = {
     /** REISE (Konzept 5): je Stufe ein Ziel weiter. */
     reise(feier, opt) {

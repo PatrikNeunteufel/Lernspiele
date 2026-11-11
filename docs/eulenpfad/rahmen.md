@@ -1245,6 +1245,36 @@ Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
   | KARTE · `dorfplan` | `{ orte, notruf? }`, `{ ebenen: true }` oder `{ ablauf: [fünf Bilder] }` | Gemeinde-Helfer |
   | KARTE · `schulweg` | Teile aus `trottoir`, `randstein`, `streifen`, `auto`, `ampel`, `velo`, `schule` | Schulweg-Profi |
 
+  Block C (NMG Rest; LERN_Session30) — Farben der Spiele (Nordpol rot, Südpol grün; Blut sauerstoffreich #d62839, arm
+  #2b59c3; Braille-Punkte nach der Tafel des Spiels, gesetzt deko-5), Mengen und Rechnungen nachgerechnet:
+
+  | Muster · bilder | Angabe je Stufe | Spiel |
+  |---|---|---|
+  | SAMMELN · `magnet` | `{ an, nicht }`, `{ pole: [[a, b], [c, d]], wahl? }` (anziehen oder abstossen nach den Polen in der Mitte), `{ durch }`, `{ kompass }`, `{ strom }` | Magnet-Labor |
+  | SAMMELN · `wanne` | `{ dinge, schiff? }` (schwimmt oder sinkt nach der Liste des Spiels) | Schwimmt oder sinkt? |
+  | BAUEN · `stromkreis` | `{ lampen: 1–3, art?: "serie" \| "parallel", schliesst?: "draht" \| "schalter" \| Bild, kurz? }` (überbrückt nur in Serie, geprüft) | Stromkreis-Bauer |
+  | BAUEN · `hebel` | `{ links, rechts }` (kg × Platz, nachgerechnet) oder `{ stein, a, b }` (Stange, ganzzahlige Kraft) | Hebel-Wippe |
+  | ZYKLUS · `wasserkreis` | `{ weg: "boden" \| "berg", bis, nummern? }`, `{ zustaende }`, `{ klaer: 3–6 }` | Wassertropfen-Reise |
+  | REISE · `energiekette` | `{ kette }` abwechselnd Form (deko-4) und Wandler (deko-6), lange Ketten als Schlange | Energie-Wandler |
+  | SAMMELN · `bionik` | `{ paare, abgeschaut? }` (Paare aus der Liste des Spiels) | Bionik-Paare |
+  | REISE · `koerperweg` | `{ teile }`, `{ gelenke }`, `{ weg: "essen" \| "luft" }` | Körper-Puzzle |
+  | SAMMELN · `znueni` | `{ koerbe }` oder `{ teller }` (ein ausgewogener Teller des Spiels) | Znüni-Teller |
+  | REISE · `blut` | `{ bis: 3–8, kammern?, spaet? }` oder `{ organe }` | Blutkreislauf-Lotse |
+  | BAUEN · `braille` | `{ text, zaehlen?, finger? }` | Braille-Finger |
+  | ZOOM · `auge` | `{ teile }`, `{ pupille: "hell" \| "dunkel" }`, `{ schnitt }`, `{ lichtweg }` | Auge-Entdecker |
+  | REISE · `schall` | `{ leise, laut }`, `{ skala }` (Lärm-Skala 1–5), `{ quelle, schutz }`, `{ ohr }`, `{ echo }` | Lärm-Wächter |
+  | KARTE · `kompassweg` | `{ start, schritte: [[Richtung, Felder]], ziel, acht?, dreh? }` (gedrehte Karte: Nordpfeil und Nadel zeigen nach Norden der Karte) | Kompass-Spiel |
+  | KARTE · `planweg` | `{ finde }`, `{ zaehle }` oder `{ start, weg, massstab }` (Länge nachgerechnet) | Plan-Leser |
+  | REISE · `teddy` | Liste der Plätze oder `{ regal: [[Bild, Fach]] }` | Teddy-Versteck |
+  | SAMMELN · `album` | `{ seiten: [[Korbzeichen, Tiere]], falle? }` | Tier-Sortierer |
+  | REISE · `lebensraeume` | `{ raeume }`, `{ kette }` oder `{ netz }` (der Pfeil: wird gefressen von) | Lebensraum-Zuordnung |
+  | ZYKLUS · `fledermaus` | `{ echo }`, `{ jagd }`, `{ wochenstube }`, `{ jahr, ohneZeit? }`, `{ anpassungen }` | Fledermaus-Forscher |
+  | ZYKLUS · `lebenszyklus` | `{ stadien, kreis? }` (Puppe, Larve, Kaulquappen gezeichnet) oder `{ geburt }` | Lebenszyklus-Puzzle |
+  | WACHSEN · `pflanze` | `{ baeume }`, `{ blaetter }`, `{ rand }`, `{ schluessel }`, `{ bluete: 4 \| 9 }` | Pflanzen-Bestimmer |
+  | ZYKLUS · `wetter` | `{ jahr }`, `{ thermo, wert, symbol?, kleidung? }`, `{ thermo, differenz }`, `{ bericht }` (Thermometer wie im Spiel, Wert auf dem Strich) | Wetter und Jahreszeiten |
+  | SAMMELN · `kaesseli` | `{ reicht }`, `{ rest }`, `{ woche, wahl }`, `{ sparen }`, `{ bedarf, wunsch }`, `{ vergleich }` (Beträge über `LS.geldText`, nachgerechnet) | Taschengeld-Planer |
+  | REISE · `kakao` | `{ schritte, fehlt?, wer?, herkunft? }` oder `{ kreislauf }` | Kakao-Weg |
+
   Stellenfarben in den Bildern nur über `var(--st-…)` aus `stil.css`, nach dem Komma `--deko-7` mit der Kommalinie
   `--deko-1` (wie `.schriftlich`); Zahlen über `LS.zahlText` und `LS.dezimalText`.
 

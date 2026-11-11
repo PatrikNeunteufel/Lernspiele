@@ -21,6 +21,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -144,6 +145,9 @@ const TIPPS = {
 
 LS.spiel({
   id: "schwimmt-sinkt",
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "wanne", ziele: { s1: { dinge: ["🪵", "🪨"] }, s2: { dinge: ["🍎", "🔑", "🕯️", "🪙"] }, s3: { dinge: ["🍃", "🥄", "🏓", "🔨", "🧊"] },
+    s4: { dinge: ["🪶", "🔩", "🍌", "🥔", "💍", "🍎"] }, s5: { dinge: ["🪵", "🪨"], schiff: true }, s6: { dinge: ["🪵", "🍎", "🍃", "🕯️", "🪨", "🔩", "🔑", "🪙"] } } },
   einleitung: "Plumps! Was passiert, wenn du das ins Wasser legst? Schwimmt es oder sinkt es?",
   hilfe: "Schau das Ding an und überleg, was passiert. Dann legst du die Karte in den passenden Korb oder tippst die passende Antwort an. Zu Hause kannst du es mit einer Schüssel Wasser ausprobieren!",
   anzahl: 8,

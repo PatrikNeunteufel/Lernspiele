@@ -58,6 +58,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
@@ -384,6 +385,10 @@ const HILFE = {
 };
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "sammeln", bilder: "kaesseli", ziele: { s1: { reicht: 850, waren: [["🍦", 400]] }, s2: { rest: 3000, waren: [["📓", 200], ["📏", 250], ["🍦", 400]] },
+    s3: { woche: 1000, waren: [["📓", 200], ["✏️", 150], ["🍦", 400], ["🍫", 200], ["📐", 400]], wahl: [0, 2, 3] }, s4: { sparen: { ziel: 1600, rate: 200, schon: 200 } },
+    s5: { bedarf: ["📓", "🪖"], wunsch: ["🍦", "🍬"] }, s6: { vergleich: [[1, 200], [6, 1020]] } } },
   id: ID,
   hilfe: stufe => HILFE[stufe] || HILFE.s1,
   einleitung: "Dein Taschengeld, dein Plan! Rechne nach, was du dir leisten kannst — und überlege, was du wirklich brauchst.",

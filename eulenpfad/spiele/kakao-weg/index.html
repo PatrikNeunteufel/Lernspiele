@@ -74,6 +74,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -347,6 +348,9 @@ function tippsFuer(a) {
 }
 
 LS.spiel({
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "reise", bilder: "kakao", ziele: { s1: { schritte: [0, 2, 5] }, s2: { schritte: [0, 2, 4, 5, 7] }, s3: { schritte: [0, 1, 2, 3, 4, 5, 6, 7], fehlt: 3, wer: true },
+    s4: { schritte: [0, 2, 3, 7], herkunft: true }, s5: { kreislauf: true }, s6: { schritte: [0, 1, 2, 3, 4, 5, 6, 7] } } },
   id: ID,
   hilfe: "Lies die Schritte genau. Je nach Aufgabe tippst du sie der Reihe nach an, wählst eine Antwort oder legst die Karte in den passenden Korb. Im Kreislauf zeigt die Farbe der Pfeile, ob Geld fliesst.",
   einleitung: "Woher kommt eigentlich die Schoggi? Verfolge den Weg der Waren vom Feld bis in den Laden — und finde heraus, wie Geld und Arbeit im Kreis laufen.",

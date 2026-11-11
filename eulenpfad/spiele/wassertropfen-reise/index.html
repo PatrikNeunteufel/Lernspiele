@@ -63,6 +63,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -542,6 +543,9 @@ const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => au
 
 LS.spiel({
   id: "wassertropfen-reise",
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "zyklus", bilder: "wasserkreis", ziele: { s1: { zustaende: true }, s2: { weg: "boden", bis: 4 }, s3: { weg: "berg", bis: 5 },
+    s4: { weg: "boden", bis: 5, nummern: true }, s5: { klaer: 4 }, s6: { klaer: 6 } } },
   hilfe: "Manchmal tippst du direkt in der Grafik auf einen Pfeil oder eine Bodenschicht. Bei einer Reise kommen die Stationen dran, die nach dem Start des Tropfens folgen.",
   einleitung: "Ein Wassertropfen ist immer unterwegs: vom Meer in die Wolke, als Regen auf die Erde und wieder zurück. Begleite ihn!",
   anzahl: 8,

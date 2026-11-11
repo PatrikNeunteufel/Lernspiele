@@ -1,6 +1,19 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-11, nach LERN_Session30** ([Report](report/LERN_Session30_2026-11-11.md)):
+- **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
+- **Eulenpfad:** Bemerkung 36 behoben (Farbfeld vor Farbcodes in Listen- und Prüfansicht). Abschluss-Animationen in
+  **140 von 169 Spielen**: Block B (Deutsch Teil 2, NMG Teil 1; 25) und Block C (NMG Rest; 24) neu, `ankunft` (Aufleuchten
+  nach der Weglänge). Es fehlt Block D (Englisch 8, Französisch 8, Musik 6, Medien und Informatik 7).
+- **Tests:** Kern „5916 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“ (Konten
+  „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Skripte „Keine Fehler.“; Eulenpfad Stichproben je Block „Keine
+  Fehler.“, alle Endbilder von B und C im Browser angesehen — **letzter voller Lauf auf `6055527`**. Commits bis
+  `6765312` nicht gepusht; Block C und dieser Abschluss noch zu committen.
+- **Weiter mit:** Block D wie B und C (Stufen und Bildzeichen je Spiel sammeln, Einbauskript neu schreiben); Abnahme von
+  M2–M5, A, B, C durch Patrik in `tools/feier_vorschau.html`; voller Eulenpfad-Lauf auf Patriks Entscheid vor dem
+  nächsten Push; Prüfer-Kandidaten (Schmuck über Inhalt, bewegt gegen ruhig, `keySplines`, `attributeName`).
+
 **2026-11-11, nach LERN_Session29** ([Report](report/LERN_Session29_2026-11-11.md)):
 - **Kern:** unverändert 1.39.0 (Inbetriebnahme des Meldungsservers bei Patrik offen).
 - **Eulenpfad:** Abschluss-Animationen in **91 von 169 Spielen**: Blöcke M4, M5 und A (Mathe M6, Deutsch Teil 1) neu;

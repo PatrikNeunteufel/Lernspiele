@@ -1,6 +1,6 @@
 # Konzept: Abschluss-Animationen im Eulenpfad
 
-Stand: 11.11.2026 (LERN_Session30) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); Piloten P1–P8 und Ruhezeiten gebaut und abgenommen; Ausrollen nach AR1 a in Arbeit: M1 abgenommen, M2 bis M5, A und B gebaut (116 von 169 Spielen), Abnahme offen; C und D offen.**
+Stand: 11.11.2026 (LERN_Session30) · **Entschieden (AN1 a, AN2 a, AN3 a, AN3-Z a, AN3-T a, AN3-K a); Piloten P1–P8 und Ruhezeiten gebaut und abgenommen; Ausrollen nach AR1 a in Arbeit: M1 abgenommen, M2 bis M5, A, B und C gebaut (140 von 169 Spielen), Abnahme offen; D offen.**
 Entscheide und Pilotliste in Abschnitt 7.
 
 ## 1. Auslöser
@@ -215,7 +215,7 @@ Die Ideen je Spiel stehen in Abschnitt 8. Wo die gebauten Piloten davon abweiche
 | M5 | Geometrie | 13 | in Arbeit seit 11.11.2026 (LERN_Session29, M5): gebaut, Abnahme offen |
 | A | Mathe M6 (Daten, Kombinatorik, Brüche) und Deutsch Teil 1 (Laute, Lesen, Schreiben, Rechtschreibung, Erzählen) | 23 | in Arbeit seit 11.11.2026 (LERN_Session29, A): gebaut, Abnahme offen |
 | B | Deutsch Teil 2 (Sätze, Wortarten, Gedichte, Zuhören) und NMG Teil 1 (Zeit, Geschichten, Gemeinschaft, Verkehr) | 25 | in Arbeit seit 11.11.2026 (LERN_Session30, B): gebaut, Abnahme offen |
-| C | NMG Rest (Forschen, Körper, Orientierung, Tiere, Wetter, Wirtschaft) | 24 | offen |
+| C | NMG Rest (Forschen, Körper, Orientierung, Tiere, Wetter, Wirtschaft) | 24 | in Arbeit seit 11.11.2026 (LERN_Session30, C): gebaut, Abnahme offen |
 | D | Englisch, Französisch, Musik, Medien und Informatik | 29 | offen |
 
 **Block M1 — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme):
@@ -477,6 +477,61 @@ Rede, Fragewörter des Verben-Fächers, hat und ist, Reimschema a und b). Bildze
   Gemeinde, Kanton und Bund als Ringe, s6 der Ablauf zum Spielplatz in fünf Schritten.
 - **Schulweg-Profi:** wie vorgeschlagen; der Fussgängerstreifen gelb, s3 ein Auto von links hält an, s4 Lichtsignal am
   Streifen, s5 Velo rechts auf der Strasse.
+
+**Block C — wo das Bild vom Entwurf in Abschnitt 8 abweicht** (die Animation folgt den Stufen des Spiels; zur Abnahme).
+Bildzeichen und Farben aus den Spielen (Nordpol rot, Südpol grün; Blut sauerstoffreich rot, arm blau; Braille-Punkte
+nach der Tafel), Mengen und Rechnungen nachgerechnet. Schmuck 2★ Glanz, 3★ Funken (Fledermaus-Forscher: Sterne und
+Sternschnuppe am Nachthimmel).
+
+- **Magnet-Labor:** s1 Büroklammer und Schraube hängen am Magneten, Holz und Papier bleiben liegen; s2 zwei Stabmagnete
+  stossen sich ab (gleiche Pole in der Mitte); s3 der Magnet wirkt durch Papier; s4 die Kompassnadel dreht nach Norden;
+  s5 der fehlende Pol wird gesetzt, sie ziehen sich an; s6 ein Elektromagnet — statt einer Kette aus Klammern.
+- **Schwimmt oder sinkt?:** die Dinge der Liste des Spiels, was schwimmt, bleibt oben; s5 ein Schiff aus Metall trägt
+  die Eule (Stahlschiff schwimmt, eine Frage der Stufe) statt eines Holzschiffchens.
+- **Stromkreis-Bauer:** Schaltbild des Spiels; was den Kreis schliesst, kommt zuletzt: s1 Draht, s2 Schalter, s3 ein
+  Schlüssel, s4 zwei Lampen in Serie, s5 parallel mit Schalter, s6 drei Lampen in Serie, die mittlere überbrückt bleibt
+  dunkel (statt eines Hauses).
+- **Hebel-Wippe:** die Wippe des Spiels mit Plätzen 1–5, darunter die Momente (2 · 3 > 2 · 1 …); s5 die Stange mit dem
+  Stein (60 · 2 = 20 · 6), s6 knapp 17 > 16 — statt nur gleicher Gewichte.
+- **Wassertropfen-Reise:** s1 Eis, Wasser, Dampf bei 0 °C und 100 °C; s2–s4 die Wege des Spiels über Boden und Berg
+  (s4 nummeriert); s5 und s6 die Kläranlage — statt eines einzigen Kreislaufs.
+- **Energie-Wandler:** Ketten des Spiels mit Energieformen und Wandlern statt eines Stausees mit Dorf; s6 die lange
+  Kette Sonne → Pflanze → Muskeln → Velodynamo → LED-Lampe.
+- **Bionik-Paare:** wie vorgeschlagen; s3 und s6 mit der Lupe „abgeschaut“.
+- **Körper-Puzzle:** statt des Wegs des Apfels in jeder Stufe: s1 und s2 Körperteile und Sinne, s3 Gelenke, s4 Körperteile,
+  s5 der Weg der Luft, s6 der Weg des Essens (wie die Liste „wege“).
+- **Znüni-Teller:** Körbe wie im Spiel (jeden Tag und ab und zu, Frucht und Gemüse, Gruppen), s4 und s5 die
+  ausgewogenen Teller des Spiels, s6 alle sechs Gruppen.
+- **Blutkreislauf-Lotse:** s1 die Organe; s2–s6 die Stationen des Kreislaufs der Stufe, das Blut wird in der Lunge rot und
+  im Körper wieder blau, s5 und s6 mit Vorhof und Kammer, s6 färben sich die Gefässe erst, wenn das Blut durchfliesst.
+  s2 zeigt den Anfang des grossen Kreislaufs (Körper, Hohlvene, Herz) statt des kleinen Bilds mit Kopf und Armen.
+- **Braille-Finger:** Buchstaben der Stufen (D gezählt, B, K = A + Punkt 3, M, HUND, EULE mit Finger) statt a bis e.
+- **Auge-Entdecker:** wie vorgeschlagen, mit den Teilen der Stufen; s3 die Pupille im Hellen klein, s5 der Schnitt,
+  s6 der Lichtweg bis ins Gehirn.
+- **Lärm-Wächter:** statt einer Reise des Schalls die Aufgaben der Stufen: s1 laut und leise, s2 die Lärm-Skala, s3 und
+  s4 Schutz (Ohrstöpsel hilft gut, Ohren zuhalten etwas), s5 das Ohr, s6 das Echo.
+- **Kompass-Spiel:** Plan 6 × 6 des Spiels mit Wegen der Stufen; ab s4 acht Richtungen, s5 und s6 gedrehte Karte (Nordpfeil
+  und Nadel zeigen nach Norden der Karte).
+- **Plan-Leser:** statt Brücke und Kirche der Quartierplan mit Legende: s1 ein Zeichen finden, s2 zählen, s3–s6 Wege mit
+  Massstab und Länge.
+- **Teddy-Versteck:** wie vorgeschlagen mit den Plätzen der Stufen (auf, unter, über, in, zwischen, links neben, rechts
+  neben); s6 das Regal 3 × 3 statt des Betts.
+- **Tier-Sortierer:** Album mit den Körben des Spiels (Haltung, Wirbeltierklassen, Säugetiergruppen) statt Heimtiere,
+  Wildtiere, …; s5 und s6 die kniffligen Tiere (Fledermaus kein Vogel, Wal kein Fisch, Spinne kein Insekt).
+- **Lebensraum-Zuordnung:** s1–s3 die Lebensräume der Stufen mit ihren Tieren, s4 eine Nahrungskette, s5 und s6
+  Nahrungsnetze (die Feldmaus fressen Fuchs und Waldkauz) — nur Tiere mit Bildzeichen.
+- **Fledermaus-Forscher:** s1 Echo, s2 Jagd, s3 Wochenstube, s4 das Jahr im Kreis, s5 Anpassungen, s6 das Jahr ohne
+  Jahreszeit — nach den Themen der Stufen.
+- **Lebenszyklus-Puzzle:** Zyklen des Spiels: s1 Huhn, s2 Sonnenblume, s3 Geburt in den Körben, s4 Schmetterling, s5
+  Marienkäfer, s6 Frosch (statt nur des Froschs).
+- **Pflanzen-Bestimmer:** s1 Laub- und Nadelbaum, s2 Blattformen, s3 Rand und Stellung, s4 Bestimmungsschlüssel, s5 und
+  s6 die Blüte im Schnitt mit den Teilen (statt Samen bis Wiese).
+- **Wetter und Jahreszeiten:** s1 der Baum durchs Jahr, s2 und s3 Thermometer der Stufen mit Wettersymbol und Kleidung, s4
+  Wetterbericht, s5 und s6 Unterschied Morgen und Mittag (s6 über null).
+- **Taschengeld-Planer:** Aufgaben der Stufen statt Münzen zählen: reicht es, Rest, Wochenbudget, sparen (7 Wochen),
+  Bedarf und Wunsch, Packungen vergleichen.
+- **Kakao-Weg:** die acht Schritte des Wegs der Schoggi auf einer Karte (Westafrika, Meer, Schweiz), s3 mit fehlendem
+  Schritt und wer ihn macht, s4 Herkunft, s5 der Kreislauf Haushalte und Unternehmen.
 
 ## 8. Ideen je Spiel
 

@@ -21,6 +21,7 @@
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
@@ -143,6 +144,10 @@ function tippsFuer(a) {
 
 LS.spiel({
   id: "lebenszyklus",
+  // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
+  feier: { muster: "zyklus", bilder: "lebenszyklus", ziele: { s1: { stadien: ["🥚", "🐣", "🐔"], kreis: true }, s2: { stadien: ["🟤", "🌱", "🌿", "🌻"], kreis: true },
+    s3: { geburt: [["🐔", "ei"], ["🦘", "beutel"], ["🦇", "lebend"], ["🐨", "beutel"], ["🐋", "lebend"]] }, s4: { stadien: ["⚪", "🐛", "puppe", "🦋"], kreis: true },
+    s5: { stadien: ["⚪", "larve", "puppe", "🐞"], kreis: true }, s6: { stadien: ["⚪", "kaulquappe", "beine", "jungfrosch", "🐸"], kreis: true } } },
   hilfe: "Tipp die Bilder der Reihe nach an, vom Anfang bis zum Ende. Bei „Wie kommen die Jungen zur Welt?“ legst du das Tier in den passenden Korb.",
   einleitung: "Aus dem Ei wird ein Küken, aus der Raupe ein Schmetterling. Bringst du alles in die richtige Reihenfolge?",
   anzahl: 6,
