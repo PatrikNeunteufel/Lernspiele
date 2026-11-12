@@ -1087,8 +1087,8 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .schalter-zeile { gap: 10px 22px; }
 .schalter-teil { display: inline-flex; align-items: center; gap: 8px; }
 .schalter-hinweis { flex-basis: 100%; }
-/* an: Teile, Endlos und Vorlesen zeigen es am goldenen Symbol wie auf der Karte; nur der Timer färbt den Knopf */
-.timer-schalter.an:is([data-schalter="reihenfolge"], [data-schalter="endlos"], [data-schalter="vorlesen"]) { background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); }
+/* an: Teile, Endlos, Favorit und Vorlesen zeigen es am goldenen Symbol wie auf der Karte; nur der Timer färbt den Knopf */
+.timer-schalter.an:is([data-schalter="reihenfolge"], [data-schalter="endlos"], [data-schalter="favorit"], [data-schalter="vorlesen"]) { background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); }
 .symbol.vorlesen .welle { fill: none; }
 .stufe .fuer.endlos { color: var(--deko-4-schrift); font-weight: 900; }
 .stufe .fuer.endlos .symbol { width: 20px; height: 20px; vertical-align: -5px; }

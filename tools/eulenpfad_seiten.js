@@ -246,8 +246,12 @@ function pruefeTabSpiele(melde) {
     }
     const erste = s.lauf(`document.querySelector(".spielkarte[data-spiel]").dataset.spiel`);
     // Favorit: Stern antippen → im Profil, Karte in der Gruppe Favoriten (doppelt), Stern an
+    // Ein Schalter zeichnet nur die eigene Karte neu (LERN_Session35): eine andere Karte bleibt dasselbe Element
+    s.lauf(`[...document.querySelectorAll(".spielkarte[data-spiel]")].at(-1).setAttribute("data-merk", "1")`);
     s.klick(`.spielkarte[data-spiel="${erste}"] [data-favorit]`); ruhe(s);
     pruefe((s.profil("Mia").favoriten || []).includes(erste), ort, `Favorit ${erste} nicht im Profil`);
+    pruefe(s.gibt("[data-merk]") === 1, ort, "Stern hat alle Karten neu gezeichnet");
+    pruefe(s.gibt(`details.gruppe:not([data-gruppe="favoriten"]) .spielkarte[data-spiel="${erste}"]`) === 1, ort, "Favorit fehlt am eigenen Platz");
     pruefe(s.gibt(`[data-gruppe="favoriten"] .spielkarte[data-spiel="${erste}"]`) === 1 && s.gibt(".spielkarte[data-spiel]") === karten + 1,
       ort, "Favorit fehlt in der Gruppe Favoriten");
     pruefe(s.gibt(`[data-gruppe="favoriten"] .spielkarte[data-spiel="${erste}"] .karten-schalter.an svg.stern.an`) === 1, ort, "Stern des Favoriten nicht an");
@@ -284,6 +288,14 @@ function pruefeTabSpiele(melde) {
     // Favorit wieder weg (sonst steht die Karte zweimal in der Liste)
     s.klick(`[data-gruppe="favoriten"] .spielkarte[data-spiel="${erste}"] [data-favorit]`); ruhe(s);
     pruefe((s.profil("Mia").favoriten || []).length === 0 && s.gibt('[data-gruppe="favoriten"]') === 0, ort, "Favorit nicht zurückgenommen");
+    // Alle Favoriten entfernen (LERN_Session35): erst beim zweiten Tippen
+    const zwei = s.lauf(`[...new Set([...document.querySelectorAll(".spielkarte[data-spiel]")].map(k => k.dataset.spiel))].slice(0, 2)`);
+    for (const id of zwei) { s.klick(`.spielkarte[data-spiel="${id}"] [data-favorit]`); ruhe(s); }
+    pruefe((s.profil("Mia").favoriten || []).length === 2 && s.gibt(".favoriten-leeren") === 1, ort, "zwei Favoriten, aber kein „Alle Favoriten entfernen“");
+    s.klick(".favoriten-leeren"); ruhe(s);
+    pruefe((s.profil("Mia").favoriten || []).length === 2, ort, "„Alle Favoriten entfernen“ löscht schon beim ersten Tippen");
+    s.klick(".favoriten-leeren"); ruhe(s);
+    pruefe((s.profil("Mia").favoriten || []).length === 0 && s.gibt('[data-gruppe="favoriten"]') === 0, ort, "„Alle Favoriten entfernen“ wirkt nicht");
     // Sortierung: nach Name, dann die Richtung umkehren
     s.lauf(`(() => { const e = document.querySelector('.sortier-wahl select'); e.value = "name"; e.dispatchEvent(new Event("change")); })()`); ruhe(s);
     const sortiert = () => s.lauf(`JSON.stringify([...document.querySelectorAll(".spielkarte[data-spiel] .name")].map(n => n.textContent))`);

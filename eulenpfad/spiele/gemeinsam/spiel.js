@@ -2438,7 +2438,7 @@ const LS = (() => {
 
     /**
      * Schalter der Stufenwahl wie auf der Karte (Entscheid RS1 a, LERN_Session35): Reihenfolge der Teile (Spiele mit
-     * `reihenfolge: true`, R1 a), Timer und Endlos (Spiele mit Endlos-Stufen) — je ein Symbolknopf mit dem Wort daneben,
+     * `reihenfolge: true`, R1 a), Timer, Endlos (Spiele mit Endlos-Stufen), Favorit und Vorlesen — je ein Symbolknopf mit dem Wort daneben,
      * dieselbe Wahl wie auf der Karte (setzeWahl, waehleTimer, Profil endlosAn; VR1 a mit 🔒, wenn die Aufsicht festlegt).
      * Darunter leise die Erklärung des zuletzt geänderten Schalters (ohne Änderung: Endlos, wenn an, sonst Timer).
      */
@@ -2479,6 +2479,12 @@ const LS = (() => {
           ? `${welche} endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.${nr.length < stufenListe.length ? " Die anderen Stufen spielst du wie sonst." : ""}${timerAn ? " Mit Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper." : ""}`
           : "Endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.";
       }
+      // Favorit (Wunsch Patrik, LERN_Session35): derselbe Stern wie auf der Karte, gleiche Liste im Profil
+      const favoriten = profil(name).favoriten || [];
+      const favorit = favoriten.includes(def.id);
+      schalter("favorit", favorit, "stern", favorit ? "Favorit" : "Kein Favorit", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten", false,
+        () => speichereProfil(name, { favoriten: favorit ? favoriten.filter(x => x !== def.id) : [...favoriten, def.id] }));
+      erklaerung.favorit = favorit ? "Das Spiel steht oben auf der Startseite bei den Favoriten." : "Mit dem Stern kommt das Spiel oben auf der Startseite zu den Favoriten.";
       // Vorlesen gleich oder auf Knopfdruck (Wunsch Patrik, LERN_Session8) — als Schalter wie die anderen (LERN_Session35);
       // gilt wie im Profil für alle Spiele. An = gleich vorlesen.
       if (vorlesenErlaubt(def.id)) {

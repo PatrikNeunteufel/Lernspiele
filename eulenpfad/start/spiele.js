@@ -78,7 +78,7 @@ const suchAttr = platzhalter => ({ class: "feld suche", placeholder: platzhalter
 function zeichneSpiele(box, neu) {
   const { el } = LS;
   const name = LS.aktuellerSpieler();
-  const p = LS.profil(name);
+  let p = LS.profil(name); // neu gelesen, wenn ein Schalter nur eine Karte ändert (karteNeu)
   const aufsicht = LS.aufsichtAngemeldet();
   const fokus = p.fokus;
   // Filter merkt sich der Browser (nur Bequemlichkeit); Ansicht, Favoriten und Zuklappen das Profil.
@@ -425,13 +425,13 @@ function zeichneSpiele(box, neu) {
           text: KLASSEN_LAGE[lage].zeichen }) : null,
         reihenfolge && (LS.istFest(name, "reihenfolge") ? festSchalter(reihenfolge.an, reihenfolge.symbol, reihenfolge.text)
           : schalter(reihenfolge.an, reihenfolge.symbol, `${reihenfolge.text} — antippen wechselt`,
-            () => { LS.setzeWahl(name, "reihenfolge", s.id, reihenfolge.naechste); neu(); })),
+            () => { LS.setzeWahl(name, "reihenfolge", s.id, reihenfolge.naechste); karteNeu(s.id); })),
         LS.istFest(name, "timer") ? festSchalter(timerAn, "uhr", timerAn ? "Timer an" : "Timer aus")
-          : schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.waehleTimer(name, s.id, !timerAn); neu(); }),
+          : schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.waehleTimer(name, s.id, !timerAn); karteNeu(s.id); }),
         s.endlos?.length ? schalter(endlosAn, "endlos", endlosAn ? "Endlos aus" : "Endlos ein: so viele wie möglich ohne Fehler",
-          () => speichere({ endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] })) : null,
+          () => { LS.speichereProfil(name, { endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] }); karteNeu(s.id); }) : null,
         schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
-          () => speichere({ favoriten: UE.umschalten(p.favoriten, s.id) }), { "data-favorit": s.id }));
+          () => { LS.speichereProfil(name, { favoriten: UE.umschalten(p.favoriten, s.id) }); karteNeu(s.id); favoritenNeu(); }, { "data-favorit": s.id }));
     const beschreibung = el("div", { class: "ziel", text: s.beschreibung, ...(aufsicht ? {} : { hidden: true }) });
     const info = aufsicht ? null : el("button", { type: "button", class: "karten-info", "aria-expanded": "false", "aria-label": `Worum geht es bei ${s.name}?`,
       title: "Worum geht es?", text: "ⓘ", onclick: () => {
@@ -470,13 +470,60 @@ function zeichneSpiele(box, neu) {
     return k;
   }
 
+  // Ein Schalter der Karte zeichnet nur diese Karte neu (Hinweis Patrik, LERN_Session35: der Neuaufbau aller Karten
+  // dauerte auf der Startseite rund 1 s, auf der Spielseite ging es sofort). Die Karte kann zweimal dastehen (Favoriten
+  // oben und am eigenen Platz); die Wirkung einer Lücke auf die Nachbarkarte (Stil „hand“) geht mit.
+  function karteNeu(id) {
+    p = LS.profil(name);
+    const s = SPIELE.find(x => x.id === id);
+    if (!s) return;
+    for (const alt of box.querySelectorAll(`.spielkarte[data-spiel="${id}"]`)) {
+      const frisch = karte(s);
+      for (const c of String(alt.getAttribute("class") || "").split(/\s+/)) if (/^(luecke-|w-)/.test(c)) frisch.classList.add(c);
+      alt.replaceWith(frisch);
+    }
+  }
+
   // ----- Bei einer Suche: eine Liste, beste Treffer zuerst; sonst Favoriten, dann Fach → Thema -----
   if (treffer && aehnlichZu) box.append(el("h2", { class: "treffer-titel" },
     el("span", { text: `🔗 Ähnlich wie ${aehnlichZu.name}: ${auswahl.length} Spiel${auswahl.length === 1 ? "" : "e"} ` }),
     chip("✕ Alle Spiele", false, () => { UE.aehnlich.schliessen(); neu(); }, null, "klein")));
   if (treffer && auswahl.length) box.append(aehnlichZu ? gitter(auswahl) : el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), aehnlichZu ? "" : gitter(auswahl));
-  const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
-  if (favoriten.length) box.append(gruppe("favoriten", "⭐ Favoriten", favoriten.length, gitter(favoriten)));
+  // Favoriten (Wunsch Patrik, LERN_Session35): oben zusätzlich, am eigenen Platz bleibt das Spiel; das Feld nur mit
+  // mindestens einem Favoriten, darin „Alle Favoriten entfernen“ (zweimal tippen). Der Platzhalter hält die Stelle,
+  // damit ein Stern nur das Feld und die Karte neu zeichnet.
+  const favoritenPlatz = el("span", { class: "favoriten-platz", hidden: true });
+  box.append(favoritenPlatz);
+  let favoritenFeld = null;
+  function favoritenGruppe() {
+    const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
+    if (!favoriten.length) return null;
+    const leeren = el("button", { type: "button", class: "knopf hell klein favoriten-leeren", text: "☆ Alle Favoriten entfernen" });
+    let gefragt = null;
+    leeren.addEventListener("click", () => {
+      if (!gefragt) { // erst nachfragen: ein Tipp aus Versehen löscht nichts
+        leeren.textContent = "Wirklich alle entfernen? Nochmal tippen";
+        gefragt = setTimeout(() => { gefragt = null; leeren.textContent = "☆ Alle Favoriten entfernen"; }, 4000);
+        return;
+      }
+      clearTimeout(gefragt);
+      const waren = p.favoriten;
+      LS.speichereProfil(name, { favoriten: [] });
+      waren.forEach(karteNeu);
+      favoritenNeu();
+    });
+    return gruppe("favoriten", "⭐ Favoriten", favoriten.length, el("div", { class: "knopfzeile favoriten-leiste" }, leeren), gitter(favoriten));
+  }
+  function favoritenNeu() {
+    p = LS.profil(name);
+    const neuesFeld = favoritenGruppe();
+    favoritenFeld?.remove();
+    if (neuesFeld) favoritenPlatz.after(neuesFeld);
+    favoritenFeld = neuesFeld;
+    if (neuesFeld) LS.langDruecken(box);
+  }
+  favoritenFeld = favoritenGruppe();
+  if (favoritenFeld) box.append(favoritenFeld);
   // Flache Sortierung: alle Spiele in einer Liste (Favoriten bleiben oben in ihrer Gruppe).
   if (flach && auswahl.length) box.append(el("h2", { class: "treffer-titel", text: `${auswahl.length} Spiele · ${LS.EINSTELLUNGEN.sortierung.werte[sort.art]}` }), gitter(auswahl));
   const faecherReihe = sort.ab ? [...FAECHER].reverse() : FAECHER;
