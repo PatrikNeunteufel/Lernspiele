@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.41.0 — 2026-11-12 (LERN_Session33)
+- Dunkler Satz in `farben.css` unter `:root[data-farben="dunkel"]` (Entscheid DM1 a), dazu `--k-bildtext` und
+  `color-scheme` (hell/dunkel für Formularfelder). Neu `farben.js` (`KERN.farben`: `WAHLEN` hell, dunkel, geraet;
+  `dunkel(wahl)`, `anwenden(wahl)` setzt `data-farben` an `<html>` und folgt bei „geraet“ dem Gerät, `merke(speicher,
+  wahl)`) und `farben.kopf.js`: setzt `data-farben` im `<head>` vor dem ersten Bild aus `<praefix>farben` (Präfix am
+  Skript, `data-speicher`). `tools/kern_verteilen.py` bündelt `.kopf.js`-Teile in `<app>/kern/kern-kopf.js`.
+
 ## 1.40.0 — 2026-11-12 (LERN_Session33)
 - Neuer Teil `farben.css` (Entscheid DM1 a, docs/konzept_darkmode.md): gemeinsame Namen für die Rahmenfarben aller
   Apps (`--k-grund`, `--k-karte`, `--k-text`, `--k-leise`, `--k-rand`, `--k-knopf`, `--k-knopf-dunkel`,

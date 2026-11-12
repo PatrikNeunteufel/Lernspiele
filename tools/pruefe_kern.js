@@ -34,8 +34,9 @@ require(path.join(WURZEL, "kern", "tastenfeld.js"));
 require(path.join(WURZEL, "kern", "notizblock.js"));
 require(path.join(WURZEL, "kern", "uebersicht.js"));
 require(path.join(WURZEL, "kern", "listenpruefung.js"));
+require(path.join(WURZEL, "kern", "farben.js"));
 // CSS-Teile (Farben, DM1 a) prüft der Abschnitt „farben.css“ unten; sie tragen sich hier ein.
-const CSS_GEPRUEFT = ["farben.css"];
+const CSS_GEPRUEFT = ["farben.css", "farben.kopf.js"]; // farben.kopf.js läuft im <head>, nicht mit require
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
@@ -2226,7 +2227,8 @@ console.log("listenpruefung.js");
     const fs = require("fs");
     const css = fs.readFileSync(path.join(WURZEL, "kern", "farben.css"), "utf8");
     const ohneKommentar = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    // Nur Blöcke :root und :root[data-farben="dunkel"], darin nur Variablen --k-*: eine Farbe als #rgb oder #rrggbb
+    // Nur Blöcke :root und :root[data-farben="dunkel"], darin nur Variablen --k-* (eine Farbe als #rgb oder #rrggbb) und
+    // color-scheme (light im hellen, dark im dunklen Satz)
     const bloecke = [...ohneKommentar.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => [m[1].trim(), m[2]]);
     const rest = ohneKommentar.replace(/[^{}]+\{[^{}]*\}/g, "").trim();
     gleich(rest === "", true, "farben.css: nichts ausserhalb der Blöcke");
@@ -2236,6 +2238,8 @@ console.log("listenpruefung.js");
       gleich(wahl in SATZ, true, `farben.css: Block ${wahl} ist :root oder :root[data-farben="dunkel"]`);
       const satz = (saetze[SATZ[wahl] ?? wahl] ??= {});
       for (const d of rumpf.split(";").map(x => x.trim()).filter(Boolean)) {
+        const cs = d.match(/^color-scheme\s*:\s*(\w+)$/);
+        if (cs) { gleich(cs[1], SATZ[wahl] === "dunkel" ? "dark" : "light", `farben.css: color-scheme im Satz ${SATZ[wahl]}`); continue; }
         const m = d.match(/^(--k-[a-z-]+)\s*:\s*(#[0-9a-f]{3}|#[0-9a-f]{6})$/i);
         gleich(Boolean(m), true, `farben.css: „${d}“ ist eine Variable --k-* mit einer Farbe`);
         if (!m) continue;
@@ -2249,13 +2253,75 @@ console.log("listenpruefung.js");
       "--k-knopf-text", "--k-gut", "--k-gut-hell", "--k-hinweis", "--k-hinweis-hell", "--k-fokus", "--k-bildgrund"]) {
       gleich(n in hell, true, `farben.css: ${n} im hellen Satz`);
     }
-    // Ein dunkler Satz nennt nur Namen des hellen (sonst fehlt einer im hellen Modus)
-    for (const n of Object.keys(saetze.dunkel || {})) gleich(n in hell, true, `farben.css: ${n} des dunklen Satzes auch hell`);
+    // Der dunkle Satz nennt dieselben Namen wie der helle (sonst fehlt einer in einem Modus)
+    const dunkel = saetze.dunkel || {};
+    gleich(Object.keys(dunkel).sort().join(","), Object.keys(hell).sort().join(","), "farben.css: dunkler und heller Satz mit denselben Namen");
+    // Kontrast (WCAG 2.x) im dunklen Satz: Schrift 4,5, Bedienelemente 3 (DM4 a); der helle Satz folgt mit DM5 a
+    const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const kontrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+    for (const [a, b, soll] of [["--k-text", "--k-karte", 4.5], ["--k-text", "--k-grund", 4.5], ["--k-leise", "--k-karte", 4.5],
+      ["--k-leise", "--k-grund", 4.5], ["--k-knopf-text", "--k-knopf", 4.5], ["--k-gut", "--k-karte", 3], ["--k-hinweis", "--k-karte", 3],
+      ["--k-text", "--k-gut-hell", 4.5], ["--k-text", "--k-hinweis-hell", 4.5], ["--k-fokus", "--k-karte", 3], ["--k-bildtext", "--k-bildgrund", 4.5]]) {
+      if (dunkel[a] && dunkel[b]) gleich(kontrast(dunkel[a], dunkel[b]) >= soll, true, `farben.css dunkel: ${a} auf ${b} ${kontrast(dunkel[a], dunkel[b]).toFixed(2)} unter ${soll}`);
+    }
     // Jeder Verweis var(--k-…) im Stil einer App nennt einen Namen aus farben.css
     for (const stil of ["eulenpfad/spiele/gemeinsam/stil.css", "lernsteig/gemeinsam/stil.css"]) {
       const text = fs.readFileSync(path.join(WURZEL, stil), "utf8");
       for (const v of new Set([...text.matchAll(/var\((--k-[a-z-]+)/g)].map(m => m[1]))) gleich(v in hell, true, `${stil}: ${v} steht in farben.css`);
     }
+  }
+
+  // ---------- farben.js und farben.kopf.js (DM1 a, DM2 a) ----------
+  console.log("farben.js, farben.kopf.js");
+  {
+    const fs = require("fs"), vm = require("vm");
+    const F = KERN.farben;
+    gleich(F.WAHLEN.join(","), "hell,dunkel,geraet", "farben.WAHLEN");
+    // Gerät hell oder dunkel: matchMedia als Ersatz
+    const mitGeraet = (dunkelGeraet, f) => {
+      const alt = global.matchMedia;
+      const hoerer = [];
+      global.matchMedia = q => ({ matches: q === "(prefers-color-scheme: dark)" && dunkelGeraet.wert, addEventListener: (_, h) => hoerer.push(h), removeEventListener: () => {} });
+      try { return f(hoerer); } finally { if (alt === undefined) delete global.matchMedia; else global.matchMedia = alt; }
+    };
+    for (const [wahl, geraet, soll] of [["hell", false, false], ["hell", true, false], ["dunkel", false, true], ["geraet", false, false], ["geraet", true, true], ["unsinn", true, false], [null, true, false]])
+      gleich(mitGeraet({ wert: geraet }, () => F.dunkel(wahl)), soll, `farben.dunkel(${wahl}) mit Gerät ${geraet ? "dunkel" : "hell"}`);
+    // anwenden: Attribut an <html>, bei „geraet“ folgt es dem Gerät
+    const html = { a: {}, setAttribute(k, v) { this.a[k] = v; }, removeAttribute(k) { delete this.a[k]; } };
+    const altDoc = global.document;
+    global.document = { documentElement: html };
+    try {
+      F.anwenden("dunkel"); gleich(html.a["data-farben"], "dunkel", "farben.anwenden(dunkel)");
+      F.anwenden("hell"); gleich("data-farben" in html.a, false, "farben.anwenden(hell) nimmt das Attribut weg");
+      const geraet = { wert: false };
+      mitGeraet(geraet, hoerer => {
+        F.anwenden("geraet"); gleich("data-farben" in html.a, false, "farben.anwenden(geraet), Gerät hell");
+        geraet.wert = true; hoerer.forEach(h => h());
+        gleich(html.a["data-farben"], "dunkel", "farben.anwenden(geraet) folgt dem Gerät");
+      });
+    } finally { if (altDoc === undefined) delete global.document; else global.document = altDoc; }
+    // merke: unter „farben“, Unbekanntes wird hell
+    const geschrieben = {};
+    F.merke({ schreibe: (k, v) => { geschrieben[k] = v; } }, "geraet"); gleich(geschrieben.farben, "geraet", "farben.merke(geraet)");
+    F.merke({ schreibe: (k, v) => { geschrieben[k] = v; } }, "lila"); gleich(geschrieben.farben, "hell", "farben.merke: Unbekanntes wird hell");
+    // farben.kopf.js in einer Sandbox: dieselbe Entscheidung wie farben.dunkel, für jede gespeicherte Wahl und jedes Gerät
+    const kopf = fs.readFileSync(path.join(WURZEL, "kern", "farben.kopf.js"), "utf8");
+    for (const gespeichert of [undefined, "hell", "dunkel", "geraet", "unsinn", "{kaputt"]) for (const geraet of [false, true]) {
+      const a = {};
+      const roh = gespeichert === undefined ? null : gespeichert === "{kaputt" ? gespeichert : JSON.stringify(gespeichert);
+      const c = vm.createContext({
+        document: { currentScript: { getAttribute: k => (k === "data-speicher" ? "lernspiele:" : null) }, documentElement: { setAttribute: (k, v) => { a[k] = v; } } },
+        localStorage: { getItem: k => (k === "lernspiele:farben" ? roh : null) },
+        matchMedia: q => ({ matches: q === "(prefers-color-scheme: dark)" && geraet }),
+      });
+      vm.runInContext(kopf, c);
+      const soll = mitGeraet({ wert: geraet }, () => F.dunkel(gespeichert === "{kaputt" ? null : gespeichert));
+      gleich(a["data-farben"] === "dunkel", soll, `farben.kopf.js: gespeichert ${gespeichert}, Gerät ${geraet ? "dunkel" : "hell"} wie farben.dunkel`);
+    }
+    // ohne localStorage (gesperrt): kein Fehler, hell
+    const ohne = {};
+    vm.runInContext(kopf, vm.createContext({ document: { currentScript: null, documentElement: { setAttribute: (k, v) => { ohne[k] = v; } } } }));
+    gleich("data-farben" in ohne, false, "farben.kopf.js ohne Speicher: hell, ohne Fehler");
   }
 
   // ---------- Kopien in den Apps ----------

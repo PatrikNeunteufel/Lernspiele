@@ -1,15 +1,18 @@
-/* kern 1.40.0 · Prüfsumme sha256:4ca8d6e1aca08a79117cfa30aaaba2c350ca42b493b3f951896fa4f3a44f132a · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.41.0 · Prüfsumme sha256:983f10c04d0be7bb94c729f4e55385ea4f38b704924dc0387e8123b85e269f1c · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/farben.css ---- */
 /* Farben der Reihe (Entscheid DM1 a, docs/konzept_darkmode.md): gemeinsame Namen für die Rahmenfarben aller Apps.
 
-   Nur Variablen, keine Regeln. tools/kern_verteilen.py bündelt die CSS-Teile aus kern/TEILE in <app>/kern/kern.css;
+   Nur Variablen und color-scheme (Formularfelder, Bildlaufleisten), keine Regeln. tools/kern_verteilen.py bündelt die CSS-Teile aus kern/TEILE in <app>/kern/kern.css;
    jede Seite lädt sie vor dem Stil ihrer App (tools/pruefe_skripte.js, Punkt 6).
 
    Hell stehen hier die Werte des Eulenpfads; eine App setzt ihre eigenen hellen Töne in ihrem :root über dieselben
    Namen (der Lernsteig sachlicher, lernsteig/gemeinsam/stil.css) — ihr Stil kommt später und gewinnt. Die alten Namen
    der Apps verweisen hierher (--text: var(--k-text)), bis sie ersetzt sind. Der dunkle Satz kommt unter
-   :root[data-farben="dunkel"] (Konzept, Reihenfolge Schritt 3) und gewinnt über die hellen Werte der Apps, weil er
-   spezifischer ist; App-eigene Töne (Himmel, Deko, Stellen, Akzent) bekommen ihre dunkle Fassung im Stil der App. */
+   :root[data-farben="dunkel"] und gewinnt über die hellen Werte der Apps, weil er spezifischer ist; App-eigene Töne
+   (Himmel, Deko, Stellen, Akzent) bekommen ihre dunkle Fassung im Stil der App. Gesetzt wird data-farben von
+   farben.kopf.js (vor dem ersten Bild) und KERN.farben.anwenden. Kontrast auf der Karte (WCAG 2.x), gerechnet
+   LERN_Session33: Text 12,5 (hell 12,9), leise 7,2, Schrift auf dem Knopf 5,7, gut 7,7, Hinweis 8,1, Fokus 6,4.
+   Bildgrund bleibt in beiden Modi hell (DM3 a); Schrift darauf nimmt --k-bildtext. */
 :root {
   --k-grund: #fef6e4;          /* Hintergrund der Seite (Eulenpfad: unterer Ton des Himmels) */
   --k-karte: #ffffff;          /* Karten, Felder, Knöpfe ohne Farbe */
@@ -25,4 +28,24 @@
   --k-hinweis-hell: #fff1dc;
   --k-fokus: #5b6cff;          /* Fokusrahmen der Tastatur */
   --k-bildgrund: #ffffff;      /* Grund unter Zeichnungen und Animationen, in beiden Modi hell (DM3 a) */
+  --k-bildtext: #2d3047;       /* Schrift auf dem Bildgrund, in beiden Modi dunkel */
+  color-scheme: light;
+}
+:root[data-farben="dunkel"] {
+  --k-grund: #1a1d2a;
+  --k-karte: #262a3b;
+  --k-text: #eef0f7;
+  --k-leise: #b3b8cc;
+  --k-rand: #4a5175;
+  --k-knopf: #7584ff;
+  --k-knopf-dunkel: #5563d8;
+  --k-knopf-text: #10132a;
+  --k-gut: #4cd68b;
+  --k-gut-hell: #1d3a2b;
+  --k-hinweis: #ffb454;
+  --k-hinweis-hell: #3d2e17;
+  --k-fokus: #9aa8ff;
+  --k-bildgrund: #f6f1e7;
+  --k-bildtext: #2d3047;
+  color-scheme: dark;
 }

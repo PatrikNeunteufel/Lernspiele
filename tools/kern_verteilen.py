@@ -1,7 +1,8 @@
 """Verteilt den gemeinsamen Kern in die Apps (Entscheid KB1 a; Plan docs/plan_angleich_reihe.md B1).
 
 kern/ ist die einzige Quelle. Dieses Werkzeug bündelt die Teile aus kern/TEILE je App in zwei Dateien mit Version und
-Prüfsumme im Kopf: die .js-Teile in <app>/kern/kern.js, die .css-Teile (Farben, Entscheid DM1 a) in <app>/kern/kern.css.
+Prüfsumme im Kopf: die .js-Teile in <app>/kern/kern.js, die .css-Teile (Farben, Entscheid DM1 a) in <app>/kern/kern.css,
+die .kopf.js-Teile (laufen im <head> vor dem ersten Bild, DM1 a) in <app>/kern/kern-kopf.js.
 Die Kopien sind Ergebnisse, nie eine zweite Quelle: Wer etwas am Kern ändert, ändert es in kern/ und verteilt neu. Am
 Ende von kern.js steht `KERN.version`; kern.css trägt dieselbe Version im Kopf.
 
@@ -25,7 +26,16 @@ WURZEL = Path(__file__).resolve().parent.parent
 KERN = WURZEL / "kern"
 APPS = ["eulenpfad", "lernsteig", "gratwanderung"]
 KOPF = re.compile(r"^/\* kern (\S+) · Prüfsumme sha256:([0-9a-f]{64}) ·")
-ARTEN = (".js", ".css")  # je Art eine Datei <app>/kern/kern<art>
+ARTEN = (".js", ".css", ".kopf.js")  # je Art eine Datei (DATEI)
+DATEI = {".js": "kern.js", ".css": "kern.css", ".kopf.js": "kern-kopf.js"}
+
+
+def art_von(name: str) -> str:
+    """Art eines Teils: .kopf.js vor .js (die Endung .js trägt auch der Kopf)."""
+    for art in (".kopf.js", ".css", ".js"):
+        if name.endswith(art):
+            return art
+    raise SystemExit(f"kern/TEILE nennt {name} — nur .js-, .css- und .kopf.js-Teile")
 
 
 def lies_text(pfad: Path) -> str:
@@ -42,9 +52,7 @@ def rumpf(art: str = ".js") -> str:
     """Die Teile einer Art (.js oder .css) in der Reihenfolge von kern/TEILE."""
     stuecke = []
     for name in teile():
-        if not name.endswith(ARTEN):
-            raise SystemExit(f"kern/TEILE nennt {name} — nur .js- und .css-Teile")
-        if not name.endswith(art):
+        if art_von(name) != art:
             continue
         quelle = KERN / name
         if not quelle.is_file():
@@ -68,13 +76,13 @@ def buendel(art: str = ".js") -> tuple[str, str]:
 
 
 def ziel(app: str, art: str = ".js") -> Path:
-    return WURZEL / app / "kern" / f"kern{art}"
+    return WURZEL / app / "kern" / DATEI[art]
 
 
 def pruefe_app(app: str, version: str, soll: str, art: str = ".js") -> tuple[int, str]:
     """(0 gleich | 1 Hinweis | 2 Fehler, Text)."""
     pfad = ziel(app, art)
-    datei = f"kern/kern{art}"
+    datei = f"kern/{DATEI[art]}"
     if not pfad.is_file():
         return 2, f"{app}: {datei} fehlt"
     ist = lies_text(pfad)

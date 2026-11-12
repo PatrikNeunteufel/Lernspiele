@@ -787,7 +787,19 @@ dem Text, Wege). Benutzt von: Eulenpfad (`spiele/gemeinsam/spiel.js`, Namen unte
 (`gemeinsam/rahmen.js`, `LST.MELDUNGEN`; lernsteig rahmen.md 5f). Ein Teil für `KERN.daten` mit `entferne` nimmt die
 Meldungen gelöschter Personen auch beim Einlesen und im Abgleich heraus (seit 1.32.1, 4.19).
 
-### 4.29 Geplant
+### 4.29 `KERN.farben` (`kern/farben.js`, `kern/farben.kopf.js`, `kern/farben.css`) — hell und dunkel
+
+Seit 1.41.0, Entscheide DM1 a, DM2 a ([Konzept Darkmode](../konzept_darkmode.md)). Die Farben stehen in `farben.css`
+(4 Einbinden, „Farben“): `--k-*` hell unter `:root`, dunkel unter `:root[data-farben="dunkel"]`, je mit `color-scheme`.
+`KERN.farben`: `WAHLEN` (`hell`, `dunkel`, `geraet`); `dunkel(wahl)` — bei `geraet` nach `prefers-color-scheme`,
+Unbekanntes hell; `anwenden(wahl)` setzt oder nimmt `data-farben="dunkel"` an `<html>` und folgt bei `geraet` dem Gerät,
+solange die Seite offen ist; `merke(speicher, wahl)` legt die aufgelöste Wahl unter `farben` im Speicher der App ab.
+`farben.kopf.js` (verteilt als `<app>/kern/kern-kopf.js`) läuft im `<head>` vor allem anderen, ohne `KERN`: liest
+`<praefix>farben` (Präfix am Skript, `data-speicher="lernspiele:"`) und setzt `data-farben`, damit eine dunkle Seite nicht
+hell aufblitzt. Welche Wahl gilt (Gerät, „Für mich“ einer Aufsicht, Person), entscheidet die App. Tests: `pruefe_kern.js`
+(Sätze vollständig, Kontrast dunkel, `dunkel`/`anwenden`/`merke`, Kopf-Skript in einer Sandbox gleich wie `dunkel`).
+
+### 4.30 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die
 Gruppenleitung mit den Gruppen (RL1 a, LERN-48). Prüfen der Antwort und der Vertrag `aufgabeErzeugen`/`pruefeAufgabe`
