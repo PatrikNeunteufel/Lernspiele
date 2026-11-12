@@ -354,6 +354,8 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
 4. Bildkachel (DM3) in Bildersammlung, Abschluss-Animationen, Kartenbildern, Avataren. **Erledigt 12.11.2026**
    (LERN_Session34, Kern 1.43.0): Klasse `bildkachel` (heller Satz gilt darin), Zeichnungen der Sammlung und
    Abschluss-Animationen dunkel auf dem warmen Bildgrund, Kartenbilder mit hellen Farben; Avatare ohne Kachel (eigener
-   heller Kreis, angesehen). Gezeichnete Szenen der Spielseiten selbst (17 Seiten) mit Schritt 5.
+   heller Kreis, angesehen); Symbole der Abzeichen im Tab Erfolge auf runder Kachel, die Blässe der offenen auf dem Symbol.
+   Messung dunkel danach 348 Funde (vorher 355); auf der Startseite bleiben nur die blassen Texte in Symbolen noch offener
+   Abzeichen (wie hell). Gezeichnete Szenen der Spielseiten selbst (17 Seiten) mit Schritt 5.
 5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen.
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

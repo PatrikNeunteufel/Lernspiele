@@ -215,7 +215,8 @@ function neueFreischaltungen(name) {
 /** Symbol eines Abzeichens: gezeichnet aus avatare.js (AV5 a), sonst das frühere Zeichen. */
 function abzeichenBild(a, groesse) {
   const svg = AVATARE.motivSvg(`abz-${a.id}`, groesse);
-  const box = LS.el("div", { class: "abzeichen-bild" });
+  // Gezeichnet: auf der Bildkachel, helle Farben auch im Dunkeln (DM3 a); ein Emoji braucht keine
+  const box = LS.el("div", { class: "abzeichen-bild" + (svg ? " bildkachel" : "") });
   if (svg) box.innerHTML = svg; else box.textContent = a.bild;
   return box;
 }
