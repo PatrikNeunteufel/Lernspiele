@@ -744,6 +744,13 @@ if (opt.tab !== 0 && (!nurSpiele.length || nurSpiele.includes("tab"))) {
     } catch (e) { console.log(`    FEHLER  Empfehlungen: Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`); gemeldet++; }
     fehlerZahl += gemeldet;
     console.log(`${gemeldet ? "✗" : "✓"} Empfehlungen der Aufsicht: ${schritte} Prüfschritte${gemeldet ? `, ${gemeldet} Fehler` : ""}`);
+    // Aussehen (Darkmode Schritt 3b): Farben des Geräts, „Für mich“ der Aufsicht
+    let g2 = 0, s2 = 0;
+    try {
+      s2 = await require("./eulenpfad_seiten.js").pruefeAussehen((ort, text) => { console.log(`    FEHLER  ${ort}: ${text}`); g2++; });
+    } catch (e) { console.log(`    FEHLER  Aussehen: Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`); g2++; }
+    fehlerZahl += g2;
+    console.log(`${g2 ? "✗" : "✓"} Aussehen (Farben, Für mich): ${s2} Prüfschritte${g2 ? `, ${g2} Fehler` : ""}`);
   })());
 }
 

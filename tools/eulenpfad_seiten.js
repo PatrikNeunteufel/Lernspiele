@@ -133,8 +133,9 @@ async function pruefeSpeicher(melde) {
     // Blöcke (LERN_Session32): je Block eine Karte, der Stil für sich im Block Aussehen, Meldeweg und Speicher je eigene
     pruefe(s.lauf(`LS.EINSTELLUNG_BLOECKE.every(b => document.querySelector('section[data-block="' + b.id + '"]'))`) === true
       && s.gibt('section[data-block="meldeweg"]') === 1 && s.gibt('section[data-block="speicher"] [data-speicher]') === 1, ort, "Einstellungen nicht in Blöcken");
-    pruefe(s.lauf(`document.querySelector('section[data-block="aussehen"]').querySelectorAll(".einstellung").length`) === 1
-      && /Stil/.test(s.lauf(`document.querySelector('section[data-block="aussehen"] h3').textContent`)), ort, "Block Aussehen trägt nicht nur den Stil");
+    // Block Aussehen: Stil und Farben fürs Gerät, darunter „Für mich“ der Aufsicht (Darkmode 3b, DM2-S a)
+    pruefe(s.lauf(`[...document.querySelectorAll('section[data-block="aussehen"] .einstellung h3')].map(h => h.textContent).join("|")`) === "Stil|Farben|Für mich (🔑 Mama)",
+      ort, "Block Aussehen trägt nicht Stil, Farben und „Für mich“");
     pruefe(/Runden und Rekorde liegen in der Ablage/.test(s.text()), ort, "Speicheranzeige nennt die Ablage nicht");
     s.lauf(`LS.schreibe("letzteSicherung", new Date().toISOString()); zeichneStart()`);
     await ruheAsync(s, 50, 4);
@@ -461,4 +462,36 @@ async function pruefeEmpfehlungen(melde) {
   return schritte;
 }
 
-module.exports = { pruefeTabSpiele, pruefeSpeicher, pruefeEmpfehlungen };
+/**
+ * Aussehen (Darkmode Schritt 3b; DM2 a, DM2-S a): Farben des Geräts wirken auf data-farben und sind für kern-kopf.js
+ * gemerkt; „Für mich“ einer Aufsicht gilt nur, solange sie angemeldet ist; ein Kind sieht die Einstellung des Geräts.
+ */
+async function pruefeAussehen(melde) {
+  let schritte = 0;
+  const pruefe = (ok, ort, text) => { schritte++; if (!ok) melde(ort, text); };
+  const ort = "Aussehen (Farben, Für mich)";
+  const browser = new Map();
+  const s = oeffne({ hash: "#verwaltung/einstellungen", speicher: browser, vorher: `LS.neuerSpieler("Mia", { klasse: 2 }); LS.setzeSpieler("Mia");` });
+  await ruheAsync(s);
+  const farben = () => s.lauf(`document.documentElement.getAttribute("data-farben")`);
+  const gemerkt = () => (browser.has("lernspiele:farben") ? JSON.parse(browser.get("lernspiele:farben")) : null);
+  pruefe(farben() === null && gemerkt() === "hell", ort, `Standard nicht hell (data-farben ${farben()}, gemerkt ${gemerkt()})`);
+  const an = await s.lauf(`(async () => { LS.neuerSpieler("Mama", { rolle: "aufsicht" }); await LS.setzePin("Mama", "2468"); return LS.meldeAufsichtAn("Mama", "2468"); })()`);
+  pruefe(!!an, ort, "Aufsicht nicht angemeldet");
+  s.lauf(`zeichneStart()`); await ruheAsync(s);
+  pruefe(s.gibt('section[data-block="aussehen"] [data-fuer-mich]') === 1, ort, "kein „Für mich“ im Block Aussehen");
+  // Gerät dunkel: wirkt sofort und ist gemerkt
+  s.lauf(`LS.setzeEinstellung("farben", "dunkel"); zeichneStart()`); await ruheAsync(s);
+  pruefe(farben() === "dunkel" && gemerkt() === "dunkel", ort, "Farben des Geräts dunkel wirken nicht oder sind nicht gemerkt");
+  // Für mich hell: die Aufsicht sieht hell, das Gerät bleibt dunkel
+  s.lauf(`LS.speichereProfil("Mama", { aussehen: { farben: "hell", stil: "glatt" } }); zeichneStart()`); await ruheAsync(s);
+  pruefe(farben() === null && s.lauf(`LS.aussehen("stil")`) === "glatt" && s.lauf(`LS.einstellung("farben", null)`) === "dunkel",
+    ort, "„Für mich“ der Aufsicht wirkt nicht oder ändert das Gerät");
+  // Ein Kind auf demselben Gerät: wie das Gerät (dunkel, Stil hand)
+  s.lauf(`LS.setzeSpieler("Mia"); zeichneStart()`); await ruheAsync(s);
+  pruefe(farben() === "dunkel" && s.lauf(`LS.aussehen("stil")`) === "hand", ort, "Kind sieht nicht die Einstellung des Geräts");
+  for (const f of new Set(s.fehler())) melde(ort, f);
+  return schritte;
+}
+
+module.exports = { pruefeTabSpiele, pruefeSpeicher, pruefeEmpfehlungen, pruefeAussehen };

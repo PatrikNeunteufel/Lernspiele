@@ -13,7 +13,9 @@
 //      sollen).
 //   6. jede Seite, die den Stil ihrer App lädt (<app>/spiele/gemeinsam/stil.css, <app>/gemeinsam/stil.css), lädt davor
 //      <app>/kern/kern.css (Farben der Reihe, Entscheid DM1 a, docs/konzept_darkmode.md): ohne sie zeigen die Namen
-//      der App (--text: var(--k-text)) ins Leere, und die Seite verliert still ihre Farben.
+//      der App (--text: var(--k-text)) ins Leere, und die Seite verliert still ihre Farben. In den Apps aus KOPF_APPS
+//      steht davor <script src="…/kern/kern-kopf.js" data-speicher="<Präfix>"> (Darkmode Schritt 3b): ohne es blitzt eine
+//      dunkle Seite hell auf, mit falschem Präfix bleibt sie hell.
 //   7. (Hinweis, kein Fehler, bis die Seiten umgebaut sind; DM4 a) feste Farben in Stilen: #…, rgb(), rgba(), hsl(),
 //      white, black ausserhalb von Variablen in :root. Nicht gezählt: ein Regelblock mit dem Kommentar
 //      „Bildfarben: <Grund>“ (Zeichnung auf heller Bildkachel, DM3 a). Mit --farben je Datei die Zahl.
@@ -121,8 +123,9 @@ const GEGENPROBEN_FARBE = [
   ["@media (x) { .a { color: #000; } }", 1, "in @media"],
 ];
 
-// 6. Stil der App und Farben des Kerns davor
+// 6. Stil der App und Farben des Kerns davor; Apps mit Kopf-Skript und ihr Speicher-Präfix (der Lernsteig folgt, Schritt 6)
 const APP_STIL = /^([a-z]+)\/(?:spiele\/)?gemeinsam\/stil\.css$/;
+const KOPF_APPS = { eulenpfad: "lernspiele:" };
 
 /**
  * Mängel einer Seite nach Punkt 6. html: Inhalt ohne HTML-Kommentare, wo: Pfad der Seite relativ zur Wurzel (mit /),
@@ -139,14 +142,29 @@ function pruefeKernStil(html, wo, gibt) {
   const k = stile.indexOf(soll);
   if (k < 0 || k > i) m.push(`${wo}: lädt ${stile[i]} ohne ${soll} davor (DM1 a)`);
   else if (!gibt(soll)) m.push(`${wo}: ${soll} fehlt — python tools/kern_verteilen.py`);
+  const app = stile[i].match(APP_STIL)[1];
+  if (KOPF_APPS[app]) {
+    const kopfSoll = `${app}/kern/kern-kopf.js`;
+    const kopf = [...html.matchAll(/<script\s[^>]*src\s*=\s*["']([^"']+)["'][^>]*>/gi)]
+      .map(s => ({ pfad: path.posix.normalize(path.posix.join(path.posix.dirname(wo), decodeURI(s[1].split(/[?#]/)[0]))), tag: s[0], stelle: s.index }))
+      .find(s => s.pfad === kopfSoll);
+    const kernStelle = html.search(/<link\s[^>]*kern\/kern\.css/i);
+    if (!kopf) m.push(`${wo}: ohne ${kopfSoll} im Kopf (Darkmode, DM1 a)`);
+    else if (kernStelle >= 0 && kopf.stelle > kernStelle) m.push(`${wo}: ${kopfSoll} steht nach kern.css — es muss vor dem ersten Bild laufen`);
+    else if (!kopf.tag.includes(`data-speicher="${KOPF_APPS[app]}"`)) m.push(`${wo}: ${kopfSoll} ohne data-speicher="${KOPF_APPS[app]}"`);
+  }
   return m;
 }
 
 // Gegenproben zu Punkt 6: [HTML, Pfad der Seite, erwartete Zahl Meldungen, Name]
+const KOPF = '<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>';
 const GEGENPROBEN_STIL = [
-  ['<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 0, "Spielseite richtig"],
-  ['<link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "Spielseite ohne Kern"],
-  ['<link rel="stylesheet" href="../gemeinsam/stil.css"><link rel="stylesheet" href="../../kern/kern.css">', "eulenpfad/spiele/x/index.html", 1, "Kern nach dem Stil"],
+  [KOPF + '<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 0, "Spielseite richtig"],
+  [KOPF + '<link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "Spielseite ohne Kern"],
+  [KOPF + '<link rel="stylesheet" href="../gemeinsam/stil.css"><link rel="stylesheet" href="../../kern/kern.css">', "eulenpfad/spiele/x/index.html", 1, "Kern nach dem Stil"],
+  ['<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "ohne Kopf-Skript"],
+  ['<link rel="stylesheet" href="../../kern/kern.css">' + KOPF + '<link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "Kopf-Skript nach kern.css"],
+  [KOPF.replace("lernspiele:", "lernsteig:") + '<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "falsches Präfix"],
   ['<link rel="stylesheet" href="kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 0, "Lernsteig richtig"],
   ['<link rel="stylesheet" href="../eulenpfad/kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 1, "Kern der falschen App"],
   ['<link rel="stylesheet" href="anleitung.css">', "eulenpfad/anleitung/kinder.html", 0, "ohne Stil der App"],

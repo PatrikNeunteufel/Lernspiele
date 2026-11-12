@@ -75,6 +75,7 @@ function zeichneStart(mitAufsicht = null) {
   abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);
   STIL.anwenden(); // Stil der Startseite (Einstellung stil, start/stil.js)
+  LS.farbenAnwenden(); // hell oder dunkel (DM2 a; die Aufsicht auch „für mich“, DM2-S a)
   if (!LS.istAufsicht(ich) && LS.neuerAufstieg(ich)) aufstiegFeier(ich);
 }
 

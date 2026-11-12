@@ -471,6 +471,31 @@ function zeichneVerwaltung(box, neu) {
           })))) : null);
   }
 
+  /**
+   * „Für mich“ (DM2-S a): Stil und Farben nur für die angemeldete Aufsicht, gespeichert in ihrem Profil (aussehen), mit
+   * Sicherung und Abgleich unterwegs. „Wie dieses Gerät“ nimmt die eigene Wahl zurück. Kinder sehen die Einstellung des
+   * Geräts.
+   */
+  function fuerMichTeil(wahlKnoepfe) {
+    const ich = LS.aktuellerSpieler();
+    const eigen = LS.profil(ich).aussehen || {};
+    const setze = (name, w) => {
+      const neu = { ...eigen };
+      if (w === null) delete neu[name]; else neu[name] = w;
+      LS.speichereProfil(ich, { aussehen: neu });
+    };
+    return el("div", { class: "einstellung fuer-mich", "data-fuer-mich": "" },
+      el("h3", { text: `Für mich (${LS.spielerName(ich)})` }),
+      el("p", { class: "leise-text", style: "margin:0 0 6px", text: "Gilt nur, solange Sie angemeldet sind — auf jedem Gerät, auf dem Sie sich anmelden. Kinder sehen, was oben fürs Gerät eingestellt ist." }),
+      ...["stil", "farben"].map(name => {
+        const e = LS.EINSTELLUNGEN[name];
+        const geraet = e.werte[LS.einstellung(name, null)];
+        return el("div", { class: "einstellung-spiel" },
+          el("span", { text: e.titel }),
+          wahlKnoepfe([[null, `wie dieses Gerät (${geraet})`], ...Object.entries(e.werte)], name in eigen ? eigen[name] : null, w => setze(name, w)));
+      }));
+  }
+
   // ----- Einstellungen für alle auf diesem Gerät (LERN_Session7; später je Klasse durch die Lehrperson) -----
   function einstellungen() {
     /** Ein Knopf je Wahl; gewählt ist, was 'aktuell' gleicht (null = „wie global“). */
@@ -495,7 +520,7 @@ function zeichneVerwaltung(box, neu) {
     };
     // Zusammengehörende Blöcke (Wunsch Patrik LERN_Session32): je Block eine Karte (LS.EINSTELLUNG_BLOECKE), danach
     // Meldeweg und Speicher je für sich, zuletzt „Alles auf Standard“ und die Hinweise
-    const TEILE = { ruhezeiten: () => ruhezeitenTeil(wahlKnoepfe) };
+    const TEILE = { ruhezeiten: () => ruhezeitenTeil(wahlKnoepfe), fuerMich: () => fuerMichTeil(wahlKnoepfe) };
     const block = (attr, ...inhalt) => el("section", { class: "karte einstellung-block", ...attr }, ...inhalt);
     seite.append(el("p", { class: "leise-text", style: "margin:0 0 12px", text: "Gelten für alle Kinder auf diesem Gerät, je Spiel auch abweichend." }));
     for (const b of LS.EINSTELLUNG_BLOECKE) {

@@ -102,6 +102,14 @@ Die Rahmenfarben (Karte, Text, Rand, Knopf, gut, Hinweis) stehen seit Kern 1.40.
 Spiele gültig. Die eigenen Töne des Eulenpfads (Himmel, Stellen, Deko, Schatten) stehen in `:root` in `stil.css`. Ein
 Spiel verwendet nur die Variablen, keine eigenen Farbwerte für diese Zwecke.
 
+**Hell und dunkel** (seit Kern 1.41.0, Darkmode Schritt 3b; DM0 a, DM2 a, DM2-S a): Einstellung `farben` im Block
+„🎨 Aussehen“ (hell · dunkel · wie das Tablet oder der Computer, Standard hell) gilt für das Gerät; darunter „Für mich“
+für die angemeldete Aufsicht, für Stil und Farben (Profil `aussehen`, `LS.aussehen(name)`). `LS.farbenAnwenden()` setzt
+`data-farben` über `KERN.farben` und merkt die Wahl unter `lernspiele:farben`; jede Seite mit `stil.css` lädt davor im
+`<head>` `kern/kern-kopf.js` mit `data-speicher="lernspiele:"` (`tools/pruefe_skripte.js` Punkt 6), damit eine dunkle
+Seite nicht hell aufblitzt. Bis die festen Farben in `stil.css`, `start.css` und den Spielseiten umgestellt sind
+(Schritte 3c und 5 im Konzept), ist der dunkle Modus noch nicht lesbar. Seitentest „Aussehen (Farben, Für mich)“.
+
 | Variable | wofür | nie für |
 |---|---|---|
 | `--st-E`, `--st-Z`, `--st-H`, `--st-T`, `--st-ZT`, `--st-HT`, `--st-M`; Klassen `.st-E` … setzen `--f` | **nur Stellen** (Einer rot, Zehner blau, Hunderter grün, ab T wiederholt — wie Calcularis) | Dekoration, Körbe, Stufen |

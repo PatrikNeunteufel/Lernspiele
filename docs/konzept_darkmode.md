@@ -294,7 +294,9 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
 2. Kontrastprüfung (DM4), zuerst nur melden; Zahlen je Spiel. **Erledigt 12.11.2026:** im Browser (`tools/kontrast.js`),
    nicht im Prüf-DOM — das Ersatz-DOM der Seitentests rechnet kein CSS (Kaskade, Variablen, Deckkraft); Zählung fester
    Farben als Hinweis in `tools/pruefe_skripte.js` Punkt 7, Ausnahme mit dem Kommentar „Bildfarben: <Grund>“.
-3. Dunkler Satz, Einstellung `farben` (DM2), Skript im `<head>`, `color-scheme` für Formularfelder.
+3. Dunkler Satz, Einstellung `farben` (DM2), Skript im `<head>`, `color-scheme` für Formularfelder. **3a erledigt
+   12.11.2026** (Kern 1.41.0: dunkler Satz, `KERN.farben`, `kern-kopf.js`), **3b erledigt 12.11.2026** (Einstellung und
+   „Für mich“, Kopf-Skript in 174 Seiten); **3c offen:** feste Farben in `stil.css` und `start.css`, DM5 a, DM6 a.
 4. Bildkachel (DM3) in Bildersammlung, Abschluss-Animationen, Kartenbildern, Avataren.
 5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen.
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

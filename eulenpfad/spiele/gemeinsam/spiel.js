@@ -161,6 +161,13 @@ const LS = (() => {
       werte: { hand: "wie von Hand gezeichnet", glatt: "glatt" },
       erklaerung: "So sehen die Startseite und um jedes Spiel herum Stufenwahl, Ranglisten und Schlussbild aus (die Aufgabe selbst bleibt glatt): wie von Hand gezeichnet oder glatt — Rahmen leicht krumm, die Linie mal dicker, mal dünner, Knöpfe und Felder mit unregelmässigen Ecken, die Spielkarten nicht ganz in Reih und Glied. Die Farben bleiben dieselben.",
     },
+    // Darkmode (Entscheide DM0 a, DM2 a, docs/konzept_darkmode.md): je Gerät, Standard hell; eine Aufsicht kann für sich
+    // abweichen (DM2-S a, LS.aussehen). Angewendet über KERN.farben (LS.farbenAnwenden), vor dem ersten Bild über kern-kopf.js.
+    farben: {
+      titel: "Farben", standard: "hell",
+      werte: { hell: "hell", dunkel: "dunkel", geraet: "wie das Tablet oder der Computer" },
+      erklaerung: "Hell oder dunkel — auf der Startseite und in den Spielen, auch in der laufenden Runde. Aufbau, Formen und die Farben der Stellen bleiben gleich; Zeichnungen und Abschlussbilder stehen auch im Dunkeln auf hellem Grund. „Wie das Tablet oder der Computer“ folgt dessen Einstellung. Für Kinder ist hell der bessere Standard zum Lesen.",
+    },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",
@@ -173,7 +180,7 @@ const LS = (() => {
   // sich): je Block eine Karte in dieser Reihenfolge. Jede Einstellung steht in genau einem Block (tools/eulenpfad_seiten.js).
   // teil: ein Teil der Verwaltung, der im Block nach den Einstellungen steht (Ruhezeiten).
   const EINSTELLUNG_BLOECKE = [
-    { id: "aussehen", titel: "🎨 Aussehen", text: "Wie die Startseite und die Seiten um die Spiele aussehen.", einstellungen: ["stil"] },
+    { id: "aussehen", titel: "🎨 Aussehen", text: "Stil und Farben für alle auf diesem Gerät. Jede Aufsicht kann darunter für sich etwas anderes wählen (DM2-S a).", einstellungen: ["stil", "farben"], teil: "fuerMich" },
     { id: "spiele", titel: "🎮 In den Spielen", text: "Was in jedem Spiel gilt, je Spiel auch abweichend.", einstellungen: ["dezimal", "notizen", "notizblock", "feier"] },
     { id: "kinder", titel: "🧒 Kinder", text: "Was Kinder selbst dürfen und wie sie die Spiele finden.", einstellungen: ["selbstAnlegen", "melden", "sortierung", "sortierungWahl"] },
     { id: "ton", titel: "🔊 Ton und Ruhezeiten", text: "Wann Spiele still sind und was mit Kopfhörern trotzdem geht.", einstellungen: ["kopfhoerer", "tonSpieleRuhe"], teil: "ruhezeiten" },
@@ -189,6 +196,23 @@ const LS = (() => {
     const eigen = spielId ? alle.spiele?.[spielId]?.[name] : undefined;
     if (eigen in e.werte) return eigen;
     return alle[name] in e.werte ? alle[name] : e.standard;
+  }
+
+  /**
+   * Stil oder Farben für die angemeldete Person (DM2-S a): die eigene Wahl einer angemeldeten Aufsicht (Profil aussehen),
+   * sonst die Einstellung des Geräts. Kinder wählen nicht.
+   */
+  function aussehen(name) {
+    const e = EINSTELLUNGEN[name];
+    const ich = aktuellerSpieler();
+    const eigen = ich && istAufsicht(ich) && aufsichtAngemeldet() ? profil(ich).aussehen?.[name] : undefined;
+    return eigen in e.werte ? eigen : einstellung(name, null);
+  }
+  /** Farben anwenden und für die nächste Seite merken (KERN.farben; kern-kopf.js liest sie vor dem ersten Bild). */
+  function farbenAnwenden() {
+    const wahl = aussehen("farben");
+    KERN.farben.anwenden(wahl);
+    KERN.farben.merke(SPEICHER, wahl);
   }
 
   /** Eigener Wert eines Spiels oder null („wie global“). */
@@ -350,6 +374,7 @@ const LS = (() => {
   //     Stufenwahl oder der Spielkarte umgestellt hat; gilt vor der Vorgabe (timer, reihenfolge, vorlesen), siehe VR1 a
   //   fest: { timer, reihenfolge, vorlesen: bool } — von der Aufsicht festgelegt: die Wahl des Kindes gilt dann nicht
   //   avatar: "<tier>-<farbe>" (avatare.js) — vom Kind selbst gewählt (AV1 a); fehlt = Anfangsbuchstabe
+  //   aussehen: { stil?, farben? } — nur bei einer Aufsicht: ihre eigene Wahl „Für mich“ (DM2-S a); fehlt = wie das Gerät
   //   empfehlungen: { oben: [{ spiel, stufe, von, zeit }], aus: [{ art, spiel, stufe, von, zeit }] } — Vorgaben der
   //     Aufsicht zu den Empfehlungen ans Kind (KS4 a): oben = angeheftet oder eigene, zuerst beim Kind; aus = ausgeblendet
   //     (AUSWERTUNG.fuerKind)
@@ -2284,6 +2309,7 @@ const LS = (() => {
   /** Ein Spiel starten, wenn Runden, Rekorde, Meldungen und Löschvermerke geladen sind (Kern 1.34.0; spiel). */
   function spielJetzt(def) {
     if (typeof STIL !== "undefined") STIL.anwenden(); // Stil um die Runde herum (Einstellung stil)
+    farbenAnwenden(); // hell oder dunkel, auch in der Runde (DM0 a)
     // Abschluss-Animation nur aus dem Katalog (Entscheide GS1 a, SK1 a, LERN_Session32): dort ist sie die einzige Quelle,
     // damit auch die Startseite das Kartenbild zeichnen kann; Daten eines Spiels nennt sie beim Namen (feier.karte).
     if (def.feier) console.error(`${def.id}: feier steht im Katalog, nicht in der Seite (GS1 a)`);
@@ -3455,7 +3481,7 @@ const LS = (() => {
 
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
-    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
+    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
     RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
@@ -3514,7 +3540,7 @@ const STIL = (() => {
     ["[data-stil-bereich] .stufe", () => "links"],
     ["[data-stil-bereich] .rangliste", () => null],
   ];
-  const an = () => typeof LS !== "undefined" && LS.einstellung("stil") === "hand";
+  const an = () => typeof LS !== "undefined" && LS.aussehen("stil") === "hand";
 
   /** Zufall mit Startwert (mulberry32): dasselbe Element bekommt dieselbe Form. */
   function zufallAus(text) {
