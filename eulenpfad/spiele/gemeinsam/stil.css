@@ -505,7 +505,7 @@ button { font-family: inherit; }
 .mit-tasten [data-marke]::after { content: attr(data-marke); position: absolute; top: 4px; right: 5px; min-width: 1.1em;
   padding: 2px 5px; border-radius: 6px; border: 1.5px solid var(--marke-rand); background: var(--marke); color: var(--marke-text); box-shadow: 0 2px 0 var(--marke-rand);
   font-size: 13px; font-weight: 800; line-height: 1.1; text-align: center; pointer-events: none; }
-.kopf .hilfe-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
+.kopf .hilfe-knopf, .kopf .farben-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
   font-size: 24px; cursor: pointer; flex: none; }
 .hilfe-eigen { font-size: 17px; font-weight: 700; }
 .hilfe-liste { padding-left: 20px; margin: 8px 0 12px; }
@@ -1087,8 +1087,8 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .schalter-zeile { gap: 10px 22px; }
 .schalter-teil { display: inline-flex; align-items: center; gap: 8px; }
 .schalter-hinweis { flex-basis: 100%; }
-/* an: Teile, Endlos, Vorlesen und Dunkel zeigen es am goldenen Symbol wie auf der Karte; nur der Timer färbt den Knopf */
-.timer-schalter.an:is([data-schalter="reihenfolge"], [data-schalter="endlos"], [data-schalter="vorlesen"], [data-schalter="farben"]) { background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); }
+/* an: Teile, Endlos und Vorlesen zeigen es am goldenen Symbol wie auf der Karte; nur der Timer färbt den Knopf */
+.timer-schalter.an:is([data-schalter="reihenfolge"], [data-schalter="endlos"], [data-schalter="vorlesen"]) { background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); }
 .symbol.vorlesen .welle { fill: none; }
 .stufe .fuer.endlos { color: var(--deko-4-schrift); font-weight: 900; }
 .stufe .fuer.endlos .symbol { width: 20px; height: 20px; vertical-align: -5px; }

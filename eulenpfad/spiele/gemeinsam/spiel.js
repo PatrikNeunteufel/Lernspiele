@@ -2397,6 +2397,14 @@ const LS = (() => {
     // ❓ Hilfe zur Bedienung (Entscheid T3 a, LERN_Session9): in der Kopfzeile, auch auf der Stufenwahl.
     const tonKnopf = document.querySelector(".kopf .ton");
     tonKnopf?.before(el("button", { type: "button", class: "hilfe-knopf", text: "❓", "aria-label": "Hilfe: So geht das Spiel", title: "So geht das Spiel", onclick: () => hilfeFenster(def) }));
+    // ☀️/🌙 für ein Kind, das selbst umschalten darf (DM2-K a): oben wie auf der Startseite, zeigt, wohin er schaltet
+    // (Hinweis Patrik, LERN_Session35: in der Zeile der Stufenwahl zeigte er den Zustand und fehlte oben)
+    const farbenOben = () => {
+      document.querySelector(".kopf .farben-knopf")?.remove();
+      const k = farbenKnopf(farbenOben);
+      if (k) document.querySelector(".kopf .hilfe-knopf")?.before(k);
+    };
+    farbenOben();
     // Kam beim Abgleich etwas von einem anderen Gerät dazu: die Stufenwahl mit Sternen und Ranglisten neu zeichnen.
     addEventListener("lernspiele:abgeglichen", () => { if (buehne.querySelector(".stufen")) stufenwahl(); });
 
@@ -2464,9 +2472,11 @@ const LS = (() => {
         schalter("endlos", endlosAn, "endlos", endlosAn ? "Endlos an" : "Endlos aus",
           endlosAn ? "Endlos ausschalten" : "Endlos einschalten: so viele wie möglich ohne Fehler", false,
           () => { const liste = profil(name).endlosAn; speichereProfil(name, { endlosAn: endlosAn ? liste.filter(x => x !== def.id) : [...liste, def.id] }); });
-        const welche = endlosListe.length === stufenListe.length ? "Alle Stufen" : `Die Stufen ${endlosListe.map(st => st.nr).join(", ")}`;
+        const nr = endlosListe.map(st => st.nr);
+        const welche = endlosListe.length === stufenListe.length ? "Alle Stufen gehen" : nr.length === 1 ? `Stufe ${nr[0]} geht`
+          : `Die Stufen ${nr.slice(0, -1).join(", ")} und ${nr.at(-1)} gehen`;
         erklaerung.endlos = endlosAn
-          ? `${welche} gehen endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.${timerAn ? " Mit Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper." : ""}`
+          ? `${welche} endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.${nr.length < stufenListe.length ? " Die anderen Stufen spielst du wie sonst." : ""}${timerAn ? " Mit Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper." : ""}`
           : "Endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.";
       }
       // Vorlesen gleich oder auf Knopfdruck (Wunsch Patrik, LERN_Session8) — als Schalter wie die anderen (LERN_Session35);
@@ -2479,13 +2489,6 @@ const LS = (() => {
           () => setzeWahl(name, "vorlesen", null, gleich ? "knopf" : "auto"));
         erklaerung.vorlesen = (gleich ? "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm."
           : "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.") + (fest ? ` ${FEST_TEXT}` : "");
-      }
-      // Hell oder dunkel (DM2-K a): nur für ein Kind, das selbst umschalten darf — wie ☀️/🌙 auf der Startseite
-      if (!istAufsicht(name) && !istFest(name, "farben")) {
-        const dunkel = KERN.farben.dunkel(aussehen("farben"));
-        schalter("farben", dunkel, "farben", dunkel ? "Dunkel" : "Hell", dunkel ? "antippen: hell" : "antippen: dunkel", false,
-          () => { setzeWahl(name, "farben", null, dunkel ? "hell" : "dunkel"); farbenAnwenden(); });
-        erklaerung.farben = dunkel ? "Dunkle Farben, gut am Abend." : "Helle Farben, gut zum Lesen am Tag.";
       }
       const hinweis = erklaerung[schalterHinweis] || (endlosAn ? erklaerung.endlos : erklaerung.timer);
       return el("div", { class: "timer-zeile schalter-zeile" }, ...teile, el("span", { class: "leise schalter-hinweis", text: hinweis }));
@@ -2582,8 +2585,7 @@ const LS = (() => {
           el("div", { class: "fuer", text: stufeFuer(def.id, st.id) + (empfohlen ? " · 👍 für dich" : "") }),
           aufsichtHier ? el("span", { class: "stufe-text", text: st.text }) : null,
           timer.an ? el("div", { class: "fuer", style: "margin-top:4px", text: `⏱ ${timer.sekunden} s je Aufgabe` }) : null,
-          endlosHier ? el("div", { class: "fuer endlos" }, schalterSymbol("endlos", true), rekord ? ` endlos · Rekord ${rekord}` : " endlos")
-            : endlosAn ? el("div", { class: "fuer", text: "ohne Endlos" }) : null);
+          endlosHier ? el("div", { class: "fuer endlos" }, schalterSymbol("endlos", true), rekord ? ` endlos · Rekord ${rekord}` : " endlos") : null);
         knopf.style.setProperty("--farbe", st.farbe);
         knopf.style.setProperty("--farbe-schrift", schriftFarbe(st.farbe)); // die grosse Nummer (DM6 a)
         const huelle = el("div", { class: "stufe-huelle" }, knopf);
@@ -3533,8 +3535,6 @@ const LS = (() => {
     stern: KERN.uebersicht.STERN,
     endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
     uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
-    // Hell oder dunkel (LERN_Session35): Mondsichel, golden im dunklen Modus
-    farben: '<path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1z"/>',
     // Vorlesen (LERN_Session35): Lautsprecher mit zwei Schallbögen
     vorlesen: '<path d="M3.5 9.4h3.6l4.9-4v13.2l-4.9-4H3.5z"/><path class="welle" d="M15.3 9.2a4 4 0 0 1 0 5.6M18 6.6a7.6 7.6 0 0 1 0 10.8"/>',
     // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil

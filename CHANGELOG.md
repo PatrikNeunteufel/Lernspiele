@@ -1969,4 +1969,4 @@
   auf Knopfdruck) als vierter Schalter in derselben Zeile, mit eigenem Symbol (Lautsprecher, Wunsch Patrik).
 - **Was Kinder selbst umstellen dürfen (Wunsch Patrik):** Verwaltung → Einstellungen → Kinder gibt Timer, Teile, Vorlesen
   und hell/dunkel für alle Kinder frei (Standard wie bisher: alles ausser hell/dunkel); im Profil je Kind „wie alle
-  Kinder“, „darf selbst umstellen“ oder „🔒 fest“. Hell/dunkel als Mond-Schalter auch auf der Spielseite.
+  Kinder“, „darf selbst umstellen“ oder „🔒 fest“. ☀️/🌙 auch in der Kopfzeile der Spielseite, neben ❓ (zeigt wie auf der Startseite, wohin er schaltet).
