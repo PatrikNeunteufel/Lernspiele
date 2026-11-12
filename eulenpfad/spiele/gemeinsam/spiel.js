@@ -2436,6 +2436,17 @@ const LS = (() => {
           ? `${welche} gehen endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.${timerAn ? " Mit Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper." : ""}`
           : "Endlos: so viele Aufgaben wie möglich bis zum ersten Fehler.";
       }
+      // Vorlesen gleich oder auf Knopfdruck (Wunsch Patrik, LERN_Session8) — als Schalter wie die anderen (LERN_Session35);
+      // gilt wie im Profil für alle Spiele. An = gleich vorlesen.
+      if (vorlesenErlaubt(def.id)) {
+        const gleich = vorlesenArt(name) === "auto";
+        const fest = istFest(name, "vorlesen");
+        schalter("vorlesen", gleich, "vorlesen", gleich ? "Vorlesen gleich" : "Vorlesen auf Knopfdruck",
+          gleich ? "antippen: Vorlesen auf Knopfdruck" : "antippen: gleich vorlesen", fest,
+          () => setzeWahl(name, "vorlesen", null, gleich ? "knopf" : "auto"));
+        erklaerung.vorlesen = (gleich ? "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm."
+          : "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.") + (fest ? ` ${FEST_TEXT}` : "");
+      }
       const hinweis = erklaerung[schalterHinweis] || (endlosAn ? erklaerung.endlos : erklaerung.timer);
       return el("div", { class: "timer-zeile schalter-zeile" }, ...teile, el("span", { class: "leise schalter-hinweis", text: hinweis }));
     }
@@ -2462,19 +2473,6 @@ const LS = (() => {
         k => setzeOption(name, def.id, id, k), neuZeichnen));
     }
 
-    /** Schalter „Vorlesen: gleich / auf Knopfdruck“ (Wunsch Patrik, LERN_Session8); gilt wie im Profil für alle Spiele. */
-    function vorlesenZeile(neuZeichnen) {
-      if (!vorlesenErlaubt(def.id)) return null;
-      const name = aktuellerSpieler();
-      return optionsZeile({
-        titel: "🗣️ Vorlesen:", wert: vorlesenArt(name), fest: istFest(name, "vorlesen"),
-        werte: { auto: "gleich", knopf: "auf Knopfdruck" },
-        erklaerung: {
-          auto: "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm.",
-          knopf: "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.",
-        },
-      }, k => setzeWahl(name, "vorlesen", null, k), neuZeichnen);
-    }
 
     /** Vorschau des Schlussbilds (?feier=): Animation der Stufe mit den Sternen aus ?sterne, „Nochmal“ spielt sie neu. */
     function feierVorschau(stufe) {
@@ -2517,7 +2515,7 @@ const LS = (() => {
       // Endlos: so viele wie möglich bis zum ersten Fehler — nur Stufen mit genug verschiedenen Aufgaben (Katalog).
       const endlosListe = stufenListe.filter(st => endlosStufen(def.id).includes(st.id));
       const endlosAn = endlosListe.length > 0 && profil(name).endlosAn.includes(def.id); // Schalter wie auf der Karte (RS1 a)
-      karte.append(spielerZeile(), eule.element, schalterZeile(stufenwahl, endlosListe), vorlesenZeile(stufenwahl) || "", ...spielOptionsZeilen(stufenwahl));
+      karte.append(spielerZeile(), eule.element, schalterZeile(stufenwahl, endlosListe), ...spielOptionsZeilen(stufenwahl));
       // Stimmen des Spiels (def.stimme) und fürs Vorlesen sichtbar, mit Probe (LERN_Session11) — nur für die Aufsicht, die
       // damit prüft; ein Kind braucht sie nicht (Hinweis Patrik, LERN_Session34). Fehlt die Stimme, sagt es die Eule.
       const sprachen = [...new Set([def.stimme, vorlesenErlaubt(def.id) ? "de" : null].filter(Boolean))];
@@ -3495,6 +3493,8 @@ const LS = (() => {
     stern: KERN.uebersicht.STERN,
     endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
     uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
+    // Vorlesen (LERN_Session35): Lautsprecher mit zwei Schallbögen
+    vorlesen: '<path d="M3.5 9.4h3.6l4.9-4v13.2l-4.9-4H3.5z"/><path class="welle" d="M15.3 9.2a4 4 0 0 1 0 5.6M18 6.6a7.6 7.6 0 0 1 0 10.8"/>',
     // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil
     balken: '<rect x="3.4" y="4.5" width="4.4" height="15.5" rx="1"/><rect x="9.8" y="8.8" width="4.4" height="11.2" rx="1"/><rect x="16.2" y="13.2" width="4.4" height="6.8" rx="1"/>',
     mischen: '<path d="M3 7h3.5c4.5 0 6.5 10 11 10H20M3 17h3.5c4.5 0 6.5-10 11-10H20M17.5 4.5 20.5 7l-3 2.5M17.5 14.5l3 2.5-3 2.5"/>',

@@ -1965,4 +1965,5 @@
   des äussersten `<svg>`. Kontrast über alle Seiten: hell 98 → 10, dunkel 348 → 9.
 - **Stufenwahl (RS1 a, Wunsch Patrik):** Teile, Timer und Endlos als Symbolknöpfe wie auf der Karte, je mit Wort und
   der Erklärung des zuletzt geänderten; Endlos an lässt die Stufenknöpfe endlos starten (mit Rekord), der Endlos-Block
-  zeigt nur noch die Ranglisten; Werte der Reihenfolge einmal im Rahmen (`LS.REIHENFOLGE_SCHALTER`).
+  zeigt nur noch die Ranglisten; Werte der Reihenfolge einmal im Rahmen (`LS.REIHENFOLGE_SCHALTER`). Vorlesen (gleich oder
+  auf Knopfdruck) als vierter Schalter in derselben Zeile, mit eigenem Symbol (Lautsprecher, Wunsch Patrik).
