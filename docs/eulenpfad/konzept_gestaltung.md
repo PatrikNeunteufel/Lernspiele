@@ -316,7 +316,10 @@ leuchtende Scheibe wie in Filmen (zieht die Kante einer Nachbarkachel als Schlau
 jedes Motiv vorkommt, gehen die Motive eines Fachs der Reihe nach über seine Lücken statt per Zufall je Spiel.
 Zweiter Nachtrag (12.11.2026): Der Schlauch setzt nur in der Mitte der Kante an, mit gekräuseltem Rand und feinen
 Zugstreifen; der dunkle Grund der Löcher läuft fein in den Hintergrund aus, wenige blasse Sterne; alle Motive und ihre
-Wirkungen auf die Kacheln bewegen sich dezent (ruhig bei „weniger Bewegung“ des Geräts).
+Wirkungen auf die Kacheln bewegen sich dezent (ruhig bei „weniger Bewegung“ des Geräts). Dritter Nachtrag: Die Rahmenlinie
+der gezogenen Kachel biegt im Bogen in den Schlauch; die Löcher wabern (Turbulenz), beim Ring wandert die hellste Stelle,
+bei der Scheibe läuft das Licht über die Scheibe; schwarze Löcher wirken auf die Zeit — die Uhr der Nachbarkachel läuft
+verzerrt (Idee Patrik).
 
 ### Titel „Eulenpfad“ (Wunsch Patrik, 12.11.2026)
 

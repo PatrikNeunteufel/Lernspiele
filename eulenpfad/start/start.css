@@ -509,8 +509,8 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .luecke-schlauch path.zug { stroke-width: 1.2; opacity: .35; }
 /* an der Kante der gezogenen Kachel fehlt ihr Rahmen nur in der Mitte, wo der Schlauch ansetzt */
 .stil-hand .luecke-nb.w-zieht > svg.hand-rahmen { -webkit-mask-composite: source-over; mask-composite: add; }
-.stil-hand .luecke-nb.w-zieht.luecke-rechts > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 23%, transparent 26% 74%, #000 77%), linear-gradient(to left, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 23%, transparent 26% 74%, #000 77%), linear-gradient(to left, transparent 0 12px, #000 12px); }
-.stil-hand .luecke-nb.w-zieht.luecke-links > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 23%, transparent 26% 74%, #000 77%), linear-gradient(to right, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 23%, transparent 26% 74%, #000 77%), linear-gradient(to right, transparent 0 12px, #000 12px); }
+.stil-hand .luecke-nb.w-zieht.luecke-rechts > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to left, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to left, transparent 0 12px, #000 12px); }
+.stil-hand .luecke-nb.w-zieht.luecke-links > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to right, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to right, transparent 0 12px, #000 12px); }
 /* Wirkungen bewegen sich dezent (Wunsch Patrik LERN_Session34): die Werte von --lx, --ly, --lr, --ls wandern */
 @property --lx { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @property --ly { syntax: '<length>'; inherits: false; initial-value: 0px; }
@@ -532,7 +532,7 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 @keyframes lu-zieht-l { 0%, 100% { --lx: -2px; --ls: 1; } 50% { --lx: -6px; --ls: .99; } }
 @keyframes lu-gepickt { 0%, 70%, 100% { --lr: 0deg; } 76% { --lr: .8deg; } 82% { --lr: -.4deg; } }
 @keyframes lu-gebohrt { 0%, 100% { --lr: -.3deg; } 50% { --lr: .3deg; } }
-@media (prefers-reduced-motion: reduce) { .stil-hand .luecke-nb { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .stil-hand .luecke-nb, .stil-hand .luecke-nb .symbol.uhr, .stil-hand .luecke-nb .symbol.uhr .zeiger { animation: none !important; } }
 /* Bewegung der Motive (start/luecken.js, Wunsch Patrik LERN_Session34): dezent, jedes Teil um seine eigene Mitte */
 .luecke-motiv [class*="lu-"] { transform-box: fill-box; transform-origin: center; }
 .lu-dreht-langsam { transform-origin: center; animation: lu-dreht 70s linear infinite; }
@@ -560,6 +560,14 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .lu-blink { animation: lu-blink 2.4s ease-in-out infinite; }
 .lu-spur { animation: lu-spur 2s linear infinite; }
 @keyframes lu-dreht { to { transform: rotate(360deg); } }
+.lu-kippt { animation: lu-kippt 9s ease-in-out infinite; }
+@keyframes lu-kippt { 0%, 100% { transform: rotate(-2deg) scaleY(1); } 50% { transform: rotate(2deg) scaleY(1.15); } }
+/* Schwarze Löcher wirken auf die Zeit (Idee Patrik, LERN_Session34): die Uhr der Nachbarkachel läuft verzerrt — der
+   Zeiger kriecht, ruckt und läuft zurück, das Zifferblatt staucht sich leicht */
+.stil-hand .luecke-nb:is(.w-sog, .w-zieht) .symbol.uhr { animation: lu-zeit-uhr 6s ease-in-out infinite; transform-origin: center; }
+.stil-hand .luecke-nb:is(.w-sog, .w-zieht) .symbol.uhr .zeiger { transform-box: view-box; transform-origin: 12px 13.6px; animation: lu-zeit-zeiger 6s ease-in-out infinite; }
+@keyframes lu-zeit-uhr { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(.82, 1.12) skewX(-8deg); } 60% { transform: scale(1.1, .9); } }
+@keyframes lu-zeit-zeiger { 0% { transform: rotate(0); } 40% { transform: rotate(40deg); } 48% { transform: rotate(250deg); } 70% { transform: rotate(160deg); } 100% { transform: rotate(360deg); } }
 @keyframes lu-gluet { 50% { opacity: .78; } }
 @keyframes lu-flimmer { 50% { opacity: .82; transform: scaleX(1.03); } }
 @keyframes lu-funkel { 50% { opacity: .1; } }

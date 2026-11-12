@@ -42,36 +42,38 @@ const LUECKEN = (() => {
     "schwarzes-loch-ring": { wirkung: "sog", svg: svg(`
       <defs>${weltraum("lid-all-a")}
         <radialGradient id="lid-ring"><stop offset="0" stop-color="#000"/><stop offset=".38" stop-color="#000"/><stop offset=".5" stop-color="#7a2400"/>
-          <stop offset=".62" stop-color="#ff8c1a"/><stop offset=".7" stop-color="#ffc35a"/><stop offset=".8" stop-color="#d9580a"/><stop offset=".92" stop-color="#3d0f00"/><stop offset="1" stop-color="#3d0f00" stop-opacity="0"/></radialGradient>
+          <stop offset=".62" stop-color="#ff8c1a"/><stop offset=".7" stop-color="#ffc35a"><animate attributeName="stop-color" dur="5s" values="#ffc35a;#ffe39a;#ffb040;#ffc35a" repeatCount="indefinite"/></stop><stop offset=".8" stop-color="#d9580a"/><stop offset=".92" stop-color="#3d0f00"/><stop offset="1" stop-color="#3d0f00" stop-opacity="0"/></radialGradient>
         <filter id="lid-weich" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
         <filter id="lid-weich-fein" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter>
+        <filter id="lid-wabern-a" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="3"><animate attributeName="baseFrequency" dur="11s" values="0.018;0.03;0.018" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="7"/></filter>
       </defs>
       <circle cx="100" cy="100" r="99" fill="url(#lid-all-a)"/>${sterne}
-      <g class="lu-dreht-langsam">
+      <g filter="url(#lid-wabern-a)"><g class="lu-dreht-langsam">
         <circle cx="100" cy="100" r="62" fill="url(#lid-ring)" filter="url(#lid-weich)" class="lu-gluet"/>
         <path d="M58 118 A46 46 0 0 0 142 118" fill="none" stroke="#ffe7a8" stroke-width="9" stroke-linecap="round" filter="url(#lid-weich)" opacity=".9"/>
         <path d="M70 76 A38 38 0 0 1 112 62" fill="none" stroke="#ff9a30" stroke-width="5" stroke-linecap="round" filter="url(#lid-weich-fein)" opacity=".6"/>
-      </g>
+      </g></g>
       <circle cx="100" cy="100" r="24" fill="#000" filter="url(#lid-weich-fein)"/>`, false) },
     "schwarzes-loch-scheibe": { wirkung: "zieht", svg: svg(`
       <defs>${weltraum("lid-all-b")}
-        <linearGradient id="lid-scheibe" x1="0" x2="1"><stop offset="0" stop-color="#ff7a1a" stop-opacity="0"/><stop offset=".18" stop-color="#ff8a2a"/>
+        <linearGradient id="lid-scheibe" x1="0" x2="1"><animateTransform attributeName="gradientTransform" type="translate" values="-0.12 0;0.12 0;-0.12 0" dur="7s" repeatCount="indefinite"/><stop offset="0" stop-color="#ff7a1a" stop-opacity="0"/><stop offset=".18" stop-color="#ff8a2a"/>
           <stop offset=".42" stop-color="#ffd9a0"/><stop offset=".5" stop-color="#fff6e0"/><stop offset=".58" stop-color="#ffd9a0"/><stop offset=".82" stop-color="#ff8a2a"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></linearGradient>
         <filter id="lid-glut" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="3"/></filter>
         <filter id="lid-glut-fein" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="1.2"/></filter>
+        <filter id="lid-wabern-b" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="7"><animate attributeName="baseFrequency" dur="13s" values="0.018;0.03;0.018" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="7"/></filter>
       </defs>
       <circle cx="100" cy="100" r="99" fill="url(#lid-all-b)"/>${sterne}
-      <g class="lu-gluet">
+      <g filter="url(#lid-wabern-b)"><g class="lu-gluet">
         <path d="M52 100 C52 52 148 52 148 100" fill="none" stroke="#ffb35a" stroke-width="12" filter="url(#lid-glut)" opacity=".85"/>
         <path d="M58 100 C58 60 142 60 142 100" fill="none" stroke="#fff0d0" stroke-width="3" filter="url(#lid-glut-fein)"/>
         <path d="M66 104 C70 128 130 128 134 104" fill="none" stroke="#ffb35a" stroke-width="5" filter="url(#lid-glut)" opacity=".7"/>
-      </g>
+      </g></g>
       <circle cx="100" cy="100" r="31" fill="#000"/>
       <circle cx="100" cy="100" r="32" fill="none" stroke="#ffe7c0" stroke-width="1.3" opacity=".9"/>
-      <g class="lu-flimmer">
+      <g class="lu-flimmer"><g class="lu-kippt">
         <ellipse cx="100" cy="102" rx="96" ry="8" fill="url(#lid-scheibe)" filter="url(#lid-glut)"/>
         <ellipse cx="100" cy="102" rx="90" ry="3.2" fill="url(#lid-scheibe)" filter="url(#lid-glut-fein)"/>
-      </g>`, false) },
+      </g></g>`, false) },
     "ziffern-loch": { wirkung: null, svg: svg(`
       <ellipse cx="100" cy="148" rx="56" ry="16" fill="#3a3324"/>
       <ellipse cx="100" cy="144" rx="56" ry="12" fill="#10132a"/>
@@ -205,7 +207,10 @@ const LUECKEN = (() => {
   function waehle(fach, nr) {
     const liste = JE_FACH[fach] || ALLE;
     const name = liste[nr % liste.length], n = ++laufend;
-    return { id: name, wirkung: MOTIVE[name].wirkung, svg: MOTIVE[name].svg.replace(/lid-([\w-]+)/g, `lid-$1-${n}`) };
+    const ruhig = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let bild = MOTIVE[name].svg.replace(/lid-([\w-]+)/g, `lid-$1-${n}`);
+    if (ruhig) bild = bild.replace(/<animate(Transform)?\b[^>]*\/>/g, ""); // bei „weniger Bewegung“ auch SMIL weglassen
+    return { id: name, wirkung: MOTIVE[name].wirkung, svg: bild };
   }
 
   return { MOTIVE, JE_FACH, waehle };
