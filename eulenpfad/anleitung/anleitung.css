@@ -22,7 +22,7 @@ p, ul, ol { margin: 0 0 10px; }
 li { margin: 2px 0; }
 figure { margin: 12px 0 14px; }
 figure img { display: block; max-width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--rand); }
-figure.handy img { max-width: 340px; margin: 0 auto; }
+figure.handy img { max-width: min(340px, 100%); margin: 0 auto; } /* nie breiter als die Karte (375 px: innen rund 300) */
 figcaption { color: var(--leise); font-size: 15px; margin-top: 6px; }
 /* Nummern wie in den roten Rahmen der Bilder */
 .nr { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;

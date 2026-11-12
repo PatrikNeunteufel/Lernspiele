@@ -370,12 +370,13 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
    in einem scrollenden Kasten hinein und lässt Schmuck (Lücken, Avatar-Motive) aus; Gegenprobe 22 Fälle. Messung über
    alle 1215 Seiten: **hell 0, dunkel 1** Fund (zu Beginn der Sitzung 98 und 348); der eine ist der Akzent im Titel des
    Lernsteigs (Schritt 6).
-6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu. **In Arbeit seit 12.11.2026**
-   (LERN_Session35): Lernsteig mit Kopf-Skript in 28 Seiten, Wahl im Profil je Person (Standard wie das Gerät, DM2 a),
+6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu. **Erledigt 13.11.2026**
+   (LERN_Session35, LERN_Session36): Lernsteig mit Kopf-Skript in 28 Seiten, Wahl im Profil je Person (Standard wie das Gerät, DM2 a),
    dunkler Akzent und Gefahr, Rechner gleich in beiden Modi; Portal folgt dem Gerät (`prefers-color-scheme`, keine
    Personen); Anleitungen folgen der Einstellung des Eulenpfads (`kern-kopf.js` mit `lernspiele:`), die Bilder darin
    bleiben Aufnahmen; Mix und Regelkarten über Variablen. `tools/pruefe_skripte.js` Punkt 7 jetzt in jedem Stil ein
    Fehler (0 feste Farben in der ganzen Reihe), Punkt 6 verlangt das Kopf-Skript auch im Lernsteig. Kontrast Lernsteig
    hell und dunkel ohne Fund (ohne Konto nur die Anmeldung gemessen). Die Gratwanderung ist eine einzige Seite und von
-   Haus aus dunkel; sie bekommt die Wahl mit ihren ersten Übungen. Offen: Bilder der Anleitungen —
-   `tools/anleitung_bilder.js` passt nicht mehr zur Startseite (bricht beim Filter ab), Texte vermutlich ebenso.
+   Haus aus dunkel; sie bekommt die Wahl mit ihren ersten Übungen. Anleitungen (AN-B a, LERN_Session36): Texte gegen die
+   heutige App nachgeführt, `tools/anleitung_bilder.js` wieder lauffähig, alle Bilder neu (hell aufgenommen, die Seiten
+   hell und dunkel angesehen).

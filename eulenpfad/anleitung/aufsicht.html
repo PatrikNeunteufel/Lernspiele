@@ -6,7 +6,7 @@
 <title>Eulenpfad · Anleitung für Erwachsene</title>
 <script src="../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
 <link rel="stylesheet" href="anleitung.css">
-<!-- Anleitung für Aufsichtspersonen (Eltern, Lehrpersonen), LERN_Session7, nachgeführt LERN_Session11. Bilder: tools/anleitung_bilder.js
+<!-- Anleitung für Aufsichtspersonen (Eltern, Lehrpersonen), LERN_Session7, nachgeführt LERN_Session36. Bilder: tools/anleitung_bilder.js
      (Musterkonten, erfundene Beispielrunden); die roten Nummern im Bild entsprechen den Nummern im Text. -->
 </head>
 <body>
@@ -47,8 +47,9 @@
       <li><b>Alles bleibt auf diesem Gerät.</b> Namen, Klasse und gespielte Runden speichert nur der Browser. Nichts geht von selbst
         an einen Server, es gibt kein Konto bei einem Dienst und keine Werbung. Daten verlassen das Gerät nur auf Knopfdruck:
         beim Sichern, beim Abgleich in einen Ordner, den Sie wählen, beim Weiterleiten einer Fehlermeldung (ohne den Namen des
-        Kindes, per E-Mail oder an den Meldungsserver der Entwicklung) und wenn ein Kind ein Abzeichen als Bild teilt (mit
-        seinem Vornamen). Alles dazu: <a href="../../portal/impressum.html">Impressum und Datenschutz</a>.</li>
+        Kindes, per E-Mail oder an den Meldungsserver der Entwicklung), wenn ein Kind ein Abzeichen als Bild teilt (mit
+        seinem Vornamen) und wenn Sie einem Kind der 6. Klasse eine Einladung zum Lernsteig mitgeben (Link oder Datei mit
+        Vorname, Geburtsdatum und Klasse). Alles dazu: <a href="../../portal/impressum.html">Impressum und Datenschutz</a>.</li>
       <li><b>Nur Vornamen.</b> Für die Kinder genügt ein Vorname oder ein Spitzname — keine Nachnamen, keine Schule, keine Fotos.</li>
       <li><b>Daten sichern.</b> Wer die Browserdaten löscht, löscht auch die Spielstände. Sichern Sie deshalb ab und zu
         (<a href="#sichern">Abschnitt 15</a>).</li>
@@ -74,9 +75,11 @@
     <p class="achtung">Merken Sie sich die PIN. Gespeichert wird nur ein verschlüsselter Prüfwert. Beim Einrichten wählen Sie dazu eine
       <b>Sicherheitsfrage</b> (eine, deren Antwort Ihre Kinder nicht kennen) und bekommen einmal einen <b>Wiederherstellungscode</b> zu sehen:
       Schreiben Sie ihn auf und bewahren Sie ihn fern von den Kindern auf. Haben Sie die PIN vergessen, tippen Sie bei der PIN-Abfrage auf
-      <b>PIN vergessen?</b>: Eine zweite Aufsicht setzt sie in der Verwaltung neu, sonst helfen Code oder Sicherheitsfrage. Fehlt beides,
-      bleibt das <b>Zurücksetzen</b>: Nach 3 Tagen, in denen die Anmeldung für alle sichtbar darauf hinweist, wird jede Aufsicht zu einem
-      gewöhnlichen Konto, und Sie richten eine neue ein; wer die PIN oder den Code noch kennt, kann es abbrechen. Die Daten der Kinder bleiben.</p>
+      <b>PIN vergessen?</b> und beantworten die Rechenfrage für Erwachsene: Eine zweite Aufsicht setzt die PIN in der Verwaltung neu, sonst
+      helfen Code oder Sicherheitsfrage. Fehlt beides, bleibt das <b>Zurücksetzen</b>: Nach 3 Tagen, in denen die Anmeldung für alle sichtbar
+      darauf hinweist, wird jede Aufsicht zu einem gewöhnlichen Konto, und Sie richten eine neue ein; wer die PIN oder den Code noch kennt,
+      kann es abbrechen. Die Daten der Kinder bleiben. Einen neuen Wiederherstellungscode oder eine andere Sicherheitsfrage richten Sie
+      jederzeit unter Verwaltung → Konten → „🔑 Falls Sie Ihre PIN vergessen“ ein.</p>
     <p class="achtung"><b>Kinder sind beim Herausfinden von PINs erfinderisch:</b> Sie schauen beim Tippen zu, probieren Geburtstage,
       Jahrgänge, die Hausnummer oder 1234 und erkennen Fingerspuren auf dem Bildschirm. Wählen Sie darum keine Zahl, die mit Ihnen
       oder der Familie zu tun hat, tippen Sie die PIN verdeckt ein, melden Sie sich nach der Verwaltung ab (↩ Abmelden) und
@@ -92,8 +95,9 @@
       <li><span class="nr">2</span>Die <b>Aufsicht</b> (mit 🔑) braucht ihre PIN.</li>
     </ul>
     <figure><img src="bilder/a03-pin.webp" alt="PIN-Eingabe für die Aufsicht" loading="lazy"></figure>
-    <p>Die Anmeldung der Aufsicht gilt nur, solange das Browserfenster offen ist. Wer das Fenster schliesst, ist wieder abgemeldet —
-      so bleibt die Verwaltung den Kindern verschlossen. Gewechselt wird oben rechts beim Namen oder in einem Spiel über „wechseln“.</p>
+    <p>Die Anmeldung der Aufsicht gilt nur, solange dieser Browser-Tab offen ist. Wer ihn schliesst, ist wieder abgemeldet — so
+      bleibt die Verwaltung den Kindern verschlossen. Gewechselt wird oben rechts: Ein Tippen auf Bild und Namen öffnet die Liste der
+      anderen Personen und darunter „↩ Abmelden“. In einem Spiel führt „wechseln“ zur Anmeldung. Daneben öffnet 📖 diese Anleitung.</p>
   </section>
 
   <section id="tabs">
@@ -103,49 +107,58 @@
     <ul>
       <li><b>🎮 Spiele</b> — alle Spiele nach Fach und Thema, mit Suche, Filtern und dem Zufall (<a href="#finden">Abschnitt 5</a>).</li>
       <li><b>👤 Profil</b> — das Kind wählt hier nur sein Bild: ein Tier, etwas aus Weltall und Technik, eine Fantasiefigur oder ein Bild aus den
-        Spielen, dazu Farbe und Rahmen. Ein Abzeichen in Gold schaltet sein Symbol als Bild frei, das erste Abzeichen in Gold,
+        Spielen, dazu Farbe, Rahmen und Form (rund, Quadrat, Dreieck, Fünfeck). Ein Abzeichen in Gold schaltet sein Symbol als Bild frei, das erste Abzeichen in Gold,
         Platin oder Diamant einen edleren Rahmen; Sie sehen es im Profil des Kindes, ändern kann es nur das Kind. Oben im
         Profil setzen Sie das Geburtsdatum (das Alter rechnet die App; kennt ein älteres Profil nur Monat und Jahr, bittet es,
         den Tag nachzutragen), Klasse und Fokus-Lernziele und die
-        Vorgaben für Reihenfolge der Teile, Timer und Vorlesen und bestätigen mit „Speichern“ gleich darunter. Das Kind kann
-        diese im Spiel umstellen, ausser Sie setzen unten
-        <b>🔒 fest</b>; <b>↺ Auf Vorgabe zurück</b> löscht seine eigene Wahl. Aus der Klasse schlägt jedes Spiel eine passende Stufe vor.
-        Zum neuen Schuljahr <b>⬆️ aufsteigen lassen</b>: einzeln hier, für mehrere Kinder auf einmal in Verwaltung → Konten →
-        „Neues Schuljahr“. Das Kind sieht beim nächsten Anmelden eine Nachricht und bekommt das Abzeichen „Aufgestiegen“;
+        Vorgaben für Vorlesen, Reihenfolge der Teile und Timer und bestätigen mit „Speichern“ gleich darunter. Was das Kind
+        selbst umstellen darf — Vorlesen, Reihenfolge der Teile, Timer, hell oder dunkel —, steht unten unter
+        <b>🔒 Was … selbst umstellen darf</b>: je Punkt „wie alle Kinder“ (Verwaltung → Einstellungen → Kinder), „darf selbst
+        umstellen“ oder <b>🔒 fest</b>. Das wirkt sofort, ohne Speichern; <b>↺ Auf Vorgabe zurück</b> löscht seine eigene Wahl.
+        Aus der Klasse schlägt jedes Spiel eine passende Stufe vor.
+        Zum neuen Schuljahr mit dem Knopf <b>⬆️ In die … Klasse</b> neben der Klasse aufsteigen lassen: einzeln hier, für mehrere
+        Kinder auf einmal in Verwaltung → Konten → „Neues Schuljahr“. Das Kind sieht beim nächsten Anmelden eine Nachricht und bekommt das Abzeichen „Aufgestiegen“;
         <b>↶ Zurücknehmen</b> macht einen Aufstieg aus Versehen rückgängig. Die Klasse von Hand ändern ist eine Korrektur und
-        zählt nicht als Aufstieg.</li>
+        zählt nicht als Aufstieg. Nach der 6. Klasse geht es im Lernsteig weiter: <b>📨 Einladung zum Lernsteig</b> gibt dem Kind den
+        Übertritt mit, als Link (🔗 Link kopieren) oder Datei (💾 Als Datei) — nur Vorname, Geburtsdatum und die 7. Klasse.</li>
       <li><b>📊 Statistik</b> — was geübt wurde, was sitzt, ein Fazit in Worten, Empfehlungen (<a href="#statistik">Abschnitt 12</a>).</li>
       <li><b>🏅 Erfolge</b> — Wochenziel und Abzeichen (<a href="#erfolge">Abschnitt 13</a>).</li>
-      <li><b>⚙️ Verwaltung</b> — nur für die Aufsicht: Konten, Freigabe, Abgleich, Einstellungen, Meldungen.</li>
+      <li><b>⚙️ Verwaltung</b> — nur für die Aufsicht: Konten, Freigabe, Abgleich, Einstellungen, Meldungen und Entwicklung
+        (<a href="#pruefen">Abschnitt 18</a>).</li>
     </ul>
     <p>Das Kind sieht in der Statistik nur, was es als Nächstes üben kann, seine Woche, seine Runden und seine Meldungen;
       alle Auswertungen sehen Sie. Im Profil eines Kindes:</p>
     <figure><img src="bilder/a19-profil.webp" alt="Profil eines Kindes mit Bild, Vorgaben und dem Schalter fest" loading="lazy">
       <figcaption>Profil von Muster Kind: (1) das Bild, das das Kind gewählt hat, (2) Klasse mit ⬆️ Aufstieg, (3) „Speichern“
-        für alles darüber, (4) 🔒 fest bei einer Vorgabe — wirkt sofort. Hat das Kind selbst etwas umgestellt, steht daneben
-        ↺ Auf Vorgabe zurück.</figcaption></figure>
+        für alles darüber, (4) was das Kind selbst umstellen darf: je Punkt wie alle Kinder, darf selbst umstellen oder 🔒 fest —
+        wirkt sofort. Hat das Kind selbst etwas umgestellt, steht daneben ↺ Auf Vorgabe zurück.</figcaption></figure>
   </section>
 
   <section id="finden">
     <h2>5. Spiele finden</h2>
-    <figure><img src="bilder/a16-spiele.webp" alt="Bereich Spiele mit Filterzeilen, Suchfeld und den Karten Zufallsmix und Zufälliges Spiel" loading="lazy">
-      <figcaption>Bereich Spiele, angemeldet als Aufsicht.</figcaption></figure>
+    <figure><img src="bilder/a16-spiele.webp" alt="Bereich Spiele mit Fach-Reitern, Suchfeld, aufgeklapptem Filter und den Karten Zufallsmix und Zufälliges Spiel" loading="lazy">
+      <figcaption>Bereich Spiele, angemeldet als Aufsicht, mit aufgeklapptem Filter.</figcaption></figure>
     <ol>
-      <li><span class="nr">1</span><b>Filter</b> in Zeilen: <b>Fach</b>, <b>Klasse</b> (für welche Klasse ein Spiel gedacht ist), <b>Nur</b> und
-        <b>Stufe</b>. Thema, Stufe und Klasse lassen sich mehrfach wählen; „Alle“ wählt alles an und, nochmals getippt, alles ab.
-        In der Zeile <b>Nur</b> stehen <b>🎒 Meine Klasse</b> (für Kinder: Spiele, die zu ihrer Klasse passen; vorgegeben an,
-        das Kind darf ihn ausschalten), <b>⭐ Mein Fokus</b> und für die Aufsicht <b>🔍 Zu prüfen</b>. Die Filter lassen sich
-        einklappen; die Kopfzeile nennt dann, was gilt (auf dem Handy zu Beginn eingeklappt, je Person gemerkt).
-        Schaltet ein Kind „Meine Klasse“ aus, zeigt ein farbiger Rand mit Zeichen, wie ein Spiel zu seiner Klasse steht:
-        <b>✓</b> Türkis leichter, <b>●</b> Gold seine Klasse, <b>▲</b> Violett eine Herausforderung; eine kleine Legende steht über den Karten.</li>
+      <li><span class="nr">1</span><b>Fach</b> wählen Sie mit den bunten Reitern über den Spielen (🌟 Alle, ➕ Mathe, 📖 Deutsch …).</li>
       <li><span class="nr">2</span><b>Suche</b> nach Name, Lernziel, Beschreibung oder Inhalt; die besten Treffer kommen zuerst. Für ein Kind
         rücken Spiele etwas nach vorn, die zu seiner Klasse und zu dem passen, was es noch üben sollte.</li>
-      <li><span class="nr">3</span><b>🎲 Zufallsmix</b> — Aufgaben aus vielen Spielen gemischt; das Kind stellt ein, wie schwer, wie lang und ob mit Timer.</li>
-      <li><span class="nr">4</span><b>🎯 Zufälliges Spiel</b> — die Eule zieht ein Spiel aus der gefilterten Auswahl, eher eines, das noch
-        Übung braucht oder lange nicht mehr dran war.</li>
+      <li><span class="nr">3</span><b>Filter</b> klappt die übrigen Gruppen auf: <b>Klasse</b> (für welche Klasse ein Spiel gedacht ist, dazu
+        <b>🎒 Meine Klasse</b> — für Kinder Spiele, die zu ihrer Klasse passen; vorgegeben an, das Kind darf es ausschalten),
+        <b>Nur</b> (<b>⭐ Mein Fokus</b>, für die Aufsicht <b>🔍 Zu prüfen</b>), <b>Thema</b> (wenn ein Fach gewählt ist) und <b>Stufe</b>.
+        Darunter Sortieren, ▦ Kacheln oder ☰ Kompakt und „Alle auf“ / „Alle zu“. Jede Gruppe klappt für sich auf; zugeklappt
+        nennt sie, was gilt. Thema, Stufe und Klasse lassen sich mehrfach wählen; „Alle“ wählt alles an und, nochmals getippt,
+        alles ab. Schaltet ein Kind „Meine Klasse“ aus, zeigt ein farbiger Rand mit Zeichen, wie ein Spiel zu seiner Klasse steht:
+        <b>✓</b> Türkis leichter, <b>●</b> Gold seine Klasse, <b>▲</b> Violett eine Herausforderung; eine kleine Legende steht über den Karten.</li>
+      <li><span class="nr">4</span><b>🎲 Zufallsmix</b> — Aufgaben aus vielen Spielen gemischt; das Kind stellt ein, wie schwer, wie lang und ob mit Timer.</li>
+      <li><span class="nr">5</span><b>🎯 Zufälliges Spiel</b> (für Kinder „Überrasch mich“) — die Eule zieht ein Spiel aus der gefilterten
+        Auswahl, eher eines, das noch Übung braucht oder lange nicht mehr dran war; mit ♾ auf der Karte ein Endlos-Spiel.</li>
     </ol>
+    <p><b>Auf jeder Karte</b> stehen oben rechts kleine Schalter: Teile (nur in Spielen mit Bausteinen; antippen wechselt nach
+      Stufe → geordnet → gemischt), ⏱ Timer, ♾ Endlos und ☆ Favorit. Was die Aufsicht festgelegt hat, trägt 🔒. Favoriten stehen
+      oben in einem goldenen Feld; dort entfernt „☆ Alle Favoriten entfernen“ (zweimal tippen) alle auf einmal. Kinder sehen auf
+      der Karte Bild, Namen und Stufen, ⓘ sagt ihnen, worum es geht; die Aufsicht sieht dazu Beschreibung, Lernziel und Sperrgrund.</p>
     <p class="tipp">Auf dem Startbild und am Ende jedes Spiels führt <b>🔗 Ähnliche Spiele</b> zu Spielen mit demselben Lernziel oder Thema.</p>
-    <p><b>Sortieren:</b> Vorgegeben stehen die Spiele nach Fach und Thema. Daneben gibt es „passt zu dir zuerst“, Alphabet und
+    <p><b>Sortieren</b> (im aufgeklappten Filter): Vorgegeben stehen die Spiele nach Fach und Thema. Daneben gibt es „passt zu dir zuerst“, Alphabet und
       Klasse, je auf- oder absteigend. Die Aufsicht wählt immer selbst; Kinder ab der 4. Klasse auch (Einstellungen). Je Kind lässt
       sich beides in den Konten abweichend setzen (Spalte 🔀).</p>
     <p><b>Alle Spiele auf einen Blick:</b> Im Portal unter „📋 Alle Spiele“ steht eine Tabelle mit Fach, Thema, Spielweise, Klasse und ob
@@ -157,14 +170,17 @@
     <figure><img src="bilder/a05-konten.webp" alt="Verwaltung, Untertab Konten mit Liste, Lernplan je Kind und Formular Neues Kind" loading="lazy"></figure>
     <p><span class="nr">1</span>Die Verwaltung hat Untertabs. Unter <b>Konten</b>:</p>
     <ul>
-      <li><b>Neues Kind:</b> Vorname und Klasse eingeben, „Anlegen“. Als Klasse geht auch <b>Kindergarten</b>: Dann beginnen die
+      <li><b>Neues Kind:</b> Vorname und Klasse eingeben, „＋ Anlegen“. Als Klasse geht auch <b>Kindergarten</b>: Dann beginnen die
         Spiele der 1. Klasse auf Stufe 1, und die Eule liest von selbst vor (<a href="#imspiel">Abschnitt 8</a>).</li>
       <li><span class="nr">2</span><b>📅 Lernplan:</b> je Kind Tage pro Woche und Minuten je Tag, zum Beispiel 3 Tage × 10 Minuten.
         Jede erfüllte Woche gibt dem Kind einen Wochenstern 🌟 — unabhängig von Fehlern und Tempo. „aus“ heisst kein Ziel.</li>
       <li><b>→ Aufsicht:</b> macht aus einem Konto eine weitere Aufsicht (zum Beispiel für den zweiten Elternteil); danach
         bei diesem Konto eine PIN setzen.</li>
+      <li><b>→ Kind</b> macht eine Aufsicht wieder zu einem gewöhnlichen Konto.</li>
       <li><b>PIN setzen:</b> neue PIN für eine Aufsicht, auch wenn sie ihre vergessen hat.</li>
-      <li><b>löschen:</b> entfernt das Konto eines Kindes. Vorher sichern, wenn seine Runden erhalten bleiben sollen.</li>
+      <li><b>🗑 löschen:</b> entfernt das Konto eines Kindes. Vorher sichern, wenn seine Runden erhalten bleiben sollen.</li>
+      <li><b>🙈 auf diesem Gerät ausblenden:</b> bei einer Aufsicht, die von einem anderen Gerät gesperrt angekommen ist (🔒) — sie
+        verschwindet hier von der Anmeldung, bleibt aber auf ihrem eigenen Gerät; „👁 wieder zeigen“ holt sie zurück.</li>
     </ul>
   </section>
 
@@ -172,14 +188,20 @@
     <h2>7. Spiele, Stufen, Timer, Endlos</h2>
     <p>Jedes Spiel übt ein Lernziel aus dem Lehrplan Volksschule St. Gallen und hat <b>sechs Stufen</b>, bezogen auf die Klasse, für die
       das Spiel gedacht ist:</p>
-    <figure><img src="bilder/a12-stufenwahl.webp" alt="Startbild eines Spiels mit Timer-Schalter, sechs Stufen und Endlos" loading="lazy"></figure>
+    <figure><img src="bilder/a12-stufenwahl.webp" alt="Startbild eines Spiels mit den Schaltern Timer, Endlos und Favorit, sechs Stufen und dem Vorlese-Knopf" loading="lazy"></figure>
     <ol>
-      <li><span class="nr">1</span><b>Timer</b> — zuschaltbar für mehr Spannung. Läuft die Zeit ab, zählt das als Fehler, die Aufgabe bleibt aber lösbar.
+      <li><span class="nr">1</span><b>⏱ Timer</b> — zuschaltbar für mehr Spannung. Läuft die Zeit ab, zählt das als Fehler, die Aufgabe bleibt aber lösbar.
         Gemessen wird die Zeit je Aufgabe immer (für die Statistik).</li>
-      <li><span class="nr">2</span><b>Stufen</b> — 🌱 1 Einstieg (eine Klasse tiefer) · 🌿 2 Üben · 🌳 3 Klassenziel · ⭐ 4 Knifflig ·
-        🚀 5 Nächste Klasse · 👑 6 Königsstufe. Unter jeder Stufe steht, für welche Klasse sie gedacht ist, und was schon erreicht ist.</li>
-      <li><span class="nr">3</span><b>Endlos</b> — so viele Aufgaben wie möglich ohne Fehler (<a href="#endlos">Abschnitt 9</a>).</li>
+      <li><span class="nr">2</span><b>♾ Endlos</b> — ist er an, startet jede Stufe, die es anbietet, im Endlos-Modus: so viele Aufgaben wie
+        möglich ohne Fehler (<a href="#endlos">Abschnitt 9</a>).</li>
+      <li><span class="nr">3</span><b>☆ Favorit</b> — das Spiel steht oben im Bereich Spiele bei den Favoriten.</li>
+      <li><span class="nr">4</span><b>Stufen</b> — 🌱 1 Einstieg (eine Klasse tiefer) · 🌿 2 Üben · 🌳 3 Klassenziel · ⭐ 4 Knifflig ·
+        🚀 5 Nächste Klasse · 👑 6 Königsstufe. Jede Stufe zeigt Nummer, Namen, die besten Sterne und für welche Klasse sie gedacht
+        ist; 👍 markiert die empfohlene. Was die Stufe übt, sehen Sie offen, Kinder hinter ⓘ.</li>
+      <li><span class="nr">5</span><b>🗣️</b> neben der Eule liest die Einleitung vor (<a href="#imspiel">Abschnitt 8</a>).</li>
     </ol>
+    <p>In Spielen mit Bausteinen steht vorne der Schalter <b>Teile</b> (nach Stufe, geordnet, gemischt). Unter dem zuletzt
+      geänderten Schalter steht leise, was er bewirkt.</p>
     <p>Eine Runde hat meist 8 Aufgaben und dauert 2 bis 5 Minuten. Am Ende gibt es 1 bis 3 Sterne; ein Fehler zählt dabei voll,
       ein geholter Tipp halb — fragen ist günstiger als raten.</p>
   </section>
@@ -193,12 +215,14 @@
       <li><span class="nr">3</span><b>🙋 Melden</b> — das Kind meldet einen Fehler im Spiel, mit kurzer Begründung (<a href="#meldungen">Abschnitt 14</a>).
         Wer melden darf, stellen Sie ein (<a href="#einstellungen">Abschnitt 17</a>).</li>
       <li><span class="nr">4</span><b>🗣️ Vorlesen</b> — die Eule liest Auftrag und Tipps vor. Im Kindergarten und in der 1. Klasse geschieht
-        das von selbst, sonst auf Knopfdruck; umstellen lässt es sich im Profil und auf dem Startbild jedes Spiels. Bleibt der
+        das von selbst, sonst auf Knopfdruck. Ein langes Drücken auf 🗣️ schaltet „immer gleich vorlesen“ ein oder aus (dann
+        goldener Ring). Die Vorgabe setzen Sie im Profil und legen dort fest, ob das Kind sie umstellen darf. Bleibt der
         Auftrag von Aufgabe zu Aufgabe gleich, liest sie ihn nur beim ersten Mal. Den Stoff eines Lesespiels liest sie nie vor,
         und nicht in Englisch und Französisch. Den Knopf gibt es nur, wenn das Gerät eine deutsche Stimme hat.</li>
     </ol>
     <p>Langes Drücken auf einen Knopf liest seinen Text vor (nicht in Deutsch-Spielen, wo die Wörter der Stoff sind). Der Ton-Schalter
-      🔊/🔇 oben rechts schaltet Töne und Stimme zusammen aus.</p>
+      🔊/🔇 oben rechts schaltet Töne und Stimme zusammen aus. Während einer Ruhezeit (<a href="#einstellungen">Abschnitt 17</a>)
+      können Klänge, Vorlesen und Hören ruhen.</p>
     <p><b>⌨️ Mit der Tastatur:</b> Am Computer tragen die Antwortknöpfe oben rechts eine kleine Taste. Gleiche Zeichen liegen in jedem
       Spiel auf denselben Tasten (Schweizer Tastatur): <b>&lt; = &gt;</b> auf Y X C, <b>+ − · :</b> auf V B N M, die Stellen auf
       E Z H T M (ZT und HT mit ⇧), Satzzeichen auf , . und - (oder getippt wie gewohnt), ⌫ auf die Rücktaste, Buchstaben und einzelne Ziffern auf sich selbst, alles andere der Reihe nach auf A S D F G H J K L.
@@ -229,11 +253,12 @@
 
   <section id="endlos">
     <h2>9. Endlos-Modus und Ranglisten</h2>
-    <p>Bei vielen Rechenspielen gibt es unter den Stufen <b>♾ Endlos</b>: Aufgaben, bis die erste falsch ist. Gezählt werden die richtigen
+    <p>Bei vielen Rechenspielen gibt es den Schalter <b>♾ Endlos</b> — auf der Spielkarte und über den Stufen. Ist er an, startet jede
+      Stufe, die es anbietet, Aufgaben, bis die erste falsch ist; die Stufe zeigt dann den eigenen Rekord. Gezählt werden die richtigen
       in Folge. Mit eingeschaltetem Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper — dann zählt es auch als Ende,
       wenn die Zeit abläuft.</p>
     <figure><img src="bilder/a14-endlos-rangliste.webp" alt="Startbild eines Spiels: Endlos-Stufen und Ranglisten ohne und mit Timer" loading="lazy">
-      <figcaption>Ranglisten im Startbild des Spiels (Musterkinder, erfundene Werte).</figcaption></figure>
+      <figcaption>Unter den Stufen: ♾ Endlos-Ranglisten je Stufe (Musterkinder, erfundene Werte).</figcaption></figure>
     <ul>
       <li><span class="nr">1</span><b>Ranglisten:</b> je Stufe eine ohne und eine mit Timer. Es zählt der beste Wert jedes Kindes; Testrunden der
         Aufsicht erscheinen nicht.</li>
@@ -249,8 +274,9 @@
     <h2>10. Selbst ausprobieren</h2>
     <p>Als Aufsicht können Sie jedes Spiel selbst spielen. Ihre Runden zählen als <b>Testrunden</b> und erscheinen nicht in der Statistik der Kinder.</p>
     <figure><img src="bilder/a13-testhilfe.webp" alt="Spiel mit der Leiste Test: Lösung zeigen, Aufgabe überspringen" loading="lazy"></figure>
-    <p><span class="nr">1</span>Die Leiste <b>Test</b> gibt es nur für die Aufsicht: <b>Lösung zeigen</b> und <b>Aufgabe überspringen</b> — praktisch, um
-      ein Spiel rasch kennenzulernen.</p>
+    <p><span class="nr">1</span>Die Leiste <b>🧪 Test</b> gibt es nur für die Aufsicht: <b>🔑 Lösung zeigen</b> und <b>⏭ Aufgabe überspringen</b> — praktisch, um
+      ein Spiel rasch kennenzulernen. Auf dem Startbild sehen Sie zudem, welche Stimme vorliest (mit ▶ Probe), und bei Spielen mit
+      Wortlisten <b>🔍 Inhalte prüfen</b> (<a href="#freigabe">Abschnitt 11</a>).</p>
   </section>
 
   <section id="freigabe">
@@ -260,35 +286,60 @@
       Unter <b>Freigabe</b> entscheiden Sie selbst:</p>
     <ul>
       <li><span class="nr">1</span><b>Alles freigeben</b>, <b>Alles sperren</b> oder <b>Alles wie Prüfstand</b> (zurück auf den geprüften Stand) — für alle Spiele auf einmal.</li>
-      <li><span class="nr">2</span>Je Spiel <b>✓ frei</b> oder <b>🔒 gesperrt</b>; die Fächer und Themen klappen Sie mit ▸ auf. „↺ wie Prüfstand“ nimmt Ihre eigene Wahl für ein Spiel zurück.</li>
+      <li><span class="nr">2</span>Je Spiel <b>✓ frei</b> oder <b>🔒 gesperrt</b>; je Fach klappt eine Gruppe auf („12 von 20 frei · 3 zu prüfen“),
+        das Suchfeld findet ein Spiel oder eine Liste. „↺ wie Prüfstand“ nimmt Ihre eigene Wahl für ein Spiel zurück.</li>
       <li>Spiele mit Wortlisten oder Sätzen: Die Listen lassen sich einzeln freigeben. Ein Kind sieht ein solches Spiel, sobald
         mindestens eine Liste frei ist; im Spiel kommen nur freie Inhalte vor.</li>
       <li>Die Freigabe gilt für dieses Gerät. Mit dem <a href="#abgleich">Abgleich</a> kommt sie auf die anderen Geräte.</li>
     </ul>
     <p class="tipp">Im Bereich Spiele zeigt der Filter <b>🔍 Zu prüfen</b> der Aufsicht, was noch gesperrt ist.</p>
+    <h3 id="listen">🔍 Wortlisten selbst prüfen</h3>
+    <figure><img src="bilder/a21-pruefansicht.webp" alt="Prüfansicht einer Wortliste mit Kästchen je Eintrag, alle-Knopf je Gruppe und Korrektur-Stift" loading="lazy">
+      <figcaption>Prüfansicht der Anlaut-Angel, Liste „Anlaut“.</figcaption></figure>
+    <p>„🔍 prüfen“ neben einer Liste in der Freigabe öffnet das Spiel mit der Prüfansicht, ebenso „🔍 Inhalte prüfen“ auf dem Startbild
+      des Spiels.</p>
+    <ol>
+      <li><span class="nr">1</span><b>✓ Ganze Liste geprüft</b> hakt alles ab, was noch offen ist.</li>
+      <li><span class="nr">2</span>Ein Abschnitt hat einen eigenen Inhalt (etwa Bezeichnungen, Sätze, Fragen) und ist für sich abzuhaken;
+        Gruppen darin haken Sie mit <b>✓ alle</b> ab. Ganz geprüfte Abschnitte und Gruppen sind beim Öffnen zu und grün gerahmt.</li>
+      <li><span class="nr">3</span>Jeder Eintrag hat ein Kästchen. ✓E daneben heisst: von der Entwicklung schon geprüft.</li>
+      <li><span class="nr">4</span>Stimmt ein Eintrag nicht, schlägt <b>✏️</b> der Entwicklung eine Korrektur vor. Sie steht dann unter
+        Verwaltung → Meldungen und geht auf demselben Weg wie eine Fehlermeldung (<a href="#meldungen">Abschnitt 14</a>).</li>
+    </ol>
+    <p>Ihre Haken gelten nur auf diesem Gerät. Sind alle Einträge abgehakt, ist die Liste auf diesem Gerät für Kinder frei; einzelne
+      Haken geben noch nichts frei.</p>
   </section>
 
   <section id="statistik">
     <h2>12. Statistik und Fazit</h2>
     <figure><img src="bilder/a09-statistik.webp" alt="Statistik eines Kindes mit Kennzahlen, Fazit und Empfehlungen" loading="lazy">
       <figcaption>Statistik mit erfundenen Beispielrunden.</figcaption></figure>
-    <p><span class="nr">1</span>Oben wählen Sie das Kind. „Testrunden zeigen“ blendet Ihre eigenen Probe-Runden ein.</p>
+    <p><span class="nr">1</span>Oben wählen Sie das Kind. „🧪 Testrunden zeigen“ blendet Ihre eigenen Probe-Runden ein.</p>
     <ul>
-      <li><b>Kennzahlen:</b> Runden, Spielzeit, Anteil Aufgaben auf Anhieb richtig (ohne Fehler und ohne Tipp).</li>
+      <li><b>Kennzahlen:</b> Runden, Spielzeit, Anteil Aufgaben auf Anhieb richtig (ohne Fehler und ohne Tipp) und Aufgaben, bei denen
+        die Lösung gezeigt wurde.</li>
       <li><span class="nr">2</span><b>Fazit</b> in Worten: Menge, Qualität, Konzentration, Stärken und Schwächen, Auffälligkeiten. Es entsteht
-        nach festen Regeln aus den Runden, ohne KI, und jede Aussage nennt ihre Zahlen. Mit „Fazit für … freigeben“ sieht das Kind
+        nach festen Regeln aus den Runden, ohne KI, und jede Aussage nennt ihre Zahlen. Mit „👀 Fazit für … freigeben“ sieht das Kind
         eine freundliche Fassung in seiner eigenen Statistik.</li>
-      <li><b>Das empfehle ich:</b> wo die nächste Stufe dran ist, was wiederholt werden sollte, wann ein Timer reizvoll wäre — mit
-        Knopf „Jetzt üben“ direkt ins Spiel.</li>
+      <li><b>Das empfehle ich für …:</b> wo die nächste Stufe dran ist, was wiederholt werden sollte, wann ein Timer reizvoll wäre — mit
+        „Jetzt üben ➜“ direkt ins Spiel. Das Kind sieht höchstens drei davon als Karten mit „▶ Los“ (Bild unten).</li>
       <li><b>Wann wird gelernt?</b> Minuten je Tag, Wochentag und Tageszeit. Lieber oft und kurz als selten und lang.</li>
       <li><b>Konzentration:</b> ob Zeit und Fehler gegen Ende einer Runde oder Sitzung zunehmen.</li>
       <li><b>Vorgehen:</b> nicht nur ob, sondern <i>wie</i> ein Kind löst — etwa ob es alle Möglichkeiten der Reihe nach sucht, oder
         ob es im Kopf, mit Notizen oder mit dem Notizblock rechnet (<a href="#notizen">Abschnitt 8</a>).</li>
       <li><b>📅 Lernplan:</b> die letzten zwölf Wochen, erfüllt oder nicht (Wochenziel in <a href="#konten">Abschnitt 6</a>).</li>
-      <li><b>Lernziele</b> und <b>beste Sterne je Spiel und Stufe</b>, Endlos-Rekorde und die letzten Runden.</li>
-      <li><b>Version</b> ganz unten, etwa „Eulenpfad 1.0.0 · Kern 1.39.0“ — hilfreich, wenn Sie der Entwicklung etwas schreiben;
+      <li><b>Lernziele</b> (bei mehreren Kindern mit einem Vergleich je Lernziel) und <b>beste Sterne je Spiel und Stufe</b>,
+        Endlos-Rekorde und die letzten Runden.</li>
+      <li><b>Version</b> ganz unten, etwa „Eulenpfad 1.0.0 · Kern 1.43.0“ — hilfreich, wenn Sie der Entwicklung etwas schreiben;
         jede Fehlermeldung trägt sie ohnehin mit.</li>
     </ul>
+    <figure><img src="bilder/a22-empfehlungen.webp" alt="Karte Das empfehle ich mit den Knöpfen Fürs Kind oben, Fürs Kind ausblenden und Eigene Empfehlung" loading="lazy"></figure>
+    <ol>
+      <li><span class="nr">1</span><b>📌 Fürs Kind oben</b> heftet einen Vorschlag an, damit das Kind ihn zuerst sieht.</li>
+      <li><span class="nr">2</span><b>🚫 Fürs Kind ausblenden</b> nimmt ihn weg; „↺ Wieder zeigen“ holt ihn zurück.</li>
+      <li><span class="nr">3</span><b>➕ Eigene Empfehlung:</b> Sie wählen selbst Spiel und Stufe. ⓘ erklärt, wie das Programm die
+        Vorschläge ordnet.</li>
+    </ol>
     <figure><img src="bilder/a17-lernplan.webp" alt="Karte Lernplan mit den letzten Wochen" loading="lazy"></figure>
     <figure><img src="bilder/a10-vorgehen.webp" alt="Karte Vorgehen mit Punkten für die letzten Aufgaben" loading="lazy">
       <figcaption>Vorgehen: grüne Punkte = systematisch, gelb = teilweise, grau = kreuz und quer; der neueste Punkt steht rechts.</figcaption></figure>
@@ -299,12 +350,13 @@
     <figure><img src="bilder/a18-erfolge.webp" alt="Bereich Erfolge mit Wochenkarte und Abzeichen" loading="lazy">
       <figcaption>Erfolge eines Musterkinds, angesehen als Aufsicht.</figcaption></figure>
     <ul>
-      <li><span class="nr">1</span><b>Deine Woche:</b> sieben Tage, ★ = Ziel des Tages erreicht, • = gespielt. Dazu die Wochensterne 🌟 und wie viele
-        Wochen in Folge. Das Kind sieht die Woche auch kurz oben im Bereich Spiele.</li>
-      <li><span class="nr">2</span><b>Abzeichen</b> (19 Stück) für Runden, drei Sterne, alle sechs Stufen, verschiedene Spiele, Wochenziele,
-        gefundene Fehler und mehr. Jedes hat <b>fünf Stufen</b>: 🥉 Bronze, 🥈 Silber, 🥇 Gold, 🏆 Platin, 💎 Diamant — etwa 1, 10, 50,
+      <li><span class="nr">1</span><b>📅 Meine Woche</b> (für Sie: „Woche von …“): sieben Tage, ★ = Ziel des Tages erreicht, • = gespielt. Dazu die
+        Wochensterne 🌟 und wie viele Wochen in Folge. Das Kind sieht die Woche auch in seiner Statistik.</li>
+      <li><span class="nr">2</span><b>Abzeichen</b> (22 Stück) für Runden, drei Sterne, alle sechs Stufen, verschiedene Spiele, Wochenziele,
+        gefundene Fehler, Kopfrechnen, frühes Üben, den Aufstieg und mehr. Jedes hat <b>fünf Stufen</b>: 🥉 Bronze, 🥈 Silber, 🥇 Gold, 🏆 Platin, 💎 Diamant — etwa 1, 10, 50,
         100 und 500 Runden; die Abstufung ist je Abzeichen eigen. Die Kachel zeigt die erreichte Stufe und den Weg zur nächsten.
         Neue Stufen tragen 🆕, bis das Kind sie gesehen hat. Testrunden zählen nicht.</li>
+      <li><b>🏆 Meine Podestplätze:</b> wo das Kind in einer Endlos-Rangliste auf Platz 1 bis 3 steht.</li>
       <li><b>📤 Teilen</b> macht aus einem Abzeichen ein Bild (Vorname, Titel, Datum) und öffnet den Teilen-Dialog des Geräts oder
         speichert es. Das geschieht nur, wenn das Kind darauf tippt; weitere Angaben reisen nicht mit.</li>
     </ul>
@@ -360,25 +412,39 @@
       <li><span class="nr">3</span>Ohne Ordner (iPad, Android-Tablet, Firefox): <b>Abgleich-Datei sichern</b>, auf das andere Gerät bringen und dort
         <b>Abgleich-Datei einlesen</b> — und umgekehrt.</li>
     </ol>
-    <p>Abgeglichen werden Runden, Endlos-Rekorde, Kinder, Profile (mit Lernplan), Freigaben und Meldungen. Wochensterne und Abzeichen
-      rechnet jedes Gerät aus den Runden selbst. Die PIN bleibt immer auf dem Gerät.</p>
+    <p>Abgeglichen werden Runden, Endlos-Rekorde, Kinder, Profile (mit Lernplan und Empfehlungen), Freigaben, Ruhezeiten und Meldungen.
+      Wochensterne und Abzeichen rechnet jedes Gerät aus den Runden selbst. Auf dem Gerät bleiben die PIN, die Einstellungen, die Haken
+      der Prüfansicht und die Angabe zu Kopfhörern.</p>
   </section>
 
   <section id="einstellungen">
     <h2>17. Einstellungen</h2>
-    <figure><img src="bilder/a08-einstellungen.webp" alt="Verwaltung, Untertab Einstellungen mit Dezimalzeichen global und je Spiel" loading="lazy"></figure>
-    <p>Die Einstellungen gelten für alle Kinder auf diesem Gerät.</p>
+    <figure><img src="bilder/a08-einstellungen.webp" alt="Verwaltung, Untertab Einstellungen mit den Blöcken Aussehen und In den Spielen, Dezimalzeichen global und je Spiel" loading="lazy"></figure>
+    <p>Die Einstellungen stehen in Blöcken und gelten für alle Kinder auf diesem Gerät, viele je Spiel auch abweichend.</p>
     <ol>
-      <li><span class="nr">1</span><b>Dezimalzeichen</b> für alle Spiele: Punkt (4.5, wie im Lehrplan, Standard) oder Komma (4,5) — so, wie es das Kind im Heft schreibt.</li>
-      <li><span class="nr">2</span><b>Je Spiel</b> abweichend: „wie global“, Punkt oder Komma.</li>
-      <li><span class="nr">3</span><b>Alles auf Standard</b> setzt alle Einstellungen zurück, auch die je Spiel.</li>
+      <li><span class="nr">1</span><b>🎨 Aussehen:</b> <b>Stil</b> wie von Hand gezeichnet (Standard) oder glatt — Startseite, Stufenwahl, Ranglisten
+        und Schlussbild, die Aufgabe bleibt glatt. <b>Farben:</b> hell (Standard), dunkel oder wie das Tablet oder der Computer.
+        Unter <b>Für mich</b> wählt jede Aufsicht für sich etwas anderes; das gilt, solange sie angemeldet ist.</li>
+      <li><span class="nr">2</span><b>🎮 In den Spielen</b>, zuerst das <b>Dezimalzeichen</b> für alle Spiele: Punkt (4.5, wie im Lehrplan, Standard)
+        oder Komma (4,5) — so, wie es das Kind im Heft schreibt.</li>
+      <li><span class="nr">3</span><b>Je Spiel</b> abweichend: „wie global“, Punkt oder Komma.</li>
     </ol>
     <p>Geldbeträge schreiben die Spiele bis zur 3. Klasse als „25 Fr. 60 Rp.“, ab der 4. Klasse als „25.60 Fr.“ — mit dem eingestellten Zeichen.</p>
     <p><b>Notizen für Zwischenergebnisse:</b> nach Stufe (Standard — in den unteren Stufen ohne, damit Kopfrechnen geübt wird),
       immer oder nie (Kopfrechnen). <b>Notizblock für schriftliches Rechnen:</b> ab Stufe 4 (Standard), immer, wo Notizen sind, oder
-      nie; ohne Notizen gibt es auch keinen Block. Beides auch je Spiel (<a href="#notizen">Abschnitt 8</a>).</p>
-    <p><b>Fehler melden durch Kinder:</b> aus, ab der 3. Klasse (Standard, weil die Begründung geschrieben wird), ab der 5. Klasse oder alle
+      nie; ohne Notizen gibt es auch keinen Block. Beides auch je Spiel (<a href="#notizen">Abschnitt 8</a>). <b>Abschluss-Animation:</b>
+      am Ende einer geschafften Runde ein kurzes bewegtes Bild, das zum Spiel passt; Tippen überspringt es, „Bewegung reduzieren“ des
+      Geräts zeigt gleich das Schlussbild.</p>
+    <p><b>🧒 Kinder:</b> ob sich Kinder selbst anlegen; ob sie Timer, Reihenfolge der Teile und Vorlesen selbst umstellen (Standard ja)
+      und selbst zwischen hell und dunkel wechseln (Standard nein) — je Kind abweichend im Profil (<a href="#tabs">Abschnitt 4</a>);
+      die Sortierung der Spiele und ob Kinder sie selbst wählen.
+      <b>Fehler melden durch Kinder:</b> aus, ab der 3. Klasse (Standard, weil die Begründung geschrieben wird), ab der 5. Klasse oder alle
       Kinder. Die Aufsicht kann immer melden.</p>
+    <p><b>🔊 Ton und Ruhezeiten:</b> Unter <b>🤫 Ruhezeiten</b> wählen Sie mit „➕ Zeitspanne“ Wochentage und eine Zeit von–bis und je Zeitspanne,
+      was ruht: Abschluss-Animation, Klänge, Vorlesen der Eule, Hören. Je Spiel gilt eine Ruhezeit wie eingestellt, hier nicht oder hier ganz.
+      <b>🎧 Dieses Gerät wird mit Kopfhörern benutzt</b> nimmt das Hören (auf Wunsch auch das Vorlesen) von der Ruhezeit aus. Spiele, die Ton
+      brauchen, zeigen in einer Ruhezeit „🎧 Diese Runde braucht Ton“ mit „🔊 Ton für diese Runde an“ — oder sie fehlen im Bereich Spiele,
+      wenn Sie das so einstellen; Zufall und Zufallsmix nehmen sie dann nie.</p>
     <p><b>Meldungen an die Entwicklung:</b> der Weg — automatisch (Meldungsserver, sonst E-Mail, sonst Text), nur Server, nur
       E-Mail oder nur Text — und, falls nötig, eine eigene Adresse. Erlaubt ist ein Server auf diesem Gerät
       (<kbd>http://localhost:…</kbd>) oder ein Server im Netz über <kbd>https://</kbd>. Leer lassen heisst: die Vorgabe der
@@ -389,6 +455,7 @@
       bitten, nichts von selbst zu löschen“. Ohne Abgleich-Ordner erinnert die Verwaltung oben ans Sichern, wenn 14 Tage lang
       nicht gesichert wurde. Safari löscht die Daten einer Seite, die sieben Tage lang nicht geöffnet wurde — dort besonders
       regelmässig sichern (<a href="#sichern">Abschnitt 15</a>).</p>
+    <p>Ganz unten setzt <b>↺ Alles auf Standard</b> alle Einstellungen zurück, auch die je Spiel.</p>
   </section>
 
   <section id="pruefen">
@@ -401,7 +468,8 @@
         möchten, ergänzen.</li>
       <li>Die Entwicklung schickt Ihnen einen <b>persönlichen Schlüssel</b> an Ihre Absenderadresse. Sie geben ihn unter
         Entwicklung ein und tippen „Freischalten“ (dafür muss der Server der Entwicklung erreichbar sein).</li>
-      <li>In den Spielen erscheint eine Leiste mit „Spiel angesehen“ und „Bemerkung“, in der Freigabe „geprüft“ je Wortliste.
+      <li>In den Spielen erscheint eine Leiste mit „Spiel angesehen“ und „Bemerkung“, in der Freigabe „✓ angesehen“ je Spiel; die
+        Haken in der Prüfansicht der Wortlisten gelten dann für alle.
         Was Sie markieren, wird <b>eingereicht</b> und wirkt erst, wenn die Entwicklung es übernommen hat — bis dahin bleibt
         alles wie vorher. Die Entwicklung übernimmt nach einer festen
         <a href="https://github.com/patrikneunteufel/Lernspiele/blob/master/docs/richtlinie_freigaben.md">Richtlinie</a>.</li>
@@ -423,9 +491,10 @@
     <p>Meist wurden die Browserdaten gelöscht, oder es wurde in einem privaten Fenster gespielt (dort vergisst der Browser alles beim Schliessen).
       Mit einer gesicherten Datei holen Sie alles zurück (<a href="#sichern">Abschnitt 15</a>).</p>
     <h3>Ein Kind sieht ein Spiel nicht.</h3>
-    <p>Es ist vermutlich noch gesperrt (<a href="#freigabe">Abschnitt 11</a>), oder der Filter „Meine Klasse“ blendet es aus.</p>
+    <p>Es ist vermutlich noch gesperrt (<a href="#freigabe">Abschnitt 11</a>), oder ein Filter blendet es aus (Fach-Reiter, Filter → Klasse
+      „🎒 Meine Klasse“), oder es braucht Ton und ist während einer Ruhezeit ausgeblendet (<a href="#einstellungen">Abschnitt 17</a>).</p>
     <h3>Die Eule liest nicht vor.</h3>
-    <p>Ist der Ton aus (🔇 oben rechts)? Hat das Gerät eine deutsche Stimme? Ohne Stimme fehlt der Knopf 🗣️; eine Stimme lässt sich in den
+    <p>Ist der Ton aus (🔇 oben rechts)? Gilt gerade eine Ruhezeit für das Vorlesen? Hat das Gerät eine deutsche Stimme? Ohne Stimme fehlt der Knopf 🗣️; eine Stimme lässt sich in den
       Einstellungen des Geräts unter Sprache oder Bedienungshilfen dazuladen.</p>
     <h3>Mehrere Kinder an einem Gerät?</h3>
     <p>Kein Problem: Jedes Kind tippt beim Start seinen Namen an. Runden und Sterne werden getrennt gezählt.</p>

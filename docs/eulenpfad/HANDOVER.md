@@ -385,8 +385,8 @@ Stand nach LERN_Session8 ([Report](report/LERN_Session8_2026-11-02.md)):
   (1.: 10, 2.: 28, 3.: 11, 4.: 37); 5./6. Klasse: Plan in `spielideen/lehrplan_sg_5-6.md` (52 Ideen),
   gebaut Bruch-Pizzeria (5), Mittelwert-Türme (5), Teiler-Spürnase (6), Überschlags-Radar (6),
   Velo-Tabelle (6) in LERN_Session7.
-- **Anleitungen** für Erwachsene und Kinder in `eulenpfad/anleitung/`, vom Portal verlinkt; Bilder neu mit
-  `node tools/anleitung_bilder.js` (Server auf Port 8765 nötig), nach Änderungen an der Oberfläche.
+- **Anleitungen** für Erwachsene und Kinder in `eulenpfad/anleitung/`, vom Portal verlinkt, nachgeführt in LERN_Session36;
+  Bilder neu mit `node tools/anleitung_bilder.js [Basis-URL]` (Server nötig, Vorgabe Port 8765), nach Änderungen an der Oberfläche.
 - **Einstellungen der Aufsicht** je Gerät (Verwaltung → Einstellungen): Dezimalzeichen global und je
   Spiel, Standard Punkt (`LS.dezimalText`); Geld nach Klasse der Stufe (`LS.geldText`, C1 a).
   Klasseneinstellungen durch Lehrpersonen nur als Konzept: `konzept_klasseneinstellungen.md` (F1–F8).

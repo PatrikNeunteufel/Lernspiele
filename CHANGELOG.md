@@ -2028,3 +2028,12 @@
   Gruppen, nicht Abschnitte. Sätze, Formen und Fallen bauen die Spiele mit ihren eigenen Funktionen; Stufen aus den
   Stufentabellen, wo sie auslesbar sind (in Trenn-Schere und Gedicht-Baukasten als Text). Prüfstand und Fingerabdrücke
   unverändert.
+- **Anleitungen nachgeführt** (AN-B a; damit ist Darkmode Schritt 6 erledigt): `eulenpfad/anleitung/aufsicht.html` und
+  `kinder.html` gegen die heutige App abgeglichen — Tab Spiele mit Fach-Reitern und Filter, Schalter auf Karte und
+  Stufenwahl (Timer, Endlos, Favorit), Favoriten, 🗣️ mit langem Drücken, Personen-Menü, „Was … selbst umstellen darf“ im
+  Profil, Einladung zum Lernsteig, Konten (→ Kind, ausblenden), Prüfansicht der Wortlisten mit ✏️ Korrektur (neuer
+  Abschnitt), Empfehlungen ans Kind (📌, 🚫, ➕), Einstellungen in Blöcken (Aussehen, In den Spielen, Kinder, Ton und
+  Ruhezeiten), Abschluss-Animation, 22 Abzeichen, Podestplätze, was der Abgleich mitnimmt (Einstellungen bleiben auf dem
+  Gerät). `tools/anleitung_bilder.js` wieder lauffähig: Laden wartet erst auf about:blank, Aufsicht 1200 breit, neue
+  Rahmen für Tab Spiele, Stufenwahl, Einstellungen, Profil und die Kinderbilder, Rahmen in offenen Dialogen; zwei neue
+  Bilder (a21 Prüfansicht, a22 Empfehlungen), alle 36 Bilder neu. `anleitung.css`: Handy-Bilder nie breiter als die Karte.

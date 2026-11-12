@@ -47,10 +47,15 @@ async function groesse(breite, hoehe, mobil = false) {
 
 /** Seite laden. Immer über about:blank, damit auch ein Wechsel nur des #Teils neu lädt (sonst kein Ladeereignis). */
 async function gehe(adresse, pause = 700) {
+  // Erst about:blank fertig laden: sonst beendet sein Ladeereignis das Warten auf die Seite, und der nächste Befehl
+  // läuft noch auf der leeren Seite (kein localStorage, LERN_Session36)
+  const leer = ereignis("Page.loadEventFired");
   await send("Page.navigate", { url: "about:blank" });
+  await Promise.race([leer, warte(3000)]);
   const geladen = ereignis("Page.loadEventFired");
   await send("Page.navigate", { url: BASIS + adresse });
   await Promise.race([geladen, warte(15000).then(() => { throw new Error(`Laden dauert zu lange: ${adresse}`); })]);
+  if (!(await js(`return location.href.startsWith(${JSON.stringify(BASIS)});`))) throw new Error(`Seite nicht geladen: ${adresse}`);
   await warte(pause);
 }
 
@@ -77,9 +82,14 @@ async function rahmen(ziele) {
       if (!e) throw new Error("Rahmen-Ziel fehlt: " + JSON.stringify(z));
       const r = e.getBoundingClientRect();
       const rand = 6;
+      // Ein offener Dialog liegt über allem (top layer): Rahmen gehören dann in den Dialog, sonst lägen sie dahinter
+      // (Prüfansicht, LERN_Session36). Lage relativ zum Dialog und seinem Scrollstand.
+      const wurzel = e.closest("dialog[open]") || document.body;
+      const d = wurzel === document.body ? null : wurzel.getBoundingClientRect();
+      const bx = d ? -d.left + wurzel.scrollLeft - wurzel.clientLeft : scrollX, by = d ? -d.top + wurzel.scrollTop - wurzel.clientTop : scrollY;
       const box = document.createElement("div");
       box.className = "anl-rahmen";
-      Object.assign(box.style, { position: "absolute", left: (r.left + scrollX - rand) + "px", top: (r.top + scrollY - rand) + "px",
+      Object.assign(box.style, { position: "absolute", left: (r.left + bx - rand) + "px", top: (r.top + by - rand) + "px",
         width: (r.width + 2 * rand) + "px", height: (r.height + 2 * rand) + "px", border: "4px solid #e11d48", borderRadius: "12px",
         boxShadow: "0 0 0 3px rgba(255,255,255,.85)", zIndex: 99999, pointerEvents: "none", boxSizing: "border-box" });
       const nr = document.createElement("div");
@@ -87,7 +97,7 @@ async function rahmen(ziele) {
       Object.assign(nr.style, { position: "absolute", left: "-16px", top: "-16px", width: "30px", height: "30px", borderRadius: "50%",
         background: "#e11d48", color: "#fff", font: "800 17px/30px system-ui, sans-serif", textAlign: "center", boxShadow: "0 0 0 3px #fff" });
       box.append(nr);
-      document.body.append(box);
+      wurzel.append(box);
     });`);
 }
 
@@ -214,7 +224,8 @@ async function notizblockZeigen() {
 // ---------- Aufnahmen ----------
 
 async function aufsicht() {
-  await groesse(1000, 760);
+  // 1200 breit: seit dem Personen-Menü und 📖 passen die Tabs bei 1000 nicht mehr in eine Zeile (LERN_Session36)
+  await groesse(1200, 760);
   // Ganz am Anfang: noch niemand da
   await js(`localStorage.clear(); sessionStorage.clear();`);
   await gehe("/eulenpfad/index.html");
@@ -238,7 +249,10 @@ async function aufsicht() {
   await rahmen([{ css: "nav.tabs" }]);
   await bild("a04-tabs", { maxHoehe: 760 });
 
-  await rahmen([{ css: ".filter" }, { css: "input.suche" },{ css: ".spielkarte.zufall" }, { css: ".spielkarte.zufall + .spielkarte.zufall" }]);
+  // Tab Spiele (LERN_Session36): Fach-Reiter, Suche, Knopf „Filter“ klappt Klasse, Nur, Stufe und Sortieren auf
+  await js(`document.querySelector(".filter-knopf").click(); await new Promise(r => setTimeout(r, 400));`);
+  await rahmen([{ css: "nav.fach-reiter-zeile" }, { css: "input.suche" }, { css: ".filter-klapp" }, { css: ".spielkarte.zufall" },
+    { css: ".spielkarte.zufall + .spielkarte.zufall" }]);
   await bild("a16-spiele", { maxHoehe: 1150 });
 
   await gehe("/eulenpfad/index.html#verwaltung/konten");
@@ -255,16 +269,21 @@ async function aufsicht() {
   await bild("a07-abgleich", { maxHoehe: 900 });
 
   await gehe("/eulenpfad/index.html#verwaltung/einstellungen");
-  await js(`document.querySelectorAll(".einstellung-spiele").forEach(d => d.open = true);`);
-  await rahmen([{ css: ".einstellung .zeile-knoepfe" }, { css: ".einstellung-spiele" }, { text: "Alles auf Standard" }]);
-  await bild("a08-einstellungen", { maxHoehe: 1000 });
+  // Einstellungen in Gruppen (Aussehen, In den Spielen, Kinder, Ton; LERN_Session36): die erste Gruppe, dann das
+  // Dezimalzeichen für alle Spiele und je Spiel
+  await js(`const h = [...document.querySelectorAll(".verwaltung h3")].find(x => x.textContent.trim() === "Dezimalzeichen").parentElement;
+    h.querySelector(".zeile-knoepfe").id = "anl-dez"; const s = h.querySelector("details") || h.nextElementSibling; s.id = "anl-dez-spiel";`);
+  await rahmen([{ css: ".einstellung-block" }, { css: "#anl-dez" }, { css: "#anl-dez-spiel" }]);
+  await bild("a08-einstellungen", { maxHoehe: 1400 });
 
   // Profil eines Kindes: Vorgaben mit „fest“ (VR1 a, LERN_Session12); das Kind hat beim Timer selbst gewählt
   await js(`LS.waehleTimer("Muster Kind", "runden-rutsche", true);`);
   await gehe("/eulenpfad/index.html#profil");
   await js(`const s = document.querySelector('select[aria-label="Profil von"]'); s.value = "Muster Kind"; s.dispatchEvent(new Event("change")); await new Promise(r => setTimeout(r, 400));`);
   // Profil neu geordnet (LERN_Session14): Bild, Klasse mit Aufstieg, Speichern, darunter die sofort wirkenden Häkchen
-  await rahmen([{ css: ".profil-bild" }, { css: ".klasse-wahl" }, { css: ".profil-speichern" }, { css: ".kind-wahl" }]);
+  // (4) der ganze Abschnitt „Was … selbst umstellen darf“ (je Vorgabe eine Wahl, LERN_Session36)
+  await js(`document.querySelector(".kind-wahl").parentElement.id = "anl-kindwahl";`);
+  await rahmen([{ css: ".profil-bild" }, { css: ".klasse-wahl" }, { css: ".profil-speichern" }, { css: "#anl-kindwahl" }]);
   await bild("a19-profil", { maxHoehe: 2000 });
 
   await js(`LS.setzeSpieler?.("Muster Kind");`);
@@ -282,17 +301,23 @@ async function aufsicht() {
   await bild("a11-daten", { css: "#anl-daten" });
   await js(`const k = [...document.querySelectorAll(".statistik .karte")].find(x => x.querySelector("h2")?.textContent.includes("Endlos")); k.id = "anl-rekorde";`);
   await bild("a15-rekorde", { css: "#anl-rekorde" });
+  // Empfehlungen ans Kind (KS4 a, LERN_Session33): 📌 oben, 🚫 ausblenden, ➕ eigene (LERN_Session36)
+  await karteMit("Das empfehle ich");
+  await rahmen([{ text: "📌 Fürs Kind oben" }, { text: "🚫 Fürs Kind ausblenden" }, { text: "➕ Eigene Empfehlung" }]);
+  await bild("a22-empfehlungen", { css: "#anl-karte" });
 
   await gehe("/eulenpfad/index.html#erfolge");
   await js(`[...document.querySelectorAll(".chip")].find(b => b.textContent.trim() === "Muster Kind")?.click(); await new Promise(r => setTimeout(r, 400));`);
   await rahmen([{ css: ".woche" }, { css: ".abzeichen" }]);
   await bild("a18-erfolge", { maxHoehe: 1000 });
 
+  // Stufenwahl (RS1 a, LERN_Session35): Schalterzeile Timer · Endlos · Favorit, die Stufen, 🗣️ neben der Eule
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html");
-  await rahmen([{ text: "Timer aus" }, { css: ".stufe" }, { text: "Endlos —" }]);
+  await rahmen([{ css: ".schalter-zeile > .schalter-teil:nth-child(1)" }, { css: ".schalter-zeile > .schalter-teil:nth-child(2)" },
+    { css: ".schalter-zeile > .schalter-teil:nth-child(3)" }, { css: ".stufe" }, { css: "button.vorlesen", wennDa: true }]);
   await bild("a12-stufenwahl", { maxHoehe: 1100 });
-  await rahmen([{ css: ".rangliste" }]);
-  await bild("a14-endlos-rangliste", { ab: "Endlos —" });
+  await rahmen([{ css: ".endlos-wahl .ranglisten" }]);
+  await bild("a14-endlos-rangliste", { ab: "Endlos-Ranglisten" });
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s3");
   await rahmen([{ css: ".testhilfe" }]);
   await bild("a13-testhilfe", { maxHoehe: 760 });
@@ -300,6 +325,13 @@ async function aufsicht() {
   await notizblockZeigen();
   await rahmen([{ css: ".nb-knopf" }, { css: ".nb-schritt + .nb-schritt .nb-schritt-kopf" }, { css: ".nb-wahl" }]);
   await bild("a20-notizblock", { maxHoehe: 760, imFenster: true });
+
+  // Prüfansicht einer Wortliste (LP1 a, LP4 a; LERN_Session36): als Aufsicht, Anlaut-Angel, Liste „Anlaut“
+  await gehe("/eulenpfad/spiele/anlaut-angel/index.html");
+  await js(`await LS.listenPruefen("anlaut-angel", "anlaut"); await new Promise(r => setTimeout(r, 800));`);
+  await rahmen([{ text: "Ganze Liste geprüft" }, { css: "dialog[open] .pruef-gruppe > summary" }, { css: "dialog[open] .pruef-haken input" },
+    { css: "dialog[open] .pruef-tabelle td:last-child button" }]);
+  await bild("a21-pruefansicht", { maxHoehe: 760, imFenster: true });
 }
 
 async function kind() {
@@ -315,12 +347,14 @@ async function kind() {
   await rahmen([{ css: ".avatar-tiere" }, { css: ".avatar-farben" }]);
   await bild("k13-bild", { maxHoehe: 1100 });
 
+  // Tab Spiele (LERN_Session36): Fach-Reiter, Suche, Filter, Weiterspielen
   await gehe("/eulenpfad/index.html#spiele");
-  await rahmen([{ css: ".weiter-zeile", wennDa: true }]);
+  await rahmen([{ css: "nav.fach-reiter-zeile" }, { css: "input.suche" }, { css: ".filter-knopf" }, { css: ".weiter-zeile", wennDa: true }]);
   await bild("k02-spiele", { maxHoehe: 1400 });
 
+  // Stufenwahl: Schalterzeile, eine Stufe, ⓘ
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html");
-  await rahmen([{ css: ".stufe" }]);
+  await rahmen([{ css: ".schalter-zeile" }, { css: ".stufe" }, { css: ".stufe-info" }]);
   await bild("k03-stufen", { maxHoehe: 1400 });
 
   await gehe("/eulenpfad/index.html#spiele");
@@ -329,7 +363,7 @@ async function kind() {
 
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s1");
   await rahmen([{ css: ".zahl-gross" }, { css: ".ziele" }]);
-  await bild("k04-aufgabe", { maxHoehe: 480 });
+  await bild("k04-aufgabe", { maxHoehe: 640 });
   await rahmen([{ css: ".hilfe-knopf" }, { css: ".tipp-knopf" }, { css: ".melden" }, { css: ".vorlesen", wennDa: true }]);
   await bild("k11-hilfe-tipp", { maxHoehe: 640 });
   // Hinweis der Eule nach einer falschen Antwort
@@ -364,7 +398,7 @@ async function kind() {
     if (bereit) { await js(RUTSCHE_RICHTIG); geloest++; }
     await warte(1300);
   }
-  await bild("k08-endlos", { maxHoehe: 480 });
+  await bild("k08-endlos", { maxHoehe: 640 });
   await js(`${RUTSCHE_RICHTIG.replace("k.click();", "")} [...document.querySelectorAll(".ziel")].find(b => b !== k).click(); await new Promise(r => setTimeout(r, 600));`);
   await klick("Zum Ergebnis");
   await warte(1200);
