@@ -1994,3 +1994,6 @@
   Abschnitten bleiben `--rand`.
 - **Keine Worktrees** (W2 b, Anweisung Patrik): Regel im Projekt-Steckbrief der `CLAUDE.md` — Sitzungen arbeiten im
   Hauptordner, weitere Sitzungen starten ohne Worktree und ändern nie dieselben Dateien.
+- **Linien der Prüfansicht im Lernsteig kräftiger** (T3 a): eigene `--trennlinie` in `lernsteig/gemeinsam/stil.css`
+  für die Zeilen der Prüftabelle und die Rahmen der Gruppen — hell `#7b8794` (3,7 auf der Karte, 3,4 auf einer Zeile mit
+  Bemerkung, 3,4 auf dem Grund; vorher `--rand` mit 1,3), dunkel `#7d84aa` wie im Eulenpfad (3,9 und 3,6).

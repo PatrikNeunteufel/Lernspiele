@@ -1150,7 +1150,7 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "bruch-werkstatt": {
-      "am": "2026-11-03",
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "buchstaben-zwillinge": {
@@ -1230,7 +1230,7 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "hundertertafel": {
-      "am": "2026-11-04",
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "koenig-falle": {
@@ -1282,7 +1282,7 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "mittelwert-waage": {
-      "am": "2026-11-08",
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "netz-falter": {
@@ -1406,7 +1406,7 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "teiler-detektiv": {
-      "am": "2026-11-08",
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "tier-sortierer": {
@@ -1418,11 +1418,11 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "ueberschlags-blitz": {
-      "am": "2026-11-11",
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "velo-tabelle": {
-      "am": "2026-11-02",
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "vergleichs-krokodil": {
@@ -1471,10 +1471,6 @@ const PRUEFSTAND = {
     },
     "zielzahl-jagd": {
       "am": "2026-11-04",
-      "von": "Patrik"
-    },
-    "ziffernkarten": {
-      "am": "2026-11-03",
       "von": "Patrik"
     },
     "znueni-teller": {
