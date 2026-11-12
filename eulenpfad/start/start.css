@@ -800,7 +800,7 @@ button.stufenknopf { border-bottom-width: 6px; }
 /* Einstellungen je Spiel in der Verwaltung */
 .verwaltung .einstellung-spiele { margin-top: 10px; }
 .verwaltung .einstellung-spiele summary { cursor: pointer; font-weight: 800; }
-.verwaltung .einstellung-spiel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding: 6px 0; border-bottom: 1px solid var(--rand); }
+.verwaltung .einstellung-spiel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding: 6px 0; border-bottom: 1px solid var(--trennlinie); }
 
 /* Vorgehen: ein Punkt je Aufgabe, gut / mittel / schwach */
 .statistik .vorgehen + .vorgehen { margin-top: 14px; }
@@ -834,7 +834,7 @@ button.stufenknopf { border-bottom-width: 6px; }
 .statistik .fazit-abschnitt li { margin-bottom: 4px; font-size: 15px; }
 .statistik .diagramme { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; }
 .statistik .diagramme h3 { font-size: 15px; margin: 0 0 6px; color: var(--text-leise); }
-.statistik .saeulen { position: relative; display: flex; align-items: flex-end; gap: 4px; height: calc(var(--h) + 44px); border-bottom: 1px solid var(--rand); padding-top: 4px; }
+.statistik .saeulen { position: relative; display: flex; align-items: flex-end; gap: 4px; height: calc(var(--h) + 44px); border-bottom: 1px solid var(--trennlinie); padding-top: 4px; }
 .statistik .spalte { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
 .statistik .saeule { width: min(70%, 26px); background: var(--knopf); border-radius: 4px 4px 0 0; }
 .statistik .saeule.betont { background: var(--hinweis); }

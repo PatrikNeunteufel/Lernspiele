@@ -111,6 +111,10 @@
   --timer-an-boden: #d97f00;
   --tipp: #fff7d6;
   --tipp-boden: #ecd98a;
+  /* Linie zwischen Zeilen (Prüfansicht, Einstellungen je Spiel), Rahmen aufklappbarer Gruppen der Prüfansicht,
+     Grundlinie der Säulen (T1 a, T2 a): mindestens 3 wie ein Bedienelement — auf der Karte 3,4, auf dem Seitengrund
+     3,2, auf der Zeile mit Bemerkung 3,2 (--rand dort 1,2, kaum zu sehen). Linien zwischen Abschnitten bleiben --rand. */
+  --trennlinie: #858aa6;
   --uebertrag-leer: #9aa0c0;
   --warn-schrift: #8a4b00;
   --zeitbalken: #8ee0b0;
@@ -193,6 +197,7 @@
   --timer-an-boden: #a86200;
   --tipp: #3d3518;
   --tipp-boden: #6e6030;
+  --trennlinie: #7d84aa;              /* 3,9 auf der Karte, 3,6 auf der Zeile mit Bemerkung (--rand 1,9) */
   --uebertrag-leer: #8a90b8;
   --warn-schrift: #ffc070;
   --zeitbalken: #2f8f5c;
@@ -637,14 +642,14 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 /* Prüfansicht je Eintrag (listenpruefung.js, LERN_Session11): Linien zwischen den Zeilen, Spalten so breit wie ihr
    Inhalt, Abschnitte und Gruppen aufklappbar (ganz geprüfte zu). */
 .pruef-dialog .pruef-stand { font-weight: 800; margin: 4px 0; }
-.pruef-gruppe { border: 2px solid var(--rand); border-radius: 12px; margin: 8px 0; padding: 4px 10px; background: var(--karte); }
+.pruef-gruppe { border: 2px solid var(--trennlinie); border-radius: 12px; margin: 8px 0; padding: 4px 10px; background: var(--karte); }
 .pruef-gruppe.fertig { border-color: var(--gut); }
 .pruef-gruppe > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
 .pruef-gruppe .pruef-gruppe { margin-left: 4px; }
 .pruef-zahl { color: var(--text-leise); font-size: 14px; }
 .pruef-rahmen { overflow-x: auto; }
 .pruef-dialog table.pruef-tabelle { border-collapse: collapse; border-spacing: 0; width: auto; min-width: 100%; }
-.pruef-tabelle th, .pruef-tabelle td { border-bottom: 1px solid var(--rand); background: none; padding: 6px 10px; vertical-align: top; }
+.pruef-tabelle th, .pruef-tabelle td { border-bottom: 1px solid var(--trennlinie); background: none; padding: 6px 10px; vertical-align: top; }
 .pruef-tabelle th { white-space: nowrap; }
 .pruef-tabelle td { width: 1%; white-space: nowrap; }
 .pruef-tabelle td.lang { width: auto; white-space: normal; min-width: 12em; }

@@ -439,7 +439,7 @@ function zeichneVerwaltung(box, neu) {
             setze(andere({ ...z, arten: artenNeu }));
           } });
       }));
-      return el("div", { class: "einstellung-spiel", "data-ruhezeit": z.id, style: "display:block;padding:8px 0;border-top:1px solid var(--rand, #ddd)" },
+      return el("div", { class: "einstellung-spiel", "data-ruhezeit": z.id, style: "display:block;padding:8px 0;border-top:1px solid var(--trennlinie)" },
         tage,
         el("div", { class: "pin-zeile", style: "justify-content:flex-start;margin:6px 0" }, zeitFeld("von", "von"), el("span", { text: "bis" }), zeitFeld("bis", "bis"),
           z.bis === "24:00" ? el("span", { class: "leise-text", text: "(Mitternacht)" }) : null,

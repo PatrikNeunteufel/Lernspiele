@@ -1985,3 +1985,10 @@
   Variablen in `:root, .bildkachel` und Masken zählen nicht. Vier Bilder der Kinder-Anleitung neu (a01–a04).
 - Session-Abschluss: Report docs/eulenpfad/report/LERN_Session35_2026-11-12.md, Handover (weiter mit den Inhaltslisten
   in LERN_Session36, danach den Anleitungen).
+
+## 2026-11-12 — LERN_Session36
+- **Linien der Prüfansicht kräftiger** (Hinweis Patrik): eigene Farbe `--trennlinie` in `stil.css` (hell `#858aa6`, 3,4
+  auf der Karte, 3,2 auf einer Zeile mit Bemerkung; dunkel `#7d84aa`, 3,9 und 3,6); vorher `--rand` mit 1,2 hell und 1,9
+  dunkel. Dieselbe Farbe für die Rahmen der Abschnitte und Gruppen der Prüfansicht (T2 a), die Zeilen der Einstellungen
+  je Spiel und der Ruhezeiten in der Verwaltung und die Grundlinie der Säulen in der Statistik (T1 a); Linien zwischen
+  Abschnitten bleiben `--rand`.
