@@ -187,12 +187,11 @@ function pruefeTabSpiele(melde) {
     const karten = s.gibt(".spielkarte[data-spiel]");
     pruefe(karten > 0, ort, "keine Spielkarte");
     pruefe(s.gibt('details.gruppe[data-gruppe^="fach:"]') > 0 && s.gibt('details.gruppe[data-gruppe^="thema:"]') > 0, ort, "keine Gruppen nach Fach und Thema");
-    // Wochenziel (WO1 a, LERN_Session32): ohne Lernplan keine Marke; mit Lernplan die Marke in der Kopfzeile, keine Karte
-    // im Tab Spiele
-    pruefe(s.gibt(".wochen-marke") === 0, ort, "Marke des Wochenziels ohne Lernplan");
+    // Wochenziel: auch mit Lernplan weder eine Marke in der Kopfzeile (WO1 a zurückgenommen, LERN_Session33) noch die
+    // Karte im Tab Spiele — sie steht in Erfolge und Statistik
     s.lauf(`LS.speichereProfil("Mia", { lernplan: { tage: 2, minuten: 10 } }); zeichneStart()`); ruhe(s);
-    pruefe(s.gibt("#leiste .wochen-marke") === 1 && /📅/.test(s.lauf(`document.querySelector(".wochen-marke").textContent`))
-      && s.gibt("#inhalt .woche-tage") === 0, ort, "Marke des Wochenziels fehlt in der Kopfzeile oder die Karte steht noch im Tab Spiele");
+    pruefe(s.gibt("#leiste .woche-tage") === 0 && !/📅/.test(s.lauf(`document.getElementById("leiste").textContent`))
+      && s.gibt("#inhalt .woche-tage") === 0, ort, "Wochenziel steht in der Kopfzeile oder im Tab Spiele");
     s.lauf(`LS.speichereProfil("Mia", { lernplan: null }); zeichneStart()`); ruhe(s);
     // Über den Spielen nur Fach-Reiter, Suche und „Filter“ (FB1 a, LERN_Session32); das Feld des Filters vorgegeben zu
     pruefe(s.gibt("button.fach-reiter") >= 3 && s.gibt(".filter-knopf") === 1 && s.lauf(`document.getElementById("filter-feld").hidden`) === true,

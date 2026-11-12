@@ -26,23 +26,6 @@ function aktuellerTab() {
  * Personen-Knopf oben rechts (KERN.personenMenue, Entscheid PA1 a, LERN_Session17): Bild und Name der angemeldeten
  * Person; das Menü nennt die anderen Kinder und Aufsichten und, getrennt darunter, „↩ Abmelden“.
  */
-/**
- * Marke des Wochenziels in der Kopfzeile (Entscheid WO1 a, LERN_Session32): nur für ein Kind mit Lernplan. „📅 1 von 2“
- * zählt die erfüllten Tage der Woche, „📅 ✓“ heisst geschafft; droht die Serie zu brechen, leuchtet sie. Antippen führt
- * zu den Erfolgen, wo die ganze Karte steht.
- */
-function wochenMarke(ich) {
-  const p = LS.profil(ich);
-  if (LS.istAufsicht(ich) || !(p.lernplan?.tage > 0)) return null;
-  const lp = ERFOLGE.lernplan(p, LS.protokoll().filter(e => e.name === ich && !e.test));
-  if (!lp.plan) return null;
-  const tage = lp.aktuelle.erfuellteTage, soll = lp.plan.tage, fertig = lp.aktuelle.erfuellt;
-  const text = fertig ? "📅 ✓" : `📅 ${tage} von ${soll}`;
-  const hilfe = fertig ? "Wochenziel geschafft!" : `Wochenziel: ${tage} von ${soll} Tagen geübt`;
-  return LS.el("a", { class: "wochen-marke" + (fertig ? " geschafft" : lp.gefahr ? " gefahr" : ""), href: "#erfolge", title: `${hilfe} — antippen: zu den Erfolgen`,
-    "aria-label": hilfe, "data-vorlesen": hilfe, text });
-}
-
 function werWahl() {
   const jetzt = LS.aktuellerSpieler();
   const andere = [...LS.kinderListe(), ...LS.aufsichtListe()].filter(n => n !== jetzt && LS.angezeigt(n)); // ohne Ausgeblendete (KE1 a)
@@ -87,7 +70,7 @@ function zeichneStart(mitAufsicht = null) {
   // Anleitung in der App (Wunsch Patrik, LERN_Session14): das Kind kommt zu seiner, die Aufsicht zu der für Erwachsene
   const anleitung = LS.istAufsicht(ich) ? "aufsicht.html" : "kinder.html";
   // Tabs in einer Zeile, Pfeile nur wenn nicht alle Platz haben (KERN.rolleiste, LERN_Session17)
-  leiste.append(...[KERN.rolleiste(tabs), wochenMarke(ich), werWahl()].filter(Boolean), el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
+  leiste.append(KERN.rolleiste(tabs), werWahl(), el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
     "aria-label": "Anleitung", "data-vorlesen": "Anleitung", text: "📖" }));
   abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);

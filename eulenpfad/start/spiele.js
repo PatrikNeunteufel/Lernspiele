@@ -165,8 +165,8 @@ function zeichneSpiele(box, neu) {
         el("span", {}, el("b", { text: `Freigeschaltet — ${teile.join(" · ")}!` }), el("span", { class: "leise-text", text: " Im Profil wählbar." }))));
     }
   }
-  // Wochenziel des Lernplans: seit WO1 a (LERN_Session32) als kleine Marke in der Kopfzeile (start.js wochenMarke), die
-  // ganze Karte nur im Tab Erfolge — vorher stand sie hier ganz oben (L1 a) und schob die Spiele nach unten.
+  // Wochenziel des Lernplans: nur in den Tabs Erfolge und Statistik — vorher stand es hier ganz oben (L1 a) und schob die
+  // Spiele nach unten; die Marke in der Kopfzeile (WO1 a, LERN_Session32) hat Patrik zurückgenommen (LERN_Session33).
   const nurKlasse = !aufsicht && klasse !== null && p.meineKlasse !== false;
   const meineKlasse = !aufsicht && klasse !== null ? chip("🎒 Meine Klasse", nurKlasse, () => speichere({ meineKlasse: !nurKlasse }), LS.klasseText(klasse)) : null;
   // Für die Aufsicht: nur, was noch zu prüfen ist — Spiel nicht angesehen oder eine eigene Inhaltsliste ungeprüft.

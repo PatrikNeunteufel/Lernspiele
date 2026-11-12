@@ -813,11 +813,10 @@ Protokoll, den Endlos-Rekorden und den Meldungen; gespeichert werden nur zwei Pr
   LERN_Session11; `gefahr` im Ergebnis von `lernplan`): Läuft eine Serie und reichen die restlichen Tage der Woche ab
   heute nur noch knapp (fehlende Tage = verbleibende), mahnt die Wochenkarte „⚠️ Achtung …“ mit orangem Rahmen;
   reicht es nicht mehr, tröstet sie („nächste Woche startest du neu“), ohne Rot. Die Karte steht in den Tabs Erfolge und
-  Statistik; im Tab Spiele steht seit WO1 a (LERN_Session32) nur noch eine **Marke** in der Kopfzeile neben dem Namen
-  („📅 1 von 2“, geschafft „📅 ✓“ in Gold, mit Warnung orange; `wochenMarke` in `start/start.js`), Antippen führt zu den
-  Erfolgen. `ERFOLGE.lernplan(profil, runden)` liefert
+  Statistik, nicht im Tab Spiele und nicht in der Kopfzeile (die Marke aus WO1 a, LERN_Session32, hat Patrik in
+  LERN_Session33 zurückgenommen). `ERFOLGE.lernplan(profil, runden)` liefert
   alle Wochen seit der ersten Runde. Das Kind sieht die Woche als sieben Tage (★ erfüllt, • gespielt, Rahmen = heute)
-  oben im Tab Spiele (kompakt, nur mit Ziel) und im Tab Erfolge; die Aufsicht sieht in der Statistik die letzten zwölf
+  im Tab Erfolge; die Aufsicht sieht in der Statistik die letzten zwölf
   Wochen als Reihe.
 - **Abzeichen:** 19 Stück in `ERFOLGE.ABZEICHEN` (Fleissig, Sternensammler, Perfekt, Aus eigener Kraft, Königsstufe,
   alle sechs Stufen, Spiel-Meister, Entdecker, Vielseitig, Mathe-/Deutsch-Ass, Forscher, Sprachtalent, Endlos-Läufer,

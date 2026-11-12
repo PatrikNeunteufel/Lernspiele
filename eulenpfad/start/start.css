@@ -579,12 +579,6 @@ button.stufenknopf { border-bottom-width: 6px; }
 .anleitung-knopf { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px;
   border-radius: 12px; background: #fff; border: 3px solid var(--rand); font-size: 22px; text-decoration: none; }
 .anleitung-knopf:hover, .anleitung-knopf:focus-visible { border-color: var(--knopf); }
-/* Marke des Wochenziels (WO1 a, LERN_Session32): klein neben dem Namen, geschafft gold, droht die Serie zu brechen orange */
-.wochen-marke { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 12px; background: #fff;
-  color: var(--text); font-weight: 900; font-size: 17px; text-decoration: none; white-space: nowrap; box-shadow: 0 4px 0 #cdd2ea; }
-.wochen-marke.geschafft { background: #fff1c2; color: #a86a00; box-shadow: 0 4px 0 #e8c66a; }
-.wochen-marke.gefahr { background: var(--hinweis-hell); color: #9a4b00; box-shadow: 0 4px 0 #f2b56b; }
-.wochen-marke:focus-visible { outline: 3px solid var(--knopf); }
 .anleitung-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 14px; margin: 14px 0 0;
   font-weight: 800; color: var(--text-leise); }
 .anleitung-link { padding: 8px 14px; border-radius: 999px; background: #fff; border: 2px solid var(--rand); color: var(--text); text-decoration: none; }
