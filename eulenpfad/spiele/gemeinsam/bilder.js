@@ -580,5 +580,50 @@ const BILDER = (() => {
         + `<path d="M88 38 L95 38 M88 52 L95 52" stroke="#6b4a2b" stroke-width="1.4"/><rect x="94" y="30" width="4" height="28" fill="#efe6cc" stroke="#9c8a68" stroke-width="1.2"/>`
         + `<ellipse cx="42" cy="44" rx="2.6" ry="10" fill="#b9a684"/><ellipse cx="64" cy="44" rx="2.6" ry="10" fill="#b9a684"/>`
         + `<ellipse cx="53" cy="53" rx="8" ry="2.8" fill="#3b3b3b"/><circle cx="45" cy="52" r="2.8" fill="#3b3b3b"/>` },
+
+    // ---------- Englisch: Parallelwörter (wort-zwillinge/woerter.js; Bemerkung 50) ----------
+    // Je Bild etwas, das kein anderes Bild der Liste „aehnlich“ zeigt: kein Haus im Garten (house), das Glas leer (milk,
+    // water), das Knie ohne Fuss (foot), das Haar von hinten ohne Gesicht (mother, sister), der Sommer ohne Sonne (sun)
+    // und ohne Glace (ice).
+    garten: { name: "Garten (Lattenzaun, Blumen, Baum; kein Haus)", box: "0 0 100 100",
+      svg: `<rect x="74" y="34" width="8" height="44" fill="#8a5a33"/><circle cx="78" cy="26" r="17" fill="#5e9e3f"/><circle cx="68" cy="32" r="10" fill="#6aa84f"/><circle cx="88" cy="33" r="10" fill="#4f8f35"/>`
+        + [[16, 26, "#e0569a"], [34, 18, "#f0a030"], [52, 28, "#8a6fd6"]].map(([x, y, f]) => `<path d="M${x} 80 V${y + 6}" stroke="#4f8f35" stroke-width="3"/><path d="M${x} ${y + 26} q8 -2 10 -9 q-8 0 -10 9" fill="#6aa84f"/>`
+          + rund(6, x, y, `<ellipse cx="${x}" cy="${y - 7}" rx="4" ry="6.5" fill="${f}"/>`) + `<circle cx="${x}" cy="${y}" r="4.2" fill="#f5c400"/>`).join("")
+        + `<rect x="2" y="61" width="96" height="5" fill="#c9ab78"/><rect x="2" y="76" width="96" height="5" fill="#c9ab78"/>`
+        + Array.from({ length: 7 }, (_, i) => { const x = 4 + i * 13.5; return `<path d="M${x} 90 V56 L${x + 4.5} 50 L${x + 9} 56 V90 Z" fill="#f1e2bf" stroke="#8a6a3f" stroke-width="1.6"/>`; }).join("")
+        + GRAS },
+    glas: { name: "Glas (leeres Trinkglas, durchsichtig)", box: "0 0 100 100",
+      svg: `<path d="M27 14 L73 14 L66 88 Q50 93 34 88 Z" fill="#e3f1fa" fill-opacity="0.6" stroke="#6f9fbf" stroke-width="3" stroke-linejoin="round"/>`
+        + `<path d="M34.6 80 L65.4 80 L66 88 Q50 93 34 88 Z" fill="#c4def0" stroke="#6f9fbf" stroke-width="2" stroke-linejoin="round"/>`
+        + `<ellipse cx="50" cy="14" rx="23" ry="4.5" fill="#f4fbff" stroke="#6f9fbf" stroke-width="2.5"/>`
+        + `<path d="M35 24 L39.5 74" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/><path d="M44 24 L45 36" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>` },
+    gras: { name: "Gras (Büschel hoher grüner Halme)", box: "0 0 100 100",
+      svg: [[6, -6, 42, "#5e9e3f"], [13, 4, 22, "#77b84f"], [20, -8, 34, "#4f8f35"], [27, 6, 12, "#6aa84f"], [34, -4, 28, "#86c45a"],
+        [41, 10, 18, "#5e9e3f"], [47, -6, 8, "#77b84f"], [53, 8, 24, "#4f8f35"], [59, -10, 16, "#6aa84f"], [65, 6, 30, "#86c45a"],
+        [71, -4, 14, "#5e9e3f"], [77, 10, 26, "#77b84f"], [83, -6, 36, "#4f8f35"], [88, 4, 44, "#6aa84f"]]
+        .map(([x, dx, top, f]) => `<path d="M${x} 94 Q${x + dx * 0.2} ${(94 + top) / 2} ${x + dx} ${top} Q${x + dx * 0.2 + 5} ${(94 + top) / 2} ${x + 7} 94 Z" fill="${f}"/>`).join("")
+        + `<ellipse cx="50" cy="95" rx="48" ry="5" fill="#8b6a4a"/>` },
+    knie: { name: "Knie (angewinkeltes Bein von der Seite, Pflaster auf dem Knie, Pfeil; ohne Fuss)", box: "0 0 100 100",
+      svg: `<path d="M0 32 Q36 29 64 32 Q83 33 82 50 Q80 72 79 100 L62 100 Q60 90 56 80 Q52 68 60 58 Q30 61 0 60 Z" fill="#f1c27d" stroke="#b07a45" stroke-width="2.4" stroke-linejoin="round"/>`
+        + `<path d="M0 29 L30 28 L32 62 L0 62 Z" fill="#4d7fd1" stroke="#2f5aa3" stroke-width="2.4" stroke-linejoin="round"/>`
+        + `<g transform="rotate(-40 74 42)"><rect x="63" y="37.5" width="22" height="9" rx="3.5" fill="#efc59a" stroke="#c4956a" stroke-width="1.4"/><rect x="70" y="38.5" width="8" height="7" rx="1.5" fill="#fbe6cf"/></g>`
+        + `<path d="M96 6 L83 22" stroke="#e0569a" stroke-width="4.5" stroke-linecap="round"/><path d="M78 27 L80 15 L89 21 Z" fill="#e0569a"/>` },
+    haar: { name: "Haar (lange Haare von hinten mit Spange, ohne Gesicht)", box: "0 0 100 100",
+      svg: `<path d="M0 100 Q8 80 30 78 L70 78 Q92 80 100 100 Z" fill="#e8a33d"/>`
+        + `<ellipse cx="19" cy="50" rx="5" ry="8.5" fill="#f1c27d" stroke="#b07a45" stroke-width="1.6"/><ellipse cx="81" cy="50" rx="5" ry="8.5" fill="#f1c27d" stroke="#b07a45" stroke-width="1.6"/>`
+        + `<path d="M50 8 C24 8 18 30 20 50 C21 70 16 86 12 98 L88 98 C84 86 79 70 80 50 C82 30 76 8 50 8 Z" fill="#8b5a2b" stroke="#5e3a18" stroke-width="2.4"/>`
+        + [[36, 16, 30, 96], [44, 12, 40, 96], [50, 10, 50, 96], [56, 12, 60, 96], [64, 16, 70, 96]].map(([x1, y1, x2, y2]) =>
+          `<path d="M${x1} ${y1} Q${(x1 + x2) / 2 - 4} ${(y1 + y2) / 2} ${x2} ${y2}" stroke="#6b4220" stroke-width="2" fill="none"/>`).join("")
+        + `<rect x="56" y="24" width="16" height="6" rx="3" transform="rotate(-20 64 27)" fill="#e0569a" stroke="#a83a72" stroke-width="1.4"/>` },
+    sommer: { name: "Sommer (Strand mit Sonnenschirm, Meer, Sandburg; ohne Sonne und Glace)", box: "0 0 100 100",
+      svg: `<rect x="0" y="56" width="100" height="18" fill="#8cc8ee"/><path d="M0 60 Q10 57 20 60 T40 60 T60 60 T80 60 T100 60" stroke="#ffffff" stroke-width="2" fill="none"/>`
+        + `<path d="M0 72 Q25 66 50 71 Q75 76 100 70 V100 H0 Z" fill="#f2d48f"/>`
+        + `<path d="M40 24 L46 94" stroke="#8a6a3f" stroke-width="3.5" stroke-linecap="round"/>`
+        + `<path d="M10 36 Q40 0 72 34 Z" fill="#e2483d"/><path d="M41 18 Q30 22 24 35 L36 35 Z M41 18 Q52 22 58 34 L48 34 Z" fill="#ffffff"/>`
+        + `<path d="M10 36 Q16 40 22 36 Q28 40 34 36 Q40 40 46 36 Q52 40 58 36 Q65 40 72 34" fill="none" stroke="#b8322a" stroke-width="1.6"/>`
+        + `<rect x="12" y="84" width="24" height="9" rx="1.5" transform="rotate(-6 24 88)" fill="#4d93dc"/><rect x="18" y="84" width="5" height="9" transform="rotate(-6 24 88)" fill="#ffffff"/>`
+        + `<rect x="68" y="72" width="24" height="16" fill="#e6c477" stroke="#b8934a" stroke-width="1.6"/>`
+        + `<path d="M66 72 V62 h3 v3 h3 v-3 h3 V72 Z M85 72 V62 h3 v3 h3 v-3 h3 V72 Z" fill="#e6c477" stroke="#b8934a" stroke-width="1.6"/>`
+        + `<path d="M77 82 a3 3 0 0 1 6 0 V88 h-6 Z" fill="#b8934a"/><path d="M80 72 V52" stroke="#6b4a2b" stroke-width="1.6"/><path d="M80 52 L90 55.5 L80 59 Z" fill="#e2483d"/>` },
   };
 })();

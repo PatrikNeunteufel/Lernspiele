@@ -59,7 +59,7 @@ const FRAGEN = ZNUENI_FRAGEN.filter(f => FREI.has(f[4]));
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   alltag() {
-    const x = waehle(L.filter(l => ["Frucht", "Gemüse", "Getränk", "Getreide", "Süsses"].includes(l.gruppe)));
+    const x = waehle(L.filter(l => ["Frucht", "Gemüse", "Getränk", "Stärke", "Süsses"].includes(l.gruppe)));
     if (!x) return null;
     return { art: "korb", typ: "alltag", x, koerbe: ["jeden", "selten"], richtig: x.gruppe === "Süsses" ? "selten" : "jeden" };
   },

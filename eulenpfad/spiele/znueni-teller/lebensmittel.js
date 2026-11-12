@@ -12,13 +12,15 @@
 //   region-saison  ZNUENI_FRAGEN, Liste im letzten Feld: was bei uns wächst, wann, woher
 const ZNUENI_LISTEN = ["lebensmittel", "znuenis", "ernaehrung", "region-saison"];
 
-// [Bild, Name, Gruppe]; Gruppe: Getränk, Frucht, Gemüse, Getreide, Eiweiss, Süsses
+// [Bild, Name, Gruppe]; Gruppe: Getränk, Frucht, Gemüse, Stärke, Eiweiss, Süsses
+// „Stärke“ wie die Gruppe „Getreideprodukte, Kartoffeln“ der Lebensmittelpyramide (SGE): Kartoffeln
+// sind kein Getreide, gehören aber in dieselbe Gruppe (Bemerkung 52).
 const LEBENSMITTEL = [
   ["💧", "Wasser", "Getränk"], ["🍵", "Tee ohne Zucker", "Getränk"],
   ["🍎", "Apfel", "Frucht"], ["🍐", "Birne", "Frucht"], ["🍌", "Banane", "Frucht"], ["🍒", "Kirschen", "Frucht"],
   ["🍓", "Erdbeere", "Frucht"], ["🍇", "Trauben", "Frucht"], ["🍊", "Orange", "Frucht"],
   ["🥕", "Karotte", "Gemüse"], ["🥦", "Brokkoli", "Gemüse"], ["🥬", "Salat", "Gemüse"], ["🧅", "Zwiebel", "Gemüse"], ["🧄", "Knoblauch", "Gemüse"],
-  ["🍞", "Brot", "Getreide"], ["🍝", "Teigwaren", "Getreide"], ["🍚", "Reis", "Getreide"], ["🥔", "Kartoffel", "Getreide"],
+  ["🍞", "Brot", "Stärke"], ["🍝", "Teigwaren", "Stärke"], ["🍚", "Reis", "Stärke"], ["🥔", "Kartoffel", "Stärke"],
   ["🥛", "Milch", "Eiweiss"], ["🧀", "Käse", "Eiweiss"], ["🥚", "Ei", "Eiweiss"], ["🐟", "Fisch", "Eiweiss"], ["🍗", "Poulet", "Eiweiss"],
   ["🍫", "Schokolade", "Süsses"], ["🍬", "Bonbon", "Süsses"], ["🍩", "Donut", "Süsses"], ["🥤", "Süssgetränk", "Süsses"], ["🍪", "Guetsli", "Süsses"], ["🍟", "Pommes frites", "Süsses"],
 ];
@@ -27,8 +29,8 @@ const LEBENSMITTEL = [
 const GRUPPEN_ZNUENI = {
   Getränk: { bild: "💧", name: "Getränke", erklaerung: "Am meisten brauchst du Wasser oder ungesüssten Tee." },
   Frucht: { bild: "🍎", name: "Früchte", erklaerung: "Früchte wachsen an Bäumen und Sträuchern und geben viele Vitamine." },
-  Gemüse: { bild: "🥕", name: "Gemüse", erklaerung: "Gemüse sind Blätter, Wurzeln oder Knollen von Pflanzen — voller Vitamine." },
-  Getreide: { bild: "🍞", name: "Brot, Teigwaren, Kartoffeln", erklaerung: "Brot, Teigwaren, Reis und Kartoffeln geben Kraft für lange Zeit." },
+  Gemüse: { bild: "🥕", name: "Gemüse", erklaerung: "Gemüse sind Blätter, Blüten, Wurzeln oder Zwiebeln von Pflanzen — voller Vitamine." },
+  Stärke: { bild: "🍞", name: "Brot, Teigwaren, Kartoffeln", erklaerung: "Brot, Teigwaren, Reis und Kartoffeln geben Kraft für lange Zeit." },
   Eiweiss: { bild: "🥚", name: "Milch, Ei, Fisch, Fleisch", erklaerung: "Milch, Käse, Eier, Fisch und Fleisch helfen beim Wachsen." },
   Süsses: { bild: "🍬", name: "Süsses und Salziges", erklaerung: "Süsses und Salziges schmeckt gut — aber nur ab und zu und wenig." },
 };

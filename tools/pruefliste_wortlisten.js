@@ -254,7 +254,7 @@ tabelle("### Fragen", null, ["Stufe", "Frage", "richtig", "falsch"], frage3(KOER
 tabelle("### Wege durch den Körper", null, ["Weg", "Stationen"], KOERPER.WEGE.map(([n, s]) => [n, s.join(" → ")]));
 z("## 18. Znüni-Teller (Lehrplan SG NMG.1.3)");
 z("");
-tabelle("### Lebensmittel und Gruppen", "Gruppe „Getreide“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.", ["Bild", "Name", "Gruppe"], ZNUENI.LEBENSMITTEL);
+tabelle("### Lebensmittel und Gruppen", "Gruppe „Stärke“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.", ["Bild", "Name", "Gruppe"], ZNUENI.LEBENSMITTEL);
 tabelle("### Znüni zur Wahl", null, ["ausgewogen", "nicht ausgewogen"], ZNUENI.ZNUENIS.map(([g, ...s]) => [g.join(""), s.map(x => x.join("")).join("; ")]));
 tabelle("### Fragen", null, ["Frage", "richtig", "falsch"], ZNUENI.ZNUENI_FRAGEN.map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));
 z("## 19. Magnet-Labor (Lehrplan SG NMG.5.2)");
@@ -312,7 +312,9 @@ const SB = lade("spiele/sentence-builder/saetze.js", ["SAETZE", "VERWECHSLER"]);
 teil("## 29. Sentence-Builder (Lehrplan SG FS1E.5.D.1)", "Britisches Englisch (have got).", ["Englisch", "Deutsch", "Liste"], SB.SAETZE);
 teil("### Verwechsler (falsche Form als zusätzliche Karte)", null, ["richtig", "falsch"], SB.VERWECHSLER);
 const LT = lade("spiele/listen-tap/hoeren.js", ["ANWEISUNG_FORMEN", "ANWEISUNG_FARBEN", "ANWEISUNG_VERBEN", "WO_TIERE", "WO_ORTE"]);
-teil("## 30. Listen & Tap (Lehrplan SG FS1E.1.A.1) — Formen", "Die Einzelwörter kommen aus Word-Match (Teil 9).", ["Form", "Angabe"], LT.ANWEISUNG_FORMEN);
+// Je Form die Bilder aller Farben (Spalte i von ANWEISUNG_FARBEN), damit die Prüfung sie sieht (Bemerkung 51)
+const formZeilen = LT.ANWEISUNG_FORMEN.map((f, i) => [f, Object.values(LT.ANWEISUNG_FARBEN).map(b => b[i]).join(" ")]);
+teil("## 30. Listen & Tap (Lehrplan SG FS1E.1.A.1) — Formen", "Die Einzelwörter kommen aus Word-Match (Teil 9).", ["Form", "Bilder"], formZeilen);
 teil("### Farben", null, ["Farbe", "Bilder"], LT.ANWEISUNG_FARBEN);
 teil("### Anweisungen", null, ["Anweisung"], LT.ANWEISUNG_VERBEN);
 teil("### Wo ist das Tier? — Tiere", null, ["Englisch", "Bild"], LT.WO_TIERE);
@@ -829,7 +831,7 @@ for (const liste of ["ich-saetze", "er-sie-saetze", "fragen", "verneinung"]) {
   const paare = [...new Set(saetze.map(([en]) => en.split(" ").map(nackt).find(w => SB.VERWECHSLER[w])).filter(Boolean))];
   if (paare.length) inListe(`sentence-builder/${liste}`, "Verwechsler (falsche Form als zusätzliche Karte, nur in Stufen mit Verwechsler)", null, ["richtig", "falsch"], paare.map(w => [w, SB.VERWECHSLER[w]]));
 }
-inListeTeil("listen-tap/anweisungen", "Formen", null, ["Form"], LT.ANWEISUNG_FORMEN);
+inListe("listen-tap/anweisungen", "Formen", null, ["Form", "Bilder"], formZeilen);
 inListeTeil("listen-tap/anweisungen", "Farben", null, ["Farbe", "Bilder"], LT.ANWEISUNG_FARBEN);
 inListeTeil("listen-tap/anweisungen", "Anweisungen", null, ["Anweisung"], LT.ANWEISUNG_VERBEN);
 inListeTeil("listen-tap/wo-ist", "Tiere", null, ["Englisch", "Bild"], LT.WO_TIERE);

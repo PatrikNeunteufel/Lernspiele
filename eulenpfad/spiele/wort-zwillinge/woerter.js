@@ -8,7 +8,7 @@
    - „aehnlich“: ähnlich, mit Lautverschiebung (house – Haus, water – Wasser)
    - „falsche-freunde“: sehen deutsch aus, bedeuten aber etwas anderes (gift = Geschenk, nicht Gift)
 
-   ZWILLINGE: [englisch, deutsch, Bild oder null, Liste] — Bild nur, wo das Emoji eindeutig ist.
+   ZWILLINGE: [englisch, deutsch, Bild oder null, Liste] — Bild nur, wo es eindeutig ist (Emoji oder „svg:<name>“ aus spiele/gemeinsam/bilder.js).
    FALSCHE_FREUNDE: [englisch, Bedeutung auf Deutsch, deutsches Wort, das gleich aussieht, Bild oder null]. */
 
 const ZWILLINGE_LISTEN = ["gleich", "aehnlich", "falsche-freunde"];
@@ -36,8 +36,8 @@ const ZWILLINGE = [
   ["ice", "Eis", "🧊", "aehnlich"], ["apple", "Apfel", "🍎", "aehnlich"], ["cow", "Kuh", "🐄", "aehnlich"],
   ["sheep", "Schaf", "🐑", "aehnlich"], ["three", "drei", "3️⃣", "aehnlich"], ["eight", "acht", "8️⃣", "aehnlich"],
   ["nine", "neun", "9️⃣", "aehnlich"], ["green", "grün", "🟩", "aehnlich"], ["brown", "braun", "🟫", "aehnlich"],
-  ["garden", "Garten", null, "aehnlich"], ["glass", "Glas", null, "aehnlich"], ["grass", "Gras", null, "aehnlich"],
-  ["knee", "Knie", null, "aehnlich"], ["hair", "Haar", null, "aehnlich"], ["summer", "Sommer", null, "aehnlich"],
+  ["garden", "Garten", "svg:garten", "aehnlich"], ["glass", "Glas", "svg:glas", "aehnlich"], ["grass", "Gras", "svg:gras", "aehnlich"],
+  ["knee", "Knie", "svg:knie", "aehnlich"], ["hair", "Haar", "svg:haar", "aehnlich"], ["summer", "Sommer", "svg:sommer", "aehnlich"],
 ];
 
 const FALSCHE_FREUNDE = [

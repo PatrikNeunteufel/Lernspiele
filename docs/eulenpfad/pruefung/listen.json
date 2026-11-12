@@ -7221,22 +7221,22 @@
           [
             "🍞",
             "Brot",
-            "Getreide"
+            "Stärke"
           ],
           [
             "🍝",
             "Teigwaren",
-            "Getreide"
+            "Stärke"
           ],
           [
             "🍚",
             "Reis",
-            "Getreide"
+            "Stärke"
           ],
           [
             "🥔",
             "Kartoffel",
-            "Getreide"
+            "Stärke"
           ],
           [
             "🥛",
@@ -7321,10 +7321,10 @@
             "Gemüse",
             "🥕",
             "Gemüse",
-            "Gemüse sind Blätter, Wurzeln oder Knollen von Pflanzen — voller Vitamine."
+            "Gemüse sind Blätter, Blüten, Wurzeln oder Zwiebeln von Pflanzen — voller Vitamine."
           ],
           [
-            "Getreide",
+            "Stärke",
             "🍞",
             "Brot, Teigwaren, Kartoffeln",
             "Brot, Teigwaren, Reis und Kartoffeln geben Kraft für lange Zeit."
@@ -10800,32 +10800,32 @@
           [
             "garden",
             "Garten",
-            ""
+            "svg:garten"
           ],
           [
             "glass",
             "Glas",
-            ""
+            "svg:glas"
           ],
           [
             "grass",
             "Gras",
-            ""
+            "svg:gras"
           ],
           [
             "knee",
             "Knie",
-            ""
+            "svg:knie"
           ],
           [
             "hair",
             "Haar",
-            ""
+            "svg:haar"
           ],
           [
             "summer",
             "Sommer",
-            ""
+            "svg:sommer"
           ]
         ]
       }
@@ -11383,17 +11383,21 @@
         "titel": "Formen",
         "hinweis": null,
         "kopf": [
-          "Form"
+          "Form",
+          "Bilder"
         ],
         "zeilen": [
           [
-            "circle"
+            "circle",
+            "🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫"
           ],
           [
-            "square"
+            "square",
+            "🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛"
           ],
           [
-            "heart"
+            "heart",
+            "❤️ 🧡 💛 💚 💙 💜 🤎 🖤"
           ]
         ]
       },

@@ -1334,7 +1334,7 @@ Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt;
 
 ### Lebensmittel und Gruppen
 
-Gruppe „Getreide“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.
+Gruppe „Stärke“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.
 
 | Bild | Name | Gruppe | ☐ |
 |---|---|---|---|
@@ -1352,10 +1352,10 @@ Gruppe „Getreide“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süs
 | 🥬 | Salat | Gemüse | ☐ |
 | 🧅 | Zwiebel | Gemüse | ☐ |
 | 🧄 | Knoblauch | Gemüse | ☐ |
-| 🍞 | Brot | Getreide | ☐ |
-| 🍝 | Teigwaren | Getreide | ☐ |
-| 🍚 | Reis | Getreide | ☐ |
-| 🥔 | Kartoffel | Getreide | ☐ |
+| 🍞 | Brot | Stärke | ☐ |
+| 🍝 | Teigwaren | Stärke | ☐ |
+| 🍚 | Reis | Stärke | ☐ |
+| 🥔 | Kartoffel | Stärke | ☐ |
 | 🥛 | Milch | Eiweiss | ☐ |
 | 🧀 | Käse | Eiweiss | ☐ |
 | 🥚 | Ei | Eiweiss | ☐ |
@@ -1932,12 +1932,12 @@ Preis je Stück in Rappen: kleinster bis grösster Wert, den das Spiel wählt.
 | nine | neun | 9️⃣ | aehnlich | ☐ |
 | green | grün | 🟩 | aehnlich | ☐ |
 | brown | braun | 🟫 | aehnlich | ☐ |
-| garden | Garten |  | aehnlich | ☐ |
-| glass | Glas |  | aehnlich | ☐ |
-| grass | Gras |  | aehnlich | ☐ |
-| knee | Knie |  | aehnlich | ☐ |
-| hair | Haar |  | aehnlich | ☐ |
-| summer | Sommer |  | aehnlich | ☐ |
+| garden | Garten | svg:garten | aehnlich | ☐ |
+| glass | Glas | svg:glas | aehnlich | ☐ |
+| grass | Gras | svg:gras | aehnlich | ☐ |
+| knee | Knie | svg:knie | aehnlich | ☐ |
+| hair | Haar | svg:haar | aehnlich | ☐ |
+| summer | Sommer | svg:sommer | aehnlich | ☐ |
 
 ### Falsche Freunde
 
@@ -2057,11 +2057,11 @@ Britisches Englisch (have got).
 
 Die Einzelwörter kommen aus Word-Match (Teil 9).
 
-| Form | Angabe | ☐ |
+| Form | Bilder | ☐ |
 |---|---|---|
-| circle | ☐ |
-| square | ☐ |
-| heart | ☐ |
+| circle | 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ | ☐ |
+| square | 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ | ☐ |
+| heart | ❤️ 🧡 💛 💚 💙 💜 🤎 🖤 | ☐ |
 
 ### Farben
 

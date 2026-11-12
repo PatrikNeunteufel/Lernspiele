@@ -30,6 +30,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="woerter.js"></script>
 <script>
 "use strict";
@@ -62,7 +63,7 @@ const ARTEN = {
     const ziel = waehle(pool);
     const andere = mische(pool.filter(z => z !== ziel)).slice(0, n - 1);
     return { art: "bild", en: ziel[0], de: ziel[1], zeige: ziel[0], richtig: ziel[2], optionen: mische([ziel, ...andere].map(z => z[2])),
-      loesung: `${ziel[2]} ${ziel[0]} = ${ziel[1]}` };
+      loesung: LS.mitBildText(ziel[2], `${ziel[0]} = ${ziel[1]}`) };
   },
   /** Englisches Wort lesen → deutschen Zwilling wählen. */
   deutsch(listen, n) {
