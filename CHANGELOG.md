@@ -1979,3 +1979,7 @@
   Caramel im Glace-Kombinator heller, Dach des Zahlenhauses als Fläche, Buchstaben im Würfel-Zähler); Prüfung Punkt 8
   (Farben in Skripten nur mit Grund); Messung genauer (Umriss-Schrift, scrollende Kästen, Schmuck). Kontrast über alle
   Seiten hell 0, dunkel 1 (Lernsteig, Schritt 6).
+- **Darkmode Schritt 6 (Teil):** Lernsteig dunkel (Wahl im Profil je Person, Standard wie das Gerät; Kopf-Skript in
+  allen Seiten; Akzent und Gefahr mit dunkler Fassung; Rechner gleich), Portal folgt dem Gerät, Anleitungen dem
+  Eulenpfad, Mix und Regelkarten über Variablen. Feste Farben in Stilen sind jetzt überall ein Fehler (Punkt 7);
+  Variablen in `:root, .bildkachel` und Masken zählen nicht. Vier Bilder der Kinder-Anleitung neu (a01–a04).

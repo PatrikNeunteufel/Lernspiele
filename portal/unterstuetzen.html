@@ -7,11 +7,16 @@
 <!-- Freiwillige Beiträge (LERN-50, LERN_Session11). Inhalt aus unterstuetzen.js; nur für Erwachsene verlinkt
      (Portal-Fusszeile, Anleitung für Erwachsene, Verwaltung). Schlichte Links, nichts vom Anbieter eingebettet. -->
 <style>
-  :root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #6366f1; }
+  :root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #6366f1; --himmel-oben: #e0f2fe; --himmel-unten: #fef9e7; }
+  /* Das Portal hat keine Personen: es folgt dem Gerät (Darkmode Schritt 6, Grundsatz „Lernsteig wie das Gerät“) */
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #eef0f7; --leise: #b3b8cc; --karte: #262a3b; --rand: #4a5175; --akzent: #8f91f7;
+      --himmel-oben: #1d2133; --himmel-unten: #15171f; color-scheme: dark; }
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0; min-height: 100vh; padding: 32px 16px; font: 18px/1.5 system-ui, "Segoe UI", sans-serif;
-    color: var(--text); background: linear-gradient(180deg, #e0f2fe, #fef9e7);
+    color: var(--text); background: linear-gradient(180deg, var(--himmel-oben), var(--himmel-unten));
   }
   main { max-width: 640px; margin: 0 auto; }
   .zurueck { display: inline-block; margin-bottom: 12px; color: var(--akzent); font-weight: 700; text-decoration: none; }

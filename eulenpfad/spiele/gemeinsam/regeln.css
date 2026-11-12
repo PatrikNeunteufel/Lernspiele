@@ -12,5 +12,5 @@
 .regeln figure { margin: 10px 0; text-align: center; }
 .regeln figure svg { max-width: 100%; height: auto; }
 .regeln figcaption { color: var(--text-leise); font-size: 16px; margin-top: 4px; }
-.regeln .merke { background: #eef2ff; border-left: 5px solid var(--knopf); border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-weight: 700; }
+.regeln .merke { background: var(--aktiv); border-left: 5px solid var(--knopf); border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-weight: 700; }
 .regeln .los { display: block; margin: 20px auto 0; text-align: center; }

@@ -18,9 +18,9 @@
 //      dunkle Seite hell auf, mit falschem Präfix bleibt sie hell.
 //   7. feste Farben in Stilen (DM4 a): #…, rgb(), rgba(), hsl(), white, black ausserhalb von Variablen in :root. Nicht
 //      gezählt: ein Regelblock mit dem Kommentar „Bildfarben: <Grund>“ (Zeichnung auf heller Bildkachel, DM3 a) oder
-//      „Gleich in beiden Modi: <Grund>“ (Gegenstand mit eigenen Farben: Banknote, Klaviertaste, Nachthimmel). In
-//      Spielseiten (eulenpfad/spiele/<spiel>/*.html) ein Fehler seit Darkmode Schritt 5 (LERN_Session35), sonst ein
-//      Hinweis, bis Schritt 6 die übrigen Stile umgebaut hat. Mit --farben je Datei die Zahl.
+//      „Gleich in beiden Modi: <Grund>“ (Gegenstand mit eigenen Farben: Banknote, Klaviertaste, Nachthimmel), Variablen
+//      in einem Block aus :root und .bildkachel, Masken. Ein Fehler in jedem Stil der Reihe seit Darkmode Schritt 6
+//      (LERN_Session35; Spielseiten seit Schritt 5). Mit --farben je Datei die Zahl.
 //   8. feste Farben in den Skripten einer Spielseite (#…, rgb(), Darkmode Schritt 5, LERN_Session35): nur in den Seiten
 //      aus SKRIPT_BILDFARBEN, je mit Grund (Szene auf der Bildkachel, Gegenstand); sonst ein Fehler, ebenso ein Eintrag
 //      der Liste ohne Farbe im Skript (die Liste bleibt so aktuell).
@@ -133,9 +133,11 @@ function festeFarben(text) {
     const [wahl, rumpf] = [b[1].trim(), b[2]];
     if (rumpf.includes(BILDFARBEN)) continue;
     const leer = rumpf;
-    const rootBlock = /^:root\b/.test(wahl.split(/\s+/).pop() || "") && /^:root(\[[^\]]*\])?$/.test(wahl.split(/[\s,]+/).pop());
+    // Variablenblock: jeder Wähler ist :root (auch :root[data-farben=…]) oder .bildkachel (DM3 a, `:root, .bildkachel`)
+    const rootBlock = wahl.split(",").map(w => w.trim()).every(w => /^:root(\[[^\]]*\])?$|^\.bildkachel$/.test(w));
     for (const d of leer.split(";")) {
       if (rootBlock && /^\s*--/.test(d)) continue;
+      if (/^\s*(?:-webkit-)?mask(?:-image)?\s*:/.test(d)) continue; // eine Maske nimmt nur die Deckkraft, keine Farbe
       // color-mix mit einer Variablen ist keine feste Farbe (der Ton kommt aus der Variablen)
       const d2 = d.replace(/color-mix\([^;]*var\(--[^;]*\)/g, "");
       n += (d2.match(FESTE_FARBE) || []).filter(f => !DUNKEL_DURCHSICHTIG(f)).length;
@@ -147,6 +149,9 @@ function festeFarben(text) {
 // Gegenproben zu Punkt 7: [CSS, erwartete Zahl]
 const GEGENPROBEN_FARBE = [
   [":root { --a: #fff; --b: rgb(1, 2, 3); }", 0, "Variablen in :root"],
+  [":root, .bildkachel { --a: #fff; }", 0, "Variablen in :root, .bildkachel"],
+  [".a { -webkit-mask: linear-gradient(#000, transparent); mask: radial-gradient(#000 1px, transparent 2px); }", 0, "Masken"],
+  [".bildkachel .x, :root { --a: #fff; }", 1, "nur :root und .bildkachel zählen als Variablenblock"],
   [".a { color: #fff; background: rgba(255, 240, 200, .9); }", 2, "zwei feste Farben"],
   [".a { --f: #abc; }", 1, "Variable ausserhalb von :root"],
   [".a { /* Bildfarben: Zeichnung */ fill: #123456; }", 0, "Bildfarben im Block"],
@@ -162,7 +167,7 @@ const GEGENPROBEN_FARBE = [
 
 // 6. Stil der App und Farben des Kerns davor; Apps mit Kopf-Skript und ihr Speicher-Präfix (der Lernsteig folgt, Schritt 6)
 const APP_STIL = /^([a-z]+)\/(?:spiele\/)?gemeinsam\/stil\.css$/;
-const KOPF_APPS = { eulenpfad: "lernspiele:" };
+const KOPF_APPS = { eulenpfad: "lernspiele:", lernsteig: "lernsteig:" };
 
 /**
  * Mängel einer Seite nach Punkt 6. html: Inhalt ohne HTML-Kommentare, wo: Pfad der Seite relativ zur Wurzel (mit /),
@@ -202,8 +207,9 @@ const GEGENPROBEN_STIL = [
   ['<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "ohne Kopf-Skript"],
   ['<link rel="stylesheet" href="../../kern/kern.css">' + KOPF + '<link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "Kopf-Skript nach kern.css"],
   [KOPF.replace("lernspiele:", "lernsteig:") + '<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "falsches Präfix"],
-  ['<link rel="stylesheet" href="kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 0, "Lernsteig richtig"],
-  ['<link rel="stylesheet" href="../eulenpfad/kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 1, "Kern der falschen App"],
+  ['<script src="kern/kern-kopf.js" data-speicher="lernsteig:"></script><link rel="stylesheet" href="kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 0, "Lernsteig richtig"],
+  ['<link rel="stylesheet" href="kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 1, "Lernsteig ohne Kopf-Skript (Schritt 6)"],
+  ['<script src="kern/kern-kopf.js" data-speicher="lernsteig:"></script><link rel="stylesheet" href="../eulenpfad/kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 1, "Kern der falschen App"],
   ['<link rel="stylesheet" href="anleitung.css">', "eulenpfad/anleitung/kinder.html", 0, "ohne Stil der App"],
 ];
 
@@ -308,9 +314,9 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
       }
     }
   }
-  // 7. in Spielseiten ein Fehler (Darkmode Schritt 5): eine feste Farbe bleibt im dunklen Modus hell und still unlesbar
+  // 7. ein Fehler (Darkmode Schritte 5 und 6): eine feste Farbe bleibt im dunklen Modus hell und still unlesbar
   for (const [wo, n] of Object.entries(zahlen.farben)) {
-    if (SPIELSEITE.test(wo)) fehler.push(`${wo}: ${n} feste Farbe(n) im Stil — Variable nehmen oder Block mit „Bildfarben:“ / „Gleich in beiden Modi:“ (DM4 a)`);
+    fehler.push(`${wo}: ${n} feste Farbe(n) im Stil — Variable nehmen oder Block mit „Bildfarben:“ / „Gleich in beiden Modi:“ (DM4 a)`);
   }
   // 8. feste Farben in Skripten der Spielseiten nur mit Grund (Schritt 5); nur, wenn eulenpfad mitgeprüft wird
   if (ordner.includes("eulenpfad") && fs.existsSync(path.join(wurzel, "eulenpfad/spiele"))) {
@@ -333,11 +339,8 @@ function zeileVon(e) {
 if (require.main === module) {
   const { fehler, zahlen } = pruefe();
   console.log(`${zahlen.js} Skriptdateien, ${zahlen.inline} Skripte in Seiten, ${zahlen.verweise} Verweise, ${zahlen.css} Stile geprüft.`);
-  // 7. feste Farben ausserhalb der Spielseiten: ein Hinweis (DM4 a, Schritt 6), je Datei mit --farben
+  // 7. feste Farben je Datei mit --farben (jede ist ein Fehler, siehe oben)
   const farben = Object.entries(zahlen.farben);
-  const uebrige = farben.filter(([d]) => !SPIELSEITE.test(d));
-  if (uebrige.length) console.log(`    HINWEIS feste Farben (DM4 a): ${uebrige.reduce((s, [, n]) => s + n, 0)} in ${uebrige.length} Stilen ` +
-    `ausserhalb der Spielseiten — Liste mit --farben`);
   if (process.argv.includes("--farben")) for (const [d, n] of farben.sort((a, b) => b[1] - a[1])) console.log(`      ${String(n).padStart(4)}  ${d}`);
   for (const f of fehler) console.log(`    FEHLER  ${f}`);
   const schluss = fehler.length ? `${fehler.length} Fehler.` : "Keine Fehler.";

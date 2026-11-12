@@ -62,7 +62,7 @@
 .knopf-zeile { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .konto-liste { display: flex; flex-wrap: wrap; gap: 8px; }
 .textfeld { min-height: 44px; font: inherit; padding: 6px 10px; border: 2px solid var(--rand); border-radius: 10px; background: var(--karte); width: 100%; }
-.fehlertext { color: #a33; margin: 0; min-height: 1em; }
+.fehlertext { color: var(--gefahr); margin: 0; min-height: 1em; }
 .code-anzeige { font-size: 26px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; margin: 4px 0; }
 .konto h3 { margin: 0; font-size: 18px; }
 /* Statistik (statistik.html) */
@@ -85,8 +85,8 @@ a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
 a.knopf { color: var(--text); }
 .serie { margin: 0; font-weight: 600; }
 /* Löschen (KE2 a): deutlich, aber ohne Alarm */
-.knopf.gefahr { border-color: #a33; color: #a33; }
-.knopf.gefahr:hover { background: #a33; color: #fff; }
+.knopf.gefahr { border-color: var(--gefahr); color: var(--gefahr); }
+.knopf.gefahr:hover { background: var(--gefahr); color: var(--auf-gefahr); }
 /* Verwaltung: Untertabs wie im Eulenpfad (Plan C5), umbrechend statt rollend */
 .untertabs { flex-wrap: wrap; margin: 14px 0 4px; }
 .untertabs .tab { min-height: 40px; padding: 6px 12px; font-size: 15px; }

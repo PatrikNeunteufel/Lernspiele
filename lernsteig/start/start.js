@@ -361,6 +361,10 @@ var LST_START = typeof LST_START === "object" ? LST_START : {};
       // Bedienung des eingebauten Rechners wie das eigene Modell (RM1 b, R11)
       auswahl("Mein Taschenrechner", Object.entries(LST_RECHNER.MODELLE).map(([id, m]) => ({ id, name: m.familie === "allgemein" ? "allgemein" : m.name })),
         k.rechnerModell, v => aendern(x => { x.rechnerModell = v; }), "Der eingebaute Rechner bedient sich dann wie dein Modell, mit Tipps dazu."),
+      // Hell oder dunkel je Person (Darkmode Schritt 6, DM2 a), Standard wie das Gerät
+      auswahl("Hell oder dunkel", [{ id: "geraet", name: "wie das Gerät" }, { id: "hell", name: "hell" }, { id: "dunkel", name: "dunkel" }],
+        k.farben || "geraet", v => { aendern(x => { x.farben = v; }); LST.farbenAnwenden(); },
+        "„Wie das Gerät“ folgt der Einstellung von Tablet, Handy oder Computer."),
       geraetHinweis(),
       LST.werUebt() === "lernend" ? null : el("small", { class: "leise", text: "Diese Einstellungen gelten nur, bis du den Tab schliesst." }));
     const eigenes = LST.werUebt() === "lernend" && ansicht.art !== "code" && ansicht.art !== "profil" ? KO.aktiv() : null;

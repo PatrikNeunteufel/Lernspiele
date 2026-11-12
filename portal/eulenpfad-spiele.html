@@ -9,10 +9,16 @@
      (rahmen.md Abschnitt 6, Freigabe). Sortieren nach mehreren Spalten: Spaltenkopf antippen fügt die Spalte hinten
      an (Priorität 1, 2, 3 …), nochmals antippen kehrt die Richtung um, ✕ nimmt sie weg. -->
 <style>
-  :root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #8e5bd6; --gut: #15803d; --offen: #b45309; }
+  :root { --text: #2b2d42; --leise: #6b7089; --karte: #fff; --rand: #e3e6f3; --akzent: #8e5bd6; --gut: #15803d; --offen: #b45309;
+    --himmel-oben: #e0f2fe; --himmel-unten: #fef9e7; --chip: #f1e8fc; --chip-hover: #e3d3f8; --kopf: #faf7fe; --auf-akzent: #fff; }
+  /* Das Portal hat keine Personen: es folgt dem Gerät (Darkmode Schritt 6, Grundsatz „Lernsteig wie das Gerät“) */
+  @media (prefers-color-scheme: dark) {
+    :root { --text: #eef0f7; --leise: #b3b8cc; --karte: #262a3b; --rand: #4a5175; --akzent: #8f91f7;
+      --himmel-oben: #1d2133; --himmel-unten: #15171f; --akzent: #b48cf0; --gut: #4cd68b; --offen: #f5a25d; --chip: #352c4a; --chip-hover: #43375c; --kopf: #2c2840; --auf-akzent: #10132a; color-scheme: dark; }
+  }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 24px 16px 40px; font: 16px/1.45 system-ui, "Segoe UI", sans-serif; color: var(--text);
-    background: linear-gradient(180deg, #e0f2fe, #fef9e7); min-height: 100vh; }
+    background: linear-gradient(180deg, var(--himmel-oben), var(--himmel-unten)); min-height: 100vh; }
   main { max-width: 1100px; margin: 0 auto; }
   .zurueck { display: inline-block; margin-bottom: 10px; color: var(--akzent); font-weight: 700; text-decoration: none; }
   h1 { font-size: clamp(24px, 5vw, 34px); margin: 0 0 4px; }
@@ -20,18 +26,18 @@
   .werkzeuge { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
   .werkzeuge input { font: inherit; padding: 8px 12px; border-radius: 12px; border: 2px solid var(--rand); min-width: 0; flex: 1 1 200px; }
   .sortierung { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 14px; color: var(--leise); }
-  .sort-chip { display: inline-flex; gap: 4px; align-items: center; background: #f1e8fc; color: var(--text); border-radius: 999px; padding: 3px 4px 3px 10px; font-weight: 700; }
+  .sort-chip { display: inline-flex; gap: 4px; align-items: center; background: var(--chip); color: var(--text); border-radius: 999px; padding: 3px 4px 3px 10px; font-weight: 700; }
   .sort-chip button, .knopf { font: inherit; border: 0; background: transparent; cursor: pointer; color: inherit; }
   .sort-chip button { width: 26px; height: 26px; border-radius: 50%; }
-  .sort-chip button:hover { background: #e3d3f8; }
+  .sort-chip button:hover { background: var(--chip-hover); }
   .knopf { font-weight: 700; color: var(--akzent); padding: 4px 8px; }
   .rahmen { overflow-x: auto; background: var(--karte); border-radius: 16px; box-shadow: 0 4px 0 var(--rand); }
   table { border-collapse: collapse; width: 100%; min-width: 720px; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rand); vertical-align: top; }
-  th { position: sticky; top: 0; background: #faf7fe; white-space: nowrap; }
+  th { position: sticky; top: 0; background: var(--kopf); white-space: nowrap; }
   th button { font: inherit; font-weight: 800; border: 0; background: transparent; cursor: pointer; padding: 0; color: var(--text); }
   th .nr { display: inline-flex; justify-content: center; align-items: center; min-width: 20px; height: 20px; margin-left: 4px; border-radius: 10px;
-    background: var(--akzent); color: #fff; font-size: 12px; }
+    background: var(--akzent); color: var(--auf-akzent); font-size: 12px; }
   td a { color: inherit; font-weight: 700; text-decoration: none; }
   td a:hover { text-decoration: underline; }
   .frei { color: var(--gut); font-weight: 700; } .offen { color: var(--offen); font-weight: 700; }

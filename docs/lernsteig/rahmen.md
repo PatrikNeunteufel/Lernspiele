@@ -26,7 +26,10 @@ gemeinsam/terme.js        Terme: reicht KERN.terme weiter (text in der Schreibwe
 gemeinsam/rechner.js      eingebauter Taschenrechner: Modelle und Tastenfeld; Rechenkern KERN.rechner
 gemeinsam/rahmen.js       Seitenteil: Konto, Stufenwahl, Runde, Serie, Protokoll, Rekorde
 gemeinsam/stil.css        Stil; Farben in :root — eigene helle Töne auf die Namen des Kerns --k-* (kern/kern.css,
-                          vor stil.css geladen, DM1 a), dazu der Akzent
+                          vor stil.css geladen, DM1 a), dazu Akzent und Gefahr; dunkel unter :root[data-farben="dunkel"]
+                          (Darkmode Schritt 6). Jede Seite lädt davor kern/kern-kopf.js mit data-speicher="lernsteig:".
+                          Hell oder dunkel wählt jede Person im Profil (Konto farben, Standard „wie das Gerät“, DM2 a;
+                          LST.farbenAnwenden). Der eingebaute Rechner sieht in beiden Modi gleich aus (ein Gerät).
 index.html, start/        Startseite: Anmeldung, dann Tabs wie im Eulenpfad (Plan C2, Adresse #<tab>): Übungen
                           (start/uebungen.js, Plan C3: Suche mit KERN.suche, einklappbarer Filter, Sortierung —
                           Gruppen, Filter-Block, Suchfeld, Sortierwahl, Favoriten über KERN.uebersicht, KT1 a —

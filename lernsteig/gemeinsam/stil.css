@@ -7,9 +7,17 @@
   --k-gut: #2f6f5e; --k-gut-hell: #e3f1ec; --k-hinweis: #8a5a00; --k-hinweis-hell: #fff4dc; --k-fokus: #1c64f2;
   --text: var(--k-text); --leise: var(--k-leise); --flaeche: var(--k-grund); --karte: var(--k-karte); --rand: var(--k-rand);
   --akzent: #2f6f5e; --akzent-hell: #e3f1ec; --akzent-text: #fff;
+  --gefahr: #aa3333; --auf-gefahr: #fff; /* Löschen, Fehler: 6,5 auf Weiss */
   --gut: var(--k-gut); --gut-hell: var(--k-gut-hell); --hinweis: var(--k-hinweis); --hinweis-hell: var(--k-hinweis-hell);
   --fokus: var(--k-fokus);
   --radius: 12px;
+}
+/* Dunkel (Darkmode Schritt 6; DM2 a: jede Person wählt im Profil, Standard wie das Gerät): die Rahmenfarben kommen aus
+   kern/kern.css, hier die eigenen Töne. Akzent als Schrift 7,8 auf dem Grund und 6,6 auf der Karte, Schrift auf dem
+   Akzent 7,9; Gefahr als Schrift 6,2, Schrift darauf 8,0. */
+:root[data-farben="dunkel"] {
+  --akzent: #5ec2a4; --akzent-hell: #1d3a33; --akzent-text: #0f1f1a;
+  --gefahr: #ff8a80; --auf-gefahr: #10132a;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -98,20 +106,20 @@ button, input { font: inherit; color: inherit; }
 }
 
 /* Eingebauter Rechner (RE1 a), Ansicht „allgemein“ */
-.rechner { max-width: 360px; margin: 0 auto 16px; background: #26313b; border-radius: 16px; padding: 12px; color: #fff; }
+.rechner { /* Gleich in beiden Modi: Taschenrechner */ max-width: 360px; margin: 0 auto 16px; background: #26313b; border-radius: 16px; padding: 12px; color: #fff; }
 .rechner:focus { outline: 3px solid var(--fokus); outline-offset: 2px; }
-.rechner-anzeige { background: #dfe8e3; color: #1f2933; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-variant-numeric: tabular-nums; min-height: 64px; }
+.rechner-anzeige { /* Gleich in beiden Modi: Taschenrechner */ background: #dfe8e3; color: #1f2933; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-variant-numeric: tabular-nums; min-height: 64px; }
 .rechner-zeile { font-size: 16px; overflow-wrap: anywhere; }
 .rechner-ergebnis { font-size: 22px; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
-.rechner-ergebnis.fehler { font-size: 15px; font-weight: 600; color: #a33; text-align: left; }
+.rechner-ergebnis.fehler { /* Gleich in beiden Modi: Taschenrechner */ font-size: 15px; font-weight: 600; color: #a33; text-align: left; }
 .rechner-tasten { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.rt { min-height: 44px; border: 0; border-radius: 8px; background: #3d4b57; color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; }
-.rt.fn { background: #55636f; font-size: 16px; }
-.rt.op { background: #4a6b5f; }
-.rt.gleich { background: var(--akzent); }
-.rt.uebernehmen { grid-column: 1 / -1; order: 99; background: #6b7f8c; font-size: 15px; }
+.rt { /* Gleich in beiden Modi: Taschenrechner */ min-height: 44px; border: 0; border-radius: 8px; background: #3d4b57; color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; }
+.rt.fn { /* Gleich in beiden Modi: Taschenrechner */ background: #55636f; font-size: 16px; }
+.rt.op { /* Gleich in beiden Modi: Taschenrechner */ background: #4a6b5f; }
+.rt.gleich { /* Gleich in beiden Modi: Taschenrechner */ background: #2f6f5e; }
+.rt.uebernehmen { /* Gleich in beiden Modi: Taschenrechner */ grid-column: 1 / -1; order: 99; background: #6b7f8c; font-size: 15px; }
 .rt:active { filter: brightness(1.2); }
-.rechner-knopf[aria-pressed="true"] { border-color: var(--akzent); background: var(--akzent-hell); }
+.rechner-knopf[aria-pressed="true"] { /* Gleich in beiden Modi: Taschenrechner */ border-color: var(--akzent); background: var(--akzent-hell); }
 .feld-gruppe { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
 .feld-vor, .feld-nach { font-size: 20px; font-weight: 600; white-space: nowrap; }
 .feld-gruppe .eingabe { width: min(180px, 50vw); }
@@ -125,8 +133,8 @@ button, input { font: inherit; color: inherit; }
 /* Rechteckmodell für Brüche (E1-6 a): erste Farbe grün, zweite gelb, beide zusammen dunkelgrün */
 .aufgabe .rechteckmodell { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 10px; margin: 12px auto 0; }
 .rechteckmodell .rm { display: block; max-width: 70vw; height: auto; }
-.rm-feld { fill: var(--karte); stroke: #9aa5b1; stroke-width: 1; }
-.rm-feld.rm-f1 { fill: #9fd5c4; } .rm-feld.rm-f2 { fill: #f7d68a; } .rm-feld.rm-f12 { fill: #3f8a73; }
+.rm-feld { /* Gleich in beiden Modi: Taschenrechner */ fill: var(--karte); stroke: #9aa5b1; stroke-width: 1; }
+.rm-feld.rm-f1 { /* Gleich in beiden Modi: Taschenrechner */ fill: #9fd5c4; } .rm-feld.rm-f2 { /* Gleich in beiden Modi: Taschenrechner */ fill: #f7d68a; } .rm-feld.rm-f12 { /* Gleich in beiden Modi: Taschenrechner */ fill: #3f8a73; }
 .rm-rahmen { fill: none; stroke: var(--text); stroke-width: 2.5; }
 .rm-zeichen { font-size: 26px; font-weight: 700; }
 /* Figurenfolge aus Rechtecken (quadratisch, E10-2 a): Figuren unten bündig, Nummer darunter */
@@ -149,14 +157,14 @@ button, input { font: inherit; color: inherit; }
 .antwort-tasten .tf-pruefen { grid-column: span 5; }
 .antwort-tasten.term-tasten .tf-pruefen { grid-column: 1 / -1; }
 .feld-gruppe .eingabe.term-eingabe, .eingabe.term-eingabe { width: min(300px, 80vw); text-align: left; }
-.rechner-modell { width: 100%; min-height: 40px; margin-bottom: 8px; border-radius: 8px; border: 0; padding: 4px 8px; font: inherit; font-size: 15px; background: #3d4b57; color: #fff; }
-.rechner-tipp { background: #fff4dc; color: #8a5a00; border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; font-size: 14px; }
+.rechner-modell { /* Gleich in beiden Modi: Taschenrechner */ width: 100%; min-height: 40px; margin-bottom: 8px; border-radius: 8px; border: 0; padding: 4px 8px; font: inherit; font-size: 15px; background: #3d4b57; color: #fff; }
+.rechner-tipp { /* Gleich in beiden Modi: Taschenrechner */ background: #fff4dc; color: #8a5a00; border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; font-size: 14px; }
 .rt.leer { visibility: hidden; }
-.rt.hilfe { background: #6b7f8c; }
-.rechner-hilfe { background: #34414c; border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 14px; }
+.rt.hilfe { /* Gleich in beiden Modi: Taschenrechner */ background: #6b7f8c; }
+.rechner-hilfe { /* Gleich in beiden Modi: Taschenrechner */ background: #34414c; border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 14px; }
 .rechner-hilfe ul { margin: 6px 0 0; padding-left: 18px; }
 .rechner-hilfe li { margin: 4px 0; }
-.rechner-vermerk { margin: 8px 0 0; font-size: 11px; color: #b8c4cc; }
+.rechner-vermerk { /* Gleich in beiden Modi: Taschenrechner */ margin: 8px 0 0; font-size: 11px; color: #b8c4cc; }
 .wahl-liste { display: grid; gap: 8px; width: 100%; max-width: 520px; }
 .knopf.wahl { display: flex; align-items: center; gap: 12px; text-align: left; font-weight: 500; font-variant-numeric: tabular-nums; }
 .wahl-taste { flex: none; width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; background: var(--flaeche); color: var(--leise); font-size: 14px; font-weight: 700; }
@@ -251,12 +259,12 @@ button, input { font: inherit; color: inherit; }
 
 /* Rechner am Bildrand wie der Notizblock (Hinweis Patrik, LERN_Session21): derselbe Platz, dieselben Breiten. Beide teilen
    ihn (RP1 a): gross ist immer nur einer, der andere liegt als Kopfzeile darunter (breit) oder über dem Blatt (schmal). */
-.rechner-fenster { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
+.rechner-fenster { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ /* Gleich in beiden Modi: Taschenrechner */ position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 24px);
   display: flex; flex-direction: column; background: #26313b; border-radius: var(--radius); box-shadow: 0 8px 24px rgba(31, 41, 51, .25); }
 .rechner-fenster[hidden] { display: none; }
-.rf-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; color: #fff; }
+.rf-kopf { /* Gleich in beiden Modi: Taschenrechner */ display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; color: #fff; }
 .rf-kopf b { flex: 1; }
-.rf-zu { border: 1px solid #3d4b57; background: #34414c; color: #fff; border-radius: 8px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 700; cursor: pointer; }
+.rf-zu { /* Gleich in beiden Modi: Taschenrechner */ border: 1px solid #3d4b57; background: #34414c; color: #fff; border-radius: 8px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 700; cursor: pointer; }
 .rf-inhalt { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .rechner-fenster .rechner { max-width: none; margin: 0; border-radius: 0 0 var(--radius) var(--radius); padding-top: 4px; }
 .rechner-fenster.klein .rf-inhalt, .notizblock.klein .nb-fuss { display: none; }

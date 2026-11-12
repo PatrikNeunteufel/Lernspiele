@@ -247,12 +247,12 @@
     return LST_KONTEN.istGast() ? "gast" : "niemand";
   }
   const TAB_KONTO = LST.PRAEFIX + "tab-konto";
-  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell", "favoriten", "zu", "ansicht", "sortierung", "filterZu"]; // ab favoriten: Tab Übungen (Plan C3)
+  const TAB_FELDER = ["niveau", "lehrplan", "pruefungsziel", "rechnerModell", "farben", "favoriten", "zu", "ansicht", "sortierung", "filterZu"]; // ab favoriten: Tab Übungen (Plan C3)
   function tabKonto() { try { return JSON.parse(sessionStorage.getItem(TAB_KONTO)) || null; } catch (e) { return null; } }
   function konto() {
     const wer = werUebt();
     const a = wer === "aufsicht" ? LST_KONTEN.aufsichtAktiv() : null;
-    const standard = { id: a ? a.id : "gast", name: a ? a.name : "Gast", niveau: {}, lehrplan: { land: "CH", kanton: null }, pruefungsziel: "keins", rechnerModell: "allgemein", favoriten: [], zu: [], ansicht: "kacheln" };
+    const standard = { id: a ? a.id : "gast", name: a ? a.name : "Gast", niveau: {}, lehrplan: { land: "CH", kanton: null }, pruefungsziel: "keins", rechnerModell: "allgemein", farben: "geraet", favoriten: [], zu: [], ansicht: "kacheln" };
     let erg;
     if (wer === "lernend") erg = Object.assign(standard, LST_KONTEN.aktiv());
     else { erg = standard; const t = tabKonto() || {}; for (const f of TAB_FELDER) if (t[f] !== undefined) erg[f] = t[f]; }
@@ -894,10 +894,22 @@
     return svg;
   }
 
+  // ---------- Hell oder dunkel (Darkmode Schritt 6, DM2 a) ----------
+  // Jede Person wählt im Profil, Standard wie das Gerät; für den Gast und die Aufsicht gilt die Wahl im Tab. Angewendet
+  // über KERN.farben; gemerkt im Speicher (lernsteig:farben), damit kern-kopf.js die nächste Seite gleich richtig zeigt.
+  function farbenAnwenden() {
+    if (typeof KERN === "undefined" || !KERN.farben) return;
+    const w = konto().farben;
+    const wahl = KERN.farben.WAHLEN.includes(w) ? w : "geraet";
+    KERN.farben.anwenden(wahl);
+    KERN.farben.merke(LST.SPEICHER, wahl);
+  }
+  if (typeof document !== "undefined") { LST.beiBereit?.(farbenAnwenden); document.addEventListener("DOMContentLoaded", farbenAnwenden); }
+
   // Für das Testskript: die gerade gestellte Aufgabe (nur lesen).
   let aktuell = null;
   const pruefung = { aufgabe: () => aktuell };
 
   Object.assign(LST, { MELDUNGEN, KORREKTUR, MELDUNG_ARTEN, MELDUNG_STATUS, meldungenVon, ungeleseneMeldungen, meldungenGelesen, meldenErlaubt, meldeFormular,
-    GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, listenPruefung, pruefungDefinition, listenPruefen, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
+    GRAPH, graphHoehe, el, FREIGABE, ENTWICKLUNG, listenPruefung, pruefungDefinition, listenPruefen, sperrGrund, uebungSichtbar, werUebt, konto, speichereKonto, farbenAnwenden, kompetenzstand, wackelt, stufenBedarf, WACKEL, standMarke, serie: wochenSerie, serieText, niveauFuer, setzeNiveau, niveauName, stufeInfo, runden, bestwert, bestzeit, dauerText, uebung, pruefung });
 })(LST);
