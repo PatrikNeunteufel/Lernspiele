@@ -1,4 +1,5 @@
-# Teile des Kerns in Ladereihenfolge, je Zeile eine Datei aus kern/ (tools/kern_verteilen.py bündelt sie).
+# Teile des Kerns in Ladereihenfolge, je Zeile eine Datei aus kern/ (tools/kern_verteilen.py bündelt sie:
+# .js-Teile nach <app>/kern/kern.js, .css-Teile nach <app>/kern/kern.css).
 zahl.js
 bruch.js
 terme.js
@@ -27,3 +28,4 @@ tastenfeld.js
 notizblock.js
 uebersicht.js
 listenpruefung.js
+farben.css

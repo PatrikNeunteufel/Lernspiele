@@ -9,7 +9,8 @@ stehen in `CLAUDE.md`. Hier steht, **wie** ein Spiel sie technisch umsetzt.
 
 **Einzige Quellen.** Dieses Dokument erklärt sie, wiederholt sie aber nicht:
 - CSS-Klassen des Rahmens: `LS.RAHMEN_KLASSEN` in `spiele/gemeinsam/spiel.js`
-- Farben: `:root` in `spiele/gemeinsam/stil.css`
+- Farben: Rahmenfarben `--k-*` in `kern/farben.css` (verteilt als `kern/kern.css`), eigene Töne in `:root` in
+  `spiele/gemeinsam/stil.css`
 - Spiele, Themen, Lernziele: `spiele/gemeinsam/katalog.js`
 
 Pfade gelten relativ zum App-Ordner `eulenpfad/` (Entscheid P1 a); die Werkzeuge liegen in `tools/`
@@ -95,8 +96,11 @@ Statistik leer.
 
 ## 3. Farben
 
-Die Werte stehen in `:root` in `stil.css`. Ein Spiel verwendet nur die Variablen, keine eigenen
-Farbwerte für diese Zwecke.
+Die Rahmenfarben (Karte, Text, Rand, Knopf, gut, Hinweis) stehen seit Kern 1.40.0 in `kern/farben.css` als `--k-*`
+(Entscheid DM1 a, [Konzept Darkmode](../konzept_darkmode.md)); jede Seite lädt `kern/kern.css` vor `stil.css`
+(`tools/pruefe_skripte.js` Punkt 6). Die Namen unten verweisen darauf (`--text: var(--k-text)`) und bleiben für die
+Spiele gültig. Die eigenen Töne des Eulenpfads (Himmel, Stellen, Deko, Schatten) stehen in `:root` in `stil.css`. Ein
+Spiel verwendet nur die Variablen, keine eigenen Farbwerte für diese Zwecke.
 
 | Variable | wofür | nie für |
 |---|---|---|

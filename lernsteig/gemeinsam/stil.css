@@ -1,10 +1,14 @@
-/* Lernsteig — gemeinsamer Stil: sachlich, wenig Deko, keine Figuren (Auftrag, Ziel). Farben nur hier.
+/* Lernsteig — gemeinsamer Stil: sachlich, wenig Deko, keine Figuren (Auftrag, Ziel). Farben hier und im Kern (kern.css).
    Vertrag: docs/lernsteig/rahmen.md, Abschnitt 3. */
+/* Rahmenfarben über den Kern (kern/kern.css, DM1 a): eigene helle Töne des Lernsteigs auf die gemeinsamen Namen, die
+   alten Namen verweisen darauf. Der Akzent bleibt ein eigener Ton. */
 :root {
-  --text: #1f2933; --leise: #616e7c; --flaeche: #f5f7fa; --karte: #fff; --rand: #d9e2ec;
+  --k-text: #1f2933; --k-leise: #616e7c; --k-grund: #f5f7fa; --k-karte: #fff; --k-rand: #d9e2ec;
+  --k-gut: #2f6f5e; --k-gut-hell: #e3f1ec; --k-hinweis: #8a5a00; --k-hinweis-hell: #fff4dc; --k-fokus: #1c64f2;
+  --text: var(--k-text); --leise: var(--k-leise); --flaeche: var(--k-grund); --karte: var(--k-karte); --rand: var(--k-rand);
   --akzent: #2f6f5e; --akzent-hell: #e3f1ec; --akzent-text: #fff;
-  --gut: #2f6f5e; --gut-hell: #e3f1ec; --hinweis: #8a5a00; --hinweis-hell: #fff4dc;
-  --fokus: #1c64f2;
+  --gut: var(--k-gut); --gut-hell: var(--k-gut-hell); --hinweis: var(--k-hinweis); --hinweis-hell: var(--k-hinweis-hell);
+  --fokus: var(--k-fokus);
   --radius: 12px;
 }
 * { box-sizing: border-box; }

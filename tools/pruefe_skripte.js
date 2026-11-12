@@ -11,6 +11,9 @@
 //      der Hände im Finger-Zähler null, Stufe 6 blitzte ein leeres Feld; acht weitere Spiele ebenso). Ausnahme nur mit
 //      dem Kommentar „ohne Untergrenze: <Grund>“ im selben Regelblock (feste Fenster, die nie grösser als das Bild sein
 //      sollen).
+//   6. jede Seite, die den Stil ihrer App lädt (<app>/spiele/gemeinsam/stil.css, <app>/gemeinsam/stil.css), lädt davor
+//      <app>/kern/kern.css (Farben der Reihe, Entscheid DM1 a, docs/konzept_darkmode.md): ohne sie zeigen die Namen
+//      der App (--text: var(--k-text)) ins Leere, und die Seite verliert still ihre Farben.
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -82,6 +85,37 @@ const GEGENPROBEN_CSS = [
   [".a { background: url(data:image/svg+xml,%3Csvg%3E); }", 0, "Bild als data-URL"],
 ];
 
+// 6. Stil der App und Farben des Kerns davor
+const APP_STIL = /^([a-z]+)\/(?:spiele\/)?gemeinsam\/stil\.css$/;
+
+/**
+ * Mängel einer Seite nach Punkt 6. html: Inhalt ohne HTML-Kommentare, wo: Pfad der Seite relativ zur Wurzel (mit /),
+ * gibt: Datei vorhanden? (Pfad relativ zur Wurzel). Gibt [Text] zurück.
+ */
+function pruefeKernStil(html, wo, gibt) {
+  const m = [];
+  const stile = [...html.matchAll(/<link\s[^>]*href\s*=\s*["']([^"']+\.css)(?:[?#][^"']*)?["'][^>]*>/gi)]
+    .filter(l => /rel\s*=\s*["']?stylesheet/i.test(l[0]) && !/^(https?:)?\/\//i.test(l[1]))
+    .map(l => path.posix.normalize(path.posix.join(path.posix.dirname(wo), decodeURI(l[1]))));
+  const i = stile.findIndex(s => APP_STIL.test(s));
+  if (i < 0) return m;
+  const soll = `${stile[i].match(APP_STIL)[1]}/kern/kern.css`;
+  const k = stile.indexOf(soll);
+  if (k < 0 || k > i) m.push(`${wo}: lädt ${stile[i]} ohne ${soll} davor (DM1 a)`);
+  else if (!gibt(soll)) m.push(`${wo}: ${soll} fehlt — python tools/kern_verteilen.py`);
+  return m;
+}
+
+// Gegenproben zu Punkt 6: [HTML, Pfad der Seite, erwartete Zahl Meldungen, Name]
+const GEGENPROBEN_STIL = [
+  ['<link rel="stylesheet" href="../../kern/kern.css"><link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 0, "Spielseite richtig"],
+  ['<link rel="stylesheet" href="../gemeinsam/stil.css">', "eulenpfad/spiele/x/index.html", 1, "Spielseite ohne Kern"],
+  ['<link rel="stylesheet" href="../gemeinsam/stil.css"><link rel="stylesheet" href="../../kern/kern.css">', "eulenpfad/spiele/x/index.html", 1, "Kern nach dem Stil"],
+  ['<link rel="stylesheet" href="kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 0, "Lernsteig richtig"],
+  ['<link rel="stylesheet" href="../eulenpfad/kern/kern.css"><link rel="stylesheet" href="gemeinsam/stil.css">', "lernsteig/index.html", 1, "Kern der falschen App"],
+  ['<link rel="stylesheet" href="anleitung.css">', "eulenpfad/anleitung/kinder.html", 0, "ohne Stil der App"],
+];
+
 /**
  * Umgebung der Stelle bei i bis zum Anfang ihrer Deklaration: geschuetzt = steht in einem max() oder als zweites oder
  * drittes Glied eines clamp(); eigenschaft = Name der Eigenschaft (klein, "" wenn nicht gefunden).
@@ -112,6 +146,10 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
     const ist = pruefeCss(css, "Gegenprobe").length;
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 5 „${name}“: ${ist} statt ${soll} Meldungen`);
   }
+  for (const [html, wo, soll, name] of GEGENPROBEN_STIL) {
+    const ist = pruefeKernStil(html, wo, () => true).length;
+    if (ist !== soll) fehler.push(`Gegenprobe Punkt 6 „${name}“: ${ist} statt ${soll} Meldungen`);
+  }
   const lies = (code, wo) => {
     try { new vm.Script(code, { filename: wo }); } catch (e) { fehler.push(`${wo}: ${e.message}${zeileVon(e)}`); }
   };
@@ -131,6 +169,8 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
       const html = fs.readFileSync(f, "utf8").replace(/<!--[\s\S]*?-->/g, "");
       // 3. auch kein <link href> von aussen (Stile, Schriften, Vorladen; LERN-1)
       for (const l of html.matchAll(/<link\s[^>]*href\s*=\s*["']((?:https?:)?\/\/[^"']+)["']/gi)) fehler.push(`${wo}: Verweis von aussen ${l[1]} (LERN-1)`);
+      // 6. Farben des Kerns vor dem Stil der App (DM1 a)
+      fehler.push(...pruefeKernStil(html, wo, p => fs.existsSync(path.join(wurzel, p))));
       const geladen = []; // aufgelöste Pfade der <script src> in Reihenfolge (für Punkt 4)
       for (const m of html.matchAll(/<script(\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
         const attr = m[1] || "";

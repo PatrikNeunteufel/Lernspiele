@@ -34,11 +34,13 @@ require(path.join(WURZEL, "kern", "tastenfeld.js"));
 require(path.join(WURZEL, "kern", "notizblock.js"));
 require(path.join(WURZEL, "kern", "uebersicht.js"));
 require(path.join(WURZEL, "kern", "listenpruefung.js"));
+// CSS-Teile (Farben, DM1 a) prüft der Abschnitt „farben.css“ unten; sie tragen sich hier ein.
+const CSS_GEPRUEFT = ["farben.css"];
 // Alle Teile aus kern/TEILE müssen hier geladen und geprüft sein.
 {
   const fs = require("fs");
   const teile = fs.readFileSync(path.join(WURZEL, "kern", "TEILE"), "utf8").split(/\r?\n/).map(z => z.trim()).filter(z => z && !z.startsWith("#"));
-  const geladen = Object.keys(require.cache).map(p => path.basename(p));
+  const geladen = [...Object.keys(require.cache).map(p => path.basename(p)), ...CSS_GEPRUEFT];
   for (const t of teile) if (!geladen.includes(t)) { console.log(`    FEHLER  kern/${t} wird in pruefe_kern.js nicht geprüft`); process.exitCode = 1; }
 }
 
@@ -2216,6 +2218,44 @@ console.log("listenpruefung.js");
     global.fetch = fetchAlt;
     wirft(() => M({ inhalt: { feld: "spiel" } }), "meldungen ohne speicher");
     wirft(() => M({ speicher: sp }), "meldungen ohne inhalt");
+  }
+
+  // ---------- farben.css (Entscheid DM1 a, docs/konzept_darkmode.md) ----------
+  console.log("farben.css");
+  {
+    const fs = require("fs");
+    const css = fs.readFileSync(path.join(WURZEL, "kern", "farben.css"), "utf8");
+    const ohneKommentar = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    // Nur Blöcke :root und :root[data-farben="dunkel"], darin nur Variablen --k-*: eine Farbe als #rgb oder #rrggbb
+    const bloecke = [...ohneKommentar.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => [m[1].trim(), m[2]]);
+    const rest = ohneKommentar.replace(/[^{}]+\{[^{}]*\}/g, "").trim();
+    gleich(rest === "", true, "farben.css: nichts ausserhalb der Blöcke");
+    const SATZ = { ":root": "hell", ':root[data-farben="dunkel"]': "dunkel" };
+    const saetze = {};
+    for (const [wahl, rumpf] of bloecke) {
+      gleich(wahl in SATZ, true, `farben.css: Block ${wahl} ist :root oder :root[data-farben="dunkel"]`);
+      const satz = (saetze[SATZ[wahl] ?? wahl] ??= {});
+      for (const d of rumpf.split(";").map(x => x.trim()).filter(Boolean)) {
+        const m = d.match(/^(--k-[a-z-]+)\s*:\s*(#[0-9a-f]{3}|#[0-9a-f]{6})$/i);
+        gleich(Boolean(m), true, `farben.css: „${d}“ ist eine Variable --k-* mit einer Farbe`);
+        if (!m) continue;
+        gleich(m[1] in satz, false, `farben.css: ${m[1]} nur einmal je Satz`);
+        satz[m[1]] = m[2].toLowerCase();
+      }
+    }
+    // Die Namen, auf die die Apps verweisen, sind alle da (heller Satz)
+    const hell = saetze.hell || {};
+    for (const n of ["--k-grund", "--k-karte", "--k-text", "--k-leise", "--k-rand", "--k-knopf", "--k-knopf-dunkel",
+      "--k-knopf-text", "--k-gut", "--k-gut-hell", "--k-hinweis", "--k-hinweis-hell", "--k-fokus", "--k-bildgrund"]) {
+      gleich(n in hell, true, `farben.css: ${n} im hellen Satz`);
+    }
+    // Ein dunkler Satz nennt nur Namen des hellen (sonst fehlt einer im hellen Modus)
+    for (const n of Object.keys(saetze.dunkel || {})) gleich(n in hell, true, `farben.css: ${n} des dunklen Satzes auch hell`);
+    // Jeder Verweis var(--k-…) im Stil einer App nennt einen Namen aus farben.css
+    for (const stil of ["eulenpfad/spiele/gemeinsam/stil.css", "lernsteig/gemeinsam/stil.css"]) {
+      const text = fs.readFileSync(path.join(WURZEL, stil), "utf8");
+      for (const v of new Set([...text.matchAll(/var\((--k-[a-z-]+)/g)].map(m => m[1]))) gleich(v in hell, true, `${stil}: ${v} steht in farben.css`);
+    }
   }
 
   // ---------- Kopien in den Apps ----------

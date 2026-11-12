@@ -1,8 +1,9 @@
 """Verteilt den gemeinsamen Kern in die Apps (Entscheid KB1 a; Plan docs/plan_angleich_reihe.md B1).
 
-kern/ ist die einzige Quelle. Dieses Werkzeug bündelt die Teile aus kern/TEILE in eine Datei je App,
-<app>/kern/kern.js, mit Version und Prüfsumme im Kopf. Die Kopie ist ein Ergebnis, nie eine zweite Quelle:
-Wer etwas am Kern ändert, ändert es in kern/ und verteilt neu. Am Ende des Bündels steht `KERN.version`.
+kern/ ist die einzige Quelle. Dieses Werkzeug bündelt die Teile aus kern/TEILE je App in zwei Dateien mit Version und
+Prüfsumme im Kopf: die .js-Teile in <app>/kern/kern.js, die .css-Teile (Farben, Entscheid DM1 a) in <app>/kern/kern.css.
+Die Kopien sind Ergebnisse, nie eine zweite Quelle: Wer etwas am Kern ändert, ändert es in kern/ und verteilt neu. Am
+Ende von kern.js steht `KERN.version`; kern.css trägt dieselbe Version im Kopf.
 
 Dazu schreibt es je App <app>/version.js aus <app>/VERSION (Plan C12, NS3 a): `APP_VERSION = { app, version }`. Jede
 Seite, die den Kern lädt, lädt version.js davor (tools/pruefe_skripte.js prüft das). Eine neue App-Version: Zahl in
@@ -24,6 +25,7 @@ WURZEL = Path(__file__).resolve().parent.parent
 KERN = WURZEL / "kern"
 APPS = ["eulenpfad", "lernsteig", "gratwanderung"]
 KOPF = re.compile(r"^/\* kern (\S+) · Prüfsumme sha256:([0-9a-f]{64}) ·")
+ARTEN = (".js", ".css")  # je Art eine Datei <app>/kern/kern<art>
 
 
 def lies_text(pfad: Path) -> str:
@@ -36,9 +38,14 @@ def teile() -> list[str]:
     return [z.strip() for z in zeilen if z.strip() and not z.lstrip().startswith("#")]
 
 
-def rumpf() -> str:
+def rumpf(art: str = ".js") -> str:
+    """Die Teile einer Art (.js oder .css) in der Reihenfolge von kern/TEILE."""
     stuecke = []
     for name in teile():
+        if not name.endswith(ARTEN):
+            raise SystemExit(f"kern/TEILE nennt {name} — nur .js- und .css-Teile")
+        if not name.endswith(art):
+            continue
         quelle = KERN / name
         if not quelle.is_file():
             raise SystemExit(f"kern/TEILE nennt {name}, die Datei fehlt")
@@ -50,33 +57,36 @@ def pruefsumme(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def buendel() -> tuple[str, str]:
+def buendel(art: str = ".js") -> tuple[str, str]:
     version = lies_text(KERN / "VERSION").strip()
-    r = rumpf() + f'\n/* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */\nglobalThis.KERN.version = "{version}";\n'
+    r = rumpf(art)
+    if art == ".js":
+        r += f'\n/* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */\nglobalThis.KERN.version = "{version}";\n'
     kopf = (f"/* kern {version} · Prüfsumme sha256:{pruefsumme(r)} · erzeugt von tools/kern_verteilen.py aus kern/ — "
             f"nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */\n")
     return version, kopf + r
 
 
-def ziel(app: str) -> Path:
-    return WURZEL / app / "kern" / "kern.js"
+def ziel(app: str, art: str = ".js") -> Path:
+    return WURZEL / app / "kern" / f"kern{art}"
 
 
-def pruefe_app(app: str, version: str, soll: str) -> tuple[int, str]:
+def pruefe_app(app: str, version: str, soll: str, art: str = ".js") -> tuple[int, str]:
     """(0 gleich | 1 Hinweis | 2 Fehler, Text)."""
-    pfad = ziel(app)
+    pfad = ziel(app, art)
+    datei = f"kern/kern{art}"
     if not pfad.is_file():
-        return 2, f"{app}: kern/kern.js fehlt"
+        return 2, f"{app}: {datei} fehlt"
     ist = lies_text(pfad)
     if ist == soll:
-        return 0, f"{app}: kern {version}, gleich"
+        return 0, f"{app}: {datei} {version}, gleich"
     kopf, _, r = ist.partition("\n")
     m = KOPF.match(kopf)
     if not m or pruefsumme(r) != m.group(2):
-        return 2, f"{app}: kern/kern.js von Hand geändert (Prüfsumme stimmt nicht) — kern/ ändern und neu verteilen"
+        return 2, f"{app}: {datei} von Hand geändert (Prüfsumme stimmt nicht) — kern/ ändern und neu verteilen"
     if m.group(1) == version:
-        return 2, f"{app}: kern {version} weicht vom Kern ab — Version in kern/VERSION erhöhen oder neu verteilen"
-    return 1, f"{app}: liegt zurück (kern {m.group(1)} statt {version})"
+        return 2, f"{app}: {datei} {version} weicht vom Kern ab — Version in kern/VERSION erhöhen oder neu verteilen"
+    return 1, f"{app}: {datei} liegt zurück (kern {m.group(1)} statt {version})"
 
 
 VERSION_MUSTER = re.compile(r"^\d+\.\d+\.\d+$")
@@ -117,18 +127,21 @@ def main() -> int:
     for a in apps:
         if a not in APPS:
             raise SystemExit(f"unbekannte App {a} (bekannt: {', '.join(APPS)})")
-    version, soll = buendel()
+    buendel_je_art = {art: buendel(art) for art in ARTEN}
+    version = buendel_je_art[".js"][0]
     schlimmste = 0
     for app in apps:
         if nur_pruefen:
-            for stufe, text in (pruefe_app(app, version, soll), pruefe_version(app)):
+            for stufe, text in (*(pruefe_app(app, version, soll, art) for art, (_, soll) in buendel_je_art.items()),
+                                pruefe_version(app)):
                 schlimmste = max(schlimmste, stufe)
                 print(("    " if stufe == 0 else "    HINWEIS " if stufe == 1 else "    FEHLER  ") + text)
         else:
-            pfad = ziel(app)
-            pfad.parent.mkdir(parents=True, exist_ok=True)
-            pfad.write_text(soll, encoding="utf-8", newline="\n")
-            print(f"{app}: kern {version} nach {pfad.relative_to(WURZEL).as_posix()}")
+            for art, (_, soll) in buendel_je_art.items():
+                pfad = ziel(app, art)
+                pfad.parent.mkdir(parents=True, exist_ok=True)
+                pfad.write_text(soll, encoding="utf-8", newline="\n")
+                print(f"{app}: kern {version} nach {pfad.relative_to(WURZEL).as_posix()}")
             version_ziel(app).write_text(version_soll(app), encoding="utf-8", newline="\n")
             print(f"{app}: version.js aus {app}/VERSION ({lies_text(WURZEL / app / 'VERSION').strip()})")
     return 1 if schlimmste == 2 else 0

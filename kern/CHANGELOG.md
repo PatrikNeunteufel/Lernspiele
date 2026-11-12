@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.40.0 — 2026-11-12 (LERN_Session33)
+- Neuer Teil `farben.css` (Entscheid DM1 a, docs/konzept_darkmode.md): gemeinsame Namen für die Rahmenfarben aller
+  Apps (`--k-grund`, `--k-karte`, `--k-text`, `--k-leise`, `--k-rand`, `--k-knopf`, `--k-knopf-dunkel`,
+  `--k-knopf-text`, `--k-gut`, `--k-gut-hell`, `--k-hinweis`, `--k-hinweis-hell`, `--k-fokus`, `--k-bildgrund`), hell
+  mit den Werten des Eulenpfads; nur Variablen. `tools/kern_verteilen.py` bündelt die `.css`-Teile aus `kern/TEILE`
+  in `<app>/kern/kern.css` (Kopf mit Version und Prüfsumme wie `kern.js`, `--pruefe` prüft beide). Jede Seite mit dem
+  Stil ihrer App lädt `kern.css` davor (`tools/pruefe_skripte.js` Punkt 6). Der dunkle Satz folgt.
+
 ## 1.39.0 — 2026-11-10 (LERN_Session27)
 - Meldungsserver im Netz (Plan C12, NS1 a): `adresseGueltig` nimmt neben localhost/127.0.0.1 einen Namen im Netz über
   https (`https://name.beispiel.ch[:Port]`), nicht http im Netz, keine IP-Adressen im Netz, keine Pfade;

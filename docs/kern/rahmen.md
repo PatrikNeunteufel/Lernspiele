@@ -13,9 +13,11 @@ kern/TEILE            Teile in Ladereihenfolge, je Zeile eine Datei
 kern/VERSION          Version des Kerns (1.29.0)
 kern/CHANGELOG.md     Änderungen je Version
 kern/<teil>.js        die Teile — einzige Quelle
-tools/kern_verteilen.py   bündelt die Teile in <app>/kern/kern.js (Kopie je App)
+kern/farben.css       Farben der Reihe (DM1 a): gemeinsame Namen --k-*, nur Variablen
+tools/kern_verteilen.py   bündelt die .js-Teile in <app>/kern/kern.js, die .css-Teile in <app>/kern/kern.css
 tools/pruefe_kern.js      Tests der Teile und der Kopien
 <app>/kern/kern.js        Kopie je App, erzeugt — nie von Hand ändern
+<app>/kern/kern.css       ebenso
 ```
 
 `kern/` selbst geht nicht online (Pages veröffentlicht nur `portal/` und die App-Ordner); online ist nur die Kopie
@@ -61,8 +63,18 @@ schreibt `KERN.version` ans Ende des Bündels; `tools/pruefe_skripte.js` meldet 
 `version.js` davor lädt, `--pruefe` eine `version.js`, die nicht zu `VERSION` passt. Die Apps geben die Version als
 Option `version` an `KERN.meldungen` und `KERN.entwicklung` weiter und zeigen sie in der Statistik.
 
+**Farben** (seit 1.40.0, Entscheid DM1 a, [Konzept Darkmode](../konzept_darkmode.md)): Jede Seite, die den Stil ihrer
+App lädt (`eulenpfad/spiele/gemeinsam/stil.css`, `lernsteig/gemeinsam/stil.css`), lädt **davor**
+`<link rel="stylesheet" href="…/kern/kern.css">` — auch eine Seite ohne `kern.js` (Regelseiten der Strategie-Rätsel);
+`tools/pruefe_skripte.js` Punkt 6 meldet eine, die es nicht tut. `kern.css` setzt nur Variablen `--k-*` (Grund, Karte,
+Text, leiser Text, Rand, Knopf, Boden und Schrift des Knopfs, gut, Hinweis, Fokus, Bildgrund), hell mit den Werten des
+Eulenpfads. Eine App setzt ihre eigenen hellen Töne im eigenen `:root` über dieselben Namen (der Stil der App kommt
+später und gewinnt); ihre alten Namen verweisen auf die neuen (`--text: var(--k-text)`). Der dunkle Satz kommt unter
+`:root[data-farben="dunkel"]` und gewinnt dann über die hellen Werte der Apps, weil er spezifischer ist; App-eigene Töne
+(Himmel, Deko, Stellen, Akzent) bekommen ihre dunkle Fassung im Stil der App.
+
 Ein neuer Kern-Teil braucht keine Änderung an den Seiten: Er kommt in `kern/TEILE` und ist nach dem Verteilen in
-`kern.js` enthalten. Die Rahmen der Apps reichen weiter (etwa `LS.zahlText` → `KERN.zahl.text` mit der Schreibweise
+`kern.js` (oder `kern.css`) enthalten. Die Rahmen der Apps reichen weiter (etwa `LS.zahlText` → `KERN.zahl.text` mit der Schreibweise
 des Eulenpfads), damit Spiele und Übungen ihre gewohnten Aufrufe behalten.
 
 ## 4. Teile

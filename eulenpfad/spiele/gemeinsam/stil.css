@@ -1,18 +1,21 @@
 /* Gemeinsamer Stil aller Lernspiele — kindgerecht: gross, rund, farbig, ruhig. */
 
+/* Rahmenfarben aus dem Kern (kern/kern.css, Entscheid DM1 a, docs/konzept_darkmode.md): die Seite lädt ihn vor diesem
+   Stil; die Namen hier verweisen auf --k-*, bis sie ersetzt sind. Eigene Töne des Eulenpfads (Himmel, Stellen, Deko)
+   stehen weiter hier. */
 :root {
   --himmel-oben: #bfe6ff;
   --himmel-unten: #fef6e4;
-  --karte: #ffffff;
-  --text: #2d3047;
-  --text-leise: #6b6f8a;
-  --rand: #e3e6f3;
-  --gut: #2fbf71;
-  --gut-hell: #dff7ea;
-  --hinweis: #ff9f1c;
-  --hinweis-hell: #fff1dc;
-  --knopf: #5b6cff;
-  --knopf-dunkel: #3f4fd9;
+  --karte: var(--k-karte);
+  --text: var(--k-text);
+  --text-leise: var(--k-leise);
+  --rand: var(--k-rand);
+  --gut: var(--k-gut);
+  --gut-hell: var(--k-gut-hell);
+  --hinweis: var(--k-hinweis);
+  --hinweis-hell: var(--k-hinweis-hell);
+  --knopf: var(--k-knopf);
+  --knopf-dunkel: var(--k-knopf-dunkel);
   --schatten: 0 6px 0 rgba(45, 48, 71, .12), 0 10px 24px rgba(45, 48, 71, .10);
 
   /* Eine feste Farbe je Stelle, wie in Calcularis: Einer rot, Zehner blau, Hunderter grün;

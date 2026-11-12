@@ -1,0 +1,28 @@
+/* kern 1.40.0 · Prüfsumme sha256:4ca8d6e1aca08a79117cfa30aaaba2c350ca42b493b3f951896fa4f3a44f132a · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* ---- kern/farben.css ---- */
+/* Farben der Reihe (Entscheid DM1 a, docs/konzept_darkmode.md): gemeinsame Namen für die Rahmenfarben aller Apps.
+
+   Nur Variablen, keine Regeln. tools/kern_verteilen.py bündelt die CSS-Teile aus kern/TEILE in <app>/kern/kern.css;
+   jede Seite lädt sie vor dem Stil ihrer App (tools/pruefe_skripte.js, Punkt 6).
+
+   Hell stehen hier die Werte des Eulenpfads; eine App setzt ihre eigenen hellen Töne in ihrem :root über dieselben
+   Namen (der Lernsteig sachlicher, lernsteig/gemeinsam/stil.css) — ihr Stil kommt später und gewinnt. Die alten Namen
+   der Apps verweisen hierher (--text: var(--k-text)), bis sie ersetzt sind. Der dunkle Satz kommt unter
+   :root[data-farben="dunkel"] (Konzept, Reihenfolge Schritt 3) und gewinnt über die hellen Werte der Apps, weil er
+   spezifischer ist; App-eigene Töne (Himmel, Deko, Stellen, Akzent) bekommen ihre dunkle Fassung im Stil der App. */
+:root {
+  --k-grund: #fef6e4;          /* Hintergrund der Seite (Eulenpfad: unterer Ton des Himmels) */
+  --k-karte: #ffffff;          /* Karten, Felder, Knöpfe ohne Farbe */
+  --k-text: #2d3047;
+  --k-leise: #6b6f8a;          /* leiser Text, Nebensachen */
+  --k-rand: #e3e6f3;           /* Ränder und Trennlinien */
+  --k-knopf: #5b6cff;          /* Hauptknopf */
+  --k-knopf-dunkel: #3f4fd9;   /* Boden des Hauptknopfs */
+  --k-knopf-text: #ffffff;     /* Schrift auf dem Hauptknopf */
+  --k-gut: #2fbf71;            /* richtig, geschafft */
+  --k-gut-hell: #dff7ea;
+  --k-hinweis: #ff9f1c;        /* Hinweis, Achtung (nie Fehler-Rot) */
+  --k-hinweis-hell: #fff1dc;
+  --k-fokus: #5b6cff;          /* Fokusrahmen der Tastatur */
+  --k-bildgrund: #ffffff;      /* Grund unter Zeichnungen und Animationen, in beiden Modi hell (DM3 a) */
+}
