@@ -45,7 +45,7 @@ const LUECKEN = (() => {
           <stop offset=".62" stop-color="#ff8c1a"/><stop offset=".7" stop-color="#ffc35a"><animate attributeName="stop-color" dur="5s" values="#ffc35a;#ffe39a;#ffb040;#ffc35a" repeatCount="indefinite"/></stop><stop offset=".8" stop-color="#d9580a"/><stop offset=".92" stop-color="#3d0f00"/><stop offset="1" stop-color="#3d0f00" stop-opacity="0"/></radialGradient>
         <filter id="lid-weich" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
         <filter id="lid-weich-fein" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter>
-        <filter id="lid-wabern-a" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="3"><animate attributeName="baseFrequency" dur="11s" values="0.018;0.03;0.018" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="7"/></filter>
+        <filter id="lid-wabern-a" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="3"><animate attributeName="baseFrequency" dur="11s" values="0.018;0.03;0.018" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="13"/></filter>
       </defs>
       <circle cx="100" cy="100" r="99" fill="url(#lid-all-a)"/>${sterne}
       <g filter="url(#lid-wabern-a)"><g class="lu-dreht-langsam">
@@ -56,11 +56,11 @@ const LUECKEN = (() => {
       <circle cx="100" cy="100" r="24" fill="#000" filter="url(#lid-weich-fein)"/>`, false) },
     "schwarzes-loch-scheibe": { wirkung: "zieht", svg: svg(`
       <defs>${weltraum("lid-all-b")}
-        <linearGradient id="lid-scheibe" x1="0" x2="1"><animateTransform attributeName="gradientTransform" type="translate" values="-0.12 0;0.12 0;-0.12 0" dur="7s" repeatCount="indefinite"/><stop offset="0" stop-color="#ff7a1a" stop-opacity="0"/><stop offset=".18" stop-color="#ff8a2a"/>
+        <linearGradient id="lid-scheibe" x1="0" x2="1"><animateTransform attributeName="gradientTransform" type="translate" values="-0.25 0;0.25 0;-0.25 0" dur="7s" repeatCount="indefinite"/><stop offset="0" stop-color="#ff7a1a" stop-opacity="0"/><stop offset=".18" stop-color="#ff8a2a"/>
           <stop offset=".42" stop-color="#ffd9a0"/><stop offset=".5" stop-color="#fff6e0"/><stop offset=".58" stop-color="#ffd9a0"/><stop offset=".82" stop-color="#ff8a2a"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></linearGradient>
         <filter id="lid-glut" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="3"/></filter>
         <filter id="lid-glut-fein" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="1.2"/></filter>
-        <filter id="lid-wabern-b" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="7"><animate attributeName="baseFrequency" dur="13s" values="0.018;0.03;0.018" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="7"/></filter>
+        <filter id="lid-wabern-b" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="2" seed="7"><animate attributeName="baseFrequency" dur="13s" values="0.018;0.03;0.018" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" scale="13"/></filter>
       </defs>
       <circle cx="100" cy="100" r="99" fill="url(#lid-all-b)"/>${sterne}
       <g filter="url(#lid-wabern-b)"><g class="lu-gluet">

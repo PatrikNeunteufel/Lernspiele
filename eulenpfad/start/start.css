@@ -500,17 +500,15 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .raster-luecke { position: relative; align-items: center; justify-content: center; pointer-events: none; }
 .raster-luecke .luecke-motiv { position: relative; z-index: 1; width: min(78%, 240px); height: auto; overflow: visible; }
 /* „zieht“: Schlauch aus der Nachbarkachel ins Loch (STIL.schlauch); an der Kante der Kachel fehlt ihr Rahmen */
-.luecke-schlauch { position: absolute; top: 0; height: 100%; width: calc(50% + var(--spalt, 16px)); overflow: visible; z-index: 0; }
-.luecke-schlauch.von-links { left: calc(-1 * var(--spalt, 16px)); }
-.luecke-schlauch.von-rechts { right: calc(-1 * var(--spalt, 16px)); transform: scaleX(-1); }
-.luecke-schlauch path { fill: none; stroke: var(--nb-f, var(--hand-linie)); vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.luecke-schlauch { position: absolute; overflow: visible; z-index: 0; } /* Lage und Grösse in px setzt STIL.schlauch */
+.luecke-schlauch path { fill: none; stroke: var(--nb-f, var(--hand-linie)); stroke-linejoin: round; stroke-linecap: round; }
 .luecke-schlauch path.flaeche { fill: var(--k-karte); stroke: none; }
-.luecke-schlauch path.rand { stroke-width: 3.5; }
+.luecke-schlauch path.rand { stroke-width: 3.6; }
 .luecke-schlauch path.zug { stroke-width: 1.2; opacity: .35; }
 /* an der Kante der gezogenen Kachel fehlt ihr Rahmen nur in der Mitte, wo der Schlauch ansetzt */
 .stil-hand .luecke-nb.w-zieht > svg.hand-rahmen { -webkit-mask-composite: source-over; mask-composite: add; }
-.stil-hand .luecke-nb.w-zieht.luecke-rechts > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to left, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to left, transparent 0 12px, #000 12px); }
-.stil-hand .luecke-nb.w-zieht.luecke-links > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to right, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 8%, transparent 10% 90%, #000 92%), linear-gradient(to right, transparent 0 12px, #000 12px); }
+.stil-hand .luecke-nb.w-zieht.luecke-rechts > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 8%, transparent 8% 92%, #000 92%), linear-gradient(to left, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 8%, transparent 8% 92%, #000 92%), linear-gradient(to left, transparent 0 12px, #000 12px); }
+.stil-hand .luecke-nb.w-zieht.luecke-links > svg.hand-rahmen { -webkit-mask: linear-gradient(#000 0 8%, transparent 8% 92%, #000 92%), linear-gradient(to right, transparent 0 12px, #000 12px); mask: linear-gradient(#000 0 8%, transparent 8% 92%, #000 92%), linear-gradient(to right, transparent 0 12px, #000 12px); }
 /* Wirkungen bewegen sich dezent (Wunsch Patrik LERN_Session34): die Werte von --lx, --ly, --lr, --ls wandern */
 @property --lx { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @property --ly { syntax: '<length>'; inherits: false; initial-value: 0px; }
@@ -520,22 +518,18 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .stil-hand .luecke-nb.w-sog.luecke-links { animation: lu-sog-l 5s ease-in-out infinite; }
 .stil-hand .luecke-nb.w-heben.luecke-rechts { animation: lu-heben-r 3.8s ease-in-out infinite; }
 .stil-hand .luecke-nb.w-heben.luecke-links { animation: lu-heben-l 3.8s ease-in-out infinite; }
-.stil-hand .luecke-nb.w-zieht.luecke-rechts { animation: lu-zieht-r 3.6s ease-in-out infinite; }
-.stil-hand .luecke-nb.w-zieht.luecke-links { animation: lu-zieht-l 3.6s ease-in-out infinite; }
 .stil-hand .luecke-nb.w-ecke { animation: lu-gepickt 2.8s ease-in-out infinite; }
 .stil-hand .luecke-nb.w-loch { animation: lu-gebohrt 3s ease-in-out infinite; }
-@keyframes lu-sog-r { 0%, 100% { --lx: 3px; --lr: 1.4deg; --ls: .975; } 50% { --lx: 7px; --lr: 2.6deg; --ls: .95; } }
-@keyframes lu-sog-l { 0%, 100% { --lx: -3px; --lr: -1.4deg; --ls: .975; } 50% { --lx: -7px; --lr: -2.6deg; --ls: .95; } }
-@keyframes lu-heben-r { 0%, 100% { --ly: -3px; --lr: -1.4deg; } 40%, 70% { --ly: -8px; --lr: -2.8deg; } }
-@keyframes lu-heben-l { 0%, 100% { --ly: -3px; --lr: 1.4deg; } 40%, 70% { --ly: -8px; --lr: 2.8deg; } }
-@keyframes lu-zieht-r { 0%, 100% { --lx: 2px; --ls: 1; } 50% { --lx: 6px; --ls: .99; } }
-@keyframes lu-zieht-l { 0%, 100% { --lx: -2px; --ls: 1; } 50% { --lx: -6px; --ls: .99; } }
-@keyframes lu-gepickt { 0%, 70%, 100% { --lr: 0deg; } 76% { --lr: .8deg; } 82% { --lr: -.4deg; } }
-@keyframes lu-gebohrt { 0%, 100% { --lr: -.3deg; } 50% { --lr: .3deg; } }
+@keyframes lu-sog-r { 0%, 100% { --lx: 2px; --lr: 1deg; --ls: .98; } 50% { --lx: 14px; --lr: 5deg; --ls: .92; } }
+@keyframes lu-sog-l { 0%, 100% { --lx: -2px; --lr: -1deg; --ls: .98; } 50% { --lx: -14px; --lr: -5deg; --ls: .92; } }
+@keyframes lu-heben-r { 0%, 100% { --ly: -2px; --lr: -1deg; } 40%, 70% { --ly: -16px; --lr: -5deg; } }
+@keyframes lu-heben-l { 0%, 100% { --ly: -2px; --lr: 1deg; } 40%, 70% { --ly: -16px; --lr: 5deg; } }
+@keyframes lu-gepickt { 0%, 70%, 100% { --lr: 0deg; --lx: 0px; } 75% { --lr: 2.5deg; --lx: 4px; } 80% { --lr: -1.5deg; --lx: -2px; } 85% { --lr: .8deg; --lx: 0px; } }
+@keyframes lu-gebohrt { 0%, 100% { --lr: -1.2deg; } 50% { --lr: 1.2deg; } }
 @media (prefers-reduced-motion: reduce) { .stil-hand .luecke-nb, .stil-hand .luecke-nb .symbol.uhr, .stil-hand .luecke-nb .symbol.uhr .zeiger { animation: none !important; } }
 /* Bewegung der Motive (start/luecken.js, Wunsch Patrik LERN_Session34): dezent, jedes Teil um seine eigene Mitte */
 .luecke-motiv [class*="lu-"] { transform-box: fill-box; transform-origin: center; }
-.lu-dreht-langsam { transform-origin: center; animation: lu-dreht 70s linear infinite; }
+.lu-dreht-langsam { transform-origin: center; animation: lu-dreht 18s linear infinite; }
 .lu-gluet { animation: lu-gluet 4.5s ease-in-out infinite; }
 .lu-flimmer { animation: lu-flimmer 3.2s ease-in-out infinite; }
 .lu-funkel { animation: lu-funkel 3.6s ease-in-out infinite; }
@@ -561,33 +555,33 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .lu-spur { animation: lu-spur 2s linear infinite; }
 @keyframes lu-dreht { to { transform: rotate(360deg); } }
 .lu-kippt { animation: lu-kippt 9s ease-in-out infinite; }
-@keyframes lu-kippt { 0%, 100% { transform: rotate(-2deg) scaleY(1); } 50% { transform: rotate(2deg) scaleY(1.15); } }
+@keyframes lu-kippt { 0%, 100% { transform: rotate(-5deg) scaleY(.9); } 50% { transform: rotate(5deg) scaleY(1.35); } }
 /* Schwarze Löcher wirken auf die Zeit (Idee Patrik, LERN_Session34): die Uhr der Nachbarkachel läuft verzerrt — der
    Zeiger kriecht, ruckt und läuft zurück, das Zifferblatt staucht sich leicht */
 .stil-hand .luecke-nb:is(.w-sog, .w-zieht) .symbol.uhr { animation: lu-zeit-uhr 6s ease-in-out infinite; transform-origin: center; }
 .stil-hand .luecke-nb:is(.w-sog, .w-zieht) .symbol.uhr .zeiger { transform-box: view-box; transform-origin: 12px 13.6px; animation: lu-zeit-zeiger 6s ease-in-out infinite; }
 @keyframes lu-zeit-uhr { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(.82, 1.12) skewX(-8deg); } 60% { transform: scale(1.1, .9); } }
 @keyframes lu-zeit-zeiger { 0% { transform: rotate(0); } 40% { transform: rotate(40deg); } 48% { transform: rotate(250deg); } 70% { transform: rotate(160deg); } 100% { transform: rotate(360deg); } }
-@keyframes lu-gluet { 50% { opacity: .78; } }
-@keyframes lu-flimmer { 50% { opacity: .82; transform: scaleX(1.03); } }
-@keyframes lu-funkel { 50% { opacity: .1; } }
-@keyframes lu-schwebt { 50% { transform: translateY(-6px) rotate(-2deg); } }
-@keyframes lu-fluegel { 50% { transform: rotate(-12deg); } }
-@keyframes lu-fluegel-r { 50% { transform: rotate(12deg); } }
-@keyframes lu-wippe { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-@keyframes lu-nickt { 0%, 60%, 100% { transform: rotate(0); } 75% { transform: rotate(5deg); } 85% { transform: rotate(-1deg); } }
-@keyframes lu-guckt { 0%, 100% { transform: translateY(6px); } 40%, 70% { transform: translateY(-2px); } }
-@keyframes lu-kriecht { 50% { transform: translateX(-6px); } }
-@keyframes lu-reibe { 50% { transform: translate(-6px, 3px); } }
-@keyframes lu-hoch { 50% { transform: translateY(-4px); } }
-@keyframes lu-sinkt { 50% { transform: translateY(5px) rotate(4deg); } }
-@keyframes lu-puls { 50% { transform: scale(1.04); } }
-@keyframes lu-tupft { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(3px, 5px); } }
-@keyframes lu-atmet { 50% { transform: translateY(-3px) scale(1.02); } }
-@keyframes lu-steigt { 0% { transform: translateY(6px); opacity: 0; } 30% { opacity: .7; } 100% { transform: translateY(-14px); opacity: 0; } }
-@keyframes lu-driftet { 50% { transform: translate(5px, -4px) rotate(18deg); opacity: .65; } }
-@keyframes lu-driftet-l { 50% { transform: translate(-5px, 4px) rotate(-18deg); opacity: .65; } }
-@keyframes lu-zuckt { 0%, 80%, 100% { transform: translateX(0); } 86% { transform: translateX(4px); } 92% { transform: translateX(-1px); } }
+@keyframes lu-gluet { 50% { opacity: .55; } }
+@keyframes lu-flimmer { 50% { opacity: .7; transform: scaleX(1.08); } }
+@keyframes lu-funkel { 50% { opacity: 0; } }
+@keyframes lu-schwebt { 50% { transform: translateY(-14px) rotate(-5deg); } }
+@keyframes lu-fluegel { 50% { transform: rotate(-24deg); } }
+@keyframes lu-fluegel-r { 50% { transform: rotate(24deg); } }
+@keyframes lu-wippe { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes lu-nickt { 0%, 60%, 100% { transform: rotate(0); } 75% { transform: rotate(12deg); } 85% { transform: rotate(-3deg); } }
+@keyframes lu-guckt { 0%, 100% { transform: translateY(22px); } 40%, 70% { transform: translateY(-4px); } }
+@keyframes lu-kriecht { 50% { transform: translateX(-18px); } }
+@keyframes lu-reibe { 50% { transform: translate(-16px, 8px); } }
+@keyframes lu-hoch { 50% { transform: translateY(-12px); } }
+@keyframes lu-sinkt { 50% { transform: translateY(16px) rotate(10deg); } }
+@keyframes lu-puls { 50% { transform: scale(1.12); } }
+@keyframes lu-tupft { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(8px, 14px); } }
+@keyframes lu-atmet { 50% { transform: translateY(-8px) scale(1.06); } }
+@keyframes lu-steigt { 0% { transform: translateY(10px); opacity: 0; } 30% { opacity: .9; } 100% { transform: translate(8px, -30px); opacity: 0; } }
+@keyframes lu-driftet { 50% { transform: translate(16px, -12px) rotate(45deg); opacity: .4; } }
+@keyframes lu-driftet-l { 50% { transform: translate(-16px, 12px) rotate(-45deg); opacity: .4; } }
+@keyframes lu-zuckt { 0%, 75%, 100% { transform: translateX(0); } 82% { transform: translateX(12px); } 90% { transform: translateX(-3px); } }
 @keyframes lu-blink { 50% { opacity: .2; } }
 @keyframes lu-spur { to { stroke-dashoffset: -28; } }
 @media (prefers-reduced-motion: reduce) { .luecke-motiv [class*="lu-"], .luecke-schlauch * { animation: none !important; } }
@@ -598,8 +592,7 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .stil-hand .luecke-nb.w-sog.luecke-links { --lx: -5px; --lr: -2deg; --ls: .96; transform-origin: left center; }
 .stil-hand .luecke-nb.w-heben.luecke-rechts { --ly: -6px; --lr: -2.2deg; transform-origin: left bottom; }
 .stil-hand .luecke-nb.w-heben.luecke-links { --ly: -6px; --lr: 2.2deg; transform-origin: right bottom; }
-.stil-hand .luecke-nb.w-zieht.luecke-rechts { --lx: 4px; transform-origin: left center; }
-.stil-hand .luecke-nb.w-zieht.luecke-links { --lx: -4px; transform-origin: right center; }
+/* „zieht“: die Kachel steht still, damit der Schlauch auf ihrem Rahmen bleibt */
 .stil-hand .luecke-nb.w-ecke.luecke-rechts { clip-path: polygon(0 0, calc(100% - 46px) 0, calc(100% - 38px) 10px, calc(100% - 26px) 6px, calc(100% - 18px) 22px, calc(100% - 6px) 24px, 100% 44px, 100% 100%, 0 100%); }
 .stil-hand .luecke-nb.w-ecke.luecke-links { clip-path: polygon(46px 0, 100% 0, 100% 100%, 0 100%, 0 44px, 6px 24px, 18px 22px, 26px 6px, 38px 10px); }
 .stil-hand .luecke-nb.w-loch.luecke-rechts { -webkit-mask: radial-gradient(circle at calc(100% - 22px) 46%, transparent 10px, #000 11px); mask: radial-gradient(circle at calc(100% - 22px) 46%, transparent 10px, #000 11px); }

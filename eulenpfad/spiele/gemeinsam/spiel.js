@@ -3672,55 +3672,75 @@ const STIL = (() => {
     if (w === "zieht") schlauch(l, gezogen);
   }
   /**
-   * Schlauch aus der gezogenen Kachel bis in die Mitte der Lücke (Skizze Patrik, LERN_Session34): die Rahmenlinie läuft
-   * ab 9 % der Höhe an der Kante entlang und biegt im Bogen in den Schlauch (wie ein Stück mit der Kachel), mit gekräuseltem Rand, der zum Loch hin enger und flacher wird, und feinen Zugstreifen;
-   * gefüllt wie die Karte, Linie in --f der Kachel. Die Wellen wandern langsam (SMIL, nicht bei „weniger Bewegung“).
-   * Reicht über den Abstand des Rasters (--spalt) bis an die Kachel. Drei fest gerechnete Fassungen (Sinus-Wellen).
+   * Schlauch aus der gezogenen Kachel bis in die Mitte der Lücke (Skizze Patrik, LERN_Session34), in Pixeln nach der
+   * wirklichen Lage der Kachel (getBoundingClientRect, mit der Verschiebung und Grösse des Rasters): Die Linie beginnt auf
+   * dem Rahmen der Kachel (8 % unter ihrer Oberkante, 2 px innerhalb der Kante), läuft ein Stück an der Kante entlang,
+   * biegt im Bogen ab und verjüngt sich gekräuselt bis in die Mitte des Lochs; feine Zugstreifen laufen mit. Der Rahmen
+   * der Kachel fehlt an dieser Kante von 8 bis 92 % (start.css), so bleibt es eine Linie. Die gezogene Kachel steht still,
+   * damit Schlauch und Rahmen aufeinander bleiben; die Wellen wandern (SMIL, nicht bei „weniger Bewegung“).
    */
-  const SCHLAUCH_FLAECHE = ["M0.0,9.0 L0.5,12.9 L1.9,16.5 L4.1,19.6 L7.0,22.0 L10.4,23.5 L14.0,24.0 L19.7,25.6 L23.9,27.3 L27.6,28.6 L31.2,29.3 L34.5,29.8 L37.7,30.8 L40.8,32.7 L43.9,34.8 L46.8,36.5 L49.7,37.5 L52.5,37.9 L55.3,38.2 L58.1,38.9 L60.7,40.1 L63.4,41.5 L66.0,42.9 L68.6,43.8 L71.2,44.3 L73.7,44.6 L76.2,45.0 L78.7,45.7 L81.1,46.5 L83.5,47.3 L85.9,47.9 L88.3,48.3 L90.7,48.5 L93.0,48.7 L95.4,49.0 L97.7,49.2 L100.0,49.3 L100.0,50.7 L97.7,50.8 L95.4,51.0 L93.0,51.3 L90.7,51.6 L88.3,51.9 L85.9,52.2 L83.5,52.6 L81.1,53.2 L78.7,54.0 L76.2,55.0 L73.7,55.8 L71.2,56.3 L68.6,56.6 L66.0,57.0 L63.4,57.9 L60.7,59.2 L58.1,60.8 L55.3,62.2 L52.5,63.1 L49.7,63.5 L46.8,63.8 L43.9,64.5 L40.8,66.1 L37.7,68.2 L34.5,70.2 L31.2,71.4 L27.6,72.2 L23.9,73.0 L19.7,74.3 L14.0,76.0 L10.4,76.5 L7.0,78.0 L4.1,80.4 L1.9,83.5 L0.5,87.1 L0.0,91.0 Z", "M0.0,9.0 L0.5,12.9 L1.9,16.5 L4.1,19.6 L7.0,22.0 L10.4,23.5 L14.0,24.0 L19.7,25.5 L23.9,26.5 L27.6,27.4 L31.2,28.8 L34.5,30.7 L37.7,32.9 L40.8,34.4 L43.9,35.0 L46.8,35.3 L49.7,35.8 L52.5,36.8 L55.3,38.3 L58.1,40.0 L60.7,41.3 L63.4,42.1 L66.0,42.5 L68.6,42.9 L71.2,43.4 L73.7,44.3 L76.2,45.4 L78.7,46.3 L81.1,47.0 L83.5,47.3 L85.9,47.6 L88.3,47.9 L90.7,48.3 L93.0,48.8 L95.4,49.1 L97.7,49.2 L100.0,49.3 L100.0,50.7 L97.7,50.8 L95.4,50.9 L93.0,51.1 L90.7,51.5 L88.3,52.1 L85.9,52.6 L83.5,53.0 L81.1,53.3 L78.7,53.6 L76.2,54.2 L73.7,55.2 L71.2,56.3 L68.6,57.4 L66.0,58.1 L63.4,58.5 L60.7,58.8 L58.1,59.5 L55.3,60.8 L52.5,62.5 L49.7,64.2 L46.8,65.5 L43.9,66.1 L40.8,66.4 L37.7,66.9 L34.5,68.3 L31.2,70.3 L27.6,72.2 L23.9,73.7 L19.7,74.8 L14.0,76.0 L10.4,76.5 L7.0,78.0 L4.1,80.4 L1.9,83.5 L0.5,87.1 L0.0,91.0 Z", "M0.0,9.0 L0.5,12.9 L1.9,16.5 L4.1,19.6 L7.0,22.0 L10.4,23.5 L14.0,24.0 L19.7,25.2 L23.9,26.6 L27.6,28.4 L31.2,30.3 L34.5,31.7 L37.7,32.3 L40.8,32.5 L43.9,33.3 L46.8,34.7 L49.7,36.6 L52.5,38.3 L55.3,39.5 L58.1,40.1 L60.7,40.5 L63.4,40.9 L66.0,41.8 L68.6,43.0 L71.2,44.2 L73.7,45.2 L76.2,45.8 L78.7,46.1 L81.1,46.4 L83.5,46.9 L85.9,47.5 L88.3,48.1 L90.7,48.6 L93.0,48.9 L95.4,49.1 L97.7,49.2 L100.0,49.3 L100.0,50.7 L97.7,50.8 L95.4,51.0 L93.0,51.2 L90.7,51.4 L88.3,51.7 L85.9,52.3 L83.5,53.0 L81.1,53.7 L78.7,54.3 L76.2,54.6 L73.7,55.0 L71.2,55.5 L68.6,56.4 L66.0,57.7 L63.4,59.1 L60.7,60.1 L58.1,60.7 L55.3,61.0 L52.5,61.5 L49.7,62.5 L46.8,64.2 L43.9,66.2 L40.8,68.0 L37.7,69.0 L34.5,69.3 L31.2,69.9 L27.6,71.1 L23.9,72.9 L19.7,74.6 L14.0,76.0 L10.4,76.5 L7.0,78.0 L4.1,80.4 L1.9,83.5 L0.5,87.1 L0.0,91.0 Z"];
-  const SCHLAUCH_RAND = [["M0.0,9.0 L0.5,12.9 L1.9,16.5 L4.1,19.6 L7.0,22.0 L10.4,23.5 L14.0,24.0 L19.7,25.6 L23.9,27.3 L27.6,28.6 L31.2,29.3 L34.5,29.8 L37.7,30.8 L40.8,32.7 L43.9,34.8 L46.8,36.5 L49.7,37.5 L52.5,37.9 L55.3,38.2 L58.1,38.9 L60.7,40.1 L63.4,41.5 L66.0,42.9 L68.6,43.8 L71.2,44.3 L73.7,44.6 L76.2,45.0 L78.7,45.7 L81.1,46.5 L83.5,47.3 L85.9,47.9 L88.3,48.3 L90.7,48.5 L93.0,48.7 L95.4,49.0 L97.7,49.2 L100.0,49.3", "M0.0,9.0 L0.5,12.9 L1.9,16.5 L4.1,19.6 L7.0,22.0 L10.4,23.5 L14.0,24.0 L19.7,25.5 L23.9,26.5 L27.6,27.4 L31.2,28.8 L34.5,30.7 L37.7,32.9 L40.8,34.4 L43.9,35.0 L46.8,35.3 L49.7,35.8 L52.5,36.8 L55.3,38.3 L58.1,40.0 L60.7,41.3 L63.4,42.1 L66.0,42.5 L68.6,42.9 L71.2,43.4 L73.7,44.3 L76.2,45.4 L78.7,46.3 L81.1,47.0 L83.5,47.3 L85.9,47.6 L88.3,47.9 L90.7,48.3 L93.0,48.8 L95.4,49.1 L97.7,49.2 L100.0,49.3", "M0.0,9.0 L0.5,12.9 L1.9,16.5 L4.1,19.6 L7.0,22.0 L10.4,23.5 L14.0,24.0 L19.7,25.2 L23.9,26.6 L27.6,28.4 L31.2,30.3 L34.5,31.7 L37.7,32.3 L40.8,32.5 L43.9,33.3 L46.8,34.7 L49.7,36.6 L52.5,38.3 L55.3,39.5 L58.1,40.1 L60.7,40.5 L63.4,40.9 L66.0,41.8 L68.6,43.0 L71.2,44.2 L73.7,45.2 L76.2,45.8 L78.7,46.1 L81.1,46.4 L83.5,46.9 L85.9,47.5 L88.3,48.1 L90.7,48.6 L93.0,48.9 L95.4,49.1 L97.7,49.2 L100.0,49.3"], ["M0.0,91.0 L0.5,87.1 L1.9,83.5 L4.1,80.4 L7.0,78.0 L10.4,76.5 L14.0,76.0 L19.7,74.3 L23.9,73.0 L27.6,72.2 L31.2,71.4 L34.5,70.2 L37.7,68.2 L40.8,66.1 L43.9,64.5 L46.8,63.8 L49.7,63.5 L52.5,63.1 L55.3,62.2 L58.1,60.8 L60.7,59.2 L63.4,57.9 L66.0,57.0 L68.6,56.6 L71.2,56.3 L73.7,55.8 L76.2,55.0 L78.7,54.0 L81.1,53.2 L83.5,52.6 L85.9,52.2 L88.3,51.9 L90.7,51.6 L93.0,51.3 L95.4,51.0 L97.7,50.8 L100.0,50.7", "M0.0,91.0 L0.5,87.1 L1.9,83.5 L4.1,80.4 L7.0,78.0 L10.4,76.5 L14.0,76.0 L19.7,74.8 L23.9,73.7 L27.6,72.2 L31.2,70.3 L34.5,68.3 L37.7,66.9 L40.8,66.4 L43.9,66.1 L46.8,65.5 L49.7,64.2 L52.5,62.5 L55.3,60.8 L58.1,59.5 L60.7,58.8 L63.4,58.5 L66.0,58.1 L68.6,57.4 L71.2,56.3 L73.7,55.2 L76.2,54.2 L78.7,53.6 L81.1,53.3 L83.5,53.0 L85.9,52.6 L88.3,52.1 L90.7,51.5 L93.0,51.1 L95.4,50.9 L97.7,50.8 L100.0,50.7", "M0.0,91.0 L0.5,87.1 L1.9,83.5 L4.1,80.4 L7.0,78.0 L10.4,76.5 L14.0,76.0 L19.7,74.6 L23.9,72.9 L27.6,71.1 L31.2,69.9 L34.5,69.3 L37.7,69.0 L40.8,68.0 L43.9,66.2 L46.8,64.2 L49.7,62.5 L52.5,61.5 L55.3,61.0 L58.1,60.7 L60.7,60.1 L63.4,59.1 L66.0,57.7 L68.6,56.4 L71.2,55.5 L73.7,55.0 L76.2,54.6 L78.7,54.3 L81.1,53.7 L83.5,53.0 L85.9,52.3 L88.3,51.7 L90.7,51.4 L93.0,51.2 L95.4,51.0 L97.7,50.8 L100.0,50.7"]]; // oben, unten (ohne die Kante an der Kachel)
-  const SCHLAUCH_STREIFEN = [["M8.4,34.0 L20.9,37.1 L30.2,38.3 L38.6,39.4 L46.4,42.0 L53.9,44.2 L61.0,45.1 L67.9,46.0 L74.6,47.5 L81.2,48.7 L87.6,49.2 L93.8,49.7 L100.0,50.0", "M8.4,50.0 L20.9,50.9 L30.2,50.0 L38.6,49.2 L46.4,50.0 L53.9,50.6 L61.0,50.0 L67.9,49.6 L74.6,50.0 L81.2,50.2 L87.6,50.0 L93.8,49.9 L100.0,50.0", "M8.4,66.0 L20.9,64.7 L30.2,61.7 L38.6,59.1 L46.4,58.0 L53.9,57.0 L61.0,54.9 L67.9,53.2 L74.6,52.5 L81.2,51.8 L87.6,50.8 L93.8,50.2 L100.0,50.0"], ["M8.4,34.0 L20.9,35.3 L30.2,38.2 L38.6,40.9 L46.4,42.0 L53.9,43.0 L61.0,45.1 L67.9,46.8 L74.6,47.5 L81.2,48.2 L87.6,49.2 L93.8,49.8 L100.0,50.0", "M8.4,50.0 L20.9,49.1 L30.2,50.0 L38.6,50.7 L46.4,50.0 L53.9,49.4 L61.0,50.0 L67.9,50.4 L74.6,50.0 L81.2,49.8 L87.6,50.0 L93.8,50.1 L100.0,50.0", "M8.4,66.0 L20.9,62.9 L30.2,61.7 L38.6,60.6 L46.4,58.1 L53.9,55.8 L61.0,54.9 L67.9,54.0 L74.6,52.5 L81.2,51.3 L87.6,50.8 L93.8,50.3 L100.0,50.0"], ["M8.4,34.0 L20.9,37.1 L30.2,38.3 L38.6,39.4 L46.4,42.0 L53.9,44.2 L61.0,45.1 L67.9,46.0 L74.6,47.5 L81.2,48.7 L87.6,49.2 L93.8,49.7 L100.0,50.0", "M8.4,50.0 L20.9,50.9 L30.2,50.0 L38.6,49.3 L46.4,50.0 L53.9,50.6 L61.0,50.0 L67.9,49.6 L74.6,50.0 L81.2,50.2 L87.6,50.0 L93.8,49.9 L100.0,50.0", "M8.4,66.0 L20.9,64.7 L30.2,61.7 L38.6,59.1 L46.4,58.0 L53.9,57.0 L61.0,54.9 L67.9,53.2 L74.6,52.5 L81.2,51.8 L87.6,50.8 L93.8,50.2 L100.0,50.0"]];
+  const SCHLAUCH_PHASEN = [0, 2.1, 4.2];
+  function schlauchLinie(kante, y0, richtung, cx, cy, ph, welle) {
+    const pts = [], R = Math.max(8, Math.min(34, (cx - kante) * 0.22)), RY = Math.max(10, Math.min(46, Math.abs(cy - y0) * 0.32));
+    for (let i = 0; i <= 8; i++) { const th = (i / 8) * Math.PI / 2; pts.push([kante + R * (1 - Math.cos(th)), y0 + richtung * RY * Math.sin(th)]); }
+    const x1 = kante + R, y1 = y0 + richtung * RY, ziel = cy - richtung * 1.6, n = 40;
+    for (let i = 1; i <= n; i++) {
+      const t = i / n, w = (1 - t) ** 1.2 * welle * Math.sin(t * 8 * Math.PI + ph) * Math.min(1, t * 5);
+      pts.push([x1 + (cx - x1) * t ** 0.8, y1 + (ziel - y1) * (1 - (1 - t) ** 1.7) + w]);
+    }
+    return pts;
+  }
   function schlauch(l, gezogen) {
     l.querySelector(":scope > svg.luecke-schlauch")?.remove();
-    if (!gezogen) return;
+    if (!gezogen || !l.offsetParent) return;
     const ruhig = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const s = document.createElementNS(NS, "svg");
-    s.setAttribute("class", "luecke-schlauch " + (gezogen.seite === "luecke-rechts" ? "von-links" : "von-rechts"));
-    s.setAttribute("viewBox", "0 0 100 100");
-    s.setAttribute("preserveAspectRatio", "none");
-    s.setAttribute("aria-hidden", "true");
-    const bewege = (el, fassungen) => {
-      el.setAttribute("d", fassungen[0]);
-      if (ruhig) return;
-      const a = document.createElementNS(NS, "animate");
-      a.setAttribute("attributeName", "d");
-      a.setAttribute("dur", "3.6s");
-      a.setAttribute("repeatCount", "indefinite");
-      a.setAttribute("values", [...fassungen, fassungen[0]].join(";"));
-      el.appendChild(a);
-    };
-    const flaeche = document.createElementNS(NS, "path");
-    flaeche.setAttribute("class", "flaeche");
-    bewege(flaeche, SCHLAUCH_FLAECHE);
-    s.appendChild(flaeche);
-    for (const fassungen of SCHLAUCH_RAND) {
-      const r = document.createElementNS(NS, "path");
-      r.setAttribute("class", "rand");
-      bewege(r, fassungen);
-      s.appendChild(r);
-    }
-    SCHLAUCH_STREIFEN[0].forEach((_, i) => {
-      const z = document.createElementNS(NS, "path");
-      z.setAttribute("class", "zug");
-      bewege(z, SCHLAUCH_STREIFEN.map(f => f[i]));
-      s.appendChild(z);
+    const lr = l.getBoundingClientRect(), kr = gezogen.k.getBoundingClientRect();
+    const links = gezogen.seite === "luecke-rechts"; // die Kachel liegt links der Lücke
+    const kanteX = links ? kr.right - lr.left - 2 : kr.left - lr.left + 2, mitteX = lr.width / 2;
+    const oben = Math.min(0, kr.top - lr.top) - 6, unten = Math.max(lr.height, kr.bottom - lr.top) + 6;
+    const x0 = Math.min(kanteX, mitteX) - 6, breite = Math.abs(mitteX - kanteX) + 12, hoehe = unten - oben;
+    // in Koordinaten des SVG, immer „von links nach rechts“ gerechnet, für die Kachel rechts gespiegelt
+    const kante = 6, cx = breite - 6, cy = lr.height / 2 - oben;
+    const yo = kr.top - lr.top - oben + 0.08 * kr.height, yu = kr.bottom - lr.top - oben - 0.08 * kr.height;
+    const xs = x => (links ? x : breite - x).toFixed(1);
+    const zug = ps => "M" + ps.map(([x, y]) => `${xs(x)},${y.toFixed(1)}`).join(" L");
+    const fassungen = SCHLAUCH_PHASEN.map(ph => {
+      const o = schlauchLinie(kante, yo, 1, cx, cy, ph, 5), u = schlauchLinie(kante, yu, -1, cx, cy, ph + 1.1, 5);
+      const streifen = [0.3, 0.5, 0.7].map(a => schlauchLinie(kante + 10, yo + (yu - yo) * a, a < 0.5 ? 1 : a > 0.5 ? -1 : 0, cx, cy, ph * 1.4 + a * 3, 2.5).slice(8));
+      return { flaeche: zug([...o, ...u.reverse()]) + " Z", oben: zug(o), unten: zug(u.reverse()), streifen: streifen.map(zug) };
     });
-    const gitter = l.parentElement, f = getComputedStyle(gezogen.k).getPropertyValue("--f").trim();
-    l.style.setProperty("--spalt", getComputedStyle(gitter).columnGap || "16px");
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("class", "luecke-schlauch");
+    s.setAttribute("viewBox", `0 0 ${breite.toFixed(1)} ${hoehe.toFixed(1)}`);
+    s.setAttribute("aria-hidden", "true");
+    Object.assign(s.style, { left: `${x0.toFixed(1)}px`, top: `${oben.toFixed(1)}px`, width: `${breite.toFixed(1)}px`, height: `${hoehe.toFixed(1)}px` });
+    const pfad = (klasse, werte) => {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("class", klasse);
+      p.setAttribute("d", werte[0]);
+      if (!ruhig) {
+        const a = document.createElementNS(NS, "animate");
+        a.setAttribute("attributeName", "d");
+        a.setAttribute("dur", "3.2s");
+        a.setAttribute("repeatCount", "indefinite");
+        a.setAttribute("values", [...werte, werte[0]].join(";"));
+        p.appendChild(a);
+      }
+      s.appendChild(p);
+    };
+    pfad("flaeche", fassungen.map(f => f.flaeche));
+    pfad("rand", fassungen.map(f => f.oben));
+    pfad("rand", fassungen.map(f => f.unten));
+    fassungen[0].streifen.forEach((_, i) => pfad("zug", fassungen.map(f => f.streifen[i])));
+    const f = getComputedStyle(gezogen.k).getPropertyValue("--f").trim();
     if (f) l.style.setProperty("--nb-f", f);
     l.prepend(s);
+    zuLuecke.set(gezogen.k, l);
+    lueckenBeobachter?.observe(gezogen.k); // ändert die Kachel ihre Grösse (Bild geladen), neu zeichnen
   }
-  const lueckenBeobachter = typeof ResizeObserver === "function" ? new ResizeObserver(e => e.forEach(x => nachbarn(x.target))) : null;
+  const zuLuecke = new WeakMap();
+  const lueckenBeobachter = typeof ResizeObserver === "function"
+    ? new ResizeObserver(e => e.forEach(x => { const l = zuLuecke.get(x.target) || x.target; if (l.matches?.(".raster-luecke")) nachbarn(l); })) : null;
 
   /** Ein Element einbinden: Rahmen beobachten, Raster setzen. */
   function binde(k) {

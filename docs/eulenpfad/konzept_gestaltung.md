@@ -319,7 +319,9 @@ Zugstreifen; der dunkle Grund der Löcher läuft fein in den Hintergrund aus, we
 Wirkungen auf die Kacheln bewegen sich dezent (ruhig bei „weniger Bewegung“ des Geräts). Dritter Nachtrag: Die Rahmenlinie
 der gezogenen Kachel biegt im Bogen in den Schlauch; die Löcher wabern (Turbulenz), beim Ring wandert die hellste Stelle,
 bei der Scheibe läuft das Licht über die Scheibe; schwarze Löcher wirken auf die Zeit — die Uhr der Nachbarkachel läuft
-verzerrt (Idee Patrik).
+verzerrt (Idee Patrik). Vierter Nachtrag: Der Schlauch wird nach der wirklichen Lage der Kachel in Pixeln gezeichnet und
+setzt ihren Rahmen als eine Linie fort (beide Seiten); die gezogene Kachel steht still; alle Bewegungen deutlich grösser
+(Hinweis Patrik: kaum zu erkennen).
 
 ### Titel „Eulenpfad“ (Wunsch Patrik, 12.11.2026)
 
