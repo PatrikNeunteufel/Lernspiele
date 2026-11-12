@@ -289,6 +289,37 @@ nicht wegnehmen. Kippen würde die Empfehlung zu b, wenn eine Lehrperson die Emp
 fremden Gerät (Schul-iPad) setzt und die Familie sie zu Hause nicht überschreiben dürfen soll — das ist eine Frage des
 Vorrangs zwischen Gruppen und gehört zu LERN-48.
 
+## Verspieltes im Stil „hand“ (Wünsche Patrik, LERN_Session34)
+
+### LU1 — Lücken im Kachelraster füllen → **a** (Patrik, 12.11.2026)
+
+**Ort:** `start/spiele.js` (`gitter`, `STIL.luecke`), `spiele/gemeinsam/bilder.js`.
+**Heute:** Im Stil „hand“ bleibt etwa jede zwölfte Zelle leer (`div.raster-luecke`), je Spiel immer an derselben Stelle,
+auch in der ersten Zelle (Wunsch LERN_Session32).
+**Problem:** Eine leere Zelle wirkt wie ein fehlendes Spiel.
+
+- **a (entschieden):** „In die Lücke kommt eine kleine Zeichnung, passend zum Fach, ohne Text und nicht antippbar
+  (`aria-hidden`): Mathe ein schwarzes Loch, das eine Ziffer einsaugt; Deutsch Bücherwurm oder Tintenklecks; NMG diebische
+  Elster mit einer Kachel im Schnabel, Maulwurfshügel; Englisch und Französisch ein davonfliegender Koffer; Musik ein
+  Pausenzeichen; Medien und Informatik ein Pixel-Loch. Je Fach zwei bis drei Motive, mit Startwert gewählt (je Spiel
+  gleich), auf der hellen Bildkachel (DM3 a), höchstens eine kleine, ruhige Bewegung. Im Stil ‚glatt‘ keine Lücken.“
+- b: ein Motiv für alle Fächer.
+
+**Zusatz (Frage Patrik, 12.11.2026, „wäre es too much?“):** Das Motiv darf die Nachbarkacheln leicht in Mitleidenschaft
+ziehen — das schwarze Loch dreht und verkleinert sie ein wenig zu sich hin, der Maulwurfshügel hebt die Nachbarkachel
+schief an, bei der Elster fehlt der Nachbarkachel eine Ecke, der Bücherwurm hinterlässt ein kleines Loch. Ruhend,
+nur im Stil „hand“, Antippen und Lesen der Nachbarn unberührt; bei „weniger Bewegung“ des Geräts keine Bewegung.
+
+### Titel „Eulenpfad“ (Wunsch Patrik, 12.11.2026)
+
+Im Stil „hand“ stehen die Buchstaben des Titels leicht verschieden hoch und leicht schräg, mit Startwert (bei jedem Laden
+gleich); im Stil „glatt“ gerade wie bisher.
+
+### Vorgemerkt: Easter Eggs zu besonderen Tagen (Wunsch Patrik, 12.11.2026 — nichts bauen)
+
+Der Stil passt sich an besonderen Tagen leicht an, etwa Weihnachten, Silvester/Neujahr, Geburtstag des Kindes (aus dem
+Profil). Vor dem Bau ein eigenes Konzept mit Entscheidungsfragen (welche Tage, was ändert sich, wer kann es ausschalten).
+
 ## Reihenfolge nach den Entscheiden (Vorschlag)
 
 1. GS1: Feier-Angaben in den Katalog, Kartenbild auf der Startseite, Ladezeit messen.

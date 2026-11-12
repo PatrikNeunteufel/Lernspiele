@@ -3648,6 +3648,22 @@ const STIL = (() => {
     k.style.setProperty("--rs", um(0.975, 1.02).toFixed(3));
   }
 
+  /**
+   * Lücke mit Wirkung (LU1 a, start/luecken.js): die Nachbarkarten in derselben Zeile bekommen .luecke-nb, die Wirkung
+   * und die Seite, auf der die Lücke liegt (start.css). Neu gerechnet, wenn die Lücke ihre Grösse ändert (andere
+   * Spaltenzahl); ist sie ausgeblendet (schmales Fenster), tragen die Nachbarn nichts.
+   */
+  function nachbarn(l) {
+    const w = l.dataset.wirkung, sichtbar = !!l.offsetParent;
+    for (const [k, seite] of [[l.previousElementSibling, "luecke-rechts"], [l.nextElementSibling, "luecke-links"]]) {
+      if (!k?.matches(".spielkarte")) continue;
+      k.classList.remove("luecke-nb", "luecke-rechts", "luecke-links", "w-sog", "w-heben", "w-ecke", "w-loch");
+      const zeile = sichtbar && Math.abs(k.offsetTop - l.offsetTop) < l.offsetHeight / 2;
+      if (w && zeile) k.classList.add("luecke-nb", seite, `w-${w}`);
+    }
+  }
+  const lueckenBeobachter = typeof ResizeObserver === "function" ? new ResizeObserver(e => e.forEach(x => nachbarn(x.target))) : null;
+
   /** Ein Element einbinden: Rahmen beobachten, Raster setzen. */
   function binde(k) {
     if (k.dataset.stil) return;
@@ -3661,6 +3677,8 @@ const STIL = (() => {
     if (wurzel.nodeType !== 1) return;
     if (wurzel.matches(rahmenWahl)) binde(wurzel);
     wurzel.querySelectorAll(rahmenWahl).forEach(binde);
+    const lu = [...(wurzel.matches(".raster-luecke[data-wirkung]") ? [wurzel] : []), ...wurzel.querySelectorAll(".raster-luecke[data-wirkung]")];
+    for (const l of lu) if (l.dataset.wirkung && !l.dataset.stil) { l.dataset.stil = "1"; if (lueckenBeobachter) lueckenBeobachter.observe(l); else nachbarn(l); }
   }
   let neues = null;
 

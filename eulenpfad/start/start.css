@@ -116,6 +116,18 @@
 .titel h1 span:nth-child(7n+5) { color: var(--deko-5-schrift); }
 .titel h1 span:nth-child(7n+6) { color: var(--deko-6-schrift); }
 .titel h1 span:nth-child(7n+7) { color: var(--deko-1-schrift); }
+/* im Stil „hand“ tanzen die Buchstaben leicht: verschieden hoch, leicht schräg, bei jedem Laden gleich (Wunsch Patrik,
+   LERN_Session34); Folge über neun Buchstaben, wiederholt bei längeren Namen */
+.stil-hand .titel h1 span { display: inline-block; transform: translateY(var(--ty, 0)) rotate(var(--tr, 0deg)); }
+.stil-hand .titel h1 span:nth-child(9n+1) { --ty: -2px;  --tr: -6deg; }
+.stil-hand .titel h1 span:nth-child(9n+2) { --ty: 4px;   --tr: 3deg; }
+.stil-hand .titel h1 span:nth-child(9n+3) { --ty: -5px;  --tr: -2deg; }
+.stil-hand .titel h1 span:nth-child(9n+4) { --ty: 2px;   --tr: 7deg; }
+.stil-hand .titel h1 span:nth-child(9n+5) { --ty: -1px;  --tr: -4deg; }
+.stil-hand .titel h1 span:nth-child(9n+6) { --ty: 5px;   --tr: 2deg; }
+.stil-hand .titel h1 span:nth-child(9n+7) { --ty: -4px;  --tr: 5deg; }
+.stil-hand .titel h1 span:nth-child(9n+8) { --ty: 1px;   --tr: -7deg; }
+.stil-hand .titel h1 span:nth-child(9n+9) { --ty: -3px;  --tr: 4deg; }
 
 .knopf.klein { font-size: 18px; min-height: 48px; padding: 8px 16px; }
 a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
@@ -481,9 +493,27 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .stil-hand #inhalt .karte { position: relative; }
 /* svg.hand-rahmen selbst und die Spielseite: spiele/gemeinsam/stil.css („Stil wie von Hand gezeichnet“) */
 /* Raster: nicht ganz in Reih und Glied; höchstens 4 px seitlich und 2 % grösser, damit sich keine Karten berühren */
-.stil-hand .spiele:not(.kompakt) > .spielkarte { transform: translate(var(--rx, 0), var(--ry, 0)) scale(var(--rs, 1)); margin-top: var(--rm, 0); }
+.stil-hand .spiele:not(.kompakt) > .spielkarte { transform: translate(calc(var(--rx, 0px) + var(--lx, 0px)), calc(var(--ry, 0px) + var(--ly, 0px))) rotate(var(--lr, 0deg)) scale(calc(var(--rs, 1) * var(--ls, 1))); margin-top: var(--rm, 0); }
 .raster-luecke { display: none; }
-@media (min-width: 640px) { .stil-hand .spiele:not(.kompakt) > .raster-luecke { display: block; } }
+@media (min-width: 640px) { .stil-hand .spiele:not(.kompakt) > .raster-luecke { display: flex; } }
+/* Motiv in der Lücke (LU1 a, start/luecken.js): mittig, nicht antippbar; leichte Bewegung nur ohne „weniger Bewegung“ */
+.raster-luecke { align-items: center; justify-content: center; pointer-events: none; }
+.raster-luecke .luecke-motiv { width: min(78%, 240px); height: auto; overflow: visible; }
+.luecke-dreht { transform-origin: 100px 100px; animation: luecke-dreht 24s linear infinite; }
+.luecke-schwebt { animation: luecke-schwebt 5s ease-in-out infinite; }
+@keyframes luecke-dreht { to { transform: rotate(360deg); } }
+@keyframes luecke-schwebt { 50% { transform: translateY(-6px) rotate(-2deg); } }
+@media (prefers-reduced-motion: reduce) { .luecke-dreht, .luecke-schwebt { animation: none; } }
+/* Wirkung auf die Nachbarn in derselben Zeile (STIL.nachbarn): ruhend, Antippen und Lesen unberührt.
+   luecke-rechts = die Lücke liegt rechts der Karte, luecke-links = links */
+.stil-hand .luecke-nb.w-sog.luecke-rechts { --lx: 5px; --lr: 2deg; --ls: .96; transform-origin: right center; }
+.stil-hand .luecke-nb.w-sog.luecke-links { --lx: -5px; --lr: -2deg; --ls: .96; transform-origin: left center; }
+.stil-hand .luecke-nb.w-heben.luecke-rechts { --ly: -6px; --lr: -2.2deg; transform-origin: left bottom; }
+.stil-hand .luecke-nb.w-heben.luecke-links { --ly: -6px; --lr: 2.2deg; transform-origin: right bottom; }
+.stil-hand .luecke-nb.w-ecke.luecke-rechts { clip-path: polygon(0 0, calc(100% - 46px) 0, calc(100% - 38px) 10px, calc(100% - 26px) 6px, calc(100% - 18px) 22px, calc(100% - 6px) 24px, 100% 44px, 100% 100%, 0 100%); }
+.stil-hand .luecke-nb.w-ecke.luecke-links { clip-path: polygon(46px 0, 100% 0, 100% 100%, 0 100%, 0 44px, 6px 24px, 18px 22px, 26px 6px, 38px 10px); }
+.stil-hand .luecke-nb.w-loch.luecke-rechts { -webkit-mask: radial-gradient(circle at calc(100% - 22px) 46%, transparent 10px, #000 11px); mask: radial-gradient(circle at calc(100% - 22px) 46%, transparent 10px, #000 11px); }
+.stil-hand .luecke-nb.w-loch.luecke-links { -webkit-mask: radial-gradient(circle at 22px 46%, transparent 10px, #000 11px); mask: radial-gradient(circle at 22px 46%, transparent 10px, #000 11px); }
 /* Knöpfe, Chips, Tabs: Ecken ungleich, im Wechsel nach der Stelle in der Reihe */
 .stil-hand :is(.chip, .tab, .karten-info, .weiter-stufe) { border-radius: 20px 26px 18px 28px / 26px 18px 28px 20px; }
 .stil-hand :is(.chip, .tab, .karten-info, .weiter-stufe):nth-child(3n+2) { border-radius: 28px 18px 26px 20px / 18px 28px 20px 26px; }
@@ -501,6 +531,10 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .karten-info[aria-expanded="true"] { background: var(--knopf); color: var(--k-knopf-text); }
 .karten-info:focus-visible { outline: 3px solid var(--knopf); }
 .spielkarte.gesperrt { opacity: .7; border-top-style: dashed; }
+/* im Stil „hand“ gestrichelt der gezeichnete Rahmen statt des Streifens (der schien sonst als weisse Linie dahinter
+   durch, Hinweis Patrik LERN_Session34): Strahlen vom Mittelpunkt schneiden Lücken in die Linie, auf allen Seiten */
+.stil-hand .spielkarte.gesperrt { border-top-style: none; }
+.stil-hand .spielkarte.gesperrt > svg.hand-rahmen { -webkit-mask: repeating-conic-gradient(#000 0 3.4deg, transparent 3.4deg 5.4deg); mask: repeating-conic-gradient(#000 0 3.4deg, transparent 3.4deg 5.4deg); }
 /* Schalter oben rechts: ⏱ Timer, ♾ Endlos, ☆ Favorit — aus = blass, an = leuchtet */
 .karten-schalter-zeile { display: flex; justify-content: flex-end; gap: 0; margin: -12px -10px -10px 0; }
 .stufen-text { display: inline-flex; align-items: center; gap: 1px; white-space: nowrap; } /* Symbol und Zahl bleiben zusammen */

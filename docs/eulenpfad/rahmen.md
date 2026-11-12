@@ -422,7 +422,13 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
   - Raster: Spielkarten in den Kacheln bis 4 px verschoben, 0–12 px tiefer, 97,5–102 % gross (`--rx`, `--ry`, `--rm`,
     `--rs`), je Spiel gleich; nach etwa jeder zwölften Karte eine Lücke (`.raster-luecke`, `STIL.luecke`), ab 640 px
     Breite. Gemessen LERN_Session32: keine Karte überdeckt eine andere, kleinster Abstand 7,4 px (1024 px) und 6,4 px
-    (375 px).
+    (375 px). In der Lücke ein Motiv zum Fach (Entscheid LU1 a, `start/luecken.js`: `LUECKEN.waehle(fach, id)`, je
+    Fach zwei bis drei, je Spiel gleich, auf dem hellen Bildgrund, nicht antippbar); manche wirken auf die Nachbarkarten
+    derselben Zeile (`data-wirkung` sog, heben, ecke, loch; `STIL.nachbarn` setzt `.luecke-nb` mit der Seite, neu bei
+    jeder Grössenänderung der Lücke). Bewegung nur ohne „weniger Bewegung“ des Geräts.
+  - Titel „Eulenpfad“: Buchstaben verschieden hoch und leicht schräg (`--ty`, `--tr` je Stelle in `start/start.css`).
+  - Nicht freigegebene Spiele (`.spielkarte.gesperrt`): der gezeichnete Rahmen gestrichelt (Maske aus Strahlen), kein
+    Streifen dahinter.
   - Knöpfe, Chips, Tabs und Felder: unregelmässige Ecken, Felder mit ungleich dicker Linie, im Wechsel nach der Stelle.
 - **Schrift** (Entscheid GS3 a): Die Startseite lädt Nunito aus `eulenpfad/schriften/Nunito.woff2` (`@font-face` in
   `start/start.css`, variabel 200–1000, Lizenz `schriften/OFL.txt`); Spiele laden sie nicht und zeigen weiter die Schrift
