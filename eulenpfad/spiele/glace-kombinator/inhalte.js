@@ -19,7 +19,7 @@ const GLACE_SORTEN = [
   ["Pistazie", "#9cc97a", "P"],
   ["Himbeere", "#d81b60", "H"],
   ["Mango", "#ffa630", "M"],
-  ["Caramel", "#c27c3a", "C"],
+  ["Caramel", "#d08a48", "C"], // heller (vorher #c27c3a): dunkle Schrift 4,6 statt 3,8
   ["Blaubeere", "#5c6bc0", "B"],
   ["Kokos", "#ffffff", "K"],
 ];

@@ -8,6 +8,9 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
+  /* Beschriftung der Ecken auf der getönten Figur (Schritt 5): hell 4,5 auf der Tönung, dunkel wie deko-6 als Schrift */
+  :root { --ks-beschriftung: #4a4ddb; --ks-beschriftung-neu: #8f4a19; }
+  :root[data-farben="dunkel"] { --ks-beschriftung: var(--deko-6-schrift); --ks-beschriftung-neu: var(--deko-3-schrift); }
   .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
   .frage b { color: var(--knopf); white-space: nowrap; }
 
@@ -290,7 +293,7 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, neu, "figur-neu"); }
       });
       polygon(svg, ecken, "figur");
-      ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--deko-6-schrift)">${"ABCD"[i]}</text>`));
+      ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--ks-beschriftung)">${"ABCD"[i]}</text>`));
       ctx.flaeche.append(svg);
     } else if (art === "vektor") {
       // Nur das Bild A' einer Ecke ist gegeben; die Verschiebung muss man selbst abzählen.
@@ -312,8 +315,8 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, neu, "figur-neu"); }
       });
       polygon(svg, ecken, "figur");
-      ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--deko-6-schrift)">${"ABCD"[i]}</text>`));
-      svg.zeichne(`<circle class="gesetzt" cx="${svg.X(neu[0][0])}" cy="${svg.Y(neu[0][1])}" r="5"/><text x="${svg.X(neu[0][0]) - 12}" y="${svg.Y(neu[0][1]) - 6}" style="font-size:13px;fill:var(--deko-3-schrift)">A'</text>`);
+      ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--ks-beschriftung)">${"ABCD"[i]}</text>`));
+      svg.zeichne(`<circle class="gesetzt" cx="${svg.X(neu[0][0])}" cy="${svg.Y(neu[0][1])}" r="5"/><text x="${svg.X(neu[0][0]) - 12}" y="${svg.Y(neu[0][1]) - 6}" style="font-size:13px;fill:var(--ks-beschriftung-neu)">A'</text>`);
       ctx.flaeche.append(svg);
     } else if (art === "ergaenzen") {
       // Drei Ecken sind gezeichnet, die vierte (D) fehlt.
@@ -334,7 +337,7 @@ LS.spiel({
       });
       const [a, b, c] = ecken;
       svg.zeichne(`<polyline class="figur" style="fill:none" points="${[a, b, c].map(([x, y]) => `${svg.X(x)},${svg.Y(y)}`).join(" ")}"/>`);
-      [a, b, c].forEach(([x, y], i) => svg.zeichne(`<circle class="gesetzt" cx="${svg.X(x)}" cy="${svg.Y(y)}" r="5"/><text x="${svg.X(x) - 12}" y="${svg.Y(y) - 6}" style="font-size:13px;fill:var(--deko-6-schrift)">${"ABC"[i]}</text>`));
+      [a, b, c].forEach(([x, y], i) => svg.zeichne(`<circle class="gesetzt" cx="${svg.X(x)}" cy="${svg.Y(y)}" r="5"/><text x="${svg.X(x) - 12}" y="${svg.Y(y) - 6}" style="font-size:13px;fill:var(--ks-beschriftung)">${"ABC"[i]}</text>`));
       ctx.flaeche.append(svg);
     } else {
       // zeichnen: Ecken der Reihe nach setzen

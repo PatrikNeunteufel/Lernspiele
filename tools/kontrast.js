@@ -105,13 +105,16 @@ function messeSeite(doc, win) {
     if (g && g[3] > 0) liste.push([g[0], g[1], g[2], g[3] * o]);
     return liste;
   }
-  const erg = { funde: [], gemessen: 0, unbekannt: 0 };
+  const erg = { funde: [], gemessen: 0, unbekannt: 0, offen: [] }; // offen: nicht messbar, mit Grund
   const gesehen = new Set();
   for (const el of doc.body.querySelectorAll("*")) {
     if (["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT", "OPTION"].includes(el.tagName)) continue;
     const knoten = [...el.childNodes].filter(n => n.nodeType === 3 && /[\p{L}\p{N}]/u.test(n.textContent));
     if (!knoten.length) continue;
     if (el.closest("[disabled], [aria-disabled='true'], [hidden], [inert]")) continue;
+    // Schmuck der Lücken im Raster (LU1 a) und Motive der Avatare (Zeichnungen mit eigenem Kreis): kein Text zum Lesen
+    // (LERN_Session35)
+    if (el.closest(".raster-luecke, .motiv-bild")) continue;
     const s = win.getComputedStyle(el);
     if (s.visibility !== "visible" || s.display === "none") continue;
     const tf = farbe(el instanceof win.SVGElement ? s.fill : s.color);
@@ -126,13 +129,27 @@ function messeSeite(doc, win) {
       box = r.getClientRects()[0];
       if (!box) continue;
     }
-    const x = box.left + box.width / 2, y = box.top + box.height / 2;
+    let x = box.left + box.width / 2, y = box.top + box.height / 2;
     if (x < 0 || y < 0 || x > win.innerWidth || y > win.innerHeight) continue;
-    const stapel = doc.elementsFromPoint(x, y);
+    let stapel = doc.elementsFromPoint(x, y);
     // Schichten ab dem Element selbst nach unten; was über dem Text liegt (und ihn verdeckt), zählt nicht
     let ab = stapel.indexOf(el);
-    if (ab < 0) ab = stapel.findIndex(e => e.contains(el));
+    // nicht an der Stelle: vielleicht ausserhalb des Ausschnitts eines scrollenden Kastens (Lesetext) — hineinscrollen
+    const scroller = () => { for (let e = el.parentElement; e && e !== doc.body; e = e.parentElement) {
+      const o = win.getComputedStyle(e).overflowY; if (/auto|scroll/.test(o) && e.scrollHeight > e.clientHeight) return e; } return null; };
+    if (ab < 0 && s.pointerEvents !== "none" && scroller()) {
+      el.scrollIntoView({ block: "center", inline: "nearest" });
+      box = r.getClientRects()[0];
+      if (box) { x = box.left + box.width / 2; y = box.top + box.height / 2; stapel = doc.elementsFromPoint(x, y); ab = stapel.indexOf(el); }
+    }
+    // Liegt an der Stelle nicht das Element selbst, sondern nur ein Vorfahr, ist der Text dort verdeckt oder
+    // abgeschnitten (scrollender Lesetext); hat es einen eigenen Grund, fehlte er der Messung: nicht messbar
+    // (LERN_Session35, „Abschnitt 2“ in der Sachtext-Spurensuche)
+    let verdeckt = false;
+    // (pointer-events: none nimmt elementsFromPoint nie mit — dort zählt der Vorfahr wie bisher)
+    if (ab < 0) { ab = stapel.findIndex(e => e.contains(el)); verdeckt = ab >= 0 && s.pointerEvents !== "none" && (schicht(el) || []).length > 0; }
     if (ab < 0) continue;
+    if (verdeckt) { erg.gemessen++; erg.unbekannt++; erg.offen.push({ sel: sel(el), text: knoten[0].textContent.trim().slice(0, 40), grund: "verdeckt" }); continue; }
     let gruende = [[255, 255, 255, 1]];
     let unbekannt = false;
     for (const e of stapel.slice(ab).reverse()) {
@@ -141,8 +158,14 @@ function messeSeite(doc, win) {
       if (!f.length) continue;
       gruende = gruende.flatMap(g => f.map(c => mische(c, g))).slice(0, 16);
     }
+    // SVG-Schrift mit Umriss darunter (paint-order: stroke, mindestens 2 px): sie steht auf ihrem Umriss, gemessen wird
+    // gegen ihn, über dem Grund gemischt (Schilder der Wassertropfen-Reise, LERN_Session35)
+    if (el instanceof win.SVGElement && /^stroke/.test(s.paintOrder || "") && parseFloat(s.strokeWidth) >= 2) {
+      const u = farbe(s.stroke);
+      if (u && u[3] > 0) { gruende = gruende.map(g => mische(u, g)); unbekannt = false; }
+    }
     erg.gemessen++;
-    if (unbekannt) { erg.unbekannt++; continue; }
+    if (unbekannt) { erg.unbekannt++; erg.offen.push({ sel: sel(el), text: knoten[0].textContent.trim().slice(0, 40), grund: "Bild" }); continue; }
     const px = parseFloat(s.fontSize), fett = Number(s.fontWeight) >= 700;
     const gross = px >= 24 || (px >= 18.66 && fett);
     const soll = gross ? 3 : 4.5;
@@ -184,6 +207,13 @@ const PROBE = `<!doctype html><body style="margin:0;background:#fff;font:16px sa
   <p data-soll="ok" style="color:#ffff00">🙂🙂</p>
   <svg width="200" height="40"><rect width="200" height="40" fill="#e9b300"/><text data-soll="fund" x="5" y="25" fill="#ffffff">Text in SVG</text></svg>
   <svg width="200" height="40"><rect width="200" height="40" fill="#000000"/><text data-soll="ok" x="5" y="25" fill="#ffffff">hell auf schwarz</text></svg>
+  <div class="raster-luecke" aria-hidden="true"><span data-soll="ok" style="color:#eee">Schmuck der Lücke</span></div>
+  <svg width="200" height="40"><text data-soll="ok" x="5" y="25" fill="#ffffff" style="paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px">Umriss weiss</text></svg>
+  <svg width="200" height="40"><text data-soll="fund" x="5" y="25" fill="#ffffff" style="paint-order:stroke;stroke:#000;stroke-width:1px">Umriss zu duenn</text></svg>
+  <svg width="200" height="40" style="background:#000"><text data-soll="ok" x="5" y="25" fill="#ffffff">Grund am svg</text></svg>
+  <svg class="motiv-bild" width="200" height="40"><text data-soll="ok" x="5" y="25" fill="#eeeeee">Motiv im Avatar</text></svg>
+  <div style="height:20px;overflow:hidden;background:#fff"><div style="height:20px"></div><span data-soll="ok" style="background:#000;color:#222">verdeckt im Ausschnitt</span></div>
+  <div style="height:24px;overflow:auto;background:#fff"><div style="height:40px"></div><span data-soll="fund" style="background:#000;color:#222">im Ausschnitt gescrollt</span></div>
 </body>`;
 
 /** Läuft in der Startseite: misst die Probeseite und gibt die Abweichungen zurück ([] = alles wie erwartet). */
@@ -253,7 +283,7 @@ async function main() {
     await warte(2500);
     const abweichung = await js(GEGENPROBE);
     if (abweichung.length) throw new Error(`Gegenprobe der Messung stimmt nicht: ${abweichung.join("; ")}`);
-    console.log("Gegenprobe der Messung: 15 Fälle wie erwartet.");
+    console.log("Gegenprobe der Messung: 22 Fälle wie erwartet.");
     // Messkind anlegen und alles freigeben (nur in diesem leeren Profil)
     const spiele = await js(`
       const n = LS.neuerSpieler("Messkind", { rolle: "kind", klasse: 3 }) || "Messkind"; LS.setzeSpieler(n);

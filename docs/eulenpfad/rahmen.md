@@ -117,7 +117,9 @@ Nachthimmel), steht in einem Regelblock mit dem Kommentar `/* Gleich in beiden M
 Szene (Pflanze, Wasserkreislauf, Karte, Plan) bekommt die Klassen `szenenbild bildkachel` an ihre Hülle, ihre Regeln den
 Kommentar `/* Bildfarben: <Grund> */`. Ein Ton, den nur eine Seite braucht, steht dort in `:root` mit seiner dunklen
 Fassung unter `:root[data-farben="dunkel"]` (Landschaftsfarben im Lebensraum-Spiel). Farben im Skript (`"#…"` in
-SVG-Zeichnungen) prüft Punkt 7 nicht; dort ebenso `var(--…)` oder eine Szene mit Bildkachel.
+SVG-Zeichnungen) prüft Punkt 8: erlaubt nur in den Spielseiten der Liste `SKRIPT_BILDFARBEN` in `tools/pruefe_skripte.js`,
+je mit Grund (Szene auf der Bildkachel, Gegenstand); sonst `var(--…)`. `tools/kontrast.js` misst Schrift mit Umriss
+(`paint-order: stroke`, ab 2 px) gegen den Umriss und lässt den Schmuck der Lücken (`raster-luecke`) aus.
 
 | Variable | wofür | nie für |
 |---|---|---|

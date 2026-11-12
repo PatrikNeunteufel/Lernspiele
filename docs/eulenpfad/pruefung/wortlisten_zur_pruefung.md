@@ -2117,7 +2117,7 @@ Die Einzelwörter kommen aus Word-Match (Teil 9).
 | Pistazie | #9cc97a | P | ☐ |
 | Himbeere | #d81b60 | H | ☐ |
 | Mango | #ffa630 | M | ☐ |
-| Caramel | #c27c3a | C | ☐ |
+| Caramel | #d08a48 | C | ☐ |
 | Blaubeere | #5c6bc0 | B | ☐ |
 | Kokos | #ffffff | K | ☐ |
 

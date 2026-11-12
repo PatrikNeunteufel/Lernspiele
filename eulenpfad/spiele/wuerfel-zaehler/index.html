@@ -34,7 +34,7 @@
   .wz-notizen label { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
   .wz-notizen .zw-notiz { font-size: 17px; min-height: 34px; }
   .wz-abc { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
-    color: var(--karte); background: var(--f, var(--deko-6)); font-weight: 900; font-size: 20px; }
+    color: var(--f-auf, var(--auf-deko-6)); background: var(--f, var(--deko-6-grund)); font-weight: 900; font-size: 20px; } /* Fläche und Schrift wie LS.flaeche (G1 a) */
   /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy stehen zwei oder drei Gebäude nebeneinander statt untereinander. */
   @media (max-width: 560px) {
     .wz-bau:has(> .wz-geb:nth-child(2)) { flex-wrap: nowrap; gap: 8px; }
@@ -633,7 +633,7 @@ function zeigeOrdnen(ctx, a, wz) {
   const loesung = `${a.namen.map((n, i) => `${n} ${zahlen[i]}`).join(", ")} Würfel: ${a.reihe.join(" → ")}.`;
   ctx.tipp(["Zähle bei jedem Gebäude Säule für Säule.", TIPP_VERSTECKT, "Merk dir die drei Zahlen. Fang mit der kleinsten an."]);
   wz.append(el("div", { class: "frage", text: "Ordne die Gebäude: zuerst das mit den wenigsten Würfeln, zuletzt das mit den meisten." }));
-  const abc = (n, i) => { const s = el("span", { class: "wz-abc", text: n }); s.style.setProperty("--f", farben[i]); return s; };
+  const abc = (n, i) => { const s = el("span", { class: "wz-abc", text: n }); const f = LS.flaeche(farben[i]); s.style.setProperty("--f", f.grund); s.style.setProperty("--f-auf", f.schrift); return s; };
   wz.append(el("div", { class: "wz-bau" }, ...a.gebaeude.map((g, i) => el("div", { class: "wz-geb" }, bauSvg(g, { farbe: farben[i] }), abc(a.namen[i], i)))));
   const { box } = LS.reihenfolge(ctx, {
     reihe: a.reihe, breite: 90, pfeile: true,

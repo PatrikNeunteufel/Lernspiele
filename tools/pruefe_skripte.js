@@ -21,6 +21,9 @@
 //      „Gleich in beiden Modi: <Grund>“ (Gegenstand mit eigenen Farben: Banknote, Klaviertaste, Nachthimmel). In
 //      Spielseiten (eulenpfad/spiele/<spiel>/*.html) ein Fehler seit Darkmode Schritt 5 (LERN_Session35), sonst ein
 //      Hinweis, bis Schritt 6 die übrigen Stile umgebaut hat. Mit --farben je Datei die Zahl.
+//   8. feste Farben in den Skripten einer Spielseite (#…, rgb(), Darkmode Schritt 5, LERN_Session35): nur in den Seiten
+//      aus SKRIPT_BILDFARBEN, je mit Grund (Szene auf der Bildkachel, Gegenstand); sonst ein Fehler, ebenso ein Eintrag
+//      der Liste ohne Farbe im Skript (die Liste bleibt so aktuell).
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -97,6 +100,24 @@ const FESTE_FARBE = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\([^)]*\)|\b(?:white|blac
 const BILDFARBEN = "Bildfarben:";
 const GLEICH = "Gleich in beiden Modi:"; // Teile, die in beiden Modi gleich aussehen (Leiste der Entwicklung, Gegenstände)
 const SPIELSEITE = /^eulenpfad\/spiele\/(?!gemeinsam\/)[^/]+\/[^/]+\.html$/; // Punkt 7 dort ein Fehler (Schritt 5)
+// 8. Spielseiten, deren Skripte feste Farben zeichnen dürfen, mit Grund (LERN_Session35)
+const SKRIPT_BILDFARBEN = {
+  "dezimal-rutsche": "Glanzlicht auf der Kugel",
+  "runden-rutsche": "Glanzlicht auf der Kugel",
+  "gegenteil-wippe": "Holz der Wippe, Zeichnungen auf der Bildkachel",
+  "glace-kombinator": "Schrift auf der Glacekugel, nach Kontrast gewählt",
+  "himmels-forscher": "Planeten im Nachthimmel",
+  "pflanzen-bestimmer": "Pflanze auf der Bildkachel",
+  "schulweg-profi": "Verkehrszeichen",
+  "sortier-kiste": "Formen mit eigener Farbe",
+  "tageslauf-sonne": "Himmel auf der Bildkachel",
+  "teddy-versteck": "Zimmer auf der Bildkachel",
+  "wassertropfen-reise": "Wasserkreislauf auf der Bildkachel",
+  "wetter-jahreszeiten": "Thermometer auf der Bildkachel",
+};
+const SKRIPT_FARBE = /(?<![\w-])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])|\brgba?\(\s*\d/g;
+/** Zahl der festen Farben in einem Skript (ohne Kommentare). */
+const skriptFarben = code => (code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"'`])\/\/.*$/gm, "$1").match(SKRIPT_FARBE) || []).length;
 /** Dunkle, halb durchsichtige Farbe (Schatten, Abdunklung): wirkt in beiden Modi und zählt nicht. */
 const DUNKEL_DURCHSICHTIG = f => {
   const m = f.replace(/\s+/g, "").match(/^rgba\((\d+),(\d+),(\d+),([\d.]+)\)$/i);
@@ -211,7 +232,7 @@ function umgebung(css, i) {
 /** Prüft alles; gibt { fehler: [Text], zahlen: { js, inline, verweise, css } } zurück. ordner: zum Prüfen mit anderen Ordnern. */
 function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   const fehler = [];
-  const zahlen = { js: 0, inline: 0, verweise: 0, css: 0, farben: {} }; // farben: Datei → Zahl fester Farben (Punkt 7)
+  const zahlen = { js: 0, inline: 0, verweise: 0, css: 0, farben: {}, skriptFarben: {} }; // Punkt 7 je Datei, Punkt 8 je Spiel
   for (const [css, soll, name] of GEGENPROBEN_CSS) {
     const ist = pruefeCss(css, "Gegenprobe").length;
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 5 „${name}“: ${ist} statt ${soll} Meldungen`);
@@ -223,6 +244,11 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   for (const [wo, soll] of [["eulenpfad/spiele/zahlenhaus/index.html", true], ["eulenpfad/spiele/koenig-falle/regeln.html", true],
     ["eulenpfad/spiele/gemeinsam/pruefen.html", false], ["eulenpfad/index.html", false], ["lernsteig/uebungen/x/index.html", false]]) {
     if (SPIELSEITE.test(wo) !== soll) fehler.push(`Gegenprobe Punkt 7: ${wo} ${soll ? "nicht" : "fälschlich"} als Spielseite erkannt`);
+  }
+  for (const [code, soll, name] of [['a = "#fff"; b = "var(--text)";', 1, "Farbe im Text"], ['/* "#000" */ x = 1; // "#fff"', 0, "Farben in Kommentaren"],
+    ['q("#abc-feld"); s.fill = "rgba(0,0,0,.2)";', 1, "Id mit Strich ist keine Farbe, rgba schon"], ['u = "https://x.ch/#top";', 0, "Anker in einer Adresse"]]) {
+    const ist = skriptFarben(code);
+    if (ist !== soll) fehler.push(`Gegenprobe Punkt 8 „${name}“: ${ist} statt ${soll} feste Farben`);
   }
   for (const [html, wo, soll, name] of GEGENPROBEN_STIL) {
     const ist = pruefeKernStil(html, wo, () => true).length;
@@ -270,6 +296,7 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
         } else if (m[2].trim() && !KEIN_SKRIPT.test(attr)) {
           zahlen.inline++;
           lies(m[2], `${wo} (Skript in der Seite)`);
+          if (SPIELSEITE.test(wo)) { const n = skriptFarben(m[2]); if (n) zahlen.skriptFarben[wo.split("/")[2]] = (zahlen.skriptFarben[wo.split("/")[2]] || 0) + n; }
         }
       }
       // 4. Version der App vor dem Kern (NS3 a)
@@ -284,6 +311,15 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   // 7. in Spielseiten ein Fehler (Darkmode Schritt 5): eine feste Farbe bleibt im dunklen Modus hell und still unlesbar
   for (const [wo, n] of Object.entries(zahlen.farben)) {
     if (SPIELSEITE.test(wo)) fehler.push(`${wo}: ${n} feste Farbe(n) im Stil — Variable nehmen oder Block mit „Bildfarben:“ / „Gleich in beiden Modi:“ (DM4 a)`);
+  }
+  // 8. feste Farben in Skripten der Spielseiten nur mit Grund (Schritt 5); nur, wenn eulenpfad mitgeprüft wird
+  if (ordner.includes("eulenpfad") && fs.existsSync(path.join(wurzel, "eulenpfad/spiele"))) {
+    for (const [spiel, n] of Object.entries(zahlen.skriptFarben)) {
+      if (!SKRIPT_BILDFARBEN[spiel]) fehler.push(`eulenpfad/spiele/${spiel}: ${n} feste Farbe(n) im Skript — Variable nehmen oder Szene mit Bildkachel und Eintrag in SKRIPT_BILDFARBEN (Punkt 8)`);
+    }
+    for (const spiel of Object.keys(SKRIPT_BILDFARBEN)) {
+      if (!zahlen.skriptFarben[spiel] && fs.existsSync(path.join(wurzel, "eulenpfad/spiele", spiel))) fehler.push(`SKRIPT_BILDFARBEN nennt ${spiel}, das Skript hat keine feste Farbe mehr (Punkt 8)`);
+    }
   }
   return { fehler, zahlen };
 }

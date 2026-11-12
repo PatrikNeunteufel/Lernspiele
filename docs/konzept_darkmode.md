@@ -361,14 +361,13 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
    kaum erkennbar — eine Überraschung bis zum Erreichen (Wunsch Patrik).
    Messung dunkel danach 348 Funde (vorher 355); auf der Startseite bleiben nur die blassen Texte in Symbolen noch offener
    Abzeichen (wie hell). Gezeichnete Szenen der Spielseiten selbst (17 Seiten) mit Schritt 5.
-5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen. **In Arbeit seit 12.11.2026**
-   (LERN_Session35): Stile aller Spielseiten ohne feste Farbe (vorher 534 in 142 Seiten; `tools/pruefe_skripte.js`
-   Punkt 7 dort jetzt ein Fehler); neue Namen `--auf-stelle`, `--feld-leise`, `--marker`, `--regel` in `stil.css`;
-   Szenen mit `szenenbild bildkachel`, Gegenstände mit „Gleich in beiden Modi:“; Deko-Töne als Schrift über
-   `--deko-N-schrift`; Notenblatt mit dunklen Noten. Messung danach: **hell 10, dunkel 9** verschiedene Funde (vorher
-   98 und 348). Übrig: Texte in den Lücken-Motiven der Startseite (Schmuck), Zahl im Dach des Zahlenhauses und
-   „Fels“ in der Wassertropfen-Reise (Grenzen der Messung: Dach als Rand gezeichnet, Schrift mit Umriss), Holz im
-   Wortfamilien-Baum 4,1 und Glace-Kugel 3,8 (Gegenstände), blasse Buchstaben ausserhalb in der Trenn-Schere
-   (absichtlich), Beschriftung B im Koordinaten-Schatz hell 3,3, Akzent im Lernsteig (Schritt 6). Feste Farben in
-   Skripten prüft keine Messung.
+5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen. **Erledigt 12.11.2026** (LERN_Session35):
+   Stile aller Spielseiten ohne feste Farbe (vorher 534 in 142 Seiten), `tools/pruefe_skripte.js` Punkt 7 dort ein
+   Fehler; Farben in Skripten nur in den Seiten von `SKRIPT_BILDFARBEN` mit Grund (Punkt 8); neue Namen `--auf-stelle`,
+   `--feld-leise`, `--marker`, `--regel` in `stil.css`, Deko-Töne als Schrift über `--deko-N-schrift`; Szenen mit
+   `szenenbild bildkachel`, Gegenstände mit „Gleich in beiden Modi:“; Notenblatt mit dunklen Noten. Die Messung
+   (`tools/kontrast.js`) liest den Grund des äussersten `<svg>`, misst Schrift mit Umriss gegen den Umriss, scrollt Text
+   in einem scrollenden Kasten hinein und lässt Schmuck (Lücken, Avatar-Motive) aus; Gegenprobe 22 Fälle. Messung über
+   alle 1215 Seiten: **hell 0, dunkel 1** Fund (zu Beginn der Sitzung 98 und 348); der eine ist der Akzent im Titel des
+   Lernsteigs (Schritt 6).
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

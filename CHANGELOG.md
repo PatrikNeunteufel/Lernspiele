@@ -1975,3 +1975,7 @@
   Platz, „☆ Alle Favoriten entfernen“ (zweimal tippen); Stern auch auf der Spielseite. Tab-Test mit fünf Schritten mehr.
 - **Favoriten gerahmt** wie ein Fach, in Gold. **🗣️ neben der Eule:** antippen liest vor, lange drücken schaltet „gleich
   vorlesen“ ein oder aus (goldener Ring); der Vorlesen-Schalter in der Zeile der Spielseite entfällt (Wunsch Patrik).
+- **Darkmode Schritt 5 abgeschlossen:** Restfunde (Beschriftungen im Koordinaten-Schatz, Holz im Wortfamilien-Baum,
+  Caramel im Glace-Kombinator heller, Dach des Zahlenhauses als Fläche, Buchstaben im Würfel-Zähler); Prüfung Punkt 8
+  (Farben in Skripten nur mit Grund); Messung genauer (Umriss-Schrift, scrollende Kästen, Schmuck). Kontrast über alle
+  Seiten hell 0, dunkel 1 (Lernsteig, Schritt 6).

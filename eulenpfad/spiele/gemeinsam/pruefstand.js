@@ -686,6 +686,15 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "auge-entdecker/teile": {
+      "am": "2026-11-12",
+      "hash": "smz5351as0",
+      "von": "Patrik"
+    },
+    "blutkreislauf-lotse/fragen": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
     "diagramm-detektiv/umfragen": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -766,12 +775,40 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "glace-kombinator/sorten": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
     "hello-dialog/dialoge": {
       "am": "2026-11-11",
       "von": "Patrik"
     },
     "koenig-falle/stellungen": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "koerper-puzzle/gelenke-schutz": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "koerper-puzzle/koerperteile": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "koerper-puzzle/kreislauf-haut": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "koerper-puzzle/organe": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "koerper-puzzle/sinne": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "koerper-puzzle/wege": {
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "komma-jagd/aufzaehlung": {
@@ -784,6 +821,10 @@ const PRUEFSTAND = {
     },
     "kulturen-koffer/dinge": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "laerm-waechter/geraeusche": {
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "lebensraum/gebirge": {
@@ -844,6 +885,10 @@ const PRUEFSTAND = {
     },
     "magnet-labor/wirkung": {
       "am": "2026-11-08",
+      "von": "Patrik"
+    },
+    "pflanzen-bestimmer/pflanzen": {
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "platzhalter-geschichten/geschichten": {
@@ -966,6 +1011,18 @@ const PRUEFSTAND = {
       "am": "2026-11-08",
       "von": "Patrik"
     },
+    "tier-sortierer/haltung": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "tier-sortierer/saeugetier-gruppen": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "tier-sortierer/tierklassen": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
     "weather-report/durchsagen": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1030,12 +1087,32 @@ const PRUEFSTAND = {
       "am": "2026-11-05",
       "von": "Patrik"
     },
+    "zeitstrahl-sortierer/epochen": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "zeitstrahl-sortierer/ereignisse": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
     "zeitstrahl-sortierer/generationen": {
       "am": "2026-11-06",
       "von": "Patrik"
     },
     "zeitstrahl-sortierer/lebensabschnitte": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "znueni-teller/ernaehrung": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "znueni-teller/region-saison": {
+      "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "znueni-teller/znuenis": {
+      "am": "2026-11-12",
       "von": "Patrik"
     }
   },
@@ -1050,6 +1127,10 @@ const PRUEFSTAND = {
     },
     "au-cafe": {
       "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "auge-entdecker": {
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "begriffs-geodreieck": {
@@ -1174,6 +1255,10 @@ const PRUEFSTAND = {
     },
     "kulturen-koffer": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "laerm-waechter": {
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "lebensraum": {
@@ -1390,6 +1475,10 @@ const PRUEFSTAND = {
     },
     "ziffernkarten": {
       "am": "2026-11-03",
+      "von": "Patrik"
+    },
+    "znueni-teller": {
+      "am": "2026-11-12",
       "von": "Patrik"
     },
     "zufalls-skala": {

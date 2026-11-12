@@ -9,7 +9,9 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .haus { width: min(280px, 90%); margin: 4px auto 14px; }
-  .dach { height: 0; border-left: 140px solid transparent; border-right: 140px solid transparent; border-bottom: 74px solid var(--deko-2); position: relative; margin: 0 auto; width: 0; }
+  /* Dach als Fläche mit Dreieck-Ausschnitt statt als Rand (Darkmode Schritt 5): so misst tools/kontrast.js den Grund
+     der Dachzahl; Fläche und Schrift als Paar (G1 a) */
+  .dach { width: 100%; height: 74px; background: var(--deko-2-grund); clip-path: polygon(50% 0, 100% 100%, 0 100%); position: relative; margin: 0 auto; }
   .dach b { position: absolute; left: 50%; top: 26px; transform: translateX(-50%); color: var(--auf-deko-2); font-size: 36px; font-weight: 900; }
   .stock { display: grid; grid-template-columns: 1fr 1fr; border: 4px solid var(--text); border-top: none; background: var(--k-feld); }
   .stock:first-of-type { border-top: 4px solid var(--text); }
