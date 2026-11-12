@@ -4,7 +4,7 @@ Stand: 12.11.2026 (LERN_Session33) · Grundsatz entschieden (Patrik, 12.11.2026,
 Einstellung im Block Aussehen, im Eulenpfad standardmässig hell, im Lernsteig nach der Einstellung des Geräts; dunkel
 werden Rahmen, Karten und Text über Variablen im Kern; die Stellenfarben bleiben gleich; Zeichnungen und
 Abschluss-Animationen stehen in beiden Modi auf einer hellen Bildkachel; zuerst dieses Konzept, dann bauen.
-**DM0–DM5 und DM2-S entschieden, je a** (Patrik, 12.11.2026); **DM6 offen**. Gebaut: Schritt 1 (Kern 1.40.0,
+**DM0–DM6 und DM2-S entschieden, je a** (Patrik, 12.11.2026). Gebaut: Schritt 1 (Kern 1.40.0,
 `kern/farben.css`) und Schritt 2 (Messung `tools/kontrast.js`, Zählung fester Farben `tools/pruefe_skripte.js` Punkt 7);
 Zahlen unten unter „Messung hell“. GS0 a im Konzept Gestaltung und im Plan Angleich um den Zusatz aus DM0 a ergänzt.
 
@@ -241,7 +241,7 @@ die Ziffern und ändert weniger am vertrauten Bild; es wiegt weniger, weil die k
 sind. c liesse einen gemessenen Mangel stehen. Kippen würde die Empfehlung, wenn das dunklere Grün neben dem Gut-Grün der
 Rückmeldung (`--gut` `#2fbf71`) verwechselbar wird — am Bildschirm nebeneinander ansehen, bevor es gebaut wird.
 
-### DM6 — Deko-Farben, Gut und Hinweis als Schrift und als Grund für Schrift (aus der Messung, LERN_Session33)
+### DM6 — Deko-Farben, Gut und Hinweis als Schrift und als Grund für Schrift (aus der Messung, LERN_Session33) → **a** (Patrik, 12.11.2026)
 
 **Ort:** `eulenpfad/spiele/gemeinsam/stil.css` `--deko-1` … `--deko-7`, `--gut`, `--hinweis`; Stufenwahl
 (`.stufe-nr`, `spiel.js`), Körbe (`.korb-knopf`), grüne Knöpfe (`.knopf.gruen`), Spielseiten mit eigener Verwendung.

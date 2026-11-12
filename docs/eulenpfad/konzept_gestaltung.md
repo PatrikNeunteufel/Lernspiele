@@ -176,6 +176,84 @@ aber Fredoka kann keine Zahlen (Ziffern ungleich breit, ≈ fehlt) und gehört d
 würde die Empfehlung, wenn die Schrift später auch in die Spiele soll (Lesetexte der Deutsch-Spiele): dann b für den
 Lesetext, Nunito für Titel und Knöpfe.
 
+## Statistik und Erfolge für Kinder (Wunsch Patrik, LERN_Session32; Vorlage LERN_Session33)
+
+**Wunsch:** Erfolge und Statistik im Stil „hand“ vollständig, die Statistik kindgerechter — die Aufsicht sieht weiter
+alles ausführlich (Beispiel Patrik: „In den letzten 4 Aufgaben nur 25 % …“). Gilt weiter: ST1 a (welche Karten das Kind
+sieht), ST2 a (Podestplätze in Erfolge), G3 (Fazit nur nach Freigabe), Gestaltungsregeln (2. Klasse fast ohne Lesetext;
+Fehler sind nicht schlimm), GS2 a (Kürzel der Lernziele nur für die Aufsicht).
+
+**Befund** (Browser, Testkind 3. Klasse mit acht Runden, LERN_Session33):
+- „🦉 Das übe ich als Nächstes“ zeigt dem Kind die Texte der Aufsicht: „🔁 Wiederholen: Uhr-Werkstatt · Stufe 4 — In den
+  letzten 6 Aufgaben nur 33 % auf Anhieb richtig, 2 Aufgaben nicht gelöst. Lieber 2–3 kurze Runden an verschiedenen
+  Tagen als viele am Stück.“ (33 Wörter, zwei Zahlen); „Fokus“ und „Auffrischen“ nennen das Lernziel mit Kürzel
+  („⭐ Fokus: 4.2-G1 …“), „Lieber oft und kurz“ einen Rat an Erwachsene ohne Knopf.
+- „🔁 Meine Runden“: 15 Textzeilen „08.11. 08:45 · Kiosk-Kasse · Stufe 🌳 3 · ★★ · 1 Fehler“, aufgeklappt die Aufgaben mit
+  Zahl der Fehlversuche.
+- „📅 Meine Woche“: die Wochenkarte („📅 Deine Woche“) steckt als Karte in der Karte, darunter die Wochenreihe „2.11. 2 ·
+  9.11. 4“ (Datum und Zahl der Tage), für ein Kind nicht lesbar. Im Tab Erfolge steht dieselbe Wochenkarte oben.
+- Erfolge: Abzeichen mit glatten Rahmen, sonst im Stil. Stil-Retuschen ohne eigene Frage: Abzeichen, Wochenkarte und
+  Personen-Dropdown bekommen die Rahmen und Ecken des Stils „hand“.
+
+### KS1 — Was sagen die Vorschläge dem Kind?
+
+**Ort:** `spiele/gemeinsam/auswertung.js` `vorschlaege()` (Felder `titel`, `text`), `start/statistik.js` Karte „Das übe
+ich als Nächstes“.
+**Heute:** Das Kind liest denselben Titel und Text wie die Aufsicht (Beispiel oben).
+**Problem:** Prozente, Fehlerzahlen und Ratschläge an Erwachsene sind für ein Kind der 2. Klasse nicht lesbar und klingen
+nach Bewertung — gegen „Fehler sind nicht schlimm“.
+
+- **a (Empfehlung):** „Jeder Vorschlag trägt neben `titel` und `text` (für die Aufsicht, unverändert) ein Feld `kind`:
+  ein kurzer Satz ohne Zahlen und ohne Kürzel, je Art fest — wiederholen ‚Das war knifflig. Nochmal?‘, weiter ‚Super!
+  Die nächste Stufe wartet.‘, auffrischen ‚Schon eine Weile her. Kurz auffrischen?‘, fokus ‚Das übst du gerade.‘, timer
+  ‚Das kannst du! Mit Uhr probieren?‘. Das Kind sieht je Vorschlag eine Karte wie im Tab Spiele: Kartenbild des Spiels,
+  Name, Stufe als Level (Zahl und Symbol), den Satz und den Knopf ‚▶ Los‘; langes Drücken liest den Satz vor. Vorschläge
+  ohne Knopf (Regelmässigkeit, Konzentration) sieht nur die Aufsicht. Höchstens drei Karten.“
+- **b:** „Die Karte bleibt, wie sie ist; nur der Text wird für Kinder kürzer und ohne Prozent (‚Nochmal üben: 2 Aufgaben
+  waren knifflig‘).“
+
+*Warum die Empfehlung:* Die Aussage gehört zur Auswertung (eine Quelle, `vorschlaege()`), die Fassung zur Leserin oder zum
+Leser — wie beim Fazit (`fazitFuerKind`). Das Kind erkennt das Spiel am Bild, nicht am Namen, und kann direkt starten; der
+Satz bleibt lesbar auch für die 2. Klasse und lässt sich vorlesen. b behält Zahlen, die ein Kind nicht deuten kann, und
+den Aufbau einer Liste für Erwachsene. Kippen würde die Empfehlung, wenn Kinder ab der 5. Klasse die Zahlen sehen wollen
+(dann `kind` je Klasse: mit Zahl ab der 5. Klasse).
+
+### KS2 — Wie zeigt „Meine Runden“ die Runden?
+
+**Ort:** `start/statistik.js` `rundenKarte()`.
+**Heute:** Textzeile je Runde mit Datum, Uhrzeit, Spiel, Stufe, Sternen und Zahl der Fehler; aufgeklappt jede Aufgabe mit
+Fehler, Zahl der Fehlversuche und Ausgang („dann gelöst“, „Lösung gezeigt“).
+**Problem:** Viel Text, Uhrzeiten und Fehlerzahlen; die Runden lassen sich nicht wiederholen.
+
+- **a (Empfehlung):** „Kacheln wie im Tab Spiele, klein: Kartenbild, Name, Stufe als Level, Sterne gross (bei Endlos ♾ mit
+  der Zahl in Folge). Gruppiert nach ‚Heute‘, ‚Gestern‘, ‚Diese Woche‘, ‚Früher‘, ohne Uhrzeit und ohne Fehlerzahl.
+  Antippen öffnet ‚Diese Aufgaben waren knifflig‘ mit jeder Aufgabe und ihrer Lösung (ohne Zahl der Fehlversuche) und den
+  Knopf ‚▶ Nochmal‘. Die Aufsicht sieht weiter die Textzeilen mit allen Angaben.“
+- **b:** „Textzeilen bleiben, ohne Uhrzeit und Fehlerzahl; aufgeklappt wie heute.“
+
+*Warum die Empfehlung:* Was ein Kind an einer Runde ablesen kann, sind Spiel, Stufe und Sterne — das zeigt a als Bild. Die
+kniffligen Aufgaben mit ihrer Lösung bleiben da (ST1 a: falsch gelöste Aufgaben aufklappbar), nur ohne Zählen der
+Fehlversuche; und das Kind kann die Runde gleich nochmal spielen. b kürzt den Text, bleibt aber eine Liste zum Lesen.
+Kippen würde die Empfehlung, wenn die Kacheln auf dem Handy (375 px) zu viel Platz brauchen — dann zwei Spalten, am Gerät
+ansehen.
+
+### KS3 — „Meine Woche“ ohne Doppelkarte und ohne Datumsreihe?
+
+**Ort:** `start/statistik.js` `lernplanKarte()`, `start/erfolge.js` `wochenKarte()`.
+**Heute:** Karte „📅 Meine Woche“ um die Karte „📅 Deine Woche“ (sieben Tage), darunter die Reihe der letzten zwölf Wochen
+mit Datum und Zahl der Tage. Im Tab Erfolge steht die Wochenkarte oben, ebenfalls in einer Karte.
+**Problem:** Zwei Titel für dasselbe, eine Zahlenreihe, die ein Kind nicht lesen kann.
+
+- **a (Empfehlung):** „Für das Kind eine Karte ‚📅 Meine Woche‘: die sieben Tage wie heute, darunter die Wochensterne als
+  Reihe 🌟🌟☆ (erfüllte Wochen der Serie, ohne Datum), ohne Wochenziel nur die Tage. Im Tab Erfolge dieselbe Karte, nicht
+  in einer zweiten. Die Reihe mit Datum und Zahl sieht nur die Aufsicht.“
+- **b:** „Nur die Doppelkarte auflösen; die Wochenreihe bleibt für alle.“
+
+*Warum die Empfehlung:* Die sieben Tage und der Wochenstern sind, was das Kind selbst steuert und gewinnt (L1 a); eine
+Sternreihe sagt „schon zwei Wochen geschafft“ ohne Zahl. Die Datumsreihe ist eine Auswertung für Erwachsene. b behebt nur
+das Doppelte. Kippen würde die Empfehlung, wenn Kinder ihre Wochen zurückverfolgen wollen (dann die Sternreihe mit
+Antippen für die Woche).
+
 ## Reihenfolge nach den Entscheiden (Vorschlag)
 
 1. GS1: Feier-Angaben in den Katalog, Kartenbild auf der Startseite, Ladezeit messen.
