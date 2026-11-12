@@ -4,7 +4,7 @@ Stand: 12.11.2026 (LERN_Session33) · Grundsatz entschieden (Patrik, 12.11.2026,
 Einstellung im Block Aussehen, im Eulenpfad standardmässig hell, im Lernsteig nach der Einstellung des Geräts; dunkel
 werden Rahmen, Karten und Text über Variablen im Kern; die Stellenfarben bleiben gleich; Zeichnungen und
 Abschluss-Animationen stehen in beiden Modi auf einer hellen Bildkachel; zuerst dieses Konzept, dann bauen.
-**DM0–DM6 und DM2-S entschieden, je a** (Patrik, 12.11.2026). Gebaut: Schritt 1 (Kern 1.40.0,
+**DM0–DM6, DM2-S und DM2-K entschieden, je a** (Patrik, 12.11.2026). Gebaut: Schritt 1 (Kern 1.40.0,
 `kern/farben.css`) und Schritt 2 (Messung `tools/kontrast.js`, Zählung fester Farben `tools/pruefe_skripte.js` Punkt 7);
 Zahlen unten unter „Messung hell“. GS0 a im Konzept Gestaltung und im Plan Angleich um den Zusatz aus DM0 a ergänzt.
 
@@ -267,6 +267,26 @@ Schriften 3,67 — für kleine Schrift unter 4,5. Für b spricht, dass keine neu
 aus den Textfarben kommt, die in beiden Modi ohnehin geprüft sind. Kippen würde die Empfehlung, wenn die dunkleren
 Fassungen neben den hellen Flächen derselben Karte fremd wirken (am Bildschirm ansehen; das Gelb `#947200` ist ein
 Ocker).
+
+### DM2-K — Dürfen Kinder selbst zwischen hell und dunkel umschalten? (Wunsch Patrik, LERN_Session33) → **a** (Patrik, 12.11.2026)
+
+**Ort:** DM2 a; Profil des Kindes (Muster VR1 a: Vorgabe der Aufsicht, „Kind darf ändern“ oder „🔒 fest“, Felder `wahl`
+und `fest`); Kopfzeile der Startseite.
+**Heute (DM2 a):** „… Kinder wählen nicht.“
+**Problem:** Patrik möchte, dass ein Kind selbst umschalten kann (☀️/🌙), ob es das darf, soll die Aufsicht entscheiden.
+
+- **a (entschieden):** „Farben folgen dem Muster VR1 a: Vorgabe ist die Einstellung des Geräts; im Profil des Kindes
+  legt die Aufsicht fest, ob es selbst umschalten darf (‚🔒 fest‘ als Standard). Darf es, steht in seiner Kopfzeile neben
+  dem Namen ein Knopf ☀️/🌙; seine Wahl wird eigens gespeichert (`wahl.farben`), gilt vor dem Gerät und reist mit
+  Sicherung und Abgleich; ‚↺ Auf Vorgabe zurück‘ löscht sie. DM2 a wird um diesen Zusatz ergänzt.“
+- b: eine Einstellung je Gerät im Block „Kinder“ für alle Kinder. c: wie DM2 a, Kinder wählen nicht.
+
+*Warum a:* VR1 a ist das Muster der Reihe für „das Kind darf, wenn die Aufsicht es erlaubt“ (Vorgabe, Freigabe je Kind,
+eigene Wahl, zurück auf Vorgabe); kein zweiter Weg für dieselbe Frage. Fest als Standard, weil hell zum Lesen der
+bessere Standard ist. Kippen würde es, wenn eine Lehrperson viele Kinder am selben Gerät nicht einzeln freigeben will
+(dann ein Knopf „für alle Kinder“ in der Verwaltung). **Gebaut noch nicht** (nach 3c-3).
+
+**Zusatz zu DM2 a:** Kinder wählen nicht — ausser die Aufsicht erlaubt es einem Kind nach DM2-K a.
 
 ## Messung hell (LERN_Session33, vor dem Umbau)
 

@@ -1919,3 +1919,20 @@
   Einstellungs-Blöcke und Wochenmarke.
 - Session-Abschluss: Report docs/eulenpfad/report/LERN_Session32_2026-11-11.md, Handover (weiter mit Erfolge und
   Statistik im Stil, Statistik kindgerechter, Wochenmarke entfernen, Personen-Dropdown, FB2-K, FB3).
+
+## 2026-11-12 — LERN_Session33
+- **Bemerkungen 50–52:** Wort-Zwillinge (wort-zwillinge) mit sechs Zeichnungen in `bilder.js` (Garten, Glas, Gras,
+  Knie, Haar, Sommer), `bilder.js` geladen, Lösungssatz über `LS.mitBildText`; Listen & Tap (listen-tap) Formen mit
+  Bildern in der Prüfansicht; Znüni-Teller (znueni-teller) Gruppe „Stärke“ statt „Getreide“.
+- **Konzept Darkmode** (`docs/konzept_darkmode.md`) mit DM0–DM6, DM2-S, DM2-K (je a), Messung hell und Reihenfolge.
+- **Kern 1.40.0–1.42.0:** `farben.css` (hell und dunkel, `--k-feld`, `--k-bildtext`, `color-scheme`), `farben.js`
+  (`KERN.farben`), `farben.kopf.js` (`kern-kopf.js`); `tools/kern_verteilen.py` mit drei Arten.
+- **Prüfungen:** `tools/kontrast.js` (Kontrast im Browser, Gegenprobe), `pruefe_skripte.js` Punkte 6 und 7, Farben in
+  `pruefe_kern.js`, Seitentests Statistik des Kindes, Empfehlungen der Aufsicht, Aussehen.
+- **Startseite:** Wochenmarke entfernt; Statistik fürs Kind mit Vorschlagskarten, Rundenkacheln und Wochensternen
+  (KS1–KS3 a), Empfehlungen der Aufsicht mit Anheften, Ausblenden, eigener Empfehlung und Rangfolge (KS4 a); Stil
+  „hand“ für Kacheln, Abzeichen und Personen-Menü; Datum der Wochen-Abzeichen aus der Runde, die das Ziel erreichte.
+- **Darkmode bis 3c-2:** Einstellung Farben und „Für mich“ (Stil, Farben), Kopf-Skript in 174 Seiten, `stil.css` und
+  `start.css` ohne feste Farben (hell unverändert, Farbabdruck gleich).
+- Session-Abschluss: Report docs/eulenpfad/report/LERN_Session33_2026-11-12.md, Handover (weiter mit Darkmode 3c-3,
+  DM2-K a; nicht pushen vor 3c-3).
