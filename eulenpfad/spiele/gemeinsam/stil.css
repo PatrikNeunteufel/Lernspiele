@@ -145,11 +145,11 @@
   --deko-7: #94a3b8;
   /* dunkel sind die Deko-Farben selbst hell genug: als Schrift auf der Karte 4,5 bis 8,7, dunkle Schrift darauf 5,8 bis 11 */
   --deko-1-schrift: var(--deko-1);
-  --deko-2-schrift: var(--deko-2);
+  --deko-2-schrift: #f590c2;          /* 6,5 auf der Karte, 5,4 auf dem Feld (deko-2 selbst 4,4 auf dem Feld) */
   --deko-3-schrift: var(--deko-3);
   --deko-4-schrift: var(--deko-4);
   --deko-5-schrift: var(--deko-5);
-  --deko-6-schrift: var(--deko-6);
+  --deko-6-schrift: #a5a7f8;          /* 4,9 auch auf getöntem Feld (deko-6 selbst 3,5) */
   --deko-7-schrift: var(--deko-7);
   --auf-gut: var(--k-knopf-text); --auf-hinweis: var(--k-knopf-text);
   --auf-deko-1: var(--k-knopf-text); --auf-deko-2: var(--k-knopf-text); --auf-deko-3: var(--k-knopf-text); --auf-deko-4: var(--k-knopf-text);
@@ -837,7 +837,7 @@ button.link, a.link {
 .noten-zeile .linie { stroke: var(--text); stroke-width: 1.4; }
 .noten-zeile .strich { stroke: var(--text); stroke-width: 3; }
 .noten-zeile .kopf { fill: var(--text); stroke: var(--text); stroke-width: 1.6; }
-.noten-zeile .kopf.hohl { fill: var(--k-bildgrund); stroke-width: 2.4; }
+.noten-zeile .kopf.hohl { fill: var(--noten-grund, var(--k-feld)); stroke-width: 2.4; }
 .noten-zeile .hals { stroke: var(--text); stroke-width: 1.8; }
 .noten-zeile .faehnchen, .noten-zeile .punkt { fill: var(--text); }
 .noten-zeile .schluessel { fill: var(--text); font-family: "Noto Music", "Segoe UI Symbol", "Apple Symbols", "Bravura", serif; }
@@ -845,7 +845,8 @@ button.link, a.link {
 .noten-zeile .vorzeichen { fill: var(--text); font-size: 22px; font-weight: 700; }
 .noten-zeile .luecke { fill: var(--hinweis-hell); stroke: var(--deko-4); stroke-width: 2.5; stroke-dasharray: 6 4; }
 .noten-zeile .luecke-text { fill: var(--deko-4); font-size: 26px; font-weight: 900; }
-.notenblatt { background: var(--k-bildgrund); border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
+/* Notenblatt: heller Bildgrund in beiden Modi, darauf dunkle Noten (Schritt 5); ausserhalb (Wahlknöpfe) gilt --text */
+.notenblatt { --text: var(--k-bildtext); --noten-grund: var(--k-bildgrund); color: var(--text); background: var(--k-bildgrund); border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
 .hoer-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
 
 /* ---------- Bildkachel (DM3 a, Darkmode Schritt 4) ----------

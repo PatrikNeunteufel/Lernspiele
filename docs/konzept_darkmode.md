@@ -361,7 +361,11 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
 5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen. **In Arbeit seit 12.11.2026**
    (LERN_Session35): Stile aller Spielseiten ohne feste Farbe (vorher 534 in 142 Seiten; `tools/pruefe_skripte.js`
    Punkt 7 dort jetzt ein Fehler); neue Namen `--auf-stelle`, `--feld-leise`, `--marker`, `--regel` in `stil.css`;
-   Szenen mit `szenenbild bildkachel`, Gegenstände mit „Gleich in beiden Modi:“. Messung danach: dunkel 27 verschiedene
-   Funde in 21 Seiten (vorher 348), hell 62 (vorher 98). Offen: diese Funde (Tasten-Namen der Klaviatur, Thermometer,
-   Marken der Wassertropfen-Reise, deko-Töne als Schrift auf Weiss, Zahl im Dach des Zahlenhauses) und Farben in Skripten.
+   Szenen mit `szenenbild bildkachel`, Gegenstände mit „Gleich in beiden Modi:“; Deko-Töne als Schrift über
+   `--deko-N-schrift`; Notenblatt mit dunklen Noten. Messung danach: **hell 10, dunkel 9** verschiedene Funde (vorher
+   98 und 348). Übrig: Texte in den Lücken-Motiven der Startseite (Schmuck), Zahl im Dach des Zahlenhauses und
+   „Fels“ in der Wassertropfen-Reise (Grenzen der Messung: Dach als Rand gezeichnet, Schrift mit Umriss), Holz im
+   Wortfamilien-Baum 4,1 und Glace-Kugel 3,8 (Gegenstände), blasse Buchstaben ausserhalb in der Trenn-Schere
+   (absichtlich), Beschriftung B im Koordinaten-Schatz hell 3,3, Akzent im Lernsteig (Schritt 6). Feste Farben in
+   Skripten prüft keine Messung.
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

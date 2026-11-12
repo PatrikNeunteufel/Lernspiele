@@ -1950,3 +1950,16 @@
 - **Stufenwahl:** Timer-Knopf nur die Uhr; Stimmzeile nur für die Aufsicht. Wassertropfen-Reise dunkel lesbar.
 - **Werkzeug:** `tools/bilder_aufnehmen.js` (Seiten je Modus und Breite als Bild).
 - Session-Abschluss: Report docs/eulenpfad/report/LERN_Session34_2026-11-12.md, Handover (weiter mit Darkmode Schritt 5).
+
+## 2026-11-12 — LERN_Session35
+- **Darkmode Schritt 5 (DM4 a):** Stile aller Spielseiten ohne feste Farbe (vorher 534 in 142 Seiten) — Felder
+  `--k-feld`, Trennlinien `--k-karte`, Schrift auf Farbgrund mit den Paaren aus `stil.css`; neu `--auf-stelle`,
+  `--feld-leise`, `--marker`, `--regel` (Regelkarte hell 5,5 statt 4,1); Szenen mit `szenenbild bildkachel`
+  (Pflanze, Wasserkreislauf, Tageslauf, Teddy, Thermometer, Plan, Karte, Kompass, Angel-See, Klaviatur); Gegenstände
+  „Gleich in beiden Modi“ (Banknoten, Münzen, Go-Brett, Schachbrett, Verkehrszeichen, Nachthimmel …).
+- **Schrift in Deko-Farbe** in 47 Spielseiten über `--deko-N-schrift` (DM6 a); dunkel deko-2 und deko-6 als Schrift
+  heller; Stufen-Plättchen, Klötze und Körbe mit Fläche und Schrift wie `LS.flaeche`; blasse Kleintexte voll.
+- **Rahmen:** `mark` mit der Schrift der Seite; Notenblatt mit dunklen Noten auf hellem Grund in beiden Modi, auf
+  Wahlknöpfen die Schrift der Seite; Blutkreislauf, Lebensraum mit dunklen Fassungen ihrer eigenen Farben.
+- **Prüfung:** `tools/pruefe_skripte.js` Punkt 7 in Spielseiten ein Fehler; `tools/kontrast.js` liest den Grund
+  des äussersten `<svg>`. Kontrast über alle Seiten: hell 98 → 10, dunkel 348 → 9.

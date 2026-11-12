@@ -1,27 +1,13 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 2026-11-12 — LERN_Session35_2026-11-12_darkmode-schritt-5
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** Vorschau-Server `lernspiele` (Port 8765, `.claude/launch.json`) beendet;
-  neu mit preview_start `lernspiele`, sobald Kontrast oder Bilder gebraucht werden. Sonst lief nichts (Kontrastmessung,
-  Seitentests, Wächter fertig).
-- **Stand:** Darkmode Schritt 5 im Arbeitsbaum, nichts committet. Stile aller Spielseiten ohne feste Farbe (vorher 534
-  in 142 Seiten); `tools/pruefe_skripte.js` Punkt 7 in Spielseiten ein Fehler (mit Gegenprobe); `stil.css` mit
-  `--auf-stelle`, `--feld-leise`, `--marker*`, `--regel*`, `mark { color: inherit }`, `.szenenbild.bildkachel` (ohne
-  Gewicht, mit Schrift); `szenenbild` in `LS.RAHMEN_KLASSEN`; Szenen und Gegenstände markiert; Skriptfarben in
-  netz-falter, wuerfelbau-blick, schwimmt-sinkt, zeitstrahl-sortierer, lebensraum (Seitenvariablen). Doku: rahmen.md
-  (Farben in einer Spielseite, Tabelle), Konzept Darkmode Schritt 5 „in Arbeit“. Tests: kurze Tests alle grün (vor den
-  letzten drei Korrekturen), Skripte „Keine Fehler.“ danach; Seitentests 16 Spiele „Keine Fehler.“; Kontrast dunkel 27
-  verschiedene Funde in 21 Seiten (vorher 348), hell 62 (vorher 98) — gemessen vor dem Klaviatur-Fix.
-- **Weiter mit:**
-  1. Restfunde dunkel: Tasten-Namen Klaviatur (neu messen), Thermometer `°C`, Nummern Wassertropfen-Reise
-     (`--k-bildtext` auf dunklem Rand?), Dach des Zahlenhauses, Blutkreislauf (Texte auf `--blut-*-hell`), Rhythmus-Leser,
-     spelling-bee Hörknopf, Spur-Abschnitt, rosa Schrift 4,41.
-  2. Restfunde hell: deko-3/5/6 als Schrift auf Weiss (→ `--deko-N-schrift`), Rutschen-Zahlen `--hinweis` als Schrift,
-     Wassertropfen „Fels“, Zahlenhaus-Dach.
-  3. Kontrast beide Modi neu, kurze Tests, Eulenpfad-Stichprobe; dann CHANGELOG, Commit-Message vorlegen.
-  4. Prüfer-Kandidat: feste Farben in Skripten der Spielseiten.
+## Stand der laufenden Sitzung LERN_Session35 (2026-11-12, nach der Pause)
+- **Darkmode Schritt 5** zweiter Teil im Arbeitsbaum, nicht committet (erster Teil `7cbd5db`): Deko-Töne als Schrift
+  über `--deko-N-schrift` in 47 Seiten (dunkel deko-2 und deko-6 heller), Restfunde dunkel und hell behoben, Notenblatt
+  mit dunklen Noten, `tools/kontrast.js` liest den Grund des äussersten `<svg>`. Kontrast über alle Seiten: hell 10,
+  dunkel 9 verschiedene Funde (zu Beginn der Sitzung 98 und 348); Rest im Konzept Darkmode, Schritt 5.
+- **Tests:** kurze Tests alle grün; Seitentests der geänderten Spiele „Keine Fehler.“.
+- **Weiter mit:** Schritt 5 abschliessen (Restfunde entscheiden, Prüfer-Kandidat feste Farben in Skripten), dann
+  Schritt 6; voller Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push.
 
 ## Stand
 **2026-11-12, nach LERN_Session34** ([Report](report/LERN_Session34_2026-11-12.md)):

@@ -126,7 +126,7 @@ function rutscheZeichnen(a) {
   }
   svg.innerHTML = `<path class="bahn" d="${pfad}"/>${striche}
     <text x="${x0}" y="${H - 4}" text-anchor="middle">${zahlText(a.unten)}</text>
-    <text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" style="fill:var(--hinweis)">${zahlText(a.unten + a.auf / 2)}</text>
+    <text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" style="fill:var(--warn-schrift)">${zahlText(a.unten + a.auf / 2)}</text>
     <text x="${x1}" y="${H - 4}" text-anchor="middle">${zahlText(a.oben)}</text>
     <g class="kugel"><circle cx="${xPos}" cy="${yBahn(xPos) - 16}" r="15" fill="var(--knopf)"/><circle cx="${xPos - 5}" cy="${yBahn(xPos) - 21}" r="4" fill="#fff" opacity=".7"/></g>`;
   // Kugel rutscht zur gewählten Seite: Verschiebung relativ zur Startposition

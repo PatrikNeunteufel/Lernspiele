@@ -87,7 +87,9 @@ function messeSeite(doc, win) {
   /** Farben einer Schicht: [] = durchsichtig, null = unbekannt (Bild), sonst Liste möglicher Farben (Verlauf) */
   function schicht(e) {
     const s = win.getComputedStyle(e), o = deckkraft(e);
-    if (e instanceof win.SVGElement) {
+    // Das äusserste <svg> malt seinen CSS-Hintergrund wie ein HTML-Element (Bildkachel einer Szene, Schritt 5)
+    const svgWurzel = e instanceof win.SVGSVGElement && !(e.parentNode instanceof win.SVGElement);
+    if (e instanceof win.SVGElement && !svgWurzel) {
       if (!SVG_FORM.has(e.tagName.toLowerCase())) return [];
       const f = farbe(s.fill);
       if (!f || f[3] === 0) return [];

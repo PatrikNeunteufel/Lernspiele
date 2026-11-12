@@ -12,7 +12,7 @@
   /* Szene: grosses Bild, dazu ein Wort (Stufe 1) oder der Ort (Dialoge) */
   .hd-szene { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 0 auto 8px; }
   .hd-szene-bild { font-size: clamp(40px, 10vw, 56px); line-height: 1.1; }
-  .hd-szene-wort { font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; color: var(--deko-1); }
+  .hd-szene-wort { font-size: clamp(16px, 3.6vw, 20px); font-weight: 800; color: var(--deko-1-schrift); }
   /* Sprechblasen: Sprecher A links, Sprecher B rechts */
   .hd-blasen { display: flex; flex-direction: column; gap: 8px; max-width: 640px; margin: 0 auto 12px; }
   .hd-blase { display: flex; align-items: flex-end; gap: 8px; max-width: 92%; }
@@ -21,7 +21,7 @@
   .hd-text { background: var(--karte); border: 3px solid var(--rand); border-radius: 18px 18px 18px 4px; padding: 8px 14px;
     font-size: clamp(17px, 3.9vw, 23px); font-weight: 700; line-height: 1.35; }
   .hd-blase.hd-b .hd-text { border-radius: 18px 18px 4px 18px; background: var(--gut-hell); }
-  .hd-blase.hd-luecke .hd-text { border-style: dashed; border-color: var(--deko-1); color: var(--deko-1); font-weight: 900; min-width: 4em; text-align: center; }
+  .hd-blase.hd-luecke .hd-text { border-style: dashed; border-color: var(--deko-1); color: var(--deko-1-schrift); font-weight: 900; min-width: 4em; text-align: center; }
   .hd-blase.hd-leise .hd-text { opacity: .55; }
   /* Nochmal hören */
   .hd-hoer { display: block; margin: 0 auto 14px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
