@@ -1,6 +1,21 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-13, nach LERN_Session36** ([Report](report/LERN_Session36_2026-11-13.md)):
+- **Kern:** unverändert 1.43.0.
+- **Inhaltslisten (LP5 a, LERN-51):** Prüfung je Eintrag für 29 weitere Spiele (Blöcke 1 Mathe, 2 und 3 Deutsch);
+  Trennlinien kräftiger (T1 a–T3 a), Prüfdialog dunkel auf der Karte (N1 a), Rahmen fertiger Gruppen (N2 a).
+- **Anleitungen:** Texte und alle Bilder nachgeführt (AN-B a, Darkmode Schritt 6 erledigt) — Patrik ist mit Aufbau und
+  Nummern nicht zufrieden; Rückmeldung im Report, Neuaufbau in LERN_Session37.
+- **Regel W2 b:** keine Worktrees (Steckbrief der Projekt-`CLAUDE.md`).
+- **Tests:** Skripte „Keine Fehler.“, Kern „6068 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Feier „169 Spiele, 6084 Bilder, keine
+  Fehler.“, Schrift „Keine Fehler.“; Eulenpfad je Block „Keine Fehler.“ — **letzter voller Lauf weiter auf `6055527`**. Commits bis
+  `71b4ffa` von Patrik, nicht gepusht; A1 a/A2 a und dieser Abschluss noch zu committen.
+- **Weiter mit:** (1) **Anleitungen neu strukturieren** — erst Vorlage mit Regeln für Bild, Nummern, Text und einem
+  gemeinsamen Layout für alle Geräte, dann umsetzen; (2) **Inhaltslisten Block 4 Deutsch** (ab sachtext-spurensuche), dann
+  Englisch, Französisch, NMG, MI und Musik; (3) voller Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push.
+
 **2026-11-12, nach LERN_Session35** ([Report](report/LERN_Session35_2026-11-12.md)):
 - **Kern:** unverändert 1.43.0.
 - **Darkmode:** Schritt 5 erledigt (alle Spielseiten ohne feste Farbe, Kontrast über alle Seiten hell 0, dunkel 1),

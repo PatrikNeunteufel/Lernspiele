@@ -2037,3 +2037,10 @@
   Gerät). `tools/anleitung_bilder.js` wieder lauffähig: Laden wartet erst auf about:blank, Aufsicht 1200 breit, neue
   Rahmen für Tab Spiele, Stufenwahl, Einstellungen, Profil und die Kinderbilder, Rahmen in offenen Dialogen; zwei neue
   Bilder (a21 Prüfansicht, a22 Empfehlungen), alle 36 Bilder neu. `anleitung.css`: Handy-Bilder nie breiter als die Karte.
+- **Zwei veraltete Texte in der App** (A1 a, A2 a): Statistik ohne Endlos-Runde weist auf den Schalter ♾ Endlos auf der
+  Spielkarte oder über den Stufen (statt „unter den Stufen“); der Abgleich in der Verwaltung nennt, was wirklich reist
+  (Runden, Endlos-Rekorde, Kinder mit Profilen, Freigaben, Ruhezeiten, Meldungen) und dass Einstellungen und PIN auf dem
+  Gerät bleiben (vorher „Einstellungen“ als mitreisend).
+- **Session-Abschluss:** Report `docs/eulenpfad/report/LERN_Session36_2026-11-13.md` mit Patriks Rückmeldung zu den
+  Anleitungen (Nummern im Bild und im Text uneinheitlich, Text mal über, mal unter dem Bild, verschiedene Breiten) als
+  Auftrag für LERN_Session37; Handover (weiter mit dem Neuaufbau der Anleitungen, dann Inhaltslisten Block 4 Deutsch).

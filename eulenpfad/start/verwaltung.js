@@ -312,7 +312,7 @@ function zeichneVerwaltung(box, neu) {
       : [el("p", { class: "leise-text", style: "margin:0 0 6px", text: "Dieser Browser kann keinen Ordner verwenden — das geht heute in Chrome und Edge auf dem Computer. Abgleichen geht hier über eine Datei: unten sichern, auf dem anderen Gerät einlesen, und umgekehrt." })];
     seite.append(karte(
       el("h2", { text: "Abgleich zwischen Geräten" }),
-      el("p", { class: "leise-text", style: "margin-top:0", text: "Haben die Kinder und die Aufsicht eigene Geräte, wählt man auf jedem denselben Ordner — einen Netzwerkordner oder den Ordner eines Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen: Runden, Endlos-Rekorde, Kinder, Einstellungen und Freigaben. So sind Ranglisten und Statistik überall vollständig. Die PIN bleibt auf dem Gerät." }),
+      el("p", { class: "leise-text", style: "margin-top:0", text: "Haben die Kinder und die Aufsicht eigene Geräte, wählt man auf jedem denselben Ordner — einen Netzwerkordner oder den Ordner eines Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen: Runden, Endlos-Rekorde, Kinder mit Profilen, Freigaben, Ruhezeiten und Meldungen. So sind Ranglisten und Statistik überall vollständig. Die Einstellungen und die PIN bleiben auf dem Gerät." }),
       el("div", { class: "pin-zeile", style: "justify-content:flex-start" }, geraetName,
         knopf("Gerät benennen", () => { ab.benenne(geraetName.value); abMeldung.textContent = "✓ Name gespeichert."; })),
       ...ordnerTeil,

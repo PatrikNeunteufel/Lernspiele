@@ -431,7 +431,7 @@ function zeichneStatistik(box, neu) {
       ? el("div", { class: "tabelle-rahmen" }, el("table", {},
           el("thead", {}, el("tr", {}, ...["Spiel", "Stufe", "Timer", "Rekord", "Platz", "Beste"].map((t, i) => el("th", { class: i === 3 ? "zahl" : "", text: t })))),
           el("tbody", {}, ...rekordZeilen)))
-      : el("p", { class: "leise-text", text: "Noch keine Endlos-Runde gespielt. Im Spiel unter den Stufen: ♾ Endlos." })));
+      : el("p", { class: "leise-text", text: "Noch keine Endlos-Runde gespielt. Schalte auf der Spielkarte oder über den Stufen ♾ Endlos ein." })));
 
   // ----- Vergleich (nur Aufsicht) -----
   const kinder = namen.filter(n => !LS.istAufsicht(n) || zeigeTest);
