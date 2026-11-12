@@ -512,7 +512,11 @@ function zeichneSpiele(box, neu) {
       waren.forEach(karteNeu);
       favoritenNeu();
     });
-    return gruppe("favoriten", "⭐ Favoriten", favoriten.length, el("div", { class: "knopfzeile favoriten-leiste" }, leeren), gitter(favoriten));
+    // gerahmt wie ein Fach (Hinweis Patrik, LERN_Session35), in Gold
+    const d = gruppe("favoriten", "⭐ Favoriten", favoriten.length, el("div", { class: "knopfzeile favoriten-leiste" }, leeren), gitter(favoriten));
+    d.classList.add("fach-block", "favoriten-block");
+    d.style.setProperty("--f", "var(--deko-4)");
+    return d;
   }
   function favoritenNeu() {
     p = LS.profil(name);

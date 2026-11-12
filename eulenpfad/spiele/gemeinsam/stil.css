@@ -477,6 +477,9 @@ button { font-family: inherit; }
 .eule-zeile .vorlesen { flex: none; align-self: center; width: 52px; height: 52px; border: none; border-radius: 50%;
   background: var(--k-feld); box-shadow: var(--schatten); font-size: 24px; cursor: pointer; }
 .eule-zeile .vorlesen:active { transform: translateY(2px); }
+/* gleich vorlesen an (lange drücken auf 🗣️, LERN_Session35): goldener Ring wie die Schalter */
+.eule-zeile .vorlesen.an { box-shadow: 0 0 0 3px var(--symbol-an), var(--schatten); }
+.eule-zeile .vorlesen { -webkit-touch-callout: none; user-select: none; }
 /* Fehler melden (LERN_Session9): kleiner runder Knopf neben der Blase, Formular über der Seite */
 .melde-zeile { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
 .melde-zeile .melden { height: 36px; padding: 0 12px; border: none; border-radius: 999px;

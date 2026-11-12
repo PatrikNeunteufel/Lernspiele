@@ -1568,7 +1568,7 @@ const LS = (() => {
     let uhr = null, gelesen = false, start = null;
     const halt = () => { clearTimeout(uhr); uhr = null; };
     // Knöpfe, Links (Stufenknöpfe der Startseite) und alles mit data-vorlesen (Spielkarten der Startseite)
-    const knopf = e => { const k = e.target.closest?.("[data-vorlesen], button, a"); return k && langDrueckenFlaeche.contains(k) ? k : null; };
+    const knopf = e => { const k = e.target.closest?.("[data-vorlesen], button, a"); return k && !k.matches(".vorlesen") && langDrueckenFlaeche.contains(k) ? k : null; };
     document.addEventListener("pointerdown", e => {
       const k = knopf(e);
       if (!k) return;
@@ -1583,6 +1583,42 @@ const LS = (() => {
     for (const t of ["pointerup", "pointercancel"]) document.addEventListener(t, halt);
     document.addEventListener("click", e => { if (gelesen) { gelesen = false; e.stopPropagation(); e.preventDefault(); } }, true);
     document.addEventListener("contextmenu", e => { if (knopf(e)) e.preventDefault(); });
+  }
+
+  /**
+   * 🗣️ neben der Eule (Wunsch Patrik, LERN_Session35): antippen liest vor, lange drücken schaltet „gleich vorlesen“ ein
+   * oder aus — dieselbe Wahl wie im Profil (VR1 a; festgelegt sagt die Eule das). Golden umrandet, wenn sie gleich
+   * vorliest. beiWechsel(gleich): die laufende Runde passt sich an. melde(text): wohin die Rückmeldung geht (Stufenwahl:
+   * die Hinweiszeile unter den Schaltern, Hinweis Patrik LERN_Session35), sonst sagt es die Eule.
+   */
+  function vorlesenKnopf(lies, eule, beiWechsel, melde = t => eule?.sag(t)) {
+    const name = aktuellerSpieler();
+    const gleich = () => vorlesenArt(name) === "auto";
+    const titel = () => `Antippen: vorlesen · lange drücken: ${gleich() ? "nur noch auf Knopfdruck" : "immer gleich vorlesen"}`;
+    const k = el("button", { type: "button", class: "vorlesen" + (gleich() ? " an" : ""), text: "🗣️", "aria-label": "Vorlesen", title: titel(),
+      "aria-pressed": String(gleich()) });
+    let uhr = null, lang = false;
+    const halt = () => { clearTimeout(uhr); uhr = null; };
+    k.addEventListener("pointerdown", () => {
+      lang = false; halt();
+      uhr = setTimeout(() => {
+        uhr = null; lang = true;
+        if (istFest(name, "vorlesen")) { melde(FEST_TEXT); return; }
+        const jetzt = gleich() ? "knopf" : "auto";
+        setzeWahl(name, "vorlesen", null, jetzt);
+        k.classList.toggle("an", jetzt === "auto");
+        k.setAttribute("aria-pressed", String(jetzt === "auto"));
+        k.title = titel();
+        ton("tipp");
+        beiWechsel?.(jetzt === "auto");
+        melde(jetzt === "auto" ? "Ab jetzt lese ich alles gleich vor. Lange auf 🗣️ drücken schaltet es aus."
+          : "Ich lese vor, wenn du auf 🗣️ tippst. Lange drücken: immer gleich vorlesen.");
+      }, 600);
+    });
+    for (const t of ["pointerup", "pointerleave", "pointercancel"]) k.addEventListener(t, halt);
+    k.addEventListener("click", e => { if (lang) { lang = false; e.preventDefault(); return; } lies(); });
+    k.addEventListener("contextmenu", e => e.preventDefault());
+    return k;
   }
 
   /**
@@ -2438,7 +2474,7 @@ const LS = (() => {
 
     /**
      * Schalter der Stufenwahl wie auf der Karte (Entscheid RS1 a, LERN_Session35): Reihenfolge der Teile (Spiele mit
-     * `reihenfolge: true`, R1 a), Timer, Endlos (Spiele mit Endlos-Stufen), Favorit und Vorlesen — je ein Symbolknopf mit dem Wort daneben,
+     * `reihenfolge: true`, R1 a), Timer, Endlos (Spiele mit Endlos-Stufen) und Favorit — je ein Symbolknopf mit dem Wort daneben,
      * dieselbe Wahl wie auf der Karte (setzeWahl, waehleTimer, Profil endlosAn; VR1 a mit 🔒, wenn die Aufsicht festlegt).
      * Darunter leise die Erklärung des zuletzt geänderten Schalters (ohne Änderung: Endlos, wenn an, sonst Timer).
      */
@@ -2485,17 +2521,7 @@ const LS = (() => {
       schalter("favorit", favorit, "stern", favorit ? "Favorit" : "Kein Favorit", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten", false,
         () => speichereProfil(name, { favoriten: favorit ? favoriten.filter(x => x !== def.id) : [...favoriten, def.id] }));
       erklaerung.favorit = favorit ? "Das Spiel steht oben auf der Startseite bei den Favoriten." : "Mit dem Stern kommt das Spiel oben auf der Startseite zu den Favoriten.";
-      // Vorlesen gleich oder auf Knopfdruck (Wunsch Patrik, LERN_Session8) — als Schalter wie die anderen (LERN_Session35);
-      // gilt wie im Profil für alle Spiele. An = gleich vorlesen.
-      if (vorlesenErlaubt(def.id)) {
-        const gleich = vorlesenArt(name) === "auto";
-        const fest = istFest(name, "vorlesen");
-        schalter("vorlesen", gleich, "vorlesen", gleich ? "Vorlesen gleich" : "Vorlesen auf Knopfdruck",
-          gleich ? "antippen: Vorlesen auf Knopfdruck" : "antippen: gleich vorlesen", fest,
-          () => setzeWahl(name, "vorlesen", null, gleich ? "knopf" : "auto"));
-        erklaerung.vorlesen = (gleich ? "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm."
-          : "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.") + (fest ? ` ${FEST_TEXT}` : "");
-      }
+      // Vorlesen schaltet 🗣️ neben der Eule (lange drücken, Wunsch Patrik LERN_Session35), nicht diese Zeile
       const hinweis = erklaerung[schalterHinweis] || (endlosAn ? erklaerung.endlos : erklaerung.timer);
       return el("div", { class: "timer-zeile schalter-zeile" }, ...teile, el("span", { class: "leise schalter-hinweis", text: hinweis }));
     }
@@ -2627,7 +2653,9 @@ const LS = (() => {
         const einleitung = () => sprich(fuerStimme(def.einleitung), "de", "", null, "vorlesen");
         const einrichten = ok => {
           if (!ok) return;
-          eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: einleitung }));
+          // Rückmeldung zum langen Drücken in der Hinweiszeile unter den Schaltern, die Blase behält die Einleitung
+          const hinweisZeile = t => { const h = karte.querySelector(".schalter-hinweis"); if (h) h.textContent = t; else eule.sag(t); };
+          eule.element.append(vorlesenKnopf(einleitung, eule, null, hinweisZeile));
           langDruecken(karte);
         };
         // Kommt die Stimme erst später, nur noch einrichten, wenn das Startblatt noch zu sehen ist.
@@ -2743,7 +2771,7 @@ const LS = (() => {
       // Ist die Stimme schon da, sofort einrichten (so auch im Testskript), sonst sobald sie geladen ist.
       const vorlesenEinrichten = ok => {
         if (!ok) return;
-        const auto = vorlesenArt(name) === "auto";
+        let auto = vorlesenArt(name) === "auto"; // lange auf 🗣️ drücken schaltet es in der Runde um
         const auftrag = () => [...flaeche.querySelectorAll(".frage, .auftrag")]
           .filter(e => !e.parentElement.closest(".frage, .auftrag")).map(e => e.textContent.trim()).filter(Boolean);
         const satz = t => (/[.!?…:]$/.test(t) ? t : `${t}.`);
@@ -2763,7 +2791,7 @@ const LS = (() => {
           sprich(text(neu), "de", "", fertig, "vorlesen");
         };
         // 🗣️ statt 🔊: Das Lautsprecher-Zeichen ist der Ton-Schalter in der Kopfzeile.
-        eule.element.append(el("button", { type: "button", class: "vorlesen", text: "🗣️", "aria-label": "Vorlesen", onclick: lies }));
+        eule.element.append(vorlesenKnopf(lies, eule, an => { auto = an; eule.vorlesen = an ? liesNeu : undefined; }));
         eule.beiSag = (t, art) => { blaseNeu = true; if (auto && !zeichnet) sprich(fuerStimme(t), "de", art, null, "vorlesen"); };
         if (auto) { eule.vorlesen = liesNeu; if (gezeigt) liesNeu(); }
         if (knoepfeVorlesen(def.id)) langDruecken(flaeche);

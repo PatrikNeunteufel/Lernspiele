@@ -1973,3 +1973,5 @@
 - **Tab Spiele schneller (Hinweis Patrik):** Timer, Endlos, Teile und Stern zeichnen nur ihre Karte neu (im Browser
   5–12 ms statt Neuaufbau der Liste mit Stil „hand“). Favoriten: Feld oben nur mit Favoriten, Spiel bleibt am eigenen
   Platz, „☆ Alle Favoriten entfernen“ (zweimal tippen); Stern auch auf der Spielseite. Tab-Test mit fünf Schritten mehr.
+- **Favoriten gerahmt** wie ein Fach, in Gold. **🗣️ neben der Eule:** antippen liest vor, lange drücken schaltet „gleich
+  vorlesen“ ein oder aus (goldener Ring); der Vorlesen-Schalter in der Zeile der Spielseite entfällt (Wunsch Patrik).
