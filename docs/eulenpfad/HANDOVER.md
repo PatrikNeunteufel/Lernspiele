@@ -1,6 +1,21 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-12, nach LERN_Session34** ([Report](report/LERN_Session34_2026-11-12.md)):
+- **Kern:** 1.43.0 (1.42.1 Kontrast nach DM5 a, 1.43 Bildkachel `:root, .bildkachel`).
+- **Eulenpfad:** Darkmode bis Schritt 4 — 3c-3 (DM5 a, DM6 a, G1 a), DM2-K a (☀️/🌙 für Kinder mit Erlaubnis), Bildkachel
+  (DM3 a) für Zeichnungen, Abschluss-Animationen, Kartenbilder, Abzeichen. Stil „hand“: gezeichnete Fach- und
+  Themenblöcke, tanzender Titel, Lücken mit Motiven zum Fach und bewegten Wirkungen auf die Nachbarn (LU1 a, zwei
+  schwarze Löcher). Timer-Knopf nur die Uhr, Stimmzeile nur für die Aufsicht. Neu `tools/bilder_aufnehmen.js`.
+- **Tests:** Skripte „Keine Fehler.“, Kern „6067 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Feier „169 Spiele, 6084 Bilder, keine
+  Fehler.“, Schrift „Keine Fehler.“; Eulenpfad Stichproben „Keine Fehler.“; Kontrast hell 98, dunkel 348 Funde —
+  **letzter voller Lauf auf `6055527`**. Commits bis `7bb91df` von Patrik, nicht gepusht; dieser Abschluss noch zu
+  committen.
+- **Weiter mit:** Darkmode Schritt 5 (Spielseiten in Blöcken, DM4 a: weisse Felder, SVG-Schrift in 23 Seiten, eigene
+  Farben, gezeichnete Szenen; je Block hell und dunkel mit `tools/bilder_aufnehmen.js`), dann Schritt 6; voller
+  Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push.
+
 **2026-11-12, nach LERN_Session33** ([Report](report/LERN_Session33_2026-11-12.md)):
 - **Kern:** 1.42.0 (1.40 `farben.css`, 1.41 dunkler Satz, `KERN.farben`, `kern-kopf.js`, 1.42 `--k-feld`).
 - **Eulenpfad:** Bemerkungen 50–52 erledigt; Wochenmarke weg; Statistik und Erfolge fürs Kind (KS1–KS3 a) und

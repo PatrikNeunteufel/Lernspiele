@@ -1936,3 +1936,17 @@
   `start.css` ohne feste Farben (hell unverändert, Farbabdruck gleich).
 - Session-Abschluss: Report docs/eulenpfad/report/LERN_Session33_2026-11-12.md, Handover (weiter mit Darkmode 3c-3,
   DM2-K a; nicht pushen vor 3c-3).
+
+## 2026-11-12 — LERN_Session34
+- **Darkmode 3c-3:** Stellenfarben und Knopf hell ab 4,5 (DM5 a, Kern 1.42.1), Schrift-Fassungen der Deko-Farben
+  (DM6 a), helle Flächen mit dunkler Schrift statt dunklerer mit weisser (G1 a, Farbmuster); Funde im Rahmen behoben
+  (Ersatz-Avatar, Kopfzellen, Wochentage, Filter). Kontrast über alle Seiten: hell 1091 → 98, dunkel 355 → 348.
+- **DM2-K a:** ☀️/🌙 neben dem Namen für Kinder, denen die Aufsicht es im Profil erlaubt (Standard fest).
+- **Darkmode Schritt 4 (DM3 a):** Kern 1.43.0 mit Bildkachel; Zeichnungen, Abschluss-Animationen, Kartenbilder und
+  Abzeichen-Symbole dunkel auf warmem hellem Grund, hell unverändert.
+- **Stil „hand“:** Fach- und Themenblöcke gezeichnet, Titel tanzend, nicht freigegebene Spiele gestrichelt; Lücken im
+  Raster mit Motiven zum Fach (`start/luecken.js`, LU1 a), Wirkungen auf die Nachbarkacheln, zwei realistische schwarze
+  Löcher mit Schlauch aus der Nachbarkachel, alles dezent bewegt.
+- **Stufenwahl:** Timer-Knopf nur die Uhr; Stimmzeile nur für die Aufsicht. Wassertropfen-Reise dunkel lesbar.
+- **Werkzeug:** `tools/bilder_aufnehmen.js` (Seiten je Modus und Breite als Bild).
+- Session-Abschluss: Report docs/eulenpfad/report/LERN_Session34_2026-11-12.md, Handover (weiter mit Darkmode Schritt 5).
