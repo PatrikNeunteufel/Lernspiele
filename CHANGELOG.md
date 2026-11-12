@@ -2018,3 +2018,13 @@
   Stufentabelle. Gruppen etwa je Wortart, je richtiger Schreibweise, je Satzart, je Anfangsbuchstabe, je Verwendung der
   Reimgruppe. Lese-Detektiv: Text und Frage bleiben ein Eintrag (je Text genau eine Frage). Die Beschreibungen nennen,
   welche Spiele eine Liste leihen. Prüfstand und Fingerabdrücke unverändert.
+- **Prüfung je Eintrag, Block 3 Deutsch** (LP5 a, LERN-51, T4 a): `pruefung.js` für Wortfamilien-Baum,
+  Zeitreise-Verben, Fehler-Lupe, Gedicht-Baukasten, Komma-Jagd, Morphem-Schere, Rede-Zeichen, Trenn-Schere,
+  Verben-Fächer und Wort-Spürnase (29 Listen). Gemischte Listen in Abschnitte getrennt: Wortfamilien „umlaut-aehnlich“
+  (Umlaut-Wörter gehören dazu, ähnliche Wörter nicht), Fehler-Lupe je Regel einer Liste (nomen-gross, sp-st-sch, ae-aeu,
+  kurzer-vokal), Komma-Jagd „verbgruppen“ (ein Komma, mehrere Kommas), Morphem-Schere „stamm-ea“ (ä/äu mit verwandtem
+  Wort, e/eu ohne), Rede-Zeichen „hinten“ (Sätze mit „|“ zusätzlich mit Begleitsatz in der Mitte), Trenn-Schere (mit und
+  ohne Trennstelle), Verben-Fächer (Satz mit Ergänzungen, Zeitformen). Kurze und lange Sätze der Fehler-Lupe sind
+  Gruppen, nicht Abschnitte. Sätze, Formen und Fallen bauen die Spiele mit ihren eigenen Funktionen; Stufen aus den
+  Stufentabellen, wo sie auslesbar sind (in Trenn-Schere und Gedicht-Baukasten als Text). Prüfstand und Fingerabdrücke
+  unverändert.
