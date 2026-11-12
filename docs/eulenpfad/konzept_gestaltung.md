@@ -310,6 +310,11 @@ ziehen — das schwarze Loch dreht und verkleinert sie ein wenig zu sich hin, de
 schief an, bei der Elster fehlt der Nachbarkachel eine Ecke, der Bücherwurm hinterlässt ein kleines Loch. Ruhend,
 nur im Stil „hand“, Antippen und Lesen der Nachbarn unberührt; bei „weniger Bewegung“ des Geräts keine Bewegung.
 
+**Nachtrag (Wunsch Patrik, 12.11.2026, mit Bildern und Skizze):** Das schwarze Loch realistischer, in zwei Fassungen mit
+eigener Wirkung — als Ring wie die erste Aufnahme eines schwarzen Lochs (dreht die Nachbarn zu sich) und als flache
+leuchtende Scheibe wie in Filmen (zieht die Kante einer Nachbarkachel als Schlauch in sich hinein, Skizze Patrik). Damit
+jedes Motiv vorkommt, gehen die Motive eines Fachs der Reihe nach über seine Lücken statt per Zufall je Spiel.
+
 ### Titel „Eulenpfad“ (Wunsch Patrik, 12.11.2026)
 
 Im Stil „hand“ stehen die Buchstaben des Titels leicht verschieden hoch und leicht schräg, mit Startwert (bei jedem Laden

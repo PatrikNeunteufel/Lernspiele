@@ -497,13 +497,25 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .raster-luecke { display: none; }
 @media (min-width: 640px) { .stil-hand .spiele:not(.kompakt) > .raster-luecke { display: flex; } }
 /* Motiv in der Lücke (LU1 a, start/luecken.js): mittig, nicht antippbar; leichte Bewegung nur ohne „weniger Bewegung“ */
-.raster-luecke { align-items: center; justify-content: center; pointer-events: none; }
-.raster-luecke .luecke-motiv { width: min(78%, 240px); height: auto; overflow: visible; }
+.raster-luecke { position: relative; align-items: center; justify-content: center; pointer-events: none; }
+.raster-luecke .luecke-motiv { position: relative; z-index: 1; width: min(78%, 240px); height: auto; overflow: visible; }
+/* „zieht“: Schlauch aus der Nachbarkachel ins Loch (STIL.schlauch); an der Kante der Kachel fehlt ihr Rahmen */
+.luecke-schlauch { position: absolute; top: 0; height: 100%; width: calc(50% + var(--spalt, 16px)); overflow: visible; z-index: 0; }
+.luecke-schlauch.von-links { left: calc(-1 * var(--spalt, 16px)); }
+.luecke-schlauch.von-rechts { right: calc(-1 * var(--spalt, 16px)); transform: scaleX(-1); }
+.luecke-schlauch path { fill: var(--k-karte); stroke: var(--nb-f, var(--hand-linie)); stroke-width: 3.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.stil-hand .luecke-nb.w-zieht.luecke-rechts > svg.hand-rahmen { -webkit-mask: linear-gradient(to left, transparent 0 12px, #000 12px); mask: linear-gradient(to left, transparent 0 12px, #000 12px); }
+.stil-hand .luecke-nb.w-zieht.luecke-links > svg.hand-rahmen { -webkit-mask: linear-gradient(to right, transparent 0 12px, #000 12px); mask: linear-gradient(to right, transparent 0 12px, #000 12px); }
+.stil-hand .luecke-nb.w-zieht.luecke-rechts { --lx: 4px; }
+.stil-hand .luecke-nb.w-zieht.luecke-links { --lx: -4px; }
+.luecke-dreht-langsam { transform-origin: 100px 100px; animation: luecke-dreht 60s linear infinite; }
+.luecke-gluet { animation: luecke-gluet 4s ease-in-out infinite; }
+@keyframes luecke-gluet { 50% { opacity: .75; } }
 .luecke-dreht { transform-origin: 100px 100px; animation: luecke-dreht 24s linear infinite; }
 .luecke-schwebt { animation: luecke-schwebt 5s ease-in-out infinite; }
 @keyframes luecke-dreht { to { transform: rotate(360deg); } }
 @keyframes luecke-schwebt { 50% { transform: translateY(-6px) rotate(-2deg); } }
-@media (prefers-reduced-motion: reduce) { .luecke-dreht, .luecke-schwebt { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .luecke-dreht, .luecke-dreht-langsam, .luecke-gluet, .luecke-schwebt { animation: none; } }
 /* Wirkung auf die Nachbarn in derselben Zeile (STIL.nachbarn): ruhend, Antippen und Lesen unberührt.
    luecke-rechts = die Lücke liegt rechts der Karte, luecke-links = links */
 .stil-hand .luecke-nb.w-sog.luecke-rechts { --lx: 5px; --lr: 2deg; --ls: .96; transform-origin: right center; }

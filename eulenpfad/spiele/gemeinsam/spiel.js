@@ -2381,14 +2381,18 @@ const LS = (() => {
       const name = aktuellerSpieler();
       const an = stufenListe.some(st => timerFuer(name, def.id, st.id).an);
       const fest = istFest(name, "timer");
-      // Symbol wie auf den Kacheln und das Wort dazu (FB2 a, LERN_Session32): hier lernt das Kind, was die Uhr heisst
+      // Symbol wie auf den Kacheln und das Wort dazu (FB2 a, LERN_Session32): hier lernt das Kind, was die Uhr heisst.
+      // Der Knopf ist nur die Uhr, wie auf den Kacheln; das Wort steht daneben (Hinweis Patrik, LERN_Session34)
+      const wort = el("b", { class: "timer-wort", text: an ? "Timer an" : "Timer aus" });
       return el("div", { class: "timer-zeile" },
         fest
-          ? el("span", { class: "timer-schalter aufsicht-fest" + (an ? " an" : ""), title: FEST_TEXT }, "🔒 ", schalterSymbol("uhr", an), an ? " Timer an" : " Timer aus")
+          ? el("span", { class: "timer-schalter nur-symbol aufsicht-fest" + (an ? " an" : ""), title: FEST_TEXT }, "🔒", schalterSymbol("uhr", an))
           : el("button", {
-            type: "button", class: "timer-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
+            type: "button", class: "timer-schalter nur-symbol" + (an ? " an" : ""), "aria-pressed": String(an),
+            "aria-label": an ? "Timer an — ausschalten" : "Timer aus — einschalten", title: an ? "Timer ausschalten" : "Timer einschalten",
             onclick: () => { waehleTimer(name, def.id, !an); ton("tipp"); neuZeichnen(); },
-          }, schalterSymbol("uhr", an), an ? " Timer an" : " Timer aus"),
+          }, schalterSymbol("uhr", an)),
+        wort,
         el("span", { class: "leise", text: fest ? FEST_TEXT : an ? "Jede Aufgabe hat eine Zeit. Ist sie um, zählt es als Fehler." : "Für mehr Spannung: Timer einschalten." }));
     }
 
@@ -2485,9 +2489,10 @@ const LS = (() => {
       const karte = el("div", { class: "karte", "data-stil-bereich": "stufenwahl" });
       const eule = euleZeile();
       karte.append(spielerZeile(), eule.element, timerZeile(stufenwahl), vorlesenZeile(stufenwahl) || "", reihenfolgeZeile(stufenwahl) || "", ...spielOptionsZeilen(stufenwahl));
-      // Stimmen des Spiels (def.stimme) und fürs Vorlesen sichtbar, mit Probe (LERN_Session11)
+      // Stimmen des Spiels (def.stimme) und fürs Vorlesen sichtbar, mit Probe (LERN_Session11) — nur für die Aufsicht, die
+      // damit prüft; ein Kind braucht sie nicht (Hinweis Patrik, LERN_Session34). Fehlt die Stimme, sagt es die Eule.
       const sprachen = [...new Set([def.stimme, vorlesenErlaubt(def.id) ? "de" : null].filter(Boolean))];
-      if (sprachen.length) karte.append(stimmenZeile(sprachen));
+      if (sprachen.length && istAufsicht(aktuellerSpieler())) karte.append(stimmenZeile(sprachen));
       stimmFehlerHoerer = stimmFehlerFuer(eule);
       eule.sag(def.einleitung);
       const stufen = el("div", { class: "stufen" });
@@ -3486,7 +3491,7 @@ const LS = (() => {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein", "vorlesen", "los-huelle", "los-ueber", "los-zahl", "los-knopf",
       "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
       "spieler-zeile", "speicher-voll",
-      "stufen", "stufe", "fuer", "stufe-huelle", "stufe-kopf", "stufe-symbol", "stufe-nr", "stufe-name", "sterne-gross", "stufe-info", "stufe-text", "blase-klein", "stil-hand", "hand-rahmen", "raster-luecke", "timer-zeile", "timer-schalter", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
+      "stufen", "stufe", "fuer", "stufe-huelle", "stufe-kopf", "stufe-symbol", "stufe-nr", "stufe-name", "sterne-gross", "stufe-info", "stufe-text", "blase-klein", "stil-hand", "hand-rahmen", "raster-luecke", "timer-zeile", "timer-schalter", "nur-symbol", "timer-wort", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "endlos-knoepfe", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
@@ -3655,12 +3660,37 @@ const STIL = (() => {
    */
   function nachbarn(l) {
     const w = l.dataset.wirkung, sichtbar = !!l.offsetParent;
+    let gezogen = null; // „zieht“ (schwarzes Loch als Scheibe): nur eine Kachel, zuerst die davor
     for (const [k, seite] of [[l.previousElementSibling, "luecke-rechts"], [l.nextElementSibling, "luecke-links"]]) {
       if (!k?.matches(".spielkarte")) continue;
-      k.classList.remove("luecke-nb", "luecke-rechts", "luecke-links", "w-sog", "w-heben", "w-ecke", "w-loch");
+      k.classList.remove("luecke-nb", "luecke-rechts", "luecke-links", "w-sog", "w-heben", "w-ecke", "w-loch", "w-zieht");
       const zeile = sichtbar && Math.abs(k.offsetTop - l.offsetTop) < l.offsetHeight / 2;
-      if (w && zeile) k.classList.add("luecke-nb", seite, `w-${w}`);
+      if (!w || !zeile || (w === "zieht" && gezogen)) continue;
+      k.classList.add("luecke-nb", seite, `w-${w}`);
+      if (w === "zieht") gezogen = { k, seite };
     }
+    if (w === "zieht") schlauch(l, gezogen);
+  }
+  /**
+   * Schlauch von der Kante der gezogenen Kachel bis in die Mitte der Lücke (Skizze Patrik, LERN_Session34): oben und
+   * unten setzt er die Linie des Rahmens fort, gefüllt wie die Karte; Farbe --f der Kachel. Reicht über den Abstand des
+   * Rasters (--spalt) bis an die Kachel.
+   */
+  function schlauch(l, gezogen) {
+    l.querySelector(":scope > svg.luecke-schlauch")?.remove();
+    if (!gezogen) return;
+    const s = document.createElementNS(NS, "svg");
+    s.setAttribute("class", "luecke-schlauch " + (gezogen.seite === "luecke-rechts" ? "von-links" : "von-rechts"));
+    s.setAttribute("viewBox", "0 0 100 100");
+    s.setAttribute("preserveAspectRatio", "none");
+    s.setAttribute("aria-hidden", "true");
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", "M0,2 C30,2 40,30 62,40 C78,47 90,48 100,49.4 L100,50.6 C90,52 78,53 62,60 C40,70 30,98 0,98 Z");
+    s.appendChild(p);
+    const gitter = l.parentElement, f = getComputedStyle(gezogen.k).getPropertyValue("--f").trim();
+    l.style.setProperty("--spalt", getComputedStyle(gitter).columnGap || "16px");
+    if (f) l.style.setProperty("--nb-f", f);
+    l.prepend(s);
   }
   const lueckenBeobachter = typeof ResizeObserver === "function" ? new ResizeObserver(e => e.forEach(x => nachbarn(x.target))) : null;
 

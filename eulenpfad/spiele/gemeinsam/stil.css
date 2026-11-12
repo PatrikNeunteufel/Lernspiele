@@ -1049,6 +1049,10 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .symbol.mischen { stroke-width: 2.4; }
 .symbol.mischen.an { fill: none; stroke: var(--symbol-mischen-an); stroke-width: 2.8; }
 .timer-schalter .symbol, .endlos-titel .symbol { width: 24px; height: 24px; vertical-align: -6px; }
+/* nur die Uhr als Knopf (LERN_Session34), das Wort daneben */
+.timer-schalter.nur-symbol { display: inline-flex; align-items: center; min-width: 56px; padding-left: 0; padding-right: 0; justify-content: center; gap: 2px; }
+.timer-schalter.nur-symbol .symbol { width: 30px; height: 30px; }
+.timer-wort { font-size: 18px; }
 .timer-schalter.an .symbol.uhr { stroke: var(--auf-hinweis); fill: none; filter: none; }
 /* Stufen als Level (FB2 a, LERN_Session32): gross Symbol und Nummer, Sterne, Untertitel; ⓘ neben dem Knopf */
 .stufe-huelle { position: relative; display: flex; flex-direction: column; }

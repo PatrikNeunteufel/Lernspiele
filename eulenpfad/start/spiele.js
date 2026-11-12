@@ -365,8 +365,11 @@ function zeichneSpiele(box, neu) {
   // Im Stil „hand“ ab und zu eine Lücke vor einer Karte (STIL.luecke, je Spiel gleich; nicht kompakt). Vor der Karte,
   // damit sie in jede Spalte fallen kann, auch in die erste der ersten Zeile (Wunsch Patrik LERN_Session32). In der Lücke
   // ein Motiv zum Fach (LU1 a, start/luecken.js); seine Wirkung auf die Nachbarn setzt STIL.nachbarn
+  const lueckenJeFach = new Map();
   const luecke = s => {
-    const m = LUECKEN.waehle(THEMEN.find(t => t.id === s.thema)?.fach, s.id);
+    const fach = THEMEN.find(t => t.id === s.thema)?.fach, nr = lueckenJeFach.get(fach) || 0;
+    lueckenJeFach.set(fach, nr + 1);
+    const m = LUECKEN.waehle(fach, nr);
     return el("div", { class: `raster-luecke motiv-${m.id}`, "aria-hidden": "true", "data-wirkung": m.wirkung || "", html: m.svg });
   };
   const gitter = spiele => el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") },

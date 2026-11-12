@@ -1,8 +1,9 @@
 // Motive für die Lücken im Kachelraster (Entscheid LU1 a mit Zusatz, docs/eulenpfad/konzept_gestaltung.md, LERN_Session34).
 // Im Stil „hand“ bleibt ab und zu eine Zelle frei (STIL.luecke); dort steht eine kleine Zeichnung passend zum Fach, ohne
-// Text und nicht antippbar. Je Fach zwei bis drei Motive; welches, entscheidet ein Zufall mit Startwert aus der Kennung des
-// Spiels nach der Lücke — je Spiel immer dasselbe. Einige Motive ziehen die Nachbarkacheln in derselben Zeile leicht in
-// Mitleidenschaft (wirkung, start/start.css .luecke-nb): sog (schwarzes Loch: zu sich hin gedreht und kleiner), heben
+// Text und nicht antippbar. Je Fach zwei bis vier Motive, der Reihe nach über die Lücken des Fachs verteilt (die erste
+// Lücke das erste Motiv …), damit jedes vorkommt — bei jedem Laden gleich, solange die Spiele gleich bleiben. Einige Motive ziehen die Nachbarkacheln in derselben Zeile leicht in
+// Mitleidenschaft (wirkung, start/start.css .luecke-nb): sog (schwarzes Loch als Ring: zu sich hin gedreht und kleiner),
+// zieht (schwarzes Loch als Scheibe: die Kante einer Nachbarkachel wird zum Schlauch ins Loch), heben
 // (Maulwurfshügel: schief angehoben), ecke (Elster, Radiergummi: eine Ecke fehlt), loch (Bücherwurm: kleines Loch).
 // Die Zeichnung liegt auf einem hellen Fleck (--k-bildgrund, DM3 a), Linien in --k-bildtext; viewBox 0 0 200 200.
 // Bildfarben: feste Töne der Zeichnungen, in beiden Modi gleich (DM3 a).
@@ -16,17 +17,45 @@ const LUECKEN = (() => {
 
   const MOTIVE = {
     // ---------- Mathe ----------
-    "schwarzes-loch": { wirkung: "sog", svg: svg(`
-      <g class="luecke-dreht">
-        <ellipse cx="100" cy="100" rx="78" ry="30" fill="none" stroke="#a77ce8" stroke-width="6" opacity=".55"/>
-        <ellipse cx="100" cy="100" rx="58" ry="22" fill="none" stroke="#8587f5" stroke-width="7" opacity=".75"/>
-        <ellipse cx="100" cy="100" rx="40" ry="15" fill="none" stroke="#ef77b0" stroke-width="6"/>
+    // Zwei schwarze Löcher, möglichst wie echte Bilder (Wunsch Patrik, LERN_Session34): der Ring wie die erste Aufnahme
+    // eines schwarzen Lochs (heller Ring, unten heller, dunkler Schatten in der Mitte), die Scheibe wie in Filmen (flache
+    // leuchtende Scheibe vor dem Schatten, darüber und darunter ihr gekrümmtes Bild). Je eigene Wirkung: der Ring dreht die
+    // Nachbarn zu sich (sog), die Scheibe zieht eine Nachbarkachel wie einen Schlauch in sich hinein (zieht).
+    "schwarzes-loch-ring": { wirkung: "sog", svg: svg(`
+      <defs>
+        <radialGradient id="lu-all-a"><stop offset="0" stop-color="#05060c"/><stop offset=".78" stop-color="#05060c"/><stop offset="1" stop-color="#05060c" stop-opacity="0"/></radialGradient>
+        <radialGradient id="lu-ring"><stop offset="0" stop-color="#000"/><stop offset=".38" stop-color="#000"/><stop offset=".5" stop-color="#7a2400"/>
+          <stop offset=".62" stop-color="#ff8c1a"/><stop offset=".7" stop-color="#ffc35a"/><stop offset=".8" stop-color="#d9580a"/><stop offset=".92" stop-color="#3d0f00"/><stop offset="1" stop-color="#3d0f00" stop-opacity="0"/></radialGradient>
+        <filter id="lu-weich" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+        <filter id="lu-weich-fein" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2"/></filter>
+      </defs>
+      <circle cx="100" cy="100" r="98" fill="url(#lu-all-a)"/>
+      <g class="luecke-dreht-langsam">
+        <circle cx="100" cy="100" r="64" fill="url(#lu-ring)" filter="url(#lu-weich)"/>
+        <path d="M58 118 A46 46 0 0 0 142 118" fill="none" stroke="#ffe7a8" stroke-width="9" stroke-linecap="round" filter="url(#lu-weich)" opacity=".9"/>
+        <path d="M70 76 A38 38 0 0 1 112 62" fill="none" stroke="#ff9a30" stroke-width="5" stroke-linecap="round" filter="url(#lu-weich-fein)" opacity=".6"/>
       </g>
-      <circle cx="100" cy="100" r="24" fill="#10132a"/>
-      <circle cx="100" cy="100" r="24" fill="none" stroke="#f0c63a" stroke-width="2.5"/>
-      <text x="30" y="58" font-size="30" font-weight="900" fill="#ef77b0" transform="rotate(-25 30 58) scale(1 .8)">7</text>
-      <text x="150" y="160" font-size="24" font-weight="900" fill="#8587f5" transform="rotate(35 150 160) scale(.8 1)">3</text>
-      <text x="58" y="96" font-size="16" font-weight="900" fill="#a77ce8" transform="rotate(-60 58 96) scale(1 .55)">5</text>`, false) },
+      <circle cx="100" cy="100" r="25" fill="#000" filter="url(#lu-weich-fein)"/>`, false) },
+    "schwarzes-loch-scheibe": { wirkung: "zieht", svg: svg(`
+      <defs>
+        <radialGradient id="lu-all-b"><stop offset="0" stop-color="#070810"/><stop offset=".8" stop-color="#070810"/><stop offset="1" stop-color="#070810" stop-opacity="0"/></radialGradient>
+        <linearGradient id="lu-scheibe" x1="0" x2="1"><stop offset="0" stop-color="#ff7a1a" stop-opacity="0"/><stop offset=".18" stop-color="#ff8a2a"/>
+          <stop offset=".42" stop-color="#ffd9a0"/><stop offset=".5" stop-color="#fff6e0"/><stop offset=".58" stop-color="#ffd9a0"/><stop offset=".82" stop-color="#ff8a2a"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></linearGradient>
+        <filter id="lu-glut" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="3"/></filter>
+        <filter id="lu-glut-fein" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="1.2"/></filter>
+      </defs>
+      <circle cx="100" cy="100" r="98" fill="url(#lu-all-b)"/>
+      <g fill="#fff"><circle cx="36" cy="56" r="1.4" opacity=".8"/><circle cx="160" cy="40" r="1.1" opacity=".7"/><circle cx="170" cy="150" r="1.3" opacity=".6"/>
+        <circle cx="52" cy="160" r="1" opacity=".7"/><circle cx="128" cy="30" r=".9" opacity=".6"/><circle cx="24" cy="112" r="1" opacity=".5"/><circle cx="178" cy="96" r=".9" opacity=".6"/></g>
+      <g class="luecke-gluet">
+        <path d="M52 100 C52 52 148 52 148 100" fill="none" stroke="#ffb35a" stroke-width="12" filter="url(#lu-glut)" opacity=".85"/>
+        <path d="M58 100 C58 60 142 60 142 100" fill="none" stroke="#fff0d0" stroke-width="3" filter="url(#lu-glut-fein)"/>
+        <path d="M66 104 C70 128 130 128 134 104" fill="none" stroke="#ffb35a" stroke-width="5" filter="url(#lu-glut)" opacity=".7"/>
+      </g>
+      <circle cx="100" cy="100" r="31" fill="#000"/>
+      <circle cx="100" cy="100" r="32" fill="none" stroke="#ffe7c0" stroke-width="1.3" opacity=".9"/>
+      <ellipse cx="100" cy="102" rx="96" ry="8" fill="url(#lu-scheibe)" filter="url(#lu-glut)"/>
+      <ellipse cx="100" cy="102" rx="90" ry="3.2" fill="url(#lu-scheibe)" filter="url(#lu-glut-fein)"/>`, false) },
     "ziffern-loch": { wirkung: null, svg: svg(`
       <ellipse cx="100" cy="148" rx="56" ry="16" fill="#3a3324"/>
       <ellipse cx="100" cy="144" rx="56" ry="12" fill="#10132a"/>
@@ -128,7 +157,7 @@ const LUECKEN = (() => {
   };
 
   const JE_FACH = {
-    "Mathe": ["schwarzes-loch", "ziffern-loch", "radiergummi"],
+    "Mathe": ["schwarzes-loch-ring", "schwarzes-loch-scheibe", "ziffern-loch", "radiergummi"],
     "Deutsch": ["buecherwurm", "tintenklecks", "buchstaben-purzeln"],
     "NMG": ["elster", "maulwurf", "schnecke"],
     "Englisch": ["koffer", "papierflieger"],
@@ -138,17 +167,10 @@ const LUECKEN = (() => {
   };
   const ALLE = Object.keys(MOTIVE);
 
-  /** Zahl aus einem Text (FNV-1a), für die Wahl je Spiel. */
-  function hash(text) {
-    let h = 2166136261;
-    for (const c of String(text)) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
-    return h >>> 0;
-  }
-
-  /** Motiv für die Lücke vor dem Spiel id im Fach fach: { id, wirkung, svg }. */
-  function waehle(fach, id) {
+  /** Motiv für die nr-te Lücke (ab 0) im Fach fach: { id, wirkung, svg }. */
+  function waehle(fach, nr) {
     const liste = JE_FACH[fach] || ALLE;
-    const name = liste[hash("motiv:" + id) % liste.length];
+    const name = liste[nr % liste.length];
     return { id: name, ...MOTIVE[name] };
   }
 
