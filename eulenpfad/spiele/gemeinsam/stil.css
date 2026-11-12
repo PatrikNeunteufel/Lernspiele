@@ -315,8 +315,6 @@ button { font-family: inherit; }
 /* Endlos-Modus: Zähler statt Punkte, Wahl im Startbild, Rangliste am Schluss */
 .fortschritt.endlos { font-size: 26px; font-weight: 900; color: var(--knopf); }
 .endlos-wahl { margin-top: 16px; padding-top: 12px; border-top: 2px dashed var(--rand); display: flex; flex-direction: column; gap: 8px; }
-.endlos-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; }
-.endlos-knoepfe small { font-size: 14px; color: var(--text-leise); }
 .rangliste { margin: 12px auto; max-width: 320px; text-align: left; }
 .rangliste ol { margin: 6px 0 0; padding-left: 1.6em; }
 .rangliste li { padding: 4px 8px; border-radius: 8px; }
@@ -1085,6 +1083,14 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .timer-schalter.nur-symbol { display: inline-flex; align-items: center; min-width: 56px; padding-left: 0; padding-right: 0; justify-content: center; gap: 2px; }
 .timer-schalter.nur-symbol .symbol { width: 30px; height: 30px; }
 .timer-wort { font-size: 18px; }
+/* Schalter der Stufenwahl wie auf der Karte (RS1 a): Teile, Timer, Endlos je Knopf mit Wort, darunter die Erklärung */
+.schalter-zeile { gap: 10px 22px; }
+.schalter-teil { display: inline-flex; align-items: center; gap: 8px; }
+.schalter-hinweis { flex-basis: 100%; }
+/* an: Teile und Endlos zeigen es am goldenen Symbol wie auf der Karte; nur der Timer färbt den Knopf */
+.timer-schalter.an:is([data-schalter="reihenfolge"], [data-schalter="endlos"]) { background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); }
+.stufe .fuer.endlos { color: var(--deko-4-schrift); font-weight: 900; }
+.stufe .fuer.endlos .symbol { width: 20px; height: 20px; vertical-align: -5px; }
 .timer-schalter.an .symbol.uhr { stroke: var(--auf-hinweis); fill: none; filter: none; }
 /* Stufen als Level (FB2 a, LERN_Session32): gross Symbol und Nummer, Sterne, Untertitel; ⓘ neben dem Knopf */
 .stufe-huelle { position: relative; display: flex; flex-direction: column; }

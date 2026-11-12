@@ -9,11 +9,7 @@ const UE = KERN.uebersicht;
 // Symbole der Karten-Schalter: aus = grauer Umriss, an = gold mit Verlauf wie der Favoriten-Stern.
 // Der Verlauf steht einmal im Dokument (#gold-verlauf). Die Form des Sterns kommt aus dem Kern.
 // Reihenfolge auf der Karte: Antippen schaltet weiter (nach Stufe → geordnet → gemischt → nach Stufe).
-const REIHENFOLGE_KARTE = {
-  stufe: { symbol: "balken", an: false, naechste: "geordnet", text: "Teile nach Stufe (1–3 geordnet, ab 4 gemischt)" },
-  geordnet: { symbol: "balken", an: true, naechste: "gemischt", text: "Teile geordnet: grösste Stelle links" },
-  gemischt: { symbol: "mischen", an: true, naechste: "stufe", text: "Teile gemischt" },
-};
+const REIHENFOLGE_KARTE = LS.REIHENFOLGE_SCHALTER; // Werte im Rahmen, gleich auf der Stufenwahl (RS1 a)
 /** Symbol der Schalter (⏱ Uhr, ♾ Endlos, ☆ Stern, Balken, Mischen): aus spiel.js, gleich auf Karten und Stufenwahl. */
 const schalterSymbol = (art, an) => LS.schalterSymbol(art, an);
 
