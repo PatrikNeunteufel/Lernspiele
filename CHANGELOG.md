@@ -1992,3 +1992,5 @@
   dunkel. Dieselbe Farbe für die Rahmen der Abschnitte und Gruppen der Prüfansicht (T2 a), die Zeilen der Einstellungen
   je Spiel und der Ruhezeiten in der Verwaltung und die Grundlinie der Säulen in der Statistik (T1 a); Linien zwischen
   Abschnitten bleiben `--rand`.
+- **Keine Worktrees** (W2 b, Anweisung Patrik): Regel im Projekt-Steckbrief der `CLAUDE.md` — Sitzungen arbeiten im
+  Hauptordner, weitere Sitzungen starten ohne Worktree und ändern nie dieselben Dateien.
