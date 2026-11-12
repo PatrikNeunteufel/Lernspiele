@@ -342,7 +342,7 @@ Stand nach LERN_Session11 ([Report](report/LERN_Session11_2026-11-03.md)):
 - **Spiele:** 168 (drei Strategie-Rätsel mit Regelseite, LERN-49). Katalogfeld `art`, Sortierung im Tab Spiele,
   Spieltabelle im Portal (`portal/eulenpfad-spiele.html`).
 - **Prüfung je Eintrag** (rahmen.md 17): Prüfansicht mit Haken je Eintrag, Gruppen und Bemerkungen; je Spiel eine
-  `pruefung.js`, bisher nur Anlaut-Angel und Auge-Entdecker (LERN-51, LP5).
+  `pruefung.js`, bisher Anlaut-Angel, Auge-Entdecker und die neun Mathe-Spiele mit Listen (Block 1; LERN-51, LP5).
 - **Wiederholungen:** eine Aufgabe erst wieder, wenn alle der Stufe dran waren (Gedächtnis `lernspiele:gestellt`).
 - **Konzept Gruppen** entschieden (G1–G11, G3b), Bau offen (LERN-48); Beiträge vorbereitet, Links leer (LERN-50).
 - **Tests:** 2026-11-03 „Keine Fehler.“ über alle 168 Spiele (19 Hinweise der bekannten Arten: verrät, Serie, Einzahl?).
@@ -525,7 +525,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G11 und G3b getroffen 2026-11-03, Bau ausstehend) | docs/konzept_gruppen.md, Abschnitt 9; docs/anleitung_zertifikat_klassenserver.md; docs/anleitung_klassenserver_internet.md; umfasst LERN-34 |
 | LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | in Arbeit seit 2026-11-03 (LERN_Session11); vorbereitet, Links leer — Patrik trägt sie ein, Steuern und Impressum klären | docs/anleitung_freiwillige_beitraege.md; portal/unterstuetzen.js |
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
-| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-12 (LERN_Session36, Zweig `claude/sleepy-snyder-54c222`); Trennlinien fertig, Listen in Blöcken | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
+| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-12 (LERN_Session36, Blöcke nach T4 a); Block 1 Mathe fertig, weiter mit Block 2 Deutsch | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
 | LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |

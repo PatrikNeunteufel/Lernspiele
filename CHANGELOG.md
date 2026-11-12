@@ -1997,3 +1997,12 @@
 - **Linien der Prüfansicht im Lernsteig kräftiger** (T3 a): eigene `--trennlinie` in `lernsteig/gemeinsam/stil.css`
   für die Zeilen der Prüftabelle und die Rahmen der Gruppen — hell `#7b8794` (3,7 auf der Karte, 3,4 auf einer Zeile mit
   Bemerkung, 3,4 auf dem Grund; vorher `--rand` mit 1,3), dunkel `#7d84aa` wie im Eulenpfad (3,9 und 3,6).
+- **Prüfung je Eintrag, Block 1 Mathe** (LP5 a, LERN-51, T4 a): `pruefung.js` für Schätz-Waage, Rechengeschichten,
+  Daten-Detektiv, Preis-Tabelle, Möglichkeiten-Finder, Gegenteil-Wippe, Platzhalter-Geschichten, Zeit-Schätzer und
+  Diagramm-Wahl — jede Liste je Abschnitt abhakbar. Gemischte Listen in mehrere Abschnitte getrennt: Umfragen (Fragen,
+  Kategorien), Gegenteile (Bildpaare, gezeichnete Dinge, Reihen), Platzhalter-Geschichten (je Gruppe; in Gruppe 3 jede
+  Variante ein Eintrag), Tätigkeiten (Dauern, Sätze mit Zeitpunkt, Sätze mit Zeitdauer), Diagramm-Daten (Säulen und
+  Linien je Daten und Fragen/Sätze, Kreise, offene Aussagen). Bilder vom Spiel gezeichnet: Glacekugeln, die vier
+  Fassungen der gezeichneten Dinge, Säulen-, Kreis- und Liniendiagramme. Rechengeschichten zeigen je Vorlage zwei
+  Beispiele (kleinste und grösste Zahlen, mit Einzahl bei 1), Platzhalter-Geschichten eines mit Gleichung und Lücke.
+  Prüfstand und Fingerabdrücke unverändert (die Listen sind vor der Prüfung je Eintrag als Ganzes geprüft).
