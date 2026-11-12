@@ -2006,3 +2006,7 @@
   Fassungen der gezeichneten Dinge, Säulen-, Kreis- und Liniendiagramme. Rechengeschichten zeigen je Vorlage zwei
   Beispiele (kleinste und grösste Zahlen, mit Einzahl bei 1), Platzhalter-Geschichten eines mit Gleichung und Lücke.
   Prüfstand und Fingerabdrücke unverändert (die Listen sind vor der Prüfung je Eintrag als Ganzes geprüft).
+- **Prüfdialog dunkel auf der Karte** (N1 a): `.listen-dialog` mit `background: var(--karte)` im Eulenpfad und im
+  Lernsteig; vorher nahm er das fast schwarze Grau des Browsers. Hell unverändert (Weiss).
+- **Rahmen einer fertig geprüften Gruppe** (N2 a): eigene Farbe `--trennlinie-fertig` in `stil.css` — hell `#1f8a50`
+  (4,4 auf der Karte; vorher `--gut` mit 2,4), dunkel `var(--gut)` (7,7). Im Lernsteig reicht `--gut` (5,9).

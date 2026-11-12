@@ -115,6 +115,7 @@
      Grundlinie der Säulen (T1 a, T2 a): mindestens 3 wie ein Bedienelement — auf der Karte 3,4, auf dem Seitengrund
      3,2, auf der Zeile mit Bemerkung 3,2 (--rand dort 1,2, kaum zu sehen). Linien zwischen Abschnitten bleiben --rand. */
   --trennlinie: #858aa6;
+  --trennlinie-fertig: #1f8a50;       /* Rahmen einer ganz geprüften Gruppe (N2 a): 4,4 auf der Karte (--gut 2,4) */
   --uebertrag-leer: #9aa0c0;
   --warn-schrift: #8a4b00;
   --zeitbalken: #8ee0b0;
@@ -198,6 +199,7 @@
   --tipp: #3d3518;
   --tipp-boden: #6e6030;
   --trennlinie: #7d84aa;              /* 3,9 auf der Karte, 3,6 auf der Zeile mit Bemerkung (--rand 1,9) */
+  --trennlinie-fertig: var(--gut);    /* 7,7 auf der Karte */
   --uebertrag-leer: #8a90b8;
   --warn-schrift: #ffc070;
   --zeitbalken: #2f8f5c;
@@ -625,7 +627,7 @@ body:has(.entwickler-leiste) { padding-bottom: 90px; }
 .entwickler-listen .liste-link.geprueft { /* Gleich in beiden Modi: Leiste und Listen der Entwicklung, immer dunkel */ color: #7ee0a1; }
 
 /* Inhaltsliste ansehen (Entwickler-Modus, Entscheid E3 a), auf Spielseiten und in der Verwaltung */
-.listen-dialog { width: calc(100% - 32px); max-width: 960px; max-height: 88vh; border: none; border-radius: 16px; padding: 18px 20px; color: var(--text); }
+.listen-dialog { width: calc(100% - 32px); max-width: 960px; max-height: 88vh; border: none; border-radius: 16px; padding: 18px 20px; color: var(--text); background: var(--karte); /* N1 a: sonst dunkel das Grau des Browsers */ }
 .listen-dialog::backdrop { background: rgba(31, 41, 51, .45); }
 .listen-dialog h2 { margin: 0 0 10px; font-size: 21px; }
 .listen-dialog h3 { margin: 14px 0 4px; font-size: 17px; }
@@ -643,7 +645,7 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
    Inhalt, Abschnitte und Gruppen aufklappbar (ganz geprüfte zu). */
 .pruef-dialog .pruef-stand { font-weight: 800; margin: 4px 0; }
 .pruef-gruppe { border: 2px solid var(--trennlinie); border-radius: 12px; margin: 8px 0; padding: 4px 10px; background: var(--karte); }
-.pruef-gruppe.fertig { border-color: var(--gut); }
+.pruef-gruppe.fertig { border-color: var(--trennlinie-fertig); }
 .pruef-gruppe > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
 .pruef-gruppe .pruef-gruppe { margin-left: 4px; }
 .pruef-zahl { color: var(--text-leise); font-size: 14px; }
