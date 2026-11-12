@@ -14,7 +14,7 @@
   .netz { display: flex; justify-content: center; margin: 0 auto 14px; }
   .netz svg { display: block; max-width: 100%; height: auto; }
   .netz .tippbar { cursor: pointer; }
-  .netz .tippbar:hover { fill: #eef0ff; }
+  .netz .tippbar:hover { fill: var(--aktiv); }
   .netz .daneben { fill: var(--hinweis-hell); }
   .netz .geloest { fill: var(--gut-hell); stroke: var(--gut); }
   .netz-wahl .wahl-knopf { min-height: 110px; }
@@ -327,7 +327,7 @@ function netzSvg(netz, opt = {}) {
   const [b, h] = NETZ.groesse(netz);
   const X = p => (p[0] * u + 4).toFixed(1), Y = p => ((h - p[1]) * u + 4).toFixed(1);
   const teile = netz.map((P, i) => {
-    const fill = i === opt.markiert ? "var(--deko-2)" : "#fff";
+    const fill = i === opt.markiert ? "var(--deko-2)" : "var(--k-feld)";
     const strich = opt.gestrichelt?.includes(i) ? ' stroke-dasharray="6 5" stroke="var(--knopf)"' : ' stroke="var(--text)"';
     return `<polygon data-i="${i}" points="${P.map(p => `${X(p)},${Y(p)}`).join(" ")}" fill="${fill}"${strich} stroke-width="2.5" stroke-linejoin="round"/>`;
   });

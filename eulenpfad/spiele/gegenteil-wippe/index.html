@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   /* Bildknöpfe: Emoji oder Zeichnung, gross genug für Finger */
-  .gw-knopf { border: 3px solid var(--rand); border-radius: 18px; background: #fff; box-shadow: 0 5px 0 var(--rand); cursor: pointer; position: relative;
+  .gw-knopf { border: 3px solid var(--rand); border-radius: 18px; background: var(--k-feld); box-shadow: 0 5px 0 var(--rand); cursor: pointer; position: relative;
     min-width: 96px; min-height: 96px; padding: 6px; display: flex; align-items: center; justify-content: center; font-family: inherit; }
   .gw-knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
   .gw-knopf.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
@@ -17,15 +17,15 @@
   .gw-knopf.gesetzt { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }
   .gw-bild { font-size: clamp(48px, 12vw, 64px); line-height: 1.1; }
   .gw-zeichnung svg { width: clamp(76px, 20vw, 96px); height: auto; display: block; }
-  .gw-nr { position: absolute; top: -10px; right: -8px; width: 32px; height: 32px; border-radius: 50%; background: var(--gut); color: #fff;
+  .gw-nr { position: absolute; top: -10px; right: -8px; width: 32px; height: 32px; border-radius: 50%; background: var(--gut-grund); color: var(--auf-gut);
     font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center; }
   .gw-reihe { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 8px auto 4px; max-width: 560px; }
   /* Wippe: Balken mit zwei Sitzen auf einem Bock; neigt sich auf die Seite mit „mehr“ */
   .wippe { max-width: 420px; margin: 4px auto 10px; }
-  .balken { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 6px; border-bottom: 12px solid #c58b4e;
+  .balken { /* Gleich in beiden Modi: Holz */  display: flex; justify-content: space-between; align-items: flex-end; padding: 0 6px; border-bottom: 12px solid #c58b4e;
     border-radius: 0 0 8px 8px; transform-origin: 50% 100%; transition: transform .7s cubic-bezier(.3, 1.6, .5, 1); }
-  .bock { width: 0; height: 0; margin: 0 auto; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 42px solid #94612f; }
-  .sitz { min-width: 96px; min-height: 96px; display: flex; align-items: center; justify-content: center; border-radius: 18px; background: #fff; box-shadow: 0 4px 0 var(--rand); }
+  .bock { /* Gleich in beiden Modi: Holz */  width: 0; height: 0; margin: 0 auto; border-left: 28px solid transparent; border-right: 28px solid transparent; border-bottom: 42px solid #94612f; }
+  .sitz { min-width: 96px; min-height: 96px; display: flex; align-items: center; justify-content: center; border-radius: 18px; background: var(--k-feld); box-shadow: 0 4px 0 var(--rand); }
   .sitz.leer { border: 4px dashed var(--rand); background: transparent; box-shadow: none; font-size: 40px; color: var(--text-leise); }
   /* Königsstufe: kleine Wippen mit Paketen */
   .wippen { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin: 0 auto 6px; }
@@ -298,7 +298,7 @@ function dingKnopf(d) {
   k.append(dingInhalt(d));
   return k;
 }
-const dingInhalt = d => (d.bild ? el("span", { class: "gw-bild", text: d.bild }) : el("span", { class: "gw-zeichnung", html: zeichnungSvg(d.zeichnung) }));
+const dingInhalt = d => (d.bild ? el("span", { class: "gw-bild", text: d.bild }) : el("span", { class: "gw-zeichnung szenenbild bildkachel", html: zeichnungSvg(d.zeichnung) }));
 const wackeln = k => { k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch"); };
 
 /**

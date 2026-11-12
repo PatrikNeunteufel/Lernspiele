@@ -8,18 +8,18 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .nacht { background: linear-gradient(180deg, #1e1b4b, #312e81); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; }
+  .nacht { /* Gleich in beiden Modi: Nachthimmel mit weisser Schrift */  background: linear-gradient(180deg, #1e1b4b, #312e81); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; }
   .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
   .mond-gross { text-align: center; font-size: clamp(80px, 18vw, 120px); line-height: 1.1; }
   .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 10px; max-width: 700px; margin: 0 auto; }
-  .option { border: none; border-radius: 16px; min-height: 64px; padding: 8px; font-family: inherit; font-size: clamp(18px, 3.8vw, 24px); font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
-  .option.mond { font-size: clamp(40px, 9vw, 56px); background: #312e81; }
+  .option { border: none; border-radius: 16px; min-height: 64px; padding: 8px; font-family: inherit; font-size: clamp(18px, 3.8vw, 24px); font-weight: 900; background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
+  .option.mond { /* Gleich in beiden Modi: Nachthimmel */  font-size: clamp(40px, 9vw, 56px); background: #312e81; }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .option.richtig { background: var(--gut-hell); }
   .option.gewaehlt { opacity: .3; }
   .reihe { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 64px; margin-bottom: 12px; }
   .reihe span { font-size: 40px; }
-  .reihe .planet { font-size: 16px; font-weight: 900; background: #fff; color: var(--text); border-radius: 999px; padding: 8px 12px; }
+  .reihe .planet { font-size: 16px; font-weight: 900; background: var(--k-feld); color: var(--text); border-radius: 999px; padding: 8px 12px; }
   .sonne { font-size: 40px; }
   .planet-knopf { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .planet-knopf i { display: block; border-radius: 50%; }

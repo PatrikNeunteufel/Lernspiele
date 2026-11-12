@@ -33,6 +33,9 @@
   --st-ZT: var(--blau);
   --st-HT: var(--gruen);
   --st-M:  var(--rot);
+  /* Schrift auf einer Stellenfarbe als Grund (Kopf einer Stellentafel, Plättchen): hell weiss, dunkel dunkel
+     (--k-knopf-text; auf rot 6,2, blau 6,9, grün 6,6). Spielseiten nehmen sie statt #fff (DM4 a, Schritt 5). */
+  --auf-stelle: var(--k-knopf-text);
 
   /* Dekoration (Spielkarten, Stufen, Titel) — bewusst andere Töne als die Stellenfarben. */
   --deko-1: #8e5bd6;
@@ -112,6 +115,13 @@
   --warn-schrift: #8a4b00;
   --zeitbalken: #8ee0b0;
   --zeitleiste: #eef0fb;
+  /* Gemeinsame Töne der Spielseiten (Darkmode Schritt 5, DM4 a): vorher feste Werte im Stil der Seiten. */
+  --feld-leise: #f6f7fd;      /* leicht getönte Fläche: Kopf einer Tabelle, Ablage, Zeile */
+  --marker: #fff1c2;          /* gelb hervorgehoben: Wortteil, Stamm, gewählte Stelle */
+  --marker-strich: #f5b301;   /* gelbe Linie dazu */
+  --regel: #fff8e1;           /* Regelkarte, Preisschild, Ereignis — gestrichelt umrandet */
+  --regel-rand: #f5c451;
+  --regel-titel: #8a5b2c;     /* Überschrift der Regelkarte, 5,5 auf --regel (vorher #a0703d 4,1) */
 
   --rund: 22px;
   --schrift: "Nunito", "Segoe UI Rounded", "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif;
@@ -187,11 +197,20 @@
   --warn-schrift: #ffc070;
   --zeitbalken: #2f8f5c;
   --zeitleiste: #30344a;
+  /* Text darauf (--text): feld-leise 11,3, marker 9,1, regel 10,7; regel-titel auf regel 7,7 */
+  --feld-leise: #2c3045;
+  --marker: #4a3f1a;
+  --marker-strich: #e0a800;
+  --regel: #3d3518;
+  --regel-rand: #8a7430;
+  --regel-titel: #f0c87a;
 }
 
 * { box-sizing: border-box; }
 
 html, body { margin: 0; min-height: 100%; }
+/* <mark> nimmt sonst die Schrift des Browsers (schwarz) — dunkel auf dem dunklen --marker unlesbar (Schritt 5) */
+mark { color: inherit; }
 
 body {
   font-family: var(--schrift);
@@ -834,6 +853,12 @@ button.link, a.link {
    :root, .bildkachel). Im dunklen Modus stehen sie auf dem warmen hellen Bildgrund mit runden Ecken; hell unverändert. */
 :root[data-farben="dunkel"] .gezeichnet.bildkachel { background: var(--k-bildgrund); border-radius: 12px; padding: 3px; }
 :root[data-farben="dunkel"] .feier.bildkachel { background: var(--k-bildgrund); border-radius: 18px; padding: 6px; }
+/* Gezeichnete Szenen der Spielseiten (Schritt 5, reserviert: szenenbild): die Seite setzt „szenenbild bildkachel“ an
+   ihr Bild (SVG oder Hülle); feste Farben darin sind Bildfarben. Dunkel derselbe warme Grund; ein eigener Grund der
+   Szene (Plan im Kompass-Spiel) gewinnt, darum ohne Gewicht (:where). */
+:where(:root[data-farben="dunkel"] .szenenbild.bildkachel) { background: var(--k-bildgrund); border-radius: 16px; }
+/* Schrift in der Szene: color erbt den berechneten Wert der Seite (dunkel hell), nicht den Namen — darum hier neu */
+:where(.szenenbild.bildkachel) { color: var(--text); }
 
 /* ---------- Abschluss-Animation (feier.js, Entscheide AN1–AN3 a; reserviert: feier, ruhig) ---------- */
 
@@ -894,7 +919,7 @@ button.link, a.link {
 }
 .schriftlich .kopfzelle { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .34); border-radius: 10px;
   background: color-mix(in srgb, var(--f) 22%, var(--k-karte)); color: var(--text); } /* blass: Ton als Grund, Schrift dunkel (DM4 a; vorher halb durchsichtig, 1,4) */
-.schriftlich .kopfzelle.aktiv { background: var(--f); color: var(--k-knopf-text); transform: scale(1.08); }
+.schriftlich .kopfzelle.aktiv { background: var(--f); color: var(--auf-stelle); transform: scale(1.08); }
 .schriftlich .ziffer { color: var(--f); }
 .schriftlich .zeichen { color: var(--text); }
 /* Übertrag: kleine Zahl im Bläschen, direkt über dem Strich */

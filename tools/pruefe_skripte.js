@@ -16,9 +16,11 @@
 //      der App (--text: var(--k-text)) ins Leere, und die Seite verliert still ihre Farben. In den Apps aus KOPF_APPS
 //      steht davor <script src="…/kern/kern-kopf.js" data-speicher="<Präfix>"> (Darkmode Schritt 3b): ohne es blitzt eine
 //      dunkle Seite hell auf, mit falschem Präfix bleibt sie hell.
-//   7. (Hinweis, kein Fehler, bis die Seiten umgebaut sind; DM4 a) feste Farben in Stilen: #…, rgb(), rgba(), hsl(),
-//      white, black ausserhalb von Variablen in :root. Nicht gezählt: ein Regelblock mit dem Kommentar
-//      „Bildfarben: <Grund>“ (Zeichnung auf heller Bildkachel, DM3 a). Mit --farben je Datei die Zahl.
+//   7. feste Farben in Stilen (DM4 a): #…, rgb(), rgba(), hsl(), white, black ausserhalb von Variablen in :root. Nicht
+//      gezählt: ein Regelblock mit dem Kommentar „Bildfarben: <Grund>“ (Zeichnung auf heller Bildkachel, DM3 a) oder
+//      „Gleich in beiden Modi: <Grund>“ (Gegenstand mit eigenen Farben: Banknote, Klaviertaste, Nachthimmel). In
+//      Spielseiten (eulenpfad/spiele/<spiel>/*.html) ein Fehler seit Darkmode Schritt 5 (LERN_Session35), sonst ein
+//      Hinweis, bis Schritt 6 die übrigen Stile umgebaut hat. Mit --farben je Datei die Zahl.
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -93,7 +95,8 @@ const GEGENPROBEN_CSS = [
 // 7. Feste Farben (DM4 a)
 const FESTE_FARBE = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\([^)]*\)|\b(?:white|black)\b(?!-)/gi; // nicht white-space
 const BILDFARBEN = "Bildfarben:";
-const GLEICH = "Gleich in beiden Modi:"; // Teile, die in beiden Modi gleich aussehen (Leiste der Entwicklung)
+const GLEICH = "Gleich in beiden Modi:"; // Teile, die in beiden Modi gleich aussehen (Leiste der Entwicklung, Gegenstände)
+const SPIELSEITE = /^eulenpfad\/spiele\/(?!gemeinsam\/)[^/]+\/[^/]+\.html$/; // Punkt 7 dort ein Fehler (Schritt 5)
 /** Dunkle, halb durchsichtige Farbe (Schatten, Abdunklung): wirkt in beiden Modi und zählt nicht. */
 const DUNKEL_DURCHSICHTIG = f => {
   const m = f.replace(/\s+/g, "").match(/^rgba\((\d+),(\d+),(\d+),([\d.]+)\)$/i);
@@ -217,6 +220,10 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
     const ist = festeFarben(css);
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 7 „${name}“: ${ist} statt ${soll} feste Farben`);
   }
+  for (const [wo, soll] of [["eulenpfad/spiele/zahlenhaus/index.html", true], ["eulenpfad/spiele/koenig-falle/regeln.html", true],
+    ["eulenpfad/spiele/gemeinsam/pruefen.html", false], ["eulenpfad/index.html", false], ["lernsteig/uebungen/x/index.html", false]]) {
+    if (SPIELSEITE.test(wo) !== soll) fehler.push(`Gegenprobe Punkt 7: ${wo} ${soll ? "nicht" : "fälschlich"} als Spielseite erkannt`);
+  }
   for (const [html, wo, soll, name] of GEGENPROBEN_STIL) {
     const ist = pruefeKernStil(html, wo, () => true).length;
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 6 „${name}“: ${ist} statt ${soll} Meldungen`);
@@ -274,6 +281,10 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
       }
     }
   }
+  // 7. in Spielseiten ein Fehler (Darkmode Schritt 5): eine feste Farbe bleibt im dunklen Modus hell und still unlesbar
+  for (const [wo, n] of Object.entries(zahlen.farben)) {
+    if (SPIELSEITE.test(wo)) fehler.push(`${wo}: ${n} feste Farbe(n) im Stil — Variable nehmen oder Block mit „Bildfarben:“ / „Gleich in beiden Modi:“ (DM4 a)`);
+  }
   return { fehler, zahlen };
 }
 
@@ -286,11 +297,11 @@ function zeileVon(e) {
 if (require.main === module) {
   const { fehler, zahlen } = pruefe();
   console.log(`${zahlen.js} Skriptdateien, ${zahlen.inline} Skripte in Seiten, ${zahlen.verweise} Verweise, ${zahlen.css} Stile geprüft.`);
-  // 7. feste Farben: nur ein Hinweis (DM4 a), je Datei mit --farben
+  // 7. feste Farben ausserhalb der Spielseiten: ein Hinweis (DM4 a, Schritt 6), je Datei mit --farben
   const farben = Object.entries(zahlen.farben);
-  const spielseiten = farben.filter(([d]) => /^eulenpfad\/spiele\/(?!gemeinsam\/)/.test(d));
-  if (farben.length) console.log(`    HINWEIS feste Farben (DM4 a): ${farben.reduce((s, [, n]) => s + n, 0)} in ${farben.length} Stilen, ` +
-    `davon ${spielseiten.reduce((s, [, n]) => s + n, 0)} in ${spielseiten.length} Spielseiten — Liste mit --farben`);
+  const uebrige = farben.filter(([d]) => !SPIELSEITE.test(d));
+  if (uebrige.length) console.log(`    HINWEIS feste Farben (DM4 a): ${uebrige.reduce((s, [, n]) => s + n, 0)} in ${uebrige.length} Stilen ` +
+    `ausserhalb der Spielseiten — Liste mit --farben`);
   if (process.argv.includes("--farben")) for (const [d, n] of farben.sort((a, b) => b[1] - a[1])) console.log(`      ${String(n).padStart(4)}  ${d}`);
   for (const f of fehler) console.log(`    FEHLER  ${f}`);
   const schluss = fehler.length ? `${fehler.length} Fehler.` : "Keine Fehler.";

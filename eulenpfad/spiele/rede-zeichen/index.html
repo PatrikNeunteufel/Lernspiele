@@ -12,13 +12,13 @@
   .frage b { color: var(--knopf); }
 
   /* Schema der direkten Rede: Begleitsatz und Rede als farbige Kästchen, die Zeichen dazwischen gross. */
-  .rz-schema { background: #fff8e1; border: 3px dashed #f5c451; border-radius: 16px; padding: 8px 12px; margin: 0 auto 14px; max-width: 700px; }
-  .rz-schema > b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+  .rz-schema { background: var(--regel); border: 3px dashed var(--regel-rand); border-radius: 16px; padding: 8px 12px; margin: 0 auto 14px; max-width: 700px; }
+  .rz-schema > b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--regel-titel); }
   .rz-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; font-size: clamp(15px, 3.6vw, 19px); font-weight: 800; margin: 4px 0; }
   .rz-zeile .rz-z { font-size: 1.35em; color: var(--text); padding: 0 1px; }
   .rz-zeile .rz-b, .rz-zeile .rz-r { border-radius: 8px; padding: 2px 8px; color: var(--text); }
-  .rz-zeile .rz-b { background: #e8ecff; border: 2px solid var(--deko-6); }
-  .rz-zeile .rz-r { background: #fff; border: 2px solid var(--deko-2); }
+  .rz-zeile .rz-b { background: var(--aktiv); border: 2px solid var(--deko-6); }
+  .rz-zeile .rz-r { background: var(--k-feld); border: 2px solid var(--deko-2); }
 
   /* Satz: Wörter mit Lücken dazwischen; jede Lücke nimmt ein oder mehrere Zeichen auf. */
   .satz { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; row-gap: 12px; max-width: 760px; margin: 0 auto 16px;
@@ -26,7 +26,7 @@
   .satz .rz-wort { padding: 0 1px; }
   .satz .rz-luecke { font: inherit; color: var(--knopf); cursor: pointer; min-width: 24px; height: 1.8em; margin: 0 1px; padding: 0 3px;
     border: 2px dashed var(--rand); border-radius: 8px; background: transparent; display: inline-flex; align-items: center; justify-content: center; }
-  .satz .rz-luecke.aktiv { border: 3px solid var(--knopf); background: #eef4ff; }
+  .satz .rz-luecke.aktiv { border: 3px solid var(--knopf); background: var(--aktiv); }
   .satz .rz-luecke.voll { border-style: solid; border-color: transparent; font-size: 1.15em; }
   .satz .rz-luecke.voll.aktiv { border-color: var(--knopf); }
   .satz .rz-luecke.richtig { color: var(--gut); border-color: transparent; background: transparent; }
@@ -34,13 +34,13 @@
 
   /* Stufe 1: gesprochene Wörter antippen */
   .satz .rz-tipp { font: inherit; color: var(--text); cursor: pointer; margin: 0 3px; padding: 2px 6px; border: 2px solid var(--rand); border-radius: 10px;
-    background: #fff; box-shadow: 0 3px 0 var(--rand); }
-  .satz .rz-tipp.gewaehlt { background: #ffe9c7; border-color: var(--deko-2); }
+    background: var(--k-feld); box-shadow: 0 3px 0 var(--rand); }
+  .satz .rz-tipp.gewaehlt { background: var(--hinweis-hell); border-color: var(--deko-2); }
   .satz .rz-tipp.richtig { background: var(--gut-hell); border-color: var(--gut); }
 
   .rz-tasten { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 auto 14px; max-width: 560px; }
   .rz-taste { font: inherit; font-size: 34px; font-weight: 900; min-width: 58px; min-height: 58px; padding: 0 8px; border: none; border-radius: 14px;
-    background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
+    background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
   .rz-taste.weg { font-size: 26px; background: var(--hinweis-hell); }
   .rz-pruefen { display: flex; justify-content: center; }
 </style>

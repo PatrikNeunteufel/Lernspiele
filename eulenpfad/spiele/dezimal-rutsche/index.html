@@ -15,8 +15,8 @@
   .frage b { color: var(--knopf); white-space: nowrap; }
 
   .rutsche { width: 100%; max-width: 720px; display: block; margin: 0 auto; overflow: visible; }
-  .rutsche .bahn { stroke: #f5b301; stroke-width: 14; stroke-linecap: round; fill: none; }
-  .rutsche .strich { stroke: #c9cde0; stroke-width: 2; }
+  .rutsche .bahn { stroke: var(--marker-strich); stroke-width: 14; stroke-linecap: round; fill: none; }
+  .rutsche .strich { stroke: var(--rand); stroke-width: 2; }
   .rutsche .mitte { stroke: var(--hinweis); stroke-width: 3; stroke-dasharray: 5 4; }
   .rutsche text { font-family: var(--schrift); font-weight: 800; fill: var(--text-leise); font-size: 20px; }
   .rutsche .kugel { transition: transform .9s cubic-bezier(.5, 0, .5, 1.2); }
@@ -25,7 +25,7 @@
   .ziel {
     border: none; border-radius: 18px; padding: 12px 18px; min-height: 72px; min-width: 130px;
     font-family: inherit; font-size: clamp(24px, 5vw, 34px); font-weight: 900;
-    background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer;
+    background: var(--k-feld); color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer;
     font-variant-numeric: tabular-nums;
   }
   .ziel small { display: block; font-size: 14px; color: var(--text-leise); font-weight: 700; }

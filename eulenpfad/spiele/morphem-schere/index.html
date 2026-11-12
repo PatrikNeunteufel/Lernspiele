@@ -10,8 +10,8 @@
 <style>
   .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
   .frage b { color: var(--knopf); }
-  .regelkarte { background: #fff8e1; border: 3px dashed #f5c451; border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
-  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+  .regelkarte { background: var(--regel); border: 3px dashed var(--regel-rand); border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
+  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--regel-titel); }
 
   /* Wort zum Schneiden: Buchstaben mit Fugen dazwischen; die Fuge ist breiter als sie aussieht. */
   .wortkarte { display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; margin: 6px auto 16px;
@@ -29,10 +29,10 @@
   /* Geschnittene Teile: Vorsilbe, Stamm, Endung */
   .teile { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 6px auto 16px; }
   .ms-teil { font: inherit; font-size: clamp(24px, 6vw, 40px); font-weight: 900; padding: 6px 14px; border-radius: 14px; border: 3px solid var(--rand);
-    background: #fff; color: var(--text); min-height: 60px; }
+    background: var(--k-feld); color: var(--text); min-height: 60px; }
   button.ms-teil { cursor: pointer; box-shadow: 0 5px 0 var(--rand); }
   .ms-teil.vorsilbe { border-color: var(--deko-1); }
-  .ms-teil.stamm { border-color: var(--deko-5); background: #e6faf7; }
+  .ms-teil.stamm { border-color: var(--deko-5); background: color-mix(in srgb, var(--deko-5) 12%, var(--k-feld)); }
   .ms-teil.endung { border-color: var(--deko-3); }
   .ms-teil.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .ms-teil small { display: block; font-size: 12px; font-weight: 800; color: var(--text-leise); }
@@ -43,7 +43,7 @@
   .lueckenwort .luecke.richtig { color: var(--gut); border-color: var(--gut); }
   .ms-optionen { display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; margin-bottom: 8px; }
   .ms-option { font: inherit; font-size: clamp(26px, 6vw, 38px); font-weight: 900; min-width: 120px; min-height: 72px; padding: 6px 16px;
-    border: none; border-radius: 18px; background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer; }
+    border: none; border-radius: 18px; background: var(--k-feld); color: var(--text); box-shadow: 0 6px 0 var(--rand), 0 8px 16px rgba(45, 48, 71, .1); cursor: pointer; }
   .ms-option.wort { font-size: clamp(18px, 4.4vw, 24px); min-width: 140px; }
   .ms-option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .ms-option.richtig { background: var(--gut-hell); }

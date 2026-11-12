@@ -10,19 +10,19 @@
 <style>
   .frage { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 10px; }
   .frage b { color: var(--knopf); }
-  .regelkarte { background: #fff8e1; border: 3px dashed #f5c451; border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
-  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+  .regelkarte { background: var(--regel); border: 3px dashed var(--regel-rand); border-radius: 16px; padding: 8px 14px; font-size: 16px; margin: 0 auto 14px; max-width: 700px; }
+  .regelkarte b { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--regel-titel); }
 
   /* Der Fächer: Fragen als Blätter über dem Griff mit dem Verb. */
   /* Innenabstand: die äusseren Blätter sind gedreht und ragen sonst auf dem Handy über den Rand */
   .vf-faecher { display: flex; justify-content: center; align-items: flex-end; gap: 6px; margin: 18px auto 0; max-width: 560px; padding: 0 14px; box-sizing: border-box; }
   .vf-blatt { font: inherit; font-size: clamp(14px, 3.6vw, 19px); font-weight: 800; line-height: 1.15; min-width: 0; max-width: 104px; flex: 1 1 0;
-    min-height: 92px; padding: 10px 4px; border: 3px solid var(--rand); border-radius: 50% 50% 12px 12px / 30% 30% 12px 12px; background: #fff;
+    min-height: 92px; padding: 10px 4px; border: 3px solid var(--rand); border-radius: 50% 50% 12px 12px / 30% 30% 12px 12px; background: var(--k-feld);
     color: var(--text); cursor: pointer; transform-origin: 50% 160%; box-shadow: 0 4px 0 var(--rand); }
-  .vf-blatt.gewaehlt { background: #ffe9c7; border-color: var(--deko-6); box-shadow: 0 4px 0 var(--deko-6); }
+  .vf-blatt.gewaehlt { background: var(--hinweis-hell); border-color: var(--deko-6); box-shadow: 0 4px 0 var(--deko-6); }
   .vf-blatt.richtig { background: var(--gut-hell); border-color: var(--gut); }
   .vf-griff { display: block; width: max-content; max-width: 100%; margin: -4px auto 16px; padding: 8px 26px; border-radius: 0 0 30px 30px;
-    background: var(--deko-6); color: #fff; font-size: clamp(24px, 6vw, 34px); font-weight: 900; position: relative; z-index: 1; }
+    background: var(--deko-6-grund); color: var(--auf-deko-6); font-size: clamp(24px, 6vw, 34px); font-weight: 900; position: relative; z-index: 1; }
   .vf-zeile { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
 
   /* Satz mit Lücken; unter jeder Lücke steht ihre Frage. */
@@ -32,17 +32,17 @@
   .satz .vf-luecke { display: inline-flex; flex-direction: column; align-items: center; min-width: 90px; padding: 4px 8px; border-bottom: 4px solid var(--rand); }
   .satz .vf-luecke small { font-size: 13px; color: var(--text-leise); font-weight: 800; }
   .satz .vf-luecke span { min-height: 1.2em; }
-  .satz .vf-luecke.dran { border-color: var(--knopf); background: #eef4ff; border-radius: 8px 8px 0 0; }
+  .satz .vf-luecke.dran { border-color: var(--knopf); background: var(--aktiv); border-radius: 8px 8px 0 0; }
   .satz .vf-luecke.dran small { color: var(--knopf); }
   .satz .vf-luecke.voll { border-color: var(--gut); }
   .vf-zeit { text-align: center; font-size: 16px; font-weight: 800; color: var(--deko-6); margin: -4px 0 8px; }
   .vf-karten { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 auto 8px; max-width: 640px; }
   .vf-karte { font: inherit; font-size: clamp(17px, 4.2vw, 22px); font-weight: 800; min-height: 56px; padding: 6px 14px; border: none; border-radius: 14px;
-    background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
+    background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
   .vf-karte.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
 
   /* Stufe 1 und 5: Wörter im Satz antippen */
-  .satz .vf-wort { font: inherit; color: var(--text); cursor: pointer; padding: 2px 8px; border: 2px solid var(--rand); border-radius: 10px; background: #fff;
+  .satz .vf-wort { font: inherit; color: var(--text); cursor: pointer; padding: 2px 8px; border: 2px solid var(--rand); border-radius: 10px; background: var(--k-feld);
     box-shadow: 0 3px 0 var(--rand); }
   .satz .vf-wort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .satz .vf-wort.richtig { background: var(--gut-hell); border-color: var(--gut); }

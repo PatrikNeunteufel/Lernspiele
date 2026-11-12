@@ -358,5 +358,10 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
    kaum erkennbar — eine Überraschung bis zum Erreichen (Wunsch Patrik).
    Messung dunkel danach 348 Funde (vorher 355); auf der Startseite bleiben nur die blassen Texte in Symbolen noch offener
    Abzeichen (wie hell). Gezeichnete Szenen der Spielseiten selbst (17 Seiten) mit Schritt 5.
-5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen.
+5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen. **In Arbeit seit 12.11.2026**
+   (LERN_Session35): Stile aller Spielseiten ohne feste Farbe (vorher 534 in 142 Seiten; `tools/pruefe_skripte.js`
+   Punkt 7 dort jetzt ein Fehler); neue Namen `--auf-stelle`, `--feld-leise`, `--marker`, `--regel` in `stil.css`;
+   Szenen mit `szenenbild bildkachel`, Gegenstände mit „Gleich in beiden Modi:“. Messung danach: dunkel 27 verschiedene
+   Funde in 21 Seiten (vorher 348), hell 62 (vorher 98). Offen: diese Funde (Tasten-Namen der Klaviatur, Thermometer,
+   Marken der Wassertropfen-Reise, deko-Töne als Schrift auf Weiss, Zahl im Dach des Zahlenhauses) und Farben in Skripten.
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

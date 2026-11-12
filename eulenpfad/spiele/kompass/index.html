@@ -15,25 +15,25 @@
   /* Kompassrose */
   .rose { display: block; width: min(300px, 80vw); margin: 0 auto 12px; touch-action: manipulation; }
   .rose.klein { width: 96px; margin: 0; }
-  .rose .ring { fill: #f6f7fd; stroke: var(--rand); stroke-width: 3; }
-  .rose .arm { fill: var(--deko-6); stroke: #fff; stroke-width: 2; cursor: pointer; }
+  .rose .ring { fill: var(--feld-leise); stroke: var(--rand); stroke-width: 3; }
+  .rose .arm { fill: var(--deko-6); stroke: var(--k-karte); stroke-width: 2; cursor: pointer; }
   .rose .arm.zwischen { fill: var(--deko-5); }
   .rose .arm.daneben { fill: var(--hinweis); }
   .rose .arm.treffer { fill: var(--gut); }
-  .rose .mitte { fill: #fff; stroke: var(--text); stroke-width: 2; }
-  .rose .pfeil { fill: var(--deko-3); stroke: #fff; stroke-width: 2; }
+  .rose .mitte { fill: var(--k-feld); stroke: var(--text); stroke-width: 2; }
+  .rose .pfeil { fill: var(--deko-3); stroke: var(--k-karte); stroke-width: 2; }
   .rose text { font-family: var(--schrift); font-weight: 900; font-size: 20px; fill: var(--text); }
 
   /* Plan: Raster mit Orten, Nordpfeil daneben */
   .karten-zeile { display: flex; justify-content: center; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-  .plan { display: grid; gap: 3px; width: min(420px, 100%); background: #d9efc9; border: 4px solid #b6d9a0; border-radius: 16px; padding: 4px; }
-  .plan .feld { aspect-ratio: 1; border: none; border-radius: 8px; background: rgba(255, 255, 255, .55); font-family: inherit; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; color: var(--text); }
+  .plan { /* Bildfarben: Szene auf der Bildkachel */ display: grid; gap: 3px; width: min(420px, 100%); background: #d9efc9; border: 4px solid #b6d9a0; border-radius: 16px; padding: 4px; }
+  .plan .feld { aspect-ratio: 1; border: none; border-radius: 8px; background: color-mix(in srgb, var(--k-feld) 55%, transparent); font-family: inherit; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; color: var(--text); }
   .plan .feld:disabled { cursor: default; }
   .plan .feld .bild { font-size: clamp(20px, 5.4vw, 30px); line-height: 1.1; }
   .plan .feld .name { font-size: clamp(8px, 2.1vw, 12px); font-weight: 800; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 1px; }
-  .plan .feld.start { box-shadow: inset 0 0 0 4px var(--deko-6); background: #fff; }
+  .plan .feld.start { box-shadow: inset 0 0 0 4px var(--deko-6); background: var(--k-feld); }
   .plan .feld.daneben { background: var(--hinweis-hell); }
-  .plan .feld.spur { background: #fff6c9; }
+  .plan .feld.spur { background: var(--tipp); }
   .plan .feld.treffer { background: var(--gut-hell); box-shadow: inset 0 0 0 4px var(--gut); }
   .nordpfeil { width: 64px; flex: none; }
   .nordpfeil .pfeil { fill: var(--text); }
@@ -393,7 +393,7 @@ function bildschirm(c, r, k) {
 
 /** Plan als Raster von Knöpfen; onTipp(c, r, feld) macht die Felder antippbar. */
 function planZeichnen(a, onTipp) {
-  const box = el("div", { class: "plan", "aria-label": "Plan" });
+  const box = el("div", { class: "plan szenenbild bildkachel", "aria-label": "Plan" });
   box.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
   box.felder = {};
   for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {

@@ -10,20 +10,20 @@
 <style>
   .bildfeld { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: flex-end; min-height: 140px; margin: 4px 0 14px; }
   .bildfeld.verdeckt > * { visibility: hidden; }
-  .bildfeld.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); border-radius: 16px; }
+  .bildfeld.verdeckt { background: repeating-linear-gradient(45deg, var(--feld-leise) 0 12px, var(--k-feld) 12px 24px); border-radius: 16px; }
   /* Würfelbild: 3 × 3 Plätze */
-  .wuerfel { display: grid; grid-template-columns: repeat(3, 26px); grid-template-rows: repeat(3, 26px); gap: 6px; padding: 12px; background: #fff; border: 4px solid var(--text); border-radius: 18px; }
+  .wuerfel { display: grid; grid-template-columns: repeat(3, 26px); grid-template-rows: repeat(3, 26px); gap: 6px; padding: 12px; background: var(--k-feld); border: 4px solid var(--text); border-radius: 18px; }
   .wuerfel i { border-radius: 50%; }
   .wuerfel i.p { background: var(--text); }
   /* Zehnerfeld: 2 Reihen à 5, die Kraft der Fünf */
-  .zehnerfeld { display: grid; grid-template-columns: repeat(5, 26px); gap: 5px; padding: 8px; background: #fff; border: 3px solid var(--rand); border-radius: 12px; }
+  .zehnerfeld { display: grid; grid-template-columns: repeat(5, 26px); gap: 5px; padding: 8px; background: var(--k-feld); border: 3px solid var(--rand); border-radius: 12px; }
   .zehnerfeld i { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--rand); box-sizing: border-box; }
   .zehnerfeld i.p { background: var(--deko-6); border-color: var(--deko-6); }
   /* Stellenwert-Material in Stellenfarben: Hunderterplatte, Zehnerstange, Einerwürfel */
   .platte { display: grid; grid-template-columns: repeat(10, 7px); gap: 1px; padding: 2px; background: var(--st-H); border-radius: 3px; }
-  .platte i { width: 7px; height: 7px; background: rgba(255, 255, 255, .45); }
+  .platte i { width: 7px; height: 7px; background: color-mix(in srgb, var(--k-feld) 45%, transparent); }
   .stange { display: grid; grid-template-rows: repeat(10, 9px); gap: 1px; padding: 2px; background: var(--st-Z); border-radius: 3px; }
-  .stange i { width: 9px; height: 9px; background: rgba(255, 255, 255, .45); }
+  .stange i { width: 9px; height: 9px; background: color-mix(in srgb, var(--k-feld) 45%, transparent); }
   .einer { width: 13px; height: 13px; background: var(--st-E); border-radius: 3px; }
   .einer-gruppe { display: grid; grid-template-columns: repeat(2, 13px); gap: 3px; align-content: end; }
   /* Umbrechen, damit bis zu neun Hunderterplatten auch auf dem Handy (375 px) Platz haben */

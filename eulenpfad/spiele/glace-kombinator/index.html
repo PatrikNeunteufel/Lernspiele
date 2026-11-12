@@ -12,29 +12,29 @@
   .gl-zaehler { text-align: center; font-size: 20px; font-weight: 800; margin: 0 0 8px; }
   .gl-kugel { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;
     border: 2px solid rgba(0, 0, 0, .18); font-weight: 900; font-size: 18px; flex: none; }
-  .gl-kugel.gl-leer { background: #fff; border: 3px dashed var(--rand); color: #c5c9de; }
+  .gl-kugel.gl-leer { background: var(--k-feld); border: 3px dashed var(--rand); color: var(--leer); }
   .gl-glace { display: inline-flex; flex-direction: column; align-items: center; }
   .gl-glace .gl-kugeln { display: flex; gap: 0; }
   .gl-glace.gl-turm .gl-kugeln { flex-direction: column-reverse; }
   .gl-glace.gl-turm .gl-kugel + .gl-kugel { margin-bottom: -8px; }
   .gl-glace.gl-becher .gl-kugel + .gl-kugel { margin-left: -6px; }
   .gl-becher .gl-unten { width: 64px; height: 22px; background: var(--deko-5); border-radius: 0 0 16px 16px; margin-top: -6px; }
-  .gl-turm .gl-unten { width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 34px solid #d9a066; margin-top: -4px; }
+  .gl-turm .gl-unten { width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 34px solid #d9a066 /* Gleich in beiden Modi: Waffel */; margin-top: -4px; }
   .gl-bau { display: flex; justify-content: center; align-items: flex-end; gap: 10px; min-height: 96px; margin: 0 0 10px; }
   .gl-bau b { font-size: 16px; color: var(--text-leise); }
   .gl-sorten { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(112px, 100%), 1fr)); gap: 10px; max-width: 640px; margin: 0 auto 12px; }
   .gl-sorte { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border: 3px solid var(--rand); border-radius: 18px;
-    background: #fff; font: inherit; font-size: 17px; font-weight: 800; color: var(--text); cursor: pointer; box-shadow: 0 5px 0 var(--rand); }
+    background: var(--k-feld); font: inherit; font-size: 17px; font-weight: 800; color: var(--text); cursor: pointer; box-shadow: 0 5px 0 var(--rand); }
   .gl-sorte .gl-kugel { width: 52px; height: 52px; font-size: 22px; }
   .gl-sorte .gl-bild { font-size: 40px; line-height: 1.1; }
-  .gl-sorte.gl-an { border-color: var(--knopf); background: #eef0ff; }
+  .gl-sorte.gl-an { border-color: var(--knopf); background: var(--aktiv); }
   .gl-gruppe { margin: 0 auto 10px; max-width: 640px; }
   .gl-gruppe > b { display: block; font-size: 15px; text-transform: uppercase; letter-spacing: .5px; color: var(--text-leise); margin: 0 0 4px 4px; }
   .gl-gefunden { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 14px; margin: 6px auto 4px; max-width: 680px; min-height: 40px; }
   .gl-gefunden > * { padding: 6px; border-radius: 14px; }
   .gl-gefunden .gl-neu { background: var(--gut-hell); }
   .gl-gefunden .gl-doppelt { background: var(--hinweis-hell); }
-  .gl-gefunden .gl-platz { min-width: 58px; min-height: 58px; border: 3px dashed var(--rand); display: flex; align-items: center; justify-content: center; color: #c5c9de; font-size: 24px; font-weight: 900; }
+  .gl-gefunden .gl-platz { min-width: 58px; min-height: 58px; border: 3px dashed var(--rand); display: flex; align-items: center; justify-content: center; color: var(--leer); font-size: 24px; font-weight: 900; }
   .gl-set { display: inline-flex; gap: 2px; font-size: 32px; line-height: 1.1; }
   .gl-liste { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 16px; margin: 0 auto 12px; max-width: 640px; }
   .gl-liste > span { display: inline-flex; flex-direction: column; align-items: center; font-size: 15px; font-weight: 800; }

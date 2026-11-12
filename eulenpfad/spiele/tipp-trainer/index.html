@@ -12,21 +12,21 @@
   .tt-text { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin: 8px auto 14px; max-width: 900px;
     font-size: clamp(26px, 6vw, 44px); font-weight: 900; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
   .tt-wort { display: inline-flex; gap: 2px; white-space: nowrap; }
-  .tt-zeichen { min-width: .62em; padding: 0 .04em; text-align: center; border-bottom: 4px solid transparent; color: #9aa0c0; }
-  .tt-zeichen.leer { color: #c5c9de; }
+  .tt-zeichen { min-width: .62em; padding: 0 .04em; text-align: center; border-bottom: 4px solid transparent; color: var(--text-leise); }
+  .tt-zeichen.leer { color: var(--leer); }
   .tt-zeichen.fertig { color: var(--gut); }
-  .tt-zeichen.jetzt { color: var(--text); border-bottom-color: var(--knopf); background: #eef0ff; border-radius: 6px 6px 0 0; }
+  .tt-zeichen.jetzt { color: var(--text); border-bottom-color: var(--knopf); background: var(--aktiv); border-radius: 6px 6px 0 0; }
   .tt-zeichen.falsch { animation: wackeln .4s; background: var(--hinweis-hell); }
   /* Bildschirmtastatur (Schweizer Anordnung QWERTZ, vereinfacht) */
   .tt-tasten { display: flex; flex-direction: column; gap: 6px; align-items: center; user-select: none; }
   /* Tasten teilen sich die Breite: auch auf dem Handy passt jede Reihe ohne Überlauf */
   .tt-reihe { display: flex; gap: 4px; justify-content: center; width: 100%; max-width: 760px; }
   .tt-taste { flex: 1 1 0; min-width: 0; max-width: 60px; height: clamp(44px, 9vw, 58px); padding: 0 2px; border: none; border-radius: 10px;
-    background: #fff; box-shadow: 0 3px 0 var(--rand); font: inherit; font-size: clamp(17px, 3.6vw, 24px); font-weight: 800; color: var(--text); cursor: pointer; }
+    background: var(--k-feld); box-shadow: 0 3px 0 var(--rand); font: inherit; font-size: clamp(17px, 3.6vw, 24px); font-weight: 800; color: var(--text); cursor: pointer; }
   .tt-taste:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--rand); }
   .tt-taste.breit { flex-grow: 1.6; max-width: 92px; }
   .tt-taste.leertaste { flex: 0 1 60%; max-width: 360px; }
-  .tt-taste.an { background: var(--deko-6); color: #fff; box-shadow: 0 3px 0 #3f43b8; }
+  .tt-taste.an { background: var(--deko-6-grund); color: var(--auf-deko-6); box-shadow: 0 3px 0 var(--knopf-dunkel); }
 </style>
 </head>
 <body>

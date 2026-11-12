@@ -27,21 +27,21 @@
   }
   .fz-feld { position: relative; }
   .fz-feld.verdeckt .fz-haende { visibility: hidden; }
-  .fz-feld.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); border-radius: 16px; }
+  .fz-feld.verdeckt { background: repeating-linear-gradient(45deg, var(--feld-leise) 0 12px, var(--k-feld) 12px 24px); border-radius: 16px; }
   .fz-feld.verdeckt::after { content: "🙈"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 56px; }
-  .fz-haut { fill: #f9d3b0; stroke: #a8714a; stroke-width: 3; }
-  .fz-haut.zu { fill: #efbf96; }
+  .fz-haut { /* Gleich in beiden Modi: Haut der Hand */  fill: #f9d3b0; stroke: #a8714a; stroke-width: 3; }
+  .fz-haut.zu { /* Gleich in beiden Modi: Haut der Hand */  fill: #efbf96; }
   .fz-tipp { fill: transparent; cursor: pointer; }
   /* Umriss eines eingeklappten Fingers: hier tippen, dann kommt der Finger */
   .fz-geist { fill: none; stroke: var(--knopf); stroke-width: 2.5; stroke-dasharray: 5 4; opacity: .55; pointer-events: none; }
   .fz-ziel { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 0 0 12px; }
   .fz-ziffer { font-size: clamp(48px, 12vw, 72px); font-weight: 900; line-height: 1; }
   /* Würfelbild 3 × 3 und Zehnerfeld 2 × 5 (Kraft der Fünf) */
-  .fz-wuerfel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 66px; height: 66px; padding: 7px; background: #fff; border: 3px solid var(--text); border-radius: 14px; box-sizing: border-box; }
+  .fz-wuerfel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 66px; height: 66px; padding: 7px; background: var(--k-feld); border: 3px solid var(--text); border-radius: 14px; box-sizing: border-box; }
   .fz-wuerfel.gross { width: 104px; height: 104px; gap: 6px; padding: 10px; }
   .fz-wuerfel i { border-radius: 50%; }
   .fz-wuerfel i.p { background: var(--text); }
-  .fz-zehner { display: grid; grid-template-columns: repeat(5, 16px); gap: 4px; padding: 6px; background: #fff; border: 3px solid var(--rand); border-radius: 10px; }
+  .fz-zehner { display: grid; grid-template-columns: repeat(5, 16px); gap: 4px; padding: 6px; background: var(--k-feld); border: 3px solid var(--rand); border-radius: 10px; }
   .fz-zehner.gross { grid-template-columns: repeat(5, 24px); gap: 5px; }
   .fz-zehner i { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--rand); box-sizing: border-box; }
   .fz-zehner i.p { background: var(--deko-6); border-color: var(--deko-6); }

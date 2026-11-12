@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .sachtext.ks-text { background: #fffdf5; border: 3px solid var(--rand); border-radius: 18px; padding: 10px 12px; margin: 4px auto 10px; max-width: 700px; font-size: clamp(18px, 4.2vw, 23px); line-height: 1.9; text-align: left; overflow-wrap: break-word; }
+  .sachtext.ks-text { background: var(--papier); border: 3px solid var(--rand); border-radius: 18px; padding: 10px 12px; margin: 4px auto 10px; max-width: 700px; font-size: clamp(18px, 4.2vw, 23px); line-height: 1.9; text-align: left; overflow-wrap: break-word; }
   .ks-wort {
     font: inherit; font-weight: 600; color: var(--text); background: transparent; border: none; border-radius: 8px;
     padding: 2px 3px; margin: 0; min-height: 38px; cursor: pointer; touch-action: manipulation;
@@ -16,7 +16,7 @@
   .ks-wort:active { background: var(--karte); }
   .ks-wort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .ks-wort.gepeilt { opacity: .5; }
-  .ks-wort.gefunden { background: #fff1c2; box-shadow: 0 0 0 3px #f5b301; }
+  .ks-wort.gefunden { background: var(--marker); box-shadow: 0 0 0 3px var(--marker-strich); }
   .ks-wort.repariert { background: var(--gut-hell); box-shadow: 0 0 0 3px var(--gut); }
   .ks-wort.aufgedeckt { background: var(--hinweis-hell); box-shadow: 0 0 0 3px var(--hinweis); }
   .ks-stand { text-align: center; font-weight: 800; font-size: clamp(17px, 3.8vw, 21px); color: var(--text-leise); margin: 0 0 8px; }

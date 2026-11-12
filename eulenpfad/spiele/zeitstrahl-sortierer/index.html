@@ -264,11 +264,11 @@ function pruefeAufgabe(a, stufe) {
 function strahl(von, bis, strich, zahl, marken) {
   const links = 36, rechts = 604, y0 = 112;
   const x = v => links + ((v - von) / (bis - von)) * (rechts - links);
-  let s = `<line x1="${links - 12}" y1="${y0}" x2="${rechts + 20}" y2="${y0}" stroke="#2d3047" stroke-width="3"/>
-    <polygon points="${rechts + 30},${y0} ${rechts + 16},${y0 - 7} ${rechts + 16},${y0 + 7}" fill="#2d3047"/>`;
+  let s = `<line x1="${links - 12}" y1="${y0}" x2="${rechts + 20}" y2="${y0}" stroke="var(--text)" stroke-width="3"/>
+    <polygon points="${rechts + 30},${y0} ${rechts + 16},${y0 - 7} ${rechts + 16},${y0 + 7}" fill="var(--text)"/>`;
   for (let v = von; v <= bis; v += strich) {
     const gross = v % zahl === 0;
-    s += `<line x1="${x(v)}" y1="${y0 - (gross ? 12 : 7)}" x2="${x(v)}" y2="${y0 + (gross ? 12 : 7)}" stroke="#2d3047" stroke-width="${gross ? 2.5 : 1.5}"/>`;
+    s += `<line x1="${x(v)}" y1="${y0 - (gross ? 12 : 7)}" x2="${x(v)}" y2="${y0 + (gross ? 12 : 7)}" stroke="var(--text)" stroke-width="${gross ? 2.5 : 1.5}"/>`;
     if (gross) s += `<text x="${x(v)}" y="${y0 + 36}" font-size="20" text-anchor="middle">${v}</text>`;
   }
   for (const mk of marken) {

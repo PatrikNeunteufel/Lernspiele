@@ -35,21 +35,21 @@
   .kreuz .ecke { font-size: clamp(24px, 6vw, 36px); color: var(--text-leise); }
   .kreuz .gleich { color: var(--text-leise); }
   /* Teile am Rand sind Stellenwerte (20 = 2 Zehner) und tragen die Farbe ihrer Stelle. */
-  .kreuz .rand { background: #fff; border: 4px solid var(--f); color: var(--f); }
-  .kreuz .gegeben { background: #f2f4fb; color: var(--text); }
-  .kreuz .feld { border: 3px dashed #c5c9de; background: #fff; color: var(--knopf); cursor: pointer; }
-  .kreuz .feld.aktiv { border: 4px solid var(--knopf); background: #eef0ff; transform: scale(1.04); }
+  .kreuz .rand { background: var(--k-feld); border: 4px solid var(--f); color: var(--f); }
+  .kreuz .gegeben { background: var(--feld-leise); color: var(--text); }
+  .kreuz .feld { border: 3px dashed var(--leer); background: var(--k-feld); color: var(--knopf); cursor: pointer; }
+  .kreuz .feld.aktiv { border: 4px solid var(--knopf); background: var(--aktiv); transform: scale(1.04); }
   .kreuz .feld.geloest { border: 3px solid var(--gut); background: var(--gut-hell); color: var(--text); cursor: default; }
-  .kreuz .feld.rand.geloest { border-color: var(--f); color: var(--f); background: #fff; }
+  .kreuz .feld.rand.geloest { border-color: var(--f); color: var(--f); background: var(--k-feld); }
   .kreuz .feld.falsch { animation: wackeln .4s; }
-  .kreuz .summe { background: #fff7e6; }
+  .kreuz .summe { background: var(--hinweis-hell); }
   /* Das Kreuz sichtbar machen: Faktoren links und oben abgerückt, die Zeilensumme ebenfalls — sonst
      sieht der Faktor links aus wie ein Feld der Zeile, das man mitzählt (Bemerkung 2, Patrik, LERN_Session9). */
   .kreuz .links, .kreuz .ecke { margin-right: 10px; }
   .kreuz .oben, .kreuz .ecke, .kreuz .kopf-summe { margin-bottom: 8px; }
   .kreuz .summe, .kreuz .kopf-summe { margin-left: 10px; }
   .kreuz .links { position: relative; }
-  .kreuz .links::after { content: ""; position: absolute; right: -11px; top: -4px; bottom: -4px; border-right: 3px solid #c5c9de; }
+  .kreuz .links::after { content: ""; position: absolute; right: -11px; top: -4px; bottom: -4px; border-right: 3px solid var(--leer); }
   .kreuz .zusammen { grid-column: 1 / -2; justify-content: flex-end; font-size: clamp(14px, 3.4vw, 20px); color: var(--text-leise); padding-right: 8px; }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
   /* Notiz (NZ1 a) links vom Text „alles zusammen =“, in derselben Zeile */

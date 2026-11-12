@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .vorgabe {
-    background: #fff8e1;
-    border: 3px dashed #f5c451;
+    background: var(--regel);
+    border: 3px dashed var(--regel-rand);
     border-radius: 18px;
     padding: 12px 18px;
     font-size: clamp(20px, 3.6vw, 26px);
@@ -32,7 +32,7 @@
   .fach-kopf {
     text-align: center;
     font-weight: 900;
-    color: #fff;
+    color: var(--auf-stelle);
     background: var(--f);
     border-radius: 10px;
     padding: 4px 0;
@@ -46,7 +46,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fbfcff;
+    background: var(--anzeige);
     cursor: pointer;
   }
 
@@ -59,7 +59,7 @@
     margin: 22px 0 6px;
     padding: 12px;
     border-radius: 20px;
-    background: rgba(91, 108, 255, .07);
+    background: color-mix(in srgb, var(--knopf) 7%, transparent);
   }
 
   .karte-ziffer {
@@ -67,8 +67,8 @@
     aspect-ratio: .72;
     border: none;
     border-radius: 14px;
-    background: #fff;
-    box-shadow: 0 5px 0 #d8dbe8, 0 8px 16px rgba(45, 48, 71, .12);
+    background: var(--k-feld);
+    box-shadow: 0 5px 0 var(--aus), 0 8px 16px rgba(45, 48, 71, .12);
     font-family: inherit;
     font-size: clamp(40px, 9vw, 56px);
     font-weight: 900;

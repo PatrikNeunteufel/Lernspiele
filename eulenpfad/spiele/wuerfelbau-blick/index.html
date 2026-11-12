@@ -404,7 +404,7 @@ function rasterSvg(raster, { zahlen = false, vorneUnten = false, g = 22 } = {}) 
   const teile = [];
   raster.forEach((zeile, y) => zeile.forEach((v, x) => {
     const voll = v > 0;
-    teile.push(`<rect x="${x * g + 2}" y="${y * g + 2}" width="${g}" height="${g}" fill="${voll && !zahlen ? "var(--deko-6)" : voll ? "var(--hinweis-hell)" : "#fff"}" stroke="${voll && !zahlen ? "var(--text)" : "var(--rand)"}" stroke-width="1.5"/>`);
+    teile.push(`<rect x="${x * g + 2}" y="${y * g + 2}" width="${g}" height="${g}" fill="${voll && !zahlen ? "var(--deko-6)" : voll ? "var(--hinweis-hell)" : "var(--k-feld)"}" stroke="${voll && !zahlen ? "var(--text)" : "var(--rand)"}" stroke-width="1.5"/>`);
     if (zahlen && v > 0) teile.push(`<text x="${x * g + 2 + g / 2}" y="${y * g + 2 + g * 0.72}" font-size="${g * 0.62}" font-weight="900" text-anchor="middle" fill="var(--text)">${v}</text>`);
   }));
   const extra = vorneUnten ? 8 : 0;

@@ -161,7 +161,7 @@ LS.spiel({
       ctx.flaeche.append(el("div", { class: "frage", text: "Was passiert im Wasser: Schwimmt es oder sinkt es?" }));
       vorlesbar(LS.koerbe(ctx, {
         karte: { bild: a.bild, text: a.name }, koerbe: ["schwimmt", "sinkt"], richtig: a.richtig, korbInhalt: k => WASSER[k],
-        farbe: k => (k === "schwimmt" ? "#2f8fe0" : "var(--deko-7)"),
+        farbe: k => (k === "schwimmt" ? "var(--deko-5)" : "var(--deko-7)"),
         hinweis: "Ist es für seine Grösse leicht wie Holz — oder schwer wie Metall und Stein?",
         loesung: `${a.name} ${a.richtig}.`, lob: `Richtig: ${a.name} ${a.richtig}! Probier es zu Hause aus.`,
       }));

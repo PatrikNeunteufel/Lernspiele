@@ -12,14 +12,14 @@
   .bild-gross { text-align: center; font-size: clamp(64px, 15vw, 100px); line-height: 1.1; margin-bottom: 8px; }
   .wort-gross { text-align: center; font-size: clamp(32px, 7vw, 48px); font-weight: 900; margin-bottom: 14px; color: var(--knopf); }
   .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 10px; max-width: 680px; margin: 0 auto; }
-  .option { border: none; border-radius: 16px; min-height: 64px; padding: 8px; font-family: inherit; font-size: clamp(20px, 4vw, 26px); font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
+  .option { border: none; border-radius: 16px; min-height: 64px; padding: 8px; font-family: inherit; font-size: clamp(20px, 4vw, 26px); font-weight: 900; background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
   .option.bild { font-size: clamp(40px, 9vw, 56px); }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .option.richtig { background: var(--gut-hell); }
   .ablage { display: flex; justify-content: center; gap: 6px; min-height: 60px; margin-bottom: 14px; flex-wrap: wrap; }
   .ablage span { width: 44px; height: 54px; border-radius: 10px; border-bottom: 4px solid var(--knopf); display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
   .kacheln { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-  .kachel { width: 52px; height: 58px; border: none; border-radius: 12px; font-family: inherit; font-size: 28px; font-weight: 900; background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
+  .kachel { width: 52px; height: 58px; border: none; border-radius: 12px; font-family: inherit; font-size: 28px; font-weight: 900; background: var(--k-feld); box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
   .kachel:disabled { opacity: .25; }
 </style>
 </head>

@@ -16,20 +16,20 @@
   .sw-signal svg { width: 100%; height: 100%; display: block; }
   .sw-piktogramm { font-size: 50px; line-height: 1; filter: brightness(0); position: relative; }
   .sw-klein .sw-piktogramm { font-size: 36px; }
-  .sw-verbot { border-radius: 50%; background: #fff; border: 13px solid #d52b1e; }
+  .sw-verbot { /* Gleich in beiden Modi: Verkehrszeichen */  border-radius: 50%; background: var(--k-feld); border: 13px solid #d52b1e; }
   .sw-klein.sw-verbot { border-width: 9px; }
-  .sw-gebot { border-radius: 50%; background: #1f5fae; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f5fae; }
+  .sw-gebot { /* Gleich in beiden Modi: Verkehrszeichen */  border-radius: 50%; background: #1f5fae; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f5fae; }
   .sw-gebot .sw-piktogramm, .sw-hinweis .sw-weiss { filter: brightness(0) invert(1); }
-  .sw-hinweis { border-radius: 10px; background: #1f5fae; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f5fae; }
-  .sw-hinweis .sw-dreieck { position: absolute; inset: 10% 8% 12%; background: #fff; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .sw-hinweis { /* Gleich in beiden Modi: Verkehrszeichen */  border-radius: 10px; background: #1f5fae; border: 3px solid #fff; box-shadow: 0 0 0 2px #1f5fae; }
+  .sw-hinweis .sw-dreieck { position: absolute; inset: 10% 8% 12%; background: var(--k-feld); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
   .sw-hinweis .sw-piktogramm { font-size: 34px; top: 8px; }
   .sw-klein.sw-hinweis .sw-piktogramm { font-size: 24px; top: 6px; }
   /* Fussgänger-Lichtsignal: oben rot (stehen), unten grün (gehen) */
-  .sw-ampel { width: 74px; margin: 0 auto 12px; padding: 8px; background: #2b2f36; border-radius: 14px; display: grid; gap: 8px; }
-  .sw-licht { width: 58px; height: 58px; border-radius: 50%; background: #474d57; display: grid; place-items: center; font-size: 34px; }
+  .sw-ampel { /* Gleich in beiden Modi: Ampel */  width: 74px; margin: 0 auto 12px; padding: 8px; background: #2b2f36; border-radius: 14px; display: grid; gap: 8px; }
+  .sw-licht { /* Gleich in beiden Modi: Ampel */  width: 58px; height: 58px; border-radius: 50%; background: #474d57; display: grid; place-items: center; font-size: 34px; }
   .sw-licht span { filter: brightness(0); opacity: .35; }
-  .sw-licht.an.rot { background: #e5322d; }
-  .sw-licht.an.gruen { background: #1fa84f; }
+  .sw-licht.an.rot { /* Gleich in beiden Modi: Ampel */  background: #e5322d; }
+  .sw-licht.an.gruen { /* Gleich in beiden Modi: Ampel */  background: #1fa84f; }
   .sw-licht.an span { opacity: 1; }
 </style>
 </head>

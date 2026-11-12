@@ -10,12 +10,12 @@
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
   .magnete { display: flex; justify-content: center; gap: 28px; margin: 6px 0 16px; }
-  .stab { display: flex; border-radius: 8px; overflow: hidden; border: 3px solid var(--text); font-weight: 900; color: #fff; font-size: 24px; }
+  .stab { /* Gleich in beiden Modi: Pole des Magneten rot und grün mit weisser Schrift */  display: flex; border-radius: 8px; overflow: hidden; border: 3px solid var(--text); font-weight: 900; color: #fff; font-size: 24px; }
   .stab span { width: 58px; height: 42px; display: grid; place-items: center; }
   /* Nordpol rot, Südpol grün — wie oft im Schulmaterial (Deko-Farben, keine Stellenfarben) */
-  .stab .N { background: #e5484d; }
-  .stab .S { background: #2fbf71; }
-  .stab .frei { background: #c9ccd6; color: var(--text); }
+  .stab .N { /* Gleich in beiden Modi: Pol des Magneten */  background: #e5484d; }
+  .stab .S { /* Gleich in beiden Modi: Pol des Magneten */  background: #2fbf71; }
+  .stab .frei { /* Gleich in beiden Modi: Mitte des Magneten */  background: #c9ccd6; color: var(--text); }
 </style>
 </head>
 <body>

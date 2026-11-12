@@ -11,9 +11,9 @@
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 0 0 10px; }
   .plan-zeile { display: flex; justify-content: center; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
   .plan-bild { display: block; width: min(360px, 100%); touch-action: manipulation; }
-  .plan-bild .grund { stroke: #fff; stroke-width: 2; }
-  .plan-bild.schulzimmer .grund { fill: #f6ead7; }
-  .plan-bild.quartier .grund { fill: #dcefcf; }
+  .plan-bild .grund { /* Bildfarben: Szene auf der Bildkachel */  stroke: #fff; stroke-width: 2; }
+  .plan-bild.schulzimmer .grund { /* Bildfarben: Szene auf der Bildkachel */  fill: #f6ead7; }
+  .plan-bild.quartier .grund { /* Bildfarben: Szene auf der Bildkachel */  fill: #dcefcf; }
   .plan-bild .rahmen { fill: none; stroke: var(--deko-7); stroke-width: 4; }
   .plan-bild .plan-feld { fill: transparent; cursor: pointer; }
   .plan-bild .plan-feld.daneben { fill: var(--hinweis-hell); }
@@ -24,13 +24,13 @@
   .plan-bild .zeichen-text, .zeichen-gross .zeichen-text, .legende .zeichen-text { font-family: var(--schrift); font-weight: 900; font-size: 26px; }
   .f1 { color: var(--deko-1); } .f2 { color: var(--deko-2); } .f3 { color: var(--deko-3); } .f4 { color: var(--deko-4); }
   .f5 { color: var(--deko-5); } .f6 { color: var(--deko-6); } .f7 { color: var(--deko-7); }
-  .legende { background: #fff; border: 3px solid var(--rand); border-radius: 14px; padding: 8px 12px; min-width: 170px; }
+  .legende { background: var(--k-feld); border: 3px solid var(--rand); border-radius: 14px; padding: 8px 12px; min-width: 170px; }
   .legende b { display: block; margin-bottom: 4px; font-size: 16px; }
   .legende-zeile { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; line-height: 1.2; margin: 3px 0; }
   .legende-zeile svg { width: 28px; height: 28px; flex: none; }
   .massstab { margin-top: 8px; font-weight: 800; font-size: 16px; }
   .massstab span { display: inline-block; width: 40px; height: 8px; background: var(--text); border-radius: 2px; margin-right: 6px; vertical-align: middle; }
-  .zeichen-gross { display: block; width: 90px; height: 90px; margin: 0 auto 8px; background: #fff; border: 3px solid var(--rand); border-radius: 14px; }
+  .zeichen-gross { display: block; width: 90px; height: 90px; margin: 0 auto 8px; background: var(--k-feld); border: 3px solid var(--rand); border-radius: 14px; }
   /* Ganze Aufgabe im Bild (BH3 a): Legende in Spalten, Legende und Antworten neben dem Plan, wo Platz ist;
      der Plan richtet sich nach der Bildhöhe. */
   /* Hoch: Plan | Legende, die Antworten darunter über die ganze Breite (.plan-seite löst sich auf);
@@ -413,7 +413,7 @@ function planBild(a) {
     s += zeichenSvg(d[3], d[4], ...mitte(z));
   }
   s += `<rect class="rahmen" x="2" y="2" width="${N * F - 4}" height="${N * F - 4}" rx="6"/>`;
-  return svgEl(`0 0 ${N * F} ${N * F}`, `plan-bild ${p.liste}`, s);
+  return svgEl(`0 0 ${N * F} ${N * F}`, `plan-bild szenenbild bildkachel ${p.liste}`, s);
 }
 
 function legende(a) {

@@ -26,9 +26,9 @@
   .kreislauf .mittel { font-size: 13px; }
   .kreislauf .gross { font-size: 16px; }
   .kreislauf .frage-zeichen { font-size: 26px; fill: var(--knopf); }
-  .kreislauf .kasten { fill: #fff; stroke: var(--text-leise); stroke-width: 2.5; }
+  .kreislauf .kasten { fill: var(--k-feld); stroke: var(--text-leise); stroke-width: 2.5; }
   .kreislauf .gefaess { fill: none; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
-  .kreislauf .halo { fill: none; stroke: #fff; stroke-width: 22; stroke-linejoin: round; }
+  .kreislauf .halo { fill: none; stroke: var(--k-karte); stroke-width: 22; stroke-linejoin: round; }
   .kreislauf .treffer { fill: none; stroke: transparent; stroke-width: 26; pointer-events: stroke; stroke-linejoin: round; }
   .kreislauf .leuchten { fill: none; stroke: var(--deko-4); stroke-width: 28; stroke-opacity: .55; stroke-linejoin: round; stroke-linecap: round; }
   .kreislauf .s-reich { stroke: var(--blut-reich); }
@@ -39,11 +39,11 @@
   .kreislauf .markiert .kasten, .kreislauf .kasten.markiert { stroke: var(--deko-4); stroke-width: 6; }
   .kreislauf .daneben .kasten, .kreislauf .daneben .gefaess { stroke: var(--hinweis); }
   .kreislauf .pfeil { fill: var(--text); }
-  .kreislauf .zelle { stroke: #fff; stroke-width: 3; transition: transform .35s ease; }
+  .kreislauf .zelle { stroke: var(--k-karte); stroke-width: 3; transition: transform .35s ease; }
   .kreislauf .zelle.z-reich { fill: var(--blut-reich); }
   .kreislauf .zelle.z-arm { fill: var(--blut-arm); }
   .kreislauf .organ { stroke: var(--text-leise); stroke-width: 2; }
-  .kreislauf .koerper-umriss { fill: #fff; stroke: var(--text-leise); stroke-width: 2.5; }
+  .kreislauf .koerper-umriss { fill: var(--k-feld); stroke: var(--text-leise); stroke-width: 2.5; }
 
   .legende { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: clamp(14px, 3.4vw, 16px); color: var(--text-leise); font-weight: 700; margin: 0 0 8px; }
   .legende span { display: inline-flex; align-items: center; gap: 6px; }

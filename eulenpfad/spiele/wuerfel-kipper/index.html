@@ -12,21 +12,21 @@
   .frage b { color: var(--knopf); }
   .kipp-buehne { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: center; }
   .wuerfel { width: min(170px, 42vw); display: block; }
-  .wuerfel .flaeche-o { fill: #fff; }
-  .wuerfel .flaeche-v { fill: color-mix(in srgb, var(--deko-7) 14%, #fff); }
-  .wuerfel .flaeche-r { fill: color-mix(in srgb, var(--deko-7) 28%, #fff); }
+  .wuerfel .flaeche-o { fill: var(--k-feld); }
+  .wuerfel .flaeche-v { fill: color-mix(in srgb, var(--deko-7) 14%, var(--k-feld)); }
+  .wuerfel .flaeche-r { fill: color-mix(in srgb, var(--deko-7) 28%, var(--k-feld)); }
   .wuerfel polygon { stroke: var(--text); stroke-width: 3; stroke-linejoin: round; }
   .wuerfel .auge { fill: var(--text); }
   .wuerfel .auge.eins { fill: var(--deko-2); }
   .kipp-folge { display: flex; flex-direction: column; gap: 6px; }
-  .kipp-chip { border: 2px solid var(--rand); border-radius: 14px; padding: 6px 12px; font-weight: 800; font-size: clamp(16px, 3.8vw, 20px); background: #fff; white-space: nowrap; }
+  .kipp-chip { border: 2px solid var(--rand); border-radius: 14px; padding: 6px 12px; font-weight: 800; font-size: clamp(16px, 3.8vw, 20px); background: var(--k-feld); white-space: nowrap; }
   .kipp-chip .pfeil-gross { font-size: 1.3em; margin-right: 6px; color: var(--deko-1); }
   .weg-karte { width: min(300px, 80vw); display: block; }
-  .weg-karte .feld { fill: #fff; stroke: var(--rand); stroke-width: 2; }
+  .weg-karte .feld { fill: var(--k-feld); stroke: var(--rand); stroke-width: 2; }
   .weg-karte .feld.ziel { fill: var(--gut-hell); stroke: var(--gut); }
   .weg-karte .spur { fill: none; stroke: var(--deko-1); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
   .weg-karte .spitze { fill: var(--deko-1); }
-  .weg-karte .stein { fill: #fff; stroke: var(--text); stroke-width: 3; }
+  .weg-karte .stein { fill: var(--k-feld); stroke: var(--text); stroke-width: 3; }
   .weg-karte .stein-zahl { font-size: 24px; font-weight: 900; fill: var(--text); }
   .weg-karte .marke { font-size: 26px; }
   .kipp-knoepfe { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }

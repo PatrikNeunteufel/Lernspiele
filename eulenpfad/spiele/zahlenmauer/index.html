@@ -10,7 +10,7 @@
 <style>
   .mauer { display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; margin: 4px 0 14px; }
   .reihe { display: flex; gap: 6px; }
-  .stein {
+  .stein { /* Gleich in beiden Modi: Backstein mit weisser Schrift */ 
     width: clamp(64px, 17vw, 108px);
     height: clamp(48px, 11vw, 64px);
     border: none;
@@ -23,9 +23,9 @@
     background: linear-gradient(180deg, #e2725b, #c4553e);
     box-shadow: inset 0 -5px 0 rgba(0, 0, 0, .18);
   }
-  .stein.leer { background: #fff; color: var(--knopf); border: 3px dashed #e2a08f; cursor: pointer; box-shadow: none; }
-  .stein.leer.aktiv { border: 4px solid var(--knopf); background: #eef0ff; transform: scale(1.06); }
-  .stein.geloest { background: linear-gradient(180deg, #5fd391, #2fb36b); }
+  .stein.leer { /* Gleich in beiden Modi: Backstein */  background: var(--k-feld); color: var(--knopf); border: 3px dashed #e2a08f; cursor: pointer; box-shadow: none; }
+  .stein.leer.aktiv { border: 4px solid var(--knopf); background: var(--aktiv); transform: scale(1.06); }
+  .stein.geloest { /* Gleich in beiden Modi: Backstein */  background: linear-gradient(180deg, #5fd391, #2fb36b); }
   .stein.falsch { animation: wackeln .4s; }
   /* Königsstufe: fünf Steine in der untersten Reihe, auch auf dem Handy ohne Querrollen */
   .mauer.fuenf .stein { width: clamp(52px, 15vw, 96px); font-size: clamp(16px, 3.8vw, 26px); }

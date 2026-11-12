@@ -10,17 +10,17 @@
 <style>
   .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 10px; }
   .frage b { color: var(--knopf); }
-  .pb-bild { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto 10px; background: #f4fbef; border-radius: 18px; touch-action: manipulation; }
+  .pb-bild { /* Bildfarben: Szene auf der Bildkachel */  display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto 10px; background: #f4fbef; border-radius: 18px; touch-action: manipulation; }
   .wahl-knopf .pb-bild { max-width: 150px; margin: 0; background: none; }
   .wahl-knopf { font-size: clamp(17px, 4vw, 22px); font-weight: 800; }
   .pb-kandidaten { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 auto 10px; max-width: 680px; }
-  .pb-kandidat { padding: 6px 12px; border-radius: 999px; background: #fff; border: 2px solid var(--deko-3); font-weight: 800; font-size: clamp(14px, 3.4vw, 17px); }
+  .pb-kandidat { padding: 6px 12px; border-radius: 999px; background: var(--k-feld); border: 2px solid var(--deko-3); font-weight: 800; font-size: clamp(14px, 3.4vw, 17px); }
   .pb-kandidat.weg { opacity: .3; text-decoration: line-through; }
   .pb-kandidat.gefunden { background: var(--gut-hell); border-color: var(--gut); }
   .pb-schritt { text-align: center; color: var(--text-leise); font-weight: 800; font-size: 15px; margin: 0 0 4px; }
   .pb-janein { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin: 0 0 10px; }
   .pb-janein .wahl-knopf { min-width: 130px; min-height: 64px; }
-  .pb-merkmale { max-width: 620px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: #f1f8e9; border: 3px dashed #9ccc65;
+  .pb-merkmale { max-width: 620px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: color-mix(in srgb, var(--gut) 10%, var(--k-feld)); border: 3px dashed color-mix(in srgb, var(--gut) 60%, var(--k-feld));
     text-align: center; font-size: clamp(16px, 3.8vw, 20px); font-weight: 800; display: flow-root; /* hält 💡 in der Box (BH3 a) */ }
   .pb-bluete .pb-teil { cursor: pointer; }
   .pb-bluete .pb-teil.hervor { stroke: var(--deko-2); stroke-width: 4; }
@@ -292,7 +292,7 @@ function bluete(b, cx, cy, R) {
  * "voll" (Blatt oder Zweig und Blüte). mitZweig: im Modus "voll" den Zweig statt eines Blatts zeigen.
  */
 function pflanzeSvg(p, modus, mitZweig = false) {
-  const svg = S("svg", { class: "pb-bild", viewBox: "0 0 300 210", role: "img", "aria-label": "Zeichnung einer Pflanze" });
+  const svg = S("svg", { class: "pb-bild szenenbild bildkachel", viewBox: "0 0 300 210", role: "img", "aria-label": "Zeichnung einer Pflanze" });
   if (p.blatt === "nadelförmig") { svg.append(nadelZweig(p)); return svg; }
   const blattL = { "herzförmig": 120, "gefingert": 150, "dreizählig": 150 }[p.blatt] || 165;
   const blattY = p.blatt === "herzförmig" ? 160 : p.blatt === "gelappt" && p.lappen === "hand" ? 185 : 190;
@@ -416,7 +416,7 @@ const FUNKTIONEN = [
 
 /** Längsschnitt einer Blüte; jedes Teil trägt data-teil und data-gruppe. */
 function bluetenSchnitt() {
-  const svg = S("svg", { class: "pb-bild pb-bluete", viewBox: "0 0 300 250", role: "img", "aria-label": "Blüte im Längsschnitt" });
+  const svg = S("svg", { class: "pb-bild pb-bluete szenenbild bildkachel", viewBox: "0 0 300 250", role: "img", "aria-label": "Blüte im Längsschnitt" });
   const teil = (id, form) => { const t = TEILE.find(x => x.id === id); form.setAttribute("class", "pb-teil"); form.setAttribute("data-teil", id); form.setAttribute("data-gruppe", t.gruppe); return form; };
   svg.append(
     S("path", { d: "M150,250 L150,186", stroke: "#4c8c2b", "stroke-width": 7, fill: "none" }),

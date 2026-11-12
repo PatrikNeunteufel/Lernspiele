@@ -23,9 +23,9 @@
   .pg-gleichung.erledigt { font-size: clamp(20px, 5vw, 28px); color: var(--text-leise); }
   .pg-luecke {
     display: inline-flex; align-items: center; justify-content: center; min-width: 2.2em; min-height: 1.45em; padding: 0 .3em;
-    border: 4px dashed var(--deko-4); border-radius: 12px; background: #fbfcff; color: var(--text); transition: border-color .2s, background .2s;
+    border: 4px dashed var(--deko-4); border-radius: 12px; background: var(--anzeige); color: var(--text); transition: border-color .2s, background .2s;
   }
-  .pg-luecke.leer::after { content: "?"; color: #c5c9de; }
+  .pg-luecke.leer::after { content: "?"; color: var(--leer); }
   .pg-luecke.richtig { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
   .pg-luecke.falsch { border-style: solid; border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
   .pg-weg { text-align: center; font-size: clamp(17px, 4vw, 22px); font-weight: 800; color: var(--gut); margin: 0 0 8px; }

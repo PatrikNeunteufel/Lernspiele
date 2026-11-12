@@ -12,15 +12,15 @@
   .frage b { color: var(--knopf); }
   .cal-hilfe { text-align: center; font-size: clamp(14px, 3.2vw, 17px); color: var(--text-leise); font-weight: 700; margin: 0 0 10px; }
   .cal-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
-    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-7); color: #fff; box-shadow: 0 5px 0 var(--deko-6); cursor: pointer; }
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-7-grund); color: var(--auf-deko-7); box-shadow: 0 5px 0 var(--deko-6); cursor: pointer; }
   .cal-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-6); }
   .cal-wort { text-align: center; font-size: clamp(34px, 8vw, 50px); font-weight: 900; margin: 4px 0 12px; }
   .cal-mitte { text-align: center; margin: 4px 0 14px; }
 
   /* Kalenderblatt (Abreisskalender): Monat oben, Tag gross */
   .blatt { display: inline-flex; flex-direction: column; align-items: stretch; width: 96px; border-radius: 12px; overflow: hidden;
-    background: #fff; border: 2px solid var(--rand); box-shadow: 0 3px 0 var(--rand); }
-  .blatt-mois { background: var(--deko-2); color: #fff; font-size: 16px; font-weight: 800; padding: 3px 4px; text-align: center; }
+    background: var(--k-feld); border: 2px solid var(--rand); box-shadow: 0 3px 0 var(--rand); }
+  .blatt-mois { background: var(--deko-2-grund); color: var(--auf-deko-2); font-size: 16px; font-weight: 800; padding: 3px 4px; text-align: center; }
   .blatt-zahl { font-size: 42px; font-weight: 900; text-align: center; padding: 2px 0 6px; color: var(--text); }
   .blatt.gross { width: 150px; }
   .blatt.gross .blatt-mois { font-size: 22px; }
@@ -28,12 +28,12 @@
   .cal-blaetter .wahl-knopf { padding: 8px 4px; }
 
   /* Monatsblatt */
-  .cal-monat { max-width: 400px; margin: 0 auto 12px; background: #fff; border: 2px solid var(--rand); border-radius: 14px; padding: 8px; }
-  .cal-monat-kopf { text-align: center; font-weight: 900; font-size: clamp(18px, 4vw, 22px); background: var(--deko-2); color: #fff; border-radius: 10px; padding: 4px; margin-bottom: 6px; }
+  .cal-monat { max-width: 400px; margin: 0 auto 12px; background: var(--k-feld); border: 2px solid var(--rand); border-radius: 14px; padding: 8px; }
+  .cal-monat-kopf { text-align: center; font-weight: 900; font-size: clamp(18px, 4vw, 22px); background: var(--deko-2-grund); color: var(--auf-deko-2); border-radius: 10px; padding: 4px; margin-bottom: 6px; }
   .cal-gitter { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .cal-kopf { text-align: center; font-size: 14px; font-weight: 800; color: var(--text-leise); padding: 2px 0; }
   .cal-zelle { text-align: center; font-weight: 800; font-size: clamp(15px, 3.6vw, 18px); padding: 7px 0; border-radius: 8px; }
-  button.cal-zelle { border: none; font-family: inherit; color: var(--text); background: #fff; box-shadow: 0 2px 0 var(--rand); min-height: 42px; cursor: pointer; }
+  button.cal-zelle { border: none; font-family: inherit; color: var(--text); background: var(--k-feld); box-shadow: 0 2px 0 var(--rand); min-height: 42px; cursor: pointer; }
   .cal-zelle.we { color: var(--deko-2); }
   button.cal-zelle.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   button.cal-zelle.richtig { background: var(--gut-hell); box-shadow: 0 2px 0 var(--gut); }

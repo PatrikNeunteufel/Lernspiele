@@ -9,10 +9,10 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .maschine { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; margin: 6px 0 14px; }
-  .m-kasten { border: 4px solid var(--deko-6); border-radius: 16px; padding: 8px 14px; background: #fff; text-align: center;
+  .m-kasten { border: 4px solid var(--deko-6); border-radius: 16px; padding: 8px 14px; background: var(--k-feld); text-align: center;
     font-size: clamp(24px, 6vw, 36px); font-weight: 900; min-width: 64px; font-variant-numeric: tabular-nums; }
   .m-kasten small { display: block; font-size: 13px; font-weight: 800; color: var(--text-leise); text-transform: uppercase; letter-spacing: .4px; }
-  .m-kasten.m-rand { border-color: var(--deko-7); background: #f6f7fb; }
+  .m-kasten.m-rand { border-color: var(--deko-7); background: var(--feld-leise); }
   .m-kasten.m-fehlt { border-style: dashed; border-color: var(--deko-3); color: var(--deko-3); }
   .m-pfeil { font-size: 28px; font-weight: 900; color: var(--text-leise); }
   /* Notiz auf dem Pfeil (NZ1 a): Feld über dem Pfeil, die Kette bleibt eine Reihe */
@@ -25,7 +25,7 @@
   .m-paare .m-kopf { font-size: 14px; font-weight: 800; color: var(--text-leise); text-transform: uppercase; }
   .m-paare span { text-align: center; }
   .weiche { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 14px; }
-  .weiche .w-frage { border: 4px solid var(--deko-1); border-radius: 16px; padding: 8px 16px; font-size: clamp(20px, 4.6vw, 26px); font-weight: 900; background: #fff; text-align: center; }
+  .weiche .w-frage { border: 4px solid var(--deko-1); border-radius: 16px; padding: 8px 16px; font-size: clamp(20px, 4.6vw, 26px); font-weight: 900; background: var(--k-feld); text-align: center; }
   .weiche .w-wege { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
   .weiche .w-weg { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .weiche .w-weg b { font-size: 18px; color: var(--text-leise); }

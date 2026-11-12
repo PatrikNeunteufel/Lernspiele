@@ -16,9 +16,9 @@
     display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 0; border-radius: 50%; }
   .teller.schale { flex: 0 1 220px; min-height: 96px; padding: 14px 26px 20px; border-radius: 0 0 50% 50%; }
   .teller > svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-  .teller-bild .flaeche-teller { fill: #fff; stroke-width: 5; }
-  .teller-bild .innen { fill: none; stroke: #eef0fa; stroke-width: 3; }
-  .teller-bild .schale-koerper { fill: #fff6d6; stroke: var(--deko-4); stroke-width: 5; }
+  .teller-bild .flaeche-teller { fill: var(--k-feld); stroke-width: 5; }
+  .teller-bild .innen { fill: none; stroke: var(--feld-leise); stroke-width: 3; }
+  .teller-bild .schale-koerper { fill: var(--tipp); stroke: var(--deko-4); stroke-width: 5; }
   .teller.waehlbar { cursor: pointer; }
   /* Etwas ist angehoben: alle anderen Teller zeigen, dass man dorthin tippen kann (auch ohne Maus sichtbar). */
   .teller.ziel-frei { outline: 4px dashed var(--knopf); outline-offset: -6px; }

@@ -18,7 +18,7 @@
   .gk-scheibe-box { margin: 0 auto 6px; width: fit-content; max-width: 100%; }
   .gk-scheibe { display: block; width: clamp(190px, 100vh - 620px, 300px); max-width: 100%; height: auto; margin: 0 auto; }
   .gk-scheibe .ring-aussen { fill: var(--karte); stroke: var(--rand); stroke-width: 2; }
-  .gk-scheibe .ring-innen { fill: #fff; stroke: var(--deko-1); stroke-width: 2; }
+  .gk-scheibe .ring-innen { fill: var(--k-feld); stroke: var(--deko-1); stroke-width: 2; }
   .gk-scheibe text { font-family: ui-monospace, Consolas, monospace; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
   .gk-scheibe .klar { font-size: 23px; fill: var(--text); }
   .gk-scheibe .geheim { font-size: 21px; fill: var(--deko-1); }
@@ -27,22 +27,22 @@
   .gk-dreh { display: flex; justify-content: center; align-items: center; gap: 6px; }
   .gk-dreh .gk-scheibe { min-width: 0; flex: 0 1 auto; }
   .gk-dreh button { font: inherit; font-size: 22px; font-weight: 900; min-width: 48px; min-height: 48px; flex: none; border: none; border-radius: 14px;
-    background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
+    background: var(--k-feld); box-shadow: 0 4px 0 var(--rand); cursor: pointer; }
   .gk-anzeige { display: block; font-weight: 800; text-align: center; margin: 2px 0 0; }
 
   .gk-slots { display: flex; justify-content: center; gap: 6px; margin: 4px 0 8px; flex-wrap: wrap; }
   .gk-slots span { width: clamp(34px, 9vw, 48px); height: clamp(44px, 11vw, 58px); border-bottom: 5px solid var(--knopf);
     font-family: ui-monospace, Consolas, monospace; font-size: clamp(26px, 6.5vw, 38px); font-weight: 900;
-    display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 8px 8px 0 0; }
+    display: flex; align-items: center; justify-content: center; background: var(--k-feld); border-radius: 8px 8px 0 0; }
   .gk-slots span.richtig { background: var(--gut-hell); border-color: var(--gut); }
   .gk-slots span.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); }
   /* 7 Spalten: A–Z, ⌫ und OK in vier Reihen (OK eine Spalte breit, BH3 a) */
   .gk-tasten { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; max-width: 460px; margin: 0 auto; }
   .gk-tasten button { font: inherit; font-size: clamp(18px, 4.6vw, 24px); font-weight: 900; min-height: 44px; border: none; border-radius: 12px;
-    background: #fff; box-shadow: 0 4px 0 var(--rand); cursor: pointer; padding: 0; }
+    background: var(--k-feld); box-shadow: 0 4px 0 var(--rand); cursor: pointer; padding: 0; }
   .gk-tasten button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rand); }
-  .gk-tasten button.gk-weg { background: #ffe3e3; box-shadow: 0 4px 0 #f5b5b5; }
-  .gk-tasten button.gk-ok { background: var(--gut); color: #fff; box-shadow: 0 4px 0 #22975a; font-size: clamp(16px, 4vw, 21px); white-space: nowrap; }
+  .gk-tasten button.gk-weg { background: var(--taste-loeschen); box-shadow: 0 4px 0 var(--taste-loeschen-boden); }
+  .gk-tasten button.gk-ok { background: var(--gut-grund); color: var(--auf-gut); box-shadow: 0 4px 0 var(--gut-boden); font-size: clamp(16px, 4vw, 21px); white-space: nowrap; }
   .gk-feld .wortkarte { margin-bottom: 6px; }
   .gk-hilfe:empty { display: none; }
   @media (max-width: 560px) {

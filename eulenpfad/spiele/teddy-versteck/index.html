@@ -10,16 +10,16 @@
 <style>
   .teddy-spiel .auftrag { margin-bottom: 12px; }
   /* Grosse Szene: Bild und darüber die Plätze zum Antippen (in Prozent der Szene) */
-  .szene { position: relative; width: 100%; max-width: 520px; margin: 0 auto 6px; border-radius: 18px; overflow: hidden; background: #fbf8f2; box-shadow: 0 4px 0 var(--rand); }
+  .szene { position: relative; width: 100%; max-width: 520px; margin: 0 auto 6px; border-radius: 18px; overflow: hidden; background: var(--papier); box-shadow: 0 4px 0 var(--rand); }
   .szene-bild, .szene-bild svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .platz { position: absolute; width: 20%; aspect-ratio: 1; border-radius: 50%; padding: 0; cursor: pointer;
-    border: 4px dashed var(--deko-6); background: rgba(255, 255, 255, .3); box-shadow: 0 0 0 3px rgba(255, 255, 255, .6); }
+    border: 4px dashed var(--deko-6); background: color-mix(in srgb, var(--k-feld) 30%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--k-feld) 60%, transparent); }
   .platz:active { transform: scale(.94); }
   .platz.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
   .szene.fertig .platz { opacity: 0; pointer-events: none; transition: opacity .3s; }
   /* Kleine Szenen als Bildknöpfe */
   .teddy-spiel .wahl-knopf { padding: 6px; min-height: 64px; }
-  .mini { width: 100%; border-radius: 12px; overflow: hidden; background: #fbf8f2; }
+  .mini { width: 100%; border-radius: 12px; overflow: hidden; background: var(--papier); }
   .mini svg { display: block; width: 100%; height: auto; }
 </style>
 </head>
@@ -470,7 +470,7 @@ LS.spiel({
       ctx.flaeche.append(el("div", { class: "auftrag", text: `Tipp auf das Bild: ${a.satz}` }));
       const box = LS.auswahl(ctx, {
         optionen: a.optionen.map((_, i) => i), richtig: a.ziel, breite: 130,
-        inhalt: i => el("div", { class: "mini", html: szeneSvg(a.szene, a.optionen[i].pose) }),
+        inhalt: i => el("div", { class: "mini szenenbild bildkachel", html: szeneSvg(a.szene, a.optionen[i].pose) }),
         hinweis, loesung, lob,
       });
       // Nur Bilder: neutral benennen, sonst läse langes Drücken die Lösung vor.
@@ -482,7 +482,7 @@ LS.spiel({
     ctx.schritte(1);
     ctx.loesung(loesung);
     ctx.flaeche.append(el("div", { class: "auftrag", text: a.satz }));
-    const szene = el("div", { class: "szene" });
+    const szene = el("div", { class: "szene szenenbild bildkachel" });
     szene.style.aspectRatio = `${B} / ${a.szene.h}`;
     const bild = el("div", { class: "szene-bild", html: szeneSvg(a.szene, null) });
     szene.append(bild);

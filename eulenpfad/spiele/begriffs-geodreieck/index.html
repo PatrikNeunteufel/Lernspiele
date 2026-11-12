@@ -11,14 +11,14 @@
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
   .frage b { color: var(--knopf); }
   .geo { display: block; width: 100%; max-width: 480px; margin: 0 auto; touch-action: manipulation; user-select: none; }
-  .geo .flaeche { fill: color-mix(in srgb, var(--deko-6) 10%, #fff); stroke: none; }
-  .geo .umriss { fill: color-mix(in srgb, var(--deko-6) 10%, #fff); stroke: var(--text); stroke-width: 4; stroke-linejoin: round; }
-  .geo .kreis { fill: color-mix(in srgb, var(--deko-6) 10%, #fff); stroke: var(--text); stroke-width: 4; }
+  .geo .flaeche { fill: color-mix(in srgb, var(--deko-6) 10%, var(--k-feld)); stroke: none; }
+  .geo .umriss { fill: color-mix(in srgb, var(--deko-6) 10%, var(--k-feld)); stroke: var(--text); stroke-width: 4; stroke-linejoin: round; }
+  .geo .kreis { fill: color-mix(in srgb, var(--deko-6) 10%, var(--k-feld)); stroke: var(--text); stroke-width: 4; }
   .geo .strich { stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
   .geo .strich.hilfe { stroke: var(--deko-7); stroke-width: 3; stroke-dasharray: 8 6; }
   .geo .strich.farbig { stroke: var(--deko-2); stroke-width: 8; }
   .geo .punkt { fill: var(--text); }
-  .geo .winkel-ziel { fill: #fff; stroke: var(--deko-6); stroke-width: 3; stroke-dasharray: 4 3; }
+  .geo .winkel-ziel { fill: var(--k-feld); stroke: var(--deko-6); stroke-width: 3; stroke-dasharray: 4 3; }
   .geo .zeichen { fill: none; stroke: var(--deko-1); stroke-width: 3; }
   .geo .zeichen-punkt { fill: var(--deko-1); }
   .geo .treffer { stroke: transparent; fill: transparent; stroke-width: 26; cursor: pointer; pointer-events: all; stroke-linecap: round; }

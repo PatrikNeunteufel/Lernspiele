@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .frage { text-align: center; font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; margin: 0 0 10px; line-height: 1.5; }
-  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: 999px; background: #fff; border: 2px solid var(--rand); white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: 999px; background: var(--k-feld); border: 2px solid var(--rand); white-space: nowrap; }
   .chip i { display: inline-block; width: .8em; height: .8em; border-radius: 50%; border: 2px solid var(--text); }
   .situationen { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px 22px; margin: 0 0 8px; }
   .situation { display: flex; flex-direction: column; align-items: center; gap: 2px; }
@@ -18,10 +18,10 @@
   .zufall-bild { display: block; width: min(200px, 60vw); max-width: 100%; }
   .zwei .zufall-bild { width: min(170px, 40vw); }
   .zufall-bild.breit { width: min(360px, 88vw); }
-  .zufall-bild .linie { fill: #fff; stroke: var(--text); stroke-width: 3; }
+  .zufall-bild .linie { fill: var(--k-karte); stroke: var(--text); stroke-width: 3; }
   .zufall-bild .auge { fill: var(--text); }
   .zufall-bild .sektor, .zufall-bild .kugel { stroke: var(--text); stroke-width: 2; }
-  .zufall-bild .karte-rand { fill: #fff; stroke: var(--deko-7); stroke-width: 3; }
+  .zufall-bild .karte-rand { fill: var(--k-feld); stroke: var(--deko-7); stroke-width: 3; }
   .zufall-bild .karte-zahl { font-size: 26px; font-weight: 900; fill: var(--text); text-anchor: middle; }
   .zufall-bild .frage-zeichen { font-size: 44px; font-weight: 900; fill: var(--deko-7); text-anchor: middle; }
   /* Fünf Knöpfe in einer Reihe: breiter als die übliche Auswahl, Schrift mit der Breite kleiner; die langen Wörter

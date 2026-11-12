@@ -16,10 +16,10 @@
   .fahrplan { margin: 4px auto 12px; border-collapse: collapse; font-size: clamp(15px, 3.9vw, 22px); font-variant-numeric: tabular-nums; }
   .fahrplan th, .fahrplan td { border: 2px solid var(--rand); padding: 6px clamp(5px, 1.8vw, 12px); text-align: center; white-space: nowrap; }
   .fahrplan th { color: var(--text-leise); font-weight: 800; background: var(--karte); }
-  .fahrplan td { font-weight: 800; background: #fff; }
+  .fahrplan td { font-weight: 800; background: var(--k-feld); }
   .fahrplan td.halt { text-align: left; }
   .fahrplan td.mittel { font-size: 1.2em; padding: 2px 6px; }
-  .fahrplan tr.umsteigen td { background: color-mix(in srgb, var(--deko-2) 16%, #fff); }
+  .fahrplan tr.umsteigen td { background: color-mix(in srgb, var(--deko-2) 16%, var(--k-feld)); }
   .fahrplan caption { font-weight: 800; color: var(--deko-2); padding-bottom: 4px; }
   .fp-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 8px; }
   .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
@@ -29,7 +29,7 @@
   .fr-beispiel { text-align: center; font-size: 15px; color: var(--text-leise); font-weight: 700; margin: 4px 0 8px; }
   .wahl-knopf { font-variant-numeric: tabular-nums; }
   /* Notizen (NZ1 a): Spalte im Fahrplan und eine Zeile unter der Aufgabe */
-  .fahrplan .nz-spalte { background: #fffbea; padding: 1px 4px; }
+  .fahrplan .nz-spalte { background: var(--papier-hell); padding: 1px 4px; }
   .fahrplan .zw-notiz { font-size: 15px; min-height: 30px; padding: 1px 3px; }
   .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 14px; margin: -4px 0 8px;
     font-size: 15px; font-weight: 800; color: var(--text-leise); }

@@ -17,7 +17,7 @@
   /* Säulendiagramm (SVG, skaliert auf die Breite) */
   .diagramm { display: block; width: min(440px, 100%); margin: 0 auto 12px; touch-action: manipulation; }
   .zwei .diagramm { width: min(400px, 100%); margin: 0; }
-  .diagramm .gitter { stroke: #dfe3ef; stroke-width: 1; }
+  .diagramm .gitter { stroke: var(--rand); stroke-width: 1; }
   .diagramm .achse { stroke: var(--text); stroke-width: 2; }
   .diagramm text { font-family: var(--schrift); font-weight: 800; fill: var(--text); }
   .diagramm .zahl { font-size: 12px; fill: var(--text-leise); }
@@ -31,10 +31,10 @@
   .diagramm .geloest { fill: var(--gut); }
 
   /* Tabelle und Strichliste */
-  .daten { border-collapse: collapse; margin: 0 auto 12px; font-size: clamp(18px, 4vw, 22px); font-weight: 800; background: #fff; }
+  .daten { border-collapse: collapse; margin: 0 auto 12px; font-size: clamp(18px, 4vw, 22px); font-weight: 800; background: var(--k-feld); }
   .zwei .daten { margin: 0; }
   .daten th, .daten td { border: 2px solid var(--rand); padding: 4px 12px; text-align: left; }
-  .daten th { background: #f6f7fd; font-size: 16px; color: var(--text-leise); }
+  .daten th { background: var(--feld-leise); font-size: 16px; color: var(--text-leise); }
   .daten td.zahl { text-align: right; font-variant-numeric: tabular-nums; min-width: 56px; }
   .daten svg { display: block; height: 30px; }
   .daten .strich { stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; }

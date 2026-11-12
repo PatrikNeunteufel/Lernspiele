@@ -19,7 +19,7 @@
   .antwort {
     border: none; border-radius: 16px; min-height: 58px; padding: 8px;
     font-family: inherit; font-size: clamp(18px, 3.6vw, 22px); font-weight: 900;
-    color: var(--text); background: #fff; box-shadow: 0 5px 0 var(--rand); cursor: pointer;
+    color: var(--text); background: var(--k-feld); box-shadow: 0 5px 0 var(--rand); cursor: pointer;
     border-left: 8px solid var(--j, var(--knopf));
   }
   .antwort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
@@ -29,10 +29,10 @@
   .antwort .zeichen { margin-right: 6px; }
 
   /* Jahreszeit-Farben: Frühling, Sommer, Herbst, Winter (Deko, keine Stellenfarben) */
-  .jz-fruehling { --j: #7ccf6b; }
-  .jz-sommer { --j: #f5b301; }
-  .jz-herbst { --j: #e07a3f; }
-  .jz-winter { --j: #74a7e0; }
+  .jz-fruehling { /* Gleich in beiden Modi: Farbe der Jahreszeit als Randstreifen */  --j: #7ccf6b; }
+  .jz-sommer { --j: var(--marker-strich); }
+  .jz-herbst { /* Gleich in beiden Modi: Farbe der Jahreszeit als Randstreifen */  --j: #e07a3f; }
+  .jz-winter { /* Gleich in beiden Modi: Farbe der Jahreszeit als Randstreifen */  --j: #74a7e0; }
 
   .reihe-gelegt { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; min-height: 52px; margin: 0 0 14px; }
   /* Notizen (NZ1 a): eine Zeile unter der Frage */

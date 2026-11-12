@@ -8,6 +8,10 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
+  /* Landschaftsfarben der Körbe (Darkmode Schritt 5): weisse Schrift hell (Wald 5,0, Wiese 5,1, Weiher 5,1, Gebirge
+     4,6; vorher Wiese #7cb342 2,5, Weiher #2f8fe0 3,4), dunkel heller mit dunkler Schrift (8,1, 9,8, 7,2, 7,3) */
+  :root { --lr-wald: #2f7d4f; --lr-wiese: #4f7a24; --lr-weiher: #2470b8; --lr-gebirge: #7a6f9b; }
+  :root[data-farben="dunkel"] { --lr-wald: #5cbf85; --lr-wiese: #9ccc5a; --lr-weiher: #5aa8ee; --lr-gebirge: #a99cd0; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 14px; }
 </style>
 </head>
@@ -42,10 +46,10 @@ const { waehle, mische, el } = LS;
 
 // Landschaftsfarben (Deko, keine Stellenfarben)
 const RAEUME = {
-  Wald: { bild: "🌲", name: "Wald", farbe: "#2f7d4f" },
-  Wiese: { bild: "🌼", name: "Wiese", farbe: "#7cb342" },
-  Weiher: { bild: "💧", name: "Weiher und Bach", farbe: "#2f8fe0" },
-  Gebirge: { bild: "🏔️", name: "Gebirge", farbe: "#7a6f9b" },
+  Wald: { bild: "🌲", name: "Wald", farbe: "var(--lr-wald)" },
+  Wiese: { bild: "🌼", name: "Wiese", farbe: "var(--lr-wiese)" },
+  Weiher: { bild: "💧", name: "Weiher und Bach", farbe: "var(--lr-weiher)" },
+  Gebirge: { bild: "🏔️", name: "Gebirge", farbe: "var(--lr-gebirge)" },
 };
 const ID = "lebensraum";
 

@@ -9,26 +9,26 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .regelkarte {
-    background: #fff8e1;
-    border: 3px dashed #f5c451;
+    background: var(--regel);
+    border: 3px dashed var(--regel-rand);
     border-radius: 16px;
     padding: 10px 16px;
     font-size: 17px;
     margin: 0 auto 14px;
     max-width: 700px;
   }
-  .regelkarte b { display: block; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: #a0703d; }
+  .regelkarte b { display: block; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--regel-titel); }
 
   .satz { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 8px 0 18px; }
   .wort {
     border: none; border-radius: 12px; padding: 8px 12px; min-height: 52px;
     font-family: inherit; font-size: clamp(22px, 5vw, 32px); font-weight: 800;
-    background: #fff; color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer;
+    background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer;
   }
   .wort:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--rand); }
   .wort.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .wort.gepeilt { opacity: .45; }
-  .wort.gefunden { background: #fff1c2; box-shadow: 0 0 0 4px #f5b301; }
+  .wort.gefunden { background: var(--marker); box-shadow: 0 0 0 4px var(--marker-strich); }
   .wort.repariert { background: var(--gut-hell); box-shadow: 0 0 0 4px var(--gut); }
   .frage { text-align: center; font-weight: 800; font-size: clamp(18px, 4vw, 22px); margin: 4px 0 10px; }
 </style>

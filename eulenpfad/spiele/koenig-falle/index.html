@@ -17,8 +17,8 @@
   /* Brett: 8 × 50 Einheiten, links und unten Platz für die Koordinaten. Auf 375 px gut 40 px je Feld. */
   /* Ganze Aufgabe im Bild (BH3 a): auf niedrigen Bildschirmen so breit, wie die Höhe unter Kopf, Eule und Auftrag reicht. */
   .kf-brett { width: max(min(280px, 100%), min(100%, 500px, calc(100vh - 340px))); height: auto; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-  .kf-brett .kf-hell { fill: #f3e3c3; }
-  .kf-brett .kf-dunkel { fill: #c49a6c; }
+  .kf-brett .kf-hell { /* Gleich in beiden Modi: Schachbrett */  fill: #f3e3c3; }
+  .kf-brett .kf-dunkel { /* Gleich in beiden Modi: Schachbrett */  fill: #c49a6c; }
   .kf-brett .kf-feld.kf-tippbar { cursor: pointer; }
   .kf-brett .kf-wahl { fill: var(--knopf); opacity: .45; }
   .kf-brett .kf-ziel { fill: var(--gut); opacity: .75; }
@@ -29,8 +29,8 @@
   .kf-brett .kf-schach { fill: var(--hinweis); opacity: .55; }
   .kf-brett .kf-fig { font-size: 42px; text-anchor: middle; dominant-baseline: central; pointer-events: none;
     font-family: "Segoe UI Symbol", "DejaVu Sans", "Noto Sans Symbols 2", "Apple Symbols", serif; }
-  .kf-brett .kf-w { fill: #ffffff; stroke: #2d3047; stroke-width: 1.8px; paint-order: stroke; }
-  .kf-brett .kf-b { fill: #2d3047; stroke: #2d3047; stroke-width: .6px; }
+  .kf-brett .kf-w { /* Gleich in beiden Modi: Schachbrett */  fill: #ffffff; stroke: #2d3047; stroke-width: 1.8px; paint-order: stroke; }
+  .kf-brett .kf-b { /* Gleich in beiden Modi: Schachbrett */  fill: #2d3047; stroke: #2d3047; stroke-width: .6px; }
   .kf-brett .kf-koord { font-size: 14px; font-weight: 700; fill: var(--text-leise); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 </style>
 </head>

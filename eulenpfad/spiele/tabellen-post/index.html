@@ -28,7 +28,7 @@
 
   .tabelle .kopfzelle {
     background: var(--f);
-    color: #fff;
+    color: var(--auf-stelle);
     border-radius: 12px 12px 4px 4px;
     text-align: center;
     font-weight: 900;
@@ -38,7 +38,7 @@
 
   .tabelle .fach {
     border: 4px solid var(--f);
-    background: #fff;
+    background: var(--k-feld);
     border-radius: 4px 4px 14px 14px;
     min-height: clamp(58px, 11vw, 78px);
     font-size: clamp(30px, 7vw, 46px);
@@ -51,7 +51,7 @@
     transition: transform .1s, box-shadow .1s;
   }
 
-  .tabelle .fach.gewaehlt { box-shadow: 0 0 0 5px rgba(91, 108, 255, .35); transform: translateY(-3px); }
+  .tabelle .fach.gewaehlt { box-shadow: 0 0 0 5px color-mix(in srgb, var(--knopf) 35%, transparent); transform: translateY(-3px); }
   .tabelle .fach.richtig { background: var(--gut-hell); }
   .tabelle .fach.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .tabelle.nur-lesen .fach { cursor: default; }

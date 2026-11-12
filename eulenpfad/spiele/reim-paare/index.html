@@ -16,7 +16,7 @@
 
   /* Paare finden: Karten mit Bild und Wort */
   .paare { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 560px; margin: 0 auto; }
-  .paar-karte { border: none; border-radius: 16px; min-height: 104px; background: #fff; box-shadow: 0 5px 0 var(--rand); font-family: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; }
+  .paar-karte { border: none; border-radius: 16px; min-height: 104px; background: var(--k-feld); box-shadow: 0 5px 0 var(--rand); font-family: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; }
   .paar-karte .bild { font-size: clamp(36px, 9vw, 48px); line-height: 1.1; }
   .paar-karte b { font-size: clamp(16px, 3.6vw, 22px); }
   .paar-karte.gewaehlt { outline: 5px solid var(--deko-6); }

@@ -29,14 +29,14 @@
     position: absolute;
     inset: 0;
     border-radius: 18px;
-    background: radial-gradient(circle, #fff6c9, #f5c451);
+    background: radial-gradient(circle, var(--tipp), var(--regel-rand));
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 56px;
   }
 
-  .tresor .tuer {
+  .tresor .tuer { /* Gleich in beiden Modi: Tresor */ 
     position: absolute;
     inset: 0;
     border-radius: 18px;
@@ -49,7 +49,7 @@
     justify-content: center;
   }
 
-  .tresor .rad {
+  .tresor .rad { /* Gleich in beiden Modi: Tresor */ 
     width: 64px;
     height: 64px;
     border-radius: 50%;
@@ -66,18 +66,18 @@
     flex: 1;
     min-width: 260px;
     max-width: 620px;
-    background: #fdf8ef;
+    background: var(--papier);
     border-radius: 18px;
-    border: 3px solid #e9dcc4;
+    border: 3px solid var(--papier-rand);
     padding: 14px 18px;
     font-size: clamp(19px, 3.4vw, 24px);
     font-weight: 700;
     line-height: 1.45;
   }
 
-  .raetsel .titel { font-weight: 900; color: #a0703d; font-size: .8em; text-transform: uppercase; letter-spacing: 1px; }
+  .raetsel .titel { font-weight: 900; color: var(--regel-titel); font-size: .8em; text-transform: uppercase; letter-spacing: 1px; }
   .raetsel ul { margin: 6px 0 0; padding-left: 1.1em; }
-  .raetsel .wk { display: inline-block; color: #fff; background: var(--f); border-radius: 8px; padding: 0 8px; font-weight: 900; }
+  .raetsel .wk { display: inline-block; color: var(--auf-stelle); background: var(--f); border-radius: 8px; padding: 0 8px; font-weight: 900; }
   /* Notizen (NZ1 a): je Bündel „13 T = ✏️“ unter dem Rätsel */
   .tr-notizen { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; }
   .tr-notizen label { display: inline-flex; align-items: center; gap: 6px; font-size: .85em; }

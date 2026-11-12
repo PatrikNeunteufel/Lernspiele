@@ -14,23 +14,23 @@
   .treppe, .klaviatur { display: block; width: 100%; height: auto; margin: 0 auto 12px; }
   .treppe { max-width: 460px; }
   .klaviatur { max-width: 560px; touch-action: manipulation; }
-  .treppe .stufe-block { fill: #fff; stroke: var(--deko-6); stroke-width: 2.5; }
+  .treppe .stufe-block { fill: var(--k-feld); stroke: var(--deko-6); stroke-width: 2.5; }
   .treppe .stufe-block.dran { fill: var(--hinweis-hell); stroke: var(--deko-4); }
   .treppe .stufe-name { font-size: 17px; font-weight: 900; fill: var(--text); }
   .treppe .stufe-nr { font-size: 13px; font-weight: 800; fill: var(--text-leise); }
   .treppe .ziel { fill: var(--hinweis-hell); stroke: var(--deko-4); stroke-width: 2.5; cursor: pointer; }
   .treppe .ziel.gefunden { fill: var(--gut-hell); stroke: var(--gut); }
-  .treppe .ziel.falsch { fill: #eceef6; stroke: var(--rand); }
+  .treppe .ziel.falsch { fill: var(--feld-leise); stroke: var(--rand); }
   .treppe .ziel-text { font-size: 14px; font-weight: 900; fill: var(--text); pointer-events: none; }
   .treppe .art-text { font-size: 11px; font-weight: 800; fill: var(--text-leise); }
-  .klaviatur .weiss { fill: #fff; stroke: var(--text); stroke-width: 1.5; cursor: pointer; }
+  .klaviatur .weiss { /* Gleich in beiden Modi: weisse Klaviertaste */  fill: #fff; stroke: var(--text); stroke-width: 1.5; cursor: pointer; }
   .klaviatur .schwarz { fill: var(--text); stroke: var(--text); stroke-width: 1.5; cursor: pointer; }
   .klaviatur .start { fill: var(--deko-4); }
   .klaviatur .gesetzt { fill: var(--gut); }
   .klaviatur .falsch { fill: var(--hinweis); }
   .klaviatur .tasten-name { font-size: 15px; font-weight: 800; fill: var(--text-leise); pointer-events: none; }
   .klaviatur .tasten-name.fett { fill: var(--text); font-weight: 900; }
-  .klaviatur .tasten-name.hell { fill: #fff; font-size: 13px; }
+  .klaviatur .tasten-name.hell { /* Gleich in beiden Modi: Name auf der schwarzen Taste */  fill: #fff; font-size: 13px; }
   .bauplan { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 10px; font-size: clamp(13px, 3.2vw, 16px); }
 </style>
 </head>
@@ -281,7 +281,7 @@ function klaviaturSvg(opt) {
   const weisse = [];
   for (let m = opt.von; m <= opt.bis; m++) if (!istSchwarz(m)) weisse.push(m);
   const W = 36, H = 150, SB = 22, SH = 92;
-  const svg = svgEl("svg", { viewBox: `0 0 ${weisse.length * W + 4} ${H + 4}`, class: "klaviatur", role: "img", "aria-label": "Klaviatur" });
+  const svg = svgEl("svg", { viewBox: `0 0 ${weisse.length * W + 4} ${H + 4}`, class: "klaviatur szenenbild bildkachel", role: "img", "aria-label": "Klaviatur" });
   const xWeiss = new Map(weisse.map((m, i) => [m, 2 + i * W]));
   const taste = (m, x, schwarz) => {
     const r = svgEl("rect", { x, y: 2, width: schwarz ? SB : W, height: schwarz ? SH : H, rx: 4, "data-midi": m,

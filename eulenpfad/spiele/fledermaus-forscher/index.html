@@ -8,11 +8,11 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .nacht { background: linear-gradient(180deg, #1e1b4b, #3b3486); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; text-align: center; }
+  .nacht { /* Gleich in beiden Modi: Nachthimmel mit weisser Schrift */  background: linear-gradient(180deg, #1e1b4b, #3b3486); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; text-align: center; }
   .nacht .bild { font-size: clamp(54px, 12vw, 80px); line-height: 1.1; }
   .nacht .aussage { font-size: clamp(20px, 4.6vw, 30px); font-weight: 800; margin-top: 6px; }
-  .wahl-knopf.ja { background: #dff7ea; }
-  .wahl-knopf.nein { background: #fde2e2; }
+  .wahl-knopf.ja { background: var(--gut-hell); }
+  .wahl-knopf.nein { background: var(--taste-loeschen); }
 </style>
 </head>
 <body>

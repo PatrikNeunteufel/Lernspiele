@@ -17,25 +17,25 @@
      stehen Antworten darunter, bleibt mehr Platz frei. */
   .tafel:has(~ .optionen) { width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 355px))); }
   .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
-  .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: #eaf4ff; font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: #8aa0bd; cursor: pointer; padding: 0; }
-  .tafel .feld.schatz { background: #fff1c2; color: var(--text); font-size: clamp(16px, 4vw, 24px); }
+  .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: var(--aktiv); font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: var(--text-leise); cursor: pointer; padding: 0; }
+  .tafel .feld.schatz { background: var(--marker); color: var(--text); font-size: clamp(16px, 4vw, 24px); }
   .tafel .feld.daneben { background: var(--hinweis-hell); }
   .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
 
   .ksys { width: max(min(240px, 90vw), min(440px, 90vw, calc(100vh - 365px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
-  .ksys .gitter { stroke: #dfe3ef; stroke-width: 1; }
+  .ksys .gitter { stroke: var(--rand); stroke-width: 1; }
   .ksys .achse { stroke: var(--text); stroke-width: 2; }
   .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }
   .ksys .punkt-ziel { fill: transparent; cursor: pointer; }
-  .ksys .punkt-ziel:hover { fill: rgba(91, 108, 255, .15); }
+  .ksys .punkt-ziel:hover { fill: color-mix(in srgb, var(--knopf) 15%, transparent); }
   .ksys .gesetzt { fill: var(--deko-3); }
   .ksys .figur { fill: rgba(99, 102, 241, .25); stroke: var(--deko-6); stroke-width: 2; }
-  .ksys .figur-neu { fill: rgba(240, 124, 42, .25); stroke: var(--deko-3); stroke-width: 2; }
+  .ksys .figur-neu { fill: color-mix(in srgb, var(--deko-3) 25%, transparent); stroke: var(--deko-3); stroke-width: 2; }
   .ksys .marke { font-size: 16px; }
   .ksys .loesung { fill: var(--gut); }
 
   .optionen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 10px; max-width: 620px; margin: 0 auto; }
-  .option { border: none; border-radius: 16px; min-height: 58px; font-family: inherit; font-size: 22px; font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
+  .option { border: none; border-radius: 16px; min-height: 58px; font-family: inherit; font-size: 22px; font-weight: 900; background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .option.richtig { background: var(--gut-hell); }
 </style>

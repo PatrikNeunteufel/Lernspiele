@@ -11,7 +11,7 @@
   /* Ein Baum je Wortfamilie: unten der Stamm mit dem Familienwort, oben die Krone mit den Wörtern. */
   .baum { display: flex; flex-direction: column; align-items: center; margin: 4px auto 16px; max-width: 640px; }
   .krone {
-    background: #e6f7f1;
+    background: color-mix(in srgb, var(--deko-5) 12%, var(--k-feld));
     border: 4px solid var(--deko-5);
     border-radius: 48% 48% 40% 40% / 60% 60% 40% 40%;
     padding: 20px 22px 24px;
@@ -22,14 +22,14 @@
   }
   .krone .leer { font-size: 40px; color: var(--deko-5); font-weight: 900; }
   .blatt {
-    background: #fff;
+    background: var(--k-feld);
     border-radius: 16px 4px 16px 4px;
     padding: 6px 12px;
     font-size: clamp(18px, 4.4vw, 24px);
     font-weight: 800;
     box-shadow: 0 3px 0 var(--rand);
   }
-  .holz {
+  .holz { /* Gleich in beiden Modi: Holz mit heller Schrift */ 
     background: #a8714d; color: #fff;
     border-radius: 0 0 14px 14px;
     padding: 8px 26px 10px; margin-top: -4px;
@@ -37,11 +37,11 @@
   }
   .holz b { display: block; font-size: clamp(22px, 5vw, 30px); }
   .holz small { font-size: 15px; font-weight: 700; opacity: .9; }
-  mark { background: #fff1c2; border-bottom: 3px solid #f5b301; border-radius: 4px; padding: 0 2px; color: inherit; }
+  mark { background: var(--marker); border-bottom: 3px solid var(--marker-strich); border-radius: 4px; padding: 0 2px; color: inherit; }
 
   .wortkarte { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 6px 0 18px; }
   .wortchip {
-    background: #fff; border: 3px solid var(--rand); border-radius: 14px;
+    background: var(--k-feld); border: 3px solid var(--rand); border-radius: 14px;
     padding: 8px 16px; font-size: clamp(22px, 5vw, 30px); font-weight: 800;
   }
   .zaehler { text-align: center; color: var(--text-leise); font-weight: 800; margin: -6px 0 10px; }

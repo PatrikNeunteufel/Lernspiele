@@ -12,18 +12,18 @@
   .titel { text-align: center; font-size: clamp(20px, 4.4vw, 26px); font-weight: 900; margin: 0 0 8px; }
 
   /* Wertetabelle: senkrecht, damit sie auch auf dem Handy Platz hat */
-  .werte { border-collapse: collapse; margin: 0 auto 14px; font-size: clamp(19px, 4.4vw, 24px); font-weight: 800; background: #fff; font-variant-numeric: tabular-nums; }
+  .werte { border-collapse: collapse; margin: 0 auto 14px; font-size: clamp(19px, 4.4vw, 24px); font-weight: 800; background: var(--k-feld); font-variant-numeric: tabular-nums; }
   .werte th, .werte td { border: 3px solid var(--rand); padding: 6px 14px; text-align: right; min-width: 92px; }
-  .werte th { background: #f6f7fd; font-size: 16px; color: var(--text-leise); text-align: center; }
+  .werte th { background: var(--feld-leise); font-size: 16px; color: var(--text-leise); text-align: center; }
   .werte .luecke { display: inline-block; min-width: 54px; text-align: center; border-radius: 10px; background: var(--hinweis-hell); color: var(--deko-3); border: 3px dashed var(--deko-3); padding: 0 8px; }
   .werte .gefuellt { display: inline-block; border-radius: 10px; background: var(--gut-hell); padding: 0 8px; }
   .werte .mehr td { color: var(--text-leise); text-align: center; }
-  .werte button.zelle { font: inherit; border: none; border-radius: 10px; background: #fff8e1; box-shadow: 0 3px 0 #f5c451; padding: 4px 10px; min-height: 44px; cursor: pointer; width: 100%; text-align: right; }
+  .werte button.zelle { font: inherit; border: none; border-radius: 10px; background: var(--regel); box-shadow: 0 3px 0 var(--regel-rand); padding: 4px 10px; min-height: 44px; cursor: pointer; width: 100%; text-align: right; }
   .werte button.zelle.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .werte button.zelle.richtig { background: var(--gut-hell); box-shadow: 0 3px 0 var(--gut); }
   .werte button.zelle.gewaehlt { opacity: .45; }
   /* Notizen (NZ1 a): Zusatzzeile „1 Stück“, „100 g“, „50 g“ mit einem Feld statt eines Preises */
-  .werte tr.nz-zeile td { background: #fffbea; color: var(--text-leise); padding-top: 2px; padding-bottom: 2px; }
+  .werte tr.nz-zeile td { background: var(--papier-hell); color: var(--text-leise); padding-top: 2px; padding-bottom: 2px; }
   .werte .zw-notiz { width: 100%; font-size: 17px; min-height: 32px; padding: 1px 4px; }
 
   /* Ganze Aufgabe im Bild (BH3 a). Ab Tablet-Breite: Tabelle links, Titel und Frage rechts daneben. */

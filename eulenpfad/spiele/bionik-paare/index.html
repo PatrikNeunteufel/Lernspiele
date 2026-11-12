@@ -10,13 +10,13 @@
 <style>
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 10px; }
   .frage b { color: var(--knopf); }
-  .problem { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: #fff8e1; border: 3px dashed var(--deko-4);
+  .problem { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: var(--regel); border: 3px dashed var(--deko-4);
     font-size: clamp(16px, 3.8vw, 20px); font-weight: 700; text-align: center; }
 
   /* Vorbild → Erfindung */
   .bionik-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 2px auto 12px; }
   .bionik-teil { display: flex; flex-direction: column; align-items: center; min-width: 120px; max-width: 220px; padding: 8px 12px; border-radius: 18px;
-    background: #fff; box-shadow: 0 4px 0 var(--rand); text-align: center; font-weight: 800; font-size: clamp(15px, 3.6vw, 19px); line-height: 1.2; }
+    background: var(--k-feld); box-shadow: 0 4px 0 var(--rand); text-align: center; font-weight: 800; font-size: clamp(15px, 3.6vw, 19px); line-height: 1.2; }
   .bionik-teil .bild { font-size: clamp(40px, 9vw, 56px); line-height: 1.1; }
   .bionik-teil small { color: var(--text-leise); font-weight: 700; font-size: 13px; }
   .bionik-teil.vorbild { border: 3px solid var(--deko-5); }
@@ -26,7 +26,7 @@
 
   /* Paare finden: alle Karten offen */
   .bionik-feld { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; max-width: 760px; margin: 0 auto; }
-  .bionik-karte { border: 3px solid var(--rand); border-radius: 16px; min-height: 104px; background: #fff; box-shadow: 0 5px 0 var(--rand);
+  .bionik-karte { border: 3px solid var(--rand); border-radius: 16px; min-height: 104px; background: var(--k-feld); box-shadow: 0 5px 0 var(--rand);
     font-family: inherit; color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 2px; padding: 6px; font-size: clamp(14px, 3.4vw, 17px); font-weight: 800; line-height: 1.15; }
   .bionik-karte .bild { font-size: clamp(30px, 7vw, 40px); line-height: 1.1; }

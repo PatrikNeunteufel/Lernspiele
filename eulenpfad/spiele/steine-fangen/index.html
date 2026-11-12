@@ -13,20 +13,20 @@
   .go-feld { max-width: max(min(300px, 100%), min(520px, calc(100vh - 345px))); margin: 4px auto 6px; }
   .go-feld:has(~ .go-zahlen) { max-width: max(min(300px, 100%), min(520px, calc(100vh - 410px))); }
   .go-brett { display: block; width: 100%; height: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
-  .go-brett .go-holz { fill: #e8c88c; }
-  .go-brett .go-linie { stroke: #6b5235; stroke-width: 1.4; }
-  .go-brett .go-randlinie { fill: none; stroke: #6b5235; stroke-width: 2.6; }
-  .go-brett .go-stern { fill: #6b5235; }
-  .go-brett .go-koord { fill: #6b5235; font-size: 13px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; font-family: var(--schrift); }
-  .go-brett .go-stein.schwarz { fill: #23263a; stroke: #111; stroke-width: 1; }
-  .go-brett .go-stein.weiss { fill: #fff; stroke: #6b6f8a; stroke-width: 1.6; }
+  .go-brett .go-holz { /* Gleich in beiden Modi: Go-Brett */  fill: #e8c88c; }
+  .go-brett .go-linie { /* Gleich in beiden Modi: Go-Brett */  stroke: #6b5235; stroke-width: 1.4; }
+  .go-brett .go-randlinie { /* Gleich in beiden Modi: Go-Brett */  fill: none; stroke: #6b5235; stroke-width: 2.6; }
+  .go-brett .go-stern { /* Gleich in beiden Modi: Go-Brett */  fill: #6b5235; }
+  .go-brett .go-koord { /* Gleich in beiden Modi: Go-Brett */  fill: #6b5235; font-size: 13px; font-weight: 800; text-anchor: middle; dominant-baseline: middle; font-family: var(--schrift); }
+  .go-brett .go-stein.schwarz { /* Gleich in beiden Modi: schwarzer Go-Stein */  fill: #23263a; stroke: #111; stroke-width: 1; }
+  .go-brett .go-stein.weiss { /* Gleich in beiden Modi: weisser Go-Stein */  fill: #fff; stroke: #6b6f8a; stroke-width: 1.6; }
   .go-brett .go-stein.neu { stroke: var(--hinweis); stroke-width: 4; }
   .go-brett .go-ring { fill: none; stroke: var(--knopf); stroke-width: 4; }
   .go-brett .go-nachbar { fill: none; stroke: var(--knopf); stroke-width: 3; stroke-dasharray: 5 4; }
   .go-brett .go-frei { fill: var(--knopf); }
   .go-brett .go-loesung { fill: none; stroke: var(--gut); stroke-width: 5; }
   .go-brett .go-gefangen { fill: none; stroke: var(--hinweis); stroke-width: 3; stroke-dasharray: 4 4; }
-  .go-brett .go-ziel { fill: #fff; fill-opacity: 0; cursor: pointer; }
+  .go-brett .go-ziel { /* Gleich in beiden Modi: Markierung auf dem Brett */  fill: #fff; fill-opacity: 0; cursor: pointer; }
   .go-legende { text-align: center; color: var(--text-leise); font-weight: 700; font-size: 16px; margin: 0 0 6px; }
   .go-zahlen .wahl-knopf { min-width: 64px; font-size: 28px; }
   @media (max-width: 560px) { .go-feld { margin-left: -8px; margin-right: -8px; } }

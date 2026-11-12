@@ -10,22 +10,22 @@
 <style>
   /* Ganze Aufgabe im Bild (BH3 a): Die Breite folgt der Bildhöhe; --seiten = Breite/Höhe des Ausschnitts (aus dem Code),
      --rest = was über und unter der Karte noch Platz braucht (Kopf, Auftrag, Quelle, Tipp; mit Namen zur Wahl mehr). */
-  .karte-svg { --rest: 330px; display: block; width: max(min(320px, 100%), min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6)))); height: auto;
+  .karte-svg { /* Bildfarben: Karte auf der Bildkachel */ --rest: 330px; display: block; width: max(min(320px, 100%), min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6)))); height: auto;
     margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
   .karte-svg.mit-wahl { --rest: 400px; }
   @media (min-height: 821px) { .karte-svg { --rest: 420px; } .karte-svg.mit-wahl { --rest: 500px; } }
   .karte-svg .land { fill: none; stroke: var(--text); stroke-width: .9; }
-  .karte-svg .gebiet { fill: #fbf7ec; stroke: #8a8fa8; stroke-width: .45; stroke-linejoin: round; fill-rule: evenodd; }
+  .karte-svg .gebiet { /* Bildfarben: Karte auf der Bildkachel */ fill: #fbf7ec; stroke: #8a8fa8; stroke-width: .45; stroke-linejoin: round; fill-rule: evenodd; }
   .karte-svg .gebiet.wahl { cursor: pointer; }
-  .karte-svg .gebiet.wahl:hover { fill: #fff1c9; }
-  .karte-svg .gebiet.blass { fill: #f3f1ea; stroke: #c5c9d6; }
+  .karte-svg .gebiet.wahl:hover { /* Bildfarben: Karte auf der Bildkachel */ fill: #fff1c9; }
+  .karte-svg .gebiet.blass { /* Bildfarben: Karte auf der Bildkachel */ fill: #f3f1ea; stroke: #c5c9d6; }
   .karte-svg .gebiet.falsch { fill: var(--hinweis-hell); }
-  .karte-svg .gebiet.richtig { fill: #bfe8cf; stroke: var(--gut); stroke-width: 1; }
-  .karte-svg .gebiet.markiert { fill: #f7b9c4; stroke: #b4233c; stroke-width: 1; }
-  .karte-svg .punkt { fill: var(--text); stroke: #fff; stroke-width: .8; }
+  .karte-svg .gebiet.richtig { /* Bildfarben: Karte auf der Bildkachel */ fill: #bfe8cf; stroke: var(--gut); stroke-width: 1; }
+  .karte-svg .gebiet.markiert { /* Bildfarben: Karte auf der Bildkachel */ fill: #f7b9c4; stroke: #b4233c; stroke-width: 1; }
+  .karte-svg .punkt { fill: var(--text); stroke: var(--k-karte); stroke-width: .8; }
   .karte-svg .punkt.richtig { fill: var(--gut); }
   .karte-svg .punkt.falsch { fill: var(--hinweis); }
-  .karte-svg .punkt.markiert { fill: #b4233c; }
+  .karte-svg .punkt.markiert { /* Bildfarben: Karte auf der Bildkachel */ fill: #b4233c; }
   .karte-svg .treffer { fill: transparent; cursor: pointer; }
   .quelle { text-align: center; font-size: 12px; color: var(--text-leise); margin: 0 0 6px; }
 </style>
@@ -164,7 +164,7 @@ LS.spiel({
     const gebiete = p.ansicht === "sg" ? KARTE.wahlkreise : KARTE.kantone;
     ctx.tipp(tippsFuer(p, ziel, gebiete));
     const [vx, vy, vb, vh] = p.ansicht === "sg" ? ausschnitt(gebiete) : [0, 0, KARTE.breite, KARTE.hoehe];
-    const svg = svgEl("svg", { class: "karte-svg", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
+    const svg = svgEl("svg", { class: "karte-svg szenenbild bildkachel", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
     svg.style.setProperty("--seiten", (vb / vh).toFixed(3));
     if (p.art === "erkennen") svg.classList.add("mit-wahl");
     const flaechen = new Map();

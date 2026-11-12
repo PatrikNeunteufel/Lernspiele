@@ -12,15 +12,15 @@
   .wort {
     border: none; border-radius: 12px; padding: 8px 12px; min-height: 52px;
     font-family: inherit; font-size: clamp(22px, 5vw, 32px); font-weight: 800;
-    background: #fff; color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer;
+    background: var(--k-feld); color: var(--text); box-shadow: 0 4px 0 var(--rand); cursor: pointer;
   }
-  .wort.gross { background: #eef0ff; color: var(--knopf); }
+  .wort.gross { background: var(--aktiv); color: var(--knopf); }
   .wort .erster { display: inline-block; min-width: .6em; text-align: center; }
   .wort.gross .erster { text-decoration: underline 3px; text-underline-offset: 4px; }
   .wort.fehler { box-shadow: 0 0 0 3px var(--hinweis); }
   .zeichen {
-    border: 3px dashed #c5c9de; border-radius: 10px; width: 46px; height: 52px;
-    font-family: inherit; font-size: 34px; font-weight: 900; background: #fbfcff; color: var(--knopf); cursor: pointer;
+    border: 3px dashed var(--leer); border-radius: 10px; width: 46px; height: 52px;
+    font-family: inherit; font-size: 34px; font-weight: 900; background: var(--anzeige); color: var(--knopf); cursor: pointer;
   }
   .zeichen.gesetzt { border-style: solid; border-color: var(--knopf); }
   .zeichen.fehler { border-color: var(--hinweis); }

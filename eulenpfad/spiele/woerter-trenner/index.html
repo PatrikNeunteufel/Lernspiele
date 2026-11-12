@@ -14,10 +14,10 @@
   .buchstabe { font-weight: 900; padding: .15em 0; color: var(--text); line-height: 1.1; }
   .luecke { width: .5em; min-width: 12px; border: none; background: transparent; cursor: pointer; position: relative; padding: 0; }
   .luecke::after { content: ""; position: absolute; left: calc(50% - 2px); top: .2em; bottom: .2em; width: 4px; border-radius: 2px; background: transparent; }
-  .luecke:hover::after { background: #dfe3ef; }
+  .luecke:hover::after { background: var(--rand); }
   .luecke.strich::after { background: var(--hinweis); top: 0; bottom: 0; }
   .luecke.fehlt::after { background: var(--gut); top: 0; bottom: 0; }
-  .luecke.zuviel::after { background: #e5484d; }
+  .luecke.zuviel::after { background: var(--hinweis); }
   .loesung { text-align: center; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; color: var(--gut); min-height: 36px; }
 </style>
 </head>

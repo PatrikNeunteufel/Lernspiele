@@ -18,10 +18,10 @@
   .ss-rahmen { max-width: 100%; overflow-x: auto; margin: 0 auto 10px; }
   .ss-tafel { margin: 0 auto; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   .ss-tafel th, .ss-tafel td { width: clamp(26px, 8vw, 52px); text-align: center; padding: 0; }
-  .ss-tafel th { color: #fff; background: var(--f, var(--text-leise)); font-size: clamp(12px, 3.2vw, 17px); font-weight: 900; padding: 4px 0; border: 2px solid #fff; border-radius: 6px; }
+  .ss-tafel th { color: var(--auf-stelle); background: var(--f, var(--text-leise)); font-size: clamp(12px, 3.2vw, 17px); font-weight: 900; padding: 4px 0; border: 2px solid var(--k-karte); border-radius: 6px; }
   .ss-tafel th.ss-nach { background: var(--text-leise); }
-  .ss-tafel td { height: clamp(36px, 9vw, 52px); border: 2px solid var(--rand); background: #fff; font-size: clamp(20px, 5.6vw, 32px); font-weight: 900; color: var(--f, var(--text)); overflow: hidden; }
-  .ss-tafel td.ss-nach { color: var(--text); background: #f6f7fb; }
+  .ss-tafel td { height: clamp(36px, 9vw, 52px); border: 2px solid var(--rand); background: var(--k-feld); font-size: clamp(20px, 5.6vw, 32px); font-weight: 900; color: var(--f, var(--text)); overflow: hidden; }
+  .ss-tafel td.ss-nach { color: var(--text); background: var(--feld-leise); }
   .ss-tafel .ss-komma { width: 12px; border: none; background: none; color: var(--text); font-size: clamp(20px, 5.6vw, 32px); font-weight: 900; }
   .ss-tafel th.ss-komma { background: none; }
   .ss-tafel tr.ss-ziel td:not(.ss-komma) { border-style: dashed; }

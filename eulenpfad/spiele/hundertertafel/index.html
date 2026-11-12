@@ -15,16 +15,16 @@
     display: grid; grid-template-columns: repeat(var(--spalten, 10), var(--z)); gap: 3px; justify-content: center; margin: 0 auto 10px; }
   .ht-feld { width: var(--z); height: var(--z); display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     border-radius: 8px; font-weight: 900; font-size: calc(var(--z) * .4); font-variant-numeric: tabular-nums; color: var(--text);
-    background: #fff; border: 2px solid var(--rand); padding: 0; font-family: inherit; }
-  .ht-feld.leer { background: #f4f5fb; border-style: dashed; color: transparent; }
+    background: var(--k-feld); border: 2px solid var(--rand); padding: 0; font-family: inherit; }
+  .ht-feld.leer { background: var(--feld-leise); border-style: dashed; color: transparent; }
   .ht-feld.aussen { visibility: hidden; }
-  .ht-feld.gesucht { border: 3px solid var(--knopf); background: #eef0ff; color: var(--knopf); }
+  .ht-feld.gesucht { border: 3px solid var(--knopf); background: var(--aktiv); color: var(--knopf); }
   .ht-feld.gesucht.fertig { border-color: var(--gut); background: var(--gut-hell); color: var(--text); }
   /* Reihe einer Einmaleins-Zahl: Deko-Farbe, nie eine Stellenfarbe */
-  .ht-feld.markiert { background: var(--deko-4); border-color: var(--deko-4); color: #fff; }
+  .ht-feld.markiert { background: var(--deko-4-grund); border-color: var(--deko-4); color: var(--auf-deko-4); }
   button.ht-feld { cursor: pointer; }
   button.ht-feld:hover { border-color: var(--knopf); }
-  button.ht-feld.richtig { background: var(--gut); border-color: var(--gut); color: #fff; }
+  button.ht-feld.richtig { background: var(--gut-grund); border-color: var(--gut); color: var(--auf-gut); }
   button.ht-feld.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); animation: wackeln .4s; }
   .ht-seite { text-align: center; font-weight: 800; color: var(--text-leise); margin: -4px 0 6px; }
   @media (max-width: 560px) { .ht-tafel { --z: clamp(26px, min((100vw - 48px) / var(--spalten, 10) - 3px, (100vh - 280px) / var(--zeilen, 10) - 3px), 44px); } }

@@ -13,9 +13,9 @@
   .frage-bild { text-align: center; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; margin: 0 0 4px; }
   .wt-grafik { display: block; width: 100%; max-width: 560px; height: auto; margin: 0 auto 10px; border-radius: 16px; touch-action: manipulation; }
   .wt-grafik .wt-pfeil { cursor: pointer; }
-  .wt-grafik .wt-linie { fill: none; stroke: #64748b; stroke-width: 4; stroke-linecap: round; }
-  .wt-grafik .wt-kopf { fill: #64748b; }
-  .wt-grafik .wt-marke { fill: #fff; stroke: #64748b; stroke-width: 2.5; }
+  .wt-grafik .wt-linie { /* Bildfarben: Szene auf der Bildkachel */  fill: none; stroke: #64748b; stroke-width: 4; stroke-linecap: round; }
+  .wt-grafik .wt-kopf { /* Bildfarben: Szene auf der Bildkachel */  fill: #64748b; }
+  .wt-grafik .wt-marke { /* Bildfarben: Szene auf der Bildkachel */  fill: #fff; stroke: #64748b; stroke-width: 2.5; }
   .wt-grafik .wt-marke-text { font: 900 15px var(--schrift); fill: var(--k-bildtext); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
   .wt-grafik .wt-pfeil.hervor .wt-linie { stroke: var(--deko-2); stroke-width: 6; }
   .wt-grafik .wt-pfeil.hervor .wt-kopf { fill: var(--deko-2); }
@@ -27,7 +27,7 @@
   .wt-grafik .wt-schicht { cursor: pointer; stroke: rgba(0, 0, 0, .25); stroke-width: 1.5; }
   .wt-grafik .wt-schicht.richtig { stroke: var(--gut); stroke-width: 5; }
   .wt-grafik .wt-schicht.falsch { stroke: var(--hinweis); stroke-width: 5; }
-  .wt-grafik .wt-schild { font: 800 13px var(--schrift); fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; pointer-events: none; }
+  .wt-grafik .wt-schild { /* Bildfarben: Szene auf der Bildkachel */  font: 800 13px var(--schrift); fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; pointer-events: none; }
   .wt-beschreibung { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: color-mix(in srgb, var(--deko-6) 9%, var(--k-karte)); border: 3px dashed color-mix(in srgb, var(--deko-6) 40%, var(--k-karte)); font-size: clamp(16px, 3.8vw, 20px); font-weight: 700; text-align: center; }
   .wahl-knopf { font-size: clamp(17px, 4vw, 22px); font-weight: 800; }
   /* Ganze Aufgabe im Bild (BH3 a): Grafik nach der Bildhöhe; quer stehen Frage und Antworten rechts daneben. */
@@ -274,7 +274,7 @@ function pruefeAufgabe(a, stufe) {
 
 /** Wasserkreislauf: Meer, Sonne, Wolke, Berg, Regen, Boden, Grundwasser, Fluss und die fünf Pfeile. */
 function kreislaufGrafik() {
-  const svg = S("svg", { class: "wt-grafik", viewBox: "0 0 400 270", role: "img", "aria-label": "Wasserkreislauf mit Meer, Sonne, Wolke, Berg, Boden und Fluss" });
+  const svg = S("svg", { class: "wt-grafik szenenbild bildkachel", viewBox: "0 0 400 270", role: "img", "aria-label": "Wasserkreislauf mit Meer, Sonne, Wolke, Berg, Boden und Fluss" });
   svg.append(
     S("rect", { x: 0, y: 0, width: 400, height: 175, fill: "#cfe9ff" }),
     // Sonne
@@ -333,7 +333,7 @@ function kreislaufGrafik() {
 
 /** Bodenprofil mit vier Schichten (ohne Namen, die erscheinen nach der richtigen Antwort). */
 function bodenGrafik() {
-  const svg = S("svg", { class: "wt-grafik", viewBox: "0 0 300 230", role: "img", "aria-label": "Bodenprofil mit vier Schichten", style: "max-width:420px" });
+  const svg = S("svg", { class: "wt-grafik szenenbild bildkachel", viewBox: "0 0 300 230", role: "img", "aria-label": "Bodenprofil mit vier Schichten", style: "max-width:420px" });
   svg.append(S("rect", { x: 0, y: 0, width: 300, height: 34, fill: "#cfe9ff" }));
   const schichten = {};
   for (const s of SCHICHTEN) {

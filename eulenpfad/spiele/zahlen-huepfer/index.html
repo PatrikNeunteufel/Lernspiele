@@ -10,13 +10,13 @@
 <style>
   .schritt-schild {
     display: inline-block;
-    background: var(--hinweis);
-    color: #fff;
+    background: var(--hinweis-grund);
+    color: var(--auf-hinweis);
     font-weight: 900;
     font-size: clamp(24px, 5vw, 34px);
     border-radius: 14px;
     padding: 4px 18px;
-    box-shadow: 0 5px 0 #d97f00;
+    box-shadow: 0 5px 0 var(--timer-an-boden);
   }
 
   .teich {
@@ -25,8 +25,8 @@
     padding: 34px 8px 18px;
     border-radius: 26px;
     background:
-      radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, .35) 0 8%, transparent 9%),
-      radial-gradient(ellipse at 75% 70%, rgba(255, 255, 255, .25) 0 6%, transparent 7%),
+      radial-gradient(ellipse at 20% 30%, color-mix(in srgb, var(--k-feld) 35%, transparent) 0 8%, transparent 9%),
+      radial-gradient(ellipse at 75% 70%, color-mix(in srgb, var(--k-feld) 25%, transparent) 0 6%, transparent 7%),
       linear-gradient(180deg, #7fd3f5, #4fb3e6);
     display: flex;
     justify-content: space-between;
@@ -34,7 +34,7 @@
     gap: 4px;
   }
 
-  .seerose {
+  .seerose { /* Gleich in beiden Modi: Seerose im Teich */ 
     position: relative;
     flex: 1;
     aspect-ratio: 1.25;
@@ -53,7 +53,7 @@
   }
 
   /* Kerbe einer Seerose */
-  .seerose::after {
+  .seerose::after { /* Gleich in beiden Modi: Wasser */ 
     content: "";
     position: absolute;
     top: 50%; right: -2px;
@@ -65,13 +65,13 @@
   .seerose span {
     position: relative;
     z-index: 1;
-    background: rgba(255, 255, 255, .85);
+    background: color-mix(in srgb, var(--k-feld) 85%, transparent);
     border-radius: 10px;
     padding: 2px 6px;
   }
 
-  .seerose.offen span { color: #b6bccf; }
-  .seerose.jetzt { transform: scale(1.08); box-shadow: 0 0 0 5px #fff, 0 6px 10px rgba(0, 60, 100, .2); }
+  .seerose.offen span { color: var(--leer); }
+  .seerose.jetzt { transform: scale(1.08); box-shadow: 0 0 0 5px var(--k-karte), 0 6px 10px rgba(0, 60, 100, .2); }
 
   .frosch {
     position: absolute;

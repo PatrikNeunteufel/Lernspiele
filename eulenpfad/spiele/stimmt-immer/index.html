@@ -8,17 +8,17 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .aussage-karte { background: #fff; border: 3px solid var(--deko-3); border-radius: 18px; padding: 14px 16px; margin: 0 0 12px; }
+  .aussage-karte { background: var(--k-feld); border: 3px solid var(--deko-3); border-radius: 18px; padding: 14px 16px; margin: 0 0 12px; }
   .aussage-karte .auftrag { font-size: clamp(19px, 4.4vw, 26px); font-weight: 800; text-align: center; line-height: 1.4; margin: 0; }
   .stimmt-frage { text-align: center; font-weight: 800; color: var(--text-leise); margin: 6px 0; font-size: clamp(16px, 3.8vw, 20px); }
   .stimmt-antwort .wahl-knopf { font-size: clamp(18px, 4.2vw, 23px); font-weight: 900; }
   .stimmt-beispiele .wahl-knopf { font-size: clamp(16px, 3.8vw, 21px); font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; overflow-wrap: anywhere; }
   .stimmt-beispiele.zahlen { --wahl-breite: 220px; }
   .stimmt-beispiele svg { width: 100%; max-width: 150px; height: auto; display: block; margin: 0 auto 4px; }
-  .stimmt-figur { fill: color-mix(in srgb, var(--deko-2) 18%, #fff); stroke: var(--deko-2); stroke-width: 3; stroke-linejoin: round; }
+  .stimmt-figur { fill: color-mix(in srgb, var(--deko-2) 18%, var(--k-feld)); stroke: var(--deko-2); stroke-width: 3; stroke-linejoin: round; }
   .stimmt-diagonale { stroke: var(--deko-5); stroke-width: 2.5; stroke-dasharray: 6 4; }
   .stimmt-kreis { fill: none; stroke: var(--deko-6); stroke-width: 3; }
-  .stimmt-punkt { fill: var(--deko-7); stroke: #fff; stroke-width: 1.5; }
+  .stimmt-punkt { fill: var(--deko-7); stroke: var(--k-karte); stroke-width: 1.5; }
 </style>
 </head>
 <body>

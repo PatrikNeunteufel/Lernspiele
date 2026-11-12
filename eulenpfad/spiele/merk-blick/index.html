@@ -9,22 +9,22 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .mb-raster { display: grid; gap: 8px; width: 100%; margin: 0 auto 14px; padding: 10px; box-sizing: border-box;
-    background: #fff; border: 3px solid var(--rand); border-radius: 18px; position: relative; }
+    background: var(--k-feld); border: 3px solid var(--rand); border-radius: 18px; position: relative; }
   .mb-raster.g2 { grid-template-columns: repeat(2, 1fr); max-width: 260px; }
   .mb-raster.g3 { grid-template-columns: repeat(3, 1fr); max-width: 330px; }
   .mb-raster.g4 { grid-template-columns: repeat(4, 1fr); max-width: 380px; }
-  .mb-platz { aspect-ratio: 1; display: grid; place-items: center; border-radius: 14px; background: #f6f7fc;
+  .mb-platz { aspect-ratio: 1; display: grid; place-items: center; border-radius: 14px; background: var(--feld-leise);
     border: 3px solid transparent; font: inherit; padding: 0; min-width: 0; min-height: 64px; }
   .mb-raster.g4 .mb-platz { min-height: 0; }
   .mb-platz .mb-ding { font-size: clamp(34px, 9vw, 52px); line-height: 1; }
   .mb-raster.g4 .mb-ding { font-size: clamp(26px, 7vw, 40px); }
   .mb-platz svg { width: 82%; height: 82%; }
-  button.mb-platz { cursor: pointer; box-shadow: 0 4px 0 var(--rand); background: #fff; border-color: var(--rand); }
+  button.mb-platz { cursor: pointer; box-shadow: 0 4px 0 var(--rand); background: var(--k-feld); border-color: var(--rand); }
   button.mb-platz.gewaehlt { background: var(--gut-hell); border-color: var(--gut); }
   button.mb-platz.richtig { background: var(--gut-hell); border-color: var(--gut); }
   button.mb-platz.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .mb-raster.verdeckt .mb-platz > * { visibility: hidden; }
-  .mb-raster.verdeckt { background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); }
+  .mb-raster.verdeckt { background: repeating-linear-gradient(45deg, var(--feld-leise) 0 12px, var(--k-feld) 12px 24px); }
   .mb-raster.verdeckt::after { content: "🙈"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 64px; }
   .mb-wahl .wahl-knopf { min-height: 80px; }
   .mb-wahl .wahl-knopf .bild { font-size: clamp(40px, 10vw, 54px); }

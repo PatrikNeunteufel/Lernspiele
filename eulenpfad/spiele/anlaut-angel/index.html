@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .see { background: linear-gradient(180deg, #bfe3ff, #7cc4f5); border-radius: 20px; padding: 12px; margin-bottom: 14px; text-align: center; }
+  .see { /* Bildfarben: Szene auf der Bildkachel */ background: linear-gradient(180deg, #bfe3ff, #7cc4f5); border-radius: 20px; padding: 12px; margin-bottom: 14px; text-align: center; }
   .see .bild { font-size: clamp(64px, 15vw, 96px); line-height: 1.1; }
   .see .wort { font-size: clamp(30px, 7vw, 44px); font-weight: 900; letter-spacing: 3px; }
   .see .wort b { color: var(--deko-1); }
@@ -161,7 +161,7 @@ LS.spiel({
     if (moeglich(ctx.stufe).length > 1) ctx.serie("art", a.art === "laut" ? a.wo : a.art);
     ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "bildZumLaut") {
-      ctx.flaeche.append(el("div", { class: "see" }, el("div", { class: "frage", text: "Angle das Bild, das so beginnt:" }), el("div", { class: "buchstabe-gross vorgabe", text: `${a.buchstabe} ${a.buchstabe.toLowerCase()}` })));
+      ctx.flaeche.append(el("div", { class: "see szenenbild bildkachel" }, el("div", { class: "frage", text: "Angle das Bild, das so beginnt:" }), el("div", { class: "buchstabe-gross vorgabe", text: `${a.buchstabe} ${a.buchstabe.toLowerCase()}` })));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 120,
         inhalt: w => ({ bild: w.bild, text: w.wort }),
@@ -170,7 +170,7 @@ LS.spiel({
         lob: `${a.richtig.bild} ${a.richtig.wort} — mit ${a.buchstabe}! 🎣`,
       });
     } else {
-      ctx.flaeche.append(el("div", { class: "see" }, el("div", { class: "bild", text: a.w.bild }), verdeckt(a.w, a.wo, a.i)));
+      ctx.flaeche.append(el("div", { class: "see szenenbild bildkachel" }, el("div", { class: "bild", text: a.w.bild }), verdeckt(a.w, a.wo, a.i)));
       const frage = a.art === "luecke" ? "Welcher Buchstabe fehlt?" : `Was hörst du ${WO_TEXT[a.wo]}?`;
       ctx.flaeche.append(el("div", { class: "auftrag", text: frage }));
       const box = LS.auswahl(ctx, {

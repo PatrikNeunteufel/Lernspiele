@@ -10,13 +10,13 @@
 <style>
   /* minmax(0, …) und kleinere Schrift unter 480 px: Stufe 6 („8 000 000 + 530 000“) lief auf dem Handy seitlich über (LERN_Session13) */
   .vergleich { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; max-width: 720px; margin: 8px auto 18px; }
-  .seite { text-align: center; font-size: clamp(20px, 5.6vw, 48px); font-weight: 900; font-variant-numeric: tabular-nums; background: #fff; border-radius: 18px; padding: 12px 6px; box-shadow: var(--schatten); }
+  .seite { text-align: center; font-size: clamp(20px, 5.6vw, 48px); font-weight: 900; font-variant-numeric: tabular-nums; background: var(--k-feld); border-radius: 18px; padding: 12px 6px; box-shadow: var(--schatten); }
   .seite .punkte { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; max-width: 180px; margin: 0 auto; font-size: 30px; line-height: 1; }
   /* nicht .mitte: so heisst im Rahmen die zentrierte Schlusskarte */
-  .kroko-mitte { width: clamp(70px, 16vw, 110px); height: clamp(70px, 16vw, 110px); border-radius: 50%; border: 4px dashed #c5c9de; display: flex; align-items: center; justify-content: center; font-size: clamp(44px, 10vw, 70px); font-weight: 900; color: var(--gut); }
+  .kroko-mitte { width: clamp(70px, 16vw, 110px); height: clamp(70px, 16vw, 110px); border-radius: 50%; border: 4px dashed var(--leer); display: flex; align-items: center; justify-content: center; font-size: clamp(44px, 10vw, 70px); font-weight: 900; color: var(--gut); }
   .kroko-mitte.krokodil { border-style: solid; border-color: var(--gut); background: var(--gut-hell); }
   .zeichen-wahl { display: flex; justify-content: center; gap: 14px; }
-  .zeichen-wahl button { width: 92px; height: 80px; border: none; border-radius: 18px; font-family: inherit; font-size: 46px; font-weight: 900; background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand); cursor: pointer; }
+  .zeichen-wahl button { width: 92px; height: 80px; border: none; border-radius: 18px; font-family: inherit; font-size: 46px; font-weight: 900; background: var(--k-feld); color: var(--text); box-shadow: 0 6px 0 var(--rand); cursor: pointer; }
   .zeichen-wahl button.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .zeichen-wahl small { display: block; font-size: 12px; font-weight: 700; color: var(--text-leise); }
 </style>

@@ -11,8 +11,8 @@
   .start-zeile { display: flex; gap: 16px; align-items: stretch; }
 
   /* Flugbahn wie bei der Rechen-Rakete: die Rakete steigt mit jeder gelösten Aufgabe */
-  .bahn {
-    position: relative;
+  .bahn { 
+/* Gleich in beiden Modi: Weltall */     position: relative;
     flex: none;
     width: 58px;
     border-radius: 999px;
@@ -20,7 +20,7 @@
     overflow: hidden;
   }
 
-  .bahn::before {
+  .bahn::before { /* Gleich in beiden Modi: Sterne im Weltall */ 
     content: "";
     position: absolute;
     inset: 0;

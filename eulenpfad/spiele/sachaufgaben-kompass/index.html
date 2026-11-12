@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  .kompass-text { background: #fff; border: 2px solid var(--rand); border-radius: 16px; padding: 12px 14px; margin: 0 0 10px;
+  .kompass-text { background: var(--k-feld); border: 2px solid var(--rand); border-radius: 16px; padding: 12px 14px; margin: 0 0 10px;
     font-size: clamp(17px, 4vw, 22px); line-height: 1.7; }
   .frage { text-align: center; font-size: clamp(18px, 4.2vw, 24px); font-weight: 800; margin: 4px 0 10px; line-height: 1.6; }
   .angabe { display: inline-block; font: inherit; font-weight: 900; color: var(--text); background: var(--karte);
@@ -17,14 +17,14 @@
   .angabe-mit-zeichen { white-space: nowrap; }
   .angabe-mit-zeichen .angabe { white-space: normal; }
   button.angabe { cursor: pointer; min-height: 40px; border-color: var(--deko-4); }
-  button.angabe.gewaehlt { background: var(--deko-4); color: #fff; }
+  button.angabe.gewaehlt { background: var(--deko-4-grund); color: var(--auf-deko-4); }
   button.angabe.richtig { background: var(--gut-hell); border-color: var(--gut); color: var(--text); }
   button.angabe.unnoetig { opacity: .45; }
   button.angabe:disabled { cursor: default; }
   .kompass-tabelle-rahmen { overflow-x: auto; max-width: 100%; margin: 0 0 10px; }
   .kompass-tabelle { margin: 0 auto; border-collapse: collapse; font-size: clamp(15px, 3.6vw, 20px); }
   .kompass-tabelle caption { font-weight: 800; color: var(--text-leise); padding-bottom: 4px; }
-  .kompass-tabelle th, .kompass-tabelle td { border: 2px solid var(--rand); padding: 4px clamp(4px, 1.5vw, 10px); text-align: center; background: #fff; }
+  .kompass-tabelle th, .kompass-tabelle td { border: 2px solid var(--rand); padding: 4px clamp(4px, 1.5vw, 10px); text-align: center; background: var(--k-feld); }
   .kompass-tabelle th { color: var(--text-leise); background: var(--karte); }
   .kompass-tabelle td.name { text-align: left; font-weight: 700; }
   .kompass-diagramm { margin: 0 auto 10px; max-width: 520px; }
@@ -42,8 +42,8 @@
   .kompass-antwort .anzeige { margin: 0; }
   .kompass-einheiten { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
   .kompass-einheit { font: inherit; font-weight: 900; font-size: clamp(17px, 4vw, 22px); min-width: 64px; min-height: 52px;
-    border: 3px solid var(--rand); border-radius: 12px; background: #fff; color: var(--text); cursor: pointer; padding: 0 10px; }
-  .kompass-einheit.gewaehlt { border-color: var(--deko-4); background: var(--deko-4); color: #fff; }
+    border: 3px solid var(--rand); border-radius: 12px; background: var(--k-feld); color: var(--text); cursor: pointer; padding: 0 10px; }
+  .kompass-einheit.gewaehlt { border-color: var(--deko-4); background: var(--deko-4-grund); color: var(--auf-deko-4); }
   .kompass-weg { --wahl-breite: 210px; }
   .kompass-weg .wahl-knopf { font-size: clamp(18px, 4.2vw, 24px); font-weight: 900; font-variant-numeric: tabular-nums; }
   .kompass-zusammenhang { --wahl-breite: 220px; }

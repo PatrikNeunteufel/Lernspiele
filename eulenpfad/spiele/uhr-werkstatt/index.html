@@ -11,7 +11,7 @@
   .frage { text-align: center; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; margin: 0 0 10px; }
   .frage b { color: var(--knopf); }
   .uhr-gross { display: block; width: min(260px, 62vw); margin: 0 auto 14px; }
-  .uhr .rand { fill: #fff; stroke: var(--text); stroke-width: 4; }
+  .uhr .rand { fill: var(--k-feld); stroke: var(--text); stroke-width: 4; }
   .uhr .strich { stroke: var(--text); stroke-width: 1.5; }
   .uhr .strich.gross { stroke-width: 3.5; }
   .uhr text { font-family: var(--schrift); font-weight: 900; font-size: 11px; fill: var(--text); }
@@ -28,11 +28,11 @@
   .option {
     border: none; border-radius: 16px; min-height: 64px; padding: 8px;
     font-family: inherit; font-size: clamp(20px, 4vw, 26px); font-weight: 900;
-    background: #fff; color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; font-variant-numeric: tabular-nums;
+    background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand); cursor: pointer; font-variant-numeric: tabular-nums;
   }
   .option svg { width: 100%; max-width: 130px; display: block; margin: 0 auto; }
   .option svg.viertel { width: 1.15em; display: inline-block; vertical-align: -0.18em; margin: 0 .35em 0 0; }
-  .viertel .kreis { fill: #fff; stroke: var(--text); stroke-width: 2; }
+  .viertel .kreis { fill: var(--k-feld); stroke: var(--text); stroke-width: 2; }
   .viertel .stueck { fill: var(--knopf); }
   .viertel .null { stroke: var(--text); stroke-width: 2; }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
@@ -46,7 +46,7 @@
   .nz-strahl > b { padding-bottom: 6px; }
   .nz-sprung { display: inline-flex; flex-direction: column; align-items: center; color: var(--text-leise); line-height: 1; }
   .nz-strahl .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
-  .digital { text-align: center; font-size: clamp(40px, 9vw, 60px); font-weight: 900; font-variant-numeric: tabular-nums; background: #1f2937; color: #7cf29a; border-radius: 16px; padding: 6px 22px; width: fit-content; margin: 0 auto 14px; letter-spacing: 2px; }
+  .digital { /* Gleich in beiden Modi: Digitalanzeige */  text-align: center; font-size: clamp(40px, 9vw, 60px); font-weight: 900; font-variant-numeric: tabular-nums; background: #1f2937; color: #7cf29a; border-radius: 16px; padding: 6px 22px; width: fit-content; margin: 0 auto 14px; letter-spacing: 2px; }
 </style>
 </head>
 <body>

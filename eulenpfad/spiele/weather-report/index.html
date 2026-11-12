@@ -11,10 +11,10 @@
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 2px 0 2px; line-height: 1.35; }
   .wr-de { text-align: center; font-size: clamp(14px, 3.2vw, 17px); color: var(--text-leise); font-weight: 700; margin: 0 0 10px; }
   .wr-hoer { display: block; margin: 0 auto 12px; border: none; border-radius: 999px; padding: 10px 24px; font-family: inherit;
-    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-6); color: #fff; box-shadow: 0 5px 0 var(--deko-1); cursor: pointer; }
+    font-size: clamp(18px, 4vw, 24px); font-weight: 900; background: var(--deko-6-grund); color: var(--auf-deko-6); box-shadow: 0 5px 0 var(--deko-1); cursor: pointer; }
   .wr-hoer:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--deko-1); }
   .wr-radio { text-align: center; font-size: clamp(44px, 10vw, 64px); line-height: 1.1; margin: 0 0 4px; }
-  .wr-text { max-width: 620px; margin: 12px auto 0; background: #fff; border: 2px dashed var(--rand); border-radius: 14px; padding: 8px 12px;
+  .wr-text { max-width: 620px; margin: 12px auto 0; background: var(--k-feld); border: 2px dashed var(--rand); border-radius: 14px; padding: 8px 12px;
     font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; color: var(--text-leise); }
   .wr-wahl .wahl-knopf .bild { font-size: clamp(40px, 9vw, 54px); }
   .wr-wahl .wahl-knopf { min-height: 84px; }
@@ -23,11 +23,11 @@
 
   /* Plan für die Wegbeschreibung: Hauptstrasse von unten nach oben, zwei Querstrassen */
   .wr-plan { display: grid; grid-template-columns: 1fr 58px 1fr; grid-template-rows: repeat(8, auto); max-width: 420px; margin: 0 auto 8px;
-    background: #e8f5e3; border-radius: 14px; overflow: hidden; }
+    background: color-mix(in srgb, var(--gut) 10%, var(--k-feld)); border-radius: 14px; overflow: hidden; }
   .wr-strasse { background: var(--deko-7); min-height: 30px; }
-  .wr-strasse.quer { min-height: 34px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 800; }
+  .wr-strasse.quer { min-height: 34px; display: flex; align-items: center; justify-content: center; color: var(--auf-deko-7); font-size: 12px; font-weight: 800; }
   .wr-leer { min-height: 54px; }
-  .wr-haus { margin: 6px 10px; border: none; border-radius: 12px; background: #fff; box-shadow: 0 3px 0 var(--rand); font-family: inherit;
+  .wr-haus { margin: 6px 10px; border: none; border-radius: 12px; background: var(--k-feld); box-shadow: 0 3px 0 var(--rand); font-family: inherit;
     min-height: 54px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; }
   .wr-haus .bild { font-size: 26px; line-height: 1.1; }
   .wr-haus small { font-size: 12px; font-weight: 800; color: var(--text-leise); }

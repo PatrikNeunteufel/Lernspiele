@@ -22,8 +22,8 @@
   .pb-zahl { white-space: nowrap; font-variant-numeric: tabular-nums; }
 
   .pb-feld, .pb-streifen { display: block; max-width: 100%; height: auto; }
-  .pb-feld rect { fill: #fff; stroke: var(--text-leise); stroke-width: .5; }
-  .pb-streifen rect { fill: #fff; stroke: var(--text); stroke-width: 1.5; }
+  .pb-feld rect { fill: var(--k-feld); stroke: var(--text-leise); stroke-width: .5; }
+  .pb-streifen rect { fill: var(--k-feld); stroke: var(--text); stroke-width: 1.5; }
   .pb-feld rect.voll, .pb-streifen rect.voll { fill: var(--deko-2); }
 
   .wahl-knopf { font-size: clamp(22px, 5vw, 30px); font-weight: 900; font-variant-numeric: tabular-nums; }
@@ -34,19 +34,19 @@
   /* Brücke: je gefundenes Paar (oder Dreier) eine Planke */
   .pb-bruecke { display: flex; gap: 6px; justify-content: center; align-items: stretch; max-width: 560px; margin: 0 auto 4px; }
   .pb-planke { flex: 1; min-width: 0; min-height: 40px; border: 3px dashed var(--rand); border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: clamp(12px, 3vw, 16px); padding: 2px 4px; text-align: center; color: var(--text-leise); background: rgba(255, 255, 255, .6); }
-  .pb-planke.gelegt { border-style: solid; border-color: var(--deko-3); background: var(--deko-3); color: #fff; }
+    font-weight: 800; font-size: clamp(12px, 3vw, 16px); padding: 2px 4px; text-align: center; color: var(--text-leise); background: color-mix(in srgb, var(--k-feld) 60%, transparent); }
+  .pb-planke.gelegt { border-style: solid; border-color: var(--deko-3); background: var(--deko-3-grund); color: var(--auf-deko-3); }
   .pb-fluss { max-width: 560px; height: 12px; margin: 0 auto 12px; border-radius: 8px; background: var(--deko-6); opacity: .35; }
   .pb-ufer { display: grid; gap: 10px; grid-template-columns: repeat(var(--sp, 2), minmax(0, 1fr)); max-width: 560px; margin: 0 auto; }
   .pb-spalte { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .pb-kopf { text-align: center; font-weight: 800; color: var(--text-leise); font-size: clamp(13px, 3.2vw, 16px); }
-  .pb-karte { min-height: 66px; border: 3px solid var(--rand); border-radius: 14px; background: #fff; color: var(--text); font-family: inherit;
+  .pb-karte { min-height: 66px; border: 3px solid var(--rand); border-radius: 14px; background: var(--k-feld); color: var(--text); font-family: inherit;
     font-size: clamp(20px, 5vw, 28px); font-weight: 900; display: flex; align-items: center; justify-content: center; padding: 6px; cursor: pointer;
     box-shadow: 0 4px 0 var(--rand); touch-action: manipulation; }
   .pb-karte .bruch { font-size: clamp(22px, 5.2vw, 28px); }
   .pb-karte .pb-feld { width: min(84px, 22vw); }
   .pb-karte .pb-streifen { width: 100%; }
-  .pb-karte.aktiv { border-color: var(--deko-1); box-shadow: 0 4px 0 var(--deko-1); background: #f3ecff; }
+  .pb-karte.aktiv { border-color: var(--deko-1); box-shadow: 0 4px 0 var(--deko-1); background: color-mix(in srgb, var(--deko-1) 12%, var(--k-feld)); }
   .pb-karte.fertig { border-color: var(--gut); background: var(--gut-hell); box-shadow: none; opacity: .7; cursor: default; }
   .pb-karte.daneben { border-color: var(--hinweis); animation: wackeln .4s; }
 
@@ -59,7 +59,7 @@
   .pb-notizen .zw-notiz { font-size: 18px; min-height: 34px; }
   .pb-notiz-bruch { display: inline-flex; flex-direction: column; align-items: center; }
   .pb-notiz-bruch .zw-notiz { width: calc(3ch + 12px); min-height: 28px; padding: 1px 3px; font-size: 16px; }
-  .pb-notiz-bruch .strich { align-self: stretch; border-top: 2px solid #c9b87a; margin: 2px 0; }
+  .pb-notiz-bruch .strich { align-self: stretch; border-top: 2px solid var(--papier-rand-stark); margin: 2px 0; }
 </style>
 </head>
 <body>

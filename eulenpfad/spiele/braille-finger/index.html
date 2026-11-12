@@ -12,11 +12,11 @@
   .frage b { color: var(--knopf); }
 
   .bf-zelle { display: block; height: auto; }
-  .bf-zelle .rahmen { fill: #fff; stroke: var(--rand); stroke-width: 3; }
-  .bf-zelle circle { fill: #fff; stroke: var(--rand); stroke-width: 3; }
+  .bf-zelle .rahmen { fill: var(--k-feld); stroke: var(--rand); stroke-width: 3; }
+  .bf-zelle circle { fill: var(--k-feld); stroke: var(--rand); stroke-width: 3; }
   .bf-zelle circle.voll { fill: var(--text); stroke: var(--text); }
   .bf-zelle text { font-size: 18px; font-weight: 800; fill: var(--text-leise); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-  .bf-zelle text.auf-voll { fill: #fff; }
+  .bf-zelle text.auf-voll { fill: var(--k-karte); }
   .bf-gross { width: clamp(96px, 26vw, 130px); margin: 0 auto 12px; }
   .bf-setzen { width: clamp(150px, 46vw, 210px); margin: 0 auto 10px; touch-action: manipulation; }
   .bf-setzen circle { cursor: pointer; }
@@ -31,14 +31,14 @@
 
   .bf-schreibwort { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 0 0 8px; }
   .bf-schreibwort span { min-width: clamp(34px, 9vw, 46px); text-align: center; font-size: clamp(26px, 6.5vw, 38px); font-weight: 900;
-    border-bottom: 5px solid var(--rand); border-radius: 8px 8px 0 0; background: #fff; }
+    border-bottom: 5px solid var(--rand); border-radius: 8px 8px 0 0; background: var(--k-feld); }
   .bf-schreibwort span.dran { border-color: var(--deko-5); color: var(--deko-5); }
   .bf-schreibwort span.richtig { background: var(--gut-hell); border-color: var(--gut); }
   .bf-geschrieben { display: flex; justify-content: center; gap: 6px; min-height: 10px; margin: 0 0 8px; flex-wrap: wrap; }
   .bf-knoepfe { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
   .bf-knoepfe button { font: inherit; font-size: clamp(18px, 4.4vw, 22px); font-weight: 900; min-height: 56px; min-width: 130px; border: none;
-    border-radius: 16px; background: #fff; box-shadow: 0 5px 0 var(--rand); cursor: pointer; padding: 6px 16px; }
-  .bf-knoepfe button.bf-pruefen { background: var(--gut); color: #fff; box-shadow: 0 5px 0 #22975a; }
+    border-radius: 16px; background: var(--k-feld); box-shadow: 0 5px 0 var(--rand); cursor: pointer; padding: 6px 16px; }
+  .bf-knoepfe button.bf-pruefen { background: var(--gut-grund); color: var(--auf-gut); box-shadow: 0 5px 0 var(--gut-boden); }
   .bf-knoepfe button:disabled { opacity: .45; }
 
   .bf-tafel { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; max-width: 640px; margin: 0 auto 12px;

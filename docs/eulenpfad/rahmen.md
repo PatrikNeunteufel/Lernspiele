@@ -107,14 +107,26 @@ Spiel verwendet nur die Variablen, keine eigenen Farbwerte für diese Zwecke.
 für die angemeldete Aufsicht, für Stil und Farben (Profil `aussehen`, `LS.aussehen(name)`). `LS.farbenAnwenden()` setzt
 `data-farben` über `KERN.farben` und merkt die Wahl unter `lernspiele:farben`; jede Seite mit `stil.css` lädt davor im
 `<head>` `kern/kern-kopf.js` mit `data-speicher="lernspiele:"` (`tools/pruefe_skripte.js` Punkt 6), damit eine dunkle
-Seite nicht hell aufblitzt. Bis die festen Farben in `stil.css`, `start.css` und den Spielseiten umgestellt sind
-(Schritte 3c und 5 im Konzept), ist der dunkle Modus noch nicht lesbar. Seitentest „Aussehen (Farben, Für mich)“.
+Seite nicht hell aufblitzt. Seitentest „Aussehen (Farben, Für mich)“.
+
+**Farben in einer Spielseite** (DM4 a, Darkmode Schritt 5, LERN_Session35): im `<style>` einer Spielseite keine feste
+Farbe — `tools/pruefe_skripte.js` Punkt 7 weist sie ab. Stattdessen ein Name aus der Tabelle unten oder aus `kern.css`
+(`--k-feld` für Felder und Tasten auf der Karte, `--k-karte` für Trennlinien und Ringe in der Farbe der Karte). Ein
+Gegenstand mit eigenen Farben, der in beiden Modi gleich aussieht (Banknote, Klaviertaste, Go-Stein, Verkehrszeichen,
+Nachthimmel), steht in einem Regelblock mit dem Kommentar `/* Gleich in beiden Modi: <Grund> */`; eine gezeichnete
+Szene (Pflanze, Wasserkreislauf, Karte, Plan) bekommt die Klassen `szenenbild bildkachel` an ihre Hülle, ihre Regeln den
+Kommentar `/* Bildfarben: <Grund> */`. Ein Ton, den nur eine Seite braucht, steht dort in `:root` mit seiner dunklen
+Fassung unter `:root[data-farben="dunkel"]` (Landschaftsfarben im Lebensraum-Spiel). Farben im Skript (`"#…"` in
+SVG-Zeichnungen) prüft Punkt 7 nicht; dort ebenso `var(--…)` oder eine Szene mit Bildkachel.
 
 | Variable | wofür | nie für |
 |---|---|---|
 | `--st-E`, `--st-Z`, `--st-H`, `--st-T`, `--st-ZT`, `--st-HT`, `--st-M`; Klassen `.st-E` … setzen `--f` | **nur Stellen** (Einer rot, Zehner blau, Hunderter grün, ab T wiederholt — wie Calcularis) | Dekoration, Körbe, Stufen |
 | `--deko-1` … `--deko-7` | Spielkarten, Stufen, Körbe, Titel, Säulen und Linien in Grafiken — als Fläche ohne Schrift, Rand, Bild | Stellen; Schrift in der Farbe oder auf ihr |
 | Klasse `bildkachel` (DM3 a, Kern 1.43.0) | darin gilt der helle Satz auch im dunklen Modus: Zeichnungen der Sammlung (`LS.bild`), Abschluss-Animationen (`.feier`), Kartenbilder; dunkel auf `--k-bildgrund` mit runden Ecken | Flächen mit Schrift des Rahmens |
+| Klassen `szenenbild bildkachel` (Schritt 5) | gezeichnete Szene einer Spielseite: heller Satz darin, dunkel auf `--k-bildgrund` (ein eigener Grund der Szene gewinnt), Schrift `var(--text)` des hellen Satzes | Knöpfe und Felder ausserhalb der Szene |
+| `--auf-stelle` | Schrift auf einer Stellenfarbe als Grund (Kopf einer Stellentafel, Plättchen): hell weiss, dunkel dunkel | — |
+| `--feld-leise`, `--marker` mit `--marker-strich`, `--regel` mit `--regel-rand` und `--regel-titel` (Schritt 5) | leicht getönte Fläche (Tabellenkopf, Ablage); gelb hervorgehobener Wortteil; Regelkarte, Preisschild — je mit dunkler Fassung | — |
 | `--deko-N-schrift` (DM6 a) | derselbe Ton mit mindestens 4,5 auf Weiss, wo die Farbe Schrift ist (Stufennummer, Titel); `LS.schriftFarbe("var(--deko-N)")` gibt sie, andere Farben unverändert | Flächen |
 | `--deko-N-grund` mit `--auf-deko-N`, `--gut-grund` mit `--auf-gut`, `--hinweis-grund` mit `--auf-hinweis` (G1 a) | Fläche mit Schrift (Körbe, grüne Knöpfe, Timer an, gewählter Fach-Reiter, Klassenmarke): helle Töne (gut, Hinweis, deko-3, 4, 5) mit dunkler Schrift, deko-1, 2, 6, 7 mit weisser; dunkel die Fläche mit `--k-knopf-text`. `LS.flaeche(farbe)` gibt `{ grund, schrift }` | — |
 | `--gut`, `--gut-hell` | richtig, gelöst | — |
