@@ -2227,12 +2227,17 @@ console.log("listenpruefung.js");
     const fs = require("fs");
     const css = fs.readFileSync(path.join(WURZEL, "kern", "farben.css"), "utf8");
     const ohneKommentar = css.replace(/\/\*[\s\S]*?\*\//g, "");
-    // Nur Blöcke :root und :root[data-farben="dunkel"], darin nur Variablen --k-* (eine Farbe als #rgb oder #rrggbb) und
-    // color-scheme (light im hellen, dark im dunklen Satz)
-    const bloecke = [...ohneKommentar.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => [m[1].trim(), m[2]]);
+    // Nur Blöcke :root, :root, .bildkachel (heller Satz, gilt auch in einer Bildkachel, DM3 a) und
+    // :root[data-farben="dunkel"], darin nur Variablen --k-* (eine Farbe als #rgb oder #rrggbb) und color-scheme (light im
+    // hellen, dark im dunklen Satz)
+    const bloecke = [...ohneKommentar.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => [m[1].trim().replace(/\s+/g, " "), m[2]]);
     const rest = ohneKommentar.replace(/[^{}]+\{[^{}]*\}/g, "").trim();
     gleich(rest === "", true, "farben.css: nichts ausserhalb der Blöcke");
-    const SATZ = { ":root": "hell", ':root[data-farben="dunkel"]': "dunkel" };
+    const SATZ = { ":root": "hell", ":root, .bildkachel": "hell", ':root[data-farben="dunkel"]': "dunkel" };
+    // Der Bildgrund behält in der Kachel den Ton des Modus: er steht nicht im Block, der für die Kachel gilt
+    const kachel = bloecke.find(([w]) => w === ":root, .bildkachel");
+    gleich(Boolean(kachel), true, "farben.css: Block :root, .bildkachel vorhanden (DM3 a)");
+    gleich(/--k-bildgrund\s*:/.test(kachel?.[1] || ""), false, "farben.css: --k-bildgrund nicht im Block der Bildkachel");
     const saetze = {};
     for (const [wahl, rumpf] of bloecke) {
       gleich(wahl in SATZ, true, `farben.css: Block ${wahl} ist :root oder :root[data-farben="dunkel"]`);

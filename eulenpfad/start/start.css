@@ -11,7 +11,7 @@
   font-display: swap;
 }
 
-:root {
+:root, .bildkachel { /* in einer Bildkachel gilt der helle Satz auch im dunklen Modus (DM3 a) */
   --achtung-schrift: #b45309;
   --balken-leer: #e4e6f5;
   --boden-zart: #dde0ef;

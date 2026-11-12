@@ -9513,7 +9513,7 @@ var LS_FEIER = (function () {
     const svg = muster(f, { stufe, sterne: Math.max(1, Math.min(3, sterne || 1)), ruhig, klang: typeof klang === "function" ? klang : null, plane });
     if (!svg) { zeitgeber.forEach(clearTimeout); return null; }
     const box = document.createElement("div");
-    box.className = "feier" + (ruhig ? " ruhig" : "");
+    box.className = "feier bildkachel" + (ruhig ? " ruhig" : ""); // helle Farben auch im Dunkeln (DM3 a)
     box.setAttribute("aria-hidden", "true");
     box.appendChild(svg);
     box.addEventListener("click", () => {

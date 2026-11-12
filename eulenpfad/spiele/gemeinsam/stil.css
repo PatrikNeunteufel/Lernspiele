@@ -2,8 +2,8 @@
 
 /* Rahmenfarben aus dem Kern (kern/kern.css, Entscheid DM1 a, docs/konzept_darkmode.md): die Seite lädt ihn vor diesem
    Stil; die Namen hier verweisen auf --k-*, bis sie ersetzt sind. Eigene Töne des Eulenpfads (Himmel, Stellen, Deko)
-   stehen weiter hier. */
-:root {
+   stehen weiter hier. In einer Bildkachel (Klasse bildkachel, DM3 a) gilt dieser helle Satz auch im dunklen Modus. */
+:root, .bildkachel {
   --himmel-oben: #bfe6ff;
   --himmel-unten: #fef6e4;
   --karte: var(--k-karte);
@@ -828,6 +828,12 @@ button.link, a.link {
 .noten-zeile .luecke-text { fill: var(--deko-4); font-size: 26px; font-weight: 900; }
 .notenblatt { background: var(--k-bildgrund); border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
 .hoer-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+
+/* ---------- Bildkachel (DM3 a, Darkmode Schritt 4) ----------
+   Zeichnungen der Bildersammlung und Abschluss-Animationen tragen bildkachel: darin gelten die hellen Farben (kern.css,
+   :root, .bildkachel). Im dunklen Modus stehen sie auf dem warmen hellen Bildgrund mit runden Ecken; hell unverändert. */
+:root[data-farben="dunkel"] .gezeichnet.bildkachel { background: var(--k-bildgrund); border-radius: 12px; padding: 3px; }
+:root[data-farben="dunkel"] .feier.bildkachel { background: var(--k-bildgrund); border-radius: 18px; padding: 6px; }
 
 /* ---------- Abschluss-Animation (feier.js, Entscheide AN1–AN3 a; reserviert: feier, ruhig) ---------- */
 

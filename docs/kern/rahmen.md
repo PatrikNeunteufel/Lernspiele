@@ -799,6 +799,13 @@ solange die Seite offen ist; `merke(speicher, wahl)` legt die aufgelöste Wahl u
 hell aufblitzt. Welche Wahl gilt (Gerät, „Für mich“ einer Aufsicht, Person), entscheidet die App. Tests: `pruefe_kern.js`
 (Sätze vollständig, Kontrast dunkel, `dunkel`/`anwenden`/`merke`, Kopf-Skript in einer Sandbox gleich wie `dunkel`).
 
+**Bildkachel** (seit 1.43.0, DM3 a): Der helle Satz steht unter `:root, .bildkachel` — in einem Element mit der Klasse
+`bildkachel` gilt er auch im dunklen Modus, so sieht eine Zeichnung darin aus wie im Hellen. `--k-bildgrund` steht in
+einem eigenen `:root`-Block und behält in der Kachel den Ton des Modus (dunkel das warme Weiss). Die App setzt die
+Klasse und, wenn sie will, den Grund (`background: var(--k-bildgrund)`); ihr eigener heller Block sollte dieselbe Liste
+von Wählern tragen (Eulenpfad: `stil.css`, `start.css`). `pruefe_kern.js` prüft, dass der Bildgrund nicht im Block der
+Kachel steht.
+
 ### 4.30 Geplant
 
 Noch nicht im Kern (Plan B, Tabelle der Kern-Teile, und `docs/gemeinsame_mechaniken.md`, Spalte „Kern?“): die

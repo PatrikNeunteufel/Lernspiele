@@ -3,6 +3,11 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.43.0 — 2026-11-12 (LERN_Session34)
+- `farben.css`: Bildkachel (DM3 a, Darkmode Schritt 4) — der helle Satz unter `:root, .bildkachel`, damit Zeichnungen in
+  einem Element mit dieser Klasse auch im dunklen Modus ihre hellen Farben behalten; `--k-bildgrund` in einem eigenen
+  `:root`-Block (behält in der Kachel den Ton des Modus). `pruefe_kern.js` lässt den Block zu und prüft den Bildgrund.
+
 ## 1.42.1 — 2026-11-12 (LERN_Session34)
 - `farben.css`, Kontrast nach DM5 a (docs/konzept_darkmode.md): hell `--k-knopf` `#5666f1` (vorher `#5b6cff`; weisse
   Schrift darauf und der Knopf als Schrift auf Weiss 4,6 statt 4,2), `--k-knopf-dunkel` `#3e4dd5`, `--k-fokus` wie der

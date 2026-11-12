@@ -70,7 +70,7 @@ const KARTENBILD_BEOBACHTER = typeof IntersectionObserver === "function" ? new I
 /** Fläche für das Kartenbild einer Spielkarte; null, wenn das Spiel keine Animation hat. */
 function kartenBild(s) {
   if (!s.feier || typeof LS_FEIER === "undefined") return null;
-  const flaeche = LS.el("div", { class: "karten-bild", "aria-hidden": "true" });
+  const flaeche = LS.el("div", { class: "karten-bild bildkachel", "aria-hidden": "true" }); // helle Farben auch im Dunkeln (DM3 a)
   flaeche.spiel = s;
   if (KARTENBILD_BEOBACHTER) KARTENBILD_BEOBACHTER.observe(flaeche); else zeichneKartenBild(flaeche, s);
   return flaeche;

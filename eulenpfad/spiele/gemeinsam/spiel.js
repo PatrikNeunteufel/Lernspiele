@@ -2110,7 +2110,7 @@ const LS = (() => {
       console.error(`Bild ${b} fehlt${typeof BILDER === "undefined" ? " (bilder.js nicht geladen)" : " in bilder.js"}`);
       return el("span", { class: klasse, text: "❔" });
     }
-    return el("span", { class: `${klasse} gezeichnet`, html: `<svg viewBox="${z.box}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${z.svg}</svg>` });
+    return el("span", { class: `${klasse} gezeichnet bildkachel`, html: `<svg viewBox="${z.box}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${z.svg}</svg>` });
   }
   /**
    * Zelle einer Prüfansicht: Text, in dem jedes „svg:<name>“ als Zeichnung erscheint (z. B. „svg:waschbrett / Waschbrett“).
@@ -3514,7 +3514,7 @@ const LS = (() => {
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
       "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
       "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
-    bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "pruef-bild", "pruef-text-bild", "pruef-farbe", "pruef-farbfeld", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
+    bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "bildkachel", "pruef-bild", "pruef-text-bild", "pruef-farbe", "pruef-farbfeld", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 

@@ -351,6 +351,9 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
    Werten; Kern 1.42.0 mit `--k-feld`; Prüfung Punkt 7 zählt dunkle halb durchsichtige Schatten und `color-mix` mit einer
    Variablen nicht mehr, Ausnahme „Gleich in beiden Modi:“ (Leiste der Entwicklung). **3c-3 erledigt 12.11.2026**
    (LERN_Session34, Kern 1.42.1): DM5 a, DM6 a, G1 a; Messung nach dem Umbau unter „Messung nach 3c-3“.
-4. Bildkachel (DM3) in Bildersammlung, Abschluss-Animationen, Kartenbildern, Avataren.
+4. Bildkachel (DM3) in Bildersammlung, Abschluss-Animationen, Kartenbildern, Avataren. **Erledigt 12.11.2026**
+   (LERN_Session34, Kern 1.43.0): Klasse `bildkachel` (heller Satz gilt darin), Zeichnungen der Sammlung und
+   Abschluss-Animationen dunkel auf dem warmen Bildgrund, Kartenbilder mit hellen Farben; Avatare ohne Kachel (eigener
+   heller Kreis, angesehen). Gezeichnete Szenen der Spielseiten selbst (17 Seiten) mit Schritt 5.
 5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen.
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

@@ -114,6 +114,7 @@ Seite nicht hell aufblitzt. Bis die festen Farben in `stil.css`, `start.css` und
 |---|---|---|
 | `--st-E`, `--st-Z`, `--st-H`, `--st-T`, `--st-ZT`, `--st-HT`, `--st-M`; Klassen `.st-E` … setzen `--f` | **nur Stellen** (Einer rot, Zehner blau, Hunderter grün, ab T wiederholt — wie Calcularis) | Dekoration, Körbe, Stufen |
 | `--deko-1` … `--deko-7` | Spielkarten, Stufen, Körbe, Titel, Säulen und Linien in Grafiken — als Fläche ohne Schrift, Rand, Bild | Stellen; Schrift in der Farbe oder auf ihr |
+| Klasse `bildkachel` (DM3 a, Kern 1.43.0) | darin gilt der helle Satz auch im dunklen Modus: Zeichnungen der Sammlung (`LS.bild`), Abschluss-Animationen (`.feier`), Kartenbilder; dunkel auf `--k-bildgrund` mit runden Ecken | Flächen mit Schrift des Rahmens |
 | `--deko-N-schrift` (DM6 a) | derselbe Ton mit mindestens 4,5 auf Weiss, wo die Farbe Schrift ist (Stufennummer, Titel); `LS.schriftFarbe("var(--deko-N)")` gibt sie, andere Farben unverändert | Flächen |
 | `--deko-N-grund` mit `--auf-deko-N`, `--gut-grund` mit `--auf-gut`, `--hinweis-grund` mit `--auf-hinweis` (G1 a) | Fläche mit Schrift (Körbe, grüne Knöpfe, Timer an, gewählter Fach-Reiter, Klassenmarke): helle Töne (gut, Hinweis, deko-3, 4, 5) mit dunkler Schrift, deko-1, 2, 6, 7 mit weisser; dunkel die Fläche mit `--k-knopf-text`. `LS.flaeche(farbe)` gibt `{ grund, schrift }` | — |
 | `--gut`, `--gut-hell` | richtig, gelöst | — |

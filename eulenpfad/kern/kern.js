@@ -1,4 +1,4 @@
-/* kern 1.42.1 · Prüfsumme sha256:07f993ed94808668f2b2504756bd8ba36ce6dff30d0d8e26a517a56e1be3c146 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.43.0 · Prüfsumme sha256:61d4cb49955b81e716de9322a36ef4a7dcf128c3ee2a3a483b25ad15cd6faca5 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -4748,4 +4748,4 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
 /* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */
-globalThis.KERN.version = "1.42.1";
+globalThis.KERN.version = "1.43.0";
