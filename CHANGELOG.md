@@ -2010,3 +2010,11 @@
   Lernsteig; vorher nahm er das fast schwarze Grau des Browsers. Hell unverändert (Weiss).
 - **Rahmen einer fertig geprüften Gruppe** (N2 a): eigene Farbe `--trennlinie-fertig` in `stil.css` — hell `#1f8a50`
   (4,4 auf der Karte; vorher `--gut` mit 2,4), dunkel `var(--gut)` (7,7). Im Lernsteig reicht `--gut` (5,9).
+- **Prüfung je Eintrag, Block 2 Deutsch** (LP5 a, LERN-51, T4 a): `pruefung.js` für Wortarten-Sortierer, Regel-Lücke,
+  Satz-Reparatur, Silben-Klatscher, Reim-Paare, ABC-Sortierer, Buchstaben-Zwillinge, Blitzlesen, Nomen-Puzzle und
+  Lese-Detektiv (36 eigene Listen; Wörter-Trenner und Tipp-Trainer leihen nur und brauchen keine). Gemischt war nur
+  Regel-Lücke „ck-tz“: zwei Abschnitte, ck oder k und tz oder z. Die Spalten rechnen die Spiele mit ihren eigenen
+  Funktionen aus (zerlegeWort, zerlegeSatz, zerlege, silbenText, zusammen); Stufen der Regel-Lücke aus ihrer
+  Stufentabelle. Gruppen etwa je Wortart, je richtiger Schreibweise, je Satzart, je Anfangsbuchstabe, je Verwendung der
+  Reimgruppe. Lese-Detektiv: Text und Frage bleiben ein Eintrag (je Text genau eine Frage). Die Beschreibungen nennen,
+  welche Spiele eine Liste leihen. Prüfstand und Fingerabdrücke unverändert.
