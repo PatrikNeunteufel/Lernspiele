@@ -734,6 +734,19 @@ if (opt.tab !== 0 && (!nurSpiele.length || nurSpiele.includes("tab"))) {
   console.log(`${gemeldet ? "✗" : "✓"} Tab Spiele: ${schritte} Prüfschritte${gemeldet ? `, ${gemeldet} Fehler` : ""}`);
 }
 
+// Empfehlungen der Aufsicht ans Kind (KS4 a; Statistik, tools/eulenpfad_seiten.js): mit dem Teil tab, async wegen der PIN
+const spaeterEmpfehlungen = [];
+if (opt.tab !== 0 && (!nurSpiele.length || nurSpiele.includes("tab"))) {
+  spaeterEmpfehlungen.push((async () => {
+    let gemeldet = 0, schritte = 0;
+    try {
+      schritte = await require("./eulenpfad_seiten.js").pruefeEmpfehlungen((ort, text) => { console.log(`    FEHLER  ${ort}: ${text}`); gemeldet++; });
+    } catch (e) { console.log(`    FEHLER  Empfehlungen: Abbruch: ${String(e.stack || e).split("\n").slice(0, 3).join(" | ")}`); gemeldet++; }
+    fehlerZahl += gemeldet;
+    console.log(`${gemeldet ? "✗" : "✓"} Empfehlungen der Aufsicht: ${schritte} Prüfschritte${gemeldet ? `, ${gemeldet} Fehler` : ""}`);
+  })());
+}
+
 // Speicherschicht (docs/konzept_gruppen.md 5a, Plan D11, Kern 1.34.0; LERN_Session26): Umzug nach IndexedDB, Start der
 // Seiten nach dem Laden, voller Speicher, Erinnerung ans Sichern — im Ersatz-DOM mit tools/ersatz_idb.js
 // (tools/eulenpfad_seiten.js); --speicher=0 schaltet ab; nur dieser Teil: node tools/pruefe_spiele.js speicher.
@@ -981,7 +994,7 @@ if (ohneTipp.size) {
   console.log(`\nOhne Tipps (ctx.tipp): ${ohneTipp.size} Spiel${ohneTipp.size === 1 ? "" : "e"}`);
   for (const [id, st] of ohneTipp) console.log(`    ${id.padEnd(22)} ${st.length === STUFEN.length ? "alle Stufen" : st.join(" ")}`);
 }
-Promise.all([...spaeter, ...spaeterSpeicher]).then(() => {
+Promise.all([...spaeter, ...spaeterSpeicher, ...spaeterEmpfehlungen]).then(() => {
   console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
   require("./testausgabe.js").merke("pruefe_spiele", `${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`); // HK1 a
   process.exitCode = fehlerZahl ? 1 : 0;

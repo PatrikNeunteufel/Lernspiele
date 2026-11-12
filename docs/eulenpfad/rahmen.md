@@ -950,7 +950,17 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   für die Aufsicht. Runden als Kacheln nach Heute, Gestern, Diese Woche, Früher (ohne Uhrzeit und Fehlerzahl;
   aufgeklappt die kniffligen Aufgaben mit Lösung und „▶ Nochmal“). Die Woche als eine Karte mit Wochensternen
   (`wochenSterne`), ohne Datumsreihe; dieselbe Karte im Tab Erfolge. Seitentest „Statistik des Kindes“ in
-  `tools/eulenpfad_seiten.js`. **Erfolge:** „🏆 Meine Podestplätze“ — Platz 1–3 der
+  `tools/eulenpfad_seiten.js`.
+- **Vorgaben der Aufsicht zu den Empfehlungen** (KS4 a): In „Das empfehle ich für …“ heftet die Aufsicht einen Vorschlag
+  „📌 Fürs Kind oben“ an, blendet ihn „🚫 Fürs Kind ausblenden“ aus (bleibt für sie grau sichtbar, „↺ Wieder zeigen“) oder
+  empfiehlt selbst „➕ Eigene Empfehlung“ (Spiel und Stufe); angeheftete und eigene nimmt „✕ Zurücknehmen“ zurück. Die
+  Rangfolge des Programms steht hinter ⓘ (`AUSWERTUNG.RANGFOLGE`), darunter, was das Kind jetzt sieht. Was das Kind sieht,
+  rechnet `AUSWERTUNG.fuerKind`: zuerst die Vorgaben (Satz „⭐ Von <Aufsicht>“), dann die Vorschläge des Programms ohne
+  ausgeblendete und ohne doppelte Spiel und Stufe, höchstens drei. Gespeichert im Profil des Kindes (`empfehlungen`), mit
+  Sicherung und Abgleich unterwegs; die Klasse soll später dieselbe Struktur nutzen (VR2). Seitentest „Empfehlungen der
+  Aufsicht“ (`pruefeEmpfehlungen`, Teil tab).
+- **Datum der Abzeichen Wochenstern und Dranbleiber:** die Runde, mit der das Wochenziel erreicht war (`erfuelltAm` in
+  `spiele/gemeinsam/erfolge.js`), wie bei allen Abzeichen. **Erfolge:** „🏆 Meine Podestplätze“ — Platz 1–3 der
   Endlos-Ranglisten dieses Geräts.
 
 ## 19. Kurztasten für Antwortknöpfe

@@ -350,6 +350,9 @@ const LS = (() => {
   //     Stufenwahl oder der Spielkarte umgestellt hat; gilt vor der Vorgabe (timer, reihenfolge, vorlesen), siehe VR1 a
   //   fest: { timer, reihenfolge, vorlesen: bool } — von der Aufsicht festgelegt: die Wahl des Kindes gilt dann nicht
   //   avatar: "<tier>-<farbe>" (avatare.js) — vom Kind selbst gewählt (AV1 a); fehlt = Anfangsbuchstabe
+  //   empfehlungen: { oben: [{ spiel, stufe, von, zeit }], aus: [{ art, spiel, stufe, von, zeit }] } — Vorgaben der
+  //     Aufsicht zu den Empfehlungen ans Kind (KS4 a): oben = angeheftet oder eigene, zuerst beim Kind; aus = ausgeblendet
+  //     (AUSWERTUNG.fuerKind)
   //   geaendert: { <feld>: ISO, angelegt: ISO } — setzt speichereProfil; beim Abgleich gewinnt je Feld der jüngere Stand
   const LEERES_PROFIL = {
     geboren: null, alter: null, klasse: null, fokus: [], rolle: "lernend", aufstiege: [], aufstiegGesehen: null,
@@ -357,6 +360,7 @@ const LS = (() => {
     timer: { an: false, faktor: 1, spiele: {} },
     favoriten: [], endlosAn: [], ansicht: "kacheln", zu: [], mix: null,
     lernplan: null, erfolgeGesehen: [], sortierung: null, sortierungWahl: null, avatar: null,
+    empfehlungen: { oben: [], aus: [] },
   };
 
   /**

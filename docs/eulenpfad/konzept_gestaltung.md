@@ -254,7 +254,7 @@ Sternreihe sagt „schon zwei Wochen geschafft“ ohne Zahl. Die Datumsreihe ist
 das Doppelte. Kippen würde die Empfehlung, wenn Kinder ihre Wochen zurückverfolgen wollen (dann die Sternreihe mit
 Antippen für die Woche).
 
-### KS4 — Darf die Aufsicht die Empfehlungen ans Kind übersteuern? (Frage Patrik, LERN_Session33)
+### KS4 — Darf die Aufsicht die Empfehlungen ans Kind übersteuern? (Frage Patrik, LERN_Session33) → **a** (Patrik, 12.11.2026)
 
 **Ort:** `start/statistik.js` (Karte „Das empfehle ich für …“ der Aufsicht, Karte „Das übe ich als Nächstes“ des
 Kindes), `spiele/gemeinsam/auswertung.js` `vorschlaege()` (Rangfolge `prio`), Profil des Kindes.

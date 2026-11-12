@@ -68,8 +68,7 @@ function zeichneStatistik(box, neu) {
    * aus AUSWERTUNG (Feld kind) und „▶ Los“. Vorschläge ohne Satz oder ohne Spiel (Regelmässigkeit, Konzentration) und
    * Spiele, die das Kind nicht sieht, fallen weg.
    */
-  function vorschlagKarten(vorschlaege) {
-    const passend = vorschlaege.filter(v => v.kind && SPIELE.some(s => s.id === v.spiel) && LS.fuerKinderSichtbar(v.spiel)).slice(0, 3);
+  function vorschlagKarten(passend) {
     if (!passend.length) return el("p", { class: "leise-text", text: runden.length ? "Alles im grünen Bereich — weiter so! 🎉"
       : "Spiel ein paar Runden — dann zeigt dir die Eule hier, was du als Nächstes üben kannst." });
     return el("div", { class: "spiele vorschlag-karten" }, ...passend.map(v => {
@@ -85,14 +84,81 @@ function zeichneStatistik(box, neu) {
       return k;
     }));
   }
-  /** Vorschläge mit Knopf „Jetzt üben“ (Aufsicht: Titel und Text mit Zahlen). */
-  function vorschlagListe(vorschlaege) {
+  /**
+   * Vorschläge für die Aufsicht: Titel und Text mit Zahlen, „Jetzt üben“. Mit vorgabe (KS4 a): je Vorschlag mit Satz
+   * fürs Kind „📌 Fürs Kind oben“ und „🚫 Fürs Kind ausblenden“ (ausgeblendete grau mit „↺ Wieder zeigen“).
+   */
+  function vorschlagListe(vorschlaege, vorgabe = null) {
+    const e = p.empfehlungen || { oben: [], aus: [] };
+    const klein = (text, onclick) => el("button", { type: "button", class: "knopf hell klein", text, onclick });
+    const oben = v => e.oben.some(o => o.spiel === v.spiel && o.stufe === v.stufe);
     return vorschlaege.length
-      ? el("div", { class: "vorschlaege" }, ...vorschlaege.map(v => el("div", { class: `vorschlag ${v.art}` },
-          el("b", { text: v.titel }),
-          el("p", { text: v.text }),
-          v.link ? el("a", { class: "knopf gruen klein", href: v.link, text: "Jetzt üben ➜" }) : null)))
+      ? el("div", { class: "vorschlaege" }, ...vorschlaege.map(v => {
+          const aus = AUSWERTUNG.ausgeblendet(v, p);
+          return el("div", { class: `vorschlag ${v.art}` + (aus ? " fuer-kind-aus" : ""), "data-art": v.art },
+            el("b", { text: v.titel }),
+            el("p", { text: v.text }),
+            aus ? el("p", { class: "leise-text", text: `🚫 Für ${LS.spielerName(gewaehlt)} ausgeblendet.` }) : null,
+            el("div", { class: "knopfzeile", style: "justify-content:flex-start" },
+              v.link ? el("a", { class: "knopf gruen klein", href: v.link, text: "Jetzt üben ➜" }) : null,
+              vorgabe && v.kind && !aus && !oben(v) ? klein("📌 Fürs Kind oben", () => vorgabe.oben(v)) : null,
+              vorgabe && v.kind ? (aus ? klein("↺ Wieder zeigen", () => vorgabe.zeigen(v)) : klein("🚫 Fürs Kind ausblenden", () => vorgabe.aus(v))) : null));
+        }))
       : el("p", { class: "leise-text", text: runden.length ? "Alles im grünen Bereich — weiter so!" : "Sobald ein paar Runden gespielt sind, erscheinen hier Vorschläge." });
+  }
+  /**
+   * Vorgaben der Aufsicht zu den Empfehlungen ans Kind (KS4 a): angeheftete und eigene Empfehlungen mit „✕ Zurücknehmen“,
+   * „➕ Eigene Empfehlung“ (Spiel und Stufe), die Rangfolge des Programms hinter ⓘ und was das Kind gerade sieht.
+   * Gespeichert im Profil des Kindes (empfehlungen), mit dem Namen der Aufsicht.
+   */
+  function empfehlungKarte() {
+    const e = { oben: [...(p.empfehlungen?.oben || [])], aus: [...(p.empfehlungen?.aus || [])] };
+    const von = LS.aktuellerSpieler();
+    const zeit = () => new Date().toISOString();
+    const speichere = () => { LS.speichereProfil(gewaehlt, { empfehlungen: e }); neu(); };
+    const gleich = (a, b) => a.spiel === b.spiel && a.stufe === b.stufe;
+    const vorgabe = {
+      oben: v => { if (!e.oben.some(o => gleich(o, v))) e.oben.push({ spiel: v.spiel, stufe: v.stufe, von, zeit: zeit() }); speichere(); },
+      aus: v => { e.aus.push({ art: v.art, spiel: v.spiel, stufe: v.stufe, von, zeit: zeit() }); speichere(); },
+      zeigen: v => { e.aus = e.aus.filter(a => AUSWERTUNG.vorschlagSchluessel(a) !== AUSWERTUNG.vorschlagSchluessel(v)); speichere(); },
+    };
+    const sName = id => SPIELE.find(s => s.id === id)?.name || id;
+    const stNr = id => LS.SKALA.find(x => x.id === id)?.nr ?? id;
+    // Rangfolge des Programms (das Programm erklärt, die Aufsicht entscheidet)
+    const rang = el("div", { class: "rangfolge", hidden: true },
+      el("p", { style: "margin:0 0 6px", text: "So ordnet das Programm die Vorschläge, von oben nach unten:" }),
+      el("ol", {}, ...AUSWERTUNG.RANGFOLGE.map(([t, w]) => el("li", {}, el("b", { text: t }), ` — ${w}`))),
+      el("p", { class: "leise-text", style: "margin:6px 0 0", text: `${LS.spielerName(gewaehlt)} sieht die ersten drei mit einem Satz für Kinder, ohne Zahlen. Was Sie oben anheften oder selbst empfehlen, steht zuerst; Ausgeblendetes sieht ${LS.spielerName(gewaehlt)} nicht.` }));
+    const info = el("button", { type: "button", class: "karten-info", "aria-expanded": "false", title: "Warum diese Reihenfolge?",
+      "aria-label": "Warum diese Reihenfolge?", text: "ⓘ", onclick: () => { rang.hidden = !rang.hidden; info.setAttribute("aria-expanded", String(!rang.hidden)); } });
+    // Was das Kind jetzt sieht
+    const sieht = AUSWERTUNG.fuerKind(gewaehlt, runden, p);
+    // Eigene Empfehlung: Spiel (nur für Kinder sichtbare) und Stufe
+    const spiele = SPIELE.filter(s => LS.fuerKinderSichtbar(s.id)).sort((a, b) => a.name.localeCompare(b.name, "de"));
+    const spielWahl = el("select", { "aria-label": "Spiel" }, ...spiele.map(s => el("option", { value: s.id, text: `${s.bild} ${s.name}` })));
+    const stufeWahl = el("select", { "aria-label": "Stufe" });
+    const stufenFuer = () => {
+      const s = SPIELE.find(x => x.id === spielWahl.value);
+      const empf = s ? LS.empfohleneStufe(gewaehlt, s.id) : null;
+      stufeWahl.replaceChildren(...(s ? LS.SKALA.filter(st => s.stufen.includes(st.id)) : []).map(st => el("option", { value: st.id, text: `${st.icon} Stufe ${st.nr} · ${st.name}`, ...(st.id === empf ? { selected: true } : {}) })));
+    };
+    spielWahl.addEventListener("change", stufenFuer);
+    stufenFuer();
+    return karte(
+      el("div", { class: "fazit-kopf" }, el("h2", { text: `Das empfehle ich für ${gewaehlt}` }), info),
+      rang,
+      el("p", { class: "fuer-kind-sieht", text: sieht.length
+        ? `${LS.spielerName(gewaehlt)} sieht jetzt: ${sieht.map((x, i) => `${i + 1}. ${sName(x.spiel)} Stufe ${stNr(x.stufe)}${x.von ? ` (⭐ von ${x.von})` : ""}`).join(" · ")}`
+        : `${LS.spielerName(gewaehlt)} sieht noch keine Empfehlung.` }),
+      e.oben.length ? el("div", { class: "fuer-kind-oben" }, el("h3", { text: "📌 Fürs Kind oben" }),
+        el("ul", {}, ...e.oben.map((o, i) => el("li", {}, `${sName(o.spiel)} · Stufe ${stNr(o.stufe)} · von ${o.von} `,
+          el("button", { type: "button", class: "knopf hell klein", text: "✕ Zurücknehmen", onclick: () => { e.oben.splice(i, 1); speichere(); } }))))) : null,
+      vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).slice(0, 8), vorgabe),
+      el("details", { class: "eigene-empfehlung" }, el("summary", { text: "➕ Eigene Empfehlung" }),
+        el("div", { class: "knopfzeile", style: "justify-content:flex-start" }, spielWahl, stufeWahl,
+          el("button", { type: "button", class: "knopf gruen klein", text: "Empfehlen", onclick: () => {
+            if (spielWahl.value && stufeWahl.value) vorgabe.oben({ spiel: spielWahl.value, stufe: stufeWahl.value });
+          } }))));
   }
   /** Fehlermeldungen und Fehlerfinder (LERN_Session9): das Kind sieht, was aus seinen Meldungen wurde. */
   function meldungenKarte() {
@@ -203,7 +269,7 @@ function zeichneStatistik(box, neu) {
       // Das freundliche Fazit erst, wenn die Aufsicht es freigegeben hat (Entscheid G3, Profil-Feld fazitFuerKind)
       p.fazitFuerKind ? el("ul", { class: "fazit-kind" }, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s }))) : null,
       // nur Vorschläge mit einem Satz fürs Kind (KS1 a): Konzentration und Regelmässigkeit gehören der Aufsicht (ST1 a)
-      vorschlagKarten(AUSWERTUNG.vorschlaege(gewaehlt, runden, p))));
+      vorschlagKarten(AUSWERTUNG.fuerKind(gewaehlt, runden, p))));
     seite.append(lernplanKarte("📅 Meine Woche"), rundenKacheln("🔁 Meine Runden", 15));
     if (meine.length) seite.append(meldungenKarte());
     LS.langDruecken(seite); // langes Drücken liest Karten und Kacheln vor
@@ -240,9 +306,7 @@ function zeichneStatistik(box, neu) {
   if (meine.length) seite.append(meldungenKarte());
 
   // ----- Auswertung und Vorschläge -----
-  seite.append(karte(
-    el("h2", { text: `Das empfehle ich für ${gewaehlt}` }),
-    vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).slice(0, 8))));
+  seite.append(empfehlungKarte());
 
   // ----- Wann wird gelernt -----
   const lz = AUSWERTUNG.lernzeiten(runden);

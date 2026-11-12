@@ -391,4 +391,74 @@ function pruefeTabSpiele(melde) {
   return schritte;
 }
 
-module.exports = { pruefeTabSpiele, pruefeSpeicher };
+/**
+ * Vorgaben der Aufsicht zu den Empfehlungen ans Kind (KS4 a): anheften, ausblenden, eigene Empfehlung, Rangfolge hinter
+ * ⓘ, und was das Kind danach sieht. Async (Anmeldung der Aufsicht mit PIN). Gibt die Zahl der Prüfschritte zurück.
+ */
+async function pruefeEmpfehlungen(melde) {
+  let schritte = 0;
+  const pruefe = (ok, ort, text) => { schritte++; if (!ok) melde(ort, text); };
+  const fehlerVon = (ort, s) => { for (const f of new Set(s.fehler())) melde(ort, f); };
+  const ort = "Empfehlungen der Aufsicht";
+  // Runden wie in „Statistik des Kindes“: Zahlenhaus s3 zweimal drei Sterne (→ weiter), s1 mit vielen Fehlern (→ wiederholen)
+  const vorher = `LS.neuerSpieler("Mia", { klasse: 2 }); LS.setzeSpieler("Mia");
+    const vor = t => new Date(Date.now() - t * 864e5).toISOString();
+    const liste = falsch => Array.from({ length: 6 }, (_, i) => i < falsch ? { text: "3 + 4", versuche: 2, geloest: false, gezeigt: true, loesung: "7" } : { text: "1 + 1", versuche: 0, geloest: true });
+    for (const [stufe, sterne, falsch, t] of [["s3", 3, 0, 2], ["s3", 3, 0, 0], ["s1", 1, 4, 1], ["s1", 1, 4, 0]])
+      LS.protokolliere({ name: "Mia", zeit: vor(t), inhalt: "zahlenhaus", stufe, aufgaben: 6, fehler: falsch, dauer: 90, sterne, liste: liste(falsch) });`;
+  const browser = new Map();
+  const s = oeffne({ hash: "#statistik", speicher: browser, vorher });
+  await ruheAsync(s);
+  const an = await s.lauf(`(async () => { LS.neuerSpieler("Mama", { rolle: "aufsicht" }); await LS.setzePin("Mama", "2468"); return LS.meldeAufsichtAn("Mama", "2468"); })()`);
+  pruefe(!!an, ort, "Aufsicht nicht angemeldet");
+  // gleiche Adresse, darum kein hashchange: neu zeichnen
+  s.lauf(`statistikVon = "Mia"; zeichneStart()`);
+  await ruheAsync(s);
+  pruefe(s.lauf("LS.aufsichtAngemeldet()") === true && s.gibt("h2", "Das empfehle ich für Mia") === 1, ort, "Statistik der Aufsicht für Mia nicht gezeichnet");
+  const fuerKind = () => JSON.parse(s.lauf(`JSON.stringify(AUSWERTUNG.fuerKind("Mia", LS.protokoll().filter(e => e.name === "Mia"), LS.profil("Mia")))`));
+  const vorgaben = () => s.profil("Mia").empfehlungen || { oben: [], aus: [] };
+  // Rangfolge hinter ⓘ, was das Kind sieht
+  pruefe(s.gibt(".rangfolge li") === s.lauf("AUSWERTUNG.RANGFOLGE.length") && s.lauf(`document.querySelector(".rangfolge").hidden`) === true,
+    ort, "Rangfolge fehlt oder ist nicht hinter ⓘ");
+  s.klick("button.karten-info", "ⓘ");
+  pruefe(s.lauf(`document.querySelector(".rangfolge").hidden`) === false, ort, "ⓘ zeigt die Rangfolge nicht");
+  pruefe(s.gibt(".fuer-kind-sieht", "sieht jetzt") === 1, ort, "keine Zeile, was das Kind sieht");
+  // Ausblenden: der Vorschlag „wiederholen“ fehlt danach beim Kind, die Aufsicht sieht ihn grau mit „Wieder zeigen“
+  pruefe(fuerKind().some(v => v.art === "wiederholen"), ort, "Gegenprobe: „wiederholen“ steht vor dem Ausblenden nicht beim Kind");
+  s.klick('.vorschlag[data-art="wiederholen"] button', "ausblenden");
+  await ruheAsync(s);
+  pruefe(vorgaben().aus.length === 1 && vorgaben().aus[0].von === "Mama" && !fuerKind().some(v => v.art === "wiederholen"), ort, "Ausblenden wirkt nicht");
+  pruefe(s.gibt('.vorschlag.fuer-kind-aus[data-art="wiederholen"]') === 1 && s.gibt('.vorschlag[data-art="wiederholen"] button', "Wieder zeigen") === 1,
+    ort, "ausgeblendeter Vorschlag nicht grau mit „Wieder zeigen“");
+  // Anheften: „weiter“ steht beim Kind zuerst, von Mama
+  s.klick('.vorschlag[data-art="weiter"] button', "Fürs Kind oben");
+  await ruheAsync(s);
+  pruefe(vorgaben().oben.length === 1 && fuerKind()[0]?.art === "aufsicht" && fuerKind()[0]?.von === "Mama", ort, "Anheften: nicht zuerst beim Kind");
+  // Eigene Empfehlung: Spiel und Stufe wählen
+  const anderes = s.lauf(`SPIELE.find(x => x.id !== "zahlenhaus" && LS.fuerKinderSichtbar(x.id))?.id || ""`);
+  pruefe(!!anderes, ort, "Gegenprobe: kein zweites Spiel für Kinder sichtbar");
+  if (anderes) {
+    s.lauf(`(() => { const w = document.querySelector(".eigene-empfehlung select"); w.value = ${JSON.stringify(anderes)}; w.dispatchEvent(new Event("change")); })()`);
+    s.klick(".eigene-empfehlung button", "Empfehlen");
+    await ruheAsync(s);
+    pruefe(vorgaben().oben.length === 2 && vorgaben().oben[1].spiel === anderes && fuerKind()[1]?.spiel === anderes, ort, "eigene Empfehlung nicht an zweiter Stelle beim Kind");
+  }
+  fehlerVon(ort, s);
+  // Das Kind sieht die Vorgaben zuerst, mit „⭐ Von Mama“, ohne den ausgeblendeten Vorschlag
+  // eigener Browser (Kopie): setzeSpieler würde sonst die Aufsicht auf der ersten Seite abmelden
+  const k = oeffne({ hash: "#statistik", speicher: new Map(browser), vorher: `LS.setzeSpieler("Mia");` });
+  await ruheAsync(k);
+  pruefe(k.lauf(`document.querySelector(".vorschlag-karte")?.dataset.art`) === "aufsicht" && k.gibt(".vorschlag-karte .vorschlag-satz", "Von Mama") >= 1
+    && k.gibt('.vorschlag-karte[data-art="wiederholen"]') === 0, "Empfehlungen beim Kind", "Vorgaben nicht zuerst, ohne „⭐ Von Mama“ oder mit dem ausgeblendeten");
+  fehlerVon("Empfehlungen beim Kind", k);
+  // Zurücknehmen
+  s.klick(".fuer-kind-oben button", "Zurücknehmen");
+  await ruheAsync(s);
+  pruefe(vorgaben().oben.length === (anderes ? 1 : 0), ort, "Zurücknehmen wirkt nicht");
+  s.klick('.vorschlag[data-art="wiederholen"] button', "Wieder zeigen");
+  await ruheAsync(s);
+  pruefe(vorgaben().aus.length === 0 && fuerKind().some(v => v.art === "wiederholen"), ort, "„Wieder zeigen“ wirkt nicht");
+  return schritte;
+}
+
+module.exports = { pruefeTabSpiele, pruefeSpeicher, pruefeEmpfehlungen };

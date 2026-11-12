@@ -163,6 +163,20 @@ const AUSWERTUNG = (() => {
   };
 
   /**
+   * Rangfolge der Vorschläge in Worten (KS4 a: das Programm erklärt, warum), in der Reihenfolge von prio unten.
+   * Die Aufsicht liest sie hinter ⓘ; die Zahlen stehen bei jedem Vorschlag.
+   */
+  const RANGFOLGE = [
+    ["🔁 Wiederholen", `weniger als ${Math.round(QUOTE_UEBEN * 100)} % der letzten Aufgaben einer Stufe auf Anhieb richtig — je schwächer, desto weiter oben`],
+    ["⭐ Fokus", "ein Fokus-Lernziel aus dem Profil, seit drei Tagen nicht geübt"],
+    ["🧠 Konzentration", "Hinweise auf nachlassende Konzentration (nur für Sie)"],
+    ["⬆️ Nächste Stufe", "eine Stufe zweimal hintereinander mit drei Sternen geschafft"],
+    ["🌤 Auffrischen", "ein Lernziel sass, ist aber über sieben Tage her"],
+    ["📅 Regelmässigkeit", "in den letzten 14 Tagen an weniger als vier Tagen geübt (nur für Sie)"],
+    ["⏱ Mit Timer", "eine Stufe sitzt sicher ohne Timer"],
+  ];
+
+  /**
    * Vorschläge: [{ art, prio, titel, text (Aufsicht), link?, spiel?, stufe?, kind? }] — spiel und stufe, wo es einen Knopf
    * gibt; kind ist der Satz fürs Kind (KIND).
    */
@@ -566,5 +580,27 @@ const AUSWERTUNG = (() => {
     return s;
   }
 
-  return { anhieb, mittel, median, sitzungen, lernzeiten, konzentration, vorschlaege, rundenZuLernziel, QUOTE_UEBEN, VORGEHEN, vorgehen, FAZIT, fazit, fazitFuerKind, korrelation, bedarf, ziehe };
+  /** Schlüssel eines Vorschlags zum Ausblenden (KS4 a): Art, Spiel, Stufe. */
+  const vorschlagSchluessel = v => `${v.art}|${v.spiel}|${v.stufe}`;
+  /** Ist der Vorschlag v von der Aufsicht fürs Kind ausgeblendet? */
+  const ausgeblendet = (v, profil) => (profil.empfehlungen?.aus || []).some(a => vorschlagSchluessel(a) === vorschlagSchluessel(v));
+
+  /**
+   * Was das Kind unter „Das übe ich als Nächstes“ sieht (KS1 a, KS4 a): zuerst die Vorgaben der Aufsicht (angeheftet
+   * oder eigene, in ihrer Reihenfolge, mit von), dann die Vorschläge des Programms mit Satz fürs Kind, ohne
+   * ausgeblendete und ohne Spiel und Stufe, die schon dastehen; nur Spiele, die das Kind sieht; höchstens anzahl.
+   * Gibt [{ art, spiel, stufe, link, kind, von? }].
+   */
+  function fuerKind(name, runden, profil, jetzt = Date.now(), anzahl = 3) {
+    const sichtbar = id => SPIELE.some(s => s.id === id) && LS.fuerKinderSichtbar(id);
+    const liste = [];
+    const schon = new Set();
+    const nimm = e => { const k = `${e.spiel}|${e.stufe}`; if (schon.has(k) || !sichtbar(e.spiel)) return; schon.add(k); liste.push(e); };
+    for (const o of profil.empfehlungen?.oben || [])
+      nimm({ art: "aufsicht", spiel: o.spiel, stufe: o.stufe, link: `${spielVon(o.spiel)?.pfad}?stufe=${o.stufe}`, kind: `⭐ Von ${o.von}`, von: o.von });
+    for (const v of vorschlaege(name, runden, profil, jetzt)) if (v.kind && !ausgeblendet(v, profil)) nimm(v);
+    return liste.slice(0, anzahl);
+  }
+
+  return { anhieb, mittel, median, sitzungen, lernzeiten, konzentration, vorschlaege, fuerKind, ausgeblendet, vorschlagSchluessel, RANGFOLGE, rundenZuLernziel, QUOTE_UEBEN, VORGEHEN, vorgehen, FAZIT, fazit, fazitFuerKind, korrelation, bedarf, ziehe };
 })();
