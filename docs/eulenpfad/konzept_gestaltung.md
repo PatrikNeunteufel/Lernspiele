@@ -314,6 +314,9 @@ nur im Stil „hand“, Antippen und Lesen der Nachbarn unberührt; bei „wenig
 eigener Wirkung — als Ring wie die erste Aufnahme eines schwarzen Lochs (dreht die Nachbarn zu sich) und als flache
 leuchtende Scheibe wie in Filmen (zieht die Kante einer Nachbarkachel als Schlauch in sich hinein, Skizze Patrik). Damit
 jedes Motiv vorkommt, gehen die Motive eines Fachs der Reihe nach über seine Lücken statt per Zufall je Spiel.
+Zweiter Nachtrag (12.11.2026): Der Schlauch setzt nur in der Mitte der Kante an, mit gekräuseltem Rand und feinen
+Zugstreifen; der dunkle Grund der Löcher läuft fein in den Hintergrund aus, wenige blasse Sterne; alle Motive und ihre
+Wirkungen auf die Kacheln bewegen sich dezent (ruhig bei „weniger Bewegung“ des Geräts).
 
 ### Titel „Eulenpfad“ (Wunsch Patrik, 12.11.2026)
 

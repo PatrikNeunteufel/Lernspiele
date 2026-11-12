@@ -425,7 +425,9 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
     (375 px). In der Lücke ein Motiv zum Fach (Entscheid LU1 a, `start/luecken.js`: `LUECKEN.waehle(fach, nr)`, je
     Fach zwei bis vier, der Reihe nach über die Lücken des Fachs, auf dem hellen Bildgrund, nicht antippbar); manche wirken auf die Nachbarkarten
     derselben Zeile (`data-wirkung` sog, zieht, heben, ecke, loch; „zieht“ mit einem Schlauch aus der Nachbarkachel, `STIL.schlauch`; `STIL.nachbarn` setzt `.luecke-nb` mit der Seite, neu bei
-    jeder Grössenänderung der Lücke). Bewegung nur ohne „weniger Bewegung“ des Geräts.
+    jeder Grössenänderung der Lücke). Motive und Wirkungen bewegen sich dezent (Klassen `lu-*`, Wirkungen über
+    `@property --lx --ly --lr --ls`, Schlauch über SMIL), nur ohne „weniger Bewegung“ des Geräts. Kennungen im SVG
+    (`lid-…`) je Lücke eindeutig — sonst fehlen Verläufe, wenn die erste Lücke in einem zugeklappten Block liegt.
   - Titel „Eulenpfad“: Buchstaben verschieden hoch und leicht schräg (`--ty`, `--tr` je Stelle in `start/start.css`).
   - Nicht freigegebene Spiele (`.spielkarte.gesperrt`): der gezeichnete Rahmen gestrichelt (Maske aus Strahlen), kein
     Streifen dahinter.

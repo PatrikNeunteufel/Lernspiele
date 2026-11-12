@@ -3672,21 +3672,49 @@ const STIL = (() => {
     if (w === "zieht") schlauch(l, gezogen);
   }
   /**
-   * Schlauch von der Kante der gezogenen Kachel bis in die Mitte der Lücke (Skizze Patrik, LERN_Session34): oben und
-   * unten setzt er die Linie des Rahmens fort, gefüllt wie die Karte; Farbe --f der Kachel. Reicht über den Abstand des
-   * Rasters (--spalt) bis an die Kachel.
+   * Schlauch aus der gezogenen Kachel bis in die Mitte der Lücke (Skizze Patrik, LERN_Session34): setzt in der Mitte der
+   * Kante an (24–76 % der Höhe), mit gekräuseltem Rand, der zum Loch hin enger und flacher wird, und feinen Zugstreifen;
+   * gefüllt wie die Karte, Linie in --f der Kachel. Die Wellen wandern langsam (SMIL, nicht bei „weniger Bewegung“).
+   * Reicht über den Abstand des Rasters (--spalt) bis an die Kachel. Drei fest gerechnete Fassungen (Sinus-Wellen).
    */
+  const SCHLAUCH_FLAECHE = ["M0.0,24.0 L6.2,25.5 L10.9,27.2 L15.1,28.5 L18.9,29.1 L22.6,29.4 L26.2,30.2 L29.6,31.8 L33.0,33.8 L36.2,35.7 L39.4,37.0 L42.6,37.7 L45.6,37.9 L48.6,38.2 L51.6,38.9 L54.5,40.1 L57.4,41.5 L60.3,42.8 L63.1,43.7 L65.9,44.2 L68.7,44.5 L71.4,44.8 L74.1,45.4 L76.8,46.1 L79.4,46.9 L82.1,47.6 L84.7,48.1 L87.3,48.4 L89.9,48.6 L92.4,48.8 L95.0,49.0 L97.5,49.2 L100.0,49.3 L100.0,50.7 L97.5,50.8 L95.0,51.0 L92.4,51.2 L89.9,51.6 L87.3,51.8 L84.7,52.1 L82.1,52.3 L79.4,52.8 L76.8,53.5 L74.1,54.4 L71.4,55.3 L68.7,55.9 L65.9,56.3 L63.1,56.6 L60.3,57.0 L57.4,57.8 L54.5,59.1 L51.6,60.6 L48.6,62.0 L45.6,62.9 L42.6,63.4 L39.4,63.6 L36.2,64.0 L33.0,65.1 L29.6,66.9 L26.2,69.1 L22.6,70.9 L18.9,71.8 L15.1,72.4 L10.9,73.1 L6.2,74.4 L0.0,76.0 Z", "M0.0,24.0 L6.2,25.4 L10.9,26.3 L15.1,27.1 L18.9,28.2 L22.6,30.0 L26.2,32.2 L29.6,33.9 L33.0,34.8 L36.2,35.2 L39.4,35.4 L42.6,36.0 L45.6,37.1 L48.6,38.6 L51.6,40.2 L54.5,41.4 L57.4,42.2 L60.3,42.5 L63.1,42.8 L65.9,43.3 L68.7,44.1 L71.4,45.0 L74.1,46.0 L76.8,46.7 L79.4,47.2 L82.1,47.5 L84.7,47.7 L87.3,48.0 L89.9,48.4 L92.4,48.8 L95.0,49.1 L97.5,49.3 L100.0,49.3 L100.0,50.7 L97.5,50.8 L95.0,50.9 L92.4,51.1 L89.9,51.4 L87.3,51.9 L84.7,52.4 L82.1,52.8 L79.4,53.1 L76.8,53.4 L74.1,53.8 L71.4,54.5 L68.7,55.5 L65.9,56.6 L63.1,57.5 L60.3,58.2 L57.4,58.5 L54.5,58.8 L51.6,59.4 L48.6,60.5 L45.6,62.0 L42.6,63.8 L39.4,65.2 L36.2,66.0 L33.0,66.3 L29.6,66.5 L26.2,67.2 L22.6,68.7 L18.9,70.8 L15.1,72.7 L10.9,74.0 L6.2,74.9 L0.0,76.0 Z", "M0.0,24.0 L6.2,25.0 L10.9,26.3 L15.1,28.1 L18.9,30.1 L22.6,31.6 L26.2,32.2 L29.6,32.4 L33.0,32.7 L36.2,33.8 L39.4,35.4 L42.6,37.2 L45.6,38.8 L48.6,39.8 L51.6,40.2 L54.5,40.5 L57.4,40.9 L60.3,41.7 L63.1,42.8 L65.9,44.0 L68.7,45.0 L71.4,45.6 L74.1,46.0 L76.8,46.3 L79.4,46.6 L82.1,47.1 L84.7,47.7 L87.3,48.3 L89.9,48.7 L92.4,48.9 L95.0,49.1 L97.5,49.2 L100.0,49.3 L100.0,50.7 L97.5,50.8 L95.0,51.0 L92.4,51.1 L89.9,51.3 L87.3,51.6 L84.7,52.0 L82.1,52.7 L79.4,53.4 L76.8,54.0 L74.1,54.4 L71.4,54.7 L68.7,55.0 L65.9,55.6 L63.1,56.6 L60.3,57.8 L57.4,59.1 L54.5,60.1 L51.6,60.7 L48.6,60.9 L45.6,61.3 L42.6,62.1 L39.4,63.5 L36.2,65.4 L33.0,67.2 L29.6,68.6 L26.2,69.2 L22.6,69.4 L18.9,69.9 L15.1,71.3 L10.9,73.1 L6.2,74.7 L0.0,76.0 Z"];
+  const SCHLAUCH_RAND = [["M0.0,24.0 L6.2,25.5 L10.9,27.2 L15.1,28.5 L18.9,29.1 L22.6,29.4 L26.2,30.2 L29.6,31.8 L33.0,33.8 L36.2,35.7 L39.4,37.0 L42.6,37.7 L45.6,37.9 L48.6,38.2 L51.6,38.9 L54.5,40.1 L57.4,41.5 L60.3,42.8 L63.1,43.7 L65.9,44.2 L68.7,44.5 L71.4,44.8 L74.1,45.4 L76.8,46.1 L79.4,46.9 L82.1,47.6 L84.7,48.1 L87.3,48.4 L89.9,48.6 L92.4,48.8 L95.0,49.0 L97.5,49.2 L100.0,49.3", "M0.0,24.0 L6.2,25.4 L10.9,26.3 L15.1,27.1 L18.9,28.2 L22.6,30.0 L26.2,32.2 L29.6,33.9 L33.0,34.8 L36.2,35.2 L39.4,35.4 L42.6,36.0 L45.6,37.1 L48.6,38.6 L51.6,40.2 L54.5,41.4 L57.4,42.2 L60.3,42.5 L63.1,42.8 L65.9,43.3 L68.7,44.1 L71.4,45.0 L74.1,46.0 L76.8,46.7 L79.4,47.2 L82.1,47.5 L84.7,47.7 L87.3,48.0 L89.9,48.4 L92.4,48.8 L95.0,49.1 L97.5,49.3 L100.0,49.3", "M0.0,24.0 L6.2,25.0 L10.9,26.3 L15.1,28.1 L18.9,30.1 L22.6,31.6 L26.2,32.2 L29.6,32.4 L33.0,32.7 L36.2,33.8 L39.4,35.4 L42.6,37.2 L45.6,38.8 L48.6,39.8 L51.6,40.2 L54.5,40.5 L57.4,40.9 L60.3,41.7 L63.1,42.8 L65.9,44.0 L68.7,45.0 L71.4,45.6 L74.1,46.0 L76.8,46.3 L79.4,46.6 L82.1,47.1 L84.7,47.7 L87.3,48.3 L89.9,48.7 L92.4,48.9 L95.0,49.1 L97.5,49.2 L100.0,49.3"], ["M0.0,76.0 L6.2,74.4 L10.9,73.1 L15.1,72.4 L18.9,71.8 L22.6,70.9 L26.2,69.1 L29.6,66.9 L33.0,65.1 L36.2,64.0 L39.4,63.6 L42.6,63.4 L45.6,62.9 L48.6,62.0 L51.6,60.6 L54.5,59.1 L57.4,57.8 L60.3,57.0 L63.1,56.6 L65.9,56.3 L68.7,55.9 L71.4,55.3 L74.1,54.4 L76.8,53.5 L79.4,52.8 L82.1,52.3 L84.7,52.1 L87.3,51.8 L89.9,51.6 L92.4,51.2 L95.0,51.0 L97.5,50.8 L100.0,50.7", "M0.0,76.0 L6.2,74.9 L10.9,74.0 L15.1,72.7 L18.9,70.8 L22.6,68.7 L26.2,67.2 L29.6,66.5 L33.0,66.3 L36.2,66.0 L39.4,65.2 L42.6,63.8 L45.6,62.0 L48.6,60.5 L51.6,59.4 L54.5,58.8 L57.4,58.5 L60.3,58.2 L63.1,57.5 L65.9,56.6 L68.7,55.5 L71.4,54.5 L74.1,53.8 L76.8,53.4 L79.4,53.1 L82.1,52.8 L84.7,52.4 L87.3,51.9 L89.9,51.4 L92.4,51.1 L95.0,50.9 L97.5,50.8 L100.0,50.7", "M0.0,76.0 L6.2,74.7 L10.9,73.1 L15.1,71.3 L18.9,69.9 L22.6,69.4 L26.2,69.2 L29.6,68.6 L33.0,67.2 L36.2,65.4 L39.4,63.5 L42.6,62.1 L45.6,61.3 L48.6,60.9 L51.6,60.7 L54.5,60.1 L57.4,59.1 L60.3,57.8 L63.1,56.6 L65.9,55.6 L68.7,55.0 L71.4,54.7 L74.1,54.4 L76.8,54.0 L79.4,53.4 L82.1,52.7 L84.7,52.0 L87.3,51.6 L89.9,51.3 L92.4,51.1 L95.0,51.0 L97.5,50.8 L100.0,50.7"]]; // oben, unten (ohne die Kante an der Kachel)
+  const SCHLAUCH_STREIFEN = [["M0.0,36.0 L13.7,38.8 L23.8,39.7 L33.0,40.7 L41.5,43.0 L49.6,45.0 L57.4,45.7 L65.0,46.4 L72.3,47.8 L79.4,48.9 L86.4,49.3 L93.3,49.7 L100.0,50.0", "M0.0,50.0 L13.7,50.9 L23.8,50.0 L33.0,49.2 L41.5,50.0 L49.6,50.6 L57.4,50.0 L65.0,49.6 L72.3,50.0 L79.4,50.2 L86.4,50.0 L93.3,49.9 L100.0,50.0", "M0.0,64.0 L13.7,63.0 L23.8,60.3 L33.0,57.8 L41.5,57.0 L49.6,56.2 L57.4,54.3 L65.0,52.7 L72.3,52.2 L79.4,51.6 L86.4,50.7 L93.3,50.1 L100.0,50.0"], ["M0.0,36.0 L13.7,37.0 L23.8,39.7 L33.0,42.2 L41.5,43.0 L49.6,43.8 L57.4,45.7 L65.0,47.3 L72.3,47.8 L79.4,48.4 L86.4,49.3 L93.3,49.9 L100.0,50.0", "M0.0,50.0 L13.7,49.1 L23.8,50.0 L33.0,50.7 L41.5,50.0 L49.6,49.4 L57.4,50.0 L65.0,50.4 L72.3,50.0 L79.4,49.8 L86.4,50.0 L93.3,50.1 L100.0,50.0", "M0.0,64.0 L13.7,61.2 L23.8,60.2 L33.0,59.3 L41.5,57.0 L49.6,55.0 L57.4,54.3 L65.0,53.6 L72.3,52.2 L79.4,51.1 L86.4,50.7 L93.3,50.3 L100.0,50.0"], ["M0.0,36.0 L13.7,38.8 L23.8,39.7 L33.0,40.7 L41.5,43.0 L49.6,45.0 L57.4,45.7 L65.0,46.4 L72.3,47.8 L79.4,48.9 L86.4,49.3 L93.3,49.7 L100.0,50.0", "M0.0,50.0 L13.7,50.9 L23.8,50.0 L33.0,49.3 L41.5,50.0 L49.6,50.6 L57.4,50.0 L65.0,49.6 L72.3,50.0 L79.4,50.2 L86.4,50.0 L93.3,49.9 L100.0,50.0", "M0.0,64.0 L13.7,63.0 L23.8,60.3 L33.0,57.8 L41.5,57.0 L49.6,56.2 L57.4,54.3 L65.0,52.7 L72.3,52.2 L79.4,51.6 L86.4,50.7 L93.3,50.1 L100.0,50.0"]];
   function schlauch(l, gezogen) {
     l.querySelector(":scope > svg.luecke-schlauch")?.remove();
     if (!gezogen) return;
+    const ruhig = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const s = document.createElementNS(NS, "svg");
     s.setAttribute("class", "luecke-schlauch " + (gezogen.seite === "luecke-rechts" ? "von-links" : "von-rechts"));
     s.setAttribute("viewBox", "0 0 100 100");
     s.setAttribute("preserveAspectRatio", "none");
     s.setAttribute("aria-hidden", "true");
-    const p = document.createElementNS(NS, "path");
-    p.setAttribute("d", "M0,2 C30,2 40,30 62,40 C78,47 90,48 100,49.4 L100,50.6 C90,52 78,53 62,60 C40,70 30,98 0,98 Z");
-    s.appendChild(p);
+    const bewege = (el, fassungen) => {
+      el.setAttribute("d", fassungen[0]);
+      if (ruhig) return;
+      const a = document.createElementNS(NS, "animate");
+      a.setAttribute("attributeName", "d");
+      a.setAttribute("dur", "3.6s");
+      a.setAttribute("repeatCount", "indefinite");
+      a.setAttribute("values", [...fassungen, fassungen[0]].join(";"));
+      el.appendChild(a);
+    };
+    const flaeche = document.createElementNS(NS, "path");
+    flaeche.setAttribute("class", "flaeche");
+    bewege(flaeche, SCHLAUCH_FLAECHE);
+    s.appendChild(flaeche);
+    for (const fassungen of SCHLAUCH_RAND) {
+      const r = document.createElementNS(NS, "path");
+      r.setAttribute("class", "rand");
+      bewege(r, fassungen);
+      s.appendChild(r);
+    }
+    SCHLAUCH_STREIFEN[0].forEach((_, i) => {
+      const z = document.createElementNS(NS, "path");
+      z.setAttribute("class", "zug");
+      bewege(z, SCHLAUCH_STREIFEN.map(f => f[i]));
+      s.appendChild(z);
+    });
     const gitter = l.parentElement, f = getComputedStyle(gezogen.k).getPropertyValue("--f").trim();
     l.style.setProperty("--spalt", getComputedStyle(gitter).columnGap || "16px");
     if (f) l.style.setProperty("--nb-f", f);
