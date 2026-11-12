@@ -490,6 +490,22 @@ async function pruefeAussehen(melde) {
   // Ein Kind auf demselben Gerät: wie das Gerät (dunkel, Stil hand)
   s.lauf(`LS.setzeSpieler("Mia"); zeichneStart()`); await ruheAsync(s);
   pruefe(farben() === "dunkel" && s.lauf(`LS.aussehen("stil")`) === "hand", ort, "Kind sieht nicht die Einstellung des Geräts");
+  // DM2-K a: ohne Erlaubnis kein ☀️/🌙 (Standard fest), eine gespeicherte Wahl gilt dann nicht
+  pruefe(s.gibt(".farben-knopf") === 0, ort, "Kind hat ☀️/🌙 ohne Erlaubnis der Aufsicht");
+  s.lauf(`LS.speichereProfil("Mia", { wahl: { farben: "hell" } }); zeichneStart()`); await ruheAsync(s);
+  pruefe(farben() === "dunkel", ort, "Wahl des Kindes gilt, obwohl die Farben fest sind");
+  // erlaubt: Knopf da, zeigt wohin er schaltet; Klick schaltet um, gilt vor dem Gerät, ist für die nächste Seite gemerkt
+  s.lauf(`LS.speichereProfil("Mia", { wahl: {} }); LS.setzeFest("Mia", "farben", false); zeichneStart()`); await ruheAsync(s);
+  pruefe(s.gibt(".farben-knopf") === 1 && s.lauf(`document.querySelector(".farben-knopf").textContent`) === "☀️", ort, "erlaubt: kein ☀️ im Dunkeln");
+  s.lauf(`document.querySelector(".farben-knopf").click()`); await ruheAsync(s);
+  pruefe(farben() === null && gemerkt() === "hell" && s.lauf(`LS.wahlFuer("Mia", "farben")`) === "hell" && s.lauf(`LS.einstellung("farben", null)`) === "dunkel",
+    ort, "☀️ schaltet nicht auf hell, merkt es nicht oder ändert das Gerät");
+  pruefe(s.lauf(`document.querySelector(".farben-knopf").textContent`) === "🌙", ort, "nach dem Umschalten kein 🌙");
+  // ↺ Auf Vorgabe zurück: wieder wie das Gerät; wieder fest: Knopf weg
+  s.lauf(`LS.wahlZuruecksetzen("Mia", "farben"); zeichneStart()`); await ruheAsync(s);
+  pruefe(farben() === "dunkel", ort, "nach „Auf Vorgabe zurück“ nicht wie das Gerät");
+  s.lauf(`LS.setzeFest("Mia", "farben", true); zeichneStart()`); await ruheAsync(s);
+  pruefe(s.gibt(".farben-knopf") === 0, ort, "wieder fest: ☀️/🌙 noch da");
   for (const f of new Set(s.fehler())) melde(ort, f);
   return schritte;
 }

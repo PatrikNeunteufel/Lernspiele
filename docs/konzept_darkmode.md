@@ -4,7 +4,7 @@ Stand: 12.11.2026 (LERN_Session33) · Grundsatz entschieden (Patrik, 12.11.2026,
 Einstellung im Block Aussehen, im Eulenpfad standardmässig hell, im Lernsteig nach der Einstellung des Geräts; dunkel
 werden Rahmen, Karten und Text über Variablen im Kern; die Stellenfarben bleiben gleich; Zeichnungen und
 Abschluss-Animationen stehen in beiden Modi auf einer hellen Bildkachel; zuerst dieses Konzept, dann bauen.
-**DM0–DM6, DM2-S, DM2-K und G1 entschieden, je a** (Patrik, 12.11.2026); Schritt 3 bis 3c-3 gebaut (Reihenfolge unten). Gebaut: Schritt 1 (Kern 1.40.0,
+**DM0–DM6, DM2-S, DM2-K und G1 entschieden, je a** (Patrik, 12.11.2026); Schritt 3 bis 3c-3 und DM2-K gebaut (Reihenfolge unten). Gebaut: Schritt 1 (Kern 1.40.0,
 `kern/farben.css`) und Schritt 2 (Messung `tools/kontrast.js`, Zählung fester Farben `tools/pruefe_skripte.js` Punkt 7);
 Zahlen unten unter „Messung hell“. GS0 a im Konzept Gestaltung und im Plan Angleich um den Zusatz aus DM0 a ergänzt.
 
@@ -284,7 +284,8 @@ und `fest`); Kopfzeile der Startseite.
 *Warum a:* VR1 a ist das Muster der Reihe für „das Kind darf, wenn die Aufsicht es erlaubt“ (Vorgabe, Freigabe je Kind,
 eigene Wahl, zurück auf Vorgabe); kein zweiter Weg für dieselbe Frage. Fest als Standard, weil hell zum Lesen der
 bessere Standard ist. Kippen würde es, wenn eine Lehrperson viele Kinder am selben Gerät nicht einzeln freigeben will
-(dann ein Knopf „für alle Kinder“ in der Verwaltung). **Gebaut noch nicht** (nach 3c-3).
+(dann ein Knopf „für alle Kinder“ in der Verwaltung). **Gebaut 12.11.2026** (LERN_Session34: `LS.farbenKnopf`, Freigabe im
+Profil unter „Was … selbst umstellen darf“, Seitentest „Aussehen“ mit 13 Schritten).
 
 **Zusatz zu DM2 a:** Kinder wählen nicht — ausser die Aufsicht erlaubt es einem Kind nach DM2-K a.
 

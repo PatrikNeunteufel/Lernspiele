@@ -200,13 +200,28 @@ const LS = (() => {
 
   /**
    * Stil oder Farben für die angemeldete Person (DM2-S a): die eigene Wahl einer angemeldeten Aufsicht (Profil aussehen),
-   * sonst die Einstellung des Geräts. Kinder wählen nicht.
+   * bei einem Kind seine Wahl hell oder dunkel, wenn die Aufsicht sie ihm erlaubt (DM2-K a, Muster VR1 a), sonst die
+   * Einstellung des Geräts.
    */
   function aussehen(name) {
     const e = EINSTELLUNGEN[name];
     const ich = aktuellerSpieler();
-    const eigen = ich && istAufsicht(ich) && aufsichtAngemeldet() ? profil(ich).aussehen?.[name] : undefined;
+    const eigen = !ich ? undefined
+      : istAufsicht(ich) ? (aufsichtAngemeldet() ? profil(ich).aussehen?.[name] : undefined)
+      : name === "farben" ? wahlFuer(ich, "farben") : undefined;
     return eigen in e.werte ? eigen : einstellung(name, null);
+  }
+  /**
+   * Knopf ☀️/🌙 für ein Kind (DM2-K a): null, wenn es nicht umschalten darf (Standard) oder eine Aufsicht angemeldet ist.
+   * Zeigt, wohin er schaltet; nach dem Klick gilt die Wahl des Kindes vor der Einstellung des Geräts.
+   */
+  function farbenKnopf(neuZeichnen) {
+    const ich = aktuellerSpieler();
+    if (!ich || istAufsicht(ich) || istFest(ich, "farben")) return null;
+    const dunkel = KERN.farben.dunkel(aussehen("farben"));
+    return el("button", { type: "button", class: "farben-knopf", "aria-pressed": String(dunkel),
+      title: dunkel ? "Hell machen" : "Dunkel machen", "aria-label": dunkel ? "Hell machen" : "Dunkel machen", text: dunkel ? "☀️" : "🌙",
+      onclick: () => { setzeWahl(ich, "farben", null, dunkel ? "hell" : "dunkel"); farbenAnwenden(); neuZeichnen?.(); } });
   }
   /** Farben anwenden und für die nächste Seite merken (KERN.farben; kern-kopf.js liest sie vor dem ersten Bild). */
   function farbenAnwenden() {
@@ -370,9 +385,11 @@ const LS = (() => {
   //   erfolgeGesehen: [ids] — Abzeichen, die das Kind im Tab Erfolge schon gesehen hat (🆕 bis dahin)
   //   sortierung: { art, ab } — Sortierung im Tab Spiele (art aus EINSTELLUNGEN.sortierung, ab = absteigend);
   //     fehlt = Vorgabe der Aufsicht. sortierungWahl: true | false | fehlt = nach Einstellung und Klasse (SO1 a)
-  //   wahl: { timer: { <spiel>: bool }, reihenfolge: { <spiel>: Wert }, vorlesen: Wert } — was das Kind selbst auf der
-  //     Stufenwahl oder der Spielkarte umgestellt hat; gilt vor der Vorgabe (timer, reihenfolge, vorlesen), siehe VR1 a
-  //   fest: { timer, reihenfolge, vorlesen: bool } — von der Aufsicht festgelegt: die Wahl des Kindes gilt dann nicht
+  //   wahl: { timer: { <spiel>: bool }, reihenfolge: { <spiel>: Wert }, vorlesen: Wert, farben: "hell" | "dunkel" } — was
+  //     das Kind selbst auf der Stufenwahl, der Spielkarte oder mit ☀️/🌙 in der Kopfzeile umgestellt hat; gilt vor der
+  //     Vorgabe, siehe VR1 a (farben: DM2-K a, Vorgabe ist die Einstellung des Geräts)
+  //   fest: { timer, reihenfolge, vorlesen, farben: bool } — von der Aufsicht festgelegt: die Wahl des Kindes gilt dann
+  //     nicht; farben fehlt = fest (DM2-K a: das Kind schaltet nur um, wenn die Aufsicht es erlaubt)
   //   avatar: "<tier>-<farbe>" (avatare.js) — vom Kind selbst gewählt (AV1 a); fehlt = Anfangsbuchstabe
   //   aussehen: { stil?, farben? } — nur bei einer Aufsicht: ihre eigene Wahl „Für mich“ (DM2-S a); fehlt = wie das Gerät
   //   empfehlungen: { oben: [{ spiel, stufe, von, zeit }], aus: [{ art, spiel, stufe, von, zeit }] } — Vorgaben der
@@ -445,9 +462,9 @@ const LS = (() => {
   // Wahl des Kindes und Vorgabe der Aufsicht (Entscheid VR1 a, LERN_Session12): Was das Kind auf der Stufenwahl oder
   // der Spielkarte umstellt, steht eigens im Profil (wahl) und gilt vor der Vorgabe, die die Aufsicht im Profil setzt —
   // ausser sie hat die Einstellung festgelegt (fest). Vorher schrieben beide dasselbe Feld, das Kind überschrieb still.
-  const WAHL_ARTEN = { timer: "Timer", reihenfolge: "Reihenfolge der Teile", vorlesen: "Vorlesen" };
-  /** Hat die Aufsicht diese Einstellung für das Kind festgelegt? */
-  const istFest = (name, art) => !!profil(name).fest?.[art];
+  const WAHL_ARTEN = { timer: "Timer", reihenfolge: "Reihenfolge der Teile", vorlesen: "Vorlesen", farben: "Hell oder dunkel" };
+  /** Hat die Aufsicht diese Einstellung für das Kind festgelegt? Farben ohne Angabe: fest (DM2-K a, Standard). */
+  const istFest = (name, art) => (art === "farben" ? profil(name).fest?.farben !== false : !!profil(name).fest?.[art]);
   /** Wahl des Kindes, soweit sie gilt (nicht festgelegt): bei timer und reihenfolge { <spiel>: Wert }, sonst der Wert. */
   const wahlFuer = (name, art) => (istFest(name, art) ? undefined : profil(name).wahl?.[art]);
   /** Das Kind wählt selbst (spiel = null bei Einstellungen für alle Spiele); false, wenn festgelegt. */
@@ -3507,7 +3524,7 @@ const LS = (() => {
 
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
-    STELLEN, SKALA, schriftFarbe, flaeche, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
+    STELLEN, SKALA, schriftFarbe, flaeche, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, farbenKnopf, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
     RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,

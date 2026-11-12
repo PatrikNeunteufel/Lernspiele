@@ -112,8 +112,11 @@ function zeichneProfil(box, neu) {
     cb.checked = fest;
     cb.addEventListener("change", () => { LS.setzeFest(name, art, cb.checked); neu(); });
     return el("div", { class: "kind-wahl" },
-      el("label", {}, cb, el("span", { text: `🔒 fest — ${LS.spielerName(name)} kann es im Spiel nicht umstellen` })),
-      !fest && n ? el("span", { class: "leise-text", text: art === "vorlesen" ? "Eigene Wahl im Spiel gesetzt. " : `Eigene Wahl in ${n} Spiel${n === 1 ? "" : "en"}. ` }) : null,
+      el("label", {}, cb, el("span", { text: art === "farben"
+        ? `🔒 fest — ${LS.spielerName(name)} kann nicht selbst umschalten (sonst ☀️/🌙 oben neben dem Namen)`
+        : `🔒 fest — ${LS.spielerName(name)} kann es im Spiel nicht umstellen` })),
+      !fest && n ? el("span", { class: "leise-text", text: art === "farben" ? `Eigene Wahl: ${LS.wahlFuer(name, "farben")}. `
+        : art === "vorlesen" ? "Eigene Wahl im Spiel gesetzt. " : `Eigene Wahl in ${n} Spiel${n === 1 ? "" : "en"}. ` }) : null,
       !fest && n ? el("button", { type: "button", class: "knopf hell klein", text: "↺ Auf Vorgabe zurück", onclick: () => { LS.wahlZuruecksetzen(name, art); neu(); } }) : null);
   };
 
@@ -324,7 +327,9 @@ function zeichneProfil(box, neu) {
   // erst die Person, dann die Vorgaben fürs Spielen, der Fokus eingeklappt. Darunter, was das Kind selbst umstellen darf:
   // diese Häkchen wirken sofort. Das Bild wählt das Kind; die Aufsicht sieht es nur (ihr eigenes wählt sie selbst).
   const abschnitt = (titel, ...inhalt) => el("div", { class: "profil-abschnitt" }, el("h3", { text: titel }), ...inhalt);
-  const kindZeilen = ["vorlesen", "reihenfolge", "timer"].map(kindZeile).filter(Boolean);
+  // Farben (DM2-K a): Vorgabe ist die Einstellung des Geräts (Verwaltung → Aussehen); Standard fest
+  const KIND_ARTEN = [["vorlesen", "Vorlesen"], ["reihenfolge", "Reihenfolge der Teile"], ["timer", "Timer"], ["farben", "Hell oder dunkel (☀️/🌙)"]];
+  const kindZeilen = KIND_ARTEN.map(([art]) => kindZeile(art));
   karte.append(
     el("h2", { text: `Profil von ${LS.spielerName(name)}` }),
     abschnitt("👤 Person",
@@ -351,7 +356,7 @@ function zeichneProfil(box, neu) {
     el("div", { class: "knopfzeile profil-speichern" },
       el("button", { class: "knopf gruen", type: "button", text: "Speichern", onclick: speichern }), meldung),
     !istKind && name === LS.aktuellerSpieler() ? abschnitt("🔁 In den Lernsteig übernehmen", uebernahmeTeil()) : "",
-    kindZeilen.length ? abschnitt(`🔒 Was ${LS.spielerName(name)} selbst umstellen darf`,
+    istKind ? abschnitt(`🔒 Was ${LS.spielerName(name)} selbst umstellen darf`,
       el("p", { class: "leise-text", text: "Diese Häkchen wirken sofort, ohne Speichern." }),
-      ...["Vorlesen", "Reihenfolge der Teile", "Timer"].flatMap((titel, i) => (kindZeilen[i] ? [el("b", { text: titel }), kindZeilen[i]] : []))) : "");
+      ...KIND_ARTEN.flatMap(([, titel], i) => [el("b", { text: titel }), kindZeilen[i]])) : "");
 }

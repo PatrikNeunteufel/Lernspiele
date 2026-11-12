@@ -958,6 +958,10 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   (`LS.waehle`, `LS.waehleTimer`) und gilt vor der Vorgabe (`timerFuer`, `reihenfolgeFuer`, `vorlesenArt`). Hat die
   Aufsicht festgelegt (`fest`, `LS.setzeFest`), gilt die Wahl nicht; Stufenwahl und Karte zeigen den Wert mit 🔒
   (Klasse `aufsicht-fest`). Später kommt die Ebene Klasse dazwischen (VR2, VR3, mit den Gruppen).
+  Hell oder dunkel (Entscheid DM2-K a, LERN_Session34) im selben Muster: Vorgabe ist die Einstellung des Geräts, Art
+  `farben` ist ohne Angabe fest (`LS.istFest`); erlaubt die Aufsicht es im Profil des Kindes, steht ☀️/🌙 neben seinem
+  Namen in der Kopfzeile (`LS.farbenKnopf`, Klasse `farben-knopf`), die Wahl `wahl.farben` gilt vor dem Gerät
+  (`LS.aussehen`) und reist mit Sicherung und Abgleich. Seitentest „Aussehen (Farben, Für mich)“.
 - **Spielkarte:** Spiele mit `reihenfolge: true` haben einen vierten Schalter, der weiterschaltet: nach Stufe (Balken
   grau), geordnet (Balken gold), gemischt (Mischpfeil gold).
 - **Tab Spiele:** zuoberst „▶️ Weiterspielen“ mit den letzten fünf Spielen (ohne Zufallsmix), Antippen startet die

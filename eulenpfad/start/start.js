@@ -70,7 +70,8 @@ function zeichneStart(mitAufsicht = null) {
   // Anleitung in der App (Wunsch Patrik, LERN_Session14): das Kind kommt zu seiner, die Aufsicht zu der für Erwachsene
   const anleitung = LS.istAufsicht(ich) ? "aufsicht.html" : "kinder.html";
   // Tabs in einer Zeile, Pfeile nur wenn nicht alle Platz haben (KERN.rolleiste, LERN_Session17)
-  leiste.append(KERN.rolleiste(tabs), werWahl(), el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
+  // ☀️/🌙 für ein Kind, das selbst umschalten darf (DM2-K a), neben seinem Namen
+  leiste.append(KERN.rolleiste(tabs), werWahl(), LS.farbenKnopf(() => zeichneStart()) || "", el("a", { class: "anleitung-knopf", href: `anleitung/${anleitung}?von=app`, title: "Anleitung",
     "aria-label": "Anleitung", "data-vorlesen": "Anleitung", text: "📖" }));
   abgleichKnopf(leiste);
   tab.zeichne(inhalt, zeichneStart);
