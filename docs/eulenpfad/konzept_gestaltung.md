@@ -68,6 +68,9 @@ Gemessen im Browser: je Spiel die Spielseite im Vorschau-Modus (`?feier=s3&stern
 
 ### GS0 — Gilt „Aussehen bleibt“ weiter für die Startseite? → **a** (Patrik, 11.11.2026)
 
+**Zusatz DM0 a** (Patrik, 12.11.2026, [konzept_darkmode.md](../konzept_darkmode.md)): Ausgenommen ist der dunkle
+Farbsatz — wer ihn wählt, sieht auch die laufende Runde dunkel; Aufbau, Formen und Stellenfarben bleiben gleich.
+
 **Ort:** `docs/plan_angleich_reihe.md`, Grundsätze.
 **Heute:** „Der Eulenpfad bleibt im Aussehen, wie er ist (höchstens kleine Retuschen); der Lernsteig wird ihm im Aufbau
 ähnlich, nur erwachsener …“
