@@ -1,5 +1,7 @@
 /* Tab „Statistik“. Ein Kind sieht vier Karten zu sich: was es als Nächstes übt, seine Woche, seine Runden, seine
-   Meldungen (Entscheid ST1 a, LERN_Session12). Die Aufsicht wählt jedes
+   Meldungen (Entscheid ST1 a, LERN_Session12) — in seiner Fassung: Vorschläge als Karten mit Bild und einem Satz ohne
+   Zahlen (KS1 a), Runden als Kacheln nach Tagen (KS2 a), eine Wochenkarte mit Wochensternen (KS3 a; Konzept Gestaltung,
+   „Statistik und Erfolge für Kinder“). Die Aufsicht sieht alles ausführlich. Die Aufsicht wählt jedes
    Kind, sieht den Vergleich, sichert alle oder einzelne, liest ein und setzt zurück (Entscheid L3 a).
    Runden der Aufsicht tragen test: true und zählen nur auf Wunsch mit (Entscheid T1 a). */
 "use strict";
@@ -52,7 +54,38 @@ function zeichneStatistik(box, neu) {
 
   const meine = LS.meldungenVon(gewaehlt);
 
-  /** Vorschläge mit Knopf „Jetzt üben“. */
+  /** Stufe als Level wie auf der Stufenwahl (FB2 a): Symbol und Zahl auf dem Ton der Stufe, die Schrift in --text. */
+  function level(stufe) {
+    const st = SKALA.find(x => x.id === stufe);
+    if (!st) return null;
+    const m = el("span", { class: "level-marke", title: `Stufe ${st.nr} · ${st.name}`, "aria-label": `Stufe ${st.nr}` },
+      el("span", { "aria-hidden": "true", text: st.icon }), el("b", { text: String(st.nr) }));
+    m.style.setProperty("--sf", st.farbe);
+    return m;
+  }
+  /**
+   * Vorschläge fürs Kind (KS1 a): höchstens drei Karten wie im Tab Spiele — Kartenbild, Name, Stufe als Level, der Satz
+   * aus AUSWERTUNG (Feld kind) und „▶ Los“. Vorschläge ohne Satz oder ohne Spiel (Regelmässigkeit, Konzentration) und
+   * Spiele, die das Kind nicht sieht, fallen weg.
+   */
+  function vorschlagKarten(vorschlaege) {
+    const passend = vorschlaege.filter(v => v.kind && SPIELE.some(s => s.id === v.spiel) && LS.fuerKinderSichtbar(v.spiel)).slice(0, 3);
+    if (!passend.length) return el("p", { class: "leise-text", text: runden.length ? "Alles im grünen Bereich — weiter so! 🎉"
+      : "Spiel ein paar Runden — dann zeigt dir die Eule hier, was du als Nächstes üben kannst." });
+    return el("div", { class: "spiele vorschlag-karten" }, ...passend.map(v => {
+      const s = SPIELE.find(x => x.id === v.spiel);
+      const bild = kartenBild(s);
+      const k = el("div", { class: "spielkarte vorschlag-karte" + (bild ? " mit-bild" : ""), "data-spiel": s.id, "data-art": v.art,
+        "data-vorlesen": `${s.name}, Stufe ${LS.SKALA.find(x => x.id === v.stufe)?.nr ?? ""}. ${v.kind}` });
+      k.style.setProperty("--f", s.farbe);
+      k.append(...[bild,
+        el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name }), level(v.stufe)),
+        el("p", { class: "vorschlag-satz", text: v.kind }),
+        el("a", { class: "knopf gruen", href: v.link, text: "▶ Los" })].filter(Boolean));
+      return k;
+    }));
+  }
+  /** Vorschläge mit Knopf „Jetzt üben“ (Aufsicht: Titel und Text mit Zahlen). */
   function vorschlagListe(vorschlaege) {
     return vorschlaege.length
       ? el("div", { class: "vorschlaege" }, ...vorschlaege.map(v => el("div", { class: `vorschlag ${v.art}` },
@@ -77,7 +110,10 @@ function zeichneStatistik(box, neu) {
     if (!aufsicht) LS.meldungenGelesen(gewaehlt);
     return k;
   }
-  /** Lernplan (Entscheid L1 a, LERN_Session10): Wochenziel und die letzten zwölf Wochen. */
+  /**
+   * Lernplan (Entscheid L1 a, LERN_Session10): eine Karte mit den sieben Tagen (KS3 a: nicht in einer zweiten). Das Kind
+   * sieht dazu die Wochensterne als Reihe; die Aufsicht das Ziel in Zahlen und die letzten zwölf Wochen mit Datum.
+   */
   function lernplanKarte(titel) {
     const plan = ERFOLGE.lernplan(p, runden);
     const letzte = plan.wochen.slice(-12);
@@ -85,11 +121,12 @@ function zeichneStatistik(box, neu) {
     return karte(
       el("h2", { text: titel }),
       // Ohne Wochenziel sagt es dem Kind die Wochenkarte selbst; die Aufsicht erfährt, wo sie eines setzt.
-      plan.plan || aufsicht ? el("p", { class: "leise-text", style: "margin:0 0 8px", text: plan.plan
+      aufsicht ? el("p", { class: "leise-text", style: "margin:0 0 8px", text: plan.plan
         ? `Wochenziel: ${plan.plan.tage} Tage × ${plan.plan.minuten} Minuten · ${plan.sterne} Wochenstern${plan.sterne === 1 ? "" : "e"}, ${plan.serie} in Folge.`
         : "Kein Wochenziel gesetzt (Verwaltung → Konten → 📅). Gezeigt werden die Tage mit Runden." }) : null,
-      wochenKarte(plan),
-      letzte.length > 1 ? el("div", { class: "wochen-reihe" }, ...letzte.map(w => el("span", {
+      wochenKarte(plan, { kopf: false }),
+      aufsicht ? null : wochenSterne(plan),
+      aufsicht && letzte.length > 1 ? el("div", { class: "wochen-reihe" }, ...letzte.map(w => el("span", {
         class: "wochen-punkt" + (w.erfuellt ? " erfuellt" : w.erfuellteTage ? " etwas" : "") + (w.laufend ? " laufend" : ""),
         title: `Woche ab ${wochenText(w)}: ${w.erfuellteTage} Tag${w.erfuellteTage === 1 ? "" : "e"}${plan.plan ? (w.erfuellt ? ", Ziel erreicht" : ", Ziel nicht erreicht") : ""}`,
       }, el("b", { text: wochenText(w) }), el("i", { text: w.erfuellt ? "🌟" : String(w.erfuellteTage) })))) : null);
@@ -116,6 +153,46 @@ function zeichneStatistik(box, neu) {
     }
     return karte(el("h2", { text: titel }), verlauf);
   }
+  /**
+   * Runden fürs Kind (KS2 a): Kacheln nach Heute, Gestern, Diese Woche, Früher — Kartenbild, Name, Stufe als Level,
+   * Sterne; ohne Uhrzeit und ohne Fehlerzahl. Antippen zeigt die kniffligen Aufgaben mit Lösung (ohne Zahl der
+   * Fehlversuche) und „▶ Nochmal“.
+   */
+  function rundenKacheln(titel, anzahl) {
+    const letzte = [...runden].sort((a, b) => (a.zeit < b.zeit ? 1 : -1)).slice(0, anzahl);
+    if (!letzte.length) return karte(el("h2", { text: titel }), el("p", { class: "leise-text", text: "Noch keine Runde gespielt." }));
+    // Tage in Ortszeit; die Woche beginnt am Montag
+    const jetzt = new Date();
+    const tagBeginn = (d, minus = 0) => new Date(d.getFullYear(), d.getMonth(), d.getDate() - minus).getTime();
+    const heute = tagBeginn(jetzt), gestern = tagBeginn(jetzt, 1), montag = tagBeginn(jetzt, (jetzt.getDay() + 6) % 7);
+    const gruppeVon = zeit => { const t = tagBeginn(new Date(zeit)); return t === heute ? "Heute" : t === gestern ? "Gestern" : t >= montag ? "Diese Woche" : "Früher"; };
+    const gruppen = new Map();
+    for (const e of letzte) { const g = gruppeVon(e.zeit); if (!gruppen.has(g)) gruppen.set(g, []); gruppen.get(g).push(e); }
+    const kachel = e => {
+      const s = SPIELE.find(x => x.id === e.inhalt);
+      const geloest = (e.liste || []).filter(a => a.geloest).length;
+      const ergebnis = e.endlos ? `♾ ${geloest}` : typeof e.sterne === "number" ? "★".repeat(e.sterne) + "☆".repeat(Math.max(0, 3 - e.sterne)) : "🎲";
+      const knifflig = KERN.runde.mitFehler(e);
+      const d = el("details", { class: "runden-klapp",
+        "data-vorlesen": `${spielName(e.inhalt)}, Stufe ${LS.SKALA.find(x => x.id === e.stufe)?.nr ?? ""}${e.endlos ? `, ${geloest} in Folge` : typeof e.sterne === "number" ? `, ${e.sterne} Sterne` : ""}.` },
+        el("summary", {}, ...[s ? kartenBild(s) : null,
+          el("span", { class: "runden-kopf" }, el("b", { class: "name", text: spielName(e.inhalt) }), level(e.stufe)),
+          el("span", { class: "runden-sterne", "aria-hidden": e.endlos ? "false" : "true", text: ergebnis })].filter(Boolean)),
+        knifflig.length
+          ? el("div", { class: "runden-knifflig" }, el("b", { text: "Diese Aufgaben waren knifflig:" }),
+              el("ul", {}, ...knifflig.map(f => el("li", {}, el("span", { text: f.text || "(Aufgabe)" }),
+                f.loesung ? el("span", { class: "runden-loesung", text: ` → ${f.loesung}` }) : null))))
+          : el("p", { class: "gut", text: "Alles auf Anhieb richtig! 🎉" }),
+        s ? el("a", { class: "knopf gruen klein", href: `${s.pfad}?stufe=${e.stufe}${e.endlos ? "&endlos=1" : ""}`, text: "▶ Nochmal" }) : null);
+      // Die Hülle trägt Farbe und gezeichneten Rahmen (STIL): ein zugeklapptes <details> zeigt nur sein <summary>
+      const k = el("div", { class: "runden-kachel", "data-spiel": e.inhalt }, d);
+      d.addEventListener("toggle", () => k.classList.toggle("offen", d.open));
+      if (s) k.style.setProperty("--f", s.farbe);
+      return k;
+    };
+    return karte(el("h2", { text: titel }),
+      ...[...gruppen].flatMap(([g, rs]) => [el("h3", { class: "runden-gruppe", text: g }), el("div", { class: "runden-raster" }, ...rs.map(kachel))]));
+  }
 
   // ----- Ein Kind (Entscheid ST1 a, LERN_Session12) -----
   // Es sieht, worauf es selbst handeln kann: was es als Nächstes übt, seine Woche, seine Runden, seine Meldungen.
@@ -125,10 +202,11 @@ function zeichneStatistik(box, neu) {
     seite.append(karte(el("h2", { text: "🦉 Das übe ich als Nächstes" }),
       // Das freundliche Fazit erst, wenn die Aufsicht es freigegeben hat (Entscheid G3, Profil-Feld fazitFuerKind)
       p.fazitFuerKind ? el("ul", { class: "fazit-kind" }, ...AUSWERTUNG.fazitFuerKind(runden, p, Date.now(), meine).map(s => el("li", { text: s }))) : null,
-      // ohne Konzentration: sie gehört nach ST1 a nur der Aufsicht (vorher erreichte sie das Kind, LERN_Session32)
-      vorschlagListe(AUSWERTUNG.vorschlaege(gewaehlt, runden, p).filter(v => v.art !== "konzentration").slice(0, 4))));
-    seite.append(lernplanKarte("📅 Meine Woche"), rundenKarte("🔁 Meine Runden", 15));
+      // nur Vorschläge mit einem Satz fürs Kind (KS1 a): Konzentration und Regelmässigkeit gehören der Aufsicht (ST1 a)
+      vorschlagKarten(AUSWERTUNG.vorschlaege(gewaehlt, runden, p))));
+    seite.append(lernplanKarte("📅 Meine Woche"), rundenKacheln("🔁 Meine Runden", 15));
     if (meine.length) seite.append(meldungenKarte());
+    LS.langDruecken(seite); // langes Drücken liest Karten und Kacheln vor
     return;
   }
 

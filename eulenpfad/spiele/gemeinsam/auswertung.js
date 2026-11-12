@@ -150,9 +150,27 @@ const AUSWERTUNG = (() => {
   /** Zufällig nach Gewicht ziehen: ohne n ein Element, mit n eine Liste ohne Zurücklegen (höchstens n; Kern). */
   const ziehe = (kandidaten, gewicht, n) => K.ziehe(kandidaten, gewicht, n);
 
+  /**
+   * Satz fürs Kind je Art (Entscheid KS1 a, docs/eulenpfad/konzept_gestaltung.md): kurz, ohne Zahlen und ohne Kürzel.
+   * Titel und Text der Vorschläge bleiben für die Aufsicht; ein Vorschlag ohne Satz hier sieht nur die Aufsicht.
+   */
+  const KIND = {
+    wiederholen: "Das war knifflig. Nochmal?",
+    weiter: "Super! Die nächste Stufe wartet.",
+    auffrischen: "Schon eine Weile her. Kurz auffrischen?",
+    fokus: "Das übst du gerade.",
+    timer: "Das kannst du! Mit Uhr probieren?",
+  };
+
+  /**
+   * Vorschläge: [{ art, prio, titel, text (Aufsicht), link?, spiel?, stufe?, kind? }] — spiel und stufe, wo es einen Knopf
+   * gibt; kind ist der Satz fürs Kind (KIND).
+   */
   function vorschlaege(name, runden, profil, jetzt = Date.now()) {
     const v = [];
     const link = (spiel, stufe) => `${spielVon(spiel)?.pfad}?stufe=${stufe}`;
+    /** Spiel und Stufe zum Knopf, dazu der Satz fürs Kind (KS1 a) */
+    const ziel = (art, spiel, stufe) => ({ link: link(spiel, stufe), spiel, stufe, kind: KIND[art] });
 
     // 1. Wiederholen: Spiel+Stufe mit schwacher Quote in den letzten Runden
     const gruppen = {};
@@ -164,7 +182,7 @@ const AUSWERTUNG = (() => {
         const offen = rundenImFenster(rs).flatMap(e => KERN.runde.mitFehler(e).filter(f => !f.geloest)).length;
         v.push({ art: "wiederholen", prio: 1 + q, titel: `🔁 Wiederholen: ${spielVon(spiel)?.name} · Stufe ${stufeNr(stufe)}`,
           text: `In den letzten ${st.imFenster} Aufgaben nur ${Math.round(q * 100)} % auf Anhieb richtig${offen ? `, ${offen} Aufgabe${offen === 1 ? "" : "n"} nicht gelöst` : ""}. Lieber 2–3 kurze Runden an verschiedenen Tagen als viele am Stück.`,
-          link: link(spiel, stufe) });
+          ...ziel("wiederholen", spiel, stufe) });
       }
     }
 
@@ -178,7 +196,7 @@ const AUSWERTUNG = (() => {
       const naechste = `s${n + 1}`;
       if (LS.besteSterne(name, spiel, naechste) === 3) continue;
       v.push({ art: "weiter", prio: 3, titel: `⬆️ Bereit für Stufe ${n + 1}: ${spielVon(spiel)?.name}`,
-        text: `Stufe ${n} zweimal hintereinander mit 3 Sternen geschafft — Zeit für die nächste Herausforderung.`, link: link(spiel, naechste) });
+        text: `Stufe ${n} zweimal hintereinander mit 3 Sternen geschafft — Zeit für die nächste Herausforderung.`, ...ziel("weiter", spiel, naechste) });
     }
 
     // 3. Auffrischen (verteiltes Üben): Lernziel sass, wurde aber seit über 7 Tagen nicht geübt
@@ -190,7 +208,7 @@ const AUSWERTUNG = (() => {
       if (tage >= 7 && standVon(rs).quote >= QUOTE_UEBEN) {
         const e = rs[rs.length - 1];
         v.push({ art: "auffrischen", prio: 4, titel: `🌤 Auffrischen: ${lz.lz} ${lz.text}`,
-          text: `Sass gut, ist aber ${tage} Tage her. Eine kurze Runde hilft, es nicht zu vergessen.`, link: link(e.inhalt, e.stufe) });
+          text: `Sass gut, ist aber ${tage} Tage her. Eine kurze Runde hilft, es nicht zu vergessen.`, ...ziel("auffrischen", e.inhalt, e.stufe) });
       }
     }
 
@@ -209,7 +227,7 @@ const AUSWERTUNG = (() => {
       const geuebt = s.lernziele.find(l => l.lz === lzId).stufen;
       const stufe = geuebt.includes(empfohlen) ? empfohlen : geuebt[0];
       v.push({ art: "fokus", prio: 2, titel: `⭐ Fokus: ${lz.lz} ${lz.text}`,
-        text: rs.length ? `Seit ${Math.floor((jetzt - zuletzt) / TAG_MS)} Tagen nicht geübt.` : "Noch nie geübt — guter Startpunkt.", link: link(s.id, stufe) });
+        text: rs.length ? `Seit ${Math.floor((jetzt - zuletzt) / TAG_MS)} Tagen nicht geübt.` : "Noch nie geübt — guter Startpunkt.", ...ziel("fokus", s.id, stufe) });
     }
 
     // 5. Konzentration
@@ -235,7 +253,7 @@ const AUSWERTUNG = (() => {
       const vor = LS.zeitVorschlag(name, spiel, stufe);
       if (!vor) continue;
       v.push({ art: "timer", prio: 6, titel: `⏱ Herausforderung: ${spielVon(spiel)?.name} mit Timer`,
-        text: `Stufe ${stufeNr(stufe)} sitzt sicher. Mit Timer (${vor.sekunden} s je Aufgabe, aus den eigenen Zeiten) wird es spannender.`, link: link(spiel, stufe) });
+        text: `Stufe ${stufeNr(stufe)} sitzt sicher. Mit Timer (${vor.sekunden} s je Aufgabe, aus den eigenen Zeiten) wird es spannender.`, ...ziel("timer", spiel, stufe) });
     }
 
     return v.sort((a, b) => a.prio - b.prio);

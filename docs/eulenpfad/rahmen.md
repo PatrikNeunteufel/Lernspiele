@@ -943,7 +943,14 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
 - **Tab Spiele:** zuoberst „▶️ Weiterspielen“ mit den letzten fünf Spielen (ohne Zufallsmix), Antippen startet die
   zuletzt gespielte Stufe, nach einer Endlos-Runde wieder endlos.
 - **Statistik des Kindes:** „Das übe ich als Nächstes“ (Vorschläge, Fazit wenn freigegeben), „Meine Woche“, „Meine
-  Runden“, „Meine Meldungen“. Alles andere nur für die Aufsicht. **Erfolge:** „🏆 Meine Podestplätze“ — Platz 1–3 der
+  Runden“, „Meine Meldungen“. Alles andere nur für die Aufsicht. In der Fassung fürs Kind (KS1 a bis KS3 a,
+  [Konzept Gestaltung](konzept_gestaltung.md)): höchstens drei Vorschläge als Karten mit Kartenbild, Stufe als Level,
+  dem Satz aus `AUSWERTUNG` (Feld `kind`, je Art fest, ohne Zahlen) und „▶ Los“ — aus derselben Rangfolge (`prio`), die
+  die Aufsicht mit bis zu acht Vorschlägen samt Zahlen sieht; Vorschläge ohne Satz (Konzentration, Regelmässigkeit) nur
+  für die Aufsicht. Runden als Kacheln nach Heute, Gestern, Diese Woche, Früher (ohne Uhrzeit und Fehlerzahl;
+  aufgeklappt die kniffligen Aufgaben mit Lösung und „▶ Nochmal“). Die Woche als eine Karte mit Wochensternen
+  (`wochenSterne`), ohne Datumsreihe; dieselbe Karte im Tab Erfolge. Seitentest „Statistik des Kindes“ in
+  `tools/eulenpfad_seiten.js`. **Erfolge:** „🏆 Meine Podestplätze“ — Platz 1–3 der
   Endlos-Ranglisten dieses Geräts.
 
 ## 19. Kurztasten für Antwortknöpfe

@@ -94,6 +94,12 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
 }
 .personen-schluss { color: var(--knopf); }
 .personen-trenner { height: 2px; margin: 4px 6px; background: var(--rand); }
+/* Stil „hand“: Knopf und Einträge mit ungleichen Ecken und Linien, die Liste mit gezeichnetem Rahmen (STIL) */
+.stil-hand .personen-knopf { border-width: 2.5px 3px 3.5px 2px; border-radius: 12px 18px 10px 20px / 18px 10px 20px 12px; }
+.stil-hand .personen-eintrag, .stil-hand .personen-schluss { border-radius: 8px 14px 10px 16px / 14px 8px 16px 10px; }
+.stil-hand .personen-eintrag:nth-child(2n) { border-radius: 14px 8px 16px 10px / 8px 16px 10px 14px; }
+.stil-hand .personen-liste { border-radius: 14px 22px 12px 24px / 22px 12px 24px 14px; }
+.stil-hand .personen-trenner { height: 3px; border-radius: 2px 3px 1px 3px; transform: rotate(-0.6deg); }
 
 /* ---------- Anmeldung ---------- */
 
@@ -241,6 +247,52 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .abzeichen .abzeichen-bild svg { width: 56px; height: 56px; }
 .woche { background: #fff; border-radius: var(--rund); box-shadow: var(--schatten); padding: 12px 16px; margin-bottom: 14px; }
 .woche.kompakt { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; cursor: pointer; }
+/* In einer Karte mit Titel ohne eigenen Kasten (KS3 a) */
+.woche.flach { background: none; box-shadow: none; padding: 0; margin: 0 0 6px; }
+.woche.flach.warnt { box-shadow: none; }
+/* Wochensterne als Reihe fürs Kind (KS3 a) */
+.wochen-sterne { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 28px; line-height: 1.1; }
+.wochen-sterne .stern.offen { color: var(--text-leise); font-size: 30px; }
+.wochen-sterne .stern.mehr { color: var(--text-leise); font-weight: 900; }
+
+/* Statistik des Kindes (KS1 a, KS2 a; Konzept Gestaltung „Statistik und Erfolge für Kinder“) */
+.level-marke { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; padding: 2px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--sf, var(--rand)) 22%, var(--karte)); color: var(--text); font-weight: 900; font-size: 17px;
+  white-space: nowrap; flex: none; }
+.vorschlag-karte .kopfzeile { align-items: center; }
+.vorschlag-satz { margin: 6px 0 12px; font-size: 19px; font-weight: 800; line-height: 1.3; }
+.vorschlag-karte .knopf { align-self: flex-start; margin-top: auto; }
+.runden-gruppe { margin: 14px 0 8px; font-size: 18px; }
+.runden-gruppe:first-of-type { margin-top: 4px; }
+.runden-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(210px, 100%), 1fr)); gap: 12px; align-items: start; }
+.runden-kachel { position: relative; background: var(--karte); border-radius: 18px; border-top: 6px solid var(--f, var(--rand));
+  box-shadow: var(--schatten); padding: 8px 10px 10px; }
+.runden-kachel.offen { grid-column: 1 / -1; }
+/* aufgeklappt über die ganze Zeile: Bild klein links, Name und Sterne daneben, darunter die kniffligen Aufgaben */
+.runden-klapp[open] > summary { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.runden-klapp[open] .karten-bild { width: min(240px, 100%); flex: none; }
+.runden-klapp[open] .runden-kopf { flex: 1 1 180px; }
+/* Handy (Kipppunkt KS2 a): zwei Spalten statt einer langen Reihe */
+@media (max-width: 520px) {
+  .runden-raster { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .runden-kachel { padding: 6px 8px 8px; }
+  .runden-kopf { flex-wrap: wrap; gap: 4px; font-size: 15px; }
+  .runden-kopf .level-marke { margin-left: 0; font-size: 15px; }
+  .runden-sterne { font-size: 22px; }
+}
+.statistik details.runden-klapp { background: none; padding: 0; margin: 0; border-radius: 0; }
+.runden-klapp > summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
+.runden-klapp > summary::-webkit-details-marker { display: none; }
+.runden-kachel .karten-bild { aspect-ratio: 320 / 120; border-radius: 12px; background: #eef4fb; overflow: hidden; }
+.runden-kachel .karten-bild .feier { margin: 0; max-width: none; pointer-events: none; }
+.runden-kopf { display: flex; align-items: center; gap: 8px; font-size: 17px; }
+.runden-kopf .name { overflow: hidden; text-overflow: ellipsis; }
+.runden-sterne { font-size: 26px; line-height: 1; color: var(--deko-4); letter-spacing: 2px; }
+.runden-knifflig { margin: 10px 0 8px; }
+.runden-knifflig ul { margin: 6px 0 0; padding-left: 22px; }
+.runden-knifflig li { margin: 4px 0; font-size: 17px; }
+.runden-loesung { font-weight: 900; }
+.stil-hand .runden-kachel { border-top: none; padding-top: 14px; }
 .woche-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; font-size: 17px; margin-bottom: 8px; }
 .woche.kompakt .woche-kopf { margin: 0; }
 /* Serie droht zu brechen (LERN_Session11): warm, nicht rot — Fehler sind nicht schlimm */
@@ -270,6 +322,9 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .abzeichen { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 12px 10px; border: 3px solid transparent; border-radius: 18px; background: #f6f7fd; }
 .abzeichen.erreicht { background: linear-gradient(160deg, #fff6d6, #ffe9a8); box-shadow: 0 3px 0 #e8c76a; }
 .abzeichen.neu { outline: 3px solid var(--knopf); }
+/* Stil „hand“: Rahmen als Zeichnung in der Farbe der Stufe (STIL, --f), Ecken ungleich */
+.stil-hand .abzeichen { position: relative; border-color: transparent; border-radius: 16px 24px 14px 26px / 24px 14px 26px 16px; }
+.stil-hand .abzeichen.neu { outline: none; } /* „🆕“ steht beim Datum; eine gerade Linie über dem gezeichneten Rahmen stört */
 /* Stufen der Abzeichen (LERN_Session11): Rahmen in der Farbe der Stufe; dieselben Töne wie RANG_FARBE in erfolge.js */
 .abzeichen.rang-bronze { border-color: #b8743c; background: linear-gradient(160deg, #fdf1e6, #f3d2b3); box-shadow: 0 3px 0 #d9a47a; }
 .abzeichen.rang-silber { border-color: #8d97a5; background: linear-gradient(160deg, #f8f9fb, #dde2e9); box-shadow: 0 3px 0 #b9c1cc; }

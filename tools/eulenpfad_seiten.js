@@ -338,6 +338,47 @@ function pruefeTabSpiele(melde) {
     pruefe(t.lauf("location.search") === "", ort, "Tippen in der Suche lässt den Parameter stehen");
     fehlerVon(ort, s); fehlerVon(ort, t);
   }
+
+  // ----- Statistik und Erfolge des Kindes (KS1 a, KS2 a, KS3 a; Konzept Gestaltung) -----
+  {
+    const ort = "Statistik des Kindes";
+    // Runden: zweimal Zahlenhaus s3 mit drei Sternen (→ „weiter“), zweimal Zahlenhaus s1 mit vielen Fehlern (→ „wiederholen“)
+    const RUNDEN = `
+      const vor = t => new Date(Date.now() - t * 864e5).toISOString();
+      const liste = falsch => Array.from({ length: 6 }, (_, i) => i < falsch ? { text: "3 + 4", versuche: 2, geloest: false, gezeigt: true, loesung: "7" } : { text: "1 + 1", versuche: 0, geloest: true });
+      for (const [stufe, sterne, falsch, t] of [["s3", 3, 0, 2], ["s3", 3, 0, 0], ["s1", 1, 4, 1], ["s1", 1, 4, 0]])
+        LS.protokolliere({ name: "Mia", zeit: vor(t), inhalt: "zahlenhaus", stufe, aufgaben: 6, fehler: falsch, dauer: 90, sterne, liste: liste(falsch) });
+      LS.speichereProfil("Mia", { lernplan: { tage: 1, minuten: 1 } });`;
+    const s = oeffne({ hash: "#statistik", vorher: `LS.neuerSpieler("Mia", { klasse: 2 }); LS.setzeSpieler("Mia");` + RUNDEN });
+    ruhe(s);
+    // KS1: Karten mit Satz aus KIND, ohne Zahlen; so viele, wie es Vorschläge mit Satz für sichtbare Spiele gibt (höchstens 3)
+    const erwartet = s.lauf(`AUSWERTUNG.vorschlaege("Mia", LS.protokoll().filter(e => e.name === "Mia"), LS.profil("Mia"))
+      .filter(v => v.kind && LS.fuerKinderSichtbar(v.spiel)).length`);
+    pruefe(erwartet > 0, ort, "Gegenprobe: keine Vorschläge mit Satz fürs Kind aus den Testrunden");
+    pruefe(s.gibt(".vorschlag-karte") === Math.min(3, erwartet), ort, `Vorschlagskarten: ${s.gibt(".vorschlag-karte")} statt ${Math.min(3, erwartet)}`);
+    const saetze = s.lauf(`JSON.stringify([...document.querySelectorAll(".vorschlag-satz")].map(x => x.textContent))`);
+    pruefe(JSON.parse(saetze).every(t => t && !/\d|%/.test(t)), ort, `Satz fürs Kind mit Zahlen: ${saetze}`);
+    pruefe(s.gibt(".vorschlag-karte a.knopf", "Los") === s.gibt(".vorschlag-karte"), ort, "Vorschlagskarte ohne „▶ Los“");
+    // Die Aufsicht behält Titel und Text mit Zahlen
+    pruefe(s.lauf(`AUSWERTUNG.vorschlaege("Mia", LS.protokoll().filter(e => e.name === "Mia"), LS.profil("Mia")).some(v => v.art === "wiederholen" && /%/.test(v.text))`),
+      ort, "Text der Aufsicht zum Wiederholen ohne Prozent");
+    // KS2: je Runde eine Kachel, nach Tagen gruppiert, ohne Uhrzeit und ohne Fehlerzahl
+    pruefe(s.gibt(".runden-kachel") === 4 && s.gibt(".runden-gruppe", "Heute") === 1, ort, "Runden nicht als vier Kacheln mit der Gruppe „Heute“");
+    const inhalt = s.lauf(`document.getElementById("inhalt").textContent`);
+    pruefe(!/%|\d\d:\d\d|Fehler\b/.test(inhalt), ort, "Statistik des Kindes zeigt Prozent, Uhrzeit oder Fehlerzahl");
+    s.klappe(".runden-klapp", true);
+    pruefe(s.gibt(".runden-kachel.offen") === 1 && s.gibt(".runden-kachel.offen a.knopf", "Nochmal") === 1, ort, "aufgeklappte Kachel ohne „▶ Nochmal“ oder nicht über die Zeile");
+    // KS3: eine Wochenkarte ohne Karte in der Karte, mit Wochensternen, ohne Datumsreihe
+    pruefe(s.gibt(".woche.flach") === 1 && s.gibt(".woche:not(.flach)") === 0 && s.gibt(".wochen-reihe") === 0 && s.gibt(".wochen-sterne") === 1,
+      ort, "Woche doppelt, mit Datumsreihe oder ohne Wochensterne");
+    textPruefen(ort, s);
+    fehlerVon(ort, s);
+    const e = oeffne({ hash: "#erfolge", speicher: s.speicher, vorher: `LS.setzeSpieler("Mia");` });
+    ruhe(e);
+    pruefe(e.gibt("#inhalt .karte h2", "Meine Woche") === 1 && e.gibt(".woche.flach") === 1 && e.gibt(".woche:not(.flach)") === 0
+      && e.gibt(".wochen-sterne") === 1 && e.gibt("#inhalt .karte:first-child .kacheln") === 0, "Erfolge des Kindes", "Wochenkarte in Erfolge nicht wie in der Statistik");
+    fehlerVon("Erfolge des Kindes", e);
+  }
   return schritte;
 }
 

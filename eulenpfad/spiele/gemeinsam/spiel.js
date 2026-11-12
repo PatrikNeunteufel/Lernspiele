@@ -3500,6 +3500,10 @@ const STIL = (() => {
     [".spielkarte", k => (k.closest(".spiele.kompakt") ? "links" : "oben")],
     [".weiter-karte", () => "links"],
     [".filter-klapp", () => null],
+    // Statistik und Erfolge (Konzept Gestaltung, KS2 a): Kacheln der Runden, Abzeichen; das Personen-Menü
+    [".runden-kachel", () => "oben"],
+    ["#inhalt .abzeichen", () => null],
+    [".personen-liste", () => null],
     ["#inhalt .karte", () => null],
     // Spielseite: die Karte der Stufenwahl und des Schlussbilds, die Stufen (Farbstreifen links), die Ranglisten
     ["[data-stil-bereich]", () => null],

@@ -195,7 +195,7 @@ Fehler sind nicht schlimm), GS2 a (Kürzel der Lernziele nur für die Aufsicht).
 - Erfolge: Abzeichen mit glatten Rahmen, sonst im Stil. Stil-Retuschen ohne eigene Frage: Abzeichen, Wochenkarte und
   Personen-Dropdown bekommen die Rahmen und Ecken des Stils „hand“.
 
-### KS1 — Was sagen die Vorschläge dem Kind?
+### KS1 — Was sagen die Vorschläge dem Kind? → **a** (Patrik, 12.11.2026)
 
 **Ort:** `spiele/gemeinsam/auswertung.js` `vorschlaege()` (Felder `titel`, `text`), `start/statistik.js` Karte „Das übe
 ich als Nächstes“.
@@ -218,7 +218,7 @@ Satz bleibt lesbar auch für die 2. Klasse und lässt sich vorlesen. b behält Z
 den Aufbau einer Liste für Erwachsene. Kippen würde die Empfehlung, wenn Kinder ab der 5. Klasse die Zahlen sehen wollen
 (dann `kind` je Klasse: mit Zahl ab der 5. Klasse).
 
-### KS2 — Wie zeigt „Meine Runden“ die Runden?
+### KS2 — Wie zeigt „Meine Runden“ die Runden? → **a** (Patrik, 12.11.2026)
 
 **Ort:** `start/statistik.js` `rundenKarte()`.
 **Heute:** Textzeile je Runde mit Datum, Uhrzeit, Spiel, Stufe, Sternen und Zahl der Fehler; aufgeklappt jede Aufgabe mit
@@ -237,7 +237,7 @@ Fehlversuche; und das Kind kann die Runde gleich nochmal spielen. b kürzt den T
 Kippen würde die Empfehlung, wenn die Kacheln auf dem Handy (375 px) zu viel Platz brauchen — dann zwei Spalten, am Gerät
 ansehen.
 
-### KS3 — „Meine Woche“ ohne Doppelkarte und ohne Datumsreihe?
+### KS3 — „Meine Woche“ ohne Doppelkarte und ohne Datumsreihe? → **a** (Patrik, 12.11.2026)
 
 **Ort:** `start/statistik.js` `lernplanKarte()`, `start/erfolge.js` `wochenKarte()`.
 **Heute:** Karte „📅 Meine Woche“ um die Karte „📅 Deine Woche“ (sieben Tage), darunter die Reihe der letzten zwölf Wochen

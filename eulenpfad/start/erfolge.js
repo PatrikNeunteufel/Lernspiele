@@ -3,8 +3,11 @@
    (spiele/gemeinsam/erfolge.js). */
 "use strict";
 
-/** Wochenkarte: sieben Tage als Punkte, Stand zum Ziel. kompakt: eine Zeile für den Tab Spiele. */
-function wochenKarte(plan, kompakt = false) {
+/**
+ * Wochenkarte: sieben Tage als Punkte, Stand zum Ziel. kopf: false, wenn die Karte darum schon einen Titel hat — dann
+ * ohne eigenen Kasten (KS3 a: nicht als Karte in der Karte). kompakt: eine Zeile.
+ */
+function wochenKarte(plan, { kompakt = false, kopf = true } = {}) {
   const { el } = LS;
   const w = plan.aktuelle;
   const tage = el("div", { class: "woche-tage" }, ...w.tage.map(t => el("span", {
@@ -25,10 +28,26 @@ function wochenKarte(plan, kompakt = false) {
     ? `Diese Woche reicht es nicht mehr für den Wochenstern. Deine ${wochenText(plan.serie)} in Folge bleiben gezählt — nächste Woche startest du neu! 💪`
     : g.bleiben === 1 ? `⚠️ Achtung: Nur noch heute! Übe ${plan.plan.minuten} Minuten, dann hält deine Serie von ${wochenText(plan.serie)}.`
       : `⚠️ Achtung: Deine Serie von ${wochenText(plan.serie)} hält nur, wenn du an jedem der ${g.bleiben} restlichen Tage ${plan.plan.minuten} Minuten übst.` });
-  const karte = el("div", { class: "woche" + (kompakt ? " kompakt" : "") + (g && !g.verloren ? " warnt" : "") },
-    el("div", { class: "woche-kopf" }, el("b", { text: "📅 Deine Woche" }), plan.plan ? el("span", { class: "leise-text", text: `Ziel: ${plan.plan.tage} Tage × ${plan.plan.minuten} min` }) : null),
+  const karte = el("div", { class: "woche" + (kompakt ? " kompakt" : "") + (kopf ? "" : " flach") + (g && !g.verloren ? " warnt" : "") },
+    kopf ? el("div", { class: "woche-kopf" }, el("b", { text: "📅 Deine Woche" }), plan.plan ? el("span", { class: "leise-text", text: `Ziel: ${plan.plan.tage} Tage × ${plan.plan.minuten} min` }) : null) : null,
     tage, el("p", { class: "woche-text", text }), warnung);
   return karte;
+}
+
+/**
+ * Wochensterne als Reihe fürs Kind (KS3 a): ein 🌟 je erfüllte Woche der laufenden Serie, ein ☆ für die laufende Woche,
+ * solange sie noch offen ist; ohne Datum und ohne Zahl. Ohne Wochenziel nichts.
+ */
+function wochenSterne(plan) {
+  if (!plan.plan) return null;
+  const MAX = 12;
+  const voll = Math.min(plan.serie, MAX);
+  const offen = !plan.aktuelle.erfuellt;
+  const text = plan.serie ? `${plan.serie} Wochenstern${plan.serie === 1 ? "" : "e"} in Folge` : "Noch kein Wochenstern in Folge";
+  return LS.el("div", { class: "wochen-sterne", role: "img", "aria-label": text, title: text, "data-vorlesen": text },
+    ...Array.from({ length: voll }, () => LS.el("span", { class: "stern voll", text: "🌟" })),
+    plan.serie > MAX ? LS.el("span", { class: "stern mehr", text: "…" }) : null,
+    offen ? LS.el("span", { class: "stern offen", text: "☆" }) : null);
 }
 
 /** Farbe der Stufe für das geteilte Bild; dieselben Töne wie .abzeichen.rang-* in start.css. */
@@ -106,9 +125,10 @@ function zeichneErfolge(box, neu) {
   const erreicht = liste.filter(a => a.erreicht);
   const offen = liste.filter(a => !a.erreicht);
 
-  // Wochenziel
-  seite.append(karte(kopf, wochenKarte(plan),
-    plan.plan ? el("div", { class: "kacheln" },
+  // Wochenziel: dieselbe Karte wie in der Statistik (KS3 a); die Zahlen dazu nur für die Aufsicht
+  seite.append(karte(kopf, el("h2", { text: aufsicht ? `📅 Woche von ${LS.spielerName(name)}` : "📅 Meine Woche" }),
+    wochenKarte(plan, { kopf: false }), aufsicht ? null : wochenSterne(plan),
+    aufsicht && plan.plan ? el("div", { class: "kacheln" },
       el("div", { class: "kachel" }, el("div", { class: "zahl", text: `${plan.sterne} 🌟` }), el("div", { class: "was", text: "Wochensterne" })),
       el("div", { class: "kachel" }, el("div", { class: "zahl", text: String(plan.serie) }), el("div", { class: "was", text: "Wochen in Folge" }))) : null));
 
@@ -130,6 +150,8 @@ function zeichneErfolge(box, neu) {
       balken(a.naechste.ist, a.naechste.soll));
     else k.append(el("span", { class: "abzeichen-naechste", text: "Höchste Stufe erreicht!" }));
     if (a.erreicht) k.append(el("button", { type: "button", class: "knopf hell klein", text: "📤 Teilen", onclick: () => teileAbzeichen(a, name) }));
+    // Farbe des Rahmens im Stil „hand“ (STIL zeichnet mit --f): die Farbe der Stufe
+    if (a.erreicht) k.style.setProperty("--f", RANG_FARBE[a.rang.id]);
     return k;
   };
   const stufenErreicht = liste.reduce((s, a) => s + a.stufe, 0);
