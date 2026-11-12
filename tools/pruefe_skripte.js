@@ -14,6 +14,9 @@
 //   6. jede Seite, die den Stil ihrer App lädt (<app>/spiele/gemeinsam/stil.css, <app>/gemeinsam/stil.css), lädt davor
 //      <app>/kern/kern.css (Farben der Reihe, Entscheid DM1 a, docs/konzept_darkmode.md): ohne sie zeigen die Namen
 //      der App (--text: var(--k-text)) ins Leere, und die Seite verliert still ihre Farben.
+//   7. (Hinweis, kein Fehler, bis die Seiten umgebaut sind; DM4 a) feste Farben in Stilen: #…, rgb(), rgba(), hsl(),
+//      white, black ausserhalb von Variablen in :root. Nicht gezählt: ein Regelblock mit dem Kommentar
+//      „Bildfarben: <Grund>“ (Zeichnung auf heller Bildkachel, DM3 a). Mit --farben je Datei die Zahl.
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -85,6 +88,39 @@ const GEGENPROBEN_CSS = [
   [".a { background: url(data:image/svg+xml,%3Csvg%3E); }", 0, "Bild als data-URL"],
 ];
 
+// 7. Feste Farben (DM4 a)
+const FESTE_FARBE = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(|\b(?:white|black)\b/gi;
+const BILDFARBEN = "Bildfarben:";
+
+/** Zahl der festen Farben einer CSS-Quelle nach Punkt 7 (ohne Kommentare, ohne Variablen in :root, ohne Bildfarben). */
+function festeFarben(text) {
+  let n = 0;
+  // Kommentare vor dem Zerlegen weg (sie dürfen Klammern enthalten); der Vermerk „Bildfarben:“ bleibt als Marke stehen
+  const ohne = text.replace(/\/\*[\s\S]*?\*\//g, k => (k.includes(BILDFARBEN) ? ` ${BILDFARBEN} ` : " "));
+  for (const b of ohne.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+    const [wahl, rumpf] = [b[1].trim(), b[2]];
+    if (rumpf.includes(BILDFARBEN)) continue;
+    const leer = rumpf;
+    const rootBlock = /^:root\b/.test(wahl.split(/\s+/).pop() || "") && /^:root(\[[^\]]*\])?$/.test(wahl.split(/[\s,]+/).pop());
+    for (const d of leer.split(";")) {
+      if (rootBlock && /^\s*--/.test(d)) continue;
+      n += (d.match(FESTE_FARBE) || []).length;
+    }
+  }
+  return n;
+}
+
+// Gegenproben zu Punkt 7: [CSS, erwartete Zahl]
+const GEGENPROBEN_FARBE = [
+  [":root { --a: #fff; --b: rgb(1, 2, 3); }", 0, "Variablen in :root"],
+  [".a { color: #fff; background: rgba(0, 0, 0, .1); }", 2, "zwei feste Farben"],
+  [".a { --f: #abc; }", 1, "Variable ausserhalb von :root"],
+  [".a { /* Bildfarben: Zeichnung */ fill: #123456; }", 0, "Bildfarben im Block"],
+  ["/* .a { color: #fff } */ .b { color: var(--text); }", 0, "nur im Kommentar"],
+  [".a { color: white; border: 1px solid black; }", 2, "Farbnamen"],
+  ["@media (x) { .a { color: #000; } }", 1, "in @media"],
+];
+
 // 6. Stil der App und Farben des Kerns davor
 const APP_STIL = /^([a-z]+)\/(?:spiele\/)?gemeinsam\/stil\.css$/;
 
@@ -141,10 +177,14 @@ function umgebung(css, i) {
 /** Prüft alles; gibt { fehler: [Text], zahlen: { js, inline, verweise, css } } zurück. ordner: zum Prüfen mit anderen Ordnern. */
 function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   const fehler = [];
-  const zahlen = { js: 0, inline: 0, verweise: 0, css: 0 };
+  const zahlen = { js: 0, inline: 0, verweise: 0, css: 0, farben: {} }; // farben: Datei → Zahl fester Farben (Punkt 7)
   for (const [css, soll, name] of GEGENPROBEN_CSS) {
     const ist = pruefeCss(css, "Gegenprobe").length;
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 5 „${name}“: ${ist} statt ${soll} Meldungen`);
+  }
+  for (const [css, soll, name] of GEGENPROBEN_FARBE) {
+    const ist = festeFarben(css);
+    if (ist !== soll) fehler.push(`Gegenprobe Punkt 7 „${name}“: ${ist} statt ${soll} feste Farben`);
   }
   for (const [html, wo, soll, name] of GEGENPROBEN_STIL) {
     const ist = pruefeKernStil(html, wo, () => true).length;
@@ -157,12 +197,20 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
     const start = path.join(wurzel, o);
     if (!fs.existsSync(start)) { fehler.push(`Ordner ${o}/ fehlt`); continue; }
     for (const f of dateien(start, ".js")) { zahlen.js++; lies(fs.readFileSync(f, "utf8"), path.relative(wurzel, f).replace(/\\/g, "/")); }
-    for (const f of dateien(start, ".css")) { zahlen.css++; fehler.push(...pruefeCss(fs.readFileSync(f, "utf8"), path.relative(wurzel, f).replace(/\\/g, "/"))); }
+    for (const f of dateien(start, ".css")) {
+      zahlen.css++;
+      const wo = path.relative(wurzel, f).replace(/\\/g, "/"), text = fs.readFileSync(f, "utf8");
+      fehler.push(...pruefeCss(text, wo));
+      const n = festeFarben(text);
+      if (n && !/\/kern\/kern\.css$/.test(wo)) zahlen.farben[wo] = n;
+    }
     for (const f of dateien(start, ".html")) {
       const wo = path.relative(wurzel, f).replace(/\\/g, "/");
       // 5. Stil in der Seite (Zeilen aus dem Original, vor dem Entfernen der HTML-Kommentare)
       for (const s of fs.readFileSync(f, "utf8").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)) {
         zahlen.css++;
+        const nf = festeFarben(s[1]);
+        if (nf) zahlen.farben[wo] = (zahlen.farben[wo] || 0) + nf;
         const start = s.index + s[0].indexOf(">") + 1;
         fehler.push(...pruefeCss(s[1], wo, 1 + (s.input.slice(0, start).match(/\n/g) || []).length));
       }
@@ -207,6 +255,12 @@ function zeileVon(e) {
 if (require.main === module) {
   const { fehler, zahlen } = pruefe();
   console.log(`${zahlen.js} Skriptdateien, ${zahlen.inline} Skripte in Seiten, ${zahlen.verweise} Verweise, ${zahlen.css} Stile geprüft.`);
+  // 7. feste Farben: nur ein Hinweis (DM4 a), je Datei mit --farben
+  const farben = Object.entries(zahlen.farben);
+  const spielseiten = farben.filter(([d]) => /^eulenpfad\/spiele\/(?!gemeinsam\/)/.test(d));
+  if (farben.length) console.log(`    HINWEIS feste Farben (DM4 a): ${farben.reduce((s, [, n]) => s + n, 0)} in ${farben.length} Stilen, ` +
+    `davon ${spielseiten.reduce((s, [, n]) => s + n, 0)} in ${spielseiten.length} Spielseiten — Liste mit --farben`);
+  if (process.argv.includes("--farben")) for (const [d, n] of farben.sort((a, b) => b[1] - a[1])) console.log(`      ${String(n).padStart(4)}  ${d}`);
   for (const f of fehler) console.log(`    FEHLER  ${f}`);
   const schluss = fehler.length ? `${fehler.length} Fehler.` : "Keine Fehler.";
   console.log(schluss);
@@ -214,4 +268,4 @@ if (require.main === module) {
   process.exit(fehler.length ? 1 : 0);
 }
 
-module.exports = { pruefe, pruefeCss };
+module.exports = { pruefe, pruefeCss, festeFarben };

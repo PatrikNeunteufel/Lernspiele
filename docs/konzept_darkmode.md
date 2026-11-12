@@ -4,8 +4,9 @@ Stand: 12.11.2026 (LERN_Session33) · Grundsatz entschieden (Patrik, 12.11.2026,
 Einstellung im Block Aussehen, im Eulenpfad standardmässig hell, im Lernsteig nach der Einstellung des Geräts; dunkel
 werden Rahmen, Karten und Text über Variablen im Kern; die Stellenfarben bleiben gleich; Zeichnungen und
 Abschluss-Animationen stehen in beiden Modi auf einer hellen Bildkachel; zuerst dieses Konzept, dann bauen.
-**DM0–DM5 und DM2-S entschieden, je a** (Patrik, 12.11.2026). Nichts gebaut; Bau nach „Reihenfolge“ am Ende. GS0 a im
-Konzept Gestaltung und im Plan Angleich um den Zusatz aus DM0 a ergänzt.
+**DM0–DM5 und DM2-S entschieden, je a** (Patrik, 12.11.2026); **DM6 offen**. Gebaut: Schritt 1 (Kern 1.40.0,
+`kern/farben.css`) und Schritt 2 (Messung `tools/kontrast.js`, Zählung fester Farben `tools/pruefe_skripte.js` Punkt 7);
+Zahlen unten unter „Messung hell“. GS0 a im Konzept Gestaltung und im Plan Angleich um den Zusatz aus DM0 a ergänzt.
 
 ## Auslöser
 
@@ -240,11 +241,59 @@ die Ziffern und ändert weniger am vertrauten Bild; es wiegt weniger, weil die k
 sind. c liesse einen gemessenen Mangel stehen. Kippen würde die Empfehlung, wenn das dunklere Grün neben dem Gut-Grün der
 Rückmeldung (`--gut` `#2fbf71`) verwechselbar wird — am Bildschirm nebeneinander ansehen, bevor es gebaut wird.
 
+### DM6 — Deko-Farben, Gut und Hinweis als Schrift und als Grund für Schrift (aus der Messung, LERN_Session33)
+
+**Ort:** `eulenpfad/spiele/gemeinsam/stil.css` `--deko-1` … `--deko-7`, `--gut`, `--hinweis`; Stufenwahl
+(`.stufe-nr`, `spiel.js`), Körbe (`.korb-knopf`), grüne Knöpfe (`.knopf.gruen`), Spielseiten mit eigener Verwendung.
+**Heute:** Die Deko-Farben sind für Flächen gewählt; dieselben Werte stehen als Schrift (die grosse Stufennummer, FB2 a)
+und als Grund unter weisser Schrift (Körbe, „OK ✓“, „▶ Los!“). Gemessen auf Weiss: deko-4 1,92, deko-5 2,49, deko-3 2,76,
+gut 2,38, hinweis 2,05 (alle unter 3); weisse Schrift darauf ebenso.
+**Problem:** DM5 a regelt Stellenfarben und Knopf, nicht diese. Mit DM4 a gilt die Untergrenze auch für sie. Weder Weiss
+noch die dunkle Schrift `--text` reicht auf allen Flächen: `--text` auf deko-1 2,84, deko-6 2,89, deko-7 2,72, Knopf 3,10;
+Weiss auf deko-2 3,52, deko-3 2,76, deko-4 1,92, deko-5 2,49, gut 2,38.
+
+- **a (Empfehlung):** „Jede dieser Farben bekommt eine Schrift-Fassung gleichen Tons mit mindestens 4,5 auf Weiss
+  (`--deko-N-schrift`, `--gut-schrift`, `--hinweis-schrift`; dunkler gemischt: deko-2 `#c24a85`, deko-3 `#b65e20`, deko-4
+  `#947200`, deko-5 `#0e8578`, gut `#218750`, hinweis `#a76812`; deko-1, 6, 7 reichen schon). Sie gilt, wo die Farbe
+  Schrift ist (Stufennummer), und als Grund, wo weisse Schrift darauf steht (Körbe, grüne Knöpfe). Die helle Fassung
+  bleibt für Flächen ohne Schrift, Ränder und Bilder. Im dunklen Modus bekommt jede Schrift-Fassung ihren eigenen Wert.“
+- **b:** „Die Farben bleiben; Schrift steht nie in einer Deko-Farbe (die Stufennummer dunkel in einem farbigen Kreis), und
+  auf einer farbigen Fläche nimmt die Schrift Weiss oder `--text`, was mehr Kontrast gibt.“
+
+*Warum die Empfehlung:* a erfüllt die Untergrenze auf jeder Fläche und für jede Schriftgrösse, mit einer Regel für alle
+Farben, und hält die Farbe dort, wo sie etwas trägt (die Stufe hat ihre Farbe, FB2 a). b ändert das von Patrik
+abgenommene Bild der Stufenwahl (grosse farbige Zahl) und reicht nicht überall: auf deko-2 gibt die bessere der beiden
+Schriften 3,67 — für kleine Schrift unter 4,5. Für b spricht, dass keine neuen Variablen entstehen und die Schrift immer
+aus den Textfarben kommt, die in beiden Modi ohnehin geprüft sind. Kippen würde die Empfehlung, wenn die dunkleren
+Fassungen neben den hellen Flächen derselben Karte fremd wirken (am Bildschirm ansehen; das Gelb `#947200` ist ein
+Ocker).
+
+## Messung hell (LERN_Session33, vor dem Umbau)
+
+`node tools/kontrast.js`: 1215 Seiten (Startseite mit vier Tabs, je Spiel Stufenwahl und erste Aufgabe jeder Stufe,
+Lernsteig), 20 994 Texte, keiner auf einem Bild als Grund. **1091 Funde unter der Untergrenze** (je Spiel verschiedene
+Orte gezählt), in 170 von 198 Spielen und Seiten; im Lernsteig keiner, dort ist ohne Konto aber nur die Anmeldung zu
+sehen (172 Texte).
+
+Fast alles kommt aus dem Rahmen (sieben Orte, 888 Funde): Stufennummern in deko-3, 4, 5 auf Weiss (je 169 Spiele; DM6),
+„wechseln“ in `--knopf` auf Weiss 4,17 (169; DM5), Buchstabe im Ersatz-Avatar `#64748b` auf `#eceef6` 4,11 (170),
+weisse Schrift auf Körben in deko-3 und deko-5 (23, 19; DM6). Dazu 167 Orte in 74 Spielen, häufigste: grüner Knopf
+„OK ✓“ 2,38 (7 Spiele), Untertitel der Körbe, Regelkarte `#a0703d` auf `#fff8e1` 4,05 (6), Buchstaben ausserhalb in der
+Trenn-Schere 1,47, Kopfzellen der Stellen im Notizblock 1,35; auf der Startseite der bunte Titel „Eulenpfad“ (1,46 bis
+2,68) und leiser Text auf dem Himmel 3,75. Alle Funde mit Ort, Farben und Stufe: `.temp/kontrast/hell.json`
+(gitignored, neu mit dem Werkzeug).
+
+Nicht erfasst: Rückmeldung, Lösung und Schlussbild (nur die erste Aufgabe); Tab Verwaltung (nur für eine Aufsicht mit PIN);
+Übungen im Lernsteig (Konto nötig). Feste Farben in Stilen (`pruefe_skripte.js --farben`): 923 in 156 Stilen, davon 606
+in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
+
 ## Reihenfolge nach den Entscheiden (Vorschlag)
 
 1. `kern/farben.css` mit hellem Satz gleich den heutigen Werten (oder den DM5-Werten), Verteilen, Seiten binden;
-   Gegenprobe: hell sieht aus wie vorher (Bildvergleich je App).
-2. Kontrastprüfung (DM4) im Prüf-DOM, zuerst nur melden; Zahlen je Spiel.
+   Gegenprobe: hell sieht aus wie vorher (Bildvergleich je App). **Erledigt 12.11.2026** (Kern 1.40.0).
+2. Kontrastprüfung (DM4), zuerst nur melden; Zahlen je Spiel. **Erledigt 12.11.2026:** im Browser (`tools/kontrast.js`),
+   nicht im Prüf-DOM — das Ersatz-DOM der Seitentests rechnet kein CSS (Kaskade, Variablen, Deckkraft); Zählung fester
+   Farben als Hinweis in `tools/pruefe_skripte.js` Punkt 7, Ausnahme mit dem Kommentar „Bildfarben: <Grund>“.
 3. Dunkler Satz, Einstellung `farben` (DM2), Skript im `<head>`, `color-scheme` für Formularfelder.
 4. Bildkachel (DM3) in Bildersammlung, Abschluss-Animationen, Kartenbildern, Avataren.
 5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen.
