@@ -14,7 +14,6 @@ const ERFOLGE = (() => {
 
   /** Montag 0:00 der Woche, in der `zeit` liegt (lokale Zeit). */
   const wochenStart = zeit => KERN.auswertung.wochenStart(zeit);
-  const tageSpaeter = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 
   /**
    * Wochenziel eines Kindes: { plan, wochen, aktuelle, serie, sterne }.
@@ -108,9 +107,9 @@ const ERFOLGE = (() => {
     { id: "mix", bild: "🎲", titel: "Mix-Meister", stufen: [5, 10, 25, 50, 100],
       text: n => `${n} Runden im Zufallsmix gespielt.`, pruefe: (k, n) => zeiten([...new Set(k.runden.filter(e => e.mix).map(e => e.zeit))].sort(), n) },
     { id: "wochenstern", bild: "🌟", titel: "Wochenstern", stufen: [1, 4, 10, 25, 52],
-      text: n => (n === 1 ? "Das Wochenziel des Lernplans einmal erreicht." : `Das Wochenziel des Lernplans ${n}-mal erreicht.`), pruefe: (k, n) => wochen(k.plan, n) },
+      text: n => (n === 1 ? "Das Wochenziel des Lernplans einmal erreicht." : `Das Wochenziel des Lernplans ${n}-mal erreicht.`), pruefe: (k, n) => wochen(k.plan, n, k.runden) },
     { id: "dranbleiber", bild: "📅", titel: "Dranbleiber", stufen: [2, 4, 8, 12, 26],
-      text: n => `Das Wochenziel ${n} Wochen in Folge erreicht.`, pruefe: (k, n) => serieBis(k.plan, n) },
+      text: n => `Das Wochenziel ${n} Wochen in Folge erreicht.`, pruefe: (k, n) => serieBis(k.plan, n, k.runden) },
     { id: "fehlerfinder", bild: "🏅", titel: "Fehlerfinder", stufen: [1, 3, 5, 10, 25],
       text: n => (n === 1 ? "Einen echten Fehler im Programm gemeldet, den die Entwicklung behoben hat."
         : `${n} echte Fehler im Programm gemeldet, die die Entwicklung behoben hat.`),
@@ -144,10 +143,29 @@ const ERFOLGE = (() => {
     return { ist: Math.min(best, n), soll: n, wann: erster };
   }
   /** Längste Serie erfüllter Wochen bis n; erreicht am Sonntag der Woche, die die Serie auf n bringt. */
-  function serieBis(plan, n) {
+  /**
+   * Zeit (ISO) der Runde, mit der die Woche w ihr Ziel erreicht hat — wie bei den übrigen Abzeichen die Runde, mit der
+   * die Menge erreicht war: der Tag, mit dem genug Tage erfüllt waren, und darin die Runde, mit der seine Minuten
+   * erreicht waren. Vorher galt der Sonntag der Woche; in der laufenden Woche stand dann ein Datum, das noch kommt
+   * (LERN_Session33). runden: zeitlich sortiert (k.runden). Ohne passende Runde der Beginn jenes Tages.
+   */
+  function erfuelltAm(w, plan, runden) {
+    const ziel = plan.plan;
+    const tag = ziel && w.tage.filter(t => t.erfuellt)[ziel.tage - 1];
+    if (!tag) return null;
+    let minuten = 0;
+    for (const e of runden) {
+      if (new Date(e.zeit).toDateString() !== tag.datum.toDateString()) continue;
+      minuten += (e.dauer || 0) / 60;
+      if (!(ziel.minuten > 0) || minuten >= ziel.minuten) return e.zeit;
+    }
+    return tag.datum.toISOString();
+  }
+
+  function serieBis(plan, n, runden = []) {
     let lauf = 0, laengste = 0, wann = null;
     for (const w of plan.wochen) {
-      if (w.erfuellt) { lauf++; if (lauf === n && !wann) wann = tageSpaeter(w.von, 6).toISOString(); }
+      if (w.erfuellt) { lauf++; if (lauf === n && !wann) wann = erfuelltAm(w, plan, runden); }
       else if (!w.laufend) lauf = 0;
       laengste = Math.max(laengste, lauf);
     }
@@ -164,10 +182,10 @@ const ERFOLGE = (() => {
     }
     return { ist: Math.min(gesehen.size, soll), soll, wann };
   }
-  function wochen(plan, soll) {
+  function wochen(plan, soll, runden = []) {
     const erfuellte = plan.wochen.filter(w => w.erfuellt);
     const w = erfuellte[soll - 1];
-    return { ist: Math.min(erfuellte.length, soll), soll, wann: w ? tageSpaeter(w.von, 6).toISOString() : null };
+    return { ist: Math.min(erfuellte.length, soll), soll, wann: w ? erfuelltAm(w, plan, runden) : null };
   }
 
   /**

@@ -377,6 +377,15 @@ function pruefeTabSpiele(melde) {
     ruhe(e);
     pruefe(e.gibt("#inhalt .karte h2", "Meine Woche") === 1 && e.gibt(".woche.flach") === 1 && e.gibt(".woche:not(.flach)") === 0
       && e.gibt(".wochen-sterne") === 1 && e.gibt("#inhalt .karte:first-child .kacheln") === 0, "Erfolge des Kindes", "Wochenkarte in Erfolge nicht wie in der Statistik");
+    // Datum der Wochen-Abzeichen: die Runde, mit der das Wochenziel erreicht war, nicht der Sonntag der Woche (der in der
+    // laufenden Woche noch kommt; LERN_Session33). Ziel 1 Tag × 1 Minute: die erste Runde der Woche (vor zwei Tagen) reicht.
+    const wann = JSON.parse(e.lauf(`JSON.stringify((() => {
+      const runden = LS.protokoll().filter(x => x.name === "Mia" && !x.test).sort((a, b) => (a.zeit < b.zeit ? -1 : 1));
+      const a = ERFOLGE.abzeichen("Mia", LS.profil("Mia"), runden, LS.rekorde(), 0, null).find(x => x.id === "wochenstern");
+      return { erreicht: a.erreicht, runden: runden.map(x => x.zeit), jetzt: new Date().toISOString() };
+    })())`));
+    pruefe(!!wann.erreicht && wann.erreicht <= wann.jetzt && wann.erreicht === wann.runden[0], "Erfolge des Kindes",
+      `Wochenstern mit Datum ${wann.erreicht} statt der ersten Runde der Woche ${wann.runden[0]}`);
     fehlerVon("Erfolge des Kindes", e);
   }
   return schritte;

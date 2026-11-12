@@ -254,6 +254,41 @@ Sternreihe sagt „schon zwei Wochen geschafft“ ohne Zahl. Die Datumsreihe ist
 das Doppelte. Kippen würde die Empfehlung, wenn Kinder ihre Wochen zurückverfolgen wollen (dann die Sternreihe mit
 Antippen für die Woche).
 
+### KS4 — Darf die Aufsicht die Empfehlungen ans Kind übersteuern? (Frage Patrik, LERN_Session33)
+
+**Ort:** `start/statistik.js` (Karte „Das empfehle ich für …“ der Aufsicht, Karte „Das übe ich als Nächstes“ des
+Kindes), `spiele/gemeinsam/auswertung.js` `vorschlaege()` (Rangfolge `prio`), Profil des Kindes.
+**Heute:** Das Programm ordnet die Vorschläge fest (wiederholen vor Fokus, Konzentration, weiter, auffrischen,
+Regelmässigkeit, Timer); das Kind sieht die ersten drei mit Satz (KS1 a), die Aufsicht bis zu acht mit Begründung in
+Zahlen. Die Aufsicht lenkt nur indirekt über die Fokus-Lernziele im Profil. Frühere Entscheide: VR1 a (Vorgabe der
+Aufsicht, „fest“), VR2 a (die Ebene Klasse kommt mit den Gruppen, LERN-48; Persönliches bestimmt die Familie, die Klasse
+schlägt vor), Gruppen-Konzept 3 (Fokus „⭐ von deiner Lehrperson“ neben „⭐ für dich“).
+**Problem:** Eine Lehrperson oder ein Elternteil weiss manchmal, was gerade dran ist (Prüfung, Thema in der Schule) oder
+dass eine Empfehlung nicht passt; heute kann sie das dem Kind nicht sagen, ohne die Fokus-Lernziele umzubauen.
+
+- **a (Empfehlung):** „Jetzt, als Vorgabe der Aufsicht am Gerät (Ebene VR1): In ihrer Karte steht bei jedem Vorschlag
+  ‚📌 Fürs Kind oben‘ und ‚🚫 Fürs Kind ausblenden‘, dazu ‚➕ Eigene Empfehlung‘ (Spiel und Stufe wählen). Angeheftete und
+  eigene Empfehlungen stehen beim Kind zuerst, mit dem Satz ‚⭐ Von <Name der Aufsicht>‘; danach füllt das Programm bis
+  drei auf. Ausgeblendete sieht das Kind nicht, die Aufsicht weiter grau mit ‚ausgeblendet‘ und dem Grund des Programms;
+  jede Vorgabe lässt sich zurücknehmen. Das Programm erklärt die Rangfolge hinter ⓘ (warum wiederholen vor weiter
+  usw.) und bei jedem Vorschlag seinen Grund in Zahlen (wie heute). Gespeichert im Profil des Kindes
+  (`empfehlungen: { oben: [{ spiel, stufe, von, zeit }], aus: [{ art, spiel, stufe, von, zeit }] }`), mit Sicherung und
+  Abgleich unterwegs. Mit den Gruppen schlägt die Klasse auf dieselbe Weise vor (Struktur gleich, Vorrang nach VR2).“
+- **b:** „Erst mit dem Klassenmanager (LERN-48): dann für Klasse und Familie zugleich, mit Vorrang nach VR2.“
+- **c:** „Kein direktes Übersteuern; die Aufsicht lenkt weiter über die Fokus-Lernziele, deren Vorschläge höher
+  gewichtet werden.“
+
+*Warum die Empfehlung:* Das Vetorecht ist ein Recht der Erwachsenen, die das Kind begleiten — Eltern wie Lehrperson —,
+nicht erst der Klasse; die Aufsicht am Gerät gibt es heute, und VR1 a hat für Vorgaben schon die Ebene „Aufsicht“
+geschaffen. Mit derselben Struktur kann die Klasse später vorschlagen, ohne dass etwas umgebaut wird; die Erklärung
+bleibt beim Programm, die Entscheidung bei der Aufsicht. b verschiebt einen Nutzen, den Familien schon jetzt hätten,
+hinter ein grosses Paket; wofür b spricht: erst dort ist geklärt, wer gewinnt, wenn Lehrperson und Eltern verschieden
+übersteuern — das wiegt heute weniger, weil an einem Gerät eine Aufsicht nach der anderen entscheidet und die letzte
+Vorgabe sichtbar mit Namen steht. c lässt die Aufsicht nur über einen Umweg wirken und kann eine unpassende Empfehlung
+nicht wegnehmen. Kippen würde die Empfehlung zu b, wenn eine Lehrperson die Empfehlungen in der Schule an einem
+fremden Gerät (Schul-iPad) setzt und die Familie sie zu Hause nicht überschreiben dürfen soll — das ist eine Frage des
+Vorrangs zwischen Gruppen und gehört zu LERN-48.
+
 ## Reihenfolge nach den Entscheiden (Vorschlag)
 
 1. GS1: Feier-Angaben in den Katalog, Kartenbild auf der Startseite, Ladezeit messen.
