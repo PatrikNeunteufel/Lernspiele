@@ -1,15 +1,23 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## Stand der laufenden Sitzung LERN_Session35 (2026-11-12, nach der Pause)
-- **Darkmode Schritt 5** zweiter Teil im Arbeitsbaum, nicht committet (erster Teil `7cbd5db`): Deko-Töne als Schrift
-  über `--deko-N-schrift` in 47 Seiten (dunkel deko-2 und deko-6 heller), Restfunde dunkel und hell behoben, Notenblatt
-  mit dunklen Noten, `tools/kontrast.js` liest den Grund des äussersten `<svg>`. Kontrast über alle Seiten: hell 10,
-  dunkel 9 verschiedene Funde (zu Beginn der Sitzung 98 und 348); Rest im Konzept Darkmode, Schritt 5.
-- **Tests:** kurze Tests alle grün; Seitentests der geänderten Spiele „Keine Fehler.“.
-- **Weiter mit:** Schritt 5 abschliessen (Restfunde entscheiden, Prüfer-Kandidat feste Farben in Skripten), dann
-  Schritt 6; voller Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push.
-
 ## Stand
+**2026-11-12, nach LERN_Session35** ([Report](report/LERN_Session35_2026-11-12.md)):
+- **Kern:** unverändert 1.43.0.
+- **Darkmode:** Schritt 5 erledigt (alle Spielseiten ohne feste Farbe, Kontrast über alle Seiten hell 0, dunkel 1),
+  Schritt 6 bis auf die Anleitungen (Lernsteig mit Wahl je Person, Portal folgt dem Gerät, Anleitungen dem Eulenpfad);
+  feste Farben in Stilen überall ein Fehler (`tools/pruefe_skripte.js` Punkte 7 und 8).
+- **Eulenpfad:** Schalterzeile der Stufenwahl wie auf der Karte (RS1 a), ☀️/🌙 auch auf der Spielseite, Freigaben für
+  alle Kinder mit Ausnahme je Kind, Tab Spiele schneller, Favoriten gerahmt, Vorlesen über 🗣️ (lange drücken).
+- **Tests:** Skripte „Keine Fehler.“, Kern „6068 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Feier „169 Spiele, 6084 Bilder, keine
+  Fehler.“, Schrift „Keine Fehler.“; Eulenpfad Stichproben „Keine Fehler.“ — **letzter voller Lauf auf `6055527`**.
+  Commits bis `123d099` von Patrik, nicht gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit (RS-A a, nacheinander):** (1) **Inhaltslisten** in der Sitzung listen-pruefung (LERN_Session36, Zweig
+  `claude/sleepy-snyder-54c222`): Trennlinien committen, `master` in den Zweig holen, zurückführen, dann LP5 a in
+  Blöcken. (2) **Danach die Anleitungen** (AN-B a): Texte und `tools/anleitung_bilder.js` gegen die heutige App, alle
+  Bilder neu, hell und dunkel — frisch von `master`, ohne eigenen Zweig; damit schliesst Darkmode Schritt 6. (3) Voller
+  Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push.
+
 **2026-11-12, nach LERN_Session34** ([Report](report/LERN_Session34_2026-11-12.md)):
 - **Kern:** 1.43.0 (1.42.1 Kontrast nach DM5 a, 1.43 Bildkachel `:root, .bildkachel`).
 - **Eulenpfad:** Darkmode bis Schritt 4 — 3c-3 (DM5 a, DM6 a, G1 a), DM2-K a (☀️/🌙 für Kinder mit Erlaubnis), Bildkachel
@@ -517,7 +525,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G11 und G3b getroffen 2026-11-03, Bau ausstehend) | docs/konzept_gruppen.md, Abschnitt 9; docs/anleitung_zertifikat_klassenserver.md; docs/anleitung_klassenserver_internet.md; umfasst LERN-34 |
 | LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | in Arbeit seit 2026-11-03 (LERN_Session11); vorbereitet, Links leer — Patrik trägt sie ein, Steuern und Impressum klären | docs/anleitung_freiwillige_beitraege.md; portal/unterstuetzen.js |
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
-| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-03 (LERN_Session11); Pilot Anlaut-Angel und Auge-Entdecker | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
+| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-12 (LERN_Session36, Zweig `claude/sleepy-snyder-54c222`); Trennlinien fertig, Listen in Blöcken | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
 | LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |

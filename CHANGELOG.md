@@ -1983,3 +1983,5 @@
   allen Seiten; Akzent und Gefahr mit dunkler Fassung; Rechner gleich), Portal folgt dem Gerät, Anleitungen dem
   Eulenpfad, Mix und Regelkarten über Variablen. Feste Farben in Stilen sind jetzt überall ein Fehler (Punkt 7);
   Variablen in `:root, .bildkachel` und Masken zählen nicht. Vier Bilder der Kinder-Anleitung neu (a01–a04).
+- Session-Abschluss: Report docs/eulenpfad/report/LERN_Session35_2026-11-12.md, Handover (weiter mit den Inhaltslisten
+  in LERN_Session36, danach den Anleitungen).
