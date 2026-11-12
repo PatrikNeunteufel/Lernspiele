@@ -31,7 +31,8 @@ noch zu committen. Keine offenen Entwickler-Bemerkungen zu Beginn (52 von 52 erl
   Profil unter „Was … selbst umstellen darf“; Seitentest „Aussehen“ mit 13 statt 6 Schritten.
 - **Schritt 4 (DM3 a), Kern 1.43.0:** heller Satz unter `:root, .bildkachel`, `--k-bildgrund` in eigenem Block;
   Zeichnungen der Sammlung, Abschluss-Animationen, Kartenbilder und Abzeichen-Symbole mit `bildkachel`; dunkel auf dem
-  warmen Bildgrund, hell unverändert. `pruefe_kern.js` prüft den Block (6067 Fälle).
+  warmen Bildgrund, hell unverändert. Noch offene Abzeichen ohne Kachel: im Dunkeln kaum erkennbar, eine Überraschung
+  bis zum Erreichen (Wunsch Patrik). `pruefe_kern.js` prüft den Block (6067 Fälle).
 - **Stil „hand“:** Fach- und Themenblöcke mit gezeichnetem Rahmen als Maske auf `::after` (SVG in `<details>`
   verschwindet zugeklappt); Titel mit tanzenden Buchstaben; gestrichelter gezeichneter Rahmen für nicht freigegebene
   Spiele.

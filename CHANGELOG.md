@@ -1943,7 +1943,7 @@
   (Ersatz-Avatar, Kopfzellen, Wochentage, Filter). Kontrast über alle Seiten: hell 1091 → 98, dunkel 355 → 348.
 - **DM2-K a:** ☀️/🌙 neben dem Namen für Kinder, denen die Aufsicht es im Profil erlaubt (Standard fest).
 - **Darkmode Schritt 4 (DM3 a):** Kern 1.43.0 mit Bildkachel; Zeichnungen, Abschluss-Animationen, Kartenbilder und
-  Abzeichen-Symbole dunkel auf warmem hellem Grund, hell unverändert.
+  Symbole erreichter Abzeichen dunkel auf warmem hellem Grund (offene ohne, als Überraschung), hell unverändert.
 - **Stil „hand“:** Fach- und Themenblöcke gezeichnet, Titel tanzend, nicht freigegebene Spiele gestrichelt; Lücken im
   Raster mit Motiven zum Fach (`start/luecken.js`, LU1 a), Wirkungen auf die Nachbarkacheln, zwei realistische schwarze
   Löcher mit Schlauch aus der Nachbarkachel, alles dezent bewegt.
