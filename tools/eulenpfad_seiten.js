@@ -506,6 +506,13 @@ async function pruefeAussehen(melde) {
   pruefe(farben() === "dunkel", ort, "nach „Auf Vorgabe zurück“ nicht wie das Gerät");
   s.lauf(`LS.setzeFest("Mia", "farben", true); zeichneStart()`); await ruheAsync(s);
   pruefe(s.gibt(".farben-knopf") === 0, ort, "wieder fest: ☀️/🌙 noch da");
+  // Für alle Kinder freigegeben (Verwaltung → Kinder, LERN_Session35): fest im Profil schlägt die Freigabe; „wie alle“ folgt ihr
+  s.lauf(`LS.setzeEinstellung("freiFarben", "ja"); zeichneStart()`); await ruheAsync(s);
+  pruefe(s.gibt(".farben-knopf") === 0, ort, "für alle frei, im Profil fest: ☀️/🌙 trotzdem da");
+  s.lauf(`LS.setzeFest("Mia", "farben", null); zeichneStart()`); await ruheAsync(s);
+  pruefe(s.gibt(".farben-knopf") === 1 && s.lauf(`LS.festImProfil("Mia", "farben")`) === null, ort, "für alle frei, im Profil wie alle: kein ☀️/🌙");
+  s.lauf(`LS.setzeEinstellung("freiFarben", null); zeichneStart()`); await ruheAsync(s);
+  pruefe(s.gibt(".farben-knopf") === 0, ort, "Freigabe für alle zurück auf nein: ☀️/🌙 noch da");
   for (const f of new Set(s.fehler())) melde(ort, f);
   return schritte;
 }

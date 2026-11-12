@@ -104,17 +104,21 @@ function zeichneProfil(box, neu) {
   const istKind = !LS.istAufsicht(name);
 
   /** Je Einstellung: festlegen oder dem Kind lassen, und seine eigene Wahl zurücksetzen (VR1 a). Wirkt sofort. */
+  // Je Kind (Wunsch Patrik, LERN_Session35): wie für alle Kinder (Verwaltung → Einstellungen → Kinder), frei oder fest
   const kindZeile = art => {
     if (!istKind) return null;
     const fest = LS.istFest(name, art);
     const n = LS.wahlAnzahl(name, art);
-    const cb = el("input", { type: "checkbox" });
-    cb.checked = fest;
-    cb.addEventListener("change", () => { LS.setzeFest(name, art, cb.checked); neu(); });
+    const alleFest = LS.einstellung(LS.FREI_EINSTELLUNG[art], null) === "nein";
+    const wo = art === "farben" ? "(☀️/🌙 neben dem Namen und auf der Spielseite)" : "(auf der Spielkarte und der Spielseite)";
+    const wahl = el("select", { class: "feld", "aria-label": `Darf ${LS.spielerName(name)} das selbst umstellen?` },
+      ...[["", `wie alle Kinder — ${alleFest ? "🔒 fest" : "darf selbst umstellen"}`], ["frei", "darf selbst umstellen"], ["fest", "🔒 fest"]]
+        .map(([wert, text]) => el("option", { value: wert, text })));
+    const eigen = LS.festImProfil(name, art);
+    wahl.value = eigen === true ? "fest" : eigen === false ? "frei" : "";
+    wahl.addEventListener("change", () => { LS.setzeFest(name, art, wahl.value === "fest" ? true : wahl.value === "frei" ? false : null); neu(); });
     return el("div", { class: "kind-wahl" },
-      el("label", {}, cb, el("span", { text: art === "farben"
-        ? `🔒 fest — ${LS.spielerName(name)} kann nicht selbst umschalten (sonst ☀️/🌙 oben neben dem Namen)`
-        : `🔒 fest — ${LS.spielerName(name)} kann es im Spiel nicht umstellen` })),
+      el("label", {}, wahl, el("span", { class: "leise-text", text: ` ${wo}` })),
       !fest && n ? el("span", { class: "leise-text", text: art === "farben" ? `Eigene Wahl: ${LS.wahlFuer(name, "farben")}. `
         : art === "vorlesen" ? "Eigene Wahl im Spiel gesetzt. " : `Eigene Wahl in ${n} Spiel${n === 1 ? "" : "en"}. ` }) : null,
       !fest && n ? el("button", { type: "button", class: "knopf hell klein", text: "↺ Auf Vorgabe zurück", onclick: () => { LS.wahlZuruecksetzen(name, art); neu(); } }) : null);
@@ -357,6 +361,6 @@ function zeichneProfil(box, neu) {
       el("button", { class: "knopf gruen", type: "button", text: "Speichern", onclick: speichern }), meldung),
     !istKind && name === LS.aktuellerSpieler() ? abschnitt("🔁 In den Lernsteig übernehmen", uebernahmeTeil()) : "",
     istKind ? abschnitt(`🔒 Was ${LS.spielerName(name)} selbst umstellen darf`,
-      el("p", { class: "leise-text", text: "Diese Häkchen wirken sofort, ohne Speichern." }),
+      el("p", { class: "leise-text", text: "Wirkt sofort, ohne Speichern. „Wie alle Kinder“ folgt Verwaltung → Einstellungen → Kinder." }),
       ...KIND_ARTEN.flatMap(([, titel], i) => [el("b", { text: titel }), kindZeilen[i]])) : "");
 }

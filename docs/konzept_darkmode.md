@@ -285,7 +285,10 @@ und `fest`); Kopfzeile der Startseite.
 eigene Wahl, zurück auf Vorgabe); kein zweiter Weg für dieselbe Frage. Fest als Standard, weil hell zum Lesen der
 bessere Standard ist. Kippen würde es, wenn eine Lehrperson viele Kinder am selben Gerät nicht einzeln freigeben will
 (dann ein Knopf „für alle Kinder“ in der Verwaltung). **Gebaut 12.11.2026** (LERN_Session34: `LS.farbenKnopf`, Freigabe im
-Profil unter „Was … selbst umstellen darf“, Seitentest „Aussehen“ mit 13 Schritten).
+Profil unter „Was … selbst umstellen darf“, Seitentest „Aussehen“ mit 13 Schritten). **Kipppunkt eingetreten
+12.11.2026** (Wunsch Patrik, LERN_Session35): Freigabe für alle Kinder in der Verwaltung (Einstellung `freiFarben`, ebenso
+für Timer, Teile und Vorlesen), je Kind „wie alle Kinder“, frei oder fest; dazu der Mond als Schalter auf der Spielseite
+(Seitentest „Aussehen“ mit 16 Schritten).
 
 **Zusatz zu DM2 a:** Kinder wählen nicht — ausser die Aufsicht erlaubt es einem Kind nach DM2-K a.
 

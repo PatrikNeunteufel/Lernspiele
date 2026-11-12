@@ -168,6 +168,24 @@ const LS = (() => {
       werte: { hell: "hell", dunkel: "dunkel", geraet: "wie das Tablet oder der Computer" },
       erklaerung: "Hell oder dunkel — auf der Startseite und in den Spielen, auch in der laufenden Runde. Aufbau, Formen und die Farben der Stellen bleiben gleich; Zeichnungen und Abschlussbilder stehen auch im Dunkeln auf hellem Grund. „Wie das Tablet oder der Computer“ folgt dessen Einstellung. Für Kinder ist hell der bessere Standard zum Lesen.",
     },
+    // Was Kinder selbst umstellen dürfen (VR1 a, DM2-K a; Wunsch Patrik LERN_Session35): für alle Kinder auf dem Gerät,
+    // im Profil je Kind abweichend (LS.istFest). Standard wie bisher: Timer, Teile, Vorlesen frei, hell/dunkel fest.
+    freiTimer: {
+      titel: "Kinder schalten den Timer selbst ein und aus", standard: "ja", werte: { ja: "ja, alle", nein: "nein" },
+      erklaerung: "Die Uhr auf der Spielkarte und auf der Spielseite. Im Profil eines Kindes lässt es sich für dieses Kind anders einstellen.",
+    },
+    freiReihenfolge: {
+      titel: "Kinder stellen die Reihenfolge der Teile selbst um", standard: "ja", werte: { ja: "ja, alle", nein: "nein" },
+      erklaerung: "Die Balken (nach Stufe, geordnet, gemischt) auf der Spielkarte und auf der Spielseite. Im Profil eines Kindes lässt es sich für dieses Kind anders einstellen.",
+    },
+    freiVorlesen: {
+      titel: "Kinder stellen das Vorlesen selbst um", standard: "ja", werte: { ja: "ja, alle", nein: "nein" },
+      erklaerung: "Der Lautsprecher auf der Spielseite: gleich vorlesen oder auf Knopfdruck. Im Profil eines Kindes lässt es sich für dieses Kind anders einstellen.",
+    },
+    freiFarben: {
+      titel: "Kinder schalten selbst zwischen hell und dunkel um", standard: "nein", werte: { ja: "ja, alle", nein: "nein" },
+      erklaerung: "☀️/🌙 neben dem Namen auf der Startseite und auf der Spielseite. Standard nein: hell ist zum Lesen der bessere Standard (DM2-K a). Im Profil eines Kindes lässt es sich für dieses Kind anders einstellen.",
+    },
     // Entscheid KR1 a (LERN_Session13): ein Kind fängt auch ohne Aufsicht an
     selbstAnlegen: {
       titel: "Kinder legen sich selbst an", standard: "ja",
@@ -182,7 +200,7 @@ const LS = (() => {
   const EINSTELLUNG_BLOECKE = [
     { id: "aussehen", titel: "🎨 Aussehen", text: "Stil und Farben für alle auf diesem Gerät. Jede Aufsicht kann darunter für sich etwas anderes wählen (DM2-S a).", einstellungen: ["stil", "farben"], teil: "fuerMich" },
     { id: "spiele", titel: "🎮 In den Spielen", text: "Was in jedem Spiel gilt, je Spiel auch abweichend.", einstellungen: ["dezimal", "notizen", "notizblock", "feier"] },
-    { id: "kinder", titel: "🧒 Kinder", text: "Was Kinder selbst dürfen und wie sie die Spiele finden.", einstellungen: ["selbstAnlegen", "melden", "sortierung", "sortierungWahl"] },
+    { id: "kinder", titel: "🧒 Kinder", text: "Was Kinder selbst dürfen und wie sie die Spiele finden.", einstellungen: ["selbstAnlegen", "freiTimer", "freiReihenfolge", "freiVorlesen", "freiFarben", "melden", "sortierung", "sortierungWahl"] },
     { id: "ton", titel: "🔊 Ton und Ruhezeiten", text: "Wann Spiele still sind und was mit Kopfhörern trotzdem geht.", einstellungen: ["kopfhoerer", "tonSpieleRuhe"], teil: "ruhezeiten" },
   ];
 
@@ -463,8 +481,19 @@ const LS = (() => {
   // der Spielkarte umstellt, steht eigens im Profil (wahl) und gilt vor der Vorgabe, die die Aufsicht im Profil setzt —
   // ausser sie hat die Einstellung festgelegt (fest). Vorher schrieben beide dasselbe Feld, das Kind überschrieb still.
   const WAHL_ARTEN = { timer: "Timer", reihenfolge: "Reihenfolge der Teile", vorlesen: "Vorlesen", farben: "Hell oder dunkel" };
-  /** Hat die Aufsicht diese Einstellung für das Kind festgelegt? Farben ohne Angabe: fest (DM2-K a, Standard). */
-  const istFest = (name, art) => (art === "farben" ? profil(name).fest?.farben !== false : !!profil(name).fest?.[art]);
+  /** Einstellung des Geräts, die eine Art für alle Kinder freigibt (Wunsch Patrik, LERN_Session35). */
+  const FREI_EINSTELLUNG = { timer: "freiTimer", reihenfolge: "freiReihenfolge", vorlesen: "freiVorlesen", farben: "freiFarben" };
+  /**
+   * Hat die Aufsicht diese Einstellung für das Kind festgelegt? Im Profil des Kindes true (fest) oder false (frei), sonst
+   * wie für alle Kinder auf dem Gerät (Einstellung frei…; Standard: Farben fest, die übrigen frei, wie bis LERN_Session34).
+   */
+  function istFest(name, art) {
+    const eigen = profil(name).fest?.[art];
+    if (eigen === true || eigen === false) return eigen;
+    return FREI_EINSTELLUNG[art] ? einstellung(FREI_EINSTELLUNG[art], null) === "nein" : false;
+  }
+  /** Festlegung im Profil des Kindes: true, false oder null („wie alle Kinder“). */
+  const festImProfil = (name, art) => { const f = profil(name).fest?.[art]; return f === true || f === false ? f : null; };
   /** Wahl des Kindes, soweit sie gilt (nicht festgelegt): bei timer und reihenfolge { <spiel>: Wert }, sonst der Wert. */
   const wahlFuer = (name, art) => (istFest(name, art) ? undefined : profil(name).wahl?.[art]);
   /** Das Kind wählt selbst (spiel = null bei Einstellungen für alle Spiele); false, wenn festgelegt. */
@@ -484,8 +513,12 @@ const LS = (() => {
     delete w[art];
     speichereProfil(name, { wahl: w });
   }
-  /** Festlegen oder freigeben (Aufsicht, im Profil). */
-  const setzeFest = (name, art, an) => speichereProfil(name, { fest: { ...(profil(name).fest || {}), [art]: !!an } });
+  /** Festlegen (true), freigeben (false) oder wie alle Kinder (null) — Aufsicht, im Profil des Kindes. */
+  function setzeFest(name, art, an) {
+    const f = { ...(profil(name).fest || {}) };
+    if (an == null) delete f[art]; else f[art] = !!an;
+    speichereProfil(name, { fest: f });
+  }
   /** Wie viele eigene Wahlen das Kind für eine Einstellung getroffen hat (für die Anzeige im Profil). */
   function wahlAnzahl(name, art) {
     const w = profil(name).wahl?.[art];
@@ -2447,6 +2480,13 @@ const LS = (() => {
         erklaerung.vorlesen = (gleich ? "Die Eule liest jede Aufgabe und jeden Tipp gleich vor. 🔇 oben schaltet alles stumm."
           : "Die Eule liest vor, wenn du auf 🗣️ neben ihr tippst.") + (fest ? ` ${FEST_TEXT}` : "");
       }
+      // Hell oder dunkel (DM2-K a): nur für ein Kind, das selbst umschalten darf — wie ☀️/🌙 auf der Startseite
+      if (!istAufsicht(name) && !istFest(name, "farben")) {
+        const dunkel = KERN.farben.dunkel(aussehen("farben"));
+        schalter("farben", dunkel, "farben", dunkel ? "Dunkel" : "Hell", dunkel ? "antippen: hell" : "antippen: dunkel", false,
+          () => { setzeWahl(name, "farben", null, dunkel ? "hell" : "dunkel"); farbenAnwenden(); });
+        erklaerung.farben = dunkel ? "Dunkle Farben, gut am Abend." : "Helle Farben, gut zum Lesen am Tag.";
+      }
       const hinweis = erklaerung[schalterHinweis] || (endlosAn ? erklaerung.endlos : erklaerung.timer);
       return el("div", { class: "timer-zeile schalter-zeile" }, ...teile, el("span", { class: "leise schalter-hinweis", text: hinweis }));
     }
@@ -3493,6 +3533,8 @@ const LS = (() => {
     stern: KERN.uebersicht.STERN,
     endlos: '<path class="linie" d="M7.6 8.2C5.3 8.2 3.5 9.9 3.5 12s1.8 3.8 4.1 3.8c3.6 0 5.2-7.6 8.8-7.6 2.3 0 4.1 1.7 4.1 3.8s-1.8 3.8-4.1 3.8c-3.6 0-5.2-7.6-8.8-7.6z"/>',
     uhr: '<rect x="10.2" y="1.8" width="3.6" height="2.6" rx="1"/><circle cx="12" cy="13.6" r="7.6"/><path class="zeiger" d="M12 13.6V9.2M12 13.6l3 2"/>',
+    // Hell oder dunkel (LERN_Session35): Mondsichel, golden im dunklen Modus
+    farben: '<path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1z"/>',
     // Vorlesen (LERN_Session35): Lautsprecher mit zwei Schallbögen
     vorlesen: '<path d="M3.5 9.4h3.6l4.9-4v13.2l-4.9-4H3.5z"/><path class="welle" d="M15.3 9.2a4 4 0 0 1 0 5.6M18 6.6a7.6 7.6 0 0 1 0 10.8"/>',
     // Reihenfolge der Teile (RF1 a, Satz B): drei absteigende Balken (grösste Stelle links), gemischt ein Mischpfeil
@@ -3559,7 +3601,7 @@ const LS = (() => {
     freigabe, spielFrei, spielZuPruefen, spielGeprueft, setzeSpielFrei, spielSichtbar, fuerKinderSichtbar, sperrGrund, suche, aehnlich, passung, spielListen, listeFrei, setzeListeFrei, freieListen,
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, alterVon, aufsteigen, aufstiegZuruecknehmen, neuerAufstieg, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,
-    WAHL_ARTEN, istFest, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
+    WAHL_ARTEN, istFest, festImProfil, FREI_EINSTELLUNG, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
     stimmeBereit, sprich: sprichInhalt, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen, schalterSymbol, REIHENFOLGE_SCHALTER,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };

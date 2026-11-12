@@ -55,7 +55,7 @@ untereinander.
 | Sterne | `sterne`, `sterne-klein`, `aus`, `konfetti`, `flug` | Belohnung und Animation |
 | Abschluss-Animation | `feier`, `ruhig` | Animation im Schlussbild (`feier.js`, Abschnitt 24) |
 | Angemeldet | `spieler-zeile` | „Du spielst als …“ im Startbild; angemeldet wird auf der Startseite |
-| Stufenwahl | `stufen`, `stufe`, `fuer`, `stufe-huelle`, `stufe-kopf`, `stufe-symbol`, `stufe-nr`, `stufe-name`, `sterne-gross`, `stufe-info`, `stufe-text`, `blase-klein`, `timer-zeile`, `timer-schalter`, `schalter-zeile`, `schalter-teil`, `schalter-hinweis`, `option-zeile`, `option-schalter`, `leise` | Stufen wie Level (Entscheid FB2 a, LERN_Session32): gross Symbol und Nummer, Name, drei Sterne (auch die nicht erreichten), Untertitel für wen; den Lehrplantext der Stufe zeigt einem Kind ⓘ neben dem Knopf (`stufe-info`) und liest langes Drücken vor, die Aufsicht sieht ihn offen. Teile, Timer, Endlos und Vorlesen (gleich oder auf Knopfdruck, für alle Spiele) als eine Zeile mit den Symbolknöpfen der Kacheln, je mit dem Wort daneben und darunter der Erklärung des zuletzt geänderten (Entscheid RS1 a, LERN_Session35; `LS.schalterSymbol`, Werte der Reihenfolge in `LS.REIHENFOLGE_SCHALTER`, gleich auf der Karte); dieselbe Wahl wie auf der Karte. Ist Endlos an, starten die Stufen mit Endlos-Angebot endlos, darunter nur noch die Endlos-Ranglisten |
+| Stufenwahl | `stufen`, `stufe`, `fuer`, `stufe-huelle`, `stufe-kopf`, `stufe-symbol`, `stufe-nr`, `stufe-name`, `sterne-gross`, `stufe-info`, `stufe-text`, `blase-klein`, `timer-zeile`, `timer-schalter`, `schalter-zeile`, `schalter-teil`, `schalter-hinweis`, `option-zeile`, `option-schalter`, `leise` | Stufen wie Level (Entscheid FB2 a, LERN_Session32): gross Symbol und Nummer, Name, drei Sterne (auch die nicht erreichten), Untertitel für wen; den Lehrplantext der Stufe zeigt einem Kind ⓘ neben dem Knopf (`stufe-info`) und liest langes Drücken vor, die Aufsicht sieht ihn offen. Teile, Timer, Endlos, Vorlesen (gleich oder auf Knopfdruck, für alle Spiele) und hell oder dunkel (nur, wenn das Kind darf) als eine Zeile mit den Symbolknöpfen der Kacheln, je mit dem Wort daneben und darunter der Erklärung des zuletzt geänderten (Entscheid RS1 a, LERN_Session35; `LS.schalterSymbol`, Werte der Reihenfolge in `LS.REIHENFOLGE_SCHALTER`, gleich auf der Karte); dieselbe Wahl wie auf der Karte. Ist Endlos an, starten die Stufen mit Endlos-Angebot endlos, darunter nur noch die Endlos-Ranglisten |
 | Entwickler-Modus | `entwickler-leiste`, `entwickler-feld` | Leiste unten im Spiel (Abschnitt 11) | Startbild des Spiels |
 | Kurztasten | `mit-tasten` (am `html`), Attribut `data-marke` | Marke der Taste am Knopf (Abschnitt 19) |
 
@@ -971,9 +971,13 @@ Klasse): `docs/eulenpfad/konzept_profil_kind.md`.
   (`LS.waehle`, `LS.waehleTimer`) und gilt vor der Vorgabe (`timerFuer`, `reihenfolgeFuer`, `vorlesenArt`). Hat die
   Aufsicht festgelegt (`fest`, `LS.setzeFest`), gilt die Wahl nicht; Stufenwahl und Karte zeigen den Wert mit 🔒
   (Klasse `aufsicht-fest`). Später kommt die Ebene Klasse dazwischen (VR2, VR3, mit den Gruppen).
+  **Für alle Kinder** (Wunsch Patrik, LERN_Session35): je Art eine Einstellung des Geräts im Block „🧒 Kinder“
+  (`freiTimer`, `freiReihenfolge`, `freiVorlesen`, `freiFarben`; Standard ja, Farben nein). Im Profil des Kindes je Art
+  „wie alle Kinder“, „darf selbst umstellen“ oder „🔒 fest“ (`LS.festImProfil`, `LS.setzeFest(name, art, true|false|null)`);
+  `LS.istFest` nimmt die Angabe im Profil, sonst die des Geräts.
   Hell oder dunkel (Entscheid DM2-K a, LERN_Session34) im selben Muster: Vorgabe ist die Einstellung des Geräts, Art
-  `farben` ist ohne Angabe fest (`LS.istFest`); erlaubt die Aufsicht es im Profil des Kindes, steht ☀️/🌙 neben seinem
-  Namen in der Kopfzeile (`LS.farbenKnopf`, Klasse `farben-knopf`), die Wahl `wahl.farben` gilt vor dem Gerät
+  `farben` ist ohne Angabe fest (`LS.istFest`, Einstellung `freiFarben` Standard nein); darf das Kind, steht ☀️/🌙 neben
+  seinem Namen in der Kopfzeile (`LS.farbenKnopf`, Klasse `farben-knopf`) und der Mond als Schalter auf der Spielseite, die Wahl `wahl.farben` gilt vor dem Gerät
   (`LS.aussehen`) und reist mit Sicherung und Abgleich. Seitentest „Aussehen (Farben, Für mich)“.
 - **Spielkarte:** Spiele mit `reihenfolge: true` haben einen vierten Schalter, der weiterschaltet: nach Stufe (Balken
   grau), geordnet (Balken gold), gemischt (Mischpfeil gold).

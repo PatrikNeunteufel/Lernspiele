@@ -1967,3 +1967,6 @@
   der Erklärung des zuletzt geänderten; Endlos an lässt die Stufenknöpfe endlos starten (mit Rekord), der Endlos-Block
   zeigt nur noch die Ranglisten; Werte der Reihenfolge einmal im Rahmen (`LS.REIHENFOLGE_SCHALTER`). Vorlesen (gleich oder
   auf Knopfdruck) als vierter Schalter in derselben Zeile, mit eigenem Symbol (Lautsprecher, Wunsch Patrik).
+- **Was Kinder selbst umstellen dürfen (Wunsch Patrik):** Verwaltung → Einstellungen → Kinder gibt Timer, Teile, Vorlesen
+  und hell/dunkel für alle Kinder frei (Standard wie bisher: alles ausser hell/dunkel); im Profil je Kind „wie alle
+  Kinder“, „darf selbst umstellen“ oder „🔒 fest“. Hell/dunkel als Mond-Schalter auch auf der Spielseite.
