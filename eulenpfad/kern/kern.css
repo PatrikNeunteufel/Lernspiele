@@ -1,4 +1,4 @@
-/* kern 1.42.0 · Prüfsumme sha256:658c51065a187e1c9331642fd520b425b79eccfbb725c4a92251610a1657fa90 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.42.1 · Prüfsumme sha256:dd257add645751ee28ce8277160052e50387c5ed498d386086f64240ddbdcd21 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/farben.css ---- */
 /* Farben der Reihe (Entscheid DM1 a, docs/konzept_darkmode.md): gemeinsame Namen für die Rahmenfarben aller Apps.
 
@@ -10,24 +10,26 @@
    der Apps verweisen hierher (--text: var(--k-text)), bis sie ersetzt sind. Der dunkle Satz kommt unter
    :root[data-farben="dunkel"] und gewinnt über die hellen Werte der Apps, weil er spezifischer ist; App-eigene Töne
    (Himmel, Deko, Stellen, Akzent) bekommen ihre dunkle Fassung im Stil der App. Gesetzt wird data-farben von
-   farben.kopf.js (vor dem ersten Bild) und KERN.farben.anwenden. Kontrast auf der Karte (WCAG 2.x), gerechnet
-   LERN_Session33: Text 12,5 (hell 12,9), leise 7,2, Schrift auf dem Knopf 5,7, gut 7,7, Hinweis 8,1, Fokus 6,4.
+   farben.kopf.js (vor dem ersten Bild) und KERN.farben.anwenden. Kontrast (WCAG 2.x), gerechnet LERN_Session33
+   und 34: hell auf der Karte Text 12,9, leise 6,1 (auf dem Himmel des Eulenpfads 4,6), Knopf und Schrift darauf 4,6
+   (DM5 a); dunkel auf der Karte Text 12,5, leise 7,2, Knopf als Schrift 5,2, Schrift auf dem Knopf 6,6, gut 7,7,
+   Hinweis 8,1, Fokus 6,4.
    Bildgrund bleibt in beiden Modi hell (DM3 a); Schrift darauf nimmt --k-bildtext. */
 :root {
   --k-grund: #fef6e4;          /* Hintergrund der Seite (Eulenpfad: unterer Ton des Himmels) */
   --k-karte: #ffffff;          /* Karten */
   --k-feld: #ffffff;           /* Knöpfe ohne Farbe, Felder, Tasten — auf einer Karte (dunkel eine Stufe heller als sie) */
   --k-text: #2d3047;
-  --k-leise: #6b6f8a;          /* leiser Text, Nebensachen */
+  --k-leise: #5e6179;          /* leiser Text, Nebensachen (4,5 auch auf dem hellen Himmel) */
   --k-rand: #e3e6f3;           /* Ränder und Trennlinien */
-  --k-knopf: #5b6cff;          /* Hauptknopf */
-  --k-knopf-dunkel: #3f4fd9;   /* Boden des Hauptknopfs */
+  --k-knopf: #5666f1;          /* Hauptknopf; auch Schrift (Links), darum 4,5 auf Weiss (DM5 a) */
+  --k-knopf-dunkel: #3e4dd5;   /* Boden des Hauptknopfs */
   --k-knopf-text: #ffffff;     /* Schrift auf dem Hauptknopf */
   --k-gut: #2fbf71;            /* richtig, geschafft */
   --k-gut-hell: #dff7ea;
   --k-hinweis: #ff9f1c;        /* Hinweis, Achtung (nie Fehler-Rot) */
   --k-hinweis-hell: #fff1dc;
-  --k-fokus: #5b6cff;          /* Fokusrahmen der Tastatur */
+  --k-fokus: #5666f1;          /* Fokusrahmen der Tastatur */
   --k-bildgrund: #ffffff;      /* Grund unter Zeichnungen und Animationen, in beiden Modi hell (DM3 a) */
   --k-bildtext: #2d3047;       /* Schrift auf dem Bildgrund, in beiden Modi dunkel */
   color-scheme: light;
@@ -39,8 +41,8 @@
   --k-text: #eef0f7;
   --k-leise: #b3b8cc;
   --k-rand: #4a5175;
-  --k-knopf: #7584ff;
-  --k-knopf-dunkel: #5563d8;
+  --k-knopf: #8593ff;
+  --k-knopf-dunkel: #6270e0;
   --k-knopf-text: #10132a;
   --k-gut: #4cd68b;
   --k-gut-hell: #1d3a2b;

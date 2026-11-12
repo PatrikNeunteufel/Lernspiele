@@ -126,6 +126,9 @@ function zeichneSpiele(box, neu) {
   const reiter = (text, bild, an, onclick, farbe) => {
     const b = el("button", { type: "button", class: "fach-reiter", "aria-pressed": String(an), onclick }, el("span", { class: "fach-reiter-bild", text: bild }), text);
     b.style.setProperty("--f", farbe);
+    const f = LS.flaeche(farbe); // gewählt: Fläche mit Schrift (G1 a)
+    b.style.setProperty("--f-grund", f.grund);
+    b.style.setProperty("--f-auf", f.schrift);
     return b;
   };
   const fachReiter = el("nav", { class: "fach-reiter-zeile", "aria-label": "Fach" },

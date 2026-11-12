@@ -4,7 +4,7 @@ Stand: 12.11.2026 (LERN_Session33) · Grundsatz entschieden (Patrik, 12.11.2026,
 Einstellung im Block Aussehen, im Eulenpfad standardmässig hell, im Lernsteig nach der Einstellung des Geräts; dunkel
 werden Rahmen, Karten und Text über Variablen im Kern; die Stellenfarben bleiben gleich; Zeichnungen und
 Abschluss-Animationen stehen in beiden Modi auf einer hellen Bildkachel; zuerst dieses Konzept, dann bauen.
-**DM0–DM6, DM2-S und DM2-K entschieden, je a** (Patrik, 12.11.2026). Gebaut: Schritt 1 (Kern 1.40.0,
+**DM0–DM6, DM2-S, DM2-K und G1 entschieden, je a** (Patrik, 12.11.2026); Schritt 3 bis 3c-3 gebaut (Reihenfolge unten). Gebaut: Schritt 1 (Kern 1.40.0,
 `kern/farben.css`) und Schritt 2 (Messung `tools/kontrast.js`, Zählung fester Farben `tools/pruefe_skripte.js` Punkt 7);
 Zahlen unten unter „Messung hell“. GS0 a im Konzept Gestaltung und im Plan Angleich um den Zusatz aus DM0 a ergänzt.
 
@@ -288,6 +288,35 @@ bessere Standard ist. Kippen würde es, wenn eine Lehrperson viele Kinder am sel
 
 **Zusatz zu DM2 a:** Kinder wählen nicht — ausser die Aufsicht erlaubt es einem Kind nach DM2-K a.
 
+### G1 — Grün und Braun nach DM5/DM6 (Kipppunkt aus DM5, LERN_Session34) → **a** (Patrik, 12.11.2026)
+
+**Ort:** `eulenpfad/spiele/gemeinsam/stil.css`, Schrift-Fassungen als Grund unter weisser Schrift.
+**Heute (gebaut nach DM6 a):** grüne Knöpfe, „Timer an“ und Körbe auf der dunkleren Schrift-Fassung mit weisser Schrift.
+**Problem:** Am Farbmuster (`.temp/farbmuster.html`, Bild mit `tools/bilder_aufnehmen.js`) war der grüne Knopf `#218750`
+vom neuen Hunderter-Grün `#157f45` kaum zu unterscheiden (1,1 zwischen beiden) — der Kipppunkt von DM5; deko-3 `#b65e20`
+und Hinweis `#a76812` wurden beide braun (1,0).
+
+- **a (entschieden):** „Wo Schrift auf einer hellen Deko-Fläche steht, behält die Fläche ihren Ton und die Schrift wird
+  dunkel (`--text`): gut 5,4, Hinweis 6,3, deko-3 4,7, deko-4 6,7, deko-5 5,2. Weisse Schrift auf der dunkleren Fassung nur,
+  wo dunkle nicht reicht (deko-1, 2, 6). Stufennummern und Titel behalten die Schrift-Fassungen. Je Farbe ein Name für die
+  Schrift darauf.“
+- b: wie gebaut, `--gut-schrift` in einem bläulicheren Ton. c: wie gebaut lassen.
+
+*Warum a:* Der grüne Knopf bleibt `#2fbf71`, zum Hunderter-Grün 2,1 — klar getrennt; Orange und Gelb bleiben wie
+abgenommen; dieselbe Regel wie dunkel (helle Fläche, dunkle Schrift). Gebaut: `--<farbe>-grund` mit `--auf-<farbe>`,
+`LS.flaeche(farbe)`; `--gut-schrift` und `--hinweis-schrift` entfallen.
+
+## Messung nach 3c-3 (LERN_Session34)
+
+`node tools/kontrast.js --modus=hell,dunkel` vor G1 a, 1215 Seiten: **hell 98 Funde** in 47 von 198 Spielen und Seiten
+(vorher 1091), **dunkel 355** in 104. Der Rahmen ist danach frei bis auf „Meine Klasse“ im Filterknopf (halb
+durchsichtig, behoben). Übrig: eigene Farben der Spielseiten (Schritt 5; am häufigsten weisse Felder mit `var(--text)`,
+Regelkarte `#a0703d` auf `#fff8e1` in sechs Spielen, Körbe und Stellenknöpfe mit eigenen Farben in Wortarten-Sortierer,
+Stellen-Detektiv, Punkte-Schieber), Texte in Kartenbildern (Schritt 4) und im Lernsteig (Schritt 6). SVG-Schrift mit
+`fill: var(--text)` in Zeichnungen steht in 23 Spielseiten und wird dunkel unlesbar (Hinweis Patrik an der
+Wassertropfen-Reise: Nummern der Pfeile; dort mit `--k-bildtext` behoben) — Schritt 5. Stichprobe nach G1 a (acht Spiele
+mit Körben, grünen Knöpfen, Stellen): Funde nur noch in den drei genannten Spielseiten.
+
 ## Messung hell (LERN_Session33, vor dem Umbau)
 
 `node tools/kontrast.js`: 1215 Seiten (Startseite mit vier Tabs, je Spiel Stufenwahl und erste Aufgabe jeder Stufe,
@@ -319,9 +348,8 @@ in 145 Spielseiten, 124 in `start.css`, 119 in `stil.css`.
    „Für mich“, Kopf-Skript in 174 Seiten); **3c-1 und 3c-2 erledigt 12.11.2026:** `stil.css` (43 Namen) und
    `start.css` (40 Namen) ohne feste Farben, hell unverändert (Farbabdruck auf acht Seiten gleich), dunkel mit eigenen
    Werten; Kern 1.42.0 mit `--k-feld`; Prüfung Punkt 7 zählt dunkle halb durchsichtige Schatten und `color-mix` mit einer
-   Variablen nicht mehr, Ausnahme „Gleich in beiden Modi:“ (Leiste der Entwicklung). **3c-3 offen:** DM5 a, DM6 a; die
-   Messung dunkel (fünf Spiele) fand 34 Stellen, meist Schrift auf Flächen in Stellen- und Deko-Farbe, dazu Ersatz-Avatar
-   4,03 und Schrift in Knopffarbe 4,4.
+   Variablen nicht mehr, Ausnahme „Gleich in beiden Modi:“ (Leiste der Entwicklung). **3c-3 erledigt 12.11.2026**
+   (LERN_Session34, Kern 1.42.1): DM5 a, DM6 a, G1 a; Messung nach dem Umbau unter „Messung nach 3c-3“.
 4. Bildkachel (DM3) in Bildersammlung, Abschluss-Animationen, Kartenbildern, Avataren.
 5. Spielseiten in Blöcken (DM4), je Block im Browser in beiden Modi ansehen.
 6. Lernsteig und Gratwanderung; Anleitungen und Portal; Bilder der Anleitungen neu.

@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.42.1 — 2026-11-12 (LERN_Session34)
+- `farben.css`, Kontrast nach DM5 a (docs/konzept_darkmode.md): hell `--k-knopf` `#5666f1` (vorher `#5b6cff`; weisse
+  Schrift darauf und der Knopf als Schrift auf Weiss 4,6 statt 4,2), `--k-knopf-dunkel` `#3e4dd5`, `--k-fokus` wie der
+  Knopf; `--k-leise` `#5e6179` (vorher `#6b6f8a`; auf Weiss 6,1, auf dem hellen Himmel des Eulenpfads 4,6 statt 3,8).
+  Dunkel `--k-knopf` `#8593ff` (als Schrift auf der Karte 5,2 statt 4,4), `--k-knopf-dunkel` `#6270e0`.
+
 ## 1.42.0 — 2026-11-12 (LERN_Session33)
 - `farben.css`: `--k-feld` für Knöpfe ohne Farbe, Felder und Tasten auf einer Karte (hell `#ffffff` wie die Karte,
   dunkel `#323750`, eine Stufe heller als die Karte), für die Umstellung der festen Farben (Darkmode Schritt 3c).

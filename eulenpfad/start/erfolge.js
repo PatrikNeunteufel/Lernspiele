@@ -56,7 +56,7 @@ const RANG_FARBE = { bronze: "#b8743c", silber: "#8d97a5", gold: "#d9a400", plat
 /** Abzeichen als Bild (PNG) teilen oder speichern; nur auf Knopfdruck, der Vorname reist mit (Annahme B1, rahmen.md 15). */
 async function teileAbzeichen(a, name) {
   const css = getComputedStyle(document.documentElement);
-  const farbe = v => css.getPropertyValue(v).trim() || "#5b6cff";
+  const farbe = v => css.getPropertyValue(v).trim() || "#5666f1";
   const c = document.createElement("canvas");
   c.width = 800; c.height = 500;
   const g = c.getContext("2d");

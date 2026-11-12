@@ -108,13 +108,14 @@
 .zum-portal { position: absolute; left: 16px; top: 8px; font-size: 15px; font-weight: 700; color: var(--text-leise); text-decoration: none; }
 .zum-portal:hover, .zum-portal:focus-visible { color: var(--knopf); }
 .titel h1 { font-size: clamp(34px, 7vw, 56px); margin: 0; letter-spacing: 1px; }
-.titel h1 span:nth-child(7n+1) { color: var(--deko-1); }
-.titel h1 span:nth-child(7n+2) { color: var(--deko-2); }
-.titel h1 span:nth-child(7n+3) { color: var(--deko-3); }
-.titel h1 span:nth-child(7n+4) { color: var(--deko-4); }
-.titel h1 span:nth-child(7n+5) { color: var(--deko-5); }
-.titel h1 span:nth-child(7n+6) { color: var(--deko-6); }
-.titel h1 span:nth-child(7n+7) { color: var(--deko-1); }
+/* bunter Titel in den Schrift-Fassungen (DM6 a): grosse Schrift, auf dem Himmel 3,4 und mehr */
+.titel h1 span:nth-child(7n+1) { color: var(--deko-1-schrift); }
+.titel h1 span:nth-child(7n+2) { color: var(--deko-2-schrift); }
+.titel h1 span:nth-child(7n+3) { color: var(--deko-3-schrift); }
+.titel h1 span:nth-child(7n+4) { color: var(--deko-4-schrift); }
+.titel h1 span:nth-child(7n+5) { color: var(--deko-5-schrift); }
+.titel h1 span:nth-child(7n+6) { color: var(--deko-6-schrift); }
+.titel h1 span:nth-child(7n+7) { color: var(--deko-1-schrift); }
 
 .knopf.klein { font-size: 18px; min-height: 48px; padding: 8px 16px; }
 a.knopf { text-decoration: none; display: inline-flex; align-items: center; }
@@ -266,7 +267,7 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
   font: inherit; font-size: 17px; font-weight: 900; color: var(--text); background: var(--k-feld); cursor: pointer;
   box-shadow: 0 4px 0 color-mix(in srgb, var(--f) 45%, var(--boden-hell)); border-top: 4px solid var(--f); transition: transform .08s, box-shadow .08s; }
 .fach-reiter-bild { font-size: 22px; line-height: 1; }
-.fach-reiter[aria-pressed="true"] { background: var(--f); color: var(--k-knopf-text); box-shadow: 0 4px 0 color-mix(in srgb, var(--f) 60%, #000); }
+.fach-reiter[aria-pressed="true"] { background: var(--f-grund, var(--f)); color: var(--f-auf, var(--k-knopf-text)); box-shadow: 0 4px 0 color-mix(in srgb, var(--f-grund, var(--f)) 60%, #000); }
 .fach-reiter:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--f) 45%, var(--boden-hell)); }
 .fach-reiter:focus-visible, .filter-knopf:focus-visible { outline: 3px solid var(--knopf); outline-offset: 2px; }
 /* Knopf „Filter“ mit drei Schiebereglern; daneben, was gerade gilt */
@@ -274,7 +275,7 @@ section.karte h2 { margin: 0 0 12px; font-size: 22px; }
   font: inherit; font-size: 16px; font-weight: 800; color: var(--text); background: var(--k-feld); cursor: pointer; box-shadow: 0 4px 0 var(--boden-hell); }
 .filter-knopf[aria-expanded="true"] { background: var(--knopf); color: var(--k-knopf-text); box-shadow: 0 4px 0 var(--knopf-dunkel); }
 .filter-knopf[aria-expanded="true"] .filter-symbol circle { fill: var(--knopf); }
-.filter-knopf .filter-aktiv { font-size: 14px; font-weight: 700; opacity: .85; }
+.filter-knopf .filter-aktiv { font-size: 14px; font-weight: 700; }
 .filter-symbol { display: inline-flex; }
 .filter-feld { margin-bottom: 12px; padding-top: 10px; }
 .filter-ansicht { border-top: 1px solid var(--rand); padding-top: 8px; }
@@ -322,8 +323,14 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
    Patrik, LERN_Session32). Nur die Startseite: die Bühne mit #inhalt; Spiele und Mix bleiben schmal */
 .buehne:has(> #inhalt), .buehne:has(> #inhalt) ~ .kopf { max-width: 1320px; }
 .thema-titel[hidden] { display: none; }
-/* im Stil „hand“ ungleiche Ecken (kein SVG-Rahmen: zugeklappt zeigt ein details nur seinen Kopf) */
-.stil-hand .fach-block { border-radius: 18px 26px 16px 28px / 26px 16px 28px 18px; }
+/* im Stil „hand“ ungleiche Ecken und ein gezeichneter Rahmen (Hinweis Patrik, LERN_Session34): kein SVG darin —
+   zugeklappt zeigt ein details nur seinen Kopf —, sondern eine Maske auf ::after, die STIL.zeichne als --hand-maske
+   setzt (dieselbe Form wie svg.hand-rahmen); beim Fach dick oben statt des glatten Streifens */
+.stil-hand .fach-block { border-radius: 18px 26px 16px 28px / 26px 16px 28px 18px; border-top: none; padding-top: 12px; }
+.stil-hand :is(.fach-block, .thema-block)::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: var(--f); -webkit-mask: var(--hand-maske) 0 0 / 100% 100% no-repeat; mask: var(--hand-maske) 0 0 / 100% 100% no-repeat; }
+.stil-hand .thema-block::after { background: color-mix(in srgb, var(--f) 55%, var(--k-karte)); }
+.stil-hand .fach-block:not([style*="--hand-maske"])::after, .stil-hand .thema-block:not([style*="--hand-maske"])::after { content: none; }
 .stil-hand .thema-block { border-radius: 14px 20px 12px 22px / 20px 12px 22px 14px; }
 .stil-hand .thema-block:nth-child(2n) { border-radius: 22px 12px 20px 14px / 12px 22px 14px 20px; }
 /* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
@@ -401,7 +408,7 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .woche-tag.etwas { color: var(--text); }
 .woche-tag.erfuellt { background: var(--gold-zart); color: var(--gold-schrift); }
 .woche-tag.heute { outline: 3px solid var(--knopf); outline-offset: -3px; }
-.woche-tag.zukunft { opacity: .45; }
+.woche-tag.zukunft { background: none; box-shadow: inset 0 0 0 2px var(--tag-leer); } /* kommende Tage: nur umrandet, Schrift lesbar (vorher halb durchsichtig, 1,8) */
 .woche-text { margin: 8px 0 0; font-weight: 700; }
 .woche.kompakt .woche-text { margin: 0; flex: 1 1 200px; font-size: 15px; }
 .erfolge .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); gap: 12px; margin-top: 12px; }
@@ -512,19 +519,19 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .karten-schalter.fest .schloss { position: absolute; right: 0; bottom: 0; font-size: 13px; line-height: 1; }
 .spielkarte.endlos-an { box-shadow: var(--schatten), 0 0 0 3px var(--knopf), var(--glow, 0 0 transparent); }
 /* Klassen-Rand (G1 a, LERN_Session14): Glow nach aussen in --deko-Farben, nie in den Stellenfarben; Zeichen links oben */
-.spielkarte.klasse-tiefer { --kf: var(--deko-5); }
+.spielkarte.klasse-tiefer { --kf: var(--deko-5); --kf-grund: var(--deko-5-grund); --kf-auf: var(--auf-deko-5); }
 .spielkarte.klasse-gleich { --kf: var(--deko-4); }
-.spielkarte.klasse-hoeher { --kf: var(--deko-1); }
+.spielkarte.klasse-hoeher { --kf: var(--deko-1); --kf-grund: var(--deko-1-grund); --kf-auf: var(--auf-deko-1); }
 .spielkarte[class*="klasse-"] { --glow: 0 0 0 2px var(--kf), 0 0 18px 4px color-mix(in srgb, var(--kf) 55%, transparent); box-shadow: var(--schatten), var(--glow); }
 .spielkarte.endlos-an[class*="klasse-"] { box-shadow: var(--schatten), 0 0 0 3px var(--knopf), var(--glow); }
 .klassen-marke { margin-right: auto; align-self: center; display: inline-flex; align-items: center; justify-content: center;
-  min-width: 26px; height: 26px; border-radius: 999px; background: var(--kf, var(--deko-7)); color: var(--k-knopf-text); font-size: 15px; font-weight: 900; line-height: 1; }
+  min-width: 26px; height: 26px; border-radius: 999px; background: var(--kf-grund, var(--kf, var(--deko-7))); color: var(--kf-auf, var(--k-knopf-text)); font-size: 15px; font-weight: 900; line-height: 1; }
 .klasse-gleich .klassen-marke { color: var(--klassen-marke-gleich); }
 .klassen-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0 0 10px; font-size: 14px; font-weight: 800; color: var(--text-leise); }
 .klassen-legende-teil { display: inline-flex; align-items: center; gap: 4px; }
-.klassen-legende-teil.klasse-tiefer { --kf: var(--deko-5); }
+.klassen-legende-teil.klasse-tiefer { --kf: var(--deko-5); --kf-grund: var(--deko-5-grund); --kf-auf: var(--auf-deko-5); }
 .klassen-legende-teil.klasse-gleich { --kf: var(--deko-4); }
-.klassen-legende-teil.klasse-hoeher { --kf: var(--deko-1); }
+.klassen-legende-teil.klasse-hoeher { --kf: var(--deko-1); --kf-grund: var(--deko-1-grund); --kf-auf: var(--auf-deko-1); }
 .klassen-legende .klassen-marke { margin: 0; min-width: 22px; height: 22px; font-size: 13px; }
 /* Aufstieg (LERN_Session14): Nachricht ans Kind über der Startseite */
 .aufstieg-feier { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px;

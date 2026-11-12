@@ -20,10 +20,12 @@
 
   /* Eine feste Farbe je Stelle, wie in Calcularis: Einer rot, Zehner blau, Hunderter grün;
      ab den Tausendern wiederholt sich die Folge (T rot, ZT blau, HT grün, M rot).
-     Nur für Stellen verwenden — Dekoration nimmt die --deko-Farben. */
-  --rot:   #e5484d;
-  --blau:  #2f8fe0;
-  --gruen: #2fb36b;
+     Nur für Stellen verwenden — Dekoration nimmt die --deko-Farben. Hell mit mindestens 4,5 auf Weiss, als Schrift und
+     als Grund unter weisser Schrift (DM5 a, LERN_Session34): rot 4,5, blau 4,9, grün 5,1; vorher #e5484d, #2f8fe0,
+     #2fb36b (3,9, 3,4, 2,7). */
+  --rot:   #d93a40;
+  --blau:  #1f74c0;
+  --gruen: #157f45;
   --st-E:  var(--rot);
   --st-Z:  var(--blau);
   --st-H:  var(--gruen);
@@ -40,6 +42,30 @@
   --deko-5: #14b8a6;
   --deko-6: #6366f1;
   --deko-7: #64748b;
+  /* Farbe als Schrift (DM6 a, LERN_Session34): Stufennummer, Titel — gleicher Ton, mindestens 4,5 auf Weiss (grosse
+     Schrift auf dem Himmel 3,4). Die Fassung oben bleibt für Flächen, Ränder und Bilder. deko-1 4,55, deko-7 4,76
+     reichen schon. LS.schriftFarbe macht aus var(--deko-N) var(--deko-N-schrift). */
+  --deko-1-schrift: #8e5bd6;
+  --deko-2-schrift: #c24a85;
+  --deko-3-schrift: #b65e20;
+  --deko-4-schrift: #947200;
+  --deko-5-schrift: #0e8578;
+  --deko-6-schrift: #6264ed;
+  --deko-7-schrift: #64748b;
+  /* Fläche mit Schrift (G1 a, LERN_Session34): Körbe, grüne Knöpfe, Timer an, gewählter Fach-Reiter, Klassenmarke.
+     Helle Töne behalten ihre Fläche und tragen dunkle Schrift (gut 5,4, Hinweis 6,3, deko-3 4,7, deko-4 6,7, deko-5
+     5,2) — so bleibt der grüne Knopf vom Hunderter-Grün getrennt (2,1 zwischen beiden) und Orange nicht braun; nur wo
+     dunkle Schrift nicht reicht, die dunklere Fassung mit weisser (deko-1, 2, 6; deko-7 weiss 4,8). Dunkel überall die
+     Fläche selbst mit --k-knopf-text. LS.flaeche(farbe) gibt { grund, schrift }. */
+  --gut-grund: var(--gut);                  --auf-gut: var(--text);
+  --hinweis-grund: var(--hinweis);          --auf-hinweis: var(--text);
+  --deko-1-grund: var(--deko-1-schrift);    --auf-deko-1: var(--k-knopf-text);
+  --deko-2-grund: var(--deko-2-schrift);    --auf-deko-2: var(--k-knopf-text);
+  --deko-3-grund: var(--deko-3);            --auf-deko-3: var(--text);
+  --deko-4-grund: var(--deko-4);            --auf-deko-4: var(--text);
+  --deko-5-grund: var(--deko-5);            --auf-deko-5: var(--text);
+  --deko-6-grund: var(--deko-6-schrift);    --auf-deko-6: var(--k-knopf-text);
+  --deko-7-grund: var(--deko-7);            --auf-deko-7: var(--k-knopf-text);
 
   /* Farben der Teile (Darkmode 3c, DM4 a): hell die bisherigen Werte, dunkel im Block darunter. Je Teil ein Name; die
      Rahmenfarben (Karte, Feld, Text, Knopf, gut, Hinweis) kommen aus kern/kern.css (--k-*). */
@@ -107,10 +133,21 @@
   --deko-5: #2cc9b6;
   --deko-6: #8587f5;
   --deko-7: #94a3b8;
+  /* dunkel sind die Deko-Farben selbst hell genug: als Schrift auf der Karte 4,5 bis 8,7, dunkle Schrift darauf 5,8 bis 11 */
+  --deko-1-schrift: var(--deko-1);
+  --deko-2-schrift: var(--deko-2);
+  --deko-3-schrift: var(--deko-3);
+  --deko-4-schrift: var(--deko-4);
+  --deko-5-schrift: var(--deko-5);
+  --deko-6-schrift: var(--deko-6);
+  --deko-7-schrift: var(--deko-7);
+  --auf-gut: var(--k-knopf-text); --auf-hinweis: var(--k-knopf-text);
+  --auf-deko-1: var(--k-knopf-text); --auf-deko-2: var(--k-knopf-text); --auf-deko-3: var(--k-knopf-text); --auf-deko-4: var(--k-knopf-text);
+  --auf-deko-5: var(--k-knopf-text); --auf-deko-6: var(--k-knopf-text); --auf-deko-7: var(--k-knopf-text);
   --aktiv: #3a3f66;
   --anzeige: #2b3044;
   --aus: #555b7a;
-  --avatar-ersatz: #3a3f58;
+  --avatar-ersatz: #30344a;
   --bemerkung: #3d2e17;
   --blase-mehr: #a6abc4;
   --boden-hell: #1c1f2e;
@@ -291,7 +328,7 @@ button { font-family: inherit; }
 }
 
 .knopf:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--knopf-dunkel); }
-.knopf.gruen { background: var(--gut); box-shadow: 0 6px 0 var(--gut-boden); }
+.knopf.gruen { background: var(--gut-grund); color: var(--auf-gut); box-shadow: 0 6px 0 var(--gut-boden); }
 .knopf.hell { background: var(--k-feld); color: var(--text); box-shadow: 0 6px 0 var(--rand); }
 .knopf:disabled { opacity: .45; cursor: default; }
 
@@ -348,7 +385,7 @@ button { font-family: inherit; }
 
 .tastatur button:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
 .tastatur button.loeschen { background: var(--taste-loeschen); box-shadow: 0 5px 0 var(--taste-loeschen-boden); }
-.tastatur button.ok { background: var(--gut); color: var(--k-knopf-text); box-shadow: 0 5px 0 var(--gut-boden); grid-column: span 2; }
+.tastatur button.ok { background: var(--gut-grund); color: var(--auf-gut); box-shadow: 0 5px 0 var(--gut-boden); grid-column: span 2; }
 .tastatur button.ok:disabled { opacity: .45; }
 
 /* ---------- Anzeige einer eingetippten Zahl ---------- */
@@ -532,11 +569,11 @@ button { font-family: inherit; }
   cursor: pointer;
 }
 
-.timer-schalter.an { background: var(--hinweis); color: var(--k-knopf-text); box-shadow: 0 4px 0 var(--timer-an-boden); }
+.timer-schalter.an { background: var(--hinweis-grund); color: var(--auf-hinweis); box-shadow: 0 4px 0 var(--timer-an-boden); }
 /* Avatar vor dem Namen (AV3 a): Bild aus avatare.js oder Anfangsbuchstabe */
 .avatar { display: inline-flex; width: var(--g, 32px); height: var(--g, 32px); flex: none; vertical-align: middle; }
 .avatar .avatar-bild { width: 100%; height: 100%; }
-.avatar-ersatz { width: 100%; height: 100%; border-radius: 50%; background: var(--avatar-ersatz); color: var(--deko-7);
+.avatar-ersatz { width: 100%; height: 100%; border-radius: 50%; background: var(--avatar-ersatz); color: var(--text-leise);
   display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: calc(var(--g, 32px) * .5); }
 .spieler-zeile .avatar { margin-right: 6px; }
 /* Von der Aufsicht festgelegt (VR1 a): nur anzeigen, nicht antippbar */
@@ -745,7 +782,7 @@ button.link, a.link {
   padding: 12px 8px 10px;
   min-height: 92px;
   cursor: pointer;
-  color: var(--k-knopf-text);
+  color: var(--korb-auf, var(--k-knopf-text));
   background: var(--k);
   box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
   font-family: inherit;
@@ -759,7 +796,7 @@ button.link, a.link {
 }
 .korb-knopf:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, .2); }
 .korb-knopf .bild { font-size: 36px; }
-.korb-knopf small { font-size: 14px; font-weight: 700; opacity: .9; }
+.korb-knopf small { font-size: 14px; font-weight: 700; }
 .korb-knopf.falsch { animation: wackeln .4s; }
 
 /* Kopie eines Teils, die vom Ausgangsort in den gewählten Korb fliegt (LS.fliegen). */
@@ -849,8 +886,9 @@ button.link, a.link {
   height: var(--zelle); display: flex; align-items: center; justify-content: center;
   font-size: calc(var(--zelle) * .62); font-weight: 900; font-variant-numeric: tabular-nums;
 }
-.schriftlich .kopfzelle { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .34); border-radius: 10px; background: var(--f); color: var(--k-knopf-text); opacity: .55; }
-.schriftlich .kopfzelle.aktiv { opacity: 1; transform: scale(1.08); }
+.schriftlich .kopfzelle { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .34); border-radius: 10px;
+  background: color-mix(in srgb, var(--f) 22%, var(--k-karte)); color: var(--text); } /* blass: Ton als Grund, Schrift dunkel (DM4 a; vorher halb durchsichtig, 1,4) */
+.schriftlich .kopfzelle.aktiv { background: var(--f); color: var(--k-knopf-text); transform: scale(1.08); }
 .schriftlich .ziffer { color: var(--f); }
 .schriftlich .zeichen { color: var(--text); }
 /* Übertrag: kleine Zahl im Bläschen, direkt über dem Strich */
@@ -871,7 +909,7 @@ button.link, a.link {
 @keyframes plopp { from { transform: scale(0); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
 /* Nach dem Komma (LERN_Session14): z, h, t neutral, nie in den Stellenfarben; die Kommalinie steht links der Zehntel */
 .schriftlich .st-nk { --f: var(--deko-7); }
-.schriftlich .kopfzelle.st-nk { background: var(--deko-7); }
+.schriftlich .kopfzelle.st-nk { --f: var(--deko-7); }
 .schriftlich .ziffer.st-nk { color: var(--text); }
 .schriftlich .nach-komma { position: relative; }
 .schriftlich .nach-komma::before { content: ""; position: absolute; left: -4px; top: -3px; bottom: -3px; border-left: 3px solid var(--deko-1); }
@@ -1011,13 +1049,13 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .symbol.mischen { stroke-width: 2.4; }
 .symbol.mischen.an { fill: none; stroke: var(--symbol-mischen-an); stroke-width: 2.8; }
 .timer-schalter .symbol, .endlos-titel .symbol { width: 24px; height: 24px; vertical-align: -6px; }
-.timer-schalter.an .symbol.uhr { stroke: var(--k-knopf-text); fill: none; filter: none; }
+.timer-schalter.an .symbol.uhr { stroke: var(--auf-hinweis); fill: none; filter: none; }
 /* Stufen als Level (FB2 a, LERN_Session32): gross Symbol und Nummer, Sterne, Untertitel; ⓘ neben dem Knopf */
 .stufe-huelle { position: relative; display: flex; flex-direction: column; }
 .stufe-huelle > .stufe { flex: 1; text-align: center; }
 .stufe-kopf { display: flex; align-items: center; justify-content: center; gap: 8px; line-height: 1; }
 .stufe-symbol { font-size: 34px; }
-.stufe-nr { font-size: 52px; font-weight: 900; color: var(--farbe, var(--knopf)); }
+.stufe-nr { font-size: 52px; font-weight: 900; color: var(--farbe-schrift, var(--farbe, var(--knopf))); }
 .stufe-name { font-size: 17px; font-weight: 800; margin-top: 2px; }
 .sterne-gross { font-size: 30px; letter-spacing: 3px; margin: 4px 0 2px; }
 .sterne-gross .aus { color: var(--sterne-aus); }

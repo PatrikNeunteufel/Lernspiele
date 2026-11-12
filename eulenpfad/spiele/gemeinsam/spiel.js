@@ -2216,6 +2216,24 @@ const LS = (() => {
   const KORB_FARBEN = ["var(--deko-6)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)", "var(--deko-1)", "var(--deko-4)"];
 
   /**
+   * Farbe als Schrift (DM6 a): aus „var(--deko-N)“ wird „var(--deko-N-schrift)“ (mindestens 4,5 auf Weiss); jede andere
+   * Farbe (Stellen, Knopf, eigene Werte eines Spiels) kommt unverändert zurück.
+   */
+  function schriftFarbe(farbe) {
+    const m = /^var\(--(deko-[1-7])\)$/.exec(String(farbe).trim());
+    return m ? `var(--${m[1]}-schrift)` : farbe;
+  }
+
+  /**
+   * Fläche mit Schrift (G1 a): { grund, schrift } für eine Farbe — bei var(--deko-N), var(--gut), var(--hinweis) die
+   * Namen aus stil.css (helle Töne mit dunkler Schrift, dunklere mit weisser), sonst die Farbe mit --k-knopf-text.
+   */
+  function flaeche(farbe) {
+    const m = /^var\(--(deko-[1-7]|gut|hinweis)\)$/.exec(String(farbe).trim());
+    return m ? { grund: `var(--${m[1]}-grund)`, schrift: `var(--auf-${m[1]})` } : { grund: farbe, schrift: "var(--k-knopf-text)" };
+  }
+
+  /**
    * Karte und Körbe: Die Karte (Bild und Name) gehört in genau einen Korb; bei richtiger Wahl
    * fliegt sie hinein. Hängt Karte und Körbe an ctx.flaeche an.
    * opt.karte: { bild, text } der Karte
@@ -2232,7 +2250,9 @@ const LS = (() => {
     opt.koerbe.forEach((wert, i) => {
       const k = el("button", { type: "button", class: "korb-knopf" });
       wahlInhalt(k, opt.korbInhalt ? opt.korbInhalt(wert) : String(wert));
-      k.style.setProperty("--k", opt.farbe ? opt.farbe(wert, i) : KORB_FARBEN[i % KORB_FARBEN.length]);
+      const f = flaeche(opt.farbe ? opt.farbe(wert, i) : KORB_FARBEN[i % KORB_FARBEN.length]); // Schrift darauf (G1 a)
+      k.style.setProperty("--k", f.grund);
+      k.style.setProperty("--korb-auf", f.schrift);
       k.addEventListener("click", () => {
         if (fertig) return;
         if (wert === opt.richtig) {
@@ -2489,6 +2509,7 @@ const LS = (() => {
           aufsichtHier ? el("span", { class: "stufe-text", text: st.text }) : null,
           timer.an ? el("div", { class: "fuer", style: "margin-top:4px", text: `⏱ ${timer.sekunden} s je Aufgabe` }) : null);
         knopf.style.setProperty("--farbe", st.farbe);
+        knopf.style.setProperty("--farbe-schrift", schriftFarbe(st.farbe)); // die grosse Nummer (DM6 a)
         const huelle = el("div", { class: "stufe-huelle" }, knopf);
         if (!aufsichtHier) {
           const text = el("div", { class: "stufe-text blase-klein", hidden: true, text: st.text });
@@ -3481,7 +3502,7 @@ const LS = (() => {
 
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
-    STELLEN, SKALA, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
+    STELLEN, SKALA, schriftFarbe, flaeche, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
     RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
@@ -3539,6 +3560,10 @@ const STIL = (() => {
     ["[data-stil-bereich]", () => null],
     ["[data-stil-bereich] .stufe", () => "links"],
     ["[data-stil-bereich] .rangliste", () => null],
+    // Fach- und Themenblöcke der Startseite (Hinweis Patrik, LERN_Session34): <details> zeigt zugeklappt nur seinen Kopf
+    // und blendet ein SVG darin aus — der Rahmen kommt darum als Maske auf ::after (--hand-maske, start.css)
+    [".fach-block", () => "oben", "maske"],
+    [".thema-block", () => null, "maske"],
   ];
   const an = () => typeof LS !== "undefined" && LS.aussehen("stil") === "hand";
 
@@ -3590,6 +3615,12 @@ const STIL = (() => {
     if (!b || !h || !k.isConnected) return;
     const eintrag = RAHMEN.find(([sel]) => k.matches(sel));
     if (!eintrag) return;
+    if (eintrag[2] === "maske") {
+      const r = parseFloat(getComputedStyle(k).borderTopLeftRadius) || 18;
+      const bild = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${b} ${h}" preserveAspectRatio="none"><path fill-rule="evenodd" d="${pfad(b, h, kennung(k), eintrag[1](k), r)}"/></svg>`;
+      k.style.setProperty("--hand-maske", `url("data:image/svg+xml,${encodeURIComponent(bild)}")`);
+      return;
+    }
     let svg = k.querySelector(":scope > svg.hand-rahmen");
     if (!svg) {
       svg = document.createElementNS(NS, "svg");

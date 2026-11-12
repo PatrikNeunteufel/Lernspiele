@@ -113,7 +113,9 @@ Seite nicht hell aufblitzt. Bis die festen Farben in `stil.css`, `start.css` und
 | Variable | wofür | nie für |
 |---|---|---|
 | `--st-E`, `--st-Z`, `--st-H`, `--st-T`, `--st-ZT`, `--st-HT`, `--st-M`; Klassen `.st-E` … setzen `--f` | **nur Stellen** (Einer rot, Zehner blau, Hunderter grün, ab T wiederholt — wie Calcularis) | Dekoration, Körbe, Stufen |
-| `--deko-1` … `--deko-7` | Spielkarten, Stufen, Körbe, Titel, Säulen und Linien in Grafiken | Stellen |
+| `--deko-1` … `--deko-7` | Spielkarten, Stufen, Körbe, Titel, Säulen und Linien in Grafiken — als Fläche ohne Schrift, Rand, Bild | Stellen; Schrift in der Farbe oder auf ihr |
+| `--deko-N-schrift` (DM6 a) | derselbe Ton mit mindestens 4,5 auf Weiss, wo die Farbe Schrift ist (Stufennummer, Titel); `LS.schriftFarbe("var(--deko-N)")` gibt sie, andere Farben unverändert | Flächen |
+| `--deko-N-grund` mit `--auf-deko-N`, `--gut-grund` mit `--auf-gut`, `--hinweis-grund` mit `--auf-hinweis` (G1 a) | Fläche mit Schrift (Körbe, grüne Knöpfe, Timer an, gewählter Fach-Reiter, Klassenmarke): helle Töne (gut, Hinweis, deko-3, 4, 5) mit dunkler Schrift, deko-1, 2, 6, 7 mit weisser; dunkel die Fläche mit `--k-knopf-text`. `LS.flaeche(farbe)` gibt `{ grund, schrift }` | — |
 | `--gut`, `--gut-hell` | richtig, gelöst | — |
 | `--hinweis`, `--hinweis-hell` | falsch, Hinweis, Zeit um | Strafe (es gibt keine) |
 | `--text`, `--text-leise`, `--rand`, `--karte`, `--knopf`, `--schatten` | Grundgestaltung | — |
@@ -357,8 +359,10 @@ Profil, `filterOffen`), darunter Sortierung, Kacheln/Kompakt und Alle auf/zu. **
 Farbe aus `FACH_BILD` und `fachFarbe` in `start/spiele.js`, für Reiter und Block gleich), darin je Thema ein Block
 (`.thema-block`) mit dem Bild des Themas (`THEMEN[].bild` im Katalog), dem kurzen Namen und ⓘ, das den langen Titel
 zeigt, ohne den Block zuzuklappen; der Titel steht auch beim Darüberfahren (`title`) und beim langen Drücken. Auf- und
-Zuklappen wie bisher (`KERN.uebersicht.gruppen`). Im Stil „hand“ haben die Blöcke ungleiche Ecken statt eines
-SVG-Rahmens, weil ein zugeklapptes `details` nur seinen Kopf zeigt. Eine Kachel ist mindestens 280 px und mindestens ein
+Zuklappen wie bisher (`KERN.uebersicht.gruppen`). Im Stil „hand“ haben die Blöcke ungleiche Ecken und einen
+gezeichneten Rahmen (Fach dick oben, Thema dünn; LERN_Session34) — nicht als SVG, weil ein zugeklapptes `details` nur
+seinen Kopf zeigt, sondern als Maske auf `::after` (`--hand-maske`, gesetzt von `STIL.zeichne`, Eintrag `"maske"` in
+`RAHMEN`). Eine Kachel ist mindestens 280 px und mindestens ein
 Drittel der Zeile breit — höchstens drei nebeneinander (Patrik: vier ist zu viel) —, und die Startseite ist bis 1320 px
 breit (Spiele 980 px; `.buehne:has(> #inhalt)`): auf breiten Bildschirmen werden Blöcke und Kacheln grösser, nicht mehr.
 **Klassen-Rand** (Entscheid G1 a, LERN_Session14): Ist „🎒 Meine Klasse“ aus, bekommt jede Karte eines Kindes mit Klasse
