@@ -91,14 +91,20 @@ const GEGENPROBEN_CSS = [
 ];
 
 // 7. Feste Farben (DM4 a)
-const FESTE_FARBE = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(|\b(?:white|black)\b/gi;
+const FESTE_FARBE = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\([^)]*\)|\b(?:white|black)\b(?!-)/gi; // nicht white-space
 const BILDFARBEN = "Bildfarben:";
+const GLEICH = "Gleich in beiden Modi:"; // Teile, die in beiden Modi gleich aussehen (Leiste der Entwicklung)
+/** Dunkle, halb durchsichtige Farbe (Schatten, Abdunklung): wirkt in beiden Modi und zählt nicht. */
+const DUNKEL_DURCHSICHTIG = f => {
+  const m = f.replace(/\s+/g, "").match(/^rgba\((\d+),(\d+),(\d+),([\d.]+)\)$/i);
+  return !!m && Number(m[4]) < 1 && (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 < 0.45;
+};
 
 /** Zahl der festen Farben einer CSS-Quelle nach Punkt 7 (ohne Kommentare, ohne Variablen in :root, ohne Bildfarben). */
 function festeFarben(text) {
   let n = 0;
   // Kommentare vor dem Zerlegen weg (sie dürfen Klammern enthalten); der Vermerk „Bildfarben:“ bleibt als Marke stehen
-  const ohne = text.replace(/\/\*[\s\S]*?\*\//g, k => (k.includes(BILDFARBEN) ? ` ${BILDFARBEN} ` : " "));
+  const ohne = text.replace(/\/\*[\s\S]*?\*\//g, k => (k.includes(BILDFARBEN) ? ` ${BILDFARBEN} ` : k.includes(GLEICH) ? ` ${BILDFARBEN} ` : " "));
   for (const b of ohne.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
     const [wahl, rumpf] = [b[1].trim(), b[2]];
     if (rumpf.includes(BILDFARBEN)) continue;
@@ -106,7 +112,9 @@ function festeFarben(text) {
     const rootBlock = /^:root\b/.test(wahl.split(/\s+/).pop() || "") && /^:root(\[[^\]]*\])?$/.test(wahl.split(/[\s,]+/).pop());
     for (const d of leer.split(";")) {
       if (rootBlock && /^\s*--/.test(d)) continue;
-      n += (d.match(FESTE_FARBE) || []).length;
+      // color-mix mit einer Variablen ist keine feste Farbe (der Ton kommt aus der Variablen)
+      const d2 = d.replace(/color-mix\([^;]*var\(--[^;]*\)/g, "");
+      n += (d2.match(FESTE_FARBE) || []).filter(f => !DUNKEL_DURCHSICHTIG(f)).length;
     }
   }
   return n;
@@ -115,12 +123,17 @@ function festeFarben(text) {
 // Gegenproben zu Punkt 7: [CSS, erwartete Zahl]
 const GEGENPROBEN_FARBE = [
   [":root { --a: #fff; --b: rgb(1, 2, 3); }", 0, "Variablen in :root"],
-  [".a { color: #fff; background: rgba(0, 0, 0, .1); }", 2, "zwei feste Farben"],
+  [".a { color: #fff; background: rgba(255, 240, 200, .9); }", 2, "zwei feste Farben"],
   [".a { --f: #abc; }", 1, "Variable ausserhalb von :root"],
   [".a { /* Bildfarben: Zeichnung */ fill: #123456; }", 0, "Bildfarben im Block"],
   ["/* .a { color: #fff } */ .b { color: var(--text); }", 0, "nur im Kommentar"],
   [".a { color: white; border: 1px solid black; }", 2, "Farbnamen"],
   ["@media (x) { .a { color: #000; } }", 1, "in @media"],
+  [".a { white-space: nowrap; }", 0, "white-space ist keine Farbe"],
+  [".a { box-shadow: 0 2px 4px rgba(0, 0, 0, .2); }", 0, "dunkler halb durchsichtiger Schatten"],
+  [".a { box-shadow: 0 2px 0 rgba(255, 255, 255, .7); }", 1, "heller halb durchsichtiger Schatten zählt"],
+  [".a { background: color-mix(in srgb, var(--k-feld) 70%, transparent); }", 0, "color-mix mit Variable"],
+  [".a { /* Gleich in beiden Modi: Leiste */ color: #fff; }", 0, "Gleich in beiden Modi"],
 ];
 
 // 6. Stil der App und Farben des Kerns davor; Apps mit Kopf-Skript und ihr Speicher-Präfix (der Lernsteig folgt, Schritt 6)

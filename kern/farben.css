@@ -13,7 +13,8 @@
    Bildgrund bleibt in beiden Modi hell (DM3 a); Schrift darauf nimmt --k-bildtext. */
 :root {
   --k-grund: #fef6e4;          /* Hintergrund der Seite (Eulenpfad: unterer Ton des Himmels) */
-  --k-karte: #ffffff;          /* Karten, Felder, Knöpfe ohne Farbe */
+  --k-karte: #ffffff;          /* Karten */
+  --k-feld: #ffffff;           /* Knöpfe ohne Farbe, Felder, Tasten — auf einer Karte (dunkel eine Stufe heller als sie) */
   --k-text: #2d3047;
   --k-leise: #6b6f8a;          /* leiser Text, Nebensachen */
   --k-rand: #e3e6f3;           /* Ränder und Trennlinien */
@@ -32,6 +33,7 @@
 :root[data-farben="dunkel"] {
   --k-grund: #1a1d2a;
   --k-karte: #262a3b;
+  --k-feld: #323750;
   --k-text: #eef0f7;
   --k-leise: #b3b8cc;
   --k-rand: #4a5175;

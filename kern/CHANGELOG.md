@@ -3,6 +3,10 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.42.0 — 2026-11-12 (LERN_Session33)
+- `farben.css`: `--k-feld` für Knöpfe ohne Farbe, Felder und Tasten auf einer Karte (hell `#ffffff` wie die Karte,
+  dunkel `#323750`, eine Stufe heller als die Karte), für die Umstellung der festen Farben (Darkmode Schritt 3c).
+
 ## 1.41.0 — 2026-11-12 (LERN_Session33)
 - Dunkler Satz in `farben.css` unter `:root[data-farben="dunkel"]` (Entscheid DM1 a), dazu `--k-bildtext` und
   `color-scheme` (hell/dunkel für Formularfelder). Neu `farben.js` (`KERN.farben`: `WAHLEN` hell, dunkel, geraet;

@@ -1,4 +1,4 @@
-/* kern 1.41.0 · Prüfsumme sha256:983f10c04d0be7bb94c729f4e55385ea4f38b704924dc0387e8123b85e269f1c · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.42.0 · Prüfsumme sha256:658c51065a187e1c9331642fd520b425b79eccfbb725c4a92251610a1657fa90 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/farben.css ---- */
 /* Farben der Reihe (Entscheid DM1 a, docs/konzept_darkmode.md): gemeinsame Namen für die Rahmenfarben aller Apps.
 
@@ -15,7 +15,8 @@
    Bildgrund bleibt in beiden Modi hell (DM3 a); Schrift darauf nimmt --k-bildtext. */
 :root {
   --k-grund: #fef6e4;          /* Hintergrund der Seite (Eulenpfad: unterer Ton des Himmels) */
-  --k-karte: #ffffff;          /* Karten, Felder, Knöpfe ohne Farbe */
+  --k-karte: #ffffff;          /* Karten */
+  --k-feld: #ffffff;           /* Knöpfe ohne Farbe, Felder, Tasten — auf einer Karte (dunkel eine Stufe heller als sie) */
   --k-text: #2d3047;
   --k-leise: #6b6f8a;          /* leiser Text, Nebensachen */
   --k-rand: #e3e6f3;           /* Ränder und Trennlinien */
@@ -34,6 +35,7 @@
 :root[data-farben="dunkel"] {
   --k-grund: #1a1d2a;
   --k-karte: #262a3b;
+  --k-feld: #323750;
   --k-text: #eef0f7;
   --k-leise: #b3b8cc;
   --k-rand: #4a5175;

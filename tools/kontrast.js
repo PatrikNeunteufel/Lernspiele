@@ -276,6 +276,8 @@ async function main() {
     }
     for (const modus of modi) {
       console.log(`Modus ${modus}: miss ${auftraege.length} Seiten …`);
+      // Die Seite wendet beim Start die Einstellung des Geräts an (LS.farbenAnwenden): sie gilt für jeden Modus mit
+      await js(`LS.setzeEinstellung("farben", ${JSON.stringify(modus === "dunkel" ? "dunkel" : "hell")}); return true;`);
       await js(MESSEN(auftraege, modus));
       let stand = 0;
       while (stand < auftraege.length) {

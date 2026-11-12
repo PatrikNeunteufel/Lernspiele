@@ -67,8 +67,8 @@ Option `version` an `KERN.meldungen` und `KERN.entwicklung` weiter und zeigen si
 App lädt (`eulenpfad/spiele/gemeinsam/stil.css`, `lernsteig/gemeinsam/stil.css`), lädt **davor**
 `<link rel="stylesheet" href="…/kern/kern.css">` — auch eine Seite ohne `kern.js` (Regelseiten der Strategie-Rätsel);
 `tools/pruefe_skripte.js` Punkt 6 meldet eine, die es nicht tut. `kern.css` setzt nur Variablen `--k-*` (Grund, Karte,
-Text, leiser Text, Rand, Knopf, Boden und Schrift des Knopfs, gut, Hinweis, Fokus, Bildgrund), hell mit den Werten des
-Eulenpfads. Eine App setzt ihre eigenen hellen Töne im eigenen `:root` über dieselben Namen (der Stil der App kommt
+Feld, Text, leiser Text, Rand, Knopf, Boden und Schrift des Knopfs, gut, Hinweis, Fokus, Bildgrund, Bildtext) und
+`color-scheme`, hell mit den Werten des Eulenpfads. Eine App setzt ihre eigenen hellen Töne im eigenen `:root` über dieselben Namen (der Stil der App kommt
 später und gewinnt); ihre alten Namen verweisen auf die neuen (`--text: var(--k-text)`). Der dunkle Satz kommt unter
 `:root[data-farben="dunkel"]` und gewinnt dann über die hellen Werte der Apps, weil er spezifischer ist; App-eigene Töne
 (Himmel, Deko, Stellen, Akzent) bekommen ihre dunkle Fassung im Stil der App.

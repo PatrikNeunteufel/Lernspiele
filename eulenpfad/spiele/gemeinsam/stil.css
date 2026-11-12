@@ -41,8 +41,115 @@
   --deko-6: #6366f1;
   --deko-7: #64748b;
 
+  /* Farben der Teile (Darkmode 3c, DM4 a): hell die bisherigen Werte, dunkel im Block darunter. Je Teil ein Name; die
+     Rahmenfarben (Karte, Feld, Text, Knopf, gut, Hinweis) kommen aus kern/kern.css (--k-*). */
+  --aktiv: #eef0ff;
+  --anzeige: #fbfcff;
+  --aus: #d8dbe8;
+  --avatar-ersatz: #eceef6;
+  --bemerkung: #fff7ed;
+  --blase-mehr: #7a7f9a;
+  --boden-hell: #cdd2ea;
+  --gut-boden: #22975a;
+  --hand-linie: #cfd3e6;
+  --leer: #c5c9de;
+  --los-oben: #eef0fa;
+  --los-unten: #f7f8fd;
+  --marke: #f4f5fb;
+  --marke-rand: #b9bed6;
+  --marke-text: #3d4260;
+  --option-an-boden: #6b3fb0;
+  --papier: #fffdf3;
+  --papier-cursor: #c98400;
+  --papier-feldrand: #d9c77f;
+  --papier-fokus: #f0d36a;
+  --papier-hell: #fffbea;
+  --papier-linie: #efe4b8;
+  --papier-platzhalter: #d6c68e;
+  --papier-rand: #e6d38d;
+  --papier-rand-stark: #c9b87a;
+  --papier-text: #6b5a1e;
+  --papier-zu: #f3ecd0;
+  --sterne-aus: #d6d9e8;
+  --stufe-info: #f0f2fb;
+  --symbol-an: #c98400;
+  --symbol-aus: #a7acc2;
+  --symbol-mischen-an: #e39a00;
+  --symbol-zeiger-an: #7a4f00;
+  --tabelle-zelle: #f8f9fe;
+  --taste-loeschen: #ffe3e3;
+  --taste-loeschen-boden: #f5b5b5;
+  --timer-an-boden: #d97f00;
+  --tipp: #fff7d6;
+  --tipp-boden: #ecd98a;
+  --uebertrag-leer: #9aa0c0;
+  --warn-schrift: #8a4b00;
+  --zeitbalken: #8ee0b0;
+  --zeitleiste: #eef0fb;
+
   --rund: 22px;
   --schrift: "Nunito", "Segoe UI Rounded", "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Dunkel (Darkmode, DM1 a, DM4 a; docs/konzept_darkmode.md): die Rahmenfarben kommen aus kern/kern.css, hier die
+   eigenen Töne des Eulenpfads und die Farben der Teile. Der Ton der Stellen bleibt (rot, blau, grün), heller fürs Dunkle. */
+:root[data-farben="dunkel"] {
+  --himmel-oben: #1d2133;
+  --himmel-unten: #15171f;
+  --schatten: 0 6px 0 rgba(0, 0, 0, .35), 0 10px 24px rgba(0, 0, 0, .45);
+  --rot:   #ff6b6f;
+  --blau:  #4ea6f0;
+  --gruen: #2fb36b;
+  --deko-1: #a77ce8;
+  --deko-2: #ef77b0;
+  --deko-3: #f5944d;
+  --deko-4: #f0c63a;
+  --deko-5: #2cc9b6;
+  --deko-6: #8587f5;
+  --deko-7: #94a3b8;
+  --aktiv: #3a3f66;
+  --anzeige: #2b3044;
+  --aus: #555b7a;
+  --avatar-ersatz: #3a3f58;
+  --bemerkung: #3d2e17;
+  --blase-mehr: #a6abc4;
+  --boden-hell: #1c1f2e;
+  --gut-boden: #2a9d5f;
+  --hand-linie: #4a5175;
+  --leer: #6b7194;
+  --los-oben: #2e3247;
+  --los-unten: #34384f;
+  --marke: #30344a;
+  --marke-rand: #5a6080;
+  --marke-text: #d8dbea;
+  --option-an-boden: #4e3290;
+  --papier: #2f2b1f;
+  --papier-cursor: #f0c040;
+  --papier-feldrand: #7d6e40;
+  --papier-fokus: #c9a93a;
+  --papier-hell: #3a3424;
+  --papier-linie: #4d4430;
+  --papier-platzhalter: #8f835c;
+  --papier-rand: #6e6038;
+  --papier-rand-stark: #8a7a48;
+  --papier-text: #f0e2b0;
+  --papier-zu: #3f3826;
+  --sterne-aus: #555b7a;
+  --stufe-info: #30344a;
+  --symbol-an: #f5b335;
+  --symbol-aus: #7d83a3;
+  --symbol-mischen-an: #f5b335;
+  --symbol-zeiger-an: #7a4f00;
+  --tabelle-zelle: #2b2f42;
+  --taste-loeschen: #4a2c33;
+  --taste-loeschen-boden: #6e3a44;
+  --timer-an-boden: #a86200;
+  --tipp: #3d3518;
+  --tipp-boden: #6e6030;
+  --uebertrag-leer: #8a90b8;
+  --warn-schrift: #ffc070;
+  --zeitbalken: #2f8f5c;
+  --zeitleiste: #30344a;
 }
 
 * { box-sizing: border-box; }
@@ -141,13 +248,13 @@ button { font-family: inherit; }
 .fortschritt span {
   width: 18px; height: 18px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, .7);
-  border: 3px solid #fff;
+  background: color-mix(in srgb, var(--k-feld) 70%, transparent);
+  border: 3px solid var(--k-feld);
   box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
   transition: background .3s, transform .3s;
 }
 
-.fortschritt span.aktiv { transform: scale(1.3); background: #fff; border-color: var(--knopf); }
+.fortschritt span.aktiv { transform: scale(1.3); background: var(--k-feld); border-color: var(--knopf); }
 
 /* Endlos-Modus: Zähler statt Punkte, Wahl im Startbild, Rangliste am Schluss */
 .fortschritt.endlos { font-size: 26px; font-weight: 900; color: var(--knopf); }
@@ -173,7 +280,7 @@ button { font-family: inherit; }
   border: none;
   border-radius: 18px;
   background: var(--knopf);
-  color: #fff;
+  color: var(--k-knopf-text);
   font-size: 24px;
   font-weight: 800;
   padding: 14px 28px;
@@ -184,8 +291,8 @@ button { font-family: inherit; }
 }
 
 .knopf:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--knopf-dunkel); }
-.knopf.gruen { background: var(--gut); box-shadow: 0 6px 0 #22975a; }
-.knopf.hell { background: #fff; color: var(--text); box-shadow: 0 6px 0 var(--rand); }
+.knopf.gruen { background: var(--gut); box-shadow: 0 6px 0 var(--gut-boden); }
+.knopf.hell { background: var(--k-feld); color: var(--text); box-shadow: 0 6px 0 var(--rand); }
 .knopf:disabled { opacity: .45; cursor: default; }
 
 /* ---------- Stufenwahl ---------- */
@@ -203,7 +310,7 @@ button { font-family: inherit; }
   padding: 20px;
   text-align: left;
   cursor: pointer;
-  background: #fff;
+  background: var(--k-karte);
   box-shadow: var(--schatten);
   font-size: 18px;
   color: var(--text);
@@ -229,7 +336,7 @@ button { font-family: inherit; }
 .tastatur button {
   border: none;
   border-radius: 16px;
-  background: #fff;
+  background: var(--k-feld);
   color: var(--text);
   font-size: 30px;
   font-weight: 900;
@@ -240,8 +347,8 @@ button { font-family: inherit; }
 }
 
 .tastatur button:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--rand); }
-.tastatur button.loeschen { background: #ffe3e3; box-shadow: 0 5px 0 #f5b5b5; }
-.tastatur button.ok { background: var(--gut); color: #fff; box-shadow: 0 5px 0 #22975a; grid-column: span 2; }
+.tastatur button.loeschen { background: var(--taste-loeschen); box-shadow: 0 5px 0 var(--taste-loeschen-boden); }
+.tastatur button.ok { background: var(--gut); color: var(--k-knopf-text); box-shadow: 0 5px 0 var(--gut-boden); grid-column: span 2; }
 .tastatur button.ok:disabled { opacity: .45; }
 
 /* ---------- Anzeige einer eingetippten Zahl ---------- */
@@ -250,7 +357,7 @@ button { font-family: inherit; }
   min-height: 76px;
   border-radius: 18px;
   border: 4px dashed var(--rand);
-  background: #fbfcff;
+  background: var(--anzeige);
   font-size: clamp(34px, 7vw, 52px);
   font-weight: 900;
   letter-spacing: 1px;
@@ -262,7 +369,7 @@ button { font-family: inherit; }
   transition: border-color .2s, background .2s;
 }
 
-.anzeige.leer::after { content: "?"; color: #c5c9de; }
+.anzeige.leer::after { content: "?"; color: var(--leer); }
 .anzeige.richtig { border-color: var(--gut); border-style: solid; background: var(--gut-hell); }
 .anzeige.falsch { border-color: var(--hinweis); border-style: solid; background: var(--hinweis-hell); animation: wackeln .4s; }
 
@@ -294,7 +401,7 @@ button { font-family: inherit; }
 
 .blase {
   position: relative;
-  background: #fff;
+  background: var(--k-karte);
   border-radius: 18px;
   padding: 12px 16px;
   font-size: 20px;
@@ -309,17 +416,17 @@ button { font-family: inherit; }
   position: absolute;
   left: -12px; bottom: 16px;
   border: 8px solid transparent;
-  border-right: 12px solid #fff;
+  border-right: 12px solid var(--k-karte);
 }
 
 /* Vorlesen (LERN_Session8): runder Knopf rechts neben der Sprechblase */
 .eule-zeile .vorlesen { flex: none; align-self: center; width: 52px; height: 52px; border: none; border-radius: 50%;
-  background: #fff; box-shadow: var(--schatten); font-size: 24px; cursor: pointer; }
+  background: var(--k-feld); box-shadow: var(--schatten); font-size: 24px; cursor: pointer; }
 .eule-zeile .vorlesen:active { transform: translateY(2px); }
 /* Fehler melden (LERN_Session9): kleiner runder Knopf neben der Blase, Formular über der Seite */
 .melde-zeile { display: flex; justify-content: flex-end; margin: -4px 0 8px; }
 .melde-zeile .melden { height: 36px; padding: 0 12px; border: none; border-radius: 999px;
-  background: #fff; box-shadow: var(--schatten); font: inherit; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; }
+  background: var(--k-feld); box-shadow: var(--schatten); font: inherit; font-size: 14px; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; }
 .melde-zeile .melden:active { transform: translateY(2px); }
 /* Gescrollt wird der Hintergrund, nicht das Fenster: ein Scrollbalken im Fenster schnitte die Rundung ab.
    margin: auto zentriert und lässt bei langem Inhalt den Anfang erreichbar (place-items: center nicht). */
@@ -327,11 +434,11 @@ button { font-family: inherit; }
 .melde-fenster { width: min(560px, 100%); margin: auto; }
 .melde-fenster h2 { margin: 0 0 6px; }
 .melde-fenster h3 { margin: 14px 0 6px; font-size: 17px; }
-.melde-fenster textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 17px; padding: 10px; border-radius: 12px; border: 2px solid #c5c9de; }
+.melde-fenster textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 17px; padding: 10px; border-radius: 12px; border: 2px solid var(--leer); }
 .melde-wahl { display: flex; flex-direction: column; gap: 6px; }
 .melde-wahl button { text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 14px;
-  border: 2px solid var(--rand); border-radius: 14px; min-height: 44px; font: inherit; font-size: 16px; background: #fff; color: var(--text); cursor: pointer; }
-.melde-wahl button[aria-pressed="true"] { background: var(--knopf); border-color: var(--knopf); color: #fff; }
+  border: 2px solid var(--rand); border-radius: 14px; min-height: 44px; font: inherit; font-size: 16px; background: var(--k-feld); color: var(--text); cursor: pointer; }
+.melde-wahl button[aria-pressed="true"] { background: var(--knopf); border-color: var(--knopf); color: var(--k-knopf-text); }
 .melde-zusatz { font-weight: 400; font-size: 14px; opacity: .8; }
 .melde-meldung { color: var(--hinweis); font-weight: 700; min-height: 1em; margin: 6px 0; }
 /* Hilfe und Tipp (LERN_Session9). Während ❓ Hilfe oder 🙋 Melden ist die Aufgabe verdeckt. */
@@ -342,7 +449,7 @@ button { font-family: inherit; }
    Als ::after gezeichnet, damit der Text des Knopfs (Kennung, Prüfung) unverändert bleibt. */
 .mit-tasten [data-marke] { position: relative; }
 .mit-tasten [data-marke]::after { content: attr(data-marke); position: absolute; top: 4px; right: 5px; min-width: 1.1em;
-  padding: 2px 5px; border-radius: 6px; border: 1.5px solid #b9bed6; background: #f4f5fb; color: #3d4260; box-shadow: 0 2px 0 #b9bed6;
+  padding: 2px 5px; border-radius: 6px; border: 1.5px solid var(--marke-rand); background: var(--marke); color: var(--marke-text); box-shadow: 0 2px 0 var(--marke-rand);
   font-size: 13px; font-weight: 800; line-height: 1.1; text-align: center; pointer-events: none; }
 .kopf .hilfe-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
   font-size: 24px; cursor: pointer; flex: none; }
@@ -352,10 +459,10 @@ button { font-family: inherit; }
 /* Tipp (BH2 a, BH2-T a, LERN_Session13): 💡 beim Antwortbereich ohne eigene Zeile — rund und rechts in der Zeile der
    Frage (Text fliesst herum), oder als Taste in der untersten Reihe der Zifferntastatur. */
 .tipp-zeile.schwebt { float: right; margin: 0 0 6px 10px; }
-.tipp-zeile.schwebt .tipp-knopf { width: 52px; height: 52px; border: none; border-radius: 50%; background: #fff7d6;
+.tipp-zeile.schwebt .tipp-knopf { width: 52px; height: 52px; border: none; border-radius: 50%; background: var(--tipp);
   box-shadow: var(--schatten); font-size: 24px; cursor: pointer; }
 .tipp-zeile.in-tastatur { display: contents; }
-.tastatur .tipp-zeile .tipp-knopf { background: #fff7d6; box-shadow: 0 5px 0 #ecd98a; font-size: 26px; }
+.tastatur .tipp-zeile .tipp-knopf { background: var(--tipp); box-shadow: 0 5px 0 var(--tipp-boden); font-size: 26px; }
 /* Mit Dezimaltaste ist die unterste Reihe voll: OK wird schmaler, damit 💡 keine neue Reihe braucht */
 .tastatur:has(.zeichen):has(.tipp-zeile:not([hidden])) button.ok { grid-column: span 1; }
 .tipp-zeile .tipp-knopf:active { transform: translateY(2px); }
@@ -366,7 +473,7 @@ button { font-family: inherit; }
 .blase.kurz { min-height: 0; }
 .blase.kurz .blase-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .blase.gekuerzt, .blase.offen { cursor: pointer; padding-right: 28px; }
-.blase.gekuerzt::after, .blase.offen::after { content: "▾"; position: absolute; right: 10px; bottom: 6px; font-size: 14px; color: #7a7f9a; }
+.blase.gekuerzt::after, .blase.offen::after { content: "▾"; position: absolute; right: 10px; bottom: 6px; font-size: 14px; color: var(--blase-mehr); }
 .blase.offen::after { content: "▴"; }
 /* Langes Drücken liest einen Knopf vor: kein Kontextmenü, keine Textauswahl auf dem Tablet */
 .karte button { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
@@ -375,7 +482,7 @@ button { font-family: inherit; }
 .los-huelle { position: relative; min-height: 140px; }
 .los-huelle.wartet > :not(.los-ueber) { visibility: hidden; }
 .los-ueber { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px;
-  border-radius: 16px; background: repeating-linear-gradient(45deg, #eef0fa 0 12px, #f7f8fd 12px 24px); }
+  border-radius: 16px; background: repeating-linear-gradient(45deg, var(--los-oben) 0 12px, var(--los-unten) 12px 24px); }
 .los-ueber .los-knopf { font-size: 26px; min-width: 160px; }
 .los-zahl { font-size: 72px; font-weight: 900; color: var(--knopf); line-height: 1; }
 .los-zahl:empty { display: none; }
@@ -419,30 +526,30 @@ button { font-family: inherit; }
   font: inherit;
   font-size: 18px;
   font-weight: 900;
-  background: #fff;
+  background: var(--k-feld);
   color: var(--text);
   box-shadow: 0 4px 0 var(--rand);
   cursor: pointer;
 }
 
-.timer-schalter.an { background: var(--hinweis); color: #fff; box-shadow: 0 4px 0 #d97f00; }
+.timer-schalter.an { background: var(--hinweis); color: var(--k-knopf-text); box-shadow: 0 4px 0 var(--timer-an-boden); }
 /* Avatar vor dem Namen (AV3 a): Bild aus avatare.js oder Anfangsbuchstabe */
 .avatar { display: inline-flex; width: var(--g, 32px); height: var(--g, 32px); flex: none; vertical-align: middle; }
 .avatar .avatar-bild { width: 100%; height: 100%; }
-.avatar-ersatz { width: 100%; height: 100%; border-radius: 50%; background: #eceef6; color: var(--deko-7);
+.avatar-ersatz { width: 100%; height: 100%; border-radius: 50%; background: var(--avatar-ersatz); color: var(--deko-7);
   display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: calc(var(--g, 32px) * .5); }
 .spieler-zeile .avatar { margin-right: 6px; }
 /* Von der Aufsicht festgelegt (VR1 a): nur anzeigen, nicht antippbar */
 .aufsicht-fest { display: inline-flex; align-items: center; cursor: default; opacity: .85; }
 
 /* Entwickler-Leiste (Entscheid E2 a): nur bei freigeschaltetem Entwickler-Modus, unten fest */
-.entwickler-leiste {
+.entwickler-leiste { /* Gleich in beiden Modi: Leiste und Listen der Entwicklung, immer dunkel */
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 14px;
   background: #1f2933; color: #fff; font-size: 15px; box-shadow: 0 -2px 8px rgba(0, 0, 0, .2);
 }
-.entwickler-leiste .leise { color: #c5ccd6; }
-.entwickler-leiste a.link { color: #9fd8ff; }
+.entwickler-leiste .leise { /* Gleich in beiden Modi: Leiste und Listen der Entwicklung, immer dunkel */ color: #c5ccd6; }
+.entwickler-leiste a.link { /* Gleich in beiden Modi: Leiste und Listen der Entwicklung, immer dunkel */ color: #9fd8ff; }
 .entwickler-leiste .knopf.klein { min-height: 36px; padding: 4px 12px; font-size: 15px; }
 .entwickler-feld { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; }
 .entwickler-feld textarea { font: inherit; font-size: 16px; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; width: 100%; }
@@ -451,9 +558,9 @@ body:has(.entwickler-leiste) { padding-bottom: 90px; }
 .entwickler-listen { flex-basis: 100%; }
 .entwickler-listen summary { cursor: pointer; }
 .entwickler-listen ul { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
-.entwickler-listen .liste-link { background: none; border: none; padding: 2px 0; font: inherit; font-size: 15px;
+.entwickler-listen .liste-link { /* Gleich in beiden Modi: Leiste und Listen der Entwicklung, immer dunkel */ background: none; border: none; padding: 2px 0; font: inherit; font-size: 15px;
   color: #9fd8ff; text-decoration: underline; cursor: pointer; text-align: left; }
-.entwickler-listen .liste-link.geprueft { color: #7ee0a1; }
+.entwickler-listen .liste-link.geprueft { /* Gleich in beiden Modi: Leiste und Listen der Entwicklung, immer dunkel */ color: #7ee0a1; }
 
 /* Inhaltsliste ansehen (Entwickler-Modus, Entscheid E3 a), auf Spielseiten und in der Verwaltung */
 .listen-dialog { width: calc(100% - 32px); max-width: 960px; max-height: 88vh; border: none; border-radius: 16px; padding: 18px 20px; color: var(--text); }
@@ -463,7 +570,7 @@ body:has(.entwickler-leiste) { padding-bottom: 90px; }
 .listen-dialog .knopfzeile { justify-content: flex-start; flex-wrap: wrap; margin: 0 0 8px; }
 .listen-dialog table { border-collapse: separate; border-spacing: 0 4px; width: 100%; font-size: 15px; }
 .listen-dialog th { text-align: left; font-size: 13px; color: var(--text-leise); padding: 4px 8px; }
-.listen-dialog td { padding: 6px 8px; background: #f8f9fe; }
+.listen-dialog td { padding: 6px 8px; background: var(--tabelle-zelle); }
 td.pruef-bild .bild.gezeichnet { font-size: 30px; }
 td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-block; }
 /* Farbe als Inhalt einer Liste (Bemerkung 36): Feld in der Farbe vor dem Code, mit Rand für helle Farben wie Weiss */
@@ -487,19 +594,19 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 .pruef-tabelle .pruef-haken input { width: 22px; height: 22px; }
 .pruef-e { margin-left: 4px; font-size: 12px; font-weight: 800; color: var(--gut); }
 .pruef-bild svg { width: 110px; height: auto; display: block; }
-.pruef-tabelle tr.mit-bemerkung td { background: #fff7ed; }
-.pruef-tabelle tr.pruef-bemerkung td { background: #fff7ed; white-space: normal; font-size: 14px; }
+.pruef-tabelle tr.mit-bemerkung td { background: var(--bemerkung); }
+.pruef-tabelle tr.pruef-bemerkung td { background: var(--bemerkung); white-space: normal; font-size: 14px; }
 .pruef-tabelle tr.pruef-bemerkung button { margin-left: 8px; }
 
 /* Spieloptionen auf der Stufenwahl (Reihenfolge der Teile R1 a, Übertrag UE1 a): je Wert ein Knopf, der gewählte gefüllt — Deko-Farbe, keine Stellenfarbe */
 .option-zeile { gap: 8px; }
 .option-schalter { padding: 8px 14px; font-size: 17px; }
-.option-schalter.an { background: var(--deko-1); color: #fff; box-shadow: 0 4px 0 #6b3fb0; }
+.option-schalter.an { background: var(--deko-1); color: var(--k-knopf-text); box-shadow: 0 4px 0 var(--option-an-boden); }
 
 .zeitleiste {
   height: 14px;
   border-radius: 999px;
-  background: #eef0fb;
+  background: var(--zeitleiste);
   overflow: hidden;
   margin: 0 0 14px;
 }
@@ -508,14 +615,14 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
   height: 100%;
   width: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--gut), #8ee0b0);
+  background: linear-gradient(90deg, var(--gut), var(--zeitbalken));
 }
 
 .zeitleiste.um .zeitbalken { background: var(--hinweis); width: 100% !important; transition: none !important; opacity: .35; }
 
 /* ---------- Speicher voll (LS.speicherVoll, D11 a): Band oben auf jeder Seite, für eine erwachsene Person ---------- */
 
-.speicher-voll { margin: 0; padding: 10px 16px; background: var(--hinweis-hell); color: #8a4b00; border-bottom: 3px solid var(--hinweis); font-weight: 700; font-size: 17px; }
+.speicher-voll { margin: 0; padding: 10px 16px; background: var(--hinweis-hell); color: var(--warn-schrift); border-bottom: 3px solid var(--hinweis); font-weight: 700; font-size: 17px; }
 
 /* ---------- Angemeldet als … (Anmeldung auf der Startseite) ---------- */
 
@@ -550,7 +657,7 @@ button.link, a.link {
   to { transform: scale(1) rotate(0); opacity: 1; }
 }
 
-.aus { color: #d8dbe8; }
+.aus { color: var(--aus); }
 
 .knopfzeile { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
 
@@ -572,7 +679,7 @@ button.link, a.link {
   font-family: inherit;
   font-size: clamp(18px, 3.8vw, 24px);
   font-weight: 900;
-  background: #fff;
+  background: var(--k-feld);
   color: var(--text);
   box-shadow: 0 5px 0 var(--rand);
   cursor: pointer;
@@ -622,7 +729,7 @@ button.link, a.link {
   margin: 6px auto 18px;
   width: fit-content;
   max-width: 100%;
-  background: #fff;
+  background: var(--k-karte);
   border: 4px solid var(--rand);
   border-radius: 20px;
   padding: 10px 28px;
@@ -638,7 +745,7 @@ button.link, a.link {
   padding: 12px 8px 10px;
   min-height: 92px;
   cursor: pointer;
-  color: #fff;
+  color: var(--k-knopf-text);
   background: var(--k);
   box-shadow: 0 6px 0 rgba(0, 0, 0, .2);
   font-family: inherit;
@@ -674,7 +781,7 @@ button.link, a.link {
 .noten-zeile .linie { stroke: var(--text); stroke-width: 1.4; }
 .noten-zeile .strich { stroke: var(--text); stroke-width: 3; }
 .noten-zeile .kopf { fill: var(--text); stroke: var(--text); stroke-width: 1.6; }
-.noten-zeile .kopf.hohl { fill: #fff; stroke-width: 2.4; }
+.noten-zeile .kopf.hohl { fill: var(--k-bildgrund); stroke-width: 2.4; }
 .noten-zeile .hals { stroke: var(--text); stroke-width: 1.8; }
 .noten-zeile .faehnchen, .noten-zeile .punkt { fill: var(--text); }
 .noten-zeile .schluessel { fill: var(--text); font-family: "Noto Music", "Segoe UI Symbol", "Apple Symbols", "Bravura", serif; }
@@ -682,7 +789,7 @@ button.link, a.link {
 .noten-zeile .vorzeichen { fill: var(--text); font-size: 22px; font-weight: 700; }
 .noten-zeile .luecke { fill: var(--hinweis-hell); stroke: var(--deko-4); stroke-width: 2.5; stroke-dasharray: 6 4; }
 .noten-zeile .luecke-text { fill: var(--deko-4); font-size: 26px; font-weight: 900; }
-.notenblatt { background: #fff; border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
+.notenblatt { background: var(--k-bildgrund); border: 3px solid var(--rand); border-radius: 18px; padding: 6px 10px; margin: 4px auto 14px; max-width: 580px; }
 .hoer-zeile { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
 
 /* ---------- Abschluss-Animation (feier.js, Entscheide AN1–AN3 a; reserviert: feier, ruhig) ---------- */
@@ -726,11 +833,11 @@ button.link, a.link {
 @media (prefers-reduced-motion: reduce) { .weiter-balken { animation: none; opacity: .5; } }
 
 /* Notiz für ein Zwischenergebnis (NZ1 a): gestrichelt wie ein Zettel, damit es nicht wie ein Antwortfeld aussieht */
-.zw-notiz { width: calc(var(--zw-breite, 6ch) + 18px); min-height: 40px; box-sizing: border-box; padding: 4px 6px; border: 2px dashed #c9b87a;
-  border-radius: 10px; background: #fffbea; color: #6b5a1e; font: inherit; font-size: 20px; font-weight: 800; text-align: center;
+.zw-notiz { width: calc(var(--zw-breite, 6ch) + 18px); min-height: 40px; box-sizing: border-box; padding: 4px 6px; border: 2px dashed var(--papier-rand-stark);
+  border-radius: 10px; background: var(--papier-hell); color: var(--papier-text); font: inherit; font-size: 20px; font-weight: 800; text-align: center;
   font-variant-numeric: tabular-nums; }
-.zw-notiz::placeholder { color: #d6c68e; font-size: 16px; }
-.zw-notiz:focus { outline: 3px solid #f0d36a; border-style: solid; }
+.zw-notiz::placeholder { color: var(--papier-platzhalter); font-size: 16px; }
+.zw-notiz:focus { outline: 3px solid var(--papier-fokus); border-style: solid; }
 
 /* Schriftlich rechnen (notizblock.js, NB4 a, LERN_Session14): Stellenwerttabelle der Schriftlich-Werkstatt und des
    Notizblocks — eine Spalte je Stelle, links das Rechenzeichen, rechts bei × Zeichen und Faktor. --spalten setzt das Skript. */
@@ -742,7 +849,7 @@ button.link, a.link {
   height: var(--zelle); display: flex; align-items: center; justify-content: center;
   font-size: calc(var(--zelle) * .62); font-weight: 900; font-variant-numeric: tabular-nums;
 }
-.schriftlich .kopfzelle { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .34); border-radius: 10px; background: var(--f); color: #fff; opacity: .55; }
+.schriftlich .kopfzelle { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .34); border-radius: 10px; background: var(--f); color: var(--k-knopf-text); opacity: .55; }
 .schriftlich .kopfzelle.aktiv { opacity: 1; transform: scale(1.08); }
 .schriftlich .ziffer { color: var(--f); }
 .schriftlich .zeichen { color: var(--text); }
@@ -752,13 +859,13 @@ button.link, a.link {
   display: inline-flex; align-items: center; justify-content: center; min-width: 1.5em; height: 1.5em; border-radius: 999px;
   background: var(--hinweis-hell); color: var(--text); border: 2px solid var(--hinweis); animation: plopp .4s;
 }
-.schriftlich .uebertrag.aktiv { border: 3px solid var(--knopf); border-radius: 999px; background: #eef0ff; width: 1.8em; margin: 0 auto; }
-.schriftlich .uebertrag.aktiv.leer::after { content: "?"; color: #9aa0c0; }
+.schriftlich .uebertrag.aktiv { border: 3px solid var(--knopf); border-radius: 999px; background: var(--aktiv); width: 1.8em; margin: 0 auto; }
+.schriftlich .uebertrag.aktiv.leer::after { content: "?"; color: var(--uebertrag-leer); }
 .schriftlich .uebertrag.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
 .schriftlich .strich { grid-column: 1 / -1; height: 0; border-top: 4px solid var(--text); border-radius: 2px; }
-.schriftlich .erg { border: 3px dashed var(--rand); border-radius: 10px; background: #fbfcff; }
-.schriftlich .erg.aktiv { border: 4px solid var(--knopf); background: #eef0ff; }
-.schriftlich .erg.aktiv.leer::after { content: "?"; color: #c5c9de; }
+.schriftlich .erg { border: 3px dashed var(--rand); border-radius: 10px; background: var(--anzeige); }
+.schriftlich .erg.aktiv { border: 4px solid var(--knopf); background: var(--aktiv); }
+.schriftlich .erg.aktiv.leer::after { content: "?"; color: var(--leer); }
 .schriftlich .erg.fertig { border: 3px solid var(--gut); background: var(--gut-hell); color: var(--f); }
 .schriftlich .erg.falsch { border-color: var(--hinweis); background: var(--hinweis-hell); animation: wackeln .4s; }
 @keyframes plopp { from { transform: scale(0); } 70% { transform: scale(1.3); } to { transform: scale(1); } }
@@ -773,12 +880,12 @@ button.link, a.link {
    damit nichts wie ein Antwortfeld aussieht */
 /* Oben rechts neben der Aufgabe, über der Entwickler-Leiste (z-index 50): unten rechts verdeckte sie den Block (LERN_Session14) */
 .notizblock { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ position: fixed; z-index: 55; right: 12px; top: 12px; width: min(460px, calc(100vw - 24px)); max-height: calc(100vh - 110px);
-  display: flex; flex-direction: column; background: #fffdf3; border: 3px solid #e6d38d; border-radius: 18px;
+  display: flex; flex-direction: column; background: var(--papier); border: 3px solid var(--papier-rand); border-radius: 18px;
   box-shadow: 0 10px 30px rgba(40, 45, 80, .25); }
 .notizblock.klein .nb-inhalt { display: none; }
-.nb-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; border-bottom: 2px dashed #e6d38d; }
+.nb-kopf { display: flex; align-items: center; gap: 8px; padding: 8px 10px 6px 14px; border-bottom: 2px dashed var(--papier-rand); }
 .nb-kopf .leise-text { flex: 1; font-size: 13px; }
-.nb-zu { border: none; background: #f3ecd0; border-radius: 10px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 900; cursor: pointer; }
+.nb-zu { border: none; background: var(--papier-zu); border-radius: 10px; min-width: 40px; min-height: 40px; font: inherit; font-weight: 900; cursor: pointer; }
 .nb-inhalt { overflow: auto; padding: 10px 12px 12px; overscroll-behavior: contain; }
 .nb-vorlagen { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .nb-zahlen-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -788,38 +895,38 @@ button.link, a.link {
 .nb-hinweis { margin: 2px 0 8px; font-size: 13px; }
 /* Eigenes Ziffernfeld des Blocks (LERN_Session14): schreibt ins gewählte Zahlenfeld oder Häuschen */
 .nb-tasten { display: grid; grid-template-columns: repeat(6, minmax(36px, 52px)); gap: 6px; margin: 8px 0 4px; }
-.nb-tasten button { min-height: 40px; border: none; border-radius: 10px; background: #fff; box-shadow: 0 3px 0 #e6d38d, inset 0 0 0 2px #efe4b8;
+.nb-tasten button { min-height: 40px; border: none; border-radius: 10px; background: var(--k-feld); box-shadow: 0 3px 0 var(--papier-rand), inset 0 0 0 2px var(--papier-linie);
   font: inherit; font-size: 20px; font-weight: 900; color: var(--text); cursor: pointer; }
-.nb-tasten button:active { transform: translateY(2px); box-shadow: 0 1px 0 #e6d38d, inset 0 0 0 2px #efe4b8; }
+.nb-tasten button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--papier-rand), inset 0 0 0 2px var(--papier-linie); }
 /* Ein Blatt mit mehreren Rechnungen (LERN_Session15): je Rechnung ein Kopf mit Nummer und Rechnung, darunter „Weiterrechnen“;
    das Ziffernfeld steht fest unten, die Rechnungen scrollen darüber */
 .nb-inhalt { flex: 1; min-height: 0; }
-.nb-fuss { padding: 0 12px 10px; border-top: 2px dashed #e6d38d; }
-.nb-schritt { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2px dashed #efe4b8; }
+.nb-fuss { padding: 0 12px 10px; border-top: 2px dashed var(--papier-rand); }
+.nb-schritt { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 2px dashed var(--papier-linie); }
 .nb-schritt-kopf { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .nb-schritt-titel { flex: 1; font-weight: 900; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.nb-nr { color: #6b5a1e; }
+.nb-nr { color: var(--papier-text); }
 .nb-weg { min-width: 32px; min-height: 32px; font-size: 14px; }
-.nb-wahl-titel { display: block; margin-bottom: 4px; font-size: 14px; color: #6b5a1e; }
-.nb-op-wechsel { min-width: 44px; min-height: 44px; border: 2px dashed #c9b87a; border-radius: 10px; background: #fffbea; color: var(--text);
+.nb-wahl-titel { display: block; margin-bottom: 4px; font-size: 14px; color: var(--papier-text); }
+.nb-op-wechsel { min-width: 44px; min-height: 44px; border: 2px dashed var(--papier-rand-stark); border-radius: 10px; background: var(--papier-hell); color: var(--text);
   font-family: inherit; cursor: pointer; }
 .nb-flaeche { overflow-x: auto; }
 .nb-flaeche .schriftlich { --zelle: clamp(26px, calc((min(var(--nb-breite, 460px), 100vw) - 70px) / var(--spalten) - 4px), 44px); justify-content: start; width: max-content; }
-.nb-feld { width: var(--zelle); box-sizing: border-box; padding: 0; text-align: center; color: #6b5a1e; caret-color: #c98400;
-  background: #fff; border: 2px dashed #d9c77f; border-radius: 8px; font-family: inherit; }
-.nb-feld:focus { outline: 3px solid #f0d36a; border-style: solid; }
+.nb-feld { width: var(--zelle); box-sizing: border-box; padding: 0; text-align: center; color: var(--papier-text); caret-color: var(--papier-cursor);
+  background: var(--k-feld); border: 2px dashed var(--papier-feldrand); border-radius: 8px; font-family: inherit; }
+.nb-feld:focus { outline: 3px solid var(--papier-fokus); border-style: solid; }
 .schriftlich .nb-feld.uebertrag { height: calc(var(--zelle) * .62); font-size: calc(var(--zelle) * .4); border-radius: 999px; width: 80%; margin: 0 auto; }
-.nb-feld.karo { border-style: solid; border-color: #efe4b8; border-radius: 3px; }
+.nb-feld.karo { border-style: solid; border-color: var(--papier-linie); border-radius: 3px; }
 /* Mal mit Komma in beiden Zahlen (NB3 a, LERN_Session19): oben ohne Komma gerechnet, darunter die Kommaregel */
-.nb-kommaregel { margin: 2px 0 6px; font-size: 15px; font-weight: 900; color: #6b5a1e; }
+.nb-kommaregel { margin: 2px 0 6px; font-size: 15px; font-weight: 900; color: var(--papier-text); }
 /* Knopf in der Zeile von „Melden“ (NB2 a): gleich hoch, in den Zettelfarben des Blocks */
 .melde-zeile { gap: 8px; }
 /* Immer da und immer gleich hoch: sonst schöbe der Balken der Rückmeldung die Aufgabe hinunter (LERN_Session14) */
 .melde-zeile { min-height: 40px; align-items: center; flex-wrap: nowrap; }
 /* Handy: während der Rückmeldung nur Balken und Weiter, sonst bräche die Zeile um */
 @media (max-width: 560px) { .melde-zeile.weiter-an .nb-platz, .melde-zeile.weiter-an .melden { display: none; } }
-.melde-zeile .nb-knopf { height: 36px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: #fffbea; color: #6b5a1e;
-  border: 2px dashed #c9b87a; box-shadow: none; font-size: 15px; }
+.melde-zeile .nb-knopf { height: 36px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: var(--papier-hell); color: var(--papier-text);
+  border: 2px dashed var(--papier-rand-stark); box-shadow: none; font-size: 15px; }
 .notizblock .knopf { min-height: 40px; padding: 4px 14px; font-size: 16px; }
 /* Die Aufgabe bleibt sichtbar: breit rückt sie nach links, auf dem Handy lässt sie sich über den Block hinauf scrollen;
    verkleinert (▁) gibt der Block den Platz zurück */
@@ -834,7 +941,7 @@ button.link, a.link {
    rund 620 px — so viel wie ab 1100 px. Überschreibt die Regel davor (kein „not (…)“: ältere Safari verwerfen es) */
 @media (min-width: 980px) and (max-width: 1099px) and (orientation: landscape) {
   .notizblock { /* ohne Untergrenze: festes Fenster, nie höher als das Bild; der Inhalt scrollt (H1 a) */ --nb-breite: 360px; left: auto; right: 12px; top: 12px; bottom: auto; width: var(--nb-breite); max-height: calc(100vh - 24px);
-    border-radius: 18px; border-bottom: 3px solid #e6d38d; }
+    border-radius: 18px; border-bottom: 3px solid var(--papier-rand); }
   body.mit-notizblock:not(.notizblock-klein) { padding-bottom: 0; }
   body.mit-notizblock:not(.notizblock-klein) .buehne { margin-right: 372px; }
 }
@@ -862,7 +969,7 @@ button.link, a.link {
 }
 /* (3) Handy und Tablet hoch: die Zifferntastatur bleibt unten im Bild, die Aufgabe scrollt darüber. */
 @media not ((min-width: 900px) and (orientation: landscape)) {
-  .karte > div > .tastatur { position: sticky; bottom: 0; z-index: 3; background: var(--karte, #fff); padding-top: 8px; padding-bottom: 8px;
+  .karte > div > .tastatur { position: sticky; bottom: 0; z-index: 3; background: var(--karte, var(--k-feld)); padding-top: 8px; padding-bottom: 8px;
     box-shadow: 0 -10px 12px -8px rgba(40, 45, 80, .18); }
 }
 
@@ -879,7 +986,7 @@ body.im-mix .buehne { padding-top: 8px; }
    data-stil-bereich (Stufenwahl, Schlussbild ohne die Animation selbst; SP1 Patrik, LERN_Session32). Die laufende Runde
    bleibt glatt. Startseite: start/start.css. */
 svg.hand-rahmen { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 1; }
-svg.hand-rahmen path { fill: var(--f, #cfd3e6); }
+svg.hand-rahmen path { fill: var(--f, var(--hand-linie)); }
 body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .stil-hand [data-stil-bereich] { position: relative; }
 /* Stufen: der Farbstreifen links wird zur dicken Seite des Rahmens; Raster leicht verschoben und skaliert (--rx …) */
@@ -896,15 +1003,15 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .stil-hand [data-stil-bereich] .stufe:nth-child(2n) { border-radius: 24px 14px 26px 16px / 14px 24px 16px 26px; }
 
 /* Symbole der Schalter (LS.schalterSymbol; seit LERN_Session32 hier, auf Kacheln und Stufenwahl gleich) */
-.symbol { width: 30px; height: 30px; fill: none; stroke: #a7acc2; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
-.symbol.an { fill: url(#gold-verlauf); stroke: #c98400; filter: drop-shadow(0 1px 1px rgba(150, 95, 0, .35)); }
+.symbol { width: 30px; height: 30px; fill: none; stroke: var(--symbol-aus); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.symbol.an { fill: url(#gold-verlauf); stroke: var(--symbol-an); filter: drop-shadow(0 1px 1px rgba(150, 95, 0, .35)); }
 .symbol.endlos { stroke-width: 2.6; }
 .symbol.endlos.an { fill: none; stroke: url(#gold-verlauf); stroke-width: 3.4; }
-.symbol.uhr.an .zeiger { stroke: #7a4f00; }
+.symbol.uhr.an .zeiger { stroke: var(--symbol-zeiger-an); }
 .symbol.mischen { stroke-width: 2.4; }
-.symbol.mischen.an { fill: none; stroke: #e39a00; stroke-width: 2.8; }
+.symbol.mischen.an { fill: none; stroke: var(--symbol-mischen-an); stroke-width: 2.8; }
 .timer-schalter .symbol, .endlos-titel .symbol { width: 24px; height: 24px; vertical-align: -6px; }
-.timer-schalter.an .symbol.uhr { stroke: #fff; fill: none; filter: none; }
+.timer-schalter.an .symbol.uhr { stroke: var(--k-knopf-text); fill: none; filter: none; }
 /* Stufen als Level (FB2 a, LERN_Session32): gross Symbol und Nummer, Sterne, Untertitel; ⓘ neben dem Knopf */
 .stufe-huelle { position: relative; display: flex; flex-direction: column; }
 .stufe-huelle > .stufe { flex: 1; text-align: center; }
@@ -913,12 +1020,12 @@ body:not(.stil-hand) svg.hand-rahmen { display: none; }
 .stufe-nr { font-size: 52px; font-weight: 900; color: var(--farbe, var(--knopf)); }
 .stufe-name { font-size: 17px; font-weight: 800; margin-top: 2px; }
 .sterne-gross { font-size: 30px; letter-spacing: 3px; margin: 4px 0 2px; }
-.sterne-gross .aus { color: #d6d9e8; }
+.sterne-gross .aus { color: var(--sterne-aus); }
 .stufe .fuer { margin-bottom: 0; }
 .stufe-text { display: block; font-size: 14px; color: var(--text-leise); margin-top: 6px; text-align: left; }
 .stufe-info { position: absolute; top: 8px; right: 8px; z-index: 2; width: 40px; height: 40px; border: none; border-radius: 999px;
-  background: #f0f2fb; color: var(--text-leise); font: inherit; font-size: 22px; font-weight: 900; line-height: 1; cursor: pointer; box-shadow: 0 3px 0 #cdd2ea; }
-.stufe-info[aria-expanded="true"] { background: var(--knopf); color: #fff; box-shadow: 0 3px 0 var(--knopf-dunkel); }
+  background: var(--stufe-info); color: var(--text-leise); font: inherit; font-size: 22px; font-weight: 900; line-height: 1; cursor: pointer; box-shadow: 0 3px 0 var(--boden-hell); }
+.stufe-info[aria-expanded="true"] { background: var(--knopf); color: var(--k-knopf-text); box-shadow: 0 3px 0 var(--knopf-dunkel); }
 .stufe-info:focus-visible { outline: 3px solid var(--knopf); }
-.blase-klein { margin-top: 6px; padding: 8px 12px; border-radius: 12px; background: #fff; box-shadow: var(--schatten); }
+.blase-klein { margin-top: 6px; padding: 8px 12px; border-radius: 12px; background: var(--k-feld); box-shadow: var(--schatten); }
 .stufe-text[hidden] { display: none; }

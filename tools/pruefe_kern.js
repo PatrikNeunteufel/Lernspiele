@@ -2249,7 +2249,7 @@ console.log("listenpruefung.js");
     }
     // Die Namen, auf die die Apps verweisen, sind alle da (heller Satz)
     const hell = saetze.hell || {};
-    for (const n of ["--k-grund", "--k-karte", "--k-text", "--k-leise", "--k-rand", "--k-knopf", "--k-knopf-dunkel",
+    for (const n of ["--k-grund", "--k-karte", "--k-feld", "--k-text", "--k-leise", "--k-rand", "--k-knopf", "--k-knopf-dunkel",
       "--k-knopf-text", "--k-gut", "--k-gut-hell", "--k-hinweis", "--k-hinweis-hell", "--k-fokus", "--k-bildgrund"]) {
       gleich(n in hell, true, `farben.css: ${n} im hellen Satz`);
     }
@@ -2260,7 +2260,7 @@ console.log("listenpruefung.js");
     const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
     const kontrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
     for (const [a, b, soll] of [["--k-text", "--k-karte", 4.5], ["--k-text", "--k-grund", 4.5], ["--k-leise", "--k-karte", 4.5],
-      ["--k-leise", "--k-grund", 4.5], ["--k-knopf-text", "--k-knopf", 4.5], ["--k-gut", "--k-karte", 3], ["--k-hinweis", "--k-karte", 3],
+      ["--k-leise", "--k-grund", 4.5], ["--k-text", "--k-feld", 4.5], ["--k-leise", "--k-feld", 4.5], ["--k-knopf-text", "--k-knopf", 4.5], ["--k-gut", "--k-karte", 3], ["--k-hinweis", "--k-karte", 3],
       ["--k-text", "--k-gut-hell", 4.5], ["--k-text", "--k-hinweis-hell", 4.5], ["--k-fokus", "--k-karte", 3], ["--k-bildtext", "--k-bildgrund", 4.5]]) {
       if (dunkel[a] && dunkel[b]) gleich(kontrast(dunkel[a], dunkel[b]) >= soll, true, `farben.css dunkel: ${a} auf ${b} ${kontrast(dunkel[a], dunkel[b]).toFixed(2)} unter ${soll}`);
     }
