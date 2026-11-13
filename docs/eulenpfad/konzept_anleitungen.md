@@ -1,6 +1,7 @@
 # Konzept: Aufbau der Anleitungen (Bild, Nummern, Text, Layout)
 
-Stand: Vorlage LERN_Session37 (2026-11-13), Entscheide AL1–AL6 offen. Anlass: Rückmeldung Patrik am Ende von
+Stand: LERN_Session37 (2026-11-13). **Entschieden (Patrik): AL1 a, AL2 a, AL3 a, AL4 a, AL5 a, AL6 a.** Offen: AL7
+(Bilder je Gerät; Rückfrage Patrik zu AL3: Kinder spielen auch im Browser und auf dem Tablet). Anlass: Rückmeldung Patrik am Ende von
 LERN_Session36 (Report, Abschnitt „Rückmeldung Patrik zu den Anleitungen“). Betrifft `eulenpfad/anleitung/kinder.html`,
 `aufsicht.html`, `anleitung.css` und `tools/anleitung_bilder.js`. Frühere Entscheide zum Aufbau gibt es keine (gesucht in
 `docs/konzept_*`, `docs/eulenpfad/konzept_*`, `rahmen.md`, Reports und CHANGELOG; nur AN-B a „nachführen“).
@@ -146,6 +147,32 @@ beide Seiten zeigt, findet in beiden alles am selben Ort. Für b spricht, dass z
 wirken kann. Neben einer linksbündigen Legende bilden aber zwei Satzachsen in einer Karte den unruhigen Eindruck, den
 die Rückmeldung bemängelt. Die Empfehlung kippt, wenn Patrik die Kinderseite als Bilderbuch ohne Legenden will (nur Bild
 und ein Satz). Dann trüge sie keine Nummern, und Zentrieren wäre stimmig.
+
+### AL7 — Welches Gerät die Bilder zeigen
+- **Ort:** `tools/anleitung_bilder.js` (`groesse`), `<figure>` in beiden Seiten, `rahmen.json`, Prüfer (AL5).
+- **Heute:** Kinderbilder nur vom Handy (390 px), Aufsicht nur breit (nach AL3 a 816 px).
+- **Problem (Rückfrage Patrik):** Ein Kind am Tablet oder Computer sieht die App im breiten Aufbau, die Bilder zeigen aber
+  den schmalen; Fach-Reiter, Filter, Karten und Stufen stehen dort anders. Umgekehrt zeigt ein breites Bild auf dem Handy
+  in rund 300 px statt 816: 37 %, die Schrift der App (18 px) im Bild rund 7 px — unlesbar, bei beiden Anleitungen.
+- **a (Empfehlung):** Zwei Fassungen je Bild, beide Anleitungen: **breit** mit 816 px Fensterbreite (Aufbau über 560 px
+  wie auf dem Tablet hoch; Tablet quer und Computer ändern ab 900 px quer und ab 1100 px nur Einzelnes, etwa die Lage des
+  Notizblocks und die Tabs in einer Zeile) und **schmal** mit 390 px (Handy, Faktor 2). Die Seite
+  wählt mit `<picture>` die Fassung nach der eigenen Breite (bis 600 px schmal). Eine Legende für beide: dieselben
+  Schlüssel, und die Lesereihenfolge muss in beiden gleich sein; sonst meldet der Prüfer einen Fehler, und die Ziele
+  werden so gewählt, dass sie es ist (etwa ein gemeinsamer Rahmen). Ein Bild, das es nur in einem Aufbau gibt (a04 Tabs:
+  nur breit), steht in `rahmen.json` mit einer Fassung und wird auch auf dem Handy gezeigt.
+- **b:** Nur breit (816 px) für beide Anleitungen.
+- **c:** Kinder nur schmal wie heute, Aufsicht nur breit.
+
+*Warum die Empfehlung:* Nur bei a sieht jedes Kind und jede Aufsicht die App so, wie sie auf dem eigenen Gerät aussieht,
+und lesbar: breit 1 : 1 (18 px), schmal 300 von 390 px (77 %, rund 14 px). b ist auf dem Handy unlesbar (rund 7 px),
+c zeigt am Tablet einen fremden Aufbau — genau die Verwirrung aus der Rückfrage. Gegen a spricht die doppelte Zahl
+der Bilder (rund 70 statt 36) und ein längerer Lauf des Werkzeugs; das kostet nur Rechenzeit, Werkzeug und Prüfer machen
+beide Fassungen gleich. Ein echtes Risiko ist eine Legende, die in einem Aufbau nicht passt: Der Prüfer meldet sie, sie
+geht nicht still durch. Die Empfehlung kippt, wenn mehr als eine Handvoll Bilder in den beiden Aufbauten keine gemeinsame
+Lesereihenfolge zulassen — dann bräuchte jede Fassung eine eigene Legende, und das widerspricht dem gleichen Text für alle.
+Zu prüfen beim Bau: ob ein Bild im Aufbau ab 900 px quer wesentlich anders aussieht (Notizblock a20/k14); dann bekommt
+nur dieses Bild eine dritte Fassung „quer“ (1200 px, `<source media>` ab 900 px quer), nicht alle.
 
 ## 4. Umsetzung (nach den Entscheiden)
 

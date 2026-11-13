@@ -7145,153 +7145,183 @@
         "kopf": [
           "Bild",
           "Name",
-          "Gruppe"
+          "Gruppe",
+          "Art"
         ],
         "zeilen": [
           [
             "💧",
             "Wasser",
-            "Getränk"
+            "Getränk",
+            ""
           ],
           [
             "🍵",
             "Tee ohne Zucker",
-            "Getränk"
+            "Getränk",
+            ""
           ],
           [
             "🍎",
             "Apfel",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🍐",
             "Birne",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🍌",
             "Banane",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🍒",
             "Kirschen",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🍓",
             "Erdbeere",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🍇",
             "Trauben",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🍊",
             "Orange",
-            "Frucht"
+            "Frucht",
+            ""
           ],
           [
             "🥕",
             "Karotte",
-            "Gemüse"
+            "Gemüse",
+            ""
           ],
           [
             "🥦",
             "Brokkoli",
-            "Gemüse"
+            "Gemüse",
+            ""
           ],
           [
             "🥬",
             "Salat",
-            "Gemüse"
+            "Gemüse",
+            ""
           ],
           [
             "🧅",
             "Zwiebel",
-            "Gemüse"
+            "Gemüse",
+            ""
           ],
           [
             "🧄",
             "Knoblauch",
-            "Gemüse"
+            "Gemüse",
+            ""
           ],
           [
             "🍞",
             "Brot",
-            "Stärke"
+            "Stärke",
+            ""
           ],
           [
             "🍝",
             "Teigwaren",
-            "Stärke"
+            "Stärke",
+            ""
           ],
           [
             "🍚",
             "Reis",
-            "Stärke"
+            "Stärke",
+            ""
           ],
           [
             "🥔",
             "Kartoffel",
-            "Stärke"
+            "Stärke",
+            ""
           ],
           [
             "🥛",
             "Milch",
-            "Eiweiss"
+            "Eiweiss",
+            ""
           ],
           [
             "🧀",
             "Käse",
-            "Eiweiss"
+            "Eiweiss",
+            ""
           ],
           [
             "🥚",
             "Ei",
-            "Eiweiss"
+            "Eiweiss",
+            ""
           ],
           [
             "🐟",
             "Fisch",
-            "Eiweiss"
+            "Eiweiss",
+            ""
           ],
           [
             "🍗",
             "Poulet",
-            "Eiweiss"
+            "Eiweiss",
+            ""
           ],
           [
             "🍫",
             "Schokolade",
-            "Süsses"
+            "Süsses",
+            "süss"
           ],
           [
             "🍬",
             "Bonbon",
-            "Süsses"
+            "Süsses",
+            "süss"
           ],
           [
             "🍩",
             "Donut",
-            "Süsses"
+            "Süsses",
+            "süss"
           ],
           [
             "🥤",
             "Süssgetränk",
-            "Süsses"
+            "Süsses",
+            "süss"
           ],
           [
             "🍪",
             "Guetsli",
-            "Süsses"
+            "Süsses",
+            "süss"
           ],
           [
             "🍟",
             "Pommes frites",
-            "Süsses"
+            "Süsses",
+            "salzig"
           ]
         ]
       },

@@ -6,7 +6,8 @@
 const ZT_ALLTAG = ["Frucht", "Gemüse", "Getränk", "Stärke", "Süsses"];
 const ztKorb = g => `${GRUPPEN_ZNUENI[g]?.bild || ""} ${GRUPPEN_ZNUENI[g]?.name || g}`.trim();
 const ztAlltag = g => (!ZT_ALLTAG.includes(g) ? "—" : g === "Süsses" ? "nur ab und zu" : "jeden Tag");
-const ztFragen = liste => () => ZNUENI_FRAGEN.filter(f => f[4] === liste);
+const ZT_ART = { "süss": "Süsses", "salzig": "Salziges" };
+const ztFragen =liste => () => ZNUENI_FRAGEN.filter(f => f[4] === liste);
 
 LS.listenPruefung("znueni-teller", {
   lebensmittel: {
@@ -17,7 +18,8 @@ LS.listenPruefung("znueni-teller", {
       id: "lebensmittel", titel: "Lebensmittel", spalten: ["Bild", "Name", "Jeden Tag?"],
       hinweis: "Je Korb eine Gruppe (Name wie im Spiel). Passt das Bild zum Namen, gehört das Lebensmittel eindeutig in "
         + "diesen Korb, und stimmt „jeden Tag“ oder „nur ab und zu“?",
-      eintraege: () => LEBENSMITTEL, gruppe: ([, , g]) => ztKorb(g),
+      // Der Korb „Süsses und Salziges“ in zwei Gruppen nach der Art (Bemerkung 53)
+      eintraege: () => LEBENSMITTEL, gruppe: ([, , g, art]) => ztKorb(g) + (art ? ` · ${ZT_ART[art] || art}` : ""),
       zeile: ([bild, name, g]) => [bild, name, ztAlltag(g)],
     }, {
       id: "gruppen", titel: "Körbe und Erklärungen", spalten: ["Bild", "Korb", "Erklärung"],

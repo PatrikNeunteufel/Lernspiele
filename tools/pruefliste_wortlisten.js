@@ -254,7 +254,7 @@ tabelle("### Fragen", null, ["Stufe", "Frage", "richtig", "falsch"], frage3(KOER
 tabelle("### Wege durch den Körper", null, ["Weg", "Stationen"], KOERPER.WEGE.map(([n, s]) => [n, s.join(" → ")]));
 z("## 18. Znüni-Teller (Lehrplan SG NMG.1.3)");
 z("");
-tabelle("### Lebensmittel und Gruppen", "Gruppe „Stärke“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.", ["Bild", "Name", "Gruppe"], ZNUENI.LEBENSMITTEL);
+tabelle("### Lebensmittel und Gruppen", "Gruppe „Stärke“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“, die Art sagt süss oder salzig.", ["Bild", "Name", "Gruppe", "Art"], ZNUENI.LEBENSMITTEL.map(([b, n, g, a = ""]) => [b, n, g, a]));
 tabelle("### Znüni zur Wahl", null, ["ausgewogen", "nicht ausgewogen"], ZNUENI.ZNUENIS.map(([g, ...s]) => [g.join(""), s.map(x => x.join("")).join("; ")]));
 tabelle("### Fragen", null, ["Frage", "richtig", "falsch"], ZNUENI.ZNUENI_FRAGEN.map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));
 z("## 19. Magnet-Labor (Lehrplan SG NMG.5.2)");
@@ -775,7 +775,7 @@ inListe("koerper-puzzle/sinne", "Sinne", null, ["Frage", "Bild", "Sinnesorgan"],
 for (const liste of ["gelenke-schutz", "organe", "kreislauf-haut"]) inListe(`koerper-puzzle/${liste}`, "Fragen", null, ["Stufe", "Frage", "richtig", "falsch"], frage3(fragenMit(KOERPER.KOERPER_FRAGEN, liste)));
 inListe("koerper-puzzle/wege", "Wege durch den Körper", null, ["Weg", "Stationen"], KOERPER.WEGE.map(([name, s]) => [name, s.join(" → ")]));
 const { GRUPPEN_ZNUENI } = lade("spiele/znueni-teller/lebensmittel.js", ["GRUPPEN_ZNUENI"]);
-inListe("znueni-teller/lebensmittel", "Lebensmittel und Gruppen", null, ["Bild", "Name", "Gruppe"], ZNUENI.LEBENSMITTEL);
+inListe("znueni-teller/lebensmittel", "Lebensmittel und Gruppen", null, ["Bild", "Name", "Gruppe", "Art"], ZNUENI.LEBENSMITTEL.map(([b, n, g, a = ""]) => [b, n, g, a]));
 inListe("znueni-teller/lebensmittel", "Gruppen und Erklärungen", null, ["Gruppe", "Bild", "Name im Spiel", "Erklärung"], Object.entries(GRUPPEN_ZNUENI).map(([g, x]) => [g, x.bild, x.name, x.erklaerung]));
 inListe("znueni-teller/znuenis", "Znüni zur Wahl", null, ["ausgewogen", "nicht ausgewogen"], ZNUENI.ZNUENIS.map(([g, ...s]) => [g.join(""), s.map(x => x.join("")).join("; ")]));
 for (const liste of ["ernaehrung", "region-saison"]) inListe(`znueni-teller/${liste}`, "Fragen", null, ["Frage", "richtig", "falsch"], fragenMit(ZNUENI.ZNUENI_FRAGEN, liste).map(([f, r, a, b]) => [f, r, `${a}; ${b}`]));

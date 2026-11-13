@@ -12,7 +12,10 @@
 //   region-saison  ZNUENI_FRAGEN, Liste im letzten Feld: was bei uns wächst, wann, woher
 const ZNUENI_LISTEN = ["lebensmittel", "znuenis", "ernaehrung", "region-saison"];
 
-// [Bild, Name, Gruppe]; Gruppe: Getränk, Frucht, Gemüse, Stärke, Eiweiss, Süsses
+// [Bild, Name, Gruppe, Art?]; Gruppe: Getränk, Frucht, Gemüse, Stärke, Eiweiss, Süsses
+// Gruppe „Süsses“ ist der eine Korb „Süsses und Salziges“ (wie „Süsses, Salziges“ an der Spitze der
+// Lebensmittelpyramide der SGE); die Art sagt, was es davon ist: „süss“ oder „salzig“ (Bemerkung 53).
+// Das Spiel fragt nur den Korb; die Art trennt die beiden in der Prüfansicht.
 // „Stärke“ wie die Gruppe „Getreideprodukte, Kartoffeln“ der Lebensmittelpyramide (SGE): Kartoffeln
 // sind kein Getreide, gehören aber in dieselbe Gruppe (Bemerkung 52).
 const LEBENSMITTEL = [
@@ -22,7 +25,8 @@ const LEBENSMITTEL = [
   ["🥕", "Karotte", "Gemüse"], ["🥦", "Brokkoli", "Gemüse"], ["🥬", "Salat", "Gemüse"], ["🧅", "Zwiebel", "Gemüse"], ["🧄", "Knoblauch", "Gemüse"],
   ["🍞", "Brot", "Stärke"], ["🍝", "Teigwaren", "Stärke"], ["🍚", "Reis", "Stärke"], ["🥔", "Kartoffel", "Stärke"],
   ["🥛", "Milch", "Eiweiss"], ["🧀", "Käse", "Eiweiss"], ["🥚", "Ei", "Eiweiss"], ["🐟", "Fisch", "Eiweiss"], ["🍗", "Poulet", "Eiweiss"],
-  ["🍫", "Schokolade", "Süsses"], ["🍬", "Bonbon", "Süsses"], ["🍩", "Donut", "Süsses"], ["🥤", "Süssgetränk", "Süsses"], ["🍪", "Guetsli", "Süsses"], ["🍟", "Pommes frites", "Süsses"],
+  ["🍫", "Schokolade", "Süsses", "süss"], ["🍬", "Bonbon", "Süsses", "süss"], ["🍩", "Donut", "Süsses", "süss"], ["🥤", "Süssgetränk", "Süsses", "süss"],
+  ["🍪", "Guetsli", "Süsses", "süss"], ["🍟", "Pommes frites", "Süsses", "salzig"],
 ];
 
 // Gruppen: Name im Korb und Erklärung

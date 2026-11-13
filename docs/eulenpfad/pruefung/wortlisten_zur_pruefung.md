@@ -1334,39 +1334,39 @@ Platzhalter {a}, {b} … werden im Spiel durch Zahlen aus den Bereichen ersetzt;
 
 ### Lebensmittel und Gruppen
 
-Gruppe „Stärke“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“.
+Gruppe „Stärke“ heisst im Spiel „Brot, Teigwaren, Kartoffeln“; „Süsses“ heisst „Süsses und Salziges“, die Art sagt süss oder salzig.
 
-| Bild | Name | Gruppe | ☐ |
-|---|---|---|---|
-| 💧 | Wasser | Getränk | ☐ |
-| 🍵 | Tee ohne Zucker | Getränk | ☐ |
-| 🍎 | Apfel | Frucht | ☐ |
-| 🍐 | Birne | Frucht | ☐ |
-| 🍌 | Banane | Frucht | ☐ |
-| 🍒 | Kirschen | Frucht | ☐ |
-| 🍓 | Erdbeere | Frucht | ☐ |
-| 🍇 | Trauben | Frucht | ☐ |
-| 🍊 | Orange | Frucht | ☐ |
-| 🥕 | Karotte | Gemüse | ☐ |
-| 🥦 | Brokkoli | Gemüse | ☐ |
-| 🥬 | Salat | Gemüse | ☐ |
-| 🧅 | Zwiebel | Gemüse | ☐ |
-| 🧄 | Knoblauch | Gemüse | ☐ |
-| 🍞 | Brot | Stärke | ☐ |
-| 🍝 | Teigwaren | Stärke | ☐ |
-| 🍚 | Reis | Stärke | ☐ |
-| 🥔 | Kartoffel | Stärke | ☐ |
-| 🥛 | Milch | Eiweiss | ☐ |
-| 🧀 | Käse | Eiweiss | ☐ |
-| 🥚 | Ei | Eiweiss | ☐ |
-| 🐟 | Fisch | Eiweiss | ☐ |
-| 🍗 | Poulet | Eiweiss | ☐ |
-| 🍫 | Schokolade | Süsses | ☐ |
-| 🍬 | Bonbon | Süsses | ☐ |
-| 🍩 | Donut | Süsses | ☐ |
-| 🥤 | Süssgetränk | Süsses | ☐ |
-| 🍪 | Guetsli | Süsses | ☐ |
-| 🍟 | Pommes frites | Süsses | ☐ |
+| Bild | Name | Gruppe | Art | ☐ |
+|---|---|---|---|---|
+| 💧 | Wasser | Getränk |  | ☐ |
+| 🍵 | Tee ohne Zucker | Getränk |  | ☐ |
+| 🍎 | Apfel | Frucht |  | ☐ |
+| 🍐 | Birne | Frucht |  | ☐ |
+| 🍌 | Banane | Frucht |  | ☐ |
+| 🍒 | Kirschen | Frucht |  | ☐ |
+| 🍓 | Erdbeere | Frucht |  | ☐ |
+| 🍇 | Trauben | Frucht |  | ☐ |
+| 🍊 | Orange | Frucht |  | ☐ |
+| 🥕 | Karotte | Gemüse |  | ☐ |
+| 🥦 | Brokkoli | Gemüse |  | ☐ |
+| 🥬 | Salat | Gemüse |  | ☐ |
+| 🧅 | Zwiebel | Gemüse |  | ☐ |
+| 🧄 | Knoblauch | Gemüse |  | ☐ |
+| 🍞 | Brot | Stärke |  | ☐ |
+| 🍝 | Teigwaren | Stärke |  | ☐ |
+| 🍚 | Reis | Stärke |  | ☐ |
+| 🥔 | Kartoffel | Stärke |  | ☐ |
+| 🥛 | Milch | Eiweiss |  | ☐ |
+| 🧀 | Käse | Eiweiss |  | ☐ |
+| 🥚 | Ei | Eiweiss |  | ☐ |
+| 🐟 | Fisch | Eiweiss |  | ☐ |
+| 🍗 | Poulet | Eiweiss |  | ☐ |
+| 🍫 | Schokolade | Süsses | süss | ☐ |
+| 🍬 | Bonbon | Süsses | süss | ☐ |
+| 🍩 | Donut | Süsses | süss | ☐ |
+| 🥤 | Süssgetränk | Süsses | süss | ☐ |
+| 🍪 | Guetsli | Süsses | süss | ☐ |
+| 🍟 | Pommes frites | Süsses | salzig | ☐ |
 
 ### Znüni zur Wahl
 
