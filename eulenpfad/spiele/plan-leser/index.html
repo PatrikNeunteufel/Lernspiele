@@ -30,7 +30,11 @@
   .legende-zeile { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; line-height: 1.2; margin: 3px 0; }
   .legende-zeile svg { width: 28px; height: 28px; flex: none; }
   .massstab { margin-top: 8px; font-weight: 800; font-size: 16px; }
-  .massstab span { display: inline-block; width: 40px; height: 8px; background: var(--text); border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  /* Massstab: ein Feld wie auf dem Plan (vorher ein fester Balken von 40 px, nicht so lang wie ein Feld) */
+  .massstab svg { width: 24px; height: 24px; margin-right: 6px; vertical-align: middle; }
+  .massstab rect { stroke: var(--deko-7); stroke-width: 3; }
+  .massstab.schulzimmer rect { /* Bildfarben: Szene auf der Bildkachel */  fill: #f6ead7; }
+  .massstab.quartier rect { /* Bildfarben: Szene auf der Bildkachel */  fill: #dcefcf; }
   .zeichen-gross { display: block; width: 90px; height: 90px; margin: 0 auto 8px; background: var(--k-feld); border: 3px solid var(--rand); border-radius: 14px; }
   /* Ganze Aufgabe im Bild (BH3 a): Legende in Spalten, Legende und Antworten neben dem Plan, wo Platz ist;
      der Plan richtet sich nach der Bildhöhe. */
@@ -383,6 +387,7 @@ function zeichenSvg(code, farbe, cx, cy) {
     case "sechseck": return g(`<polygon points="${[0, 1, 2, 3, 4, 5].map(i => `${(cx + 12 * Math.cos(i * Math.PI / 3)).toFixed(1)},${(cy + 12 * Math.sin(i * Math.PI / 3)).toFixed(1)}`).join(" ")}" ${cc}/>`);
     case "halbkreis": return g(`<path d="M${cx - 13} ${cy + 6}A13 13 0 0 1 ${cx + 13} ${cy + 6}Z" ${cc}/>`);
     case "haus": return g(`<polygon points="${cx},${cy - 13} ${cx + 12},${cy - 2} ${cx + 12},${cy + 11} ${cx - 12},${cy + 11} ${cx - 12},${cy - 2}" ${cc}/>`);
+    case "haken": return g(`<path d="M${cx - 10} ${cy - 11}H${cx + 10}M${cx} ${cy - 11}V${cy + 3}a6 6 0 1 1 -6 6" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>`);
     case "baum": return g(`<rect x="${cx - 2}" y="${cy + 2}" width="4" height="11" ${cc}/><circle cx="${cx}" cy="${cy - 4}" r="9" ${cc}/>`);
     default: return g(`<text class="zeichen-text" x="${cx}" y="${cy + 9}" text-anchor="middle" ${cc}>${code}</text>`);
   }
@@ -438,7 +443,8 @@ function legende(a) {
     const x = ding(p.liste, d);
     box.append(el("div", { class: "legende-zeile" }, legendeZeichen(x), el("span", { text: legendeName(x) })));
   }
-  if (a.massstab) box.append(el("div", { class: "massstab" }, el("span"), document.createTextNode(`1 Feld = ${meter(a.massstab)}`)));
+  if (a.massstab) box.append(el("div", { class: `massstab ${p.liste}` }, svgEl("0 0 30 30", "bildkachel", '<rect x="3" y="3" width="24" height="24" rx="2"/>'),
+    document.createTextNode(`1 Feld = ${meter(a.massstab)}`)));
   return box;
 }
 

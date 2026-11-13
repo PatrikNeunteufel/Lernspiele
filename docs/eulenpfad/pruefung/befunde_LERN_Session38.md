@@ -10,13 +10,16 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Spiel | Stand | Einzelheiten |
 |---|---|---|
 | Geheimschrift-Knacker | erledigt 2026-11-13 (LERN_Session38, GK1 a, GK2 a) | `GEHEIM_SPERRE` |
-| Plan-Leser | in Arbeit seit 2026-11-13 (LERN_Session38); Stufentext behoben, Rest offen | unten |
+| Plan-Leser | in Arbeit seit 2026-11-13 (LERN_Session39); Zeichen und Massstab-Feld behoben, Massstab als Entscheid PL1 offen | Durchgang 7 unten |
+| Taschengeld-Planer | in Arbeit seit 2026-11-13 (LERN_Session39); Bilder behoben, TG1–TG3 als Entscheid offen | Durchgang 7 unten |
+| Pflanzen-Bestimmer | erledigt 2026-11-13 (LERN_Session39); Fichte/Tanne/Eibe, Spitzahorn, Schlüsselfragen, Edelweiss vertretbar | Durchgang 7 unten |
+| Tageslauf-Sonne | erledigt 2026-11-13 (LERN_Session39); Bilder ohne Satz und Abend/Nacht vertretbar | Durchgang 7 unten |
 | Instrumenten-Kenner | erledigt 2026-11-13 (LERN_Session38, BI1 a, IK2 a) | unten |
 | Wassertropfen-Reise | erledigt 2026-11-13 (LERN_Session38, WT1 a) | unten |
 | „Bild verrät“ in zehn Spielen | erledigt 2026-11-13 (LERN_Session38, BI1 a; neun behoben, ein Scheinfund) | Tabelle unten |
 | Lärm-Wächter | erledigt 2026-11-13 (LERN_Session39); Skala vertretbar | Durchgang 6 unten |
 | Kakao-Weg | erledigt 2026-11-13 (LERN_Session39, KW1 a); Zucker vertretbar | Durchgang 6 unten |
-| Erdzeit-Leiter | erledigt 2026-11-13 (LERN_Session38) bis auf die Schreibweise „2 500 000“ | Durchgang 3 unten |
+| Erdzeit-Leiter | erledigt 2026-11-13 (LERN_Session39); „2 500 000“ vertretbar | Durchgang 7 unten |
 | Zeitstrahl-Sortierer | erledigt 2026-11-13 (LERN_Session38); Pfahlbauten und Urgrosseltern vertretbar | Durchgang 3 unten |
 | Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session39); Bleistiftmine im Versuch vertretbar | Durchgang 6 unten |
 | Energie-Wandler | erledigt 2026-11-13 (LERN_Session39) | Durchgang 6 unten |
@@ -142,6 +145,23 @@ Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die 
   Herkunft Schweiz stimmt so nicht — Entscheid KW1 a: Weg aus Altpapier (Rohstoff Altpapier, „aus 9 von 10 Teilen“),
   erster Schritt „Wir bündeln Altpapier für die Papiersammlung.“ ohne „Wer macht das?“; damit ist auch „Forstwarte →
   Landwirtschaft“ weg.
+
+**Durchgang 7 (LERN_Session39)** — ohne Netzabruf, nur nach dem Bild und dem Code:
+- Plan-Leser: Garderobe mit einem Haken (Zeichen „haken“) statt des Kreuzes der Kirche; Spital „H“, Bushaltestelle ein
+  Rechteck (die Haltestellentafel); in der Legende ein Feld wie auf dem Plan neben „1 Feld = … m“ statt eines festen
+  Balkens von 40 px. Plangrösse und Massstab: Entscheid PL1.
+- Erdzeit-Leiter: „2 500 000 Jahren“ vertretbar — die Datei verlangt ganze Zahlen (Stufe 1 ist die 4. Klasse, noch ohne
+  Dezimalzahlen); „2,5 Millionen“ ginge erst ab der 5. Klasse.
+- Pflanzen-Bestimmer: Maiglöckchen mit hängenden Glöckchen (`form: "glocken"`, Zahl null) statt des Sterns wie beim
+  Bärlauch; „Einheimische Pflanzen“ in der Prüfansicht zu „Pflanzen, die bei uns wachsen“ (die Kinder sehen das Wort
+  nicht). Fichte/Tanne/Eibe, Spitzahorn, die Schlüsselfragen zu „schmal“ und „gesägt“, Edelweiss und die Dolden
+  vertretbar.
+- Taschengeld-Planer: Radiergummi, Kaugummi, Sammelbilder, Comic-Heft, Velolicht, Busbillett und Sonnenhut gezeichnet,
+  auch mitten im Text („1 × … für“). Blumen für Mama, Bedarf als Sparziel, Pack mit 10: Entscheide TG1–TG3.
+- Tageslauf-Sonne: „In der Pause am Morgen isst du das Znüni.“ statt „Im Kindergarten …“ (Basisklasse 1). Abend oder
+  Nacht bei Gute Nacht, Teddy, Gutenachtgeschichte vertretbar (vor dem Schlafen). Bilder ohne Satz beim Ordnen und bei
+  „Welches passt nicht?“ vertretbar: Langes Drücken liest den Satz vor (die Hilfe sagt es); nur Bilder mit eindeutiger
+  Tageszeit liessen für Mittag und Nachmittag keins übrig (Spaghetti, Suppe, Guetzli, Sirup passen auch anderswo).
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

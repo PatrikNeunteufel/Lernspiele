@@ -13913,7 +13913,7 @@
             "die Garderobe",
             "der Garderobe",
             "",
-            "kreuz",
+            "haken",
             "1"
           ],
           [
@@ -13994,7 +13994,7 @@
             "die Bushaltestelle",
             "der Bushaltestelle",
             "",
-            "H",
+            "rechteck",
             "4"
           ],
           [
@@ -14029,7 +14029,7 @@
             "das Spital",
             "dem Spital",
             "",
-            "halbkreis",
+            "H",
             "2"
           ],
           [
@@ -18844,7 +18844,7 @@
             "ja"
           ],
           [
-            "🧽",
+            "svg:radiergummi",
             "Radiergummi",
             "150",
             "bedarf"
@@ -18887,7 +18887,7 @@
             "ja"
           ],
           [
-            "👒",
+            "svg:sonnenhut",
             "Sonnenhut",
             "1500",
             "bedarf"
@@ -18905,7 +18905,7 @@
             "bedarf"
           ],
           [
-            "🔦",
+            "svg:velolicht",
             "Velolicht",
             "1500",
             "bedarf"
@@ -18923,7 +18923,7 @@
             "bedarf"
           ],
           [
-            "🚌",
+            "svg:busbillett",
             "Busbillett",
             "250",
             ""
@@ -18983,20 +18983,20 @@
             "wunsch"
           ],
           [
-            "🫧",
+            "svg:kaugummi",
             "Kaugummi",
             "150",
             "wunsch",
             "ja"
           ],
           [
-            "📕",
+            "svg:comicheft",
             "Comic-Heft",
             "700",
             "wunsch"
           ],
           [
-            "🌟",
+            "svg:sammelbilder",
             "Sammelbilder (1 Päckli)",
             "150",
             "wunsch",
@@ -19502,7 +19502,7 @@
             "name: Bärlauch; gruppe: Blume; blatt: lanzettlich; rand: glatt; stellung: null; bluete: zahl: 6; farbe: weiss; merke: Er riecht nach Knoblauch."
           ],
           [
-            "name: Maiglöckchen; gruppe: Blume; blatt: lanzettlich; rand: glatt; stellung: null; bluete: zahl: 6; farbe: weiss; merke: Es ist sehr giftig — nicht mit Bärlauch verwechseln!"
+            "name: Maiglöckchen; gruppe: Blume; blatt: lanzettlich; rand: glatt; stellung: null; bluete: zahl: null; farbe: weiss; form: glocken; merke: Es ist sehr giftig — nicht mit Bärlauch verwechseln!"
           ],
           [
             "name: Grosse Brennnessel; gruppe: Blume; blatt: herzförmig; rand: gesägt; stellung: gegenständig; merke: Ihre Brennhaare brennen auf der Haut."
@@ -24508,7 +24508,7 @@
           ],
           [
             "🍎",
-            "Im Kindergarten isst du das Znüni.",
+            "In der Pause am Morgen isst du das Znüni.",
             "morgen"
           ],
           [

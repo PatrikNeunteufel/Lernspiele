@@ -2545,7 +2545,7 @@ Zeichen frei erfunden.
 | der Computer | dem Computer |  | raute | 6 | ☐ |
 | die Leseecke | der Leseecke |  | halbkreis | 4 | ☐ |
 | der Abfalleimer | dem Abfalleimer |  | kreis | 7 | ☐ |
-| die Garderobe | der Garderobe |  | kreuz | 1 | ☐ |
+| die Garderobe | der Garderobe |  | haken | 1 | ☐ |
 | das Schülerpult | dem Schülerpult | Schülerpulte | rechteck | 4 | ☐ |
 | die Pflanze | der Pflanze | Pflanzen | baum | 5 | ☐ |
 
@@ -2561,12 +2561,12 @@ Zeichen frei erfunden.
 | die Post | der Post |  | stern | 4 | ☐ |
 | der Spielplatz | dem Spielplatz |  | dreieck | 5 | ☐ |
 | der Brunnen | dem Brunnen |  | ring | 6 | ☐ |
-| die Bushaltestelle | der Bushaltestelle |  | H | 4 | ☐ |
+| die Bushaltestelle | der Bushaltestelle |  | rechteck | 4 | ☐ |
 | das Feuerwehrdepot | dem Feuerwehrdepot |  | raute | 2 | ☐ |
 | der Bahnhof | dem Bahnhof |  | balken | 7 | ☐ |
 | der Weiher | dem Weiher |  | welle | 6 | ☐ |
 | die Turnhalle | der Turnhalle |  | sechseck | 3 | ☐ |
-| das Spital | dem Spital |  | halbkreis | 2 | ☐ |
+| das Spital | dem Spital |  | H | 2 | ☐ |
 | der Baum | dem Baum | Bäume | baum | 5 | ☐ |
 | das Wohnhaus | dem Wohnhaus | Wohnhäuser | haus | 7 | ☐ |
 
@@ -3848,20 +3848,20 @@ Preis in Rappen, gerundet für die Schweiz 2026 (geschätzt).
 |---|---|---|---|---|---|
 | 📓 | Schulheft | 200 | bedarf | ja | ☐ |
 | ✏️ | Bleistift | 150 | bedarf | ja | ☐ |
-| 🧽 | Radiergummi | 150 | bedarf | ☐ |
+| svg:radiergummi | Radiergummi | 150 | bedarf | ☐ |
 | 📏 | Lineal | 250 | bedarf | ☐ |
 | 🖍️ | Farbstifte-Schachtel | 1200 | bedarf | ☐ |
 | 📐 | Geodreieck | 400 | bedarf | ☐ |
 | 🖋️ | Füllerpatronen | 350 | bedarf | ☐ |
 | 🎒 | Turnsack | 1500 | bedarf | ☐ |
 | 🪥 | Zahnbürste | 300 | bedarf | ja | ☐ |
-| 👒 | Sonnenhut | 1500 | bedarf | ☐ |
+| svg:sonnenhut | Sonnenhut | 1500 | bedarf | ☐ |
 | 🧴 | Sonnencreme | 1200 | bedarf | ☐ |
 | 🧤 | Winterhandschuhe | 1500 | bedarf | ☐ |
-| 🔦 | Velolicht | 1500 | bedarf | ☐ |
+| svg:velolicht | Velolicht | 1500 | bedarf | ☐ |
 | 🪖 | Velohelm | 5000 | bedarf | ☐ |
 | 👟 | Turnschuhe | 6000 | bedarf | ☐ |
-| 🚌 | Busbillett | 250 |  | ☐ |
+| svg:busbillett | Busbillett | 250 |  | ☐ |
 | 🍎 | Apfel zum Znüni | 80 | bedarf | ja | ☐ |
 | 🥖 | Brötli zum Znüni | 100 | bedarf | ja | ☐ |
 | 🍦 | Glace-Cornet | 400 | wunsch | ☐ |
@@ -3870,9 +3870,9 @@ Preis in Rappen, gerundet für die Schweiz 2026 (geschätzt).
 | 🍭 | Lutscher | 100 | wunsch | ja | ☐ |
 | 🥤 | Limonade (Dose) | 200 | wunsch | ja | ☐ |
 | 🍿 | Popcorn im Kino | 600 | wunsch | ☐ |
-| 🫧 | Kaugummi | 150 | wunsch | ja | ☐ |
-| 📕 | Comic-Heft | 700 | wunsch | ☐ |
-| 🌟 | Sammelbilder (1 Päckli) | 150 | wunsch | ja | ☐ |
+| svg:kaugummi | Kaugummi | 150 | wunsch | ja | ☐ |
+| svg:comicheft | Comic-Heft | 700 | wunsch | ☐ |
+| svg:sammelbilder | Sammelbilder (1 Päckli) | 150 | wunsch | ja | ☐ |
 | 📰 | Kinder-Zeitschrift | 800 | wunsch | ☐ |
 | 📚 | Jugendbuch | 1800 | wunsch | ☐ |
 | 🃏 | Kartenspiel | 1500 | wunsch | ☐ |
@@ -4033,7 +4033,7 @@ Merkmale bitte nachprüfen; null = nicht verwendet.
 | name: Wald-Sauerklee; gruppe: Blume; blatt: dreizählig; rand: glatt; stellung: null; bluete: zahl: 5; farbe: weiss; merke: Seine Blätter schmecken sauer. | ☐ |
 | name: Rotklee; gruppe: Blume; blatt: dreizählig; rand: null; stellung: null; bluete: zahl: viele; farbe: rosa; merke: Seine Blüten sind ein rundes Köpfchen. Bienen lieben ihn. | ☐ |
 | name: Bärlauch; gruppe: Blume; blatt: lanzettlich; rand: glatt; stellung: null; bluete: zahl: 6; farbe: weiss; merke: Er riecht nach Knoblauch. | ☐ |
-| name: Maiglöckchen; gruppe: Blume; blatt: lanzettlich; rand: glatt; stellung: null; bluete: zahl: 6; farbe: weiss; merke: Es ist sehr giftig — nicht mit Bärlauch verwechseln! | ☐ |
+| name: Maiglöckchen; gruppe: Blume; blatt: lanzettlich; rand: glatt; stellung: null; bluete: zahl: null; farbe: weiss; form: glocken; merke: Es ist sehr giftig — nicht mit Bärlauch verwechseln! | ☐ |
 | name: Grosse Brennnessel; gruppe: Blume; blatt: herzförmig; rand: gesägt; stellung: gegenständig; merke: Ihre Brennhaare brennen auf der Haut. | ☐ |
 | name: Sumpfdotterblume; gruppe: Blume; blatt: herzförmig; rand: gekerbt; stellung: null; bluete: zahl: 5; farbe: gelb; merke: Sie wächst an Bächen und auf nassen Wiesen. | ☐ |
 | name: Scharbockskraut; gruppe: Blume; blatt: herzförmig; rand: null; stellung: null; bluete: zahl: null; farbe: gelb; merke: Seine Blätter glänzen. Es blüht im Frühling im Wald. | ☐ |
@@ -5091,7 +5091,7 @@ Erstes Bild hat MEHR davon (bei vorher: zuerst).
 | 🍞 | Zum Zmorge isst du ein Konfibrot. | morgen | ☐ |
 | 🥛 | Zum Zmorge trinkst du ein Glas Milch. | morgen | ☐ |
 | 👕 | Nach dem Aufstehen ziehst du dich an. | morgen | ☐ |
-| 🍎 | Im Kindergarten isst du das Znüni. | morgen | ☐ |
+| 🍎 | In der Pause am Morgen isst du das Znüni. | morgen | ☐ |
 | 🐓 | Der Hahn kräht, die Nacht ist vorbei. | morgen | ☐ |
 | 🍝 | Zum Zmittag gibt es Spaghetti. | mittag | ☐ |
 | 🍲 | Zum Zmittag gibt es eine heisse Suppe. | mittag | ☐ |

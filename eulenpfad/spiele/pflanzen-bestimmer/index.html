@@ -259,7 +259,21 @@ function bluete(b, cx, cy, R) {
   const f = FARBE[b.farbe] || "#ffffff";
   const rand = b.farbe === "weiss" ? "#b8b8b8" : "rgba(0,0,0,.25)";
   const mitte = b.farbe === "rot" ? "#2d2d2d" : b.farbe === "gelb" ? "#e08a00" : "#f2c200";
-  if (typeof b.zahl === "number") {
+  if (b.form === "glocken") {
+    // Hängende Glöckchen an einem gebogenen Stiel (Maiglöckchen; vorher ein offener Stern wie beim Bärlauch,
+    // Befund LERN_Session38) — die Zahl der Zipfel ist so nicht zu zählen, darum zahl: null in der Liste
+    const p0 = [cx - 1.2 * R, cy + 0.3 * R], p1 = [cx, cy - 1.0 * R], p2 = [cx + 1.2 * R, cy + 0.1 * R];
+    g.append(S("path", { d: `M${r1(p0[0])},${r1(p0[1])} Q${r1(p1[0])},${r1(p1[1])} ${r1(p2[0])},${r1(p2[1])}`, fill: "none", ...STIEL_STIL }));
+    const aufKurve = (t, k) => (1 - t) ** 2 * p0[k] + 2 * t * (1 - t) * p1[k] + t ** 2 * p2[k];
+    for (const t of [0.2, 0.43, 0.66, 0.89]) {
+      const x = aufKurve(t, 0), y = aufKurve(t, 1);
+      const br = 0.24 * R, oben = y + 0.22 * R, unten = y + 0.7 * R;
+      g.append(S("path", { d: `M${r1(x)},${r1(y)} V${r1(oben)}`, ...STIEL_STIL, "stroke-width": 2 }),
+        S("path", { d: `M${r1(x - br)},${r1(unten)} Q${r1(x - br)},${r1(oben)} ${r1(x)},${r1(oben)} Q${r1(x + br)},${r1(oben)} ${r1(x + br)},${r1(unten)}`
+          + ` q${r1(-br / 3)},${r1(0.12 * R)} ${r1(-2 * br / 3)},0 q${r1(-br / 3)},${r1(0.12 * R)} ${r1(-2 * br / 3)},0 q${r1(-br / 3)},${r1(0.12 * R)} ${r1(-2 * br / 3)},0 Z`,
+          fill: f, stroke: rand, "stroke-width": 1.5 }));
+    }
+  } else if (typeof b.zahl === "number") {
     const n = b.zahl, ry = n === 4 ? 0.36 * R : n === 6 ? 0.22 * R : 0.3 * R;
     for (let i = 0; i < n; i++) {
       const a = -90 + 360 * i / n, ar = a * Math.PI / 180;

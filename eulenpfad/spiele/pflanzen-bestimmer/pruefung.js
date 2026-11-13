@@ -62,7 +62,7 @@
 
   LS.listenPruefung("pflanzen-bestimmer", {
     pflanzen: {
-      beschreibung: "Einheimische Pflanzen mit ihren Merkmalen (NMG.2.4): Das Kind ordnet Bäume als Laub- oder Nadelbaum, "
+      beschreibung: "Pflanzen, die bei uns wachsen, mit ihren Merkmalen (NMG.2.4): Das Kind ordnet Bäume als Laub- oder Nadelbaum, "
         + "benennt Blattform, Blattrand und Blattstellung und bestimmt Pflanzen mit einem Ja/Nein-Schlüssel nach dem Bild. "
         + `${stufenUeberblick}. Die Blütenteile gehören zum Spiel, nicht zu dieser Liste. `
         + "„—“ heisst: nicht eindeutig oder für die Zeichnung nicht sicher; das Merkmal wird zu dieser Pflanze nie gefragt. "

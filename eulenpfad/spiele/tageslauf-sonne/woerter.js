@@ -17,7 +17,7 @@ const TAETIGKEITEN = [
   ["🍞", "Zum Zmorge isst du ein Konfibrot.", "morgen"],
   ["🥛", "Zum Zmorge trinkst du ein Glas Milch.", "morgen"],
   ["👕", "Nach dem Aufstehen ziehst du dich an.", "morgen"],
-  ["🍎", "Im Kindergarten isst du das Znüni.", "morgen"],
+  ["🍎", "In der Pause am Morgen isst du das Znüni.", "morgen"],
   ["🐓", "Der Hahn kräht, die Nacht ist vorbei.", "morgen"],
 
   ["🍝", "Zum Zmittag gibt es Spaghetti.", "mittag"],

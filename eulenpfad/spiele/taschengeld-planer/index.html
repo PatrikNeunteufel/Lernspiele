@@ -18,6 +18,7 @@
   .tg-zeile { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px dashed var(--rand); }
   .tg-zeile:last-child { border-bottom: none; }
   .tg-zeile .tg-bild { font-size: 1.5em; width: 1.6em; text-align: center; flex: none; }
+  .tg-inline.gezeichnet { vertical-align: -0.2em; }
   .tg-zeile .tg-name { flex: 1; font-weight: 700; min-width: 0; }
   .tg-zeile .tg-preis { font-weight: 900; }
   .tg-preis { white-space: nowrap; }
@@ -59,6 +60,7 @@
 <script src="../gemeinsam/avatare.js"></script>
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/notizblock.js"></script>
@@ -320,7 +322,7 @@ function listeEl(titel, eintraege) {
   for (const e of eintraege) {
     const [name, k] = Array.isArray(e) ? e : [e, 1];
     const w = ware(name);
-    box.append(el("div", { class: "tg-zeile" }, el("span", { class: "tg-bild", text: w.bild }),
+    box.append(el("div", { class: "tg-zeile" }, LS.bild(w.bild, "bild tg-bild"),
       el("span", { class: "tg-name", text: k > 1 ? `${k} × ${w.name}` : w.name }),
       el("span", { class: "tg-preis", text: k > 1 ? `${k} × ${geld(w.rp)}` : geld(w.rp) })));
   }
@@ -459,7 +461,7 @@ LS.spiel({
       for (const name of a.regal) {
         const w = ware(name);
         const k = el("button", { type: "button", class: "tg-ware", "aria-pressed": "false" },
-          el("span", { class: "tg-bild", text: w.bild }), el("span", { text: w.name }), el("span", { class: "tg-preis", text: geld(w.rp) }));
+          LS.bild(w.bild, "bild tg-bild"), el("span", { text: w.name }), el("span", { class: "tg-preis", text: geld(w.rp) }));
         k.addEventListener("click", () => {
           if (ctx.vorbei()) return;
           if (gewaehlt.has(name)) gewaehlt.delete(name);
@@ -492,7 +494,7 @@ LS.spiel({
 
     if (a.art === "sparen") {
       const z = ware(a.ziel);
-      karte.append(el("div", { class: "tg-budget" }, `🎯 Sparziel: ${z.bild} ${z.name} für `, el("span", { class: "tg-preis", text: geld(z.rp) })),
+      karte.append(el("div", { class: "tg-budget" }, "🎯 Sparziel: ", LS.bild(z.bild, "bild tg-inline"), ` ${z.name} für `, el("span", { class: "tg-preis", text: geld(z.rp) })),
         el("div", { class: "tg-zeile" }, el("span", { class: "tg-bild", text: "🐷" }),
           el("span", { class: "tg-name", text: a.schon ? `Im Kässeli sind schon ${geld(a.schon)}` : "Dein Kässeli ist leer." })),
         el("div", { class: "tg-zeile" }, el("span", { class: "tg-bild", text: "📅" }),
@@ -545,7 +547,7 @@ LS.spiel({
       const w = ware(a.ware);
       const notiz = notizenAn(ctx);
       const angebot = (b, [n, p]) => el("div", { class: "tg-angebot" }, el("b", { text: `Angebot ${b}` }),
-        `${n} × ${w.bild} ${w.name}`, el("br"), `für ${geld(p)}`,
+        `${n} × `, LS.bild(w.bild, "bild tg-inline"), ` ${w.name}`, el("br"), `für ${geld(p)}`,
         ...(notiz && n > 1 ? [el("br"), "1 Stück: ", geldNotiz(`Angebot ${b}, Preis für ein Stück`), " Fr."] : []));
       f.append(el("div", { class: "frage", text: "Welches Angebot ist pro Stück günstiger?" }),
         el("div", { class: "tg-angebote sachtext" }, angebot("A", a.a), angebot("B", a.b)));
@@ -563,9 +565,9 @@ LS.spiel({
     const w = ware(a.ware);
     f.append(el("div", { class: "frage", text: `Du brauchst ${a.k} × ${w.name}. Wie kaufst du günstiger ein?` }),
       el("div", { class: "tg-angebote sachtext" },
-        el("div", { class: "tg-angebot" }, el("b", { text: "einzeln" }), `1 × ${w.bild} für ${geld(w.rp)}`,
+        el("div", { class: "tg-angebot" }, el("b", { text: "einzeln" }), "1 × ", LS.bild(w.bild, "bild tg-inline"), ` für ${geld(w.rp)}`,
           ...(a.k > 1 && notizenAn(ctx) ? [el("br"), `${a.k} Stück: `, geldNotiz(`${a.k} Stück einzeln zusammen`), " Fr."] : [])),
-        el("div", { class: "tg-angebot" }, el("b", { text: "Pack" }), `${a.n} × ${w.bild} für ${geld(a.pack)}`)));
+        el("div", { class: "tg-angebot" }, el("b", { text: "Pack" }), `${a.n} × `, LS.bild(w.bild, "bild tg-inline"), ` für ${geld(a.pack)}`)));
     LS.auswahl(ctx, {
       optionen: ["einzeln", "pack", "gleich"], richtig: a.antwort, breite: 120,
       inhalt: o => (o === "einzeln" ? { bild: "1️⃣", text: "einzeln kaufen" } : o === "pack" ? { bild: "📦", text: "den Pack kaufen" } : { bild: "🤝", text: "kostet gleich viel" }),

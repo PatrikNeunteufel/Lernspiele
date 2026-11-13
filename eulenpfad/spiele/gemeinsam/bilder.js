@@ -809,6 +809,44 @@ const BILDER = (() => {
         + `<path d="M30 50 Q50 44 70 50" stroke="#9ab8d6" stroke-width="2" fill="none"/>`
         + [[12, 30], [88, 30], [88, 72], [12, 72]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#6f97bc"/>`).join("") },
 
+    // Taschengeld-Planer (BI1 a, Befund LERN_Session38): Radiergummi 🧽 (Schwamm), Kaugummi 🫧 (Seifenblasen),
+    // Sammelbilder 🌟, Comic-Heft 📕 (Buch), Velolicht 🔦 (Taschenlampe), Busbillett 🚌 (Bus), Sonnenhut 👒 (Damenhut)
+    radiergummi: { name: "Radiergummi (halb weiss, halb blau)", box: "0 0 100 100",
+      svg: `<g transform="rotate(-20 50 50)"><rect x="14" y="34" width="36" height="32" rx="4" fill="#f4f4f4" stroke="#8a929e" stroke-width="2.4"/>`
+        + `<rect x="50" y="34" width="36" height="32" rx="4" fill="#4d93dc" stroke="#2f5f8a" stroke-width="2.4"/></g>`
+        + `<path d="M18 86 q8 -6 16 0 t16 0" stroke="#b8bec8" stroke-width="2" fill="none"/>` },
+    kaugummi: { name: "Kaugummi (Streifen in Papier, einer halb ausgepackt)", box: "0 0 100 100",
+      svg: `<rect x="14" y="40" width="60" height="18" rx="3" fill="#e0569a" stroke="#a83a72" stroke-width="2"/>`
+        + `<rect x="22" y="56" width="60" height="18" rx="3" fill="#7fc7e8" stroke="#3d8fb6" stroke-width="2"/>`
+        + `<rect x="30" y="20" width="56" height="16" rx="3" fill="#f4b6d2" stroke="#a83a72" stroke-width="2" transform="rotate(-12 58 28)"/>`
+        + `<path d="M30 34 L44 30" stroke="#ffffff" stroke-width="2"/>` },
+    sammelbilder: { name: "Sammelbilder (Päckli mit Bildkarten, eine Karte schaut heraus)", box: "0 0 100 100",
+      svg: `<rect x="40" y="10" width="34" height="46" rx="3" fill="#ffffff" stroke="#3a3d4a" stroke-width="2" transform="rotate(12 57 33)"/>`
+        + `<circle cx="58" cy="28" r="9" fill="#f2a12e" transform="rotate(12 57 33)"/>`
+        + `<rect x="18" y="34" width="54" height="58" rx="5" fill="#4d93dc" stroke="#2f5f8a" stroke-width="2.4"/>`
+        + `<path d="M18 46 H72" stroke="#ffffff" stroke-width="3"/><path d="M45 58 l4 9 l10 1 l-7 7 l2 10 l-9 -5 l-9 5 l2 -10 l-7 -7 l10 -1 Z" fill="#f2c12e"/>` },
+    comicheft: { name: "Comic-Heft (dünnes Heft mit Bildkästchen und Sprechblase)", box: "0 0 100 100",
+      svg: `<rect x="18" y="8" width="64" height="84" rx="3" fill="#f2c12e" stroke="#a8860e" stroke-width="2.4"/>`
+        + `<rect x="24" y="20" width="24" height="26" fill="#ffffff" stroke="#3a3d4a" stroke-width="1.6"/><rect x="52" y="20" width="24" height="26" fill="#ffffff" stroke="#3a3d4a" stroke-width="1.6"/>`
+        + `<rect x="24" y="50" width="52" height="34" fill="#ffffff" stroke="#3a3d4a" stroke-width="1.6"/>`
+        + `<path d="M44 56 h24 a4 4 0 0 1 4 4 v8 a4 4 0 0 1 -4 4 h-14 l-6 6 v-6 h-4 a4 4 0 0 1 -4 -4 v-8 a4 4 0 0 1 4 -4 Z" fill="#ffffff" stroke="#3a3d4a" stroke-width="1.6"/>`
+        + `<circle cx="36" cy="33" r="6" fill="#e2483d"/><path d="M58 40 l6 -12 l6 12 Z" fill="#4d93dc"/>` },
+    velolicht: { name: "Velolicht (Lampe mit Halter am Lenker, Lichtstrahl)", box: "0 0 100 100",
+      svg: `<path d="M6 70 H40" stroke="#3a3d4a" stroke-width="7" stroke-linecap="round"/>`
+        + `<path d="M28 70 V54" stroke="#5f6673" stroke-width="4"/>`
+        + `<rect x="18" y="36" width="30" height="20" rx="6" fill="#3a3d4a"/><path d="M48 34 L56 32 V60 L48 58 Z" fill="#f2c12e" stroke="#a8860e" stroke-width="1.6"/>`
+        + `<path d="M58 34 L96 18 V74 L58 58 Z" fill="#f9e27a" fill-opacity="0.7"/>` },
+    busbillett: { name: "Busbillett (Fahrkarte aus Papier mit Bus und Preis)", box: "0 0 100 100",
+      svg: `<path d="M8 28 H92 V44 a6 6 0 0 0 0 12 V72 H8 V56 a6 6 0 0 0 0 -12 Z" fill="#ffffff" stroke="#3a3d4a" stroke-width="2.4"/>`
+        + `<path d="M64 30 V70" stroke="#8a929e" stroke-width="2" stroke-dasharray="3 3"/>`
+        + `<rect x="18" y="38" width="36" height="18" rx="4" fill="#e2483d"/><rect x="22" y="41" width="9" height="7" fill="#d9f0fb"/><rect x="34" y="41" width="9" height="7" fill="#d9f0fb"/>`
+        + `<circle cx="26" cy="58" r="3.4" fill="#3a3d4a"/><circle cx="46" cy="58" r="3.4" fill="#3a3d4a"/>`
+        + `<path d="M72 42 H86 M72 50 H84 M72 58 H86" stroke="#3a3d4a" stroke-width="2.4"/>` },
+    sonnenhut: { name: "Sonnenhut für Kinder (breite Krempe, Band)", box: "0 0 100 100",
+      svg: `<ellipse cx="50" cy="66" rx="44" ry="14" fill="#e8d08a" stroke="#a8860e" stroke-width="2.2"/>`
+        + `<path d="M28 64 Q28 30 50 30 Q72 30 72 64 Z" fill="#e8d08a" stroke="#a8860e" stroke-width="2.2"/>`
+        + `<path d="M29 56 Q50 62 71 56 L71 62 Q50 68 29 62 Z" fill="#4d93dc"/>` },
+
     // Körbe der Lebensräume (lebensraum, BI1 a): Landschaften statt eines Tiers oder einer Pflanze der Karten (vorher
     // Fichte 🌲 → Korb 🌲 Wald, Gänseblümchen 🌼 → Korb 🌼 Wiese)
     lrWald: { name: "Wald (Nadel- und Laubbäume)", box: "0 0 100 100",

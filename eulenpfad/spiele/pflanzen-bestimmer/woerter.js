@@ -15,7 +15,8 @@
      stellung   „gegenständig“ (zwei Blätter auf gleicher Höhe) oder „wechselständig“ (abwechselnd)
      nadeln     bei Nadelbäumen: „einzeln“, „zu zweit“, „zu fünft“ oder „Büschel“
      bluete     { zahl: Zahl der Blütenblätter oder „viele“ (Körbchen/Köpfchen aus vielen kleinen Blüten),
-                  farbe: „weiss“, „gelb“, „rot“, „rosa“, „blau“, „violett“, „hellviolett“ }
+                  farbe: „weiss“, „gelb“, „rot“, „rosa“, „blau“, „violett“, „hellviolett“,
+                  form: „glocken“ = hängende Glöckchen am Stiel, gezeichnet von der Seite, die Zahl darum null }
      merke      ein kurzer Satz zum Merken
    Schweizer Schreibweise (ss statt ß). */
 
@@ -60,7 +61,7 @@ const PFLANZEN_LISTE = [
   { name: "Wald-Sauerklee", gruppe: "Blume", blatt: "dreizählig", rand: "glatt", stellung: null, bluete: { zahl: 5, farbe: "weiss" }, merke: "Seine Blätter schmecken sauer." },
   { name: "Rotklee", gruppe: "Blume", blatt: "dreizählig", rand: null, stellung: null, bluete: { zahl: "viele", farbe: "rosa" }, merke: "Seine Blüten sind ein rundes Köpfchen. Bienen lieben ihn." },
   { name: "Bärlauch", gruppe: "Blume", blatt: "lanzettlich", rand: "glatt", stellung: null, bluete: { zahl: 6, farbe: "weiss" }, merke: "Er riecht nach Knoblauch." },
-  { name: "Maiglöckchen", gruppe: "Blume", blatt: "lanzettlich", rand: "glatt", stellung: null, bluete: { zahl: 6, farbe: "weiss" }, merke: "Es ist sehr giftig — nicht mit Bärlauch verwechseln!" },
+  { name: "Maiglöckchen", gruppe: "Blume", blatt: "lanzettlich", rand: "glatt", stellung: null, bluete: { zahl: null, farbe: "weiss", form: "glocken" }, merke: "Es ist sehr giftig — nicht mit Bärlauch verwechseln!" },
   { name: "Grosse Brennnessel", gruppe: "Blume", blatt: "herzförmig", rand: "gesägt", stellung: "gegenständig", merke: "Ihre Brennhaare brennen auf der Haut." },
   { name: "Sumpfdotterblume", gruppe: "Blume", blatt: "herzförmig", rand: "gekerbt", stellung: null, bluete: { zahl: 5, farbe: "gelb" }, merke: "Sie wächst an Bächen und auf nassen Wiesen." },
   { name: "Scharbockskraut", gruppe: "Blume", blatt: "herzförmig", rand: null, stellung: null, bluete: { zahl: null, farbe: "gelb" }, merke: "Seine Blätter glänzen. Es blüht im Frühling im Wald." },

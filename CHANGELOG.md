@@ -2283,3 +2283,13 @@
   - Kakao-Weg (kakao-weg): Papier aus Altpapier statt aus dem Schweizer Wald (KW1 a; BAFU: 90 % der Faserstoffe aus
     Altpapier) — Rohstoff Altpapier, erster Schritt „Wir bündeln Altpapier für die Papiersammlung.“, Auflösen statt
     Zerfasern; damit fällt auch „Forstwarte → Landwirtschaft“ weg.
+- **Befunde, Durchgang 7:**
+  - Plan-Leser (plan-leser): Garderobe mit einem Haken statt des Kreuzes (das Kreuz ist im Quartier die Kirche), Spital
+    „H“, Bushaltestelle ein Rechteck; in der Legende ein Feld wie auf dem Plan neben „1 Feld = … m“ statt eines festen
+    Balkens, der nicht so lang war wie ein Feld.
+  - Pflanzen-Bestimmer (pflanzen-bestimmer): Maiglöckchen mit hängenden Glöckchen (`form: "glocken"`) statt des Sterns
+    wie beim Bärlauch; Prüfansicht ohne „einheimisch“.
+  - Taschengeld-Planer (taschengeld-planer): Radiergummi, Kaugummi, Sammelbilder, Comic-Heft, Velolicht, Busbillett und
+    Sonnenhut gezeichnet (`bilder.js`), auch mitten im Text; bilder.js eingebunden.
+  - Tageslauf-Sonne (tageslauf-sonne): „In der Pause am Morgen isst du das Znüni.“ statt „Im Kindergarten …“.
+  - Erdzeit-Leiter: „2 500 000“ bleibt (ganze Zahlen ab der 4. Klasse).
