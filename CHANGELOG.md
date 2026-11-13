@@ -2257,7 +2257,8 @@
     längeren Weg.
   - Bionik-Paare (bionik-paare): Gruppe „widerstand“ für Haifischhaut und Eisvogel, Gecko „(in Entwicklung)“, Termiten
     ohne das Kaminmodell; Ahornsamen, Wabenplatte und Wand mit Klappen gezeichnet (`bilder.js`: ahornSamen,
-    wabenplatte, klappenWand; BI1 a), bilder.js eingebunden.
+    wabenplatte, klappenWand; BI1 a), bilder.js eingebunden. Paar Riesenseerose und Kristallpalast gestrichen (BK1 a:
+    nur populäre Quellen, kein Primärbeleg; wie die übrigen unsicheren Geschichten im Dateikopf).
   - Gemeinde-Helfer (gemeinde-helfer): Feld `auch` (Einrichtung oder Stelle, die ebenfalls passt, nie als Korb oder zur
     Wahl): Schule beim Schwimmen, Werkhof beim Sperrgut, Schulleitung beim Ärgern; Sofa statt Kühlschrank (den nimmt
     auch der Handel zurück), Glasflaschen statt Flaschen (PET nimmt jede Verkaufsstelle zurück); Tipp „öffentlich“

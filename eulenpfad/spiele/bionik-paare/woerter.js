@@ -5,14 +5,15 @@
    Inhaltsliste (Entscheid L4 a): eine Liste, Id „paare“ (Katalog, Eintrag „bionik-paare“).
    Nur Beispiele, bei denen die Erfindung nachweislich nach dem Vorbild entstand oder entwickelt wird
    („in Entwicklung“ steht dann in der Erklärung). Bekannte, aber unsichere Geschichten (Fledermaus und
-   Sonar, Löwenzahn und Fallschirm, Libelle und Hubschrauber) sind bewusst weggelassen.
+   Sonar, Löwenzahn und Fallschirm, Libelle und Hubschrauber) sind bewusst weggelassen, ebenso Riesenseerose und
+   Kristallpalast (nur populäre Quellen, kein Primärbeleg; Entscheid BK1 a, LERN_Session39).
 
    Je Paar: id, vorbild (Name), vbild (Emoji), erfindung, ebild, kann (was das Vorbild besonders kann,
    Stufe 1), eigenschaft (was abgeschaut wurde), kurz (dasselbe in zwei, drei Wörtern, für die Karten der
    Königsstufe), problem (Stufe 5: welches Vorbild hilft?), text (Erklärung nach der Antwort),
    gruppen (ähnliche Vorbilder: kommen nie zusammen als Antworten vor, damit es eindeutig bleibt).
 
-   Emojis: Für Klette, Eisvogel, Mohn, Riesenseerose, Termiten und Tannenzapfen gibt es kein eigenes
+   Emojis: Für Klette, Eisvogel, Mohn, Termiten und Tannenzapfen gibt es kein eigenes
    Zeichen; dort steht ein allgemeines (Pflanze, Vogel, Hügel). Der Name ist massgebend. Ahornsamen, Wabenplatte
    und Wand mit Klappen sind gezeichnet („svg:…“ aus spiele/gemeinsam/bilder.js, BI1 a).
 
@@ -85,12 +86,6 @@ const BIONIK_PAARE = [
     eigenschaft: "Viele Luftschächte lassen frische Luft durch den Bau strömen.", kurz: "Luftschächte",
     problem: "Du möchtest ein Haus in einem heissen Land, das fast ohne Klimaanlage kühl bleibt.",
     text: "Das Eastgate Centre in Harare (Simbabwe) wurde nach dem Vorbild von Termitenbauten gebaut. Luftschächte kühlen es fast ohne Klimaanlage.",
-    gruppen: ["haus", "bauen"] },
-  { id: "seerose", vorbild: "Riesenseerose", vbild: "🍃", erfindung: "Glasdach des Kristallpalasts", ebild: "🏛️",
-    kann: "Ihre riesigen Blätter liegen flach auf dem Wasser. Ein Netz aus dicken Rippen auf der Unterseite stützt sie.",
-    eigenschaft: "Ein Netz aus Rippen trägt eine grosse, dünne Fläche.", kurz: "tragende Rippen",
-    problem: "Du möchtest ein grosses, leichtes Dach aus Glas bauen, das trotzdem stabil ist.",
-    text: "Joseph Paxton züchtete die Riesenseerose und studierte die Rippen ihrer Blätter. Danach baute er 1851 in London den Kristallpalast aus Eisen und Glas.",
     gruppen: ["haus", "bauen"] },
   { id: "mohn", vorbild: "Mohnkapsel", vbild: "🌱", erfindung: "Salzstreuer", ebild: "🧂",
     kann: "Ihre Kapsel hat oben kleine Löcher. Schüttelt der Wind sie, fallen die Samen nach und nach heraus.",

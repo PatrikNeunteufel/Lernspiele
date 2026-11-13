@@ -24,7 +24,7 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Wetter und Jahreszeiten | erledigt 2026-11-13 (LERN_Session38); Grenzfälle der Jahreszeiten vertretbar | Durchgang 4 unten |
 | Datei-Typen | erledigt 2026-11-13 (LERN_Session39); .pdf, .avi, .bmp und GROESSEN vertretbar | Durchgang 5 unten |
 | Blutkreislauf-Lotse | erledigt 2026-11-13 (LERN_Session39) | Durchgang 5 unten |
-| Bionik-Paare | in Arbeit seit 2026-11-13 (LERN_Session39); behoben, Riesenseerose als Entscheid offen | Durchgang 5 unten |
+| Bionik-Paare | erledigt 2026-11-13 (LERN_Session39, BK1 a) | Durchgang 5 unten |
 | Gemeinde-Helfer | erledigt 2026-11-13 (LERN_Session39); ID, Einkaufszentrum, Turnhalle, Abläufe vertretbar (ZU PRÜFEN) | Durchgang 5 unten |
 | Kulturen-Koffer | in Arbeit seit 2026-11-13 (LERN_Session39); behoben, Vase, Grosse Mauer, Katze, Augusta Raurica offen | Durchgang 5 unten |
 | übrige | offen | unten |
@@ -112,7 +112,7 @@ als im Lungenkreislauf (etwa 120 gegen 25 mmHg) nur aus der Zusammenfassung der 
 Termiten: [Harvard Magazine 2015](https://www.harvardmagazine.com/2015/10/harvard-study-finds-that-termite-mound-functions-as-lung-that-sneezes-carbon-dioxide)
 (Zusammenfassung: Luftstrom durch tägliche Temperaturwechsel, nicht als Kamin). Gecko-Haftband: kein Beleg für ein Produkt
 im Handel gefunden, darum „(in Entwicklung)“ wie Spinne und Muschel. Riesenseerose: nur populäre Quellen (Gartengeschichte,
-Bildlegenden), kein Primärbeleg — als Entscheid vorgelegt.
+Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die übrigen unsicheren Geschichten im Dateikopf.
 - Datei-Typen: .gif mit `nieNeben: ["video"]`.
 - Blutkreislauf-Lotse: Themen atmen und gefaesse mit eigenem Tipp; Erklärung der linken Kammer.
 - Bionik-Paare: Gruppe „widerstand“ (hai, eisvogel); Gecko „(in Entwicklung)“; Termiten „Viele Luftschächte lassen
