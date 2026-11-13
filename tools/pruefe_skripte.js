@@ -24,6 +24,12 @@
 //   8. feste Farben in den Skripten einer Spielseite (#…, rgb(), Darkmode Schritt 5, LERN_Session35): nur in den Seiten
 //      aus SKRIPT_BILDFARBEN, je mit Grund (Szene auf der Bildkachel, Gegenstand); sonst ein Fehler, ebenso ein Eintrag
 //      der Liste ohne Farbe im Skript (die Liste bleibt so aktuell).
+//   9. Bilder und Legenden der Anleitungen (eulenpfad/anleitung/*.html, AL5 a, docs/eulenpfad/konzept_anleitungen.md):
+//      jedes Bild steht in einem <figure> mit breiter und schmaler Fassung; die Schlüssel der Legende (data-ziel) sind
+//      genau die Rahmen des Bilds in docs/eulenpfad/anleitung_rahmen.json, in derselben Reihenfolge, in beiden Fassungen;
+//      ein Bild ohne Rahmen hat keine Legende; class="hoch" nur bei einem Bild höchstens halb so breit wie die Karte; keine
+//      Nummer von Hand (class="nr", „(1)“ in der Bildunterschrift); jede Bilddatei hat den Fingerabdruck aus der Liste
+//      (sonst ist sie neuer als die Liste) und wird benutzt, jeder Eintrag der Liste ebenso.
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -235,6 +241,78 @@ function umgebung(css, i) {
   return { geschuetzt, eigenschaft: "" };
 }
 
+// 9. Anleitungen: Bilder und Legenden (AL5 a)
+const ANLEITUNG = "eulenpfad/anleitung", ANLEITUNG_RAHMEN = "docs/eulenpfad/anleitung_rahmen.json";
+const KARTE_BREIT = 816; // Breite der Karte in anleitung.css (main 860, Rand 22): breite Fassung 1 : 1
+const FASSUNG_SRC = /^bilder\/(.+)-(breit|schmal)\.webp$/;
+
+/**
+ * Prüft die Seiten einer Anleitung gegen die Liste der Rahmen. seiten: { <wo>: html }, liste: { <bild>: { <fassung>:
+ * { schluessel, breite, hoehe, fingerabdruck } } }, abdruck: Name der Bilddatei → Fingerabdruck (oder undefined, wenn
+ * sie fehlt). Gibt die Fehler zurück.
+ */
+function pruefeAnleitung(seiten, liste, abdruck, dateienImOrdner) {
+  const fehler = [], benutzt = new Set();
+  for (const [wo, roh] of Object.entries(seiten)) {
+    const html = roh.replace(/<!--[\s\S]*?-->/g, "");
+    if (/class="[^"]*\bnr\b/.test(html)) fehler.push(`${wo}: Nummer von Hand (class="nr") — die Legende zählt selbst (AL1 a)`);
+    const ohneFigur = html.replace(/<figure[\s\S]*?<\/figure>/g, "");
+    if (/<img[^>]+src="bilder\//.test(ohneFigur)) fehler.push(`${wo}: Bild ausserhalb eines <figure> (AL1 a)`);
+    for (const fig of html.matchAll(/<figure([^>]*)>([\s\S]*?)<\/figure>/g)) {
+      const [, attr, inhalt] = fig;
+      const breit = inhalt.match(/<img[^>]*\ssrc="([^"]+)"/)?.[1], schmal = inhalt.match(/<source[^>]*\ssrcset="([^"]+)"/)?.[1];
+      const mb = breit?.match(FASSUNG_SRC), ms = schmal?.match(FASSUNG_SRC);
+      if (!mb || mb[2] !== "breit" || !ms || ms[2] !== "schmal" || mb[1] !== ms[1]) {
+        fehler.push(`${wo}: Bild ${breit || "?"} ohne breite und schmale Fassung desselben Namens (AL7 a)`); continue;
+      }
+      const name = mb[1], eintrag = liste[name];
+      if (!/media="\(max-width: 600px\)"/.test(inhalt)) fehler.push(`${wo}: ${name}: schmale Fassung nicht für „(max-width: 600px)“`);
+      if (!eintrag?.breit || !eintrag?.schmal) { fehler.push(`${wo}: ${name} fehlt in ${ANLEITUNG_RAHMEN} — tools/anleitung_bilder.js laufen lassen`); continue; }
+      benutzt.add(name);
+      if (/<figcaption[^>]*>[^<]*\(\d\)/.test(inhalt)) fehler.push(`${wo}: ${name}: Nummer in der Bildunterschrift — gehört in die Legende (AL1 a)`);
+      const legenden = [...inhalt.matchAll(/<ol class="legende">([\s\S]*?)<\/ol>/g)];
+      if (legenden.length > 1) fehler.push(`${wo}: ${name}: mehr als eine Legende`);
+      const punkte = legenden[0] ? [...legenden[0][1].matchAll(/<li(\s[^>]*)?>/g)].map(l => l[1]?.match(/data-ziel="([^"]+)"/)?.[1] ?? null) : [];
+      if (punkte.includes(null)) fehler.push(`${wo}: ${name}: Legendenpunkt ohne data-ziel`);
+      for (const f of ["breit", "schmal"]) {
+        const soll = eintrag[f].schluessel;
+        if (punkte.join(",") !== soll.join(",")) {
+          fehler.push(`${wo}: ${name} (${f}): Legende ${punkte.join(", ") || "—"}, Rahmen im Bild ${soll.join(", ") || "—"} (AL4 a, AL5 a)`);
+        }
+      }
+      const hoch = /class="[^"]*\bhoch\b/.test(attr), sollHoch = eintrag.breit.breite * 2 <= KARTE_BREIT;
+      if (hoch !== sollHoch) fehler.push(`${wo}: ${name}: class="hoch" ${sollHoch ? "fehlt" : "falsch"} (Bild ${eintrag.breit.breite} px breit, AL2 a)`);
+    }
+  }
+  for (const [name, f] of Object.entries(liste)) {
+    if (!benutzt.has(name)) fehler.push(`${ANLEITUNG_RAHMEN}: ${name} steht in keiner Anleitung`);
+    for (const [fassung, e] of Object.entries(f)) {
+      const datei = `${name}-${fassung}.webp`, ist = abdruck(datei);
+      if (ist === undefined) fehler.push(`${ANLEITUNG}/bilder/${datei} fehlt`);
+      else if (ist !== e.fingerabdruck) fehler.push(`${ANLEITUNG}/bilder/${datei}: anders als in ${ANLEITUNG_RAHMEN} — Bild ohne tools/anleitung_bilder.js geändert`);
+    }
+  }
+  for (const d of dateienImOrdner) {
+    const m = d.match(/^(.+)-(breit|schmal)\.webp$/);
+    if (!m || !liste[m[1]]?.[m[2]]) fehler.push(`${ANLEITUNG}/bilder/${d}: nicht in ${ANLEITUNG_RAHMEN}`);
+  }
+  return fehler;
+}
+
+// Gegenproben zu Punkt 9: [Seite, erwartete Zahl Fehler, Name]
+const GP_LISTE = { x: { breit: { schluessel: ["a", "b"], breite: 816, fingerabdruck: "f" }, schmal: { schluessel: ["a", "b"], breite: 390, fingerabdruck: "f" } } };
+const gpFigur = (legende, extra = "") => `<figure${extra}><picture><source media="(max-width: 600px)" srcset="bilder/x-schmal.webp"><img src="bilder/x-breit.webp" alt=""></picture>${legende}</figure>`;
+const GEGENPROBEN_ANLEITUNG = [
+  [gpFigur('<ol class="legende"><li data-ziel="a">A</li><li data-ziel="b">B</li></ol>'), 0, "richtig"],
+  [gpFigur('<ol class="legende"><li data-ziel="b">B</li><li data-ziel="a">A</li></ol>'), 2, "Reihenfolge vertauscht (je Fassung)"],
+  [gpFigur('<ol class="legende"><li data-ziel="a">A</li></ol>'), 2, "Punkt fehlt"],
+  [gpFigur('<ol class="legende"><li data-ziel="a">A</li><li>B</li></ol>'), 3, "Punkt ohne Schlüssel"],
+  [gpFigur('<ol class="legende"><li data-ziel="a">A</li><li data-ziel="b">B</li></ol><figcaption>(1) A</figcaption>'), 1, "Nummer in der Bildunterschrift"],
+  [gpFigur('<ol class="legende"><li data-ziel="a">A</li><li data-ziel="b"><span class="nr">2</span>B</li></ol>'), 1, "Nummer von Hand"],
+  [gpFigur('<ol class="legende"><li data-ziel="a">A</li><li data-ziel="b">B</li></ol>', ' class="hoch"'), 1, "hoch bei breitem Bild"],
+  ['<figure><img src="bilder/x-breit.webp" alt=""></figure>', 2, "ohne schmale Fassung (dazu: x unbenutzt)"],
+];
+
 /** Prüft alles; gibt { fehler: [Text], zahlen: { js, inline, verweise, css } } zurück. ordner: zum Prüfen mit anderen Ordnern. */
 function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   const fehler = [];
@@ -259,6 +337,21 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   for (const [html, wo, soll, name] of GEGENPROBEN_STIL) {
     const ist = pruefeKernStil(html, wo, () => true).length;
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 6 „${name}“: ${ist} statt ${soll} Meldungen`);
+  }
+  for (const [html, soll, name] of GEGENPROBEN_ANLEITUNG) {
+    const ist = pruefeAnleitung({ "probe.html": html }, GP_LISTE, () => "f", ["x-breit.webp", "x-schmal.webp"]).length;
+    if (ist !== soll) fehler.push(`Gegenprobe Punkt 9 „${name}“: ${ist} statt ${soll} Fehler`);
+  }
+  // 9. Anleitungen (nur, wenn eulenpfad mitgeprüft wird)
+  const anleitung = path.join(wurzel, ANLEITUNG);
+  if (ordner.includes("eulenpfad") && fs.existsSync(anleitung)) {
+    const rahmenDatei = path.join(wurzel, ANLEITUNG_RAHMEN);
+    const liste = fs.existsSync(rahmenDatei) ? JSON.parse(fs.readFileSync(rahmenDatei, "utf8")).bilder : {};
+    if (!fs.existsSync(rahmenDatei)) fehler.push(`${ANLEITUNG_RAHMEN} fehlt — tools/anleitung_bilder.js laufen lassen`);
+    const seiten = Object.fromEntries(fs.readdirSync(anleitung).filter(d => d.endsWith(".html")).map(d => [`${ANLEITUNG}/${d}`, fs.readFileSync(path.join(anleitung, d), "utf8")]));
+    const bilder = path.join(anleitung, "bilder");
+    const abdruck = d => (fs.existsSync(path.join(bilder, d)) ? require("crypto").createHash("sha256").update(fs.readFileSync(path.join(bilder, d))).digest("hex").slice(0, 16) : undefined);
+    fehler.push(...pruefeAnleitung(seiten, liste, abdruck, fs.existsSync(bilder) ? fs.readdirSync(bilder).filter(d => d.endsWith(".webp")) : []));
   }
   const lies = (code, wo) => {
     try { new vm.Script(code, { filename: wo }); } catch (e) { fehler.push(`${wo}: ${e.message}${zeileVon(e)}`); }

@@ -20,13 +20,22 @@ h2 { margin: 0 0 8px; font-size: 24px; line-height: 1.3; }
 h3 { margin: 16px 0 6px; font-size: 19px; }
 p, ul, ol { margin: 0 0 10px; }
 li { margin: 2px 0; }
-figure { margin: 12px 0 14px; }
+/* Bildblock (docs/eulenpfad/konzept_anleitungen.md, AL1 a, AL2 a, AL7 a): Bild in zwei Fassungen (<picture>, bis 600 px
+   die schmale), darunter die Bildunterschrift und die Legende. Die Legende zählt selbst; ihr Zähler ist die rote Nummer
+   im Bild (tools/anleitung_bilder.js nummeriert nach der Lage, tools/pruefe_skripte.js prüft Schlüssel und Reihenfolge).
+   Ein Bild höchstens halb so breit wie die Karte (Klasse hoch) steht ab 720 px links neben seiner Legende. */
+figure { margin: 14px 0 18px; }
 figure img { display: block; max-width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--rand); }
-figure.handy img { max-width: min(340px, 100%); margin: 0 auto; } /* nie breiter als die Karte (375 px: innen rund 300) */
 figcaption { color: var(--leise); font-size: 15px; margin-top: 6px; }
-/* Nummern wie in den roten Rahmen der Bilder */
-.nr { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;
-  background: var(--markierung); color: var(--auf-markierung); font-weight: 800; font-size: 14px; margin-right: 4px; vertical-align: 2px; }
+ol.legende { list-style: none; counter-reset: nr; padding: 0; margin: 10px 0 0; }
+ol.legende > li { counter-increment: nr; position: relative; padding-left: 36px; margin: 8px 0; }
+ol.legende > li::before { content: counter(nr); position: absolute; left: 0; top: .15em; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--markierung); color: var(--auf-markierung); font: 800 15px/26px system-ui, sans-serif; text-align: center; }
+@media (min-width: 720px) {
+  figure.hoch { display: grid; grid-template-columns: auto 1fr; gap: 0 22px; align-items: start; }
+  figure.hoch > picture { grid-row: 1 / span 2; }
+  figure.hoch > ol.legende { margin-top: 0; }
+}
 .tipp { background: var(--tipp); border-left: 5px solid var(--akzent); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
 .achtung { background: var(--achtung); border-left: 5px solid var(--achtung-rand); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
 nav.inhalt ol { columns: 2; column-gap: 28px; padding-left: 22px; }
@@ -34,8 +43,9 @@ nav.inhalt ol { columns: 2; column-gap: 28px; padding-left: 22px; }
 nav.inhalt a { color: var(--akzent); text-decoration: none; }
 kbd { font: inherit; font-weight: 700; background: var(--taste); border: 1px solid var(--rand); border-radius: 6px; padding: 0 6px; }
 
-/* Kinderanleitung: grosse Schrift, wenig Text */
+/* Kinderanleitung (AL6 a): derselbe Aufbau, linksbündig; nur grössere Schrift, das grosse Bildzeichen und kürzere Sätze */
 body.kinder { font-size: 22px; }
 body.kinder h2 { font-size: 28px; }
-body.kinder section { text-align: center; }
-body.kinder .gross { font-size: 44px; line-height: 1; }
+body.kinder .gross { font-size: 44px; line-height: 1; margin-bottom: 4px; }
+body.kinder ol.legende > li { padding-left: 42px; }
+body.kinder ol.legende > li::before { width: 30px; height: 30px; font-size: 17px; line-height: 30px; }

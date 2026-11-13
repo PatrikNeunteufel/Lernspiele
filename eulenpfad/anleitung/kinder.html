@@ -6,8 +6,9 @@
 <title>Eulenpfad · So spielst du</title>
 <script src="../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
 <link rel="stylesheet" href="anleitung.css">
-<!-- Anleitung für Kinder (LERN_Session7, nachgeführt LERN_Session36): wenig Text, kurze Sätze, grosse Bilder vom Handy.
-     Bilder: tools/anleitung_bilder.js (Musterkonto „Muster Kind“). -->
+<!-- Anleitung für Kinder (LERN_Session7, neu aufgebaut LERN_Session37 nach docs/eulenpfad/konzept_anleitungen.md):
+     wenig Text, kurze Sätze. Je Abschnitt: hinführender Satz, Bild mit Legende (die Nummern im Bild), dann Ergänzungen.
+     Bilder: tools/anleitung_bilder.js (Musterkonto „Muster Kind“), je breit und schmal. -->
 </head>
 <body class="kinder">
 <main>
@@ -15,124 +16,198 @@
   <h1>🦉 So spielst du</h1>
   <p class="unter">Die Eule zeigt dir, wie es geht.</p>
 
-  <section>
+  <nav class="inhalt"><section>
+    <h2>Inhalt</h2>
+    <ol>
+      <li><a href="#wer">Wer bist du?</a></li>
+      <li><a href="#spiel">Such dir ein Spiel aus</a></li>
+      <li><a href="#stufe">Wähle eine Stufe</a></li>
+      <li><a href="#aufgabe">Löse die Aufgabe</a></li>
+      <li><a href="#knoepfe">Knöpfe, die dir helfen</a></li>
+      <li><a href="#notizblock">Rechne auf dem Notizblock</a></li>
+      <li><a href="#eule">Die Eule hilft dir</a></li>
+      <li><a href="#sterne">Sammle Sterne</a></li>
+      <li><a href="#erfolge">Deine Erfolge</a></li>
+      <li><a href="#statistik">Schau, was du kannst</a></li>
+      <li><a href="#endlos">Endlos</a></li>
+    </ol>
+  </section></nav>
+
+  <section id="wer">
     <div class="gross">👋</div>
     <h2>1. Wer bist du?</h2>
-    <p>Tippe auf deinen Namen.<br>Bist du neu? Tippe auf 🐣 <b>Ich bin neu</b> und dann auf 🧒 <b>Ich bin ein Kind</b>.<br>
-      Schreib deinen Vornamen und tippe auf deine Klasse.</p>
-    <figure class="handy"><img src="bilder/k01-anmelden.webp" alt="Knopf mit dem Namen des Kindes" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k01-anmelden-schmal.webp"><img src="bilder/k01-anmelden-breit.webp" alt="Knopf mit dem Namen des Kindes und Knopf Ich bin neu" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="name">Tippe auf deinen Namen.</li>
+        <li data-ziel="neu">Bist du neu? Tippe auf 🐣 <b>Ich bin neu</b> und dann auf 🧒 <b>Ich bin ein Kind</b>.
+          Schreib deinen Vornamen und tippe auf deine Klasse.</li>
+      </ol>
+    </figure>
     <p>Ist ein anderes Kind dran? Tippe oben rechts auf deinen Namen.</p>
-    <p>Unter 👤 <b>Profil</b> suchst du dir dein Bild aus:<br>ein Tier, eine Rakete, einen Drachen …<br>
-      Dazu eine Farbe, einen Rahmen und eine Form.</p>
-    <figure class="handy"><img src="bilder/k13-bild.webp" alt="Bilder, Farben und Rahmen zum Aussuchen" loading="lazy"></figure>
-    <p>🔒 heisst: Das Bild oder der Rahmen kommt mit einem Abzeichen (siehe 8).</p>
+    <p>Unter 👤 <b>Profil</b> suchst du dir dein Bild aus.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k13-bild-schmal.webp"><img src="bilder/k13-bild-breit.webp" alt="Bilder und Farben zum Aussuchen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="bilder">Ein Tier, eine Rakete, einen Drachen …</li>
+        <li data-ziel="farben">Dazu eine Farbe. Weiter unten wählst du einen Rahmen und eine Form.</li>
+      </ol>
+    </figure>
+    <p>🔒 heisst: Das Bild oder der Rahmen kommt mit einem Abzeichen (siehe 9).</p>
   </section>
 
-  <section>
+  <section id="spiel">
     <div class="gross">🎮</div>
     <h2>2. Such dir ein Spiel aus</h2>
-    <figure class="handy"><img src="bilder/k02-spiele.webp" alt="Spiele mit Fach-Reitern, Suche, Filter und Weiterspielen" loading="lazy"></figure>
-    <p>Tippe auf ein Spiel.<br>
-      <span class="nr">1</span>Oben wählst du das Fach: ➕ Mathe, 📖 Deutsch, 🌍 NMG …<br>
-      <span class="nr">2</span>Mit der Lupe 🔍 findest du ein Spiel schneller.<br>
-      <span class="nr">3</span>Unter <b>Filter</b> → Klasse steht 🎒 <b>Meine Klasse</b>.<br>
-      <span class="nr">4</span>▶️ <b>Weiterspielen</b> zeigt die Spiele, die du zuletzt gespielt hast.</p>
+    <p>Tippe auf ein Spiel.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k02-spiele-schmal.webp"><img src="bilder/k02-spiele-breit.webp" alt="Spiele mit Fach-Reitern, Suche und Filter" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="fach">Hier wählst du das Fach: ➕ Mathe, 📖 Deutsch, 🌍 NMG …</li>
+        <li data-ziel="suche">Mit der Lupe 🔍 findest du ein Spiel schneller.</li>
+        <li data-ziel="filter">Unter <b>Filter</b> → Klasse steht 🎒 <b>Meine Klasse</b>.</li>
+      </ol>
+    </figure>
     <p>Schaltest du 🎒 <b>Meine Klasse</b> aus, siehst du alle Spiele.<br>Dann zeigt der Rand einer Karte:<br>
       ✓ leichter · ● deine Klasse · ▲ Herausforderung</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k15-weiterspielen-schmal.webp"><img src="bilder/k15-weiterspielen-breit.webp" alt="Weiterspielen mit den zuletzt gespielten Spielen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="weiter">▶️ <b>Weiterspielen</b> zeigt die Spiele, die du zuletzt gespielt hast.</li>
+      </ol>
+    </figure>
     <p>☆ Tipp auf den Stern einer Karte.<br>Dann steht das Spiel ganz oben bei ⭐ <b>Favoriten</b>.<br>
       ⓘ sagt dir, worum es im Spiel geht.</p>
     <p>Weisst du nicht, was? 🎯 <b>Überrasch mich</b>: Die Eule sucht eins für dich aus.<br>
       🎲 <b>Zufallsmix</b>: Aufgaben aus vielen Spielen.<br>
       Bei beiden geht auch ♾ <b>Endlos</b>: so viele wie möglich ohne Fehler.</p>
-    <figure class="handy"><img src="bilder/k10-zufall.webp" alt="Karten Zufallsmix und Zufälliges Spiel" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k10-zufall-schmal.webp"><img src="bilder/k10-zufall-breit.webp" alt="Karten Zufallsmix und Überrasch mich" loading="lazy"></picture>
+    </figure>
   </section>
 
-  <section>
+  <section id="stufe">
     <div class="gross">🌱 🌳 👑</div>
     <h2>3. Wähle eine Stufe</h2>
     <p>🌱 ist leicht. 🌳 ist das Ziel deiner Klasse.<br>👑 ist der Endgegner!<br>👍 heisst: Diese Stufe passt zu dir.</p>
-    <figure class="handy"><img src="bilder/k03-stufen.webp" alt="Schalter Timer, Endlos und Favorit über den Stufen eines Spiels" loading="lazy"></figure>
-    <p><span class="nr">1</span>Oben schaltest du ⏱ Timer und ♾ Endlos ein oder aus.<br>
-      Siehst du ein 🔒? Dann hat das deine Aufsicht so eingestellt.<br>
-      <span class="nr">2</span>Tippe auf eine Stufe, dann geht es los.<br>
-      <span class="nr">3</span>ⓘ sagt dir, was die Stufe übt.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k03-stufen-schmal.webp"><img src="bilder/k03-stufen-breit.webp" alt="Schalter Timer, Endlos und Favorit über den Stufen eines Spiels" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="schalter">Hier schaltest du ⏱ Timer und ♾ Endlos ein oder aus.
+          Siehst du ein 🔒? Dann hat das deine Aufsicht so eingestellt.</li>
+        <li data-ziel="stufe">Tippe auf eine Stufe, dann geht es los.</li>
+        <li data-ziel="info">ⓘ sagt dir, was die Stufe übt.</li>
+      </ol>
+    </figure>
   </section>
 
-  <section>
+  <section id="aufgabe">
     <div class="gross">🤔</div>
     <h2>4. Löse die Aufgabe</h2>
-    <p>Schau genau. Dann tippe auf deine Antwort.</p>
-    <figure class="handy"><img src="bilder/k04-aufgabe.webp" alt="Eine Aufgabe mit zwei Antworten zum Antippen" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k04-aufgabe-schmal.webp"><img src="bilder/k04-aufgabe-breit.webp" alt="Eine Aufgabe mit zwei Antworten zum Antippen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="aufgabe">Schau genau: Das ist die Aufgabe.</li>
+        <li data-ziel="antworten">Tippe auf deine Antwort.</li>
+      </ol>
+    </figure>
     <p>⌨️ Am Computer geht es auch mit der Tastatur:<br>Die kleine Taste oben am Knopf zeigt, welche.</p>
   </section>
 
-  <section>
+  <section id="knoepfe">
     <div class="gross">❓ 💡 🗣️</div>
     <h2>5. Knöpfe, die dir helfen</h2>
-    <figure class="handy"><img src="bilder/k11-hilfe-tipp.webp" alt="Aufgabe mit den Knöpfen Hilfe, Tipp, Melden und Vorlesen" loading="lazy"></figure>
-    <p><span class="nr">1</span>❓ So geht das Spiel.<br>
-      <span class="nr">2</span>💡 Ein Tipp für diese Aufgabe.<br>
-      <span class="nr">3</span>🙋 Stimmt etwas nicht? Melde es!<br>
-      <span class="nr">4</span>🗣️ Die Eule liest dir vor.<br>Drückst du lange darauf, liest sie immer gleich vor.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k11-hilfe-tipp-schmal.webp"><img src="bilder/k11-hilfe-tipp-breit.webp" alt="Aufgabe mit den Knöpfen Hilfe, Vorlesen, Melden und Tipp" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="hilfe">❓ So geht das Spiel.</li>
+        <li data-ziel="vorlesen">🗣️ Die Eule liest dir vor.<br>Drückst du lange darauf, liest sie immer gleich vor.</li>
+        <li data-ziel="melden">🙋 Stimmt etwas nicht? Melde es!</li>
+        <li data-ziel="tipp">💡 Ein Tipp für diese Aufgabe.</li>
+      </ol>
+    </figure>
     <p>☀️/🌙 Darfst du es? Dann machst du damit die Seite hell oder dunkel.</p>
   </section>
 
-  <section>
+  <section id="notizblock">
     <div class="gross">📝 ✏️</div>
     <h2>6. Rechne auf dem Notizblock</h2>
-    <figure class="handy"><img src="bilder/k14-notizblock.webp" alt="Notizblock mit zwei Rechnungen untereinander: 24 × 3, dann 72 + 45" loading="lazy"></figure>
-    <p><span class="nr">1</span>📝 öffnet den Notizblock.<br>Wähle + − × : und tippe deine Zahlen ein.<br>Dann rechnest du darunter wie im Heft.</p>
-    <p><span class="nr">2</span>Fertig? Unten bei <b>Weiterrechnen</b> hängst du die nächste Rechnung an.<br>Dein Ergebnis steht dann schon oben.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k14-notizblock-schmal.webp"><img src="bilder/k14-notizblock-breit.webp" alt="Notizblock mit zwei Rechnungen untereinander: 24 × 3, dann 72 + 45" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="knopf">📝 öffnet den Notizblock.<br>Wähle + − × : und tippe deine Zahlen ein.<br>Dann rechnest du darunter wie im Heft.</li>
+        <li data-ziel="weiter">Hier hängt die nächste Rechnung an.<br>Dein Ergebnis steht dann schon oben.</li>
+        <li data-ziel="wahl">Fertig? Unten bei <b>Weiterrechnen</b> wählst du, wie es weitergeht.</li>
+      </ol>
+    </figure>
     <p>Tipp auf + oder −, dann wechselt das Zeichen.<br>So geht Plus und Minus in einer Rechnung.</p>
     <p>✏️ Kleine Felder in der Aufgabe sind auch Notizen.<br>Schreib dort hin, was du dir merken willst.</p>
     <p>Notizen werden nicht bewertet.<br>Deine Antwort gibst du wie immer im Spiel ein.</p>
   </section>
 
-  <section>
+  <section id="eule">
     <div class="gross">🦉</div>
     <h2>7. Die Eule hilft dir</h2>
-    <p>Falsch? Das ist nicht schlimm!<br>Die Eule gibt dir einen Tipp. Probier es nochmals.</p>
-    <figure class="handy"><img src="bilder/k05-hinweis.webp" alt="Die Eule gibt einen Tipp" loading="lazy"></figure>
+    <p>Falsch? Das ist nicht schlimm!</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k05-hinweis-schmal.webp"><img src="bilder/k05-hinweis-breit.webp" alt="Die Eule gibt einen Tipp" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="tipp">Die Eule gibt dir einen Tipp. Probier es nochmals.</li>
+      </ol>
+    </figure>
   </section>
 
-  <section>
+  <section id="sterne">
     <div class="gross">⭐ ⭐ ⭐</div>
     <h2>8. Sammle Sterne</h2>
-    <p>Am Ende bekommst du Sterne.<br>Oft gibt es dazu ein kleines Bild, das sich bewegt.<br>Tipp darauf, dann geht es schneller.<br>
-      Willst du nochmals? Oder eine andere Stufe?<br>
-      🔗 <b>Ähnliche Spiele</b> zeigt dir Spiele, die dazu passen.</p>
-    <figure class="handy"><img src="bilder/k06-sterne.webp" alt="Drei Sterne am Ende der Runde" loading="lazy"></figure>
+    <p>Am Ende bekommst du Sterne.<br>Oft gibt es dazu ein kleines Bild, das sich bewegt.<br>Tipp darauf, dann geht es schneller.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k06-sterne-schmal.webp"><img src="bilder/k06-sterne-breit.webp" alt="Drei Sterne am Ende der Runde" loading="lazy"></picture>
+    </figure>
+    <p>Willst du nochmals? Oder eine andere Stufe?<br>🔗 <b>Ähnliche Spiele</b> zeigt dir Spiele, die dazu passen.</p>
   </section>
 
-  <section>
+  <section id="erfolge">
     <div class="gross">🏅 🌟</div>
     <h2>9. Deine Erfolge</h2>
-    <p><span class="nr">1</span>Schaffst du dein Ziel für die Woche?<br>Dann bekommst du einen Wochenstern 🌟.</p>
-    <p><span class="nr">2</span>Sammle Abzeichen! 🆕 heisst: neu für dich.<br>
-      Jedes Abzeichen wird besser: 🥉 → 🥈 → 🥇 → 🏆 → 💎</p>
-    <figure class="handy"><img src="bilder/k12-erfolge.webp" alt="Bereich Erfolge mit Woche und Abzeichen" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k12-erfolge-schmal.webp"><img src="bilder/k12-erfolge-breit.webp" alt="Bereich Erfolge mit Woche und Abzeichen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="woche">Schaffst du dein Ziel für die Woche?<br>Dann bekommst du einen Wochenstern 🌟.</li>
+        <li data-ziel="abzeichen">Sammle Abzeichen! 🆕 heisst: neu für dich.<br>
+          Jedes Abzeichen wird besser: 🥉 → 🥈 → 🥇 → 🏆 → 💎</li>
+      </ol>
+    </figure>
     <p>Ein Abzeichen in 🥇 Gold? Dann kannst du sein Bild als dein Bild nehmen.<br>
       Dein erstes 🥇 Gold, 🏆 Platin oder 💎 Diamant schenkt dir einen neuen Rahmen.</p>
     <p>Bist du bei Endlos unter den ersten drei?<br>Dann steht es bei 🏆 <b>Meine Podestplätze</b>.</p>
     <p>Mit 📤 <b>Teilen</b> kannst du ein Abzeichen zeigen.<br>Frag zuerst einen Erwachsenen.</p>
   </section>
 
-  <section>
+  <section id="statistik">
     <div class="gross">📊</div>
     <h2>10. Schau, was du kannst</h2>
-    <p>Unter 📊 <b>Statistik</b> zeigt dir die Eule, was du als Nächstes üben kannst.<br>Tipp auf ▶ <b>Los</b>.<br>
-      Dazu siehst du deine Woche und deine Runden.<br>Tipp auf eine Runde: Dann siehst du, was knifflig war.</p>
-    <figure class="handy"><img src="bilder/k07-statistik.webp" alt="Statistik des Kindes" loading="lazy"></figure>
+    <p>Unter 📊 <b>Statistik</b> zeigt dir die Eule, was du als Nächstes üben kannst.<br>Tipp auf ▶ <b>Los</b>.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k07-statistik-schmal.webp"><img src="bilder/k07-statistik-breit.webp" alt="Statistik des Kindes" loading="lazy"></picture>
+    </figure>
+    <p>Dazu siehst du deine Woche und deine Runden.<br>Tipp auf eine Runde: Dann siehst du, was knifflig war.</p>
   </section>
 
-  <section>
+  <section id="endlos">
     <div class="gross">♾</div>
     <h2>11. Endlos: Wie viele schaffst du?</h2>
     <p>Bei vielen Spielen gibt es den Schalter ♾ <b>Endlos</b>:<br>auf der Karte und oben bei den Stufen.<br>
       Schalte ihn ein und tippe auf eine Stufe.<br>Es geht so lange, bis eine Antwort falsch ist.<br>Oben siehst du, wie viele du schon hast.</p>
-    <figure class="handy"><img src="bilder/k08-endlos.webp" alt="Ein Endlos-Spiel läuft" loading="lazy"></figure>
-    <p>Am Ende siehst du die <b>Rangliste</b>.<br>Kannst du deinen Rekord knacken?</p>
-    <figure class="handy"><img src="bilder/k09-endlos-ende.webp" alt="Rangliste nach einem Endlos-Spiel" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k08-endlos-schmal.webp"><img src="bilder/k08-endlos-breit.webp" alt="Ein Endlos-Spiel läuft" loading="lazy"></picture>
+    </figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k09-endlos-ende-schmal.webp"><img src="bilder/k09-endlos-ende-breit.webp" alt="Rangliste nach einem Endlos-Spiel" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="rangliste">Am Ende siehst du die <b>Rangliste</b>.<br>Kannst du deinen Rekord knacken?</li>
+      </ol>
+    </figure>
   </section>
 
   <section>

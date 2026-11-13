@@ -6,8 +6,9 @@
 <title>Eulenpfad · Anleitung für Erwachsene</title>
 <script src="../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
 <link rel="stylesheet" href="anleitung.css">
-<!-- Anleitung für Aufsichtspersonen (Eltern, Lehrpersonen), LERN_Session7, nachgeführt LERN_Session36. Bilder: tools/anleitung_bilder.js
-     (Musterkonten, erfundene Beispielrunden); die roten Nummern im Bild entsprechen den Nummern im Text. -->
+<!-- Anleitung für Aufsichtspersonen (Eltern, Lehrpersonen), LERN_Session7, neu aufgebaut LERN_Session37 nach
+     docs/eulenpfad/konzept_anleitungen.md. Bilder: tools/anleitung_bilder.js (Musterkonten, erfundene Beispielrunden), je breit
+     und schmal; die Legende unter einem Bild beschreibt seine roten Nummern (data-ziel = Schlüssel des Rahmens). -->
 </head>
 <body>
 <main>
@@ -63,15 +64,18 @@
     <p>Beim ersten Öffnen ist noch niemand da. Ein Kind kann mit <b>🐣 Ich bin neu</b> → „Ich bin ein Kind“ gleich selbst anfangen:
       Vorname, Klasse, Bild — und los. Die <b>Aufsicht</b> richtet eine erwachsene Person ein, wann es passt: <b>🐣 Ich bin neu</b> →
       „Ich bin erwachsen“. Erst dann gibt es Freigaben, Wochenziel und Meldungen.</p>
-    <figure><img src="bilder/a01-einrichten.webp" alt="Ich bin neu: Wahl zwischen Kind und erwachsen (Aufsicht)" loading="lazy">
-      <figcaption>Erster Start (Musterkonto).</figcaption></figure>
-    <ol>
-      <li><span class="nr">1</span><b>🐣 Ich bin neu</b> → „Ich bin erwachsen (Aufsicht)“. Zuerst kommt eine Rechenfrage, die über dem Stoff
-        der Primarschule liegt (etwa √144) — sie hält Kinder davon ab, sich als Aufsicht anzulegen. Dann Ihren Namen und zweimal eine
-        <b>PIN mit 4 bis 6 Ziffern</b>, „Einrichten“. Gibt es schon eine Aufsicht, bestätigt sie die neue mit ihrer PIN.</li>
-      <li><span class="nr">2</span>Kinder legen sich mit <b>🐣 Ich bin neu</b> selbst an, oder Sie legen sie in der Verwaltung an (<a href="#konten">Abschnitt 6</a>).
-        Soll das nur die Aufsicht dürfen (etwa in einer Klasse), schalten Sie in den Einstellungen „Kinder legen sich selbst an“ aus.</li>
-    </ol>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a01-einrichten-schmal.webp"><img src="bilder/a01-einrichten-breit.webp" alt="Ich bin neu: Wahl zwischen Kind und erwachsen (Aufsicht)" loading="lazy"></picture>
+      <figcaption>Nach 🐣 Ich bin neu (Musterkonto).</figcaption>
+      <ol class="legende">
+        <li data-ziel="kind"><b>Ich bin ein Kind:</b> Kinder legen sich so selbst an, oder Sie legen sie in der Verwaltung an
+          (<a href="#konten">Abschnitt 6</a>). Soll das nur die Aufsicht dürfen (etwa in einer Klasse), schalten Sie in den
+          Einstellungen „Kinder legen sich selbst an“ aus.</li>
+        <li data-ziel="erwachsen"><b>Ich bin erwachsen (Aufsicht):</b> Zuerst kommt eine Rechenfrage, die über dem Stoff der Primarschule
+          liegt (etwa √144) — sie hält Kinder davon ab, sich als Aufsicht anzulegen. Dann Ihren Namen und zweimal eine
+          <b>PIN mit 4 bis 6 Ziffern</b>, „Einrichten“. Gibt es schon eine Aufsicht, bestätigt sie die neue mit ihrer PIN.</li>
+      </ol>
+    </figure>
     <p class="achtung">Merken Sie sich die PIN. Gespeichert wird nur ein verschlüsselter Prüfwert. Beim Einrichten wählen Sie dazu eine
       <b>Sicherheitsfrage</b> (eine, deren Antwort Ihre Kinder nicht kennen) und bekommen einmal einen <b>Wiederherstellungscode</b> zu sehen:
       Schreiben Sie ihn auf und bewahren Sie ihn fern von den Kindern auf. Haben Sie die PIN vergessen, tippen Sie bei der PIN-Abfrage auf
@@ -89,12 +93,19 @@
 
   <section id="anmelden">
     <h2>3. Anmelden und wechseln</h2>
-    <figure><img src="bilder/a02-wer-bist-du.webp" alt="Auswahl: Wer bist du? mit den Knöpfen Muster Kind und Muster Admin" loading="lazy"></figure>
-    <ul>
-      <li><span class="nr">1</span><b>Kinder</b> tippen einfach auf ihren Namen — ohne PIN.</li>
-      <li><span class="nr">2</span>Die <b>Aufsicht</b> (mit 🔑) braucht ihre PIN.</li>
-    </ul>
-    <figure><img src="bilder/a03-pin.webp" alt="PIN-Eingabe für die Aufsicht" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a02-wer-bist-du-schmal.webp"><img src="bilder/a02-wer-bist-du-breit.webp" alt="Auswahl: Wer bist du? mit den Knöpfen Muster Kind und Muster Admin" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="kind"><b>Kinder</b> tippen einfach auf ihren Namen — ohne PIN.</li>
+        <li data-ziel="aufsicht">Die <b>Aufsicht</b> (mit 🔑) braucht ihre PIN.</li>
+      </ol>
+    </figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a03-pin-schmal.webp"><img src="bilder/a03-pin-breit.webp" alt="PIN-Eingabe für die Aufsicht" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="pin">Hier tippen Sie Ihre PIN ein — verdeckt, damit kein Kind mitliest.</li>
+      </ol>
+    </figure>
     <p>Die Anmeldung der Aufsicht gilt nur, solange dieser Browser-Tab offen ist. Wer ihn schliesst, ist wieder abgemeldet — so
       bleibt die Verwaltung den Kindern verschlossen. Gewechselt wird oben rechts: Ein Tippen auf Bild und Namen öffnet die Liste der
       anderen Personen und darunter „↩ Abmelden“. In einem Spiel führt „wechseln“ zur Anmeldung. Daneben öffnet 📖 diese Anleitung.</p>
@@ -102,8 +113,12 @@
 
   <section id="tabs">
     <h2>4. Die fünf Bereiche</h2>
-    <figure><img src="bilder/a04-tabs.webp" alt="Startseite mit den Bereichen Spiele, Profil, Statistik, Erfolge, Verwaltung" loading="lazy"></figure>
-    <p><span class="nr">1</span>Oben wählen Sie den Bereich:</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a04-tabs-schmal.webp"><img src="bilder/a04-tabs-breit.webp" alt="Startseite mit den Bereichen Spiele, Profil, Statistik, Erfolge, Verwaltung" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="tabs">Oben wählen Sie den Bereich; passen nicht alle in die Zeile, blättert ▶ zu den übrigen.</li>
+      </ol>
+    </figure>
     <ul>
       <li><b>🎮 Spiele</b> — alle Spiele nach Fach und Thema, mit Suche, Filtern und dem Zufall (<a href="#finden">Abschnitt 5</a>).</li>
       <li><b>👤 Profil</b> — das Kind wählt hier nur sein Bild: ein Tier, etwas aus Weltall und Technik, eine Fantasiefigur oder ein Bild aus den
@@ -128,31 +143,51 @@
     </ul>
     <p>Das Kind sieht in der Statistik nur, was es als Nächstes üben kann, seine Woche, seine Runden und seine Meldungen;
       alle Auswertungen sehen Sie. Im Profil eines Kindes:</p>
-    <figure><img src="bilder/a19-profil.webp" alt="Profil eines Kindes mit Bild, Vorgaben und dem Schalter fest" loading="lazy">
-      <figcaption>Profil von Muster Kind: (1) das Bild, das das Kind gewählt hat, (2) Klasse mit ⬆️ Aufstieg, (3) „Speichern“
-        für alles darüber, (4) was das Kind selbst umstellen darf: je Punkt wie alle Kinder, darf selbst umstellen oder 🔒 fest —
-        wirkt sofort. Hat das Kind selbst etwas umgestellt, steht daneben ↺ Auf Vorgabe zurück.</figcaption></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a19-profil-schmal.webp"><img src="bilder/a19-profil-breit.webp" alt="Profil eines Kindes mit Bild, Klasse, Vorgaben und Speichern" loading="lazy"></picture>
+      <figcaption>Profil von Muster Kind, angesehen als Aufsicht.</figcaption>
+      <ol class="legende">
+        <li data-ziel="bild">Das Bild, das das Kind gewählt hat — nur zum Ansehen.</li>
+        <li data-ziel="klasse">Klasse mit ⬆️ Aufstieg ins nächste Schuljahr.</li>
+        <li data-ziel="speichern"><b>Speichern</b> für alles darüber: Person, Vorgaben fürs Spielen, Fokus.</li>
+      </ol>
+    </figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a24-selbst-umstellen-schmal.webp"><img src="bilder/a24-selbst-umstellen-breit.webp" alt="Abschnitt Was Muster Kind selbst umstellen darf" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="kindwahl">Was das Kind selbst umstellen darf: je Punkt wie alle Kinder, darf selbst umstellen oder 🔒 fest —
+          wirkt sofort, ohne Speichern. Hat das Kind selbst etwas umgestellt, steht daneben ↺ Auf Vorgabe zurück.</li>
+      </ol>
+    </figure>
   </section>
 
   <section id="finden">
     <h2>5. Spiele finden</h2>
-    <figure><img src="bilder/a16-spiele.webp" alt="Bereich Spiele mit Fach-Reitern, Suchfeld, aufgeklapptem Filter und den Karten Zufallsmix und Zufälliges Spiel" loading="lazy">
-      <figcaption>Bereich Spiele, angemeldet als Aufsicht, mit aufgeklapptem Filter.</figcaption></figure>
-    <ol>
-      <li><span class="nr">1</span><b>Fach</b> wählen Sie mit den bunten Reitern über den Spielen (🌟 Alle, ➕ Mathe, 📖 Deutsch …).</li>
-      <li><span class="nr">2</span><b>Suche</b> nach Name, Lernziel, Beschreibung oder Inhalt; die besten Treffer kommen zuerst. Für ein Kind
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a16-spiele-schmal.webp"><img src="bilder/a16-spiele-breit.webp" alt="Bereich Spiele mit Fach-Reitern, Suchfeld und aufgeklapptem Filter" loading="lazy"></picture>
+      <figcaption>Bereich Spiele, angemeldet als Aufsicht, mit aufgeklapptem Filter.</figcaption>
+      <ol class="legende">
+      <li data-ziel="fach"><b>Fach</b> wählen Sie mit den bunten Reitern über den Spielen (🌟 Alle, ➕ Mathe, 📖 Deutsch …).</li>
+      <li data-ziel="suche"><b>Suche</b> nach Name, Lernziel, Beschreibung oder Inhalt; die besten Treffer kommen zuerst. Für ein Kind
         rücken Spiele etwas nach vorn, die zu seiner Klasse und zu dem passen, was es noch üben sollte.</li>
-      <li><span class="nr">3</span><b>Filter</b> klappt die übrigen Gruppen auf: <b>Klasse</b> (für welche Klasse ein Spiel gedacht ist, dazu
+      <li data-ziel="filter"><b>Filter</b> klappt die übrigen Gruppen auf: <b>Klasse</b> (für welche Klasse ein Spiel gedacht ist, dazu
         <b>🎒 Meine Klasse</b> — für Kinder Spiele, die zu ihrer Klasse passen; vorgegeben an, das Kind darf es ausschalten),
         <b>Nur</b> (<b>⭐ Mein Fokus</b>, für die Aufsicht <b>🔍 Zu prüfen</b>), <b>Thema</b> (wenn ein Fach gewählt ist) und <b>Stufe</b>.
         Darunter Sortieren, ▦ Kacheln oder ☰ Kompakt und „Alle auf“ / „Alle zu“. Jede Gruppe klappt für sich auf; zugeklappt
         nennt sie, was gilt. Thema, Stufe und Klasse lassen sich mehrfach wählen; „Alle“ wählt alles an und, nochmals getippt,
         alles ab. Schaltet ein Kind „Meine Klasse“ aus, zeigt ein farbiger Rand mit Zeichen, wie ein Spiel zu seiner Klasse steht:
         <b>✓</b> Türkis leichter, <b>●</b> Gold seine Klasse, <b>▲</b> Violett eine Herausforderung; eine kleine Legende steht über den Karten.</li>
-      <li><span class="nr">4</span><b>🎲 Zufallsmix</b> — Aufgaben aus vielen Spielen gemischt; das Kind stellt ein, wie schwer, wie lang und ob mit Timer.</li>
-      <li><span class="nr">5</span><b>🎯 Zufälliges Spiel</b> (für Kinder „Überrasch mich“) — die Eule zieht ein Spiel aus der gefilterten
+      </ol>
+    </figure>
+    <p>Vor den Spielen stehen zwei Karten für den Zufall:</p>
+    <ul>
+      <li><b>🎲 Zufallsmix</b> — Aufgaben aus vielen Spielen gemischt; das Kind stellt ein, wie schwer, wie lang und ob mit Timer.</li>
+      <li><b>🎯 Zufälliges Spiel</b> (für Kinder „Überrasch mich“) — die Eule zieht ein Spiel aus der gefilterten
         Auswahl, eher eines, das noch Übung braucht oder lange nicht mehr dran war; mit ♾ auf der Karte ein Endlos-Spiel.</li>
-    </ol>
+    </ul>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a23-zufall-schmal.webp"><img src="bilder/a23-zufall-breit.webp" alt="Karten Zufallsmix und Zufälliges Spiel" loading="lazy"></picture>
+    </figure>
     <p><b>Auf jeder Karte</b> stehen oben rechts kleine Schalter: Teile (nur in Spielen mit Bausteinen; antippen wechselt nach
       Stufe → geordnet → gemischt), ⏱ Timer, ♾ Endlos und ☆ Favorit. Was die Aufsicht festgelegt hat, trägt 🔒. Favoriten stehen
       oben in einem goldenen Feld; dort entfernt „☆ Alle Favoriten entfernen“ (zweimal tippen) alle auf einmal. Kinder sehen auf
@@ -167,13 +202,18 @@
 
   <section id="konten">
     <h2>6. Kinder, Konten und Lernplan</h2>
-    <figure><img src="bilder/a05-konten.webp" alt="Verwaltung, Untertab Konten mit Liste, Lernplan je Kind und Formular Neues Kind" loading="lazy"></figure>
-    <p><span class="nr">1</span>Die Verwaltung hat Untertabs. Unter <b>Konten</b>:</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a05-konten-schmal.webp"><img src="bilder/a05-konten-breit.webp" alt="Verwaltung, Untertab Konten mit Liste und Lernplan je Kind" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="untertabs">Die Verwaltung hat Untertabs; hier <b>Konten</b>.</li>
+        <li data-ziel="lernplan"><b>📅 Lernplan:</b> je Kind Tage pro Woche und Minuten je Tag, zum Beispiel 3 Tage × 10 Minuten.
+          Jede erfüllte Woche gibt dem Kind einen Wochenstern 🌟 — unabhängig von Fehlern und Tempo. „aus“ heisst kein Ziel.</li>
+      </ol>
+    </figure>
+    <p>Weiter unter <b>Konten</b>:</p>
     <ul>
       <li><b>Neues Kind:</b> Vorname und Klasse eingeben, „＋ Anlegen“. Als Klasse geht auch <b>Kindergarten</b>: Dann beginnen die
         Spiele der 1. Klasse auf Stufe 1, und die Eule liest von selbst vor (<a href="#imspiel">Abschnitt 8</a>).</li>
-      <li><span class="nr">2</span><b>📅 Lernplan:</b> je Kind Tage pro Woche und Minuten je Tag, zum Beispiel 3 Tage × 10 Minuten.
-        Jede erfüllte Woche gibt dem Kind einen Wochenstern 🌟 — unabhängig von Fehlern und Tempo. „aus“ heisst kein Ziel.</li>
       <li><b>→ Aufsicht:</b> macht aus einem Konto eine weitere Aufsicht (zum Beispiel für den zweiten Elternteil); danach
         bei diesem Konto eine PIN setzen.</li>
       <li><b>→ Kind</b> macht eine Aufsicht wieder zu einem gewöhnlichen Konto.</li>
@@ -188,18 +228,20 @@
     <h2>7. Spiele, Stufen, Timer, Endlos</h2>
     <p>Jedes Spiel übt ein Lernziel aus dem Lehrplan Volksschule St. Gallen und hat <b>sechs Stufen</b>, bezogen auf die Klasse, für die
       das Spiel gedacht ist:</p>
-    <figure><img src="bilder/a12-stufenwahl.webp" alt="Startbild eines Spiels mit den Schaltern Timer, Endlos und Favorit, sechs Stufen und dem Vorlese-Knopf" loading="lazy"></figure>
-    <ol>
-      <li><span class="nr">1</span><b>⏱ Timer</b> — zuschaltbar für mehr Spannung. Läuft die Zeit ab, zählt das als Fehler, die Aufgabe bleibt aber lösbar.
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a12-stufenwahl-schmal.webp"><img src="bilder/a12-stufenwahl-breit.webp" alt="Startbild eines Spiels mit dem Vorlese-Knopf, den Schaltern Timer, Endlos und Favorit und den Stufen" loading="lazy"></picture>
+      <ol class="legende">
+      <li data-ziel="vorlesen"><b>🗣️</b> neben der Eule liest die Einleitung vor (<a href="#imspiel">Abschnitt 8</a>).</li>
+      <li data-ziel="timer"><b>⏱ Timer</b> — zuschaltbar für mehr Spannung. Läuft die Zeit ab, zählt das als Fehler, die Aufgabe bleibt aber lösbar.
         Gemessen wird die Zeit je Aufgabe immer (für die Statistik).</li>
-      <li><span class="nr">2</span><b>♾ Endlos</b> — ist er an, startet jede Stufe, die es anbietet, im Endlos-Modus: so viele Aufgaben wie
+      <li data-ziel="endlos"><b>♾ Endlos</b> — ist er an, startet jede Stufe, die es anbietet, im Endlos-Modus: so viele Aufgaben wie
         möglich ohne Fehler (<a href="#endlos">Abschnitt 9</a>).</li>
-      <li><span class="nr">3</span><b>☆ Favorit</b> — das Spiel steht oben im Bereich Spiele bei den Favoriten.</li>
-      <li><span class="nr">4</span><b>Stufen</b> — 🌱 1 Einstieg (eine Klasse tiefer) · 🌿 2 Üben · 🌳 3 Klassenziel · ⭐ 4 Knifflig ·
+      <li data-ziel="favorit"><b>☆ Favorit</b> — das Spiel steht oben im Bereich Spiele bei den Favoriten.</li>
+      <li data-ziel="stufe"><b>Stufen</b> — 🌱 1 Einstieg (eine Klasse tiefer) · 🌿 2 Üben · 🌳 3 Klassenziel · ⭐ 4 Knifflig ·
         🚀 5 Nächste Klasse · 👑 6 Königsstufe. Jede Stufe zeigt Nummer, Namen, die besten Sterne und für welche Klasse sie gedacht
         ist; 👍 markiert die empfohlene. Was die Stufe übt, sehen Sie offen, Kinder hinter ⓘ.</li>
-      <li><span class="nr">5</span><b>🗣️</b> neben der Eule liest die Einleitung vor (<a href="#imspiel">Abschnitt 8</a>).</li>
-    </ol>
+      </ol>
+    </figure>
     <p>In Spielen mit Bausteinen steht vorne der Schalter <b>Teile</b> (nach Stufe, geordnet, gemischt). Unter dem zuletzt
       geänderten Schalter steht leise, was er bewirkt.</p>
     <p>Eine Runde hat meist 8 Aufgaben und dauert 2 bis 5 Minuten. Am Ende gibt es 1 bis 3 Sterne; ein Fehler zählt dabei voll,
@@ -208,18 +250,20 @@
 
   <section id="imspiel">
     <h2>8. Im Spiel: Hilfe, Tipp, Vorlesen, Melden, Notizen</h2>
-    <figure class="handy"><img src="bilder/k11-hilfe-tipp.webp" alt="Aufgabe mit den Knöpfen Hilfe, Tipp, Melden und Vorlesen" loading="lazy"></figure>
-    <ol>
-      <li><span class="nr">1</span><b>❓ Hilfe</b> erklärt, wie das Spiel geht. Die Uhr hält dabei an.</li>
-      <li><span class="nr">2</span><b>💡 Tipp</b> hilft bei der aktuellen Aufgabe; jedes Antippen zeigt den nächsten. Nicht im Endlos-Modus.</li>
-      <li><span class="nr">3</span><b>🙋 Melden</b> — das Kind meldet einen Fehler im Spiel, mit kurzer Begründung (<a href="#meldungen">Abschnitt 14</a>).
-        Wer melden darf, stellen Sie ein (<a href="#einstellungen">Abschnitt 17</a>).</li>
-      <li><span class="nr">4</span><b>🗣️ Vorlesen</b> — die Eule liest Auftrag und Tipps vor. Im Kindergarten und in der 1. Klasse geschieht
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k11-hilfe-tipp-schmal.webp"><img src="bilder/k11-hilfe-tipp-breit.webp" alt="Aufgabe mit den Knöpfen Hilfe, Vorlesen, Melden und Tipp" loading="lazy"></picture>
+      <ol class="legende">
+      <li data-ziel="hilfe"><b>❓ Hilfe</b> erklärt, wie das Spiel geht. Die Uhr hält dabei an.</li>
+      <li data-ziel="vorlesen"><b>🗣️ Vorlesen</b> — die Eule liest Auftrag und Tipps vor. Im Kindergarten und in der 1. Klasse geschieht
         das von selbst, sonst auf Knopfdruck. Ein langes Drücken auf 🗣️ schaltet „immer gleich vorlesen“ ein oder aus (dann
         goldener Ring). Die Vorgabe setzen Sie im Profil und legen dort fest, ob das Kind sie umstellen darf. Bleibt der
         Auftrag von Aufgabe zu Aufgabe gleich, liest sie ihn nur beim ersten Mal. Den Stoff eines Lesespiels liest sie nie vor,
         und nicht in Englisch und Französisch. Den Knopf gibt es nur, wenn das Gerät eine deutsche Stimme hat.</li>
-    </ol>
+      <li data-ziel="melden"><b>🙋 Melden</b> — das Kind meldet einen Fehler im Spiel, mit kurzer Begründung (<a href="#meldungen">Abschnitt 14</a>).
+        Wer melden darf, stellen Sie ein (<a href="#einstellungen">Abschnitt 17</a>).</li>
+      <li data-ziel="tipp"><b>💡 Tipp</b> hilft bei der aktuellen Aufgabe; jedes Antippen zeigt den nächsten. Nicht im Endlos-Modus.</li>
+      </ol>
+    </figure>
     <p>Langes Drücken auf einen Knopf liest seinen Text vor (nicht in Deutsch-Spielen, wo die Wörter der Stoff sind). Der Ton-Schalter
       🔊/🔇 oben rechts schaltet Töne und Stimme zusammen aus. Während einer Ruhezeit (<a href="#einstellungen">Abschnitt 17</a>)
       können Klänge, Vorlesen und Hören ruhen.</p>
@@ -229,18 +273,23 @@
       Zahlen tippt man wie bisher mit den Ziffern und Enter. Chrome und Edge erkennen eine andere Tastatur und beschriften danach.
       Spiele, die nur mit Zeigen oder Ziehen gehen, haben keine Tasten.</p>
     <h3 id="notizen">✏️ Notizen und 📝 Notizblock</h3>
-    <figure><img src="bilder/a20-notizblock.webp" alt="Hebel-Wippe mit offenem Notizblock: 24 × 3, darunter 72 + 45 und Weiterrechnen" loading="lazy">
-      <figcaption>Hebel-Wippe, Stufe 4: (1) 📝 Notizblock in der Zeile von „Melden“, (2) eine zweite Rechnung, angehängt an
-        24 × 3 — oben steht schon die 72, die das Kind hingeschrieben hat, (3) Weiterrechnen.</figcaption></figure>
+    <p><b>✏️ Notizen:</b> In Aufgaben mit mehreren Rechenschritten stehen kleine Felder für Zwischenergebnisse, dort, wo sie
+      hingehören — etwa auf den Pfeilen der Rechen-Maschine. Jedes Feld sagt, was hineingehört. Für schriftliches Rechnen gibt es
+      den Notizblock:</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/k14-notizblock-schmal.webp"><img src="bilder/k14-notizblock-breit.webp" alt="Hebel-Wippe mit offenem Notizblock: 24 × 3, darunter 72 + 45 und Weiterrechnen" loading="lazy"></picture>
+      <figcaption>Hebel-Wippe, Stufe 4, mit zwei Rechnungen untereinander.</figcaption>
+      <ol class="legende">
+        <li data-ziel="knopf"><b>📝 Notizblock</b> in der Zeile von „Melden“: Das Kind wählt Plus, Minus, Mal, Geteilt oder Häuschen,
+          tippt seine Zahlen ein und rechnet darunter wie auf einem Blatt, mit Überträgen. Dezimalzahlen stehen am Komma untereinander.
+          <b>Plus und Minus mischen:</b> Antippen des Zeichens vor einer Zahl macht aus + ein − und umgekehrt (bis zu vier Zahlen).</li>
+        <li data-ziel="weiter">Eine zweite Rechnung, angehängt an 24 × 3: Ihre erste Zahl ist das Ergebnis, das das Kind eben
+          hingeschrieben hat (72); es kann sie ändern. Bis zu sechs Rechnungen auf einem Blatt, ✕ neben einer Rechnung nimmt sie weg.</li>
+        <li data-ziel="wahl"><b>Weiterrechnen:</b> Unter jede Rechnung lässt sich die nächste hängen, mit jedem Verfahren — erst 24 × 3,
+          dann + 45.</li>
+      </ol>
+    </figure>
     <ul>
-      <li><b>✏️ Notizen:</b> In Aufgaben mit mehreren Rechenschritten stehen kleine Felder für Zwischenergebnisse, dort, wo sie
-        hingehören — etwa auf den Pfeilen der Rechen-Maschine. Jedes Feld sagt, was hineingehört.</li>
-      <li><span class="nr">1</span><b>📝 Notizblock</b> für schriftliches Rechnen: Das Kind wählt Plus, Minus, Mal, Geteilt oder Häuschen,
-        tippt seine Zahlen ein und rechnet darunter wie auf einem Blatt, mit Überträgen. Dezimalzahlen stehen am Komma untereinander.
-        <b>Plus und Minus mischen:</b> Antippen des Zeichens vor einer Zahl macht aus + ein − und umgekehrt (bis zu vier Zahlen).</li>
-      <li><span class="nr">2</span><span class="nr">3</span><b>Weiterrechnen:</b> Unter jede Rechnung lässt sich die nächste hängen, mit
-        jedem Verfahren — erst 24 × 3, dann + 45. Ihre erste Zahl ist das Ergebnis, das das Kind eben hingeschrieben hat; es kann sie
-        ändern. Bis zu sechs Rechnungen auf einem Blatt, ✕ neben einer Rechnung nimmt sie weg.</li>
       <li>Beides wird <b>nicht bewertet</b>: nichts geprüft, nichts übernommen, nichts gespeichert. Die Antwort gibt das Kind wie immer
         im Spiel ein; mit jeder neuen Aufgabe ist der Block wieder leer. ▁ verkleinert ihn, ✕ oben schliesst und leert ihn.</li>
       <li>Am Computer und auf dem Tablet quer steht der Block rechts neben der Aufgabe, auf dem Tablet hochkant und auf dem Handy
@@ -257,70 +306,93 @@
       Stufe, die es anbietet, Aufgaben, bis die erste falsch ist; die Stufe zeigt dann den eigenen Rekord. Gezählt werden die richtigen
       in Folge. Mit eingeschaltetem Timer wird die Zeit nach jeder richtigen Aufgabe etwas knapper — dann zählt es auch als Ende,
       wenn die Zeit abläuft.</p>
-    <figure><img src="bilder/a14-endlos-rangliste.webp" alt="Startbild eines Spiels: Endlos-Stufen und Ranglisten ohne und mit Timer" loading="lazy">
-      <figcaption>Unter den Stufen: ♾ Endlos-Ranglisten je Stufe (Musterkinder, erfundene Werte).</figcaption></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a14-endlos-rangliste-schmal.webp"><img src="bilder/a14-endlos-rangliste-breit.webp" alt="Startbild eines Spiels: Endlos-Ranglisten ohne und mit Timer" loading="lazy"></picture>
+      <figcaption>Unter den Stufen (Musterkinder, erfundene Werte).</figcaption>
+      <ol class="legende">
+        <li data-ziel="ranglisten"><b>♾ Endlos-Ranglisten:</b> je Stufe eine ohne und eine mit Timer. Es zählt der beste Wert jedes
+          Kindes; Testrunden der Aufsicht erscheinen nicht.</li>
+      </ol>
+    </figure>
     <ul>
-      <li><span class="nr">1</span><b>Ranglisten:</b> je Stufe eine ohne und eine mit Timer. Es zählt der beste Wert jedes Kindes; Testrunden der
-        Aufsicht erscheinen nicht.</li>
       <li>Ranglisten machen besonders Spass, wenn <b>mehrere Kinder</b> mitspielen — Geschwister, Freundinnen und Freunde oder eine Klasse.</li>
       <li>Spielen die Kinder an <b>verschiedenen Geräten</b>, sieht jedes Gerät zuerst nur seine eigenen Rekorde. Erst der
         <a href="#abgleich">Abgleich</a> bringt alle in dieselbe Rangliste.</li>
     </ul>
     <p>In der Statistik steht je Spiel und Stufe der beste Wert des Kindes und sein Platz:</p>
-    <figure><img src="bilder/a15-rekorde.webp" alt="Statistik-Karte Endlos-Rekorde mit Bestwert und Platz" loading="lazy"></figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a15-rekorde-schmal.webp"><img src="bilder/a15-rekorde-breit.webp" alt="Statistik-Karte Endlos-Rekorde mit Bestwert und Platz" loading="lazy"></picture>
+    </figure>
   </section>
 
   <section id="testen">
     <h2>10. Selbst ausprobieren</h2>
     <p>Als Aufsicht können Sie jedes Spiel selbst spielen. Ihre Runden zählen als <b>Testrunden</b> und erscheinen nicht in der Statistik der Kinder.</p>
-    <figure><img src="bilder/a13-testhilfe.webp" alt="Spiel mit der Leiste Test: Lösung zeigen, Aufgabe überspringen" loading="lazy"></figure>
-    <p><span class="nr">1</span>Die Leiste <b>🧪 Test</b> gibt es nur für die Aufsicht: <b>🔑 Lösung zeigen</b> und <b>⏭ Aufgabe überspringen</b> — praktisch, um
-      ein Spiel rasch kennenzulernen. Auf dem Startbild sehen Sie zudem, welche Stimme vorliest (mit ▶ Probe), und bei Spielen mit
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a13-testhilfe-schmal.webp"><img src="bilder/a13-testhilfe-breit.webp" alt="Spiel mit der Leiste Test: Lösung zeigen, Aufgabe überspringen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="test">Die Leiste <b>🧪 Test</b> gibt es nur für die Aufsicht: <b>🔑 Lösung zeigen</b> und <b>⏭ Aufgabe
+          überspringen</b> — praktisch, um ein Spiel rasch kennenzulernen.</li>
+      </ol>
+    </figure>
+    <p>Auf dem Startbild sehen Sie zudem, welche Stimme vorliest (mit ▶ Probe), und bei Spielen mit
       Wortlisten <b>🔍 Inhalte prüfen</b> (<a href="#freigabe">Abschnitt 11</a>).</p>
   </section>
 
   <section id="freigabe">
     <h2>11. Freigabe: was Kinder sehen</h2>
-    <figure><img src="bilder/a06-freigabe.webp" alt="Verwaltung, Untertab Freigabe mit Schaltern je Spiel" loading="lazy"></figure>
     <p>Neue Spiele und neue Wortlisten werden erst geprüft, bevor Kinder sie sehen. Was noch nicht geprüft ist, ist <b>gesperrt</b>.
       Unter <b>Freigabe</b> entscheiden Sie selbst:</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a06-freigabe-schmal.webp"><img src="bilder/a06-freigabe-breit.webp" alt="Verwaltung, Untertab Freigabe mit Schaltern je Spiel" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="alle"><b>Alles freigeben</b>, <b>Alles sperren</b> oder <b>Alles wie Prüfstand</b> (zurück auf den geprüften
+          Stand) — für alle Spiele auf einmal.</li>
+        <li data-ziel="schalter">Je Spiel <b>✓ frei</b> oder <b>🔒 gesperrt</b>; je Fach klappt eine Gruppe auf („12 von 20 frei · 3 zu prüfen“),
+          das Suchfeld findet ein Spiel oder eine Liste. „↺ wie Prüfstand“ nimmt Ihre eigene Wahl für ein Spiel zurück.</li>
+      </ol>
+    </figure>
     <ul>
-      <li><span class="nr">1</span><b>Alles freigeben</b>, <b>Alles sperren</b> oder <b>Alles wie Prüfstand</b> (zurück auf den geprüften Stand) — für alle Spiele auf einmal.</li>
-      <li><span class="nr">2</span>Je Spiel <b>✓ frei</b> oder <b>🔒 gesperrt</b>; je Fach klappt eine Gruppe auf („12 von 20 frei · 3 zu prüfen“),
-        das Suchfeld findet ein Spiel oder eine Liste. „↺ wie Prüfstand“ nimmt Ihre eigene Wahl für ein Spiel zurück.</li>
       <li>Spiele mit Wortlisten oder Sätzen: Die Listen lassen sich einzeln freigeben. Ein Kind sieht ein solches Spiel, sobald
         mindestens eine Liste frei ist; im Spiel kommen nur freie Inhalte vor.</li>
       <li>Die Freigabe gilt für dieses Gerät. Mit dem <a href="#abgleich">Abgleich</a> kommt sie auf die anderen Geräte.</li>
     </ul>
     <p class="tipp">Im Bereich Spiele zeigt der Filter <b>🔍 Zu prüfen</b> der Aufsicht, was noch gesperrt ist.</p>
     <h3 id="listen">🔍 Wortlisten selbst prüfen</h3>
-    <figure><img src="bilder/a21-pruefansicht.webp" alt="Prüfansicht einer Wortliste mit Kästchen je Eintrag, alle-Knopf je Gruppe und Korrektur-Stift" loading="lazy">
-      <figcaption>Prüfansicht der Anlaut-Angel, Liste „Anlaut“.</figcaption></figure>
     <p>„🔍 prüfen“ neben einer Liste in der Freigabe öffnet das Spiel mit der Prüfansicht, ebenso „🔍 Inhalte prüfen“ auf dem Startbild
       des Spiels.</p>
-    <ol>
-      <li><span class="nr">1</span><b>✓ Ganze Liste geprüft</b> hakt alles ab, was noch offen ist.</li>
-      <li><span class="nr">2</span>Ein Abschnitt hat einen eigenen Inhalt (etwa Bezeichnungen, Sätze, Fragen) und ist für sich abzuhaken;
-        Gruppen darin haken Sie mit <b>✓ alle</b> ab. Ganz geprüfte Abschnitte und Gruppen sind beim Öffnen zu und grün gerahmt.</li>
-      <li><span class="nr">3</span>Jeder Eintrag hat ein Kästchen. ✓E daneben heisst: von der Entwicklung schon geprüft.</li>
-      <li><span class="nr">4</span>Stimmt ein Eintrag nicht, schlägt <b>✏️</b> der Entwicklung eine Korrektur vor. Sie steht dann unter
-        Verwaltung → Meldungen und geht auf demselben Weg wie eine Fehlermeldung (<a href="#meldungen">Abschnitt 14</a>).</li>
-    </ol>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a21-pruefansicht-schmal.webp"><img src="bilder/a21-pruefansicht-breit.webp" alt="Prüfansicht einer Wortliste mit Kästchen je Eintrag, alle-Knopf je Gruppe und Korrektur-Stift" loading="lazy"></picture>
+      <figcaption>Prüfansicht der Anlaut-Angel, Liste „Anlaut“.</figcaption>
+      <ol class="legende">
+        <li data-ziel="ganz"><b>✓ Ganze Liste geprüft</b> hakt alles ab, was noch offen ist.</li>
+        <li data-ziel="gruppe">Ein Abschnitt hat einen eigenen Inhalt (etwa Bezeichnungen, Sätze, Fragen) und ist für sich abzuhaken;
+          Gruppen darin haken Sie mit <b>✓ alle</b> ab. Ganz geprüfte Abschnitte und Gruppen sind beim Öffnen zu und grün gerahmt.</li>
+        <li data-ziel="haken">Jeder Eintrag hat ein Kästchen. ✓E daneben heisst: von der Entwicklung schon geprüft.</li>
+        <li data-ziel="korrektur">Stimmt ein Eintrag nicht, schlägt <b>✏️</b> der Entwicklung eine Korrektur vor. Sie steht dann unter
+          Verwaltung → Meldungen und geht auf demselben Weg wie eine Fehlermeldung (<a href="#meldungen">Abschnitt 14</a>).</li>
+      </ol>
+    </figure>
     <p>Ihre Haken gelten nur auf diesem Gerät. Sind alle Einträge abgehakt, ist die Liste auf diesem Gerät für Kinder frei; einzelne
       Haken geben noch nichts frei.</p>
   </section>
 
   <section id="statistik">
     <h2>12. Statistik und Fazit</h2>
-    <figure><img src="bilder/a09-statistik.webp" alt="Statistik eines Kindes mit Kennzahlen, Fazit und Empfehlungen" loading="lazy">
-      <figcaption>Statistik mit erfundenen Beispielrunden.</figcaption></figure>
-    <p><span class="nr">1</span>Oben wählen Sie das Kind. „🧪 Testrunden zeigen“ blendet Ihre eigenen Probe-Runden ein.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a09-statistik-schmal.webp"><img src="bilder/a09-statistik-breit.webp" alt="Statistik eines Kindes mit Kindwahl und Fazit" loading="lazy"></picture>
+      <figcaption>Statistik mit erfundenen Beispielrunden.</figcaption>
+      <ol class="legende">
+        <li data-ziel="kind">Oben wählen Sie das Kind. „🧪 Testrunden zeigen“ blendet Ihre eigenen Probe-Runden ein.</li>
+        <li data-ziel="fazit"><b>Fazit</b> in Worten: Menge, Qualität, Konzentration, Stärken und Schwächen, Auffälligkeiten. Es entsteht
+          nach festen Regeln aus den Runden, ohne KI, und jede Aussage nennt ihre Zahlen. Mit „👀 Fazit für … freigeben“ sieht das Kind
+          eine freundliche Fassung in seiner eigenen Statistik.</li>
+      </ol>
+    </figure>
+    <p>Weiter unten:</p>
     <ul>
       <li><b>Kennzahlen:</b> Runden, Spielzeit, Anteil Aufgaben auf Anhieb richtig (ohne Fehler und ohne Tipp) und Aufgaben, bei denen
         die Lösung gezeigt wurde.</li>
-      <li><span class="nr">2</span><b>Fazit</b> in Worten: Menge, Qualität, Konzentration, Stärken und Schwächen, Auffälligkeiten. Es entsteht
-        nach festen Regeln aus den Runden, ohne KI, und jede Aussage nennt ihre Zahlen. Mit „👀 Fazit für … freigeben“ sieht das Kind
-        eine freundliche Fassung in seiner eigenen Statistik.</li>
       <li><b>Das empfehle ich für …:</b> wo die nächste Stufe dran ist, was wiederholt werden sollte, wann ein Timer reizvoll wäre — mit
         „Jetzt üben ➜“ direkt ins Spiel. Das Kind sieht höchstens drei davon als Karten mit „▶ Los“ (Bild unten).</li>
       <li><b>Wann wird gelernt?</b> Minuten je Tag, Wochentag und Tageszeit. Lieber oft und kurz als selten und lang.</li>
@@ -333,34 +405,51 @@
       <li><b>Version</b> ganz unten, etwa „Eulenpfad 1.0.0 · Kern 1.43.0“ — hilfreich, wenn Sie der Entwicklung etwas schreiben;
         jede Fehlermeldung trägt sie ohnehin mit.</li>
     </ul>
-    <figure><img src="bilder/a22-empfehlungen.webp" alt="Karte Das empfehle ich mit den Knöpfen Fürs Kind oben, Fürs Kind ausblenden und Eigene Empfehlung" loading="lazy"></figure>
-    <ol>
-      <li><span class="nr">1</span><b>📌 Fürs Kind oben</b> heftet einen Vorschlag an, damit das Kind ihn zuerst sieht.</li>
-      <li><span class="nr">2</span><b>🚫 Fürs Kind ausblenden</b> nimmt ihn weg; „↺ Wieder zeigen“ holt ihn zurück.</li>
-      <li><span class="nr">3</span><b>➕ Eigene Empfehlung:</b> Sie wählen selbst Spiel und Stufe. ⓘ erklärt, wie das Programm die
-        Vorschläge ordnet.</li>
-    </ol>
-    <figure><img src="bilder/a17-lernplan.webp" alt="Karte Lernplan mit den letzten Wochen" loading="lazy"></figure>
-    <figure><img src="bilder/a10-vorgehen.webp" alt="Karte Vorgehen mit Punkten für die letzten Aufgaben" loading="lazy">
-      <figcaption>Vorgehen: grüne Punkte = systematisch, gelb = teilweise, grau = kreuz und quer; der neueste Punkt steht rechts.</figcaption></figure>
+    <p>Die Empfehlungen steuern Sie selbst:</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a22-empfehlungen-schmal.webp"><img src="bilder/a22-empfehlungen-breit.webp" alt="Ein Vorschlag mit den Knöpfen Fürs Kind oben und Fürs Kind ausblenden" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="oben"><b>📌 Fürs Kind oben</b> heftet einen Vorschlag an, damit das Kind ihn zuerst sieht.</li>
+        <li data-ziel="ausblenden"><b>🚫 Fürs Kind ausblenden</b> nimmt ihn weg; „↺ Wieder zeigen“ holt ihn zurück.</li>
+      </ol>
+    </figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a26-eigene-empfehlung-schmal.webp"><img src="bilder/a26-eigene-empfehlung-breit.webp" alt="Knopf Eigene Empfehlung unter den Vorschlägen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="eigene"><b>➕ Eigene Empfehlung:</b> Sie wählen selbst Spiel und Stufe. ⓘ erklärt, wie das Programm die
+          Vorschläge ordnet.</li>
+      </ol>
+    </figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a17-lernplan-schmal.webp"><img src="bilder/a17-lernplan-breit.webp" alt="Karte Lernplan mit den letzten Wochen" loading="lazy"></picture>
+      <figcaption>Lernplan: die letzten Wochen, erfüllt oder nicht.</figcaption>
+    </figure>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a10-vorgehen-schmal.webp"><img src="bilder/a10-vorgehen-breit.webp" alt="Karte Vorgehen mit Punkten für die letzten Aufgaben" loading="lazy"></picture>
+      <figcaption>Vorgehen: grüne Punkte = systematisch, gelb = teilweise, grau = kreuz und quer; der neueste Punkt steht rechts.</figcaption>
+    </figure>
   </section>
 
   <section id="erfolge">
     <h2>13. Erfolge: Wochenstern und Abzeichen</h2>
-    <figure><img src="bilder/a18-erfolge.webp" alt="Bereich Erfolge mit Wochenkarte und Abzeichen" loading="lazy">
-      <figcaption>Erfolge eines Musterkinds, angesehen als Aufsicht.</figcaption></figure>
-    <ul>
-      <li><span class="nr">1</span><b>📅 Meine Woche</b> (für Sie: „Woche von …“): sieben Tage, ★ = Ziel des Tages erreicht, • = gespielt. Dazu die
+    <p>Als Aufsicht wählen Sie oben das Kind, wie in der Statistik.</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a18-erfolge-schmal.webp"><img src="bilder/a18-erfolge-breit.webp" alt="Bereich Erfolge mit Wochenkarte und Abzeichen" loading="lazy"></picture>
+      <figcaption>Erfolge eines Musterkinds, angesehen als Aufsicht.</figcaption>
+      <ol class="legende">
+      <li data-ziel="woche"><b>📅 Meine Woche</b> (für Sie: „Woche von …“): sieben Tage, ★ = Ziel des Tages erreicht, • = gespielt. Dazu die
         Wochensterne 🌟 und wie viele Wochen in Folge. Das Kind sieht die Woche auch in seiner Statistik.</li>
-      <li><span class="nr">2</span><b>Abzeichen</b> (22 Stück) für Runden, drei Sterne, alle sechs Stufen, verschiedene Spiele, Wochenziele,
+      <li data-ziel="abzeichen"><b>Abzeichen</b> (22 Stück) für Runden, drei Sterne, alle sechs Stufen, verschiedene Spiele, Wochenziele,
         gefundene Fehler, Kopfrechnen, frühes Üben, den Aufstieg und mehr. Jedes hat <b>fünf Stufen</b>: 🥉 Bronze, 🥈 Silber, 🥇 Gold, 🏆 Platin, 💎 Diamant — etwa 1, 10, 50,
         100 und 500 Runden; die Abstufung ist je Abzeichen eigen. Die Kachel zeigt die erreichte Stufe und den Weg zur nächsten.
         Neue Stufen tragen 🆕, bis das Kind sie gesehen hat. Testrunden zählen nicht.</li>
+      </ol>
+    </figure>
+    <ul>
       <li><b>🏆 Meine Podestplätze:</b> wo das Kind in einer Endlos-Rangliste auf Platz 1 bis 3 steht.</li>
       <li><b>📤 Teilen</b> macht aus einem Abzeichen ein Bild (Vorname, Titel, Datum) und öffnet den Teilen-Dialog des Geräts oder
         speichert es. Das geschieht nur, wenn das Kind darauf tippt; weitere Angaben reisen nicht mit.</li>
     </ul>
-    <p>Als Aufsicht wählen Sie oben das Kind, wie in der Statistik.</p>
   </section>
 
   <section id="meldungen">
@@ -386,15 +475,17 @@
 
   <section id="sichern">
     <h2>15. Daten sichern und einlesen</h2>
-    <figure><img src="bilder/a11-daten.webp" alt="Karte Daten mit Knöpfen Alle sichern, Nur ein Kind sichern, Einlesen, Zurücksetzen" loading="lazy"></figure>
     <p>Ganz unten in der Statistik:</p>
-    <ul>
-      <li><span class="nr">1</span><b>Alle sichern</b> lädt eine Datei <kbd>lernspiele-…-Datum.json</kbd> herunter. Bewahren Sie sie auf, zum Beispiel auf einem USB-Stick oder in Ihrem Cloud-Ordner.</li>
-      <li><span class="nr">2</span><b>Nur … sichern</b> sichert ein einzelnes Kind.</li>
-      <li><span class="nr">3</span><b>Einlesen</b> holt eine gesicherte Datei zurück. Dabei wird <b>zusammengeführt</b>: Runden, die schon da sind,
-        zählen nur einmal, nichts geht verloren.</li>
-      <li><span class="nr">4</span><b>Zurücksetzen</b> löscht die Runden eines Kindes (alle Spiele oder eines). Name, Klasse und Einstellungen bleiben.</li>
-    </ul>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a11-daten-schmal.webp"><img src="bilder/a11-daten-breit.webp" alt="Karte Daten mit Knöpfen Alle sichern, Nur ein Kind sichern, Einlesen, Zurücksetzen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="alle"><b>Alle sichern</b> lädt eine Datei <kbd>lernspiele-…-Datum.json</kbd> herunter. Bewahren Sie sie auf, zum Beispiel auf einem USB-Stick oder in Ihrem Cloud-Ordner.</li>
+        <li data-ziel="eins"><b>Nur … sichern</b> sichert ein einzelnes Kind.</li>
+        <li data-ziel="einlesen"><b>Einlesen</b> holt eine gesicherte Datei zurück. Dabei wird <b>zusammengeführt</b>: Runden, die schon da sind,
+          zählen nur einmal, nichts geht verloren.</li>
+        <li data-ziel="zuruecksetzen"><b>Zurücksetzen</b> löscht die Runden eines Kindes (alle Spiele oder eines). Name, Klasse und Einstellungen bleiben.</li>
+      </ol>
+    </figure>
     <p class="achtung">Die PIN der Aufsicht wird nie mitgesichert. Gesicherte Dateien enthalten Vornamen und Lernstand — geben Sie sie nur Personen,
       die das Kind begleiten.</p>
   </section>
@@ -403,15 +494,17 @@
     <h2>16. Mehrere Geräte abgleichen</h2>
     <p>Spielt ein Kind am Tablet und am Laptop, oder haben Geschwister eigene Geräte, sorgt der <b>Abgleich</b> dafür, dass Statistik und
       Ranglisten überall vollständig sind.</p>
-    <figure><img src="bilder/a07-abgleich.webp" alt="Verwaltung, Untertab Abgleich mit Gerät benennen, Ordner wählen und Abgleich-Datei" loading="lazy"></figure>
-    <ol>
-      <li><span class="nr">1</span><b>Gerät benennen</b>, zum Beispiel „Laptop Wohnzimmer“ — so sehen Sie später, woher Daten kommen.</li>
-      <li><span class="nr">2</span><b>Ordner wählen:</b> auf jedem Gerät denselben Ordner, etwa einen Netzwerkordner oder den Ordner eines
-        Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen. Das geht heute in <b>Chrome und Edge
-        am Computer</b>.</li>
-      <li><span class="nr">3</span>Ohne Ordner (iPad, Android-Tablet, Firefox): <b>Abgleich-Datei sichern</b>, auf das andere Gerät bringen und dort
-        <b>Abgleich-Datei einlesen</b> — und umgekehrt.</li>
-    </ol>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a07-abgleich-schmal.webp"><img src="bilder/a07-abgleich-breit.webp" alt="Verwaltung, Untertab Abgleich mit Gerät benennen, Ordner wählen und Abgleich-Datei" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="geraet"><b>Gerät benennen</b>, zum Beispiel „Laptop Wohnzimmer“ — so sehen Sie später, woher Daten kommen.</li>
+        <li data-ziel="ordner"><b>Ordner wählen:</b> auf jedem Gerät denselben Ordner, etwa einen Netzwerkordner oder den Ordner eines
+          Cloud-Dienstes. Jedes Gerät schreibt dort seine eigene Datei und liest die der anderen. Das geht heute in <b>Chrome und Edge
+          am Computer</b>.</li>
+        <li data-ziel="datei">Ohne Ordner (iPad, Android-Tablet, Firefox): <b>Abgleich-Datei sichern</b>, auf das andere Gerät bringen und dort
+          <b>Abgleich-Datei einlesen</b> — und umgekehrt.</li>
+      </ol>
+    </figure>
     <p>Abgeglichen werden Runden, Endlos-Rekorde, Kinder, Profile (mit Lernplan und Empfehlungen), Freigaben, Ruhezeiten und Meldungen.
       Wochensterne und Abzeichen rechnet jedes Gerät aus den Runden selbst. Auf dem Gerät bleiben die PIN, die Einstellungen, die Haken
       der Prüfansicht und die Angabe zu Kopfhörern.</p>
@@ -419,16 +512,24 @@
 
   <section id="einstellungen">
     <h2>17. Einstellungen</h2>
-    <figure><img src="bilder/a08-einstellungen.webp" alt="Verwaltung, Untertab Einstellungen mit den Blöcken Aussehen und In den Spielen, Dezimalzeichen global und je Spiel" loading="lazy"></figure>
     <p>Die Einstellungen stehen in Blöcken und gelten für alle Kinder auf diesem Gerät, viele je Spiel auch abweichend.</p>
-    <ol>
-      <li><span class="nr">1</span><b>🎨 Aussehen:</b> <b>Stil</b> wie von Hand gezeichnet (Standard) oder glatt — Startseite, Stufenwahl, Ranglisten
-        und Schlussbild, die Aufgabe bleibt glatt. <b>Farben:</b> hell (Standard), dunkel oder wie das Tablet oder der Computer.
-        Unter <b>Für mich</b> wählt jede Aufsicht für sich etwas anderes; das gilt, solange sie angemeldet ist.</li>
-      <li><span class="nr">2</span><b>🎮 In den Spielen</b>, zuerst das <b>Dezimalzeichen</b> für alle Spiele: Punkt (4.5, wie im Lehrplan, Standard)
-        oder Komma (4,5) — so, wie es das Kind im Heft schreibt.</li>
-      <li><span class="nr">3</span><b>Je Spiel</b> abweichend: „wie global“, Punkt oder Komma.</li>
-    </ol>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a08-einstellungen-schmal.webp"><img src="bilder/a08-einstellungen-breit.webp" alt="Verwaltung, Untertab Einstellungen mit dem Block Aussehen" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="aussehen"><b>🎨 Aussehen:</b> <b>Stil</b> wie von Hand gezeichnet (Standard) oder glatt — Startseite, Stufenwahl, Ranglisten
+          und Schlussbild, die Aufgabe bleibt glatt. <b>Farben:</b> hell (Standard), dunkel oder wie das Tablet oder der Computer.
+          Unter <b>Für mich</b> wählt jede Aufsicht für sich etwas anderes; das gilt, solange sie angemeldet ist.</li>
+      </ol>
+    </figure>
+    <p>Im Block <b>🎮 In den Spielen</b> steht zuerst das Dezimalzeichen:</p>
+    <figure>
+      <picture><source media="(max-width: 600px)" srcset="bilder/a25-dezimalzeichen-schmal.webp"><img src="bilder/a25-dezimalzeichen-breit.webp" alt="Dezimalzeichen für alle Spiele und je Spiel" loading="lazy"></picture>
+      <ol class="legende">
+        <li data-ziel="dezimal"><b>Für alle Spiele:</b> Punkt (4.5, wie im Lehrplan, Standard) oder Komma (4,5) — so, wie es das Kind
+          im Heft schreibt.</li>
+        <li data-ziel="dezimal-spiel"><b>Je Spiel</b> abweichend: „wie global“, Punkt oder Komma.</li>
+      </ol>
+    </figure>
     <p>Geldbeträge schreiben die Spiele bis zur 3. Klasse als „25 Fr. 60 Rp.“, ab der 4. Klasse als „25.60 Fr.“ — mit dem eingestellten Zeichen.</p>
     <p><b>Notizen für Zwischenergebnisse:</b> nach Stufe (Standard — in den unteren Stufen ohne, damit Kopfrechnen geübt wird),
       immer oder nie (Kopfrechnen). <b>Notizblock für schriftliches Rechnen:</b> ab Stufe 4 (Standard), immer, wo Notizen sind, oder

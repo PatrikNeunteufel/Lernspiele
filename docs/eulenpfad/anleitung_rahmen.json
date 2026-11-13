@@ -1,0 +1,767 @@
+{
+ "hinweis": "Erzeugt von tools/anleitung_bilder.js — nicht von Hand ändern (docs/eulenpfad/konzept_anleitungen.md, AL4 a, AL5 a).",
+ "bilder": {
+  "a01-einrichten": {
+   "breit": {
+    "schluessel": [
+     "kind",
+     "erwachsen"
+    ],
+    "breite": 816,
+    "hoehe": 271,
+    "fingerabdruck": "22e05eed94aae27e"
+   },
+   "schmal": {
+    "schluessel": [
+     "kind",
+     "erwachsen"
+    ],
+    "breite": 390,
+    "hoehe": 378,
+    "fingerabdruck": "0e48872253cce2fe"
+   }
+  },
+  "a02-wer-bist-du": {
+   "breit": {
+    "schluessel": [
+     "kind",
+     "aufsicht"
+    ],
+    "breite": 816,
+    "hoehe": 346,
+    "fingerabdruck": "06c04fba9496351f"
+   },
+   "schmal": {
+    "schluessel": [
+     "kind",
+     "aufsicht"
+    ],
+    "breite": 390,
+    "hoehe": 634,
+    "fingerabdruck": "a774b000e5411c87"
+   }
+  },
+  "a03-pin": {
+   "breit": {
+    "schluessel": [
+     "pin"
+    ],
+    "breite": 816,
+    "hoehe": 133,
+    "fingerabdruck": "56b74cb3b4026a9e"
+   },
+   "schmal": {
+    "schluessel": [
+     "pin"
+    ],
+    "breite": 390,
+    "hoehe": 159,
+    "fingerabdruck": "7b5c34206af4cad7"
+   }
+  },
+  "a04-tabs": {
+   "breit": {
+    "schluessel": [
+     "tabs"
+    ],
+    "breite": 816,
+    "hoehe": 170,
+    "fingerabdruck": "020c3ceae783f7b1"
+   },
+   "schmal": {
+    "schluessel": [
+     "tabs"
+    ],
+    "breite": 390,
+    "hoehe": 162,
+    "fingerabdruck": "c07389ce0a1f7121"
+   }
+  },
+  "a05-konten": {
+   "breit": {
+    "schluessel": [
+     "untertabs",
+     "lernplan"
+    ],
+    "breite": 816,
+    "hoehe": 755,
+    "fingerabdruck": "eacbe5b60bb99aa1"
+   },
+   "schmal": {
+    "schluessel": [
+     "untertabs",
+     "lernplan"
+    ],
+    "breite": 390,
+    "hoehe": 905,
+    "fingerabdruck": "8ff978d2e6bdc933"
+   }
+  },
+  "a06-freigabe": {
+   "breit": {
+    "schluessel": [
+     "alle",
+     "schalter"
+    ],
+    "breite": 816,
+    "hoehe": 423,
+    "fingerabdruck": "d7c137b2aae005ad"
+   },
+   "schmal": {
+    "schluessel": [
+     "alle",
+     "schalter"
+    ],
+    "breite": 390,
+    "hoehe": 487,
+    "fingerabdruck": "96b288ca4d0c735e"
+   }
+  },
+  "a07-abgleich": {
+   "breit": {
+    "schluessel": [
+     "geraet",
+     "ordner",
+     "datei"
+    ],
+    "breite": 816,
+    "hoehe": 360,
+    "fingerabdruck": "9fac0a108fb8d175"
+   },
+   "schmal": {
+    "schluessel": [
+     "geraet",
+     "ordner",
+     "datei"
+    ],
+    "breite": 390,
+    "hoehe": 320,
+    "fingerabdruck": "d1cbc160e820df52"
+   }
+  },
+  "a08-einstellungen": {
+   "breit": {
+    "schluessel": [
+     "aussehen"
+    ],
+    "breite": 816,
+    "hoehe": 827,
+    "fingerabdruck": "def62c71c24d4b48"
+   },
+   "schmal": {
+    "schluessel": [
+     "aussehen"
+    ],
+    "breite": 390,
+    "hoehe": 1394,
+    "fingerabdruck": "edc9f49967a578e1"
+   }
+  },
+  "a09-statistik": {
+   "breit": {
+    "schluessel": [
+     "kind",
+     "fazit"
+    ],
+    "breite": 816,
+    "hoehe": 499,
+    "fingerabdruck": "7bb4bba69500e4d5"
+   },
+   "schmal": {
+    "schluessel": [
+     "kind",
+     "fazit"
+    ],
+    "breite": 390,
+    "hoehe": 757,
+    "fingerabdruck": "49821065d1509bdd"
+   }
+  },
+  "a10-vorgehen": {
+   "breit": {
+    "schluessel": [],
+    "breite": 816,
+    "hoehe": 339,
+    "fingerabdruck": "daafd15a37617f33"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 419,
+    "fingerabdruck": "77bb5cc6aba9c372"
+   }
+  },
+  "a11-daten": {
+   "breit": {
+    "schluessel": [
+     "alle",
+     "eins",
+     "einlesen",
+     "zuruecksetzen"
+    ],
+    "breite": 816,
+    "hoehe": 359,
+    "fingerabdruck": "cb0c6f453c99d42e"
+   },
+   "schmal": {
+    "schluessel": [
+     "alle",
+     "eins",
+     "einlesen",
+     "zuruecksetzen"
+    ],
+    "breite": 390,
+    "hoehe": 524,
+    "fingerabdruck": "d8c68f3d9dae67fd"
+   }
+  },
+  "a12-stufenwahl": {
+   "breit": {
+    "schluessel": [
+     "vorlesen",
+     "timer",
+     "endlos",
+     "favorit",
+     "stufe"
+    ],
+    "breite": 816,
+    "hoehe": 576,
+    "fingerabdruck": "13f0971436c57d02"
+   },
+   "schmal": {
+    "schluessel": [
+     "vorlesen",
+     "timer",
+     "endlos",
+     "favorit",
+     "stufe"
+    ],
+    "breite": 390,
+    "hoehe": 677,
+    "fingerabdruck": "29e03135996bab70"
+   }
+  },
+  "a13-testhilfe": {
+   "breit": {
+    "schluessel": [
+     "test"
+    ],
+    "breite": 800,
+    "hoehe": 132,
+    "fingerabdruck": "b368b4c03d692f3d"
+   },
+   "schmal": {
+    "schluessel": [
+     "test"
+    ],
+    "breite": 390,
+    "hoehe": 260,
+    "fingerabdruck": "90ca30a1f27a445b"
+   }
+  },
+  "a14-endlos-rangliste": {
+   "breit": {
+    "schluessel": [
+     "ranglisten"
+    ],
+    "breite": 816,
+    "hoehe": 257,
+    "fingerabdruck": "deede45a77cfade6"
+   },
+   "schmal": {
+    "schluessel": [
+     "ranglisten"
+    ],
+    "breite": 390,
+    "hoehe": 400,
+    "fingerabdruck": "8d99a22f51c4ed5b"
+   }
+  },
+  "a15-rekorde": {
+   "breit": {
+    "schluessel": [],
+    "breite": 816,
+    "hoehe": 332,
+    "fingerabdruck": "dac1c001849eac4e"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 682,
+    "fingerabdruck": "b536b37b275cad30"
+   }
+  },
+  "a16-spiele": {
+   "breit": {
+    "schluessel": [
+     "fach",
+     "suche",
+     "filter"
+    ],
+    "breite": 816,
+    "hoehe": 517,
+    "fingerabdruck": "883fe50ab00af245"
+   },
+   "schmal": {
+    "schluessel": [
+     "fach",
+     "suche",
+     "filter"
+    ],
+    "breite": 390,
+    "hoehe": 830,
+    "fingerabdruck": "af8396fdf0218a8e"
+   }
+  },
+  "a17-lernplan": {
+   "breit": {
+    "schluessel": [],
+    "breite": 816,
+    "hoehe": 280,
+    "fingerabdruck": "6a013b75858824cb"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 292,
+    "fingerabdruck": "2cc994f533356aaf"
+   }
+  },
+  "a18-erfolge": {
+   "breit": {
+    "schluessel": [
+     "woche",
+     "abzeichen"
+    ],
+    "breite": 816,
+    "hoehe": 808,
+    "fingerabdruck": "a83e04907a042e33"
+   },
+   "schmal": {
+    "schluessel": [
+     "woche",
+     "abzeichen"
+    ],
+    "breite": 390,
+    "hoehe": 791,
+    "fingerabdruck": "49229b17bc0c1f31"
+   }
+  },
+  "a19-profil": {
+   "breit": {
+    "schluessel": [
+     "bild",
+     "klasse",
+     "speichern"
+    ],
+    "breite": 816,
+    "hoehe": 950,
+    "fingerabdruck": "6c0d64679b60c26d"
+   },
+   "schmal": {
+    "schluessel": [
+     "bild",
+     "klasse",
+     "speichern"
+    ],
+    "breite": 390,
+    "hoehe": 1416,
+    "fingerabdruck": "9ef4adde77c68ccc"
+   }
+  },
+  "a21-pruefansicht": {
+   "breit": {
+    "schluessel": [
+     "ganz",
+     "gruppe",
+     "haken",
+     "korrektur"
+    ],
+    "breite": 816,
+    "hoehe": 369,
+    "fingerabdruck": "c55b2bfdd8184817"
+   },
+   "schmal": {
+    "schluessel": [
+     "ganz",
+     "gruppe",
+     "haken",
+     "korrektur"
+    ],
+    "breite": 390,
+    "hoehe": 411,
+    "fingerabdruck": "0b1460abfa764bf3"
+   }
+  },
+  "a22-empfehlungen": {
+   "breit": {
+    "schluessel": [
+     "oben",
+     "ausblenden"
+    ],
+    "breite": 816,
+    "hoehe": 336,
+    "fingerabdruck": "4fd6a732519063ab"
+   },
+   "schmal": {
+    "schluessel": [
+     "oben",
+     "ausblenden"
+    ],
+    "breite": 390,
+    "hoehe": 336,
+    "fingerabdruck": "8796d1eb65d79d0d"
+   }
+  },
+  "a23-zufall": {
+   "breit": {
+    "schluessel": [],
+    "breite": 807,
+    "hoehe": 268,
+    "fingerabdruck": "4c2af93e7990025f"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 547,
+    "fingerabdruck": "8790a9b1c536c0d5"
+   }
+  },
+  "a24-selbst-umstellen": {
+   "breit": {
+    "schluessel": [
+     "kindwahl"
+    ],
+    "breite": 816,
+    "hoehe": 535,
+    "fingerabdruck": "3df886de58374870"
+   },
+   "schmal": {
+    "schluessel": [
+     "kindwahl"
+    ],
+    "breite": 390,
+    "hoehe": 590,
+    "fingerabdruck": "74b52102ae581148"
+   }
+  },
+  "a25-dezimalzeichen": {
+   "breit": {
+    "schluessel": [
+     "dezimal",
+     "dezimal-spiel"
+    ],
+    "breite": 816,
+    "hoehe": 194,
+    "fingerabdruck": "dab953b7de4213d0"
+   },
+   "schmal": {
+    "schluessel": [
+     "dezimal",
+     "dezimal-spiel"
+    ],
+    "breite": 390,
+    "hoehe": 224,
+    "fingerabdruck": "f33920916e9883d3"
+   }
+  },
+  "a26-eigene-empfehlung": {
+   "breit": {
+    "schluessel": [
+     "eigene"
+    ],
+    "breite": 816,
+    "hoehe": 169,
+    "fingerabdruck": "4bfce9e28903d761"
+   },
+   "schmal": {
+    "schluessel": [
+     "eigene"
+    ],
+    "breite": 390,
+    "hoehe": 143,
+    "fingerabdruck": "c440ac4f4b9f1e65"
+   }
+  },
+  "k01-anmelden": {
+   "breit": {
+    "schluessel": [
+     "name",
+     "neu"
+    ],
+    "breite": 816,
+    "hoehe": 378,
+    "fingerabdruck": "c54b200fd43b58d9"
+   },
+   "schmal": {
+    "schluessel": [
+     "name",
+     "neu"
+    ],
+    "breite": 390,
+    "hoehe": 666,
+    "fingerabdruck": "3d7ce2e6d8fb0111"
+   }
+  },
+  "k02-spiele": {
+   "breit": {
+    "schluessel": [
+     "fach",
+     "suche",
+     "filter"
+    ],
+    "breite": 816,
+    "hoehe": 302,
+    "fingerabdruck": "b6a12ddcb9a6bb9a"
+   },
+   "schmal": {
+    "schluessel": [
+     "fach",
+     "suche",
+     "filter"
+    ],
+    "breite": 390,
+    "hoehe": 434,
+    "fingerabdruck": "48372727ea507c5a"
+   }
+  },
+  "k03-stufen": {
+   "breit": {
+    "schluessel": [
+     "schalter",
+     "stufe",
+     "info"
+    ],
+    "breite": 816,
+    "hoehe": 439,
+    "fingerabdruck": "15ebe173dc136f46"
+   },
+   "schmal": {
+    "schluessel": [
+     "schalter",
+     "stufe",
+     "info"
+    ],
+    "breite": 390,
+    "hoehe": 580,
+    "fingerabdruck": "fe73c70b154eaf47"
+   }
+  },
+  "k04-aufgabe": {
+   "breit": {
+    "schluessel": [
+     "aufgabe",
+     "antworten"
+    ],
+    "breite": 816,
+    "hoehe": 491,
+    "fingerabdruck": "95d6992cfe977eda"
+   },
+   "schmal": {
+    "schluessel": [
+     "aufgabe",
+     "antworten"
+    ],
+    "breite": 390,
+    "hoehe": 424,
+    "fingerabdruck": "03b87ab252133d6a"
+   }
+  },
+  "k05-hinweis": {
+   "breit": {
+    "schluessel": [
+     "tipp"
+    ],
+    "breite": 816,
+    "hoehe": 176,
+    "fingerabdruck": "930c563ceede656d"
+   },
+   "schmal": {
+    "schluessel": [
+     "tipp"
+    ],
+    "breite": 390,
+    "hoehe": 198,
+    "fingerabdruck": "c2f3ec90db1fb99c"
+   }
+  },
+  "k06-sterne": {
+   "breit": {
+    "schluessel": [],
+    "breite": 816,
+    "hoehe": 560,
+    "fingerabdruck": "d50a09dac0c67973"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 560,
+    "fingerabdruck": "957ae26ad31e3465"
+   }
+  },
+  "k07-statistik": {
+   "breit": {
+    "schluessel": [],
+    "breite": 816,
+    "hoehe": 900,
+    "fingerabdruck": "936f6cad9ae6f835"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 900,
+    "fingerabdruck": "b3d7ab32c8ac3b92"
+   }
+  },
+  "k08-endlos": {
+   "breit": {
+    "schluessel": [],
+    "breite": 816,
+    "hoehe": 640,
+    "fingerabdruck": "9ddf75c9f6112207"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 640,
+    "fingerabdruck": "d5bb4fddc3d93a9a"
+   }
+  },
+  "k09-endlos-ende": {
+   "breit": {
+    "schluessel": [
+     "rangliste"
+    ],
+    "breite": 816,
+    "hoehe": 271,
+    "fingerabdruck": "6b435d91af39b5e9"
+   },
+   "schmal": {
+    "schluessel": [
+     "rangliste"
+    ],
+    "breite": 390,
+    "hoehe": 289,
+    "fingerabdruck": "0024d45a8d4069f5"
+   }
+  },
+  "k10-zufall": {
+   "breit": {
+    "schluessel": [],
+    "breite": 805,
+    "hoehe": 225,
+    "fingerabdruck": "deff9131d73c2eac"
+   },
+   "schmal": {
+    "schluessel": [],
+    "breite": 390,
+    "hoehe": 463,
+    "fingerabdruck": "18bd6b29ec59bfa7"
+   }
+  },
+  "k11-hilfe-tipp": {
+   "breit": {
+    "schluessel": [
+     "hilfe",
+     "vorlesen",
+     "melden",
+     "tipp"
+    ],
+    "breite": 816,
+    "hoehe": 396,
+    "fingerabdruck": "193733a69887b5d4"
+   },
+   "schmal": {
+    "schluessel": [
+     "hilfe",
+     "vorlesen",
+     "melden",
+     "tipp"
+    ],
+    "breite": 390,
+    "hoehe": 354,
+    "fingerabdruck": "df8b0e0777f338c6"
+   }
+  },
+  "k12-erfolge": {
+   "breit": {
+    "schluessel": [
+     "woche",
+     "abzeichen"
+    ],
+    "breite": 816,
+    "hoehe": 746,
+    "fingerabdruck": "afdb27b4adc6edfa"
+   },
+   "schmal": {
+    "schluessel": [
+     "woche",
+     "abzeichen"
+    ],
+    "breite": 390,
+    "hoehe": 727,
+    "fingerabdruck": "8b1508ceb59074bc"
+   }
+  },
+  "k13-bild": {
+   "breit": {
+    "schluessel": [
+     "bilder",
+     "farben"
+    ],
+    "breite": 816,
+    "hoehe": 320,
+    "fingerabdruck": "eb5fc27433ba1bc1"
+   },
+   "schmal": {
+    "schluessel": [
+     "bilder",
+     "farben"
+    ],
+    "breite": 390,
+    "hoehe": 488,
+    "fingerabdruck": "a21f03c1bb28419d"
+   }
+  },
+  "k14-notizblock": {
+   "breit": {
+    "schluessel": [
+     "knopf",
+     "weiter",
+     "wahl"
+    ],
+    "breite": 816,
+    "hoehe": 790,
+    "fingerabdruck": "423a1c8329b0c9a2"
+   },
+   "schmal": {
+    "schluessel": [
+     "knopf",
+     "weiter",
+     "wahl"
+    ],
+    "breite": 390,
+    "hoehe": 678,
+    "fingerabdruck": "d3284474843c853b"
+   }
+  },
+  "k15-weiterspielen": {
+   "breit": {
+    "schluessel": [
+     "weiter"
+    ],
+    "breite": 816,
+    "hoehe": 278,
+    "fingerabdruck": "a073279ae1be6085"
+   },
+   "schmal": {
+    "schluessel": [
+     "weiter"
+    ],
+    "breite": 390,
+    "hoehe": 515,
+    "fingerabdruck": "0040ad7a9e25468c"
+   }
+  }
+ }
+}

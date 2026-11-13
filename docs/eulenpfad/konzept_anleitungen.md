@@ -1,7 +1,9 @@
 # Konzept: Aufbau der Anleitungen (Bild, Nummern, Text, Layout)
 
-Stand: LERN_Session37 (2026-11-13). **Entschieden (Patrik): AL1 a, AL2 a, AL3 a, AL4 a, AL5 a, AL6 a.** Offen: AL7
-(Bilder je Gerät; Rückfrage Patrik zu AL3: Kinder spielen auch im Browser und auf dem Tablet). Anlass: Rückmeldung Patrik am Ende von
+Stand: LERN_Session37 (2026-11-13). **Entschieden (Patrik): AL1 a bis AL7 a.** AL7 kam aus der Rückfrage Patrik zu AL3 (Kinder
+spielen auch im Browser und auf dem Tablet) und ersetzt dort „Kinder weiter auf dem Handy“: Jedes Bild gibt es breit und
+schmal. Die Liste der Rahmen (AL4) liegt in `docs/eulenpfad/anleitung_rahmen.json` statt im Bildordner, weil
+`eulenpfad/` nur enthält, was online geht (P1 a). Anlass: Rückmeldung Patrik am Ende von
 LERN_Session36 (Report, Abschnitt „Rückmeldung Patrik zu den Anleitungen“). Betrifft `eulenpfad/anleitung/kinder.html`,
 `aufsicht.html`, `anleitung.css` und `tools/anleitung_bilder.js`. Frühere Entscheide zum Aufbau gibt es keine (gesucht in
 `docs/konzept_*`, `docs/eulenpfad/konzept_*`, `rahmen.md`, Reports und CHANGELOG; nur AN-B a „nachführen“).
@@ -159,8 +161,8 @@ und ein Satz). Dann trüge sie keine Nummern, und Zentrieren wäre stimmig.
   Notizblocks und die Tabs in einer Zeile) und **schmal** mit 390 px (Handy, Faktor 2). Die Seite
   wählt mit `<picture>` die Fassung nach der eigenen Breite (bis 600 px schmal). Eine Legende für beide: dieselben
   Schlüssel, und die Lesereihenfolge muss in beiden gleich sein; sonst meldet der Prüfer einen Fehler, und die Ziele
-  werden so gewählt, dass sie es ist (etwa ein gemeinsamer Rahmen). Ein Bild, das es nur in einem Aufbau gibt (a04 Tabs:
-  nur breit), steht in `rahmen.json` mit einer Fassung und wird auch auf dem Handy gezeigt.
+  werden so gewählt, dass sie es ist (etwa ein gemeinsamer Rahmen). Ein Bild, das es nur in einem Aufbau gibt, steht in
+  der Liste der Rahmen mit einer Fassung und wird auf jedem Gerät gezeigt (heute keins: auch die Tabs gibt es auf dem Handy).
 - **b:** Nur breit (816 px) für beide Anleitungen.
 - **c:** Kinder nur schmal wie heute, Aufsicht nur breit.
 
@@ -174,7 +176,14 @@ Lesereihenfolge zulassen — dann bräuchte jede Fassung eine eigene Legende, un
 Zu prüfen beim Bau: ob ein Bild im Aufbau ab 900 px quer wesentlich anders aussieht (Notizblock a20/k14); dann bekommt
 nur dieses Bild eine dritte Fassung „quer“ (1200 px, `<source media>` ab 900 px quer), nicht alle.
 
-## 4. Umsetzung (nach den Entscheiden)
+## 4. Umsetzung — erledigt 2026-11-13 (LERN_Session37)
+
+Folge von AL7 für AL2: Die breite Fassung ist 816 px breit, also so breit wie die Karte; neben einer Legende stünde sie nur
+verkleinert. „Nebeneinander“ gilt darum nur für ein Bild höchstens halb so breit wie die Karte (class `hoch`, geprüft in
+`tools/pruefe_skripte.js` Punkt 9); heute hat keins diese Breite, alle Bilder stehen über ihrer Legende. Die schmale
+Fassung zeigt die Seite nur bis 600 px, wo ohnehin alles untereinander steht.
+
+Offen: a08 (Aussehen) und a19 (Profil) sind schmal über 1300 px hoch — ein Block der App, der auf dem Handy so lang ist.
 
 1. `anleitung.css`: Bildblock, Legende mit Zähler, beide Seiten im gleichen Aufbau; dunkel und hell.
 2. `tools/anleitung_bilder.js`: Ziele mit Schlüssel, Nummer nach Lage, Ausschnitt um die Rahmen, Breite nach AL3,

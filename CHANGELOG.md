@@ -2044,3 +2044,21 @@
 - **Session-Abschluss:** Report `docs/eulenpfad/report/LERN_Session36_2026-11-13.md` mit Patriks Rückmeldung zu den
   Anleitungen (Nummern im Bild und im Text uneinheitlich, Text mal über, mal unter dem Bild, verschiedene Breiten) als
   Auftrag für LERN_Session37; Handover (weiter mit dem Neuaufbau der Anleitungen, dann Inhaltslisten Block 4 Deutsch).
+
+## 2026-11-13 — LERN_Session37
+- **Bemerkung 53, Znüni-Teller** (znueni-teller, LP5 a): neue Prüfansicht `pruefung.js` für alle vier Listen, Lebensmittel
+  nach Korb mit den Namen wie im Spiel; die Einträge des Korbs „Süsses und Salziges“ tragen die Art „süss“ oder „salzig“
+  (Pommes frites salzig) und stehen in der Prüfansicht in zwei Gruppen; im Spiel bleibt es ein Korb.
+- **Anleitungen neu aufgebaut** (docs/eulenpfad/konzept_anleitungen.md, AL1 a–AL7 a): Jedes Bild steht mit seiner Legende
+  in einem Block; die Legende zählt selbst, ihre Nummer ist die rote Nummer im Bild (keine Nummern von Hand, keine in
+  Bildunterschriften). Jedes Bild in zwei Fassungen, breit (816 px, 1 : 1 in der Karte, Aufbau wie am Tablet) und schmal
+  (390 px, Handy), die Seite zeigt die passende. Kinder-Anleitung im selben Aufbau wie die für Erwachsene (linksbündig,
+  mit Inhaltsverzeichnis). Rahmen nur, wo die Legende etwas beschreibt; a20 entfällt (beide Seiten zeigen k14), neu a23
+  Zufall, a24 Selbst umstellen, a25 Dezimalzeichen, a26 Eigene Empfehlung, k15 Weiterspielen.
+- **`tools/anleitung_bilder.js`:** Ziele mit Schlüssel, Nummer nach der Lage (Lesereihenfolge), Ausschnitt um die Rahmen
+  ohne angeschnittene Zeilen, Knöpfe und Bilder, Rahmen nur um den sichtbaren Teil in Scrollbereichen, Fenster bis ans
+  Ende des Ausschnitts statt Scrollen (sonst lag die Kopfzeile darüber); schreibt `docs/eulenpfad/anleitung_rahmen.json`
+  (Schlüssel, Grösse, Fingerabdruck je Bild und Fassung).
+- **`tools/pruefe_skripte.js` Punkt 9** (AL5 a): Legenden gegen die Liste der Rahmen (Schlüssel und Reihenfolge in beiden
+  Fassungen), keine Nummern von Hand, jedes Bild mit beiden Fassungen, unverändert seit der Aufnahme und benutzt; mit
+  acht Gegenproben.
