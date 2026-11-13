@@ -2347,3 +2347,9 @@
     „in dieses Feld passt nur ein Tier“, gemessen), 4 bis 2 Rätsel je Runde, Endlos in allen Stufen, nicht im Mix,
     Abschluss-Animation mit den Tieren. Baustein dafür um `nennung`, eigene `tipps`, `notizText` und grosse Bildknöpfe
     erweitert (rahmen.md 26); Zahlen-Sudoku unverändert (gleiche Klickzahlen im Spieltest).
+  - Neues Spiel **Gebiets-Sudoku (gebiets-sudoku)**, Basisklasse 4, neu und ungeprüft (Zusatz Patrik zu SU1 a: Zeilen
+    und Spalten bleiben, die Kästen werden unregelmässige Gebiete, keins ein Rechteck): 4 × 4, 5 × 5, 6 × 6 (zweimal),
+    9 × 9 (zweimal), Knifflig und Königsstufe mit „versteckt“; Gebiete leicht gefärbt, Nachbarn verschieden; Endlos, nicht
+    im Mix, Abschluss-Animation mit den Gebieten. Baustein: `gebieteZufall` (Gebiete zu einer gegebenen Lösung, Tausch nur
+    gleicher Zahlen), `gebieteMaengel`, `startGebiete`, `erzeuge` mit `loesung`, `fuelle` mit Schrittgrenze. Kein 7 × 7:
+    dort blieb fast immer ein Gebiet ein Rechteck, die Prüfung liefe aus (logikraetsel.md).

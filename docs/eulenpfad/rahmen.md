@@ -1551,6 +1551,13 @@ und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku
   Königsstufe).
 - **Generator** (`SUDOKU.erzeuge`): volles Raster in zufälliger Ordnung (`LS.mische`, im Testskript mit Startwert), dann
   Felder leeren, solange es lösbar bleibt, bis die Zahl der Stufe erreicht ist; unter einer Millisekunde je 9 × 9.
+- **Gebiete** (Gebiets-Sudoku): `SUDOKU.gebieteZufall(n, loesung, zufall)` baut zu einer vollen Lösung mit Kästen
+  (`startGebiete`: 4, 6, 9; bei 5 die Zeilen) unregelmässige Gebiete — ein Randfeld von A geht an B, das Feld von B mit
+  derselben Zahl an A, wenn beide zusammenhängend bleiben. So behält jedes Gebiet jede Zahl, die Lösung bleibt gültig,
+  und es braucht keine Suche (die umgekehrte Reihenfolge, erst Gebiete, dann eine Lösung suchen, gelang beim 9 × 9 nur
+  bei einem Teil). `gebieteMaengel` prüft: n Gebiete zu n Feldern, zusammenhängend, keins ein Rechteck. `erzeuge` nimmt
+  die Lösung mit `loesung`. Im Spiel sind die Gebiete leicht gefärbt (`sd-ton0` … `sd-ton3` aus `--deko-*`, Nachbarn
+  verschieden); die Abschluss-Animation nimmt `gebiete` als Ziffernfolge.
 - **Prüfung** (`SUDOKU.maengel` für `pruefeAufgabe`): Lösung gültig, Vorgaben passen, genau eine Lösung — unabhängig vom
   Generator durch Probieren gezählt (`SUDOKU.zaehleLoesungen`) —, mit den Schritten der Stufe lösbar, richtige Zahl
   leerer Felder.

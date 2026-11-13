@@ -4141,10 +4141,14 @@ var LS_FEIER = (function () {
    */
   function sudoku(feier, { stufe, sterne, ruhig }) {
     const z = feier.ziele?.[stufe];
-    if (!z || ![4, 6, 9].includes(z.n) || z.kh * z.kb !== z.n || z.n % z.kh || z.n % z.kb) return null;
+    if (!z || ![4, 5, 6, 9].includes(z.n)) return null;
+    // Kästen kh × kb oder Gebiete als Ziffernfolge (Gebiets-Sudoku): je Feld die Nummer seines Gebiets
+    if (!z.gebiete && (z.kh * z.kb !== z.n || z.n % z.kh || z.n % z.kb)) return null;
     const n = z.n, w = [...String(z.loesung)].map(Number), leer = z.leer || [];
     if (w.length !== n * n || w.some(v => !(v >= 1 && v <= n))) return null;
-    const kasten = i => Math.floor(Math.floor(i / n) / z.kh) * (n / z.kb) + Math.floor((i % n) / z.kb);
+    const gebiet = z.gebiete ? [...String(z.gebiete)].map(Number) : null;
+    if (gebiet && (gebiet.length !== n * n || gebiet.some(g => !(g >= 0 && g < n)))) return null;
+    const kasten = gebiet ? (i => gebiet[i]) : (i => Math.floor(Math.floor(i / n) / z.kh) * (n / z.kb) + Math.floor((i % n) / z.kb));
     const einheit = f => Array.from({ length: n }, (_, k) => new Set(w.filter((_, i) => f(i) === k)).size === n).every(Boolean);
     if (!einheit(i => Math.floor(i / n)) || !einheit(i => i % n) || !einheit(kasten)) return null;
     if (!leer.length || new Set(leer).size !== leer.length || leer.some(i => !(Number.isInteger(i) && i >= 0 && i < n * n))) return null;
@@ -4155,9 +4159,14 @@ var LS_FEIER = (function () {
     const c = Math.min(26, 132 / n), x0 = (BREITE - n * c) / 2, y0 = (HOEHE - n * c) / 2;
     svg.appendChild(s("rect", { x: x0, y: y0, width: n * c, height: n * c, fill: "#ffffff" }));
     svg.appendChild(gitter(x0, y0, n, n, c));
-    // Kästen mit kräftigen Linien wie im Spiel
-    for (let k = 0; k <= n; k += z.kb) svg.appendChild(s("line", { x1: x0 + k * c, y1: y0, x2: x0 + k * c, y2: y0 + n * c, stroke: "#2d3047", "stroke-width": 1.6 }));
-    for (let k = 0; k <= n; k += z.kh) svg.appendChild(s("line", { x1: x0, y1: y0 + k * c, x2: x0 + n * c, y2: y0 + k * c, stroke: "#2d3047", "stroke-width": 1.6 }));
+    // Kästen und Gebiete mit kräftigen Linien wie im Spiel: der Rand und jede Kante zwischen zwei Gebieten
+    const kante = (x1, y1, x2, y2) => svg.appendChild(s("line", { x1, y1, x2, y2, stroke: "#2d3047", "stroke-width": 1.6, "stroke-linecap": "square" }));
+    kante(x0, y0, x0 + n * c, y0); kante(x0, y0 + n * c, x0 + n * c, y0 + n * c); kante(x0, y0, x0, y0 + n * c); kante(x0 + n * c, y0, x0 + n * c, y0 + n * c);
+    for (let i = 0; i < n * n; i++) {
+      const zz = Math.floor(i / n), sp = i % n, x = x0 + sp * c, y = y0 + zz * c;
+      if (sp + 1 < n && kasten(i) !== kasten(i + 1)) kante(x + c, y, x + c, y + c);
+      if (zz + 1 < n && kasten(i) !== kasten(i + n)) kante(x, y + c, x + c, y + c);
+    }
     const gross = Math.max(8, c * 0.62), mitte = i => [x0 + ((i % n) + 0.5) * c, y0 + (Math.floor(i / n) + 0.5) * c + gross * 0.36];
     const offen = new Set(leer);
     w.forEach((v, i) => { if (!offen.has(i)) svg.appendChild(text(...mitte(i), zeig(v), { gross })); });

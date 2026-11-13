@@ -26,6 +26,77 @@ const SUDOKU = (() => {
     return Array.from({ length: n * n }, (_, i) => Math.floor(Math.floor(i / n) / kh) * (n / kb) + Math.floor((i % n) / kb));
   }
 
+  /** Felder rechts, links, unten, oben von i im n × n. */
+  const nachbarnVon = (n, i) => {
+    const z = Math.floor(i / n), s = i % n, aus = [];
+    if (s + 1 < n) aus.push(i + 1); if (s > 0) aus.push(i - 1); if (z + 1 < n) aus.push(i + n); if (z > 0) aus.push(i - n);
+    return aus;
+  };
+  /** Hängen die Felder des Gebiets g über Kanten zusammen? */
+  function zusammenhaengend(n, gebiete, g) {
+    const felder = gebiete.map((x, i) => (x === g ? i : -1)).filter(i => i >= 0);
+    if (!felder.length) return false;
+    const gesehen = new Set([felder[0]]), offen = [felder[0]];
+    while (offen.length) for (const k of nachbarnVon(n, offen.pop())) if (gebiete[k] === g && !gesehen.has(k)) { gesehen.add(k); offen.push(k); }
+    return gesehen.size === felder.length;
+  }
+  /** Ist das Gebiet ein volles Rechteck (Kasten, Zeile, Spalte)? */
+  function rechteck(n, gebiete, g) {
+    const felder = gebiete.map((x, i) => (x === g ? i : -1)).filter(i => i >= 0);
+    const z = felder.map(i => Math.floor(i / n)), s = felder.map(i => i % n);
+    return (Math.max(...z) - Math.min(...z) + 1) * (Math.max(...s) - Math.min(...s) + 1) === felder.length;
+  }
+  /**
+   * Mängel einer Einteilung in Gebiete (Gebiets-Sudoku): n Gebiete zu je n Feldern, jedes zusammenhängend und keins ein
+   * Rechteck — sonst wäre es ein Kasten, eine Zeile oder eine Spalte (Zusatz Patrik zu SU1 a: „nicht als Quadrate“).
+   */
+  function gebieteMaengel(n, gebiete) {
+    const m = [];
+    if (gebiete.length !== n * n) return ["Gebiete passen nicht zum Raster"];
+    const ids = [...new Set(gebiete)];
+    if (ids.length !== n) m.push(`${ids.length} Gebiete statt ${n}`);
+    for (const g of ids) {
+      const k = gebiete.filter(x => x === g).length;
+      if (k !== n) m.push(`Gebiet ${g} hat ${k} statt ${n} Felder`);
+      else if (!zusammenhaengend(n, gebiete, g)) m.push(`Gebiet ${g} hängt nicht zusammen`);
+      else if (rechteck(n, gebiete, g)) m.push(`Gebiet ${g} ist ein Rechteck`);
+    }
+    return m;
+  }
+  /**
+   * Kästen, mit denen ein Gebiets-Sudoku beginnt (4, 6, 8, 9); bei 5 und 7 gibt es keine, dort sind es die Zeilen.
+   */
+  const startGebiete = n => {
+    const k = { 4: [2, 2], 6: [2, 3], 8: [2, 4], 9: [3, 3] }[n];
+    return k ? kaesten(n, ...k) : Array.from({ length: n * n }, (_, i) => Math.floor(i / n));
+  };
+  /**
+   * Zufällige unregelmässige Gebiete zu einer vollen Lösung, die zu startGebiete(n) passt: viele Male ein Randfeld von A
+   * an das Nachbargebiet B geben und dafür das Feld von B mit derselben Zahl an A, wenn es an A grenzt und beide danach
+   * noch zusammenhängen. So behält jedes Gebiet jede Zahl genau einmal, und die Lösung bleibt gültig — ohne Suche. (Zuerst
+   * die Gebiete und dann eine Lösung dazu zu suchen, gelang beim 9 × 9 nur bei einem Teil der Einteilungen, LERN_Session40.)
+   * Zwei benachbarte Felder direkt zu tauschen ginge nie: jedes verlöre damit seinen Anschluss. Am Ende ist kein Gebiet
+   * ein Rechteck. → Array oder null. zufall() in [0, 1).
+   */
+  function gebieteZufall(n, loesung, zufall, { tausche = 10 * n * n, versuche = 40 } = {}) {
+    for (let v = 0; v < versuche; v++) {
+      const g = startGebiete(n);
+      for (let t = 0; t < tausche; t++) {
+        const a = Math.floor(zufall() * n * n);
+        const fremd = nachbarnVon(n, a).filter(k => g[k] !== g[a]);
+        if (!fremd.length) continue;
+        const ga = g[a], gb = g[fremd[Math.floor(zufall() * fremd.length)]];
+        // das Feld von B mit derselben Zahl, wenn es an A grenzt (nicht über a allein)
+        const c = g.findIndex((x, i) => x === gb && loesung[i] === loesung[a]);
+        if (c < 0 || !nachbarnVon(n, c).some(k => k !== a && g[k] === ga)) continue;
+        g[a] = gb; g[c] = ga;
+        if (!zusammenhaengend(n, g, ga) || !zusammenhaengend(n, g, gb)) { g[a] = ga; g[c] = gb; }
+      }
+      if (!gebieteMaengel(n, g).length) return g;
+    }
+    return null;
+  }
+
   /**
    * Raster aus Grösse und Gebieten. → { n, gebiete, einheiten: [{ art, felder }], vonFeld: [[Einheit …]], voll }
    * art: "zeile", "spalte", "kasten" oder "gebiet" (für die Sätze der Eule).
@@ -89,11 +160,16 @@ const SUDOKU = (() => {
     return anzahl;
   }
 
-  /** Volles, gültiges Raster in zufälliger Ordnung (für den Generator). zufallsFolge(liste) mischt. */
-  function fuelle(r, mische) {
+  /**
+   * Volles, gültiges Raster in zufälliger Ordnung (für den Generator); mische(liste) mischt. → Werte oder null, wenn es
+   * keins gibt oder die Suche mehr als grenze Schritte braucht (nicht jede Einteilung in Gebiete lässt sich füllen).
+   */
+  function fuelle(r, mische, grenze = Infinity) {
     const leer = Array(r.n * r.n).fill(0);
     const werte = leer.slice(), masken = einheitsMasken(r, werte);
+    let schritte = 0;
     const ok = (function suche() {
+      if (++schritte > grenze) return false;
       let best = -1, bestMaske = 0, bestZahl = 99;
       for (let i = 0; i < werte.length; i++) {
         if (werte[i]) continue;
@@ -107,11 +183,11 @@ const SUDOKU = (() => {
         werte[best] = v; for (const u of r.vonFeld[best]) masken[u] |= 1 << (v - 1);
         if (suche()) return true;
         werte[best] = 0; for (const u of r.vonFeld[best]) masken[u] &= ~(1 << (v - 1));
+        if (schritte > grenze) return false;
       }
       return false;
     })();
-    if (!ok) throw new Error("Raster lässt sich nicht füllen");
-    return werte;
+    return ok ? werte : null;
   }
 
   /**
@@ -166,12 +242,14 @@ const SUDOKU = (() => {
   /**
    * Rätsel erzeugen: volles Raster, dann Felder in zufälliger Reihenfolge leeren, solange es mit den Techniken lösbar
    * bleibt, bis leer Felder leer sind. → { loesung, vorgabe } oder null nach versuche Fehlschlägen.
-   * opt: { leer, techniken: Set, mische, versuche = 30, braucht: "versteckt" (mindestens ein solcher Schritt nötig) }
+   * opt: { leer, techniken: Set, mische, versuche = 30, braucht: "versteckt" (mindestens ein solcher Schritt nötig),
+   *        loesung: eine schon gegebene volle Lösung (Gebiets-Sudoku: die Gebiete sind zu ihr gebaut) }
    */
   function erzeuge(r, opt) {
     const { leer, techniken, mische, versuche = 30, braucht = null } = opt;
     for (let v = 0; v < versuche; v++) {
-      const loesung = fuelle(r, mische);
+      const loesung = opt.loesung ? opt.loesung.slice() : fuelle(r, mische);
+      if (!loesung) return null;
       const vorgabe = loesung.slice();
       let geleert = 0;
       for (const i of mische(loesung.map((_, k) => k))) {
@@ -208,6 +286,28 @@ const SUDOKU = (() => {
     if (braucht && mitTechnikLoesen(r, a.vorgabe, new Set([...techniken].filter(t => t !== braucht))).geloest)
       m.push(`braucht keinen Schritt „${braucht}“`);
     return m;
+  }
+
+  /**
+   * Ton 0 … 3 je Gebiet, so dass Gebiete mit gemeinsamer Kante verschieden sind (vier Farben reichen für jede Karte; hier
+   * mit Probieren gefunden, höchstens neun Gebiete). → { gebiet: ton }
+   */
+  function toene(r) {
+    const n = r.n, ids = [...new Set(r.gebiete)];
+    const nachbar = Object.fromEntries(ids.map(g => [g, new Set()]));
+    r.gebiete.forEach((g, i) => nachbarnVon(n, i).forEach(k => { if (r.gebiete[k] !== g) nachbar[g].add(r.gebiete[k]); }));
+    const ton = {};
+    (function setze(k) {
+      if (k === ids.length) return true;
+      for (let t = 0; t < 4; t++) {
+        if ([...nachbar[ids[k]]].some(h => ton[h] === t)) continue;
+        ton[ids[k]] = t;
+        if (setze(k + 1)) return true;
+        delete ton[ids[k]];
+      }
+      return false;
+    })(0);
+    return ton;
   }
 
   // ----- Bedienung im Spiel -----
@@ -253,11 +353,14 @@ const SUDOKU = (() => {
     const brett = el("div", { class: "sd-brett", role: "grid", "aria-label": `Sudoku ${n} mal ${n}` });
     brett.style.setProperty("--sd-n", String(n));
     brett.style.setProperty("--sd-nk", n <= 4 ? "2" : "3"); // Notizen: 2 × 2 beim 4 × 4, sonst drei Spalten
+    // Unregelmässige Gebiete zusätzlich leicht eingefärbt, Nachbarn verschieden (Kästen sieht man an den Linien)
+    const ton = r.einheiten[2 * n].art === "gebiet" ? toene(r) : null;
     const felder = [];
     for (let i = 0; i < n * n; i++) {
       const z = Math.floor(i / n), s = i % n;
       const g = r.gebiete[i];
       const kl = ["sd-feld"];
+      if (ton) kl.push(`sd-ton${ton[g]}`);
       if (opt.vorgabe[i]) kl.push("sd-vorgabe");
       if (z === 0 || r.gebiete[i - n] !== g) kl.push("sd-oben");
       if (s === 0 || r.gebiete[i - 1] !== g) kl.push("sd-links");
@@ -382,7 +485,7 @@ const SUDOKU = (() => {
     }
   }
 
-  return { kaesten, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
+  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
 })();
 
 if (typeof module !== "undefined") module.exports = SUDOKU;

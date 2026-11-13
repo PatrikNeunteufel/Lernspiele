@@ -40,6 +40,12 @@
 .sd-feld.sd-unten { border-bottom: 3px solid var(--text); }
 .sd-feld.sd-rechts { border-right: 3px solid var(--text); }
 .sd-feld.sd-vorgabe { color: var(--text); font-weight: 900; cursor: default; opacity: 1; }
+/* Gebiets-Sudoku: jedes Gebiet leicht in einer Deko-Farbe, Nachbarn verschieden (sudoku.js, toene); vor den Zuständen,
+   damit Auswahl, Nachbarn und Leuchten darüber liegen */
+.sd-feld.sd-ton0 { background: color-mix(in srgb, var(--deko-2) 16%, var(--k-feld)); }
+.sd-feld.sd-ton1 { background: color-mix(in srgb, var(--deko-3) 22%, var(--k-feld)); }
+.sd-feld.sd-ton2 { background: color-mix(in srgb, var(--deko-5) 18%, var(--k-feld)); }
+.sd-feld.sd-ton3 { background: color-mix(in srgb, var(--deko-6) 16%, var(--k-feld)); }
 .sd-feld.sd-nachbar { background: var(--feld-leise); }
 .sd-feld.sd-gleich { background: var(--gut-hell); }
 .sd-feld.sd-gewaehlt { background: var(--aktiv); box-shadow: inset 0 0 0 3px var(--knopf); }

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gebiets-Sudoku</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/sudoku.css">
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔳 Gebiets-Sudoku</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../../version.js"></script>
+<script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/sudoku.js"></script>
+<script>
+"use strict";
+// Sudoku-Familie (LERN-56, SU1 a mit Zusatz Patrik, LERN_Session13): das Gebiets-Sudoku, Basisklasse 4. Zeilen und
+// Spalten bleiben, die Kästen werden zu unregelmässigen Gebieten — keins ist ein Rechteck. Lernziel als Annahme
+// (docs/eulenpfad/lernziele/lehrplan_sg_session40.md): Lehrplan SG MA.1.B.1.f, .h wie beim Zahlen-Sudoku.
+
+// Je Stufe: Grösse, leere Felder, erlaubte Schritte, braucht (dieser Schritt muss vorkommen). Gemessen LERN_Session40,
+// je 300 Rätsel ohne Mangel. Kein 7 × 7: Von den Zeilen aus wird die Einteilung kaum unregelmässig (in 96 bis 99 von 100
+// Versuchen bleibt ein Gebiet ein Rechteck), ein Rätsel kostete über 100 ms und die Prüfung mit 3000 Rätseln liefe aus.
+const STUFE = {
+  s1: { n: 4, leer: 8, techniken: ["einer"] },                                    // 3. Klasse
+  s2: { n: 5, leer: 13, techniken: ["einer", "versteckt"] },                      // 5 × 5 gibt es nur mit Gebieten
+  s3: { n: 6, leer: 18, techniken: ["einer", "versteckt"] },                      // Klassenziel
+  s4: { n: 6, leer: 22, techniken: ["einer", "versteckt"], braucht: "versteckt" },
+  s5: { n: 9, leer: 45, techniken: ["einer", "versteckt"] },                      // 5. Klasse
+  s6: { n: 9, leer: 52, techniken: ["einer", "versteckt"], braucht: "versteckt" }, // Königsstufe
+};
+const START = {};
+const startRaster = n => (START[n] = START[n] || SUDOKU.raster(n, SUDOKU.startGebiete(n)));
+const regel = p => ({ leer: p.leer, techniken: new Set(p.techniken), braucht: p.braucht || null });
+
+/** { gebiete, loesung, vorgabe }: Lösung mit Kästen (oder Zeilen), Gebiete dazu umgebaut, dann Felder geleert. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let v = 0; v < 50; v++) {
+    const loesung = SUDOKU.fuelle(startRaster(p.n), LS.mische);
+    const gebiete = SUDOKU.gebieteZufall(p.n, loesung, () => KERN.zufall.quelle.zufall()); // Quelle des Kerns (Startwert im Test)
+    if (!gebiete) continue;
+    const a = SUDOKU.erzeuge(SUDOKU.raster(p.n, gebiete, "gebiet"), { ...regel(p), mische: LS.mische, versuche: 5, loesung });
+    if (a) return { gebiete, ...a };
+  }
+  throw new Error(`Gebiets-Sudoku ${stufe}: kein Rätsel gefunden`);
+}
+
+/** Mängel: Gebiete zusammenhängend, je n Felder, keins ein Rechteck; Rätsel wie beim Zahlen-Sudoku (genau eine Lösung). */
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  const m = SUDOKU.gebieteMaengel(p.n, a.gebiete);
+  return m.length ? m : SUDOKU.maengel(SUDOKU.raster(p.n, a.gebiete, "gebiet"), a, regel(p));
+}
+
+LS.spiel({
+  id: "gebiets-sudoku",
+  einleitung: "Fülle das Sudoku! Jede Zahl steht in jeder Zeile, jeder Spalte und jedem farbigen Gebiet genau einmal.",
+  hilfe: "Die dicken Linien und die Farben zeigen die Gebiete. Tipp auf ein leeres Feld, dann auf eine Zahl unten. Mit ✏️ schreibst du kleine Zahlen als Notiz ins Feld. ⌫ leert das Feld. Sind alle Felder voll, drückst du „✓ Fertig“.",
+  anzahl: { s1: 3, s2: 3, s3: 2, s4: 2, s5: 1, s6: 1 },
+  stufen: {
+    s1: "4 × 4 mit krummen Gebieten.",
+    s2: "5 × 5 — das gibt es nur mit Gebieten.",
+    s3: "6 × 6 mit Gebieten statt Kästen.",
+    s4: "6 × 6 mit wenigen Zahlen — such für eine Zahl ihren einzigen Platz.",
+    s5: "Das grosse Gebiets-Sudoku: 9 × 9.",
+    s6: "Endgegner: 9 × 9 mit wenigen Zahlen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const { gebiete, loesung, vorgabe } = aufgabeErzeugen(ctx.stufe);
+    SUDOKU.spiel(ctx, {
+      raster: SUDOKU.raster(p.n, gebiete, "gebiet"), vorgabe, loesung,
+      auftrag: `Jede Zahl von 1 bis ${p.n} einmal in jeder Zeile, Spalte und jedem Gebiet.`,
+    });
+    if (ctx.nr === 0) ctx.sag("Schau zuerst die Gebiete an. Welche Zahl fehlt in einem Gebiet noch?");
+  },
+});
+</script>
+</body>
+</html>

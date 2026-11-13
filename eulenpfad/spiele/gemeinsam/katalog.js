@@ -1821,6 +1821,27 @@ const SPIELE = [
       s4: { n: 4, kh: 2, kb: 2, loesung: "4231312424131342", leer: [0, 1, 2, 3, 4, 6, 7, 10, 13] },
       s5: { n: 4, kh: 2, kb: 2, loesung: "1243431234212134", leer: [0, 1, 2, 3, 6, 8, 9, 10, 11, 12, 15] },
       s6: { n: 4, kh: 2, kb: 2, loesung: "3412124343212134", leer: [1, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14] } } } },
+  // Gebiets-Sudoku (LERN-56, SU1 a mit Zusatz Patrik): unregelmässige Gebiete statt Kästen, Basisklasse 4
+  { id: "gebiets-sudoku", art: ["antippen"], klasse: 4, neu: "LERN_Session40", bild: "🔳", name: "Gebiets-Sudoku", thema: "logik", farbe: "var(--deko-6)",
+    // nicht im Zufallsmix (Entscheid ZM1 b, LERN_Session40): ein ganzes Rätsel ist keine Kurzaufgabe
+    mix: false,
+    pfad: "spiele/gebiets-sudoku/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 120, s2: 180, s3: 240, s4: 300, s5: 600, s6: 900 },
+    beschreibung: "Sudoku mit krummen Gebieten statt Kästen — jede Zahl einmal in jeder Zeile, Spalte und jedem Gebiet",
+    lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (feier.js, BAUEN · sudoku): das Rätsel der Stufe mit seinen Gebieten füllt sich Feld um Feld
+    feier: { muster: "bauen", bilder: "sudoku", ziele: {
+      s1: { n: 4, gebiete: "2233021302130011", loesung: "1234342143122143", leer: [0, 1, 2, 3, 5, 6, 13, 15] },
+      s2: { n: 5, gebiete: "3000030112311123342244442", loesung: "2145332514143254523153142", leer: [3, 6, 7, 9, 10, 11, 12, 17, 18, 19, 20, 22, 23] },
+      s3: { n: 6, gebiete: "001111000011244333224335224535244555", loesung: "536412421635362154154326243561615243",
+        leer: [2, 3, 4, 5, 6, 10, 12, 14, 16, 18, 19, 22, 23, 27, 28, 29, 30, 34] },
+      s4: { n: 6, gebiete: "001111022113022223003333444455445555", loesung: "435261162345243156651432524613316524",
+        leer: [0, 1, 2, 3, 4, 5, 6, 8, 9, 12, 13, 14, 15, 17, 18, 25, 26, 27, 28, 29, 31, 33] },
+      s5: { n: 9, gebiete: "000222222000212112030111115330444515333444555336474555636477788666777888666778888",
+        loesung: "216357984958246731734918526893472165641583297527169843379625418482731659165894372",
+        leer: [0, 2, 3, 4, 5, 9, 11, 12, 13, 14, 15, 16, 18, 20, 22, 23, 24, 26, 27, 31, 34, 35, 37, 39, 40, 43, 46, 49, 50, 51, 53, 54, 55, 56, 57, 60, 66, 70, 71, 72, 73, 74, 75, 77, 80] },
+      s6: { n: 9, gebiete: "000111222011111122000002222333455555633455455663444444663777788663778888663777888",
+        loesung: "643192785278564319519873642384625971192748563765319824427956138936481257851237496",
+        leer: [2, 4, 5, 6, 7, 10, 11, 12, 13, 15, 16, 17, 18, 20, 21, 23, 24, 26, 29, 30, 31, 33, 35, 36, 37, 39, 40, 42, 43, 45, 46, 47, 48, 49, 50, 56, 58, 59, 60, 61, 63, 64, 65, 66, 67, 69, 70, 72, 73, 74, 75, 77] } } } },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */

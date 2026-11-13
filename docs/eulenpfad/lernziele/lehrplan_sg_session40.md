@@ -18,6 +18,13 @@ Annahme.
 |---|---|---|
 | MA.1.B.1 (`.f` Beziehungen erforschen: in welches Feld passt nur eine Zahl, wo hat eine Zahl nur einen Platz; `.h` Annahmen treffen und prüfen mit den ✏️-Notizen) | Zahlen-Sudoku | s1 4 × 4, 6 leere Felder, nur „ein Feld, eine Zahl“ · s2 4 × 4, 10 leer · s3 6 × 6 (Kästen 2 × 3), 18 leer · s4 6 × 6, 24 leer, eine Zahl mit nur einem Platz nötig · s5 9 × 9, 45 leer · s6 9 × 9, 54 leer, eine Zahl mit nur einem Platz nötig |
 
+**Gebiets-Sudoku, Basisklasse 4** wie das Zahlen-Sudoku, mit unregelmässigen Gebieten statt Kästen (Zusatz Patrik zu
+SU1 a).
+
+| Lernziel | Spiel | Stufen im Spiel (s1 → s6) |
+|---|---|---|
+| MA.1.B.1 (`.f`, `.h` wie beim Zahlen-Sudoku; dazu die Form der Gebiete lesen) | Gebiets-Sudoku | s1 4 × 4, 8 leer · s2 5 × 5, 13 leer · s3 6 × 6, 18 leer · s4 6 × 6, 22 leer, „versteckt“ nötig · s5 9 × 9, 45 leer · s6 9 × 9, 52 leer, „versteckt“ nötig |
+
 **Bilder-Sudoku, Basisklasse 1** (SU1 a: „Basis Kindergarten/1. Klasse“; Spiele für den Kindergarten haben Basisklasse
 1, Stufe 1 ist der Kindergarten): s3 = Klassenziel 1. Klasse, s5 = 2. Klasse.
 

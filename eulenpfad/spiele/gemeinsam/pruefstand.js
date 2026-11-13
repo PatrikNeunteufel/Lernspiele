@@ -829,6 +829,11 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "kompass/orte": {
+      "am": "2026-11-14",
+      "hash": "g8upqrdllp",
+      "von": "Patrik"
+    },
     "kulturen-koffer/dinge": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -1202,6 +1207,10 @@ const PRUEFSTAND = {
       "am": "2026-11-03",
       "von": "Patrik"
     },
+    "bilder-sudoku": {
+      "am": "2026-11-13",
+      "von": "Patrik"
+    },
     "bionik-paare": {
       "am": "2026-11-03",
       "von": "Patrik"
@@ -1320,6 +1329,10 @@ const PRUEFSTAND = {
     },
     "komma-messband": {
       "am": "2026-11-05",
+      "von": "Patrik"
+    },
+    "kompass": {
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "korrektur-stift": {

@@ -15,15 +15,19 @@ beliebigen Gebieten, Löser, Generator, Bedienung mit ✏️-Notizen; Fehler nac
 |---|---|---|---|
 | Zahlen-Sudoku | 4 | Zahlen 1 … n in Zeile, Spalte, Kasten; 4 × 4 → 6 × 6 → 9 × 9 | erledigt 2026-11-13 (LERN_Session40), neu und ungeprüft |
 | Bilder-Sudoku | KG/1 | dasselbe mit Tieren statt Zahlen, 4 × 4 | erledigt 2026-11-13 (LERN_Session40), neu und ungeprüft |
-| Gebiets-Sudoku | 4 | unregelmässige Gebiete statt Kästen (Zusatz Patrik) | offen |
+| Gebiets-Sudoku | 4 | unregelmässige Gebiete statt Kästen (Zusatz Patrik); 4 × 4, 5 × 5, 6 × 6, 9 × 9 | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
 | Vergleichs-Sudoku | 3 | < und > zwischen Nachbarfeldern statt vieler Vorgaben | offen |
 | Käfig-Sudoku | 5 | Summen in Zellgruppen, oben auch −, ×, : | offen |
 | Sudoku-Duell | 5 | abwechselnd mit der Eule regelkonform setzen (Thema Strategie) | offen |
 
 Was der Baustein für die übrigen noch braucht (Bilder kann er seit dem Bilder-Sudoku: `zeichen`, `name`, `nennung`, eigene
-`tipps`): ein Erzeuger
-unregelmässiger Gebiete (Gebiets-Sudoku), Zusatzbedingungen im Löser und im menschlichen Löser (< und >, Summen), ein Zug
+`tipps`; Gebiete seit dem Gebiets-Sudoku): Zusatzbedingungen im Löser und im menschlichen Löser (< und >, Summen), ein Zug
 der Eule (Duell).
+
+**Gebiets-Sudoku 7 × 7 (offen):** Bei 5 und 7 gibt es keine Kästen; die Gebiete entstehen dort aus den Zeilen, und ein Tausch
+gelingt fast nur an den Zeilenenden. Beim 7 × 7 blieb in 96 bis 99 von 100 ersten Versuchen ein Gebiet ein Rechteck, ein
+Rätsel kostete über 100 ms, die Prüfung mit 3000 Rätseln je Stufe liefe aus (LERN_Session40). Für ein 7 × 7 bräuchte
+`gebieteZufall` einen anderen Start (eine Lösung, deren Gebiete schon unregelmässig sind) oder Tausche über drei Gebiete.
 
 ## 2. Weitere Ideen (nicht entschieden)
 
