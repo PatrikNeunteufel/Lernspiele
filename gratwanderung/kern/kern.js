@@ -1,4 +1,4 @@
-/* kern 1.44.0 · Prüfsumme sha256:27b26fc9b9bde07351229aa621bd069c5ec45572b3e6a1c23911523a25347e04 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.45.0 · Prüfsumme sha256:596ff321bdbabf198c14ee52191c92bdfb3aae0cb8c8a4c17cc9b8627a198e57 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -4468,13 +4468,21 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
    KERN.listenpruefung.eintraegeVon(def)  → [{ roh, abschnitt, schluessel, zellen, gruppe }]
    KERN.listenpruefung.listenHash(liste)  → Fingerabdruck der ganzen Liste (alle Schlüssel)
+   KERN.listenpruefung.inhaltVon(eintrag) → { zeile, zellen, bild } als Fingerabdrücke (ÜB1 a, seit 1.45.0)
    KERN.listenpruefung.ansicht(opt)       → { oeffne(defs, id, listeId, nachher?) } — Dialog; false ohne Definition;
                                             nachher() nach dem Schliessen, wenn alles gespeichert ist (seit 1.44.0)
      opt.el            KERN.el (Standard)
      opt.eintraegeUrl  Adresse von pruefstand-eintraege.json (relativ zur Seite)
      opt.entwicklung   () → KERN.entwicklung-Objekt der App oder null
      opt.ich           () → Name der Aufsicht (für „von“ ohne Entwickler-Modus)
-     opt.lokal         { lies(quelle) → haken, schreibe(quelle, haken) } — Haken der Aufsicht auf diesem Gerät
+     opt.lokal         { lies(quelle) → haken, schreibe(quelle, haken), alle?() → { quelle: haken } } — Haken der Aufsicht auf
+                       diesem Gerät; alle() für „schon geprüft“ aus anderen Listen (ÜB1 a, seit 1.45.0)
+
+   Schon geprüft (ÜB1 a, seit 1.45.0): Jeder Haken trägt Fingerabdrücke — „zeile“ (Spalten, Prüffrage des Abschnitts,
+   Zellen und Bild zusammen) und „zellen“ (je Zelle und das Bild) —, nie den Wortlaut. Zellen, die dieselbe Person schon
+   in einer anderen Zeile oder Liste abgehakt hat, stehen grau mit „schon geprüft“; eine Zeile, die sie genau so (gleiche
+   Spalten, gleiche Prüffrage, gleiche Zellen, gleiches Bild) schon abgehakt hat, gilt als geprüft („✓ übernommen“) und
+   lässt sich wieder aufheben. Bekannte Zellen allein haken nie ab: Eine Zeile sagt etwas über ihren Zusammenhang.
      opt.setzeFrei     (id, listeId, wert) — Freigabe je Gerät (true, null)
      opt.liste         (id, listeId) → { name, geprueft } aus dem Katalog
      opt.titel         id → Text vor dem Listennamen (etwa das Bild des Spiels); Standard ""
@@ -4498,6 +4506,21 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
   }
   /** Fingerabdruck der ganzen Liste (alle Schlüssel): ändert sich ein Eintrag, passt er nicht mehr zum Prüfstand. */
   const listenHash = eintraege => fingerabdruck(eintraege.map(e => e.schluessel).sort());
+  /**
+   * Was ein Haken über seinen Eintrag festhält (ÜB1 a, seit 1.45.0): { zeile, zellen, bild } als Fingerabdrücke — zeile aus
+   * Spalten, Prüffrage (hinweis), Zellen und Bild; zellen je Zelle und das Bild. Merkt sich Bild und Ergebnis am Eintrag
+   * (e.bildEl, e.inhalt). Auch für tools/haken_nachtragen.js, damit beide gleich rechnen.
+   */
+  function inhaltVon(e) {
+    if (e.inhalt) return e.inhalt;
+    const bild = e.abschnitt.bild ? e.abschnitt.bild(e.roh) : null;
+    const bildFp = bild ? fingerabdruck(bild.outerHTML ?? bild.innerHTML ?? "") : null;
+    const zellen = e.zellen.map(z => fingerabdruck(z));
+    e.bildEl = bild;
+    e.inhalt = { zeile: fingerabdruck([e.abschnitt.spalten, e.abschnitt.hinweis || "", e.zellen, bildFp]),
+      zellen: bildFp ? [...zellen, bildFp] : zellen, bild: bildFp };
+    return e.inhalt;
+  }
 
   function ansicht(opt) {
     const o = opt || {};
@@ -4526,6 +4549,19 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       const lokal = o.lokal.lies(quelle);
       const meine = entwickler ? entw : lokal;
       const kor = o.korrektur || null;
+
+      // Schon geprüft (ÜB1 a): Fingerabdrücke je Zeile und Zelle aus den Haken derselben Person in allen Listen
+      const vonAnderen = entwickler ? (await ladeEintraege()) : (typeof o.lokal.alle === "function" ? o.lokal.alle() : {});
+      const bekannteZellen = new Set(), bekannteZeilen = new Set();
+      for (const [q, haken] of Object.entries(vonAnderen || {})) {
+        for (const h of Object.values(haken || {})) {
+          if (entwickler ? h?.von !== ich : (h?.von && h.von !== ich)) continue; // nur dieselbe Person
+          for (const z of h?.zellen || []) bekannteZellen.add(z);
+          if (h?.zeile) bekannteZeilen.add(h.zeile);
+        }
+        void q;
+      }
+      const istBekannt = (text, fp) => text.trim().length > 3 && bekannteZellen.has(fp); // „ja“, „—“ zählen nicht
       // Bemerkungen: Entwicklung aus bemerkungen.json (Server), Aufsicht ihre Korrekturen (wenn die App sie kennt)
       let bemerkungen = [];
       if (entwickler && (await ent.server())) {
@@ -4557,7 +4593,10 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       const speichern = async () => {
         const komplett = alle.every(e => meine[e.schluessel]);
         if (entwickler) {
-          const ok = await ent.setzeEintraege({ liste: quelle, setzen: [...offen.setzen], entfernen: [...offen.entfernen], komplett, hash: listenHash(alle) });
+          const setzen = [...offen.setzen];
+          const inhalt = Object.fromEntries(setzen.map(s => [s, { zeile: meine[s]?.zeile, zellen: meine[s]?.zellen }]));
+          const ok = await ent.setzeEintraege({ liste: quelle, setzen, entfernen: [...offen.entfernen], komplett, hash: listenHash(alle), inhalt });
+          if (ok && eintraegeDaten) eintraegeDaten[quelle] = { ...meine }; // für die nächste Liste auf dieser Seite
           offen = { setzen: new Set(), entfernen: new Set() };
           meldung.textContent = ok ? (komplett ? "✓ Liste vollständig geprüft — im Prüfstand eingetragen." : "✓ gespeichert") : "⚠ nicht gespeichert (Entwickler-Server?)";
         } else {
@@ -4570,23 +4609,36 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       };
       const merke = () => { clearTimeout(timer); timer = setTimeout(sichern, entwickler ? 500 : 0); };
       function setze(e, an) {
-        if (an) { meine[e.schluessel] = { am: KERN.zeit.tag(), von: ich }; offen.setzen.add(e.schluessel); offen.entfernen.delete(e.schluessel); }
+        if (an) {
+          const { zeile, zellen } = inhaltVon(e);
+          meine[e.schluessel] = { am: KERN.zeit.tag(), von: ich, zeile, zellen };
+          offen.setzen.add(e.schluessel); offen.entfernen.delete(e.schluessel);
+        }
         else { delete meine[e.schluessel]; offen.entfernen.add(e.schluessel); offen.setzen.delete(e.schluessel); }
       }
 
       // Zeilen und Gruppen
       const kaestchen = [];
       const spaltenZahl = e => 2 + (mitKnopf ? 1 : 0) + e.zellen.length + (e.abschnitt.bild ? 1 : 0) - 1;
+      const uebernommen = new Set(); // Zeilen, die genau so schon abgehakt waren (ÜB1 a)
+      const bekanntMarke = td => { td.classList.add("pruef-bekannt"); td.title = "schon geprüft (in einer anderen Zeile oder Liste)"; return td; };
       function zeileEl(e) {
+        const inhalt = inhaltVon(e);
+        if (!meine[e.schluessel] && bekannteZeilen.has(inhalt.zeile) && !bemerkungZu(e).length) { setze(e, true); uebernommen.add(e.schluessel); }
         const box = el("input", { type: "checkbox", "aria-label": `Geprüft: ${e.zellen.join(", ")}` });
         box.checked = !!meine[e.schluessel];
         box.addEventListener("change", () => { setze(e, box.checked); aktualisiereGruppen(); merke(); });
         kaestchen.push({ e, box });
-        const bild = e.abschnitt.bild ? el("td", { class: "pruef-bild" }, e.abschnitt.bild(e.roh)) : null;
+        const bild = e.bildEl ? el("td", { class: "pruef-bild" }, e.bildEl) : null;
+        if (bild && bekannteZellen.has(inhalt.bild)) bekanntMarke(bild);
         const zeile = el("tr", { class: bemerkungZu(e).length ? "mit-bemerkung" : "" },
-          el("td", { class: "pruef-haken" }, box, !entwickler && entw[e.schluessel] ? el("span", { class: "pruef-e", title: "von der Entwicklung geprüft", text: "✓E" }) : null),
-          // Kurze Zellen so breit wie ihr Inhalt, lange (Sätze) umbrechen
-          bild, ...e.zellen.map(z => zelle(z, z.length > 24 ? "lang" : "")),
+          el("td", { class: "pruef-haken" }, box, !entwickler && entw[e.schluessel] ? el("span", { class: "pruef-e", title: "von der Entwicklung geprüft", text: "✓E" }) : null,
+            uebernommen.has(e.schluessel) ? el("span", { class: "pruef-e", title: "genau so schon in einer anderen Liste geprüft", text: "✓ übernommen" }) : null),
+          // Kurze Zellen so breit wie ihr Inhalt, lange (Sätze) umbrechen; schon geprüfte grau
+          bild, ...e.zellen.map((z, i) => {
+            const td = zelle(z, z.length > 24 ? "lang" : "");
+            return istBekannt(z, inhalt.zellen[i]) ? bekanntMarke(td) : td;
+          }),
           mitKnopf ? el("td", {}, el("button", { type: "button", class: "knopf hell klein", text: entwickler ? "📝" : "✏️", title: entwickler ? "Bemerkung zu diesem Eintrag" : "Korrektur vorschlagen",
             onclick: () => bemerkeEintrag(e, zeile) })) : null);
         const zeilen = [zeile];
@@ -4694,8 +4746,13 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
         def.beschreibung ? el("p", { text: def.beschreibung }) : null,
         el("p", { class: "leise", text: entwickler ? "Entwickler-Modus: Haken gelten für alle (Prüfstand)."
           : `Ihre Haken gelten auf diesem Gerät. ✓E = von der Entwicklung geprüft.${kor ? " ✏️ schlägt der Entwicklung eine Korrektur vor." : ""}` }),
+        el("p", { class: "leise", text: "Grau: schon in einer anderen Zeile oder Liste geprüft. ✓ übernommen: genau diese Zeile ist schon geprüft." }),
         stand, kopf, meldung, ...abschnitte);
       aktualisiereGruppen();
+      if (uebernommen.size) {
+        meldung.textContent = `✓ ${uebernommen.size} ${uebernommen.size === 1 ? "Zeile" : "Zeilen"} übernommen — genau so schon geprüft.`;
+        merke();
+      }
       // Beim Schliessen Offenes sofort speichern; nachher() erst danach, damit die App den neuen Prüfstand zeigt (die
       // Entwickler-Leiste des Eulenpfads zeichnete ihre Listen vorher erst beim Neuladen neu, Hinweis Patrik LERN_Session38)
       dialog.addEventListener("close", async () => {
@@ -4713,7 +4770,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
     return { oeffne };
   }
 
-  KERN.listenpruefung = { ansicht, eintraegeVon, listenHash };
+  KERN.listenpruefung = { ansicht, eintraegeVon, listenHash, inhaltVon };
 })(typeof globalThis.KERN === "object" ? globalThis.KERN : (globalThis.KERN = {}));
 
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
@@ -4759,4 +4816,4 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
 /* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */
-globalThis.KERN.version = "1.44.0";
+globalThis.KERN.version = "1.45.0";

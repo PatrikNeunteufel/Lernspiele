@@ -813,6 +813,8 @@ const LS = (() => {
   /** Haken einer Aufsicht oder Lehrperson auf diesem Gerät: { "<schlüssel>": { am, von } } je Liste. */
   const pruefungLokal = quelle => ({ ...(lies("pruefungLokal", {})[quelle] || {}) });
   const setzePruefungLokal = (quelle, haken) => schreibe("pruefungLokal", { ...lies("pruefungLokal", {}), [quelle]: haken });
+  /** Haken aller Listen auf diesem Gerät, { quelle: haken } — für „schon geprüft“ aus anderen Listen (ÜB1 a). */
+  const pruefungLokalAlle = () => ({ ...lies("pruefungLokal", {}) });
   const ladeSkript = src => new Promise((ok, fehler) => {
     if ([...document.scripts].some(s => s.getAttribute("src") === src)) return ok();
     const s = document.createElement("script");
@@ -3684,7 +3686,7 @@ const LS = (() => {
     angezeigt, istAusgeblendet, darfAusblenden, ausblenden, zeigen,
     MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
     bild, istZeichnung, mitBildText, zelleMitBildern,
-    neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal,
+    neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal, pruefungLokalAlle,
     listenPruefen, katalogEintrag,
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,
     setzeMeldung, meldungenGelesen, meldungFuerEntwicklung, meldeFormular, meldungStandAnwenden, meldungStatusAusBemerkung,

@@ -2227,6 +2227,13 @@
   nachher)` ruft `nachher()` nach dem Schliessen, wenn auch das letzte Speichern fertig ist (Speichern als Kette);
   Eulenpfad: `LS.listenPruefen(spiel, liste, nachher)`, die Leiste gibt ihr `zeichne` mit. Kern verteilt, Test in
   `pruefe_kern.js` (nachher erst nach dem Speichern). Dazu Patriks Prüfvermerke: Schwimmt oder sinkt, Listen
-  eigenschaften und schwimmen-sinken. Wetter und Jahreszeiten
+  eigenschaften und schwimmen-sinken.
+- **Prüfansicht: schon Geprüftes erkennen (ÜB1 a, Kern 1.45.0):** Haken tragen Fingerabdrücke von Zeile und Zellen (nie
+  den Wortlaut). Zellen, die dieselbe Person schon anderswo abgehakt hat, stehen grau; eine genau gleiche Zeile (gleiche
+  Spalten, Prüffrage, Zellen, Bild) gilt als geprüft („✓ übernommen“). Bekannte Zellen allein haken nicht ab. Kern
+  `listenpruefung.js` (`inhaltVon`, `opt.lokal.alle`), Entwickler-Server und `entwicklung_abgleich.py` speichern `zeile`
+  und `zellen` (geprüft, Ungültiges fällt weg), Eulenpfad und Lernsteig binden die lokalen Haken aller Listen an, Stil
+  `pruef-bekannt` in beiden Apps. Neu `tools/haken_nachtragen.js`: 252 bisherige Haken nachgetragen. Tests in
+  `pruefe_kern.js` und `pruefe_server.py`. Wetter und Jahreszeiten
   (wetter-jahreszeiten): 🌅, Korb Herbst 🍄, 🌿, kahler Laubbaum als Zeichnung (`bilder.js`, baumKahl), 🩱 Badekleid;
   bilder.js eingebunden.

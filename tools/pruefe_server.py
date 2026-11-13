@@ -81,6 +81,14 @@ def pruefe(basis: str) -> None:
            "freischalten: Aufsicht, klein ohne Bindestriche")
     gleich(anfrage(basis, "/entwicklung/freischalten", {"schluessel": "falsch"})[0], 403, "freischalten: falscher Schlüssel")
 
+    # Haken je Eintrag der Entwicklung mit Fingerabdrücken von Zeile und Zellen (ÜB1 a, Kern 1.45.0)
+    st, j = anfrage(basis, "/entwicklung/eintraege", {"app": "eulenpfad", "schluessel": E, "liste": "zahlenhaus/saetze", "setzen": ["z:1", "z:2"],
+                                                     "inhalt": {"z:1": {"zeile": "q9", "zellen": ["a1", "b2"]}}, "von": "Patrik"})
+    h = ES.lies_eintraege(ES.APPS["eulenpfad"]).get("zahlenhaus/saetze", {})
+    gleich((st, h.get("z:1", {}).get("zeile"), h.get("z:1", {}).get("zellen"), sorted(h.get("z:2", {}))), (200, "q9", ["a1", "b2"], ["am", "von"]),
+           "Haken der Entwicklung: Zeile und Zellen als Fingerabdruck, ohne Inhalt nur am und von")
+    anfrage(basis, "/entwicklung/eintraege", {"app": "eulenpfad", "schluessel": E, "liste": "zahlenhaus/saetze", "entfernen": ["z:1", "z:2"]})
+
     # Prüfvermerk einer Aufsicht geht in den Eingang, nicht in pruefstand.js (ES3 a); Name vom Server, nicht von der Seite
     ep = ES.APPS["eulenpfad"]
     st, j = anfrage(basis, "/entwicklung/pruefstand", {"app": "eulenpfad", "schluessel": k1, "art": "spiele", "id": "zahlenhaus", "geprueft": True, "von": "Hacker"})
@@ -263,6 +271,13 @@ def pruefe_uebernehmen() -> None:
     EA.entscheide(app, {v["nr"]}, "angenommen")
     gleich((ES.lies_pruefstand(a)["listen"].get("zufall/woerter", {}).get("hash"), sorted(ES.lies_eintraege(a).get("zufall/woerter", {}))),
            ("abc", ["a:1", "b:2"]), "Liste angenommen: geprüft mit Hash, Haken je Eintrag")
+    # ÜB1 a: Fingerabdrücke von Zeile und Zellen gehen beim Annehmen mit, Ungültiges fällt weg
+    v = ES.reiche_ein(a, "Bea", "eintraege", {"liste": "zufall/saetze", "setzen": ["s:1", "s:2"], "komplett": False,
+                                              "inhalt": {"s:1": {"zeile": "abc123", "zellen": ["x1", "y2", "Ungültig!"]}, "s:2": {"zeile": "<b>"}}}, jetzt)
+    EA.entscheide(app, {v["nr"]}, "angenommen")
+    h = ES.lies_eintraege(a).get("zufall/saetze", {})
+    gleich((h.get("s:1", {}).get("zeile"), h.get("s:1", {}).get("zellen"), "zeile" in h.get("s:2", {})), ("abc123", ["x1", "y2"], False),
+           "Liste angenommen: Fingerabdrücke von Zeile und Zellen, ungültige weggelassen")
 
 
 def main() -> int:

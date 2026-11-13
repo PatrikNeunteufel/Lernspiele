@@ -200,7 +200,8 @@
   const ansicht = () => pruefAnsicht || (pruefAnsicht = KERN.listenpruefung.ansicht({
     el, eintraegeUrl: "../../gemeinsam/pruefstand-eintraege.json", entwicklung: () => ENTWICKLUNG,
     ich: () => (aufsichtDa() || {}).name || "Aufsicht",
-    lokal: { lies: q => ({ ...(LST.lies("pruefungLokal", {})[q] || {}) }), schreibe: (q, h) => LST.schreibe("pruefungLokal", { ...LST.lies("pruefungLokal", {}), [q]: h }) },
+    lokal: { lies: q => ({ ...(LST.lies("pruefungLokal", {})[q] || {}) }), schreibe: (q, h) => LST.schreibe("pruefungLokal", { ...LST.lies("pruefungLokal", {}), [q]: h }),
+      alle: () => ({ ...LST.lies("pruefungLokal", {}) }) }, // alle: „schon geprüft“ aus anderen Listen (ÜB1 a, Kern 1.45.0)
     setzeFrei: FREIGABE.setzeListeFrei, liste: (id, listeId) => FREIGABE.listen(id).find(l => l.id === listeId) || null,
     feld: "inhalt", wer: "Jugendliche", korrektur: KORREKTUR,
   }));

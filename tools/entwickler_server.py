@@ -341,7 +341,7 @@ def reiche_ein(a: dict, von: str, art: str, daten: dict, jetzt: str) -> dict:
     """Vermerk einer zugelassenen Aufsicht in docs/<app>/pruefstand-eingang.json (ES3 a); derselbe offene Vermerk nur
     einmal. Wirksam erst, wenn die Entwicklung ihn übernimmt (docs/richtlinie_freigaben.md)."""
     eingang = lies_eingang(a)
-    inhalt = {k: daten[k] for k in ("art", "id", "geprueft", "liste", "setzen", "entfernen", "komplett", "hash") if k in daten}
+    inhalt = {k: daten[k] for k in ("art", "id", "geprueft", "liste", "setzen", "entfernen", "komplett", "hash", "inhalt") if k in daten}
     schon = next((v for v in eingang if v.get("von") == von and v.get("pfad") == art and v.get("inhalt") == inhalt
                   and v.get("status") == "offen"), None)
     if schon:
@@ -366,6 +366,26 @@ def lies_pruefstand(a: dict) -> dict:
 def schreibe_pruefstand(a: dict, stand: dict) -> None:
     inhalt = a["kopf"] + f"const {a['name']} = " + json.dumps(stand, ensure_ascii=False, indent=2, sort_keys=True) + ";\n" + a["fuss"]
     a["pruefstand"].write_bytes(inhalt.encode("utf-8"))
+
+
+FINGERABDRUCK = re.compile(r"[a-z0-9]{1,20}")
+
+
+def inhalt_eines_hakens(i) -> dict:
+    """Was zu einem Haken je Eintrag gespeichert wird (ÜB1 a, Kern 1.45.0): Fingerabdruck der ganzen Zeile („zeile“) und
+    je Zelle („zellen“, höchstens 40) — nie der Wortlaut. Damit erkennt die Prüfansicht in anderen Listen, was dieselbe
+    Person schon bestätigt hat. Ungültiges fällt still weg."""
+    if not isinstance(i, dict):
+        return {}
+    aus = {}
+    if isinstance(i.get("zeile"), str) and FINGERABDRUCK.fullmatch(i["zeile"]):
+        aus["zeile"] = i["zeile"]
+    zellen = i.get("zellen")
+    if isinstance(zellen, list):
+        gut = [z for z in zellen[:40] if isinstance(z, str) and FINGERABDRUCK.fullmatch(z)]
+        if gut:
+            aus["zellen"] = gut
+    return aus
 
 
 def lies_eintraege(a: dict) -> dict:
@@ -560,9 +580,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             alle = lies_eintraege(a)
             haken = alle.setdefault(liste, {})
             von = str(daten.get("von", ""))[:40]
+            inhalt = daten.get("inhalt") if isinstance(daten.get("inhalt"), dict) else {}
             for s in daten.get("setzen", []):
                 if schluessel_ok(s):
-                    haken[s] = {"am": jetzt[:10], "von": von}
+                    haken[s] = {"am": jetzt[:10], "von": von, **inhalt_eines_hakens(inhalt.get(s))}
             for s in daten.get("entfernen", []):
                 if schluessel_ok(s):
                     haken.pop(s, None)

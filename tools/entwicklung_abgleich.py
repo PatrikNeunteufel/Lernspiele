@@ -127,8 +127,10 @@ def wende_an(app: str, vs: list, jetzt: str) -> None:
         haken_alle = ES.lies_eintraege(a)
         haken = haken_alle.setdefault(id_, {})
         for v in vs:
+            inhalt = v["inhalt"].get("inhalt") if isinstance(v["inhalt"].get("inhalt"), dict) else {}
             for s in v["inhalt"].get("setzen", []):
-                haken[s] = {"am": jetzt[:10], "von": v["von"]}
+                # mit den Fingerabdrücken von Zeile und Zellen, wie beim Server (ÜB1 a)
+                haken[s] = {"am": jetzt[:10], "von": v["von"], **ES.inhalt_eines_hakens(inhalt.get(s))}
             for s in v["inhalt"].get("entfernen", []):
                 haken.pop(s, None)
         if not haken:

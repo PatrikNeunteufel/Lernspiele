@@ -659,6 +659,9 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 .pruef-tabelle td.lang { width: auto; white-space: normal; min-width: 8em; }
 .pruef-tabelle .pruef-haken input { width: 22px; height: 22px; }
 .pruef-e { margin-left: 4px; font-size: 12px; font-weight: 800; color: var(--gut); }
+/* ÜB1 a (LERN_Session38): schon in einer anderen Zeile oder Liste geprüft — grau, damit das Neue auffällt */
+.pruef-tabelle td.pruef-bekannt { color: var(--leise); }
+.pruef-tabelle td.pruef-bekannt.pruef-bild svg { opacity: 0.55; }
 .pruef-bild svg { width: 110px; height: auto; display: block; }
 .pruef-tabelle tr.mit-bemerkung td { background: var(--bemerkung); }
 .pruef-tabelle tr.pruef-bemerkung td { background: var(--bemerkung); white-space: normal; font-size: 14px; }

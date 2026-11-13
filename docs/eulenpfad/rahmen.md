@@ -907,6 +907,10 @@ Kern 1.31.0 in `kern/listenpruefung.js` (LK1 a, docs/kern/rahmen.md 4.27), `spie
   Eintrag, ist sein Haken weg. Abschnitte und Gruppen klappen auf und zu; ganz geprüfte sind beim Öffnen zu. „✓ alle“ je
   Gruppe, „✓ Ganze Liste geprüft“ übernimmt die gesetzten Haken und hakt den Rest ab; Einträge mit offener Bemerkung
   bleiben offen.
+- **Schon geprüft** (ÜB1 a, LERN_Session38, Kern 1.45.0): Jeder Haken trägt Fingerabdrücke `zeile` (Spalten, Prüffrage,
+  Zellen, Bild) und `zellen` (je Zelle und das Bild). Was dieselbe Person schon in einer anderen Zeile oder Liste abgehakt
+  hat, steht grau („schon geprüft“); eine genau gleiche Zeile gilt als geprüft („✓ übernommen“, aufhebbar). Bekannte
+  Zellen allein haken nie ab. Alte Haken ohne Fingerabdrücke trägt `node tools/haken_nachtragen.js` nach.
 - **Entwicklung** (Entwickler-Modus): Haken in `spiele/gemeinsam/pruefstand-eintraege.json`; ist alles abgehakt, steht die
   Liste in `pruefstand.js` mit `hash` (Fingerabdruck der ganzen Liste). Bemerkungen je Eintrag (mit `schluessel`) stehen
   in der Ansicht und lassen sich entfernen (Status „erledigt … (in der Prüfansicht entfernt)“).

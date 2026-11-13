@@ -12,7 +12,7 @@ const LISTENPRUEFUNG = (() => {
     eintraegeUrl: "../gemeinsam/pruefstand-eintraege.json",
     entwicklung: () => LS.entwicklung || null,
     ich: () => LS.spielerName(LS.aktuellerSpieler()),
-    lokal: { lies: LS.pruefungLokal, schreibe: LS.setzePruefungLokal },
+    lokal: { lies: LS.pruefungLokal, schreibe: LS.setzePruefungLokal, alle: LS.pruefungLokalAlle }, // alle: ÜB1 a
     setzeFrei: LS.setzeListeFrei,
     liste: (spielId, listeId) => LS.spielListen(spielId).find(l => l.id === listeId) || null,
     titel: spielId => LS.katalogEintrag?.(spielId)?.bild || "",
@@ -32,5 +32,5 @@ const LISTENPRUEFUNG = (() => {
     if (!ok) alert("Für diese Liste gibt es noch keine Prüfansicht (pruefung.js).");
     return ok;
   }
-  return { oeffne, eintraegeVon: KERN.listenpruefung.eintraegeVon, listenHash: KERN.listenpruefung.listenHash };
+  return { oeffne, eintraegeVon: KERN.listenpruefung.eintraegeVon, listenHash: KERN.listenpruefung.listenHash, inhaltVon: KERN.listenpruefung.inhaltVon };
 })();

@@ -3,6 +3,14 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.45.0 — 2026-11-13 (LERN_Session38)
+- `listenpruefung.js`, schon geprüft (Entscheid ÜB1 a): Jeder Haken trägt Fingerabdrücke `zeile` (Spalten, Prüffrage,
+  Zellen und Bild zusammen) und `zellen` (je Zelle und das Bild), nie den Wortlaut. Zellen, die dieselbe Person in einer
+  anderen Zeile oder Liste schon abgehakt hat, stehen grau (Klasse `pruef-bekannt`); eine Zeile, die sie genau so schon
+  abgehakt hat, gilt als geprüft („✓ übernommen“, lässt sich aufheben). Bekannte Zellen allein haken nie ab. Neu
+  `opt.lokal.alle()` (Haken aller Listen der Aufsicht); im Entwickler-Modus kommen sie aus `pruefstand-eintraege.json`,
+  `setzeEintraege` schickt dazu `inhalt: { <schlüssel>: { zeile, zellen } }` (Entwickler-Server speichert sie).
+
 ## 1.44.0 — 2026-11-13 (LERN_Session38)
 - `listenpruefung.js`: `ansicht(opt).oeffne(defs, id, liste, nachher)` — `nachher()` läuft nach dem Schliessen, wenn
   auch das letzte Speichern fertig ist (Speichern jetzt als Kette, `laufend`). Damit kann die App ihren Prüfstand neu

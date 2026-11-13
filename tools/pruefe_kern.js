@@ -2360,6 +2360,30 @@ console.log("listenpruefung.js");
     const l = loesen; loesen = null; l(true);
     for (let i = 0; i < 10; i++) await null;
     gleich(nachherAm, "nach", "nachher nach dem Speichern");
+
+    // ÜB1 a (1.45.0): genau gleiche Zeile übernommen, bekannte Zellen grau, bekannte Zellen allein haken nicht ab
+    vm.runInContext(`document.body.innerHTML = ""`, c);
+    const fp = vm.runInContext(`KERN.runden.fingerabdruck`, c);
+    const geschrieben = [];
+    c.__alle = { "spiel/alt": {
+      "x:1": { am: "2026-11-01", von: "Anna", zeile: fp([["Wort", "Tier"], "", ["Haus", "nein"], null]), zellen: [fp("Haus"), fp("nein")] },
+      "x:2": { am: "2026-11-01", von: "Anna", zeile: fp([["Wort", "Tier"], "", ["Maus", "nein"], null]), zellen: [fp("Maus"), fp("nein")] },
+      "x:3": { am: "2026-11-01", von: "Bruno", zeile: fp([["Wort", "Tier"], "", ["Katze", "ja"], null]), zellen: [fp("Katze")] } } };
+    c.__schreibe = (q, h) => geschrieben.push([q, Object.keys(h).length]);
+    c.__def2 = { neu: { beschreibung: "", abschnitte: [{ id: "w", titel: "Wörter", spalten: ["Wort", "Tier"], eintraege: () => [["Haus", "nein"], ["Maus", "ja"], ["Katze", "ja"]],
+      zeile: x => x }] } };
+    const a2 = vm.runInContext(`KERN.listenpruefung.ansicht({ eintraegeUrl: "x", ich: () => "Anna", entwicklung: () => null,
+      lokal: { lies: () => ({}), schreibe: __schreibe, alle: () => __alle }, setzeFrei() {} })`, c);
+    await a2.oeffne(c.__def2, "spiel", "neu");
+    const zeilen = vm.runInContext(`[...document.querySelectorAll("dialog tbody tr")].map(tr => ({
+      an: tr.querySelector("input").checked, ueber: /übernommen/.test(tr.textContent),
+      grau: [...tr.querySelectorAll("td.pruef-bekannt")].map(td => td.textContent) }))`, c);
+    gleich(JSON.stringify(zeilen.map(z => [z.an, z.ueber])), JSON.stringify([[true, true], [false, false], [false, false]]),
+      "genau gleiche Zeile übernommen; „Maus | ja“ (andere Angabe) und Katze (andere Person) nicht");
+    gleich(JSON.stringify(zeilen.map(z => z.grau)), JSON.stringify([["Haus", "nein"], ["Maus"], []]), "bekannte Zellen grau, kurze („ja“) nie, andere Person nie");
+    vm.runInContext(`__uhr.weiter(10)`, c);
+    for (let i = 0; i < 5; i++) await null;
+    gleich(JSON.stringify(geschrieben.at(-1)), JSON.stringify(["spiel/neu", 1]), "Übernahme gespeichert (lokal)");
   }
 
   // ---------- Kopien in den Apps ----------

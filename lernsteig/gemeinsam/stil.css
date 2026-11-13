@@ -68,6 +68,8 @@ button, input { font: inherit; color: inherit; }
 .pruef-tabelle td.lang { width: auto; white-space: normal; min-width: 12em; }
 .pruef-tabelle .pruef-haken input { width: 22px; height: 22px; }
 .pruef-e { margin-left: 4px; font-size: 12px; font-weight: 800; color: var(--gut); }
+/* ÜB1 a (Kern 1.45.0): schon in einer anderen Zeile oder Liste geprüft — grau, damit das Neue auffällt */
+.pruef-tabelle td.pruef-bekannt { color: var(--leise); }
 .pruef-tabelle tr.mit-bemerkung td, .pruef-tabelle tr.pruef-bemerkung td { background: var(--hinweis-hell); }
 .pruef-tabelle tr.pruef-bemerkung td { white-space: normal; font-size: 14px; }
 .chip { border: 2px solid var(--rand); background: var(--karte); border-radius: 999px; padding: 6px 16px; font-weight: 700; color: var(--leise); cursor: pointer; min-height: 40px; }
