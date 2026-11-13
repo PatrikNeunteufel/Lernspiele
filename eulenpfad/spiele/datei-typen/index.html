@@ -101,6 +101,15 @@ const nurMoegliche = texte => (LISTE_FREI ? texte : {});
 const endungVon = e => DATEI_ENDUNGEN.find(x => x.endung === e);
 const korbEndungen = p => DATEI_ENDUNGEN.filter(x => KORB_ARTEN.includes(x.art) && (!p.nurHaeufig || x.haeufig));
 const datei = (name, endung) => `${name}.${endung}`;
+/** Woraus eine Aufgabenart in der Stufe p wählt: ding die Dinge, korb und falle die Endungen der Körbe (Stufe 2 nur
+    häufige), welche die Endungen der Körbe, programm alle Endungen — auch für die Prüfansicht (pruefung.js). */
+const vorratFuer = (art, p) => ({
+  ding: () => DATEI_DINGE,
+  korb: () => korbEndungen(p),
+  falle: () => korbEndungen(p),
+  welche: () => DATEI_ENDUNGEN.filter(x => KORB_ARTEN.includes(x.art)),
+  programm: () => DATEI_ENDUNGEN,
+})[art]?.() || [];
 
 // ---------- Aufgaben als Daten ----------
 
@@ -115,28 +124,28 @@ function aufgabeErzeugen(stufe) {
 
 function erzeuge(art, p) {
   if (art === "ding") {
-    const d = waehle(DATEI_DINGE);
+    const d = waehle(vorratFuer(art, p));
     return { art, ding: DATEI_DINGE.indexOf(d), koerbe: ["text", "bild", "ton"], richtig: d.art };
   }
   if (art === "korb") {
-    const e = waehle(korbEndungen(p));
+    const e = waehle(vorratFuer(art, p));
     return { art, endung: e.endung, name: waehle(e.namen), koerbe: KORB_ARTEN, richtig: e.art };
   }
   if (art === "falle") {
     // Der Name gehört zu einer anderen Art als die Endung: Es zählt nur die Endung.
-    const e = waehle(korbEndungen(p));
+    const e = waehle(vorratFuer(art, p));
     const andere = DATEI_ENDUNGEN.filter(x => KORB_ARTEN.includes(x.art) && x.art !== e.art);
     return { art, endung: e.endung, name: waehle(waehle(andere).namen), koerbe: KORB_ARTEN, richtig: e.art };
   }
   if (art === "welche") {
     // Gleicher Name, vier Endungen aus vier Arten: Welche Datei ist ein Bild?
     const name = waehle(DATEI_NEUTRAL);
-    const endungen = KORB_ARTEN.map(k => waehle(DATEI_ENDUNGEN.filter(x => x.art === k)).endung);
+    const endungen = KORB_ARTEN.map(k => waehle(vorratFuer(art, p).filter(x => x.art === k)).endung);
     const gesucht = waehle(KORB_ARTEN);
     return { art, name, optionen: mische(endungen), gesucht, richtig: endungen[KORB_ARTEN.indexOf(gesucht)] };
   }
   if (art === "programm") {
-    const e = waehle(DATEI_ENDUNGEN);
+    const e = waehle(vorratFuer(art, p));
     const falsch = mische(FALSCHE_PROGRAMME[e.art]).slice(0, 3);
     return { art, endung: e.endung, name: waehle(e.namen), optionen: mische([e.programm, ...falsch]), richtig: e.programm };
   }

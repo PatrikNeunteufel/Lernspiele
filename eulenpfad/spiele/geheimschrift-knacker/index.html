@@ -121,6 +121,14 @@ const STUFE = {
   s6: { arten: ["knackenWort"], schluessel: Array.from({ length: 25 }, (_, i) => i + 1), hilfe: "spaet", minLaenge: 5 },
 };
 const brauchtWoerter = stufe => STUFE[stufe].arten[0] !== "buchstabe";
+/** Ist das Wort lang genug für die Stufe p (minLaenge)? — auch für die Prüfansicht (pruefung.js). */
+const langGenug = (wort, p) => wort.length >= (p.minLaenge || 0);
+/** Nimmt die Stufe p das Wort mit Schlüssel k? Mindestlänge und, wo die Stufe es festlegt, Überlauf über das
+    Alphabet-Ende (ueberlauf) — auch für die Prüfansicht (pruefung.js). */
+const passtInStufe = (wort, k, p) => langGenug(wort, p) && (p.ueberlauf === undefined || ueberlauf(wort, k) === p.ueberlauf);
+/** Macht die Verschiebung um k aus dem Wort ein anstössiges Geheimwort (GEHEIM_SPERRE in woerter.js, GK1 a)?
+    k darf negativ oder über 25 sein (Hinweise beim Knacken verschieben um k − j). */
+const gesperrt = (wort, k) => (GEHEIM_SPERRE[wort] || []).includes(((k % 26) + 26) % 26);
 const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => !brauchtWoerter(s) || WOERTER.length));
 
 /** Schlüssel (1–25), die aus dem Geheimwort ein Wort der Liste machen. */
@@ -149,18 +157,22 @@ function erzeuge(p) {
     return { art, k, richtung, von, loesung, falsch, optionen };
   }
   const wort = waehle(WOERTER);
-  if (!wort || wort.length < (p.minLaenge || 0)) return null;
+  if (!wort || !langGenug(wort, p)) return null;
+  // gesperrt erst hier geprüft (nach der Richtung), damit Aufgaben ohne gesperrtes Paar gleich bleiben
   if (art === "wort") {
     const richtung = waehle(p.richtungen);
-    if (ueberlauf(wort, k) !== p.ueberlauf) return null;
+    if (!passtInStufe(wort, k, p) || gesperrt(wort, k)) return null;
     const geheim = verschiebe(wort, k);
     return richtung === "ver"
       ? { art, k, richtung, gegeben: wort, loesung: geheim }
       : { art, k, richtung, gegeben: geheim, loesung: wort };
   }
+  if (gesperrt(wort, k)) return null;
   const geheim = verschiebe(wort, k);
   if (art === "knacken") {
-    const andere = mische(p.schluessel.filter(j => j !== k)).slice(0, 3);
+    // Der Hinweis zu einer falschen Antwort j zeigt das Wort um k − j verschoben: keine gesperrte Verschiebung
+    // (erst nach dem Mischen aussortiert, damit Aufgaben ohne gesperrtes Paar gleich bleiben)
+    const andere = mische(p.schluessel.filter(j => j !== k)).filter(j => !gesperrt(wort, k - j)).slice(0, 3);
     return { art, k, gegeben: geheim, wort, optionen: mische([k, ...andere]) };
   }
   return { art, k, gegeben: geheim, wort, loesung: wort };
@@ -182,6 +194,7 @@ function pruefeAufgabe(a, stufe) {
   const klar = a.art === "wort" ? (a.richtung === "ver" ? a.gegeben : a.loesung) : a.wort;
   if (!WOERTER.includes(klar)) m.push("Wort nicht aus der freien Liste");
   if (!/^[A-Z]{3,7}$/.test(klar)) m.push("Wort nicht nur A–Z oder falsche Länge");
+  if (gesperrt(klar, a.k)) m.push("Schlüssel für dieses Wort gesperrt (GEHEIM_SPERRE)");
   if (a.art === "wort") {
     const geheim = a.richtung === "ver" ? a.loesung : a.gegeben;
     if (verschiebe(klar, a.k) !== geheim) m.push("Verschiebung falsch");
@@ -194,6 +207,7 @@ function pruefeAufgabe(a, stufe) {
   if (a.art === "knacken") {
     if (a.optionen.filter(o => o === a.k).length !== 1) m.push("Schlüssel nicht genau einmal unter den Antworten");
     if (new Set(a.optionen).size !== a.optionen.length) m.push("doppelte Antworten");
+    if (a.optionen.some(j => j !== a.k && gesperrt(a.wort, a.k - j))) m.push("Hinweis zu einer Antwort zeigt eine gesperrte Verschiebung");
   }
   if (a.wort.length < (p.minLaenge || 0)) m.push("Wort zu kurz für die Stufe");
   return m;

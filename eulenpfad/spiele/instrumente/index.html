@@ -44,8 +44,9 @@ const ID = "instrumente";
 // Freigabe (Entscheid L4 a): nur Inhalte aus Listen, die der Spieler üben darf. Kennt der Katalog
 // die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
 const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : INSTRUMENT_LISTEN);
-const I = INSTRUMENTE.map(([bild, name, gruppe, spielart, genauer]) => ({ bild, name, gruppe, spielart, genauer }))
-  .filter(i => FREI.has(INSTRUMENT_LISTE_JE_GRUPPE[i.gruppe]));
+/** Instrument aus einer Zeile von INSTRUMENTE — auch für die Prüfansicht (pruefung.js). */
+const instrumentVon = ([bild, name, gruppe, spielart, genauer]) => ({ bild, name, gruppe, spielart, genauer });
+const I = INSTRUMENTE.map(instrumentVon).filter(i => FREI.has(INSTRUMENT_LISTE_JE_GRUPPE[i.gruppe]));
 const FRAGEN = INSTRUMENT_FRAGEN.filter(f => FREI.has(f[4]));
 
 // Schulinstrumente ohne Emoji (Triangel, Klangstab, Schlagholz) stehen in der Bildersammlung (bilder.js, B1 a).
@@ -57,18 +58,33 @@ const GRUPPEN = {
 const FALLEN = /Saxofon|Querflöte/;
 const SPIELARTEN = { schlagen: "🥢", zupfen: "🤏", streichen: "🎻", blasen: "💨", schütteln: "🫨", "Tasten drücken": "🎹" };
 
+/**
+ * Nimmt die Art (mit ihrem Zusatz aus STUFE_ARTEN) dieses Instrument, unabhängig von der Freigabe — auch für die
+ * Prüfansicht (pruefung.js). Die Fragen (Art frage) nehmen kein Instrument.
+ */
+const NIMMT = {
+  name: i => !!i.bild,
+  spielart: (i, mitBild) => !mitBild || !!i.bild,
+  gruppe: () => true,
+  genauer: i => !!i.genauer,
+  genauerAlle: (i, nurFallen) => !!i.genauer && (!nurFallen || FALLEN.test(i.name)),
+  frage: () => false,
+};
+/** Die zwei Körbe der genaueren Gruppe (Stufen 4, 5) — auch für die Prüfansicht (pruefung.js). */
+const genauerPaar = i => (i.genauer.includes("blas") ? ["Holzblasinstrument", "Blechblasinstrument"] : ["Streichinstrument", "Zupfinstrument"]);
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   name() {
     // Die Namen zur Auswahl stammen nur aus freien Listen; sind es weniger als drei, genügen zwei.
-    const mitBild = I.filter(i => i.bild);
+    const mitBild = I.filter(i => NIMMT.name(i));
     if (mitBild.length < 2) return null;
     const x = waehle(mitBild);
     const andere = mische(mitBild.filter(i => i !== x)).slice(0, 2).map(i => i.name);
     return { art: "name", x, richtig: x.name, optionen: mische([x.name, ...andere]) };
   },
   spielart(mitBild) {
-    const x = waehle(I.filter(i => !mitBild || i.bild));
+    const x = waehle(I.filter(i => NIMMT.spielart(i, mitBild)));
     if (!x) return null;
     const andere = mische(Object.keys(SPIELARTEN).filter(s => s !== x.spielart)).slice(0, 2);
     return { art: "korb", nach: "spielart", x, richtig: x.spielart, koerbe: mische([x.spielart, ...andere]), info: SPIELARTEN };
@@ -79,14 +95,13 @@ const ARTEN = {
     return { art: "korb", nach: "gruppe", x, richtig: x.gruppe, koerbe: ["Schlaginstrument", "Saiteninstrument", "Blasinstrument", "Tasteninstrument"], info: GRUPPEN };
   },
   genauer() {
-    const x = waehle(I.filter(i => i.genauer));
+    const x = waehle(I.filter(i => NIMMT.genauer(i)));
     if (!x) return null;
-    const paar = x.genauer.includes("blas") ? ["Holzblasinstrument", "Blechblasinstrument"] : ["Streichinstrument", "Zupfinstrument"];
-    return { art: "korb", nach: "genauer", x, richtig: x.genauer, koerbe: paar, info: GRUPPEN };
+    return { art: "korb", nach: "genauer", x, richtig: x.genauer, koerbe: genauerPaar(x), info: GRUPPEN };
   },
   /** Königsstufe: alle vier genaueren Gruppen; nurFallen = Instrumente aus Metall, die zu den Holzblasinstrumenten zählen. */
   genauerAlle(nurFallen) {
-    const x = waehle(I.filter(i => i.genauer && (!nurFallen || FALLEN.test(i.name))));
+    const x = waehle(I.filter(i => NIMMT.genauerAlle(i, nurFallen)));
     if (!x) return null;
     return { art: "korb", nach: "genauer", x, richtig: x.genauer, koerbe: mische(["Holzblasinstrument", "Blechblasinstrument", "Streichinstrument", "Zupfinstrument"]), info: GRUPPEN };
   },
@@ -97,16 +112,19 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [ARTEN.name],
-  s2: [() => ARTEN.spielart(true), ARTEN.name],
-  s3: [ARTEN.gruppe, () => ARTEN.spielart(false)],
-  s4: [ARTEN.genauer, ARTEN.gruppe],
-  s5: [ARTEN.frage, ARTEN.genauer],
+// Je Stufe die Arten als [Art, Zusatz] (Zusatz: mitBild bei spielart, nurFallen bei genauerAlle; mehrfach genannt =
+// häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus mit NIMMT die Stufen je Instrument liest.
+const STUFE_ARTEN = {
+  s1: [["name"]],
+  s2: [["spielart", true], ["name"]],
+  s3: [["gruppe"], ["spielart", false]],
+  s4: [["genauer"], ["gruppe"]],
+  s5: [["frage"], ["genauer"]],
   // Königsstufe: Ensembles, Klangerzeugung und Fallen gemischt, genauere Gruppen mit allen vier Körben
-  s6: [ARTEN.frage, ARTEN.frage, () => ARTEN.genauerAlle(false), () => ARTEN.genauerAlle(true)],
+  s6: [["frage"], ["frage"], ["genauerAlle", false], ["genauerAlle", true]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, zusatz]) => () => ARTEN[art](zusatz))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {

@@ -83,7 +83,9 @@ const TAG = ["morgen", "mittag", "nachmittag"]; // in Stufe 1: hell; der Abend i
 
 // Freigabe (Entscheid L4 a): nur Tätigkeiten aus freien Listen; die Aufsicht bekommt alle.
 const FREI = LS.spielListen("tageslauf-sonne").length ? LS.freieListen("tageslauf-sonne") : ["taetigkeiten"];
-const LISTE = FREI.includes("taetigkeiten") ? TAETIGKEITEN.map(([bild, satz, zeit]) => ({ bild, satz, zeit })) : [];
+/** Tätigkeit aus einer Zeile von TAETIGKEITEN — auch für die Prüfansicht (pruefung.js). */
+const taetigkeitVon = ([bild, satz, zeit]) => ({ bild, satz, zeit });
+const LISTE = FREI.includes("taetigkeiten") ? TAETIGKEITEN.map(taetigkeitVon) : [];
 const SATZ = Object.fromEntries(LISTE.map(t => [t.bild, t.satz]));
 const WAS = Object.fromEntries(WOCHENPLAN);
 
@@ -101,6 +103,8 @@ const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([
 
 const zeitIn = (t, stufe) => (stufe === "s1" ? (t.zeit === "nacht" ? "nacht" : TAG.includes(t.zeit) ? "tag" : null) : t.zeit);
 const TAGE = { "-2": "vorgestern", "-1": "gestern", "1": "morgen", "2": "übermorgen" };
+/** Kann die Tätigkeit in dieser Stufe beim Zuordnen vorkommen (ihre Tageszeit ist dort eine Antwort)? — auch für die Prüfansicht (pruefung.js). */
+const zuordnenIn = (t, stufe) => STUFE[stufe].zeiten.includes(zeitIn(t, stufe));
 
 function aufgabeErzeugen(stufe) {
   const s = STUFE[stufe];
@@ -108,7 +112,7 @@ function aufgabeErzeugen(stufe) {
   if (art === "zuordnen") {
     // Stufe 1: zuerst Tag oder Nacht wählen, sonst kämen fast nur Tag-Bilder
     const ziel = stufe === "s1" ? waehle(s.zeiten) : null;
-    const t = waehle(LISTE.filter(x => s.zeiten.includes(zeitIn(x, stufe)) && (!ziel || zeitIn(x, stufe) === ziel)));
+    const t = waehle(LISTE.filter(x => zuordnenIn(x, stufe) && (!ziel || zeitIn(x, stufe) === ziel)));
     return { art, bild: t.bild, satz: t.satz, richtig: zeitIn(t, stufe), optionen: s.zeiten };
   }
   if (art === "ordnen") {

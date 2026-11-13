@@ -2155,3 +2155,18 @@
   `lautKorb`, `ORDNEN_LAUT`, `STILL_ORT`, `SCHLIMMER_PAARE`, `andereKoerbe`, `ANTWORT`, `mitArtikel` (Aufgaben unverändert:
   je Stufe 400 bis 500 Aufgaben mit festen Startwerten vorher und nachher byte-gleich). Prüfstand und Fingerabdrücke
   unverändert.
+- **Prüfung je Eintrag, MI, Musik und die letzten (LP5 a, LERN-51, T4 a):** `pruefung.js` für Instrumenten-Kenner
+  (sechs Listen), Geheimschrift-Knacker, Datei-Typen, Tageslauf-Sonne und Königs-Falle — damit hat jedes Spiel mit
+  eigenen Listen eine Prüfansicht. Geheimschrift zeigt alle 25 Geheimwörter je Wort (zur Prüfung auf Anstössiges),
+  Königs-Falle das Brett mit dem Lösungszug und die Prüfung der Regel-Maschine (genau ein Mattzug). Im Spiel neu:
+  Instrumente `instrumentVon`, `NIMMT`, `genauerPaar`, `STUFE_ARTEN`; Tageslauf-Sonne `taetigkeitVon`, `zuordnenIn`;
+  Geheimschrift `langGenug`, `passtInStufe`; Datei-Typen `vorratFuer`; Königs-Falle unverändert (Aufgaben unverändert:
+  je Stufe 400 Aufgaben mit festen Startwerten vorher und nachher byte-gleich). Prüfstand und Fingerabdrücke unverändert.
+- **Geheimschrift-Knacker: gesperrte Schlüssel (GK1 a):** Neun Paare aus Wort und Schlüssel ergaben anstössige
+  Geheimwörter (PUZZLE 19 INSSEX, MAUS/HAUS/PAUSE 6 mit GAY, TOMATE 20 NIGUNY, KARTE 13 XNEGR, BLUME 8 JTCUM, APFEL 5
+  FUKJQ, ZWERG 6 FCKXM; Suche nach 118 Teilwörtern, Deutsch und Englisch, über alle 88 Wörter und Schlüssel 1–25). Neu
+  `GEHEIM_SPERRE` in `woerter.js`; das Spiel (`gesperrt`) verschlüsselt diese Wörter nie mit diesen Schlüsseln und zeigt
+  die Verschiebung auch in keinem Hinweis zu einer falschen Antwort beim Knacken; `pruefeAufgabe` meldet beides. Die
+  Wörter bleiben. Prüfansicht: ⛔ bei gesperrten Geheimwörtern, neuer Abschnitt „Gesperrte Schlüssel“ (Fingerabdruck der
+  Liste dadurch neu, Prüfstand ohne Fingerabdruck unverändert). Je Stufe 20 000 Startwerte mit und ohne Sperre: geändert
+  nur Aufgaben mit gesperrtem Paar (Stufe 3: 61, 4: 186, 5: 324, 6: 80), mit Sperre keine mehr.
