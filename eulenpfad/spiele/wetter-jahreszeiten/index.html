@@ -98,10 +98,21 @@ function zahlOptionen(richtig, kandidaten, von, bis) {
   return mische([richtig, ...mische(andere).slice(0, 3)]);
 }
 
+/**
+ * Nimmt die Art (mit ihrer Angabe aus STUFE_ARTEN) diesen Eintrag, unabhängig von der Freigabe — auch für die
+ * Prüfansicht (pruefung.js). zeit: Beobachtung bis Stufe n; frage: bis Stufe n, mit nurAb genau Stufe n.
+ */
+const NIMMT = {
+  zeit: (z, n) => z[0] <= n,
+  frage: (f, n, nurAb = false) => (nurAb ? f[0] === n : f[0] <= n),
+};
+/** Frage zur Kleidung — auch für die Prüfansicht (pruefung.js). */
+const kleidungFrage = text => `${text} Was passt jetzt?`;
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   zeit(n) {
-    const liste = JAHRESZEITEN.filter(z => z[0] <= n);
+    const liste = JAHRESZEITEN.filter(z => NIMMT.zeit(z, n));
     if (!liste.length) return null;
     const [, bild, text, richtig] = waehle(liste);
     return { art: "zeit", bild, text, richtig };
@@ -163,7 +174,7 @@ const ARTEN = {
     return { art: "bericht", zeit, frage: `Wie warm wird es am ${tage[ziel]}?`, tage, symbole, grade, richtig: grad(grade[ziel]), optionen: mische(grade.map(grad)) };
   },
   frage(n, nurAb = false) {
-    const liste = FRAGEN.filter(f => (nurAb ? f[0] === n : f[0] <= n));
+    const liste = FRAGEN.filter(f => NIMMT.frage(f, n, nurAb));
     if (!liste.length) return null;
     const [, bild, frage, richtig, f1, f2, erklaerung] = waehle(liste);
     return { art: "frage", bild, frage, richtig, optionen: mische([richtig, f1, f2]), erklaerung };
@@ -173,17 +184,21 @@ const ARTEN = {
 // Der Wetterbericht zieht manchmal Temperaturen, die nicht alle verschieden sind; dann neu ziehen.
 const nochmal = (art, mal = 20) => () => { for (let i = 0; i < mal; i++) { const a = art(); if (a) return a; } return null; };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.zeit(1)],
-  s2: [() => ARTEN.kleidung(), () => ARTEN.kleidung(), () => ARTEN.thermo("s2")],
-  s3: [() => ARTEN.zeit(3), () => ARTEN.symbol(), () => ARTEN.thermo("s3")],
-  s4: [nochmal(() => ARTEN.bericht()), nochmal(() => ARTEN.bericht()), () => ARTEN.thermo("s4"), () => ARTEN.differenz(false)],
-  s5: [() => ARTEN.frage(5)],
+// Je Stufe die Arten als [Art, Angaben …] (mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht
+// (pruefung.js), die daraus mit NIMMT die Stufen je Eintrag liest. Der Wetterbericht wird bei Bedarf neu gezogen (nochmal).
+const STUFE_ARTEN = {
+  s1: [["zeit", 1]],
+  s2: [["kleidung"], ["kleidung"], ["thermo", "s2"]],
+  s3: [["zeit", 3], ["symbol"], ["thermo", "s3"]],
+  s4: [["bericht"], ["bericht"], ["thermo", "s4"], ["differenz", false]],
+  s5: [["frage", 5]],
   // Königsstufe: schwerste Fragen, Wetterbericht, Thermometer auf 1 °C bis −20 °C, über null rechnen
-  s6: [() => ARTEN.frage(6, true), () => ARTEN.frage(6), nochmal(() => ARTEN.bericht()), () => ARTEN.thermo("s6"), () => ARTEN.differenz(true),
-    () => ARTEN.zeit(3), () => ARTEN.kleidung()],
+  s6: [["frage", 6, true], ["frage", 6], ["bericht"], ["thermo", "s6"], ["differenz", true], ["zeit", 3], ["kleidung"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) => [s, arten.map(([art, ...angaben]) => {
+  const f = () => ARTEN[art](...angaben);
+  return art === "bericht" ? nochmal(f) : f;
+})]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
@@ -336,7 +351,7 @@ LS.spiel({
         loesung: `${a.text}: ${a.richtig}.`,
       });
     } else if (a.art === "kleidung") {
-      f.append(el("div", { class: "wj-bild", text: a.bild }), el("div", { class: "frage", text: `${a.text} Was passt jetzt?` }));
+      f.append(el("div", { class: "wj-bild", text: a.bild }), el("div", { class: "frage", text: kleidungFrage(a.text) }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 170,
         inhalt: o => { const [bild, ...rest] = o.split(" "); return { bild, text: rest.join(" ") }; },

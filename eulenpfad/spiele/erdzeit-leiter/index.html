@@ -155,6 +155,24 @@ function auswahlMitAbstand(k, r, filter = () => true) {
   return null;
 }
 
+/**
+ * Welche Ereignisse eine Art nimmt (sonst alle), unabhängig von der Freigabe — auch für die Prüfansicht (pruefung.js).
+ * Leiter: nicht genau auf einer Sprosse; Zeitalter: nicht an der Grenze; Erd-Tag: mindestens 100 000 Jahre her.
+ */
+const NIMMT = {
+  leiter: e => abschnitt(jahreVon(e)) >= 0,
+  zeitalter: e => !e.grenze,
+  tag: e => jahreVon(e) >= 1e5,
+  tagRueck: e => jahreVon(e) >= 1e5,
+};
+/** „Wie viel Zeit liegt dazwischen?“: Zeiten mindestens um diesen Faktor auseinander — auch für die Prüfansicht. */
+const ABSTAND_FAKTOR = 1.5;
+/** Abstand in Jahren vom älteren Ereignis alt zum jüngeren jung, null wenn kein Vielfaches von 10 000 — auch für die Prüfansicht. */
+function abstandVon(alt, jung) {
+  const d = jahreVon(alt) - jahreVon(jung);
+  return d % 10000 === 0 ? d : null;
+}
+
 const ARTEN = {
   frueher: r => {
     const paar = auswahlMitAbstand(2, r);
@@ -165,19 +183,19 @@ const ARTEN = {
     return reihe && { art: "ordnen", reihe: reihe.map(e => e.text), zahlen };
   },
   leiter: zahl => {
-    const pool = EREIGNISSE.filter(e => abschnitt(jahreVon(e)) >= 0);
+    const pool = EREIGNISSE.filter(NIMMT.leiter);
     if (!pool.length) return null;
     const e = waehle(pool);
     return { art: "leiter", text: e.text, richtig: abschnitt(jahreVon(e)), zahl };
   },
   zeitalter: zahl => {
-    const pool = EREIGNISSE.filter(e => !e.grenze);
+    const pool = EREIGNISSE.filter(NIMMT.zeitalter);
     if (!pool.length) return null;
     const e = waehle(pool);
     return { art: "zeitalter", text: e.text, richtig: e.zeitalter, zahl };
   },
   tag: r => {
-    const e = waehle(EREIGNISSE.filter(x => jahreVon(x) >= 1e5));
+    const e = waehle(EREIGNISSE.filter(NIMMT.tag));
     if (!e) return null;
     const richtig = tagText(jahreVon(e));
     const texte = [richtig];
@@ -188,30 +206,34 @@ const ARTEN = {
     return texte.length === 4 ? { art: "tag", text: e.text, richtig, optionen: mische(texte) } : null;
   },
   tagRueck: () => {
-    const drei = auswahlMitAbstand(3, 3, x => jahreVon(x) >= 1e5);
+    const drei = auswahlMitAbstand(3, 3, NIMMT.tagRueck);
     if (!drei) return null;
     const e = waehle(drei);
     return { art: "tagRueck", uhr: tagText(jahreVon(e)), richtig: e.text, optionen: mische(drei.map(x => x.text)) };
   },
   abstand: () => {
-    const paar = auswahlMitAbstand(2, 1.5);
+    const paar = auswahlMitAbstand(2, ABSTAND_FAKTOR);
     if (!paar) return null;
-    const d = jahreVon(paar[0]) - jahreVon(paar[1]);
-    if (d % 10000 !== 0) return null;
+    const d = abstandVon(paar[0], paar[1]);
+    if (d === null) return null;
     const optionen = [d, d * 10, d / 10];
     return { art: "abstand", texte: paar.map(e => e.text), richtig: d, optionen: mische(optionen) };
   },
 };
 
-const STUFE = {
-  s1: [() => ARTEN.frueher(8)],
-  s2: [() => ARTEN.ordnen(3, 2.5, false), () => ARTEN.ordnen(3, 2.5, false), () => ARTEN.frueher(3)],
-  s3: [() => ARTEN.leiter(true), () => ARTEN.leiter(true), () => ARTEN.ordnen(4, 1.4, true)],
-  s4: [() => ARTEN.zeitalter(true), () => ARTEN.zeitalter(true), () => ARTEN.ordnen(4, 1.6, false), () => ARTEN.leiter(false)],
-  s5: [() => ARTEN.tag(2), () => ARTEN.tag(2), () => ARTEN.tagRueck(), () => ARTEN.abstand()],
+// Je Stufe die Arten mit ihren Angaben (mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht
+// (pruefung.js), die daraus mit NIMMT die Stufen je Ereignis liest.
+const STUFE_ARTEN = {
+  s1: [["frueher", 8]],
+  s2: [["ordnen", 3, 2.5, false], ["ordnen", 3, 2.5, false], ["frueher", 3]],
+  s3: [["leiter", true], ["leiter", true], ["ordnen", 4, 1.4, true]],
+  s4: [["zeitalter", true], ["zeitalter", true], ["ordnen", 4, 1.6, false], ["leiter", false]],
+  s5: [["tag", 2], ["tag", 2], ["tagRueck"], ["abstand"]],
   // Königsstufe: fünf Ereignisse ohne Zahlen, Zeitalter ohne Zeitangabe, Leiter ohne Zahl, Erd-Tag mit nahen Uhrzeiten.
-  s6: [() => ARTEN.ordnen(5, 1.25, false), () => ARTEN.zeitalter(false), () => ARTEN.leiter(false), () => ARTEN.tag(1.25), () => ARTEN.abstand()],
+  s6: [["ordnen", 5, 1.25, false], ["zeitalter", false], ["leiter", false], ["tag", 1.25], ["abstand"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 function aufgabeErzeugen(stufe) {
   for (let versuch = 0; versuch < 5; versuch++) {

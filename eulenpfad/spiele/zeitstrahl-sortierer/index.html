@@ -59,6 +59,24 @@ function zahlOptionen(richtig, kandidaten, n = 4) {
   return mische([richtig, ...mische(andere).slice(0, n - 1)]);
 }
 
+/**
+ * Listen je Aufgabenart: Eine Art kommt nur vor, wenn alle ihre Listen frei sind (pfeil braucht keine) —
+ * auch für die Prüfansicht (pruefung.js).
+ */
+const ART_LISTEN = {
+  abschnitte: ["lebensabschnitte"], leben: ["lebensabschnitte"], geburtstag: ["lebensabschnitte"],
+  generationen: ["generationen"], genStrahl: ["generationen"], alter: ["generationen"], unterschied: ["generationen"],
+  ereignisse: ["ereignisse"], buchstabe: ["ereignisse"], jahrhundert: ["ereignisse"], epocheJahr: ["ereignisse", "epochen"],
+  epochen: ["epochen"], merkmal: ["epochen"], pfeil: [],
+};
+/** Generationen einer Familie (0 Kind, 1 Eltern, 2 Grosseltern, 3 Urgrosseltern) — Angabe der Arten in STUFE_ARTEN. */
+const DREI_GENERATIONEN = [0, 1, 2], VIER_GENERATIONEN = [0, 1, 2, 3];
+/** Welche Einträge eine Art nimmt (sonst alle), unabhängig von der Freigabe — auch für die Prüfansicht (pruefung.js). */
+const NIMMT = {
+  geburtstag: l => l[0] > 0, // ZS_LEBEN: nicht die Geburt
+  epocheJahr: e => ZS_EPOCHEN.some(p => p[1] === e[4]), // ZS_EREIGNISSE: nur mit eindeutigem Zeitalter (ZA1 a: nicht ZS_UEBERGANG)
+};
+
 /** Eine erfundene Familie: je Generation eine Person; Abstand 25–35 Jahre (rund: auf 5 Jahre). */
 function familie(generationen, rund) {
   let jahr = rund ? waehle([2010, 2015, 2020]) : zufall(2013, 2018);
@@ -71,38 +89,33 @@ function familie(generationen, rund) {
   return personen.sort((a, b) => a.jahr - b.jahr); // älteste zuerst
 }
 
-// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
+// Die Arten; ob ihre Listen frei sind, prüft STUFE (ART_LISTEN).
 const ARTEN = {
   abschnitte(n) {
-    if (!hat("lebensabschnitte")) return null;
     const weg = mische(ZS_ABSCHNITTE.map((_, i) => i)).slice(0, ZS_ABSCHNITTE.length - n);
     return { art: "ordnen", typ: "abschnitte", reihe: ZS_ABSCHNITTE.filter((_, i) => !weg.includes(i)).map(a => a[1]) };
   },
   leben(n) {
-    if (!hat("lebensabschnitte")) return null;
     const weg = mische(ZS_LEBEN.map((_, i) => i)).slice(0, ZS_LEBEN.length - n);
     return { art: "ordnen", typ: "leben", reihe: ZS_LEBEN.filter((_, i) => !weg.includes(i)).map(a => a[2]) };
   },
-  /** Drei von vier Generationen, von der ältesten Person zur jüngsten. */
-  generationen() {
-    if (!hat("generationen")) return null;
-    const gens = mische([0, 1, 2, 3]).slice(0, 3).sort((a, b) => b - a);
-    const reihe = gens.map(g => waehle(ZS_GENERATIONEN.filter(p => p[0] === g))[2]);
+  /** Drei der Generationen gens, von der ältesten Person zur jüngsten. */
+  generationen(gens) {
+    const drei = mische(gens).slice(0, 3).sort((a, b) => b - a);
+    const reihe = drei.map(g => waehle(ZS_GENERATIONEN.filter(p => p[0] === g))[2]);
     return { art: "ordnen", typ: "gen", reihe };
   },
   epochen() {
-    return hat("epochen") ? { art: "ordnen", typ: "epochen", reihe: ZS_EPOCHEN.map(e => e[1]) } : null;
+    return { art: "ordnen", typ: "epochen", reihe: ZS_EPOCHEN.map(e => e[1]) };
   },
   ereignisse(n) {
-    if (!hat("ereignisse")) return null;
     // Höchstens ein Ereignis je Jahr (1847/1848 und 1969/1971 dürfen zusammen kommen: die Jahrzahl steht da)
     const wahl = mische(ZS_EREIGNISSE).slice(0, n).sort((a, b) => a[0] - b[0]);
     return { art: "ordnen", typ: "ereignisse", reihe: wahl.map(e => e[3]) };
   },
-  /** Familie auf dem Zeitstrahl: In welchem Jahr ist … geboren? */
-  genStrahl(vier) {
-    if (!hat("generationen")) return null;
-    const personen = familie(vier ? [0, 1, 2, 3] : [0, 1, 2], true);
+  /** Familie mit den Generationen gens auf dem Zeitstrahl: In welchem Jahr ist … geboren? */
+  genStrahl(gens) {
+    const personen = familie(gens, true);
     const ziel = waehle(personen);
     const von = Math.floor((personen[0].jahr - 5) / 20) * 20;
     const bis = Math.ceil((personen[personen.length - 1].jahr + 5) / 20) * 20;
@@ -119,30 +132,26 @@ const ARTEN = {
     return { art: "pfeil", jahr, richtig: jahr, optionen: zahlOptionen(jahr, kand.filter(v => v > von && v < bis)), von, bis, strich, zahl: 20 };
   },
   /** Wie alt wird … im Jahr …? */
-  alter() {
-    if (!hat("generationen")) return null;
-    const p = waehle(familie([0, 1, 2], false));
+  alter(gens) {
+    const p = waehle(familie(gens, false));
     const richtig = JETZT - p.jahr;
     return { art: "alter", bild: p.bild, name: p.name, geboren: p.jahr, jahr: JETZT, richtig, optionen: zahlOptionen(richtig, [richtig + 1, richtig - 1, richtig + 10, richtig - 10]) };
   },
   /** Wie viele Jahre älter ist … als …? */
-  unterschied() {
-    if (!hat("generationen")) return null;
-    const [alt, jung] = mische(familie([0, 1, 2], false)).slice(0, 2).sort((a, b) => a.jahr - b.jahr);
+  unterschied(gens) {
+    const [alt, jung] = mische(familie(gens, false)).slice(0, 2).sort((a, b) => a.jahr - b.jahr);
     const richtig = jung.jahr - alt.jahr;
     return { art: "unterschied", alt, jung, richtig, optionen: zahlOptionen(richtig, [richtig + 1, richtig - 1, richtig + 10, richtig - 10]) };
   },
   /** In welchem Jahr wird ein Kind 4, 6, 9, 12 oder 18? */
   geburtstag() {
-    if (!hat("lebensabschnitte")) return null;
-    const [alter, bild, ereignis] = waehle(ZS_LEBEN.filter(l => l[0] > 0));
+    const [alter, bild, ereignis] = waehle(ZS_LEBEN.filter(NIMMT.geburtstag));
     const geboren = zufall(2008, 2022);
     const richtig = geboren + alter;
     return { art: "geburtstag", bild, ereignis, alter, geboren, richtig, optionen: zahlOptionen(richtig, [richtig + 1, richtig - 1, richtig + 10, geboren + 10 * alter].filter(v => v < 2300)) };
   },
   /** Welcher Buchstabe auf dem Zeitstrahl zeigt das Jahr …? Ereignisse mindestens 150 Jahre auseinander. */
   buchstabe() {
-    if (!hat("ereignisse")) return null;
     const marken = [];
     for (const e of mische(ZS_EREIGNISSE)) if (marken.length < 4 && marken.every(m => Math.abs(m[0] - e[0]) >= 150)) marken.push(e);
     if (marken.length < 4) return null;
@@ -151,36 +160,36 @@ const ARTEN = {
     return { art: "buchstabe", marken: marken.map(m => ({ jahr: m[0], jahrText: m[1], text: m[3] })), ziel, richtig: BUCHSTABEN[ziel], optionen: BUCHSTABEN.slice() };
   },
   jahrhundert() {
-    if (!hat("ereignisse")) return null;
     const [jahr, jahrText, bild, text] = waehle(ZS_EREIGNISSE);
     const n = jahrhundert(jahr);
     return { art: "jahrhundert", jahr, jahrText, bild, text, richtig: jahrhundertText(n), optionen: mische([n - 1, n, n + 1].map(jahrhundertText)) };
   },
   /** Zu welchem Zeitalter gehört das Ereignis? (braucht Ereignisse und Zeitalter) */
   epocheJahr() {
-    if (!hat("ereignisse") || !hat("epochen")) return null;
-    // nur Ereignisse mit eindeutigem Zeitalter (ZA1 a: nicht ZS_UEBERGANG)
-    const [, jahrText, bild, text, epoche] = waehle(ZS_EREIGNISSE.filter(e => ZS_EPOCHEN.some(p => p[1] === e[4])));
+    const [, jahrText, bild, text, epoche] = waehle(ZS_EREIGNISSE.filter(NIMMT.epocheJahr));
     return { art: "epocheJahr", jahrText, bild, text, richtig: epoche, optionen: ZS_EPOCHEN.map(e => e[1]) };
   },
   merkmal() {
-    if (!hat("epochen")) return null;
     const [epoche, bild, text] = waehle(ZS_MERKMALE);
     return { art: "merkmal", bild, text, richtig: epoche, optionen: ZS_EPOCHEN.map(e => e[1]) };
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.abschnitte(3)],
-  s2: [() => ARTEN.generationen(), () => ARTEN.leben(3), () => ARTEN.leben(4)],
-  s3: [() => ARTEN.genStrahl(false), () => ARTEN.genStrahl(false), () => ARTEN.pfeil(false)],
-  s4: [() => ARTEN.alter(), () => ARTEN.unterschied(), () => ARTEN.geburtstag(), () => ARTEN.pfeil(true)],
-  s5: [() => ARTEN.ereignisse(3), () => ARTEN.buchstabe(), () => ARTEN.epochen(), () => ARTEN.merkmal(), () => ARTEN.merkmal()],
+// Je Stufe die Arten mit ihren Angaben (mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht
+// (pruefung.js), die daraus mit ART_LISTEN und NIMMT die Stufen je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["abschnitte", 3]],
+  s2: [["generationen", VIER_GENERATIONEN], ["leben", 3], ["leben", 4]],
+  s3: [["genStrahl", DREI_GENERATIONEN], ["genStrahl", DREI_GENERATIONEN], ["pfeil", false]],
+  s4: [["alter", DREI_GENERATIONEN], ["unterschied", DREI_GENERATIONEN], ["geburtstag"], ["pfeil", true]],
+  s5: [["ereignisse", 3], ["buchstabe"], ["epochen"], ["merkmal"], ["merkmal"]],
   // Königsstufe: Jahrhunderte, vier Ereignisse, Zeitalter, vier Generationen
-  s6: [() => ARTEN.jahrhundert(), () => ARTEN.jahrhundert(), () => ARTEN.ereignisse(4), () => ARTEN.epocheJahr(), () => ARTEN.merkmal(),
-    () => ARTEN.genStrahl(true), () => ARTEN.unterschied()],
+  s6: [["jahrhundert"], ["jahrhundert"], ["ereignisse", 4], ["epocheJahr"], ["merkmal"],
+    ["genStrahl", VIER_GENERATIONEN], ["unterschied", DREI_GENERATIONEN]],
 };
+// Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => () => (ART_LISTEN[art].every(hat) ? ARTEN[art](...angaben) : null))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
@@ -211,6 +220,8 @@ function teilBild(typ, name) {
   return ZS_EREIGNISSE.find(a => a[3] === name)?.[2];
 }
 const ereignis = text => ZS_EREIGNISSE.find(e => e[3] === text);
+/** „sie“, „er“ oder „es“ zu einer Person aus ZS_GENERATIONEN („die Mutter“) — auch für die Prüfansicht (pruefung.js). */
+const pronomen = name => (name.startsWith("die") ? "sie" : name.startsWith("der") ? "er" : "es");
 
 /** Listen, aus denen der Inhalt einer Aufgabe stammt — nachgeschlagen in den Rohdaten (zeitstrahl.js). */
 function herkunft(a) {
@@ -361,7 +372,7 @@ LS.spiel({
       });
     } else if (a.art === "alter") {
       f.append(el("div", { class: "zs-bild" }, LS.bild(a.bild)),
-        el("div", { class: "frage", text: `${a.name[0].toUpperCase() + a.name.slice(1)} ist ${a.geboren} geboren. Wie alt wird ${a.name.startsWith("die") ? "sie" : a.name.startsWith("der") ? "er" : "es"} im Jahr ${a.jahr}?` }));
+        el("div", { class: "frage", text: `${a.name[0].toUpperCase() + a.name.slice(1)} ist ${a.geboren} geboren. Wie alt wird ${pronomen(a.name)} im Jahr ${a.jahr}?` }));
       LS.auswahl(ctx, {
         optionen: a.optionen.map(v => `${v} Jahre`), richtig: `${a.richtig} Jahre`, breite: 120,
         hinweis: "Wie viele Jahre liegen zwischen dem Geburtsjahr und diesem Jahr? Rechne mit Minus.",

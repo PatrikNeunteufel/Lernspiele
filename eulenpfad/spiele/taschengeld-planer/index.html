@@ -82,7 +82,9 @@ const { zufall, waehle, mische, el } = LS;
 const ID = "taschengeld-planer";
 
 const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["waren"]);
-const WAREN = (FREI.has("waren") ? TASCHEN_WAREN : []).map(([bild, name, rp, art, stueck]) => ({ bild, name, rp, art, stueck: !!stueck }));
+/** Ware aus einem Eintrag von TASCHEN_WAREN — auch für die Prüfansicht (pruefung.js). */
+const wareAus = ([bild, name, rp, art, stueck]) => ({ bild, name, rp, art, stueck: !!stueck });
+const WAREN = (FREI.has("waren") ? TASCHEN_WAREN : []).map(wareAus);
 const geld = rp => LS.geldText(rp);
 const summe = liste => liste.reduce((s, w) => s + w.rp * (w.anzahl || 1), 0);
 const ware = name => WAREN.find(w => w.name === name);
@@ -92,10 +94,28 @@ const ziehe = (liste, k) => mische(liste).slice(0, k);
 
 // ---------- Aufgaben als Daten ----------
 
+/** Feste Ausgaben (Monatsbudget): Bedarf bis 15 Fr. */
+const istFest = w => w.art === "bedarf" && w.rp <= 1500;
+/**
+ * Welche Waren eine Aufgabenart nimmt, je Rolle in der Aufgabe, unabhängig von der Freigabe — auch für die
+ * Prüfansicht (pruefung.js), die daraus mit STUFE die Stufen je Ware liest.
+ */
+const NIMMT = {
+  reicht: { kaufen: w => w.rp <= 1500 },
+  rest: { kaufen: w => w.rp <= 1200 },
+  woche: { regal: w => w.rp <= 1000 },
+  sparen: { sparziel: w => w.rp >= 1500 },
+  fest: { fest: istFest },
+  wunsch: { fest: istFest, wunsch: w => w.art === "wunsch" },
+  sortieren: { sortieren: w => !!w.art },
+  vergleich: { angebot: w => w.stueck },
+  brauche: { pack: w => w.stueck && w.rp >= 80 },
+};
+
 const ARTEN = {
   /** Reicht das Geld für eine oder zwei Sachen? */
   reicht() {
-    const billig = WAREN.filter(w => w.rp <= 1500);
+    const billig = WAREN.filter(NIMMT.reicht.kaufen);
     if (billig.length < 2) return null;
     const waren = ziehe(billig, zufall(1, 2));
     const t = summe(waren);
@@ -108,7 +128,7 @@ const ARTEN = {
   },
   /** Was bleibt übrig? */
   rest() {
-    const kand = WAREN.filter(w => w.rp <= 1200);
+    const kand = WAREN.filter(NIMMT.rest.kaufen);
     if (kand.length < 2) return null;
     const waren = ziehe(kand, zufall(2, 3));
     const t = summe(waren);
@@ -118,7 +138,7 @@ const ARTEN = {
   },
   /** Wochenbudget: genau k von fünf Sachen wählen, ohne zu überziehen. */
   woche() {
-    const kand = WAREN.filter(w => w.rp <= 1000);
+    const kand = WAREN.filter(NIMMT.woche.regal);
     if (kand.length < 5) return null;
     const regal = ziehe(kand, 5);
     const k = waehle([2, 3]);
@@ -131,7 +151,7 @@ const ARTEN = {
   },
   /** Sparziel: Wie viele Wochen? */
   sparen() {
-    const ziele = WAREN.filter(w => w.rp >= 1500);
+    const ziele = WAREN.filter(NIMMT.sparen.sparziel);
     if (!ziele.length) return null;
     const ziel = waehle(ziele);
     const rate = waehle([200, 250, 300, 400, 500, 600, 800, 1000]);
@@ -143,7 +163,7 @@ const ARTEN = {
   },
   /** Monatsbudget mit festen Ausgaben: Was bleibt für Wünsche? */
   fest() {
-    const bedarf = WAREN.filter(w => w.art === "bedarf" && w.rp <= 1500);
+    const bedarf = WAREN.filter(NIMMT.fest.fest);
     if (bedarf.length < 2) return null;
     const fest = ziehe(bedarf, zufall(2, 3)).map(w => ({ name: w.name, anzahl: w.rp <= 300 ? zufall(1, 4) : 1, rp: w.rp }));
     const f = summe(fest);
@@ -153,8 +173,8 @@ const ARTEN = {
   },
   /** Bedarf vor Wunsch: Welcher Wunsch passt danach noch ins Budget? */
   wunsch() {
-    const bedarf = WAREN.filter(w => w.art === "bedarf" && w.rp <= 1500);
-    const wuensche = WAREN.filter(w => w.art === "wunsch");
+    const bedarf = WAREN.filter(NIMMT.wunsch.fest);
+    const wuensche = WAREN.filter(NIMMT.wunsch.wunsch);
     if (bedarf.length < 2 || wuensche.length < 3) return null;
     const fest = ziehe(bedarf, 2);
     const f = summe(fest);
@@ -170,7 +190,7 @@ const ARTEN = {
   },
   /** Bedarf oder Wunsch? (nur Waren mit eindeutiger Art) */
   sortieren() {
-    const kand = WAREN.filter(w => w.art);
+    const kand = WAREN.filter(NIMMT.sortieren.sortieren);
     if (!kand.some(w => w.art === "bedarf") || !kand.some(w => w.art === "wunsch")) return null;
     const art = waehle(["bedarf", "wunsch"]);
     const w = waehle(kand.filter(x => x.art === art));
@@ -178,7 +198,7 @@ const ARTEN = {
   },
   /** Welches Angebot ist pro Stück günstiger? */
   vergleich() {
-    const kand = WAREN.filter(w => w.stueck);
+    const kand = WAREN.filter(NIMMT.vergleich.angebot);
     if (!kand.length) return null;
     const w = waehle(kand);
     const [n1, n2] = ziehe([1, 2, 3, 4, 5, 6, 10], 2);
@@ -190,7 +210,7 @@ const ARTEN = {
   },
   /** Ich brauche nur wenige: einzeln oder im Pack? */
   brauche() {
-    const kand = WAREN.filter(w => w.stueck && w.rp >= 80);
+    const kand = WAREN.filter(NIMMT.brauche.pack);
     if (!kand.length) return null;
     const w = waehle(kand);
     const n = waehle([5, 6, 10]);

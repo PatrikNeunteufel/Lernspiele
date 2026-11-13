@@ -197,11 +197,15 @@ const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : STROM_LIST
 const SCH_FREI = SCH.filter(s => FREI.has(s.liste));
 const DINGE = FREI.has("leiter") ? GEGENSTAENDE.map((g, i) => i) : [];
 
-/** Alle Paare (Schaltung, Gegenstand oder null) aus den freien Listen, die die Bedingung erfüllen. */
-function paare(bedingung, dingFilter = () => true) {
+/** Woraus die Aufgaben gebaut werden: die freien Listen; ALLE ohne Freigabe — auch für die Prüfansicht (pruefung.js). */
+const VORRAT_FREI = { sch: SCH_FREI, dinge: DINGE };
+const VORRAT_ALLE = { sch: SCH, dinge: GEGENSTAENDE.map((g, i) => i) };
+
+/** Alle Paare (Schaltung, Gegenstand oder null) aus dem Vorrat, die die Bedingung erfüllen. */
+function paare(bedingung, dingFilter = () => true, vorrat = VORRAT_FREI) {
   const liste = [];
-  for (const s of SCH_FREI) {
-    if (plaetze(s).includes("G")) { for (const d of DINGE) if (dingFilter(GEGENSTAENDE[d]) && bedingung(s, GEGENSTAENDE[d])) liste.push([s.i, d]); }
+  for (const s of vorrat.sch) {
+    if (plaetze(s).includes("G")) { for (const d of vorrat.dinge) if (dingFilter(GEGENSTAENDE[d]) && bedingung(s, GEGENSTAENDE[d])) liste.push([s.i, d]); }
     else if (bedingung(s, null)) liste.push([s.i, null]);
   }
   return liste;
@@ -232,10 +236,22 @@ function teilmengen(alle) {
 
 // ---------- Aufgabenarten (null, wenn die freien Listen nichts hergeben) ----------
 
+/**
+ * Was eine Aufgabenart aus dem Vorrat nimmt, mit den Angaben der Stufe — auch für die Prüfansicht (pruefung.js).
+ * brennt, warum: Paare [Schaltung, Gegenstand oder null] · korb: Gegenstände · kurz, welche: Schaltungen.
+ */
+const KANDIDATEN = {
+  brennt: (vorrat, listen, dingFilter = g => !g[3]) => paare((s, g) => listen(s) && eineLampe(s), dingFilter, vorrat),
+  korb: (vorrat, dingFilter = g => !g[3]) => vorrat.dinge.filter(d => dingFilter(GEGENSTAENDE[d])),
+  warum: vorrat => paare((s, g) => !!warumGrund(s, g), () => true, vorrat),
+  kurz: vorrat => vorrat.sch.filter(s => s.liste === "kurzschluss"),
+  welche: (vorrat, maxLampen, mitKurz) => vorrat.sch.filter(s => s.liste === "serie-parallel" && lampenVon(s).length <= maxLampen && (mitKurz || !s.kurz)),
+};
+
 const ARTEN = {
   /** Brennt die Lampe? Ja und nein etwa gleich oft. */
-  brennt(listen, dingFilter = g => !g[3]) {
-    const alle = paare((s, g) => listen(s) && eineLampe(s), dingFilter);
+  brennt(listen, dingFilter) {
+    const alle = KANDIDATEN.brennt(VORRAT_FREI, listen, dingFilter);
     if (!alle.length) return null;
     const ja = alle.filter(([i, d]) => ergebnis(SCH[i], GEGENSTAENDE[d]).brennt.size);
     const nein = alle.filter(p => !ja.includes(p));
@@ -243,15 +259,15 @@ const ARTEN = {
     return { art: "brennt", sch: i, ding: d, richtig: ja.some(p => p[0] === i && p[1] === d) ? "ja" : "nein", optionen: ["ja", "nein"] };
   },
   /** Gegenstand in den Korb: leitet er den Strom? */
-  korb(dingFilter = g => !g[3]) {
-    const liste = DINGE.filter(d => dingFilter(GEGENSTAENDE[d]));
+  korb(dingFilter) {
+    const liste = KANDIDATEN.korb(VORRAT_FREI, dingFilter);
     if (!liste.length) return null;
     const d = waehle(liste);
     return { art: "korb", sch: null, ding: d, richtig: GEGENSTAENDE[d][2] ? "leitet" : "nicht", optionen: ["leitet", "nicht"] };
   },
   /** Warum brennt die Lampe nicht? */
   warum() {
-    const alle = paare((s, g) => !!warumGrund(s, g), () => true);
+    const alle = KANDIDATEN.warum(VORRAT_FREI);
     if (!alle.length) return null;
     const [i, d] = waehle(alle);
     const richtig = warumGrund(SCH[i], GEGENSTAENDE[d]);
@@ -260,7 +276,7 @@ const ARTEN = {
   },
   /** Kurzschluss-Schaltungen: brennt die Lampe, oder gibt es einen Kurzschluss? */
   kurz() {
-    const liste = SCH_FREI.filter(s => s.liste === "kurzschluss");
+    const liste = KANDIDATEN.kurz(VORRAT_FREI);
     if (!liste.length) return null;
     const s = waehle(liste);
     const e = ergebnis(s, null);
@@ -269,7 +285,7 @@ const ARTEN = {
   },
   /** Welche Lampen brennen? maxLampen: 2 (Stufe 5) oder 3; mitKurz: auch Schaltungen mit zusätzlichem Draht. */
   welche(maxLampen, mitKurz) {
-    const liste = SCH_FREI.filter(s => s.liste === "serie-parallel" && lampenVon(s).length <= maxLampen && (mitKurz || !s.kurz));
+    const liste = KANDIDATEN.welche(VORRAT_FREI, maxLampen, mitKurz);
     if (!liste.length) return null;
     const s = waehle(liste);
     const alle = lampenVon(s);
@@ -280,16 +296,17 @@ const ARTEN = {
 };
 
 const nurListe = l => s => s.liste === l;
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.brennt(s => s.liste === "einfach" && !s.zusatz)],
-  s2: [() => ARTEN.brennt(nurListe("einfach")), () => ARTEN.brennt(nurListe("schalter"))],
-  s3: [() => ARTEN.brennt(nurListe("leiter")), () => ARTEN.korb(), () => ARTEN.brennt(nurListe("schalter"))],
-  s4: [() => ARTEN.warum(), () => ARTEN.warum(), () => ARTEN.kurz(), () => ARTEN.brennt(nurListe("leiter"), g => g[3])],
-  s5: [() => ARTEN.welche(2, false)],
+// Je Stufe die Arten mit ihren Angaben [Art, …] (mehrfach genannt = häufiger) — auch für die Prüfansicht (pruefung.js).
+const STUFE_ARTEN = {
+  s1: [["brennt", s => s.liste === "einfach" && !s.zusatz]],
+  s2: [["brennt", nurListe("einfach")], ["brennt", nurListe("schalter")]],
+  s3: [["brennt", nurListe("leiter")], ["korb"], ["brennt", nurListe("schalter")]],
+  s4: [["warum"], ["warum"], ["kurz"], ["brennt", nurListe("leiter"), g => g[3]]],
+  s5: [["welche", 2, false]],
   // Königsstufe: drei Lampen, Kurzschluss über eine Lampe, dazu Warum und Kurzschluss gemischt
-  s6: [() => ARTEN.welche(3, true), () => ARTEN.welche(3, true), () => ARTEN.kurz(), () => ARTEN.warum(), () => ARTEN.korb(() => true)],
+  s6: [["welche", 3, true], ["welche", 3, true], ["kurz"], ["warum"], ["korb", () => true]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) => [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 /** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren. */
 const ARTEN_JE_STUFE = Object.fromEntries(Object.entries(STUFE).map(([s, neue]) => [s, new Set(neue.map(neu => neu()?.art).filter(Boolean)).size]));
@@ -487,6 +504,16 @@ function loesungText(a, s, g, e) {
   return "Die Lampe brennt nicht. " + (m.length ? m.map(k => GRUENDE[k]).join(" ") : "");
 }
 
+/** Zeile unter der Frage: Gegenstand in der Lücke, herausgedrehte Lampen, zusätzlicher Draht — auch für die Prüfansicht (pruefung.js). */
+function zusatzText(s, g) {
+  const raus = herausgedreht(s);
+  return [
+    g ? `In der Lücke: ${g[1]}` : "",
+    raus.length ? `Lampe ${raus.join(" und ")} ist herausgedreht.` : "",
+    s.kurz ? "Orange: ein zusätzlicher Draht." : "",
+  ].filter(Boolean).join(" · ");
+}
+
 LS.spiel({
   id: ID,
   einleitung: "Batterie, Drähte, Lampe: Brennt das Licht? Bau im Kopf mit! Experimentiere nur mit Batterien, nie mit der Steckdose.",
@@ -515,12 +542,7 @@ LS.spiel({
     }
     const frage = { brennt: "Brennt die Lampe?", kurzfrage: "Gibt es einen Kurzschluss?", warum: "Warum brennt die Lampe nicht?", welche: "Welche Lampen brennen?" }[a.art];
     ctx.flaeche.append(el("div", { class: "frage", text: frage }));
-    const raus = herausgedreht(s);
-    const zusatz = [
-      g ? `In der Lücke: ${g[1]}` : "",
-      raus.length ? `Lampe ${raus.join(" und ")} ist herausgedreht.` : "",
-      s.kurz ? "Orange: ein zusätzlicher Draht." : "",
-    ].filter(Boolean).join(" · ");
+    const zusatz = zusatzText(s, g);
     if (zusatz) ctx.flaeche.append(el("div", { class: "strom-zusatz auftrag", text: zusatz }));
     const bild = schaltbild(s, g);
     ctx.flaeche.append(bild);

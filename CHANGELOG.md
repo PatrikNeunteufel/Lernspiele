@@ -2133,3 +2133,12 @@
   fehlende Farbe). Oder-Aufgaben in Stufe 1 jetzt möglich 530 / sicher 380 von 20 000 (vorher sicher 2045, möglich 530,
   unmöglich 548); im Generator geprüft. Unter der Aussage neu die Frage „Wie wahrscheinlich ist das?“ (ZS2 a; vorher
   liess sich „Sie ist orange oder gelb.“ als Frage nach der Farbe lesen).
+- **Prüfung je Eintrag, NMG Block 2 (LP5 a, LERN-51, T4 a):** `pruefung.js` für Schulweg-Profi, Wetter und Jahreszeiten,
+  Zeitstrahl-Sortierer, Stromkreis-Bauer, Plan-Leser, Echt oder erfunden?, Taschengeld-Planer, Wassertropfen-Reise und
+  Erdzeit-Leiter (22 Listen); Stufen je Eintrag aus den Spielen, Schaltbilder, Pläne und Signale vom Spiel gezeichnet.
+  Damit keine Prüfansicht einen Aufgabenschritt nachbaut, im Spiel neu die Stufentabelle als Daten `STUFE_ARTEN` (alle
+  neun Spiele), dazu je nach Spiel `NIMMT`, `korbVon`, `frageNimmt`, `signalAblenker`, `LOESUNG`, `kleidungFrage`,
+  `ART_LISTEN`, `DREI_GENERATIONEN`/`VIER_GENERATIONEN`, `pronomen`, `ABSTAND_FAKTOR`, `abstandVon`, `VORRAT_FREI`/
+  `VORRAT_ALLE`, `KANDIDATEN`, `zusatzText`, `legendeName`, `legendeZeichen`, `kurzformen`, `wareAus` (Aufgaben unverändert:
+  je Stufe 400 bis 500 Aufgaben mit festen Startwerten vorher und nachher byte-gleich). Prüfstand und Fingerabdrücke
+  unverändert.

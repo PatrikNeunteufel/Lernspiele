@@ -72,16 +72,26 @@ const HINWEIS = {
   velo: "Überleg: Was hilft, dass dich alle sehen und hören? Was schützt dich?",
 };
 
+/** Korb einer Situation aus SW_SICHER — auch für die Prüfansicht (pruefung.js). */
+const korbVon = ([, , sicher]) => (sicher ? "sicher" : "gefaehrlich");
+/** Nimmt die Art „frage“ (Liste, Stufe, nurAb aus STUFE_ARTEN) diese Frage, unabhängig von der Freigabe —
+    auch für die Prüfansicht (pruefung.js). */
+const frageNimmt = (f, liste, n, nurAb = false) => (!liste || f[1] === liste) && (nurAb ? f[0] === n : f[0] <= n);
+/** Darf das Signal s bei der Frage nach signal ein Ablenker sein (vor: Signal → Bedeutung)? Nie eines, dessen
+    Bedeutung auch passen würde — auch für die Prüfansicht (pruefung.js). */
+const signalAblenker = (signal, s, vor) => s[0] !== signal[0] && (vor ? !signal[2].includes(s[1]) : !s[2].includes(signal[1]));
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   korb() {
     if (!SICHER.length) return null;
-    const [bild, text, sicher] = waehle(SICHER);
-    return { art: "korb", bild, text, richtig: sicher ? "sicher" : "gefaehrlich" };
+    const situation = waehle(SICHER);
+    const [bild, text] = situation;
+    return { art: "korb", bild, text, richtig: korbVon(situation) };
   },
   /** Fragen einer Liste bis zu dieser Stufe; nurAb: nur Fragen genau dieser Stufe. */
   frage(liste, n, nurAb = false) {
-    const passend = FRAGEN.filter(f => (!liste || f[1] === liste) && (nurAb ? f[0] === n : f[0] <= n));
+    const passend = FRAGEN.filter(f => frageNimmt(f, liste, n, nurAb));
     if (!passend.length) return null;
     const [ab, l, bild, frage, richtig, f1, f2, erklaerung] = waehle(passend);
     return { art: "frage", ab, liste: l, bild, frage, richtig, optionen: mische([richtig, f1, f2].filter(Boolean)), erklaerung };
@@ -92,8 +102,9 @@ const ARTEN = {
   /** Signal → Bedeutung (vor) oder Bedeutung → Signal; Ablenker passen nie auch. */
   signal(vor) {
     if (SIGNALE.length < 3) return null;
-    const [schluessel, bedeutung, auch] = waehle(SIGNALE);
-    const andere = mische(SIGNALE.filter(s => s[0] !== schluessel && (vor ? !auch.includes(s[1]) : !s[2].includes(bedeutung)))).slice(0, 2);
+    const signal = waehle(SIGNALE);
+    const [schluessel, bedeutung] = signal;
+    const andere = mische(SIGNALE.filter(s => signalAblenker(signal, s, vor))).slice(0, 2);
     if (andere.length < 2) return null;
     return vor
       ? { art: "signal", vor, schluessel, bedeutung, richtig: bedeutung, optionen: mische([bedeutung, ...andere.map(s => s[1])]) }
@@ -101,16 +112,19 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.korb()],
-  s2: [() => ARTEN.frage("queren", 2), () => ARTEN.frage("queren", 2), () => ARTEN.merksatz()],
-  s3: [() => ARTEN.frage("queren", 3, true), () => ARTEN.frage("queren", 3)],
-  s4: [() => ARTEN.signal(true), () => ARTEN.signal(false)],
-  s5: [() => ARTEN.frage("velo", 5)],
+// Je Stufe die Arten mit ihren Angaben (mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht
+// (pruefung.js), die daraus mit frageNimmt die Stufen je Frage liest.
+const STUFE_ARTEN = {
+  s1: [["korb"]],
+  s2: [["frage", "queren", 2], ["frage", "queren", 2], ["merksatz"]],
+  s3: [["frage", "queren", 3, true], ["frage", "queren", 3]],
+  s4: [["signal", true], ["signal", false]],
+  s5: [["frage", "velo", 5]],
   // Königsstufe: die schwersten Fragen, Signale in beide Richtungen, dazu alles andere
-  s6: [() => ARTEN.frage(null, 6, true), () => ARTEN.frage(null, 6), () => ARTEN.signal(false), () => ARTEN.signal(true), () => ARTEN.korb()],
+  s6: [["frage", null, 6, true], ["frage", null, 6], ["signal", false], ["signal", true], ["korb"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 /** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren.
     Der Merksatz zählt nicht mit: Er ist eine einzige Aufgabe und kommt je Runde höchstens einmal. */

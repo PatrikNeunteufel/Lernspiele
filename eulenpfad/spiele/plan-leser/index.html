@@ -113,6 +113,8 @@ const zeile = z => Math.floor(z / N), spalte = z => z % N;
 const gross = s => s[0].toUpperCase() + s.slice(1);
 const feldText = n => `${n} ${n === 1 ? "Feld" : "Felder"}`;
 const meter = m => `${LS.zahlText(m)} m`;
+/** von dem → vom, zu dem → zum, zu der → zur — auch für die Prüfansicht (pruefung.js). */
+const kurzformen = t => t.replace(/\bvon dem\b/g, "vom").replace(/\bzu dem\b/g, "zum").replace(/\bzu der\b/g, "zur");
 
 // Richtungen auf dem Plan (für Wege): dx nach rechts, dy nach unten
 const SCHRITTE = [[0, -1], [1, 0], [0, 1], [-1, 0]];
@@ -268,16 +270,19 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten; jede Art bekommt eine freie Liste.
-const STUFE = {
-  s1: [l => ARTEN.zeichen(l), l => ARTEN.tippen(l)],
-  s2: [l => ARTEN.zaehlen(l), l => ARTEN.lage(l, false), l => ARTEN.lage(l, false), l => ARTEN.tippen(l)],
-  s3: [l => ARTEN.strecke(l, "s3"), l => ARTEN.strecke(l, "s3"), l => ARTEN.lage(l, true)],
-  s4: [l => ARTEN.weg(l, "weglaenge", 2, "s4"), l => ARTEN.weg(l, "abbiegen", 2), l => ARTEN.strecke(l, "s4")],
-  s5: [l => ARTEN.weg(l, "beschreiben", 3), l => ARTEN.weg(l, "weglaenge", 3, "s5")],
+// Je Stufe die Arten als [Art, weitere Angaben an ARTEN.<Art>] (mehrfach genannt = häufiger); jede Art bekommt eine
+// freie Liste. Als Daten — auch für die Prüfansicht (pruefung.js), die daraus die Stufen liest.
+const STUFE_ARTEN = {
+  s1: [["zeichen"], ["tippen"]],
+  s2: [["zaehlen"], ["lage", false], ["lage", false], ["tippen"]],
+  s3: [["strecke", "s3"], ["strecke", "s3"], ["lage", true]],
+  s4: [["weg", "weglaenge", 2, "s4"], ["weg", "abbiegen", 2], ["strecke", "s4"]],
+  s5: [["weg", "beschreiben", 3], ["weg", "weglaenge", 3, "s5"]],
   // Königsstufe: lange Wege beschreiben und messen, Massstab 25 m oder 50 m
-  s6: [l => ARTEN.weg(l, "beschreiben", 4), l => ARTEN.weg(l, "weglaenge", 4, "s6"), l => ARTEN.lage(l, true)],
+  s6: [["weg", "beschreiben", 4], ["weg", "weglaenge", 4, "s6"], ["lage", true]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => l => ARTEN[art](l, ...angaben))]));
 
 function aufgabeErzeugen(stufe) {
   if (!LISTEN.length) return null;
@@ -417,12 +422,17 @@ function planBild(a) {
   return svgEl(`0 0 ${N * F} ${N * F}`, `plan-bild szenenbild bildkachel ${p.liste}`, s);
 }
 
+/** Name in der Legende: bei Dingen, die mehrmals vorkommen, ohne Artikel — auch für die Prüfansicht (pruefung.js). */
+const legendeName = x => (x[2] ? x[0].split(" ").slice(1).join(" ") : x[0]);
+/** Zeichen eines Dings klein, wie in der Legende — auch für die Prüfansicht (pruefung.js). */
+const legendeZeichen = x => svgEl("0 0 30 30", "", zeichenSvg(x[3], x[4], 15, 15));
+
 function legende(a) {
   const p = a.plan;
   const box = el("div", { class: "legende" }, el("b", { text: "Legende" }));
   for (const d of imPlan(p)) {
     const x = ding(p.liste, d);
-    box.append(el("div", { class: "legende-zeile" }, svgEl("0 0 30 30", "", zeichenSvg(x[3], x[4], 15, 15)), el("span", { text: x[2] ? x[0].split(" ").slice(1).join(" ") : x[0] })));
+    box.append(el("div", { class: "legende-zeile" }, legendeZeichen(x), el("span", { text: legendeName(x) })));
   }
   if (a.massstab) box.append(el("div", { class: "massstab" }, el("span"), document.createTextNode(`1 Feld = ${meter(a.massstab)}`)));
   return box;
@@ -509,8 +519,7 @@ LS.spiel({
       loesung = `${a.richtig}.`;
       inhalt = t => t;
     }
-    // von dem → vom, zu dem → zum, zu der → zur
-    frage = frage.replace(/\bvon dem\b/g, "vom").replace(/\bzu dem\b/g, "zum").replace(/\bzu der\b/g, "zur");
+    frage = kurzformen(frage);
     const frageEl = el("div", { class: "frage", text: frage });
     if (a.art === "zeichen") { // das Zeichen neben der Frage, nicht darunter (BH3 a)
       const x = ding(p.liste, a.ding);

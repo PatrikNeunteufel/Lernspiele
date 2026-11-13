@@ -61,27 +61,47 @@ function ausgewogen(liste, istEcht) {
   return waehle(ja.length && nein.length ? (Math.random() < 0.5 ? ja : nein) : liste);
 }
 
+/**
+ * Nimmt die Art (mit ihrem Zusatz aus STUFE_ARTEN) diesen Eintrag ihrer Liste (LISTE_DER_ART), unabhängig von der
+ * Freigabe — auch für die Prüfansicht (pruefung.js).
+ */
+const NIMMT = {
+  aussage: (e, nurEinfach) => !nurEinfach || e[3],
+  geschichte: () => true,
+  welcherSatz: e => e[1] >= 0,
+  merkmal: e => e[1] >= 0,
+  staunen: () => true,
+  textsorte: () => true,
+  textmerkmal: () => true,
+};
+/** Lösung der Ja/Nein-Arten zum Eintrag (Schlüssel in KORB) — auch für die Prüfansicht (pruefung.js). */
+const LOESUNG = {
+  aussage: e => (e[2] ? "echt" : "erfunden"),
+  geschichte: e => (e[1] < 0 ? "echt" : "erfunden"),
+  staunen: e => (e[1] ? "stimmt" : "erfunden"),
+};
+
 const ARTEN = {
   aussage(nurEinfach) {
-    const liste = AUS.filter(i => !nurEinfach || AUSSAGEN[i][3]);
+    const liste = AUS.filter(i => NIMMT.aussage(AUSSAGEN[i], nurEinfach));
     if (!liste.length) return null;
     const i = ausgewogen(liste, i => AUSSAGEN[i][2]);
-    return { art: "aussage", nr: i, richtig: AUSSAGEN[i][2] ? "echt" : "erfunden", optionen: ["echt", "erfunden"] };
+    return { art: "aussage", nr: i, richtig: LOESUNG.aussage(AUSSAGEN[i]), optionen: ["echt", "erfunden"] };
   },
   geschichte() {
     if (!GES.length) return null;
     const i = ausgewogen(GES, i => GESCHICHTEN[i][1] < 0);
-    return { art: "geschichte", nr: i, richtig: GESCHICHTEN[i][1] < 0 ? "echt" : "erfunden", optionen: ["echt", "erfunden"] };
+    return { art: "geschichte", nr: i, richtig: LOESUNG.geschichte(GESCHICHTEN[i]), optionen: ["echt", "erfunden"] };
   },
   welcherSatz() {
-    const liste = GES.filter(i => GESCHICHTEN[i][1] >= 0);
+    const liste = GES.filter(i => NIMMT.welcherSatz(GESCHICHTEN[i]));
     if (!liste.length) return null;
     const i = waehle(liste);
     const [saetze, k] = GESCHICHTEN[i];
     return { art: "welcherSatz", nr: i, richtig: saetze[k], optionen: saetze.slice() };
   },
   merkmal() {
-    const liste = GES.filter(i => GESCHICHTEN[i][1] >= 0);
+    const liste = GES.filter(i => NIMMT.merkmal(GESCHICHTEN[i]));
     if (!liste.length) return null;
     const i = waehle(liste);
     const richtig = GESCHICHTEN[i][2];
@@ -91,7 +111,7 @@ const ARTEN = {
   staunen() {
     if (!STA.length) return null;
     const i = ausgewogen(STA, i => STAUNEN[i][1]);
-    return { art: "staunen", nr: i, richtig: STAUNEN[i][1] ? "stimmt" : "erfunden", optionen: ["stimmt", "erfunden"] };
+    return { art: "staunen", nr: i, richtig: LOESUNG.staunen(STAUNEN[i]), optionen: ["stimmt", "erfunden"] };
   },
   textsorte() {
     if (!TXT.length) return null;
@@ -107,15 +127,19 @@ const ARTEN = {
   },
 };
 
-const STUFE = {
-  s1: [() => ARTEN.aussage(true)],
-  s2: [() => ARTEN.aussage(false)],
-  s3: [() => ARTEN.geschichte()],
-  s4: [() => ARTEN.staunen(), () => ARTEN.staunen(), () => ARTEN.geschichte()],
-  s5: [() => ARTEN.welcherSatz(), () => ARTEN.merkmal()],
+// Je Stufe die Arten mit ihrem Zusatz (mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht
+// (pruefung.js), die daraus mit NIMMT die Stufen je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["aussage", true]],
+  s2: [["aussage", false]],
+  s3: [["geschichte"]],
+  s4: [["staunen"], ["staunen"], ["geschichte"]],
+  s5: [["welcherSatz"], ["merkmal"]],
   // Königsstufe: Textsorten erkennen und begründen, dazu erstaunliche Fakten
-  s6: [() => ARTEN.textsorte(), () => ARTEN.textmerkmal(), () => ARTEN.staunen()],
+  s6: [["textsorte"], ["textmerkmal"], ["staunen"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, zusatz]) => () => ARTEN[art](zusatz))]));
 
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {

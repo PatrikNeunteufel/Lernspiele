@@ -209,16 +209,19 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.frage([1])],
-  s2: [() => ARTEN.reise(3), () => ARTEN.reise(4), () => ARTEN.danach()],
-  s3: [() => ARTEN.pfeilBegriff(), () => ARTEN.begriffPfeil(), () => ARTEN.beschreibung(), () => ARTEN.frage([3]), () => ARTEN.frage([3])],
-  s4: [() => ARTEN.nummern(), () => ARTEN.reise(5), () => ARTEN.frage([4]), () => ARTEN.frage([4]), () => ARTEN.frage([3])],
-  s5: [() => ARTEN.schicht(), () => ARTEN.klaer(3), () => ARTEN.klaer(4), () => ARTEN.klaerWas(), () => ARTEN.frage([5]), () => ARTEN.frage([5])],
+// Je Stufe die Arten als [Art, Angabe] (Angabe: Feld stufe der Fragen bei frage, Anzahl Stationen bei reise und klaer;
+// mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus die Stufen je Frage liest.
+const STUFE_ARTEN = {
+  s1: [["frage", [1]]],
+  s2: [["reise", 3], ["reise", 4], ["danach"]],
+  s3: [["pfeilBegriff"], ["begriffPfeil"], ["beschreibung"], ["frage", [3]], ["frage", [3]]],
+  s4: [["nummern"], ["reise", 5], ["frage", [4]], ["frage", [4]], ["frage", [3]]],
+  s5: [["schicht"], ["klaer", 3], ["klaer", 4], ["klaerWas"], ["frage", [5]], ["frage", [5]]],
   // Königsstufe: ganze Reise, alle Pfeile nummeriert, ganze Kläranlage, knifflige Fragen.
-  s6: [() => ARTEN.nummern(), () => ARTEN.reise(6), () => ARTEN.klaer(6), () => ARTEN.schicht(), () => ARTEN.frage([4, 5]), () => ARTEN.frage([4, 5])],
+  s6: [["nummern"], ["reise", 6], ["klaer", 6], ["schicht"], ["frage", [4, 5]], ["frage", [4, 5]]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
