@@ -93,26 +93,44 @@ const KNIFFLIG = [
   ["Spitzmaus", "gruppe", "Nagetier"], ["Fledermaus", "gruppe", "Nagetier"], ["Igel", "gruppe", "Nagetier"],
 ];
 
+// Körbe der kniffligen Art je Merkmal — auch für die Prüfansicht (pruefung.js), die daraus die Körbe einer Liste liest.
+const KNIFFLIG_KOERBE = { klasse: [...KLASSEN, "Spinnentier", "Weichtier", "Wurm"], gruppe: GRUPPEN };
+
+/**
+ * Je Art die abgefragte Eigenschaft (Spalte in tiere.js) und ob die Art ein Tier nehmen kann (mit ihrem Zusatz aus
+ * STUFE_ARTEN: mitBild), unabhängig von der Freigabe — auch für die Prüfansicht (pruefung.js), die daraus die Stufen
+ * je Tier liest. Die knifflige Art nimmt die Tiere aus KNIFFLIG, je mit ihrer eigenen Eigenschaft.
+ */
+const NIMMT = {
+  haltung: { merkmal: "haltung", nimmt: t => HALTUNGEN.includes(t.haltung) && !!t.bild },
+  wirbeltier: { merkmal: "klasse", nimmt: (t, mitBild) => WIRBELTIERE.includes(t.klasse) && (!mitBild || !!t.bild) },
+  klasse: { merkmal: "klasse", nimmt: t => KLASSEN.includes(t.klasse) },
+  gruppe: { merkmal: "gruppe", nimmt: t => GRUPPEN.includes(t.gruppe) },
+  merkmal: { merkmal: "klasse", nimmt: t => KLASSEN.includes(t.klasse) },
+};
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
-function sortieren(merkmal, auswahlKoerbe, anzahlKoerbe, mitBild) {
+function sortieren(art, zusatz, auswahlKoerbe, anzahlKoerbe) {
+  const { merkmal, nimmt } = NIMMT[art];
   if (!merkmalFrei(merkmal)) return null;
-  const t = waehle(TIER.filter(x => auswahlKoerbe.includes(x[merkmal]) && (!mitBild || x.bild)));
+  const t = waehle(TIER.filter(x => nimmt(x, zusatz)));
   const andere = mische(auswahlKoerbe.filter(k => k !== t[merkmal])).slice(0, anzahlKoerbe - 1);
   return { art: "sortieren", merkmal, tier: t, richtig: t[merkmal], koerbe: mische([t[merkmal], ...andere]) };
 }
 
 const ARTEN = {
-  haltung: () => sortieren("haltung", HALTUNGEN, 3, true),
-  wirbeltier: mitBild => sortieren("klasse", WIRBELTIERE, 5, mitBild),
-  klasse: () => sortieren("klasse", KLASSEN, 6, false),
-  gruppe: () => sortieren("gruppe", GRUPPEN, 4, false),
+  haltung: () => sortieren("haltung", undefined, HALTUNGEN, 3),
+  wirbeltier: mitBild => sortieren("wirbeltier", mitBild, WIRBELTIERE, 5),
+  klasse: () => sortieren("klasse", undefined, KLASSEN, 6),
+  gruppe: () => sortieren("gruppe", undefined, GRUPPEN, 4),
   merkmal(mitBild) {
     // Welches Tier gehört zu …? Die anderen Tiere sind aus anderen Klassen.
     // Ohne Bild (Königsstufe) zählt nur das Wissen über das Tier, nicht sein Aussehen.
-    if (!merkmalFrei("klasse")) return null;
+    if (!merkmalFrei(NIMMT.merkmal.merkmal)) return null;
     const klasse = waehle(KLASSEN);
-    const richtig = waehle(TIER.filter(t => t.klasse === klasse));
-    const andere = mische(KLASSEN.filter(k => k !== klasse)).slice(0, 3).map(k => waehle(TIER.filter(t => t.klasse === k)));
+    const pool = TIER.filter(NIMMT.merkmal.nimmt);
+    const richtig = waehle(pool.filter(t => t.klasse === klasse));
+    const andere = mische(KLASSEN.filter(k => k !== klasse)).slice(0, 3).map(k => waehle(pool.filter(t => t.klasse === k)));
     return { art: "merkmal", merkmal: "klasse", klasse, richtig, mitBild, optionen: mische([richtig, ...andere]) };
   },
   knifflig(anzahlKoerbe = 3) {
@@ -120,22 +138,26 @@ const ARTEN = {
     if (!frei.length) return null;
     const [name, merkmal, falle] = waehle(frei);
     const t = tier(name);
-    const liste = merkmal === "klasse" ? [...KLASSEN, "Spinnentier", "Weichtier", "Wurm"] : GRUPPEN;
+    const liste = KNIFFLIG_KOERBE[merkmal];
     const weitere = mische(liste.filter(k => k !== t[merkmal] && k !== falle)).slice(0, anzahlKoerbe - 2);
     return { art: "sortieren", merkmal, tier: t, richtig: t[merkmal], falle, koerbe: mische([t[merkmal], falle, ...weitere]) };
   },
 };
 
 // Basisklasse 3: Stufe 1 = 2. Klasse, 2–4 = 3. Klasse, 5 = 4. Klasse, 6 Endgegner.
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [ARTEN.haltung],
-  s2: [() => ARTEN.wirbeltier(true)],
-  s3: [ARTEN.klasse, ARTEN.klasse, () => ARTEN.merkmal(true)],
-  s4: [ARTEN.gruppe],
-  s5: [() => ARTEN.knifflig(3), () => ARTEN.knifflig(3), ARTEN.gruppe],
-  s6: [() => ARTEN.knifflig(5), () => ARTEN.knifflig(5), () => ARTEN.merkmal(false)],
+// Je Stufe die Arten als [Art, Zusatz] (Zusatz: mitBild bei wirbeltier und merkmal, Zahl der Körbe bei knifflig;
+// mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus mit NIMMT die Stufen je
+// Tier liest.
+const STUFE_ARTEN = {
+  s1: [["haltung"]],
+  s2: [["wirbeltier", true]],
+  s3: [["klasse"], ["klasse"], ["merkmal", true]],
+  s4: [["gruppe"]],
+  s5: [["knifflig", 3], ["knifflig", 3], ["gruppe"]],
+  s6: [["knifflig", 5], ["knifflig", 5], ["merkmal", false]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, zusatz]) => () => ARTEN[art](zusatz))]));
 // Stufen, in denen jedes Tier ein Bild tragen muss (2. Klasse und die Wirbeltier-Stufe mit Bild).
 const BILD_NOETIG = ["s1", "s2"];
 

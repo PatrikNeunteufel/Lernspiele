@@ -64,11 +64,26 @@ function paarDing(name) {
   return null;
 }
 
+/** Dinge der Paare für die Körbe früher und heute: [Bild, Name, Korb]; das Ding von früher nur, wenn es eindeutig von
+    früher ist — auch für die Prüfansicht (pruefung.js). */
+const korbDinge = paare => paare.flatMap(p => [...(p[5] ? [[p[1], p[2], "frueher"]] : []), [p[3], p[4], "heute"]]);
+/** Ablenker beim Paar-Finden: die Gegenseite der Paare aus anderen Gruppen (vor = von früher zu heute) — auch für die
+    Prüfansicht (pruefung.js). */
+const paarAblenker = (paare, p, vor) => [...new Set(paare.filter(q => q[0] !== p[0]).map(q => (vor ? q[4] : q[2])))];
+/** Ablenker bei „Was kam dazwischen?“: Dinge aus Reihen anderer Gruppen, die in dieser Reihe nicht vorkommen — auch für
+    die Prüfansicht (pruefung.js). */
+function dazwischenAblenker(reihen, [gruppe, , dinge]) {
+  const namen = new Set(dinge.map(d => d[1]));
+  return reihen.filter(r => r[0] !== gruppe).flatMap(r => r[2]).filter(d => !namen.has(d[1]));
+}
+/** Antwort bei „Gab es das schon?“: ja oder nein vor 60 bzw. 100 Jahren — auch für die Prüfansicht (pruefung.js). */
+const gabEs = ([, , vor60, vor100], jahre) => ((jahre === 60 ? vor60 : vor100) ? "ja" : "nein");
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   /** Stufe 1: Ist das ein Ding von früher oder von heute? */
   korb() {
-    const dinge = PAARE.flatMap(p => [...(p[5] ? [[p[1], p[2], "frueher"]] : []), [p[3], p[4], "heute"]]);
+    const dinge = korbDinge(PAARE);
     if (!dinge.length) return null;
     const [bild, name, richtig] = waehle(dinge);
     return { art: "korb", bild, name, richtig };
@@ -77,9 +92,8 @@ const ARTEN = {
   paar(vor, n) {
     if (!PAARE.length) return null;
     const p = waehle(PAARE);
-    const [gruppe] = p;
     const [bild, name, richtig] = vor ? [p[1], p[2], p[4]] : [p[3], p[4], p[2]];
-    const fremd = [...new Set(PAARE.filter(q => q[0] !== gruppe).map(q => (vor ? q[4] : q[2])))];
+    const fremd = paarAblenker(PAARE, p, vor);
     if (fremd.length < n - 1) return null;
     return { art: "paar", vor, bild, name, richtig, optionen: mische([richtig, ...mische(fremd).slice(0, n - 1)]) };
   },
@@ -97,12 +111,11 @@ const ARTEN = {
   /** Was kam dazwischen? Erstes und letztes von drei aufeinanderfolgenden Dingen sind gegeben. */
   dazwischen() {
     if (!REIHEN.length) return null;
-    const [gruppe, thema, dinge] = waehle(REIHEN);
+    const r = waehle(REIHEN);
+    const [, thema, dinge] = r;
     const i = Math.floor(Math.random() * (dinge.length - 2));
     const [vor, mitte, nach] = dinge.slice(i, i + 3);
-    // Ablenker: Dinge aus Reihen anderer Gruppen, die in dieser Reihe nicht vorkommen
-    const namen = new Set(dinge.map(d => d[1]));
-    const fremd = REIHEN.filter(r => r[0] !== gruppe).flatMap(r => r[2]).filter(d => !namen.has(d[1]));
+    const fremd = dazwischenAblenker(REIHEN, r);
     const andere = [];
     for (const d of mische(fremd)) if (!andere.some(a => a[1] === d[1]) && andere.length < 2) andere.push(d);
     if (andere.length < 2) return null;
@@ -111,21 +124,24 @@ const ARTEN = {
   /** Gab es das schon vor etwa 60 oder 100 Jahren? */
   gross(jahre) {
     if (!GROSS.length) return null;
-    const [bild, name, vor60, vor100] = waehle(GROSS);
-    return { art: "gross", jahre, bild, name, richtig: (jahre === 60 ? vor60 : vor100) ? "ja" : "nein" };
+    const g = waehle(GROSS);
+    const [bild, name] = g;
+    return { art: "gross", jahre, bild, name, richtig: gabEs(g, jahre) };
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.korb()],
-  s2: [() => ARTEN.paar(true, 3)],
-  s3: [() => ARTEN.paar(true, 4), () => ARTEN.ordnen()],
-  s4: [() => ARTEN.paar(false, 4), () => ARTEN.dazwischen()],
-  s5: [() => ARTEN.gross(60)],
+// Je Stufe die Arten mit ihren Angaben (mehrfach genannt = häufiger) — auch für die Prüfansicht (pruefung.js).
+const STUFE_ARTEN = {
+  s1: [["korb"]],
+  s2: [["paar", true, 3]],
+  s3: [["paar", true, 4], ["ordnen"]],
+  s4: [["paar", false, 4], ["dazwischen"]],
+  s5: [["gross", 60]],
   // Königsstufe: vor 100 Jahren, ganze Reihen, Paare zurück — alles gemischt
-  s6: [() => ARTEN.gross(100), () => ARTEN.gross(60), () => ARTEN.ordnen(true), () => ARTEN.paar(false, 4), () => ARTEN.dazwischen()],
+  s6: [["gross", 100], ["gross", 60], ["ordnen", true], ["paar", false, 4], ["dazwischen"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN)
+  .map(([s, arten]) => [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {

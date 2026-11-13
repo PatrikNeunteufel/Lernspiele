@@ -57,32 +57,53 @@ const ID = "lebensraum";
 // eine Liste, dazu die Nahrungsketten. Kennt der Katalog die Listen des Spiels noch nicht, gilt der
 // ganze Inhalt mit dem Spiel als frei.
 const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : LEBENSRAUM_LISTEN);
-const LEBEWESEN = TIERE.map(([name, bild, klasse, , , lebensraum]) => ({ name, bild, klasse, lebensraum }))
+/** Lebewesen aus einer Zeile von tiere.js und Glieder einer Kette aus nahrung.js, wie das Spiel sie benutzt — auch für
+ * die Prüfansicht (pruefung.js). */
+const lebewesen = ([name, bild, klasse, , , lebensraum]) => ({ name, bild, klasse, lebensraum });
+const glieder = k => k.map(([name, bild, pflanze]) => ({ name, bild, pflanze: !!pflanze }));
+const LEBEWESEN = TIERE.map(lebewesen)
   .filter(t => t.lebensraum && FREI.has(LEBENSRAUM_LISTE_JE_RAUM[t.lebensraum]));
 
-const KETTEN = (FREI.has("nahrungsketten") ? NAHRUNGSKETTEN : []).map(k => k.map(([name, bild, pflanze]) => ({ name, bild, pflanze: !!pflanze })));
-/** Alle Paare „frisst“: { esser, futter } aus allen Ketten. */
-const FRISST = KETTEN.flatMap(k => k.slice(1).map((esser, i) => ({ esser: esser.name, futter: k[i] })));
+const KETTEN = (FREI.has("nahrungsketten") ? NAHRUNGSKETTEN : []).map(glieder);
+/** Alle Paare „frisst“: { esser, futter } aus den Ketten (Glieder wie glieder) — auch für die Prüfansicht (pruefung.js). */
+const frisstPaare = ketten => ketten.flatMap(k => k.slice(1).map((esser, i) => ({ esser: esser.name, futter: k[i] })));
+const FRISST = frisstPaare(KETTEN);
+/** Namen, aus denen „Was frisst …?“ zwei Ablenker zieht: grosse Räuber, wenn das Futter eine Pflanze ist, sonst Pflanzen,
+ * die kein Fleischfresser frisst — auch für die Prüfansicht (pruefung.js). */
+const ablenkerFuer = (esser, futter) => (futter.pflanze ? GROSSE_RAEUBER.filter(n => n !== esser) : NICHT_FUTTER);
+/** Frage „Was frisst der/die/das …?“ — auch für die Prüfansicht (pruefung.js). */
+const wasFrisstFrage = esser => `Was frisst ${ARTIKEL[esser]} ${esser}?`;
 const glied = name => KETTEN.flat().find(g => g.name === name);
+
+/**
+ * Nimmt die Art (mit ihren Angaben aus STUFE_ARTEN) dieses Lebewesen oder diese Kette, unabhängig von der Freigabe —
+ * auch für die Prüfansicht (pruefung.js), die daraus die Stufen je Eintrag liest. „Was frisst …?“ nimmt jedes Paar
+ * aus jeder Kette.
+ */
+const NIMMT = {
+  zuordnen: (t, raeume, anzahl, mitBild) => raeume.includes(t.lebensraum) && (!mitBild || !!t.bild),
+  kette: (k, laenge, mitBild) => (!laenge || k.length === laenge) && (!mitBild || k.every(g => g.bild)),
+  wasFrisst: () => true,
+};
 
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   /** Lebewesen aus einem der 'raeume', dazu weitere dieser Räume als Körbe, zusammen 'anzahl'. */
   zuordnen(raeume, anzahl, mitBild) {
-    const w = waehle(LEBEWESEN.filter(t => raeume.includes(t.lebensraum) && (!mitBild || t.bild)));
+    const w = waehle(LEBEWESEN.filter(t => NIMMT.zuordnen(t, raeume, anzahl, mitBild)));
     if (!w) return null;
     const auswahl = [w.lebensraum, ...mische(raeume.filter(r => r !== w.lebensraum)).slice(0, anzahl - 1)];
     return { art: "zuordnen", w, raeume: Object.keys(RAEUME).filter(r => auswahl.includes(r)) };
   },
   /** Nahrungskette mit 'laenge' Gliedern (null = jede); mitBild: nur Ketten, deren Glieder alle ein Bild haben. */
   kette(laenge, mitBild) {
-    const kette = waehle(KETTEN.filter(k => (!laenge || k.length === laenge) && (!mitBild || k.every(g => g.bild))));
+    const kette = waehle(KETTEN.filter(k => NIMMT.kette(k, laenge, mitBild)));
     return kette ? { art: "kette", kette } : null;
   },
   wasFrisst() {
     if (!FRISST.length) return null;
     const { esser, futter } = waehle(FRISST);
-    const andere = futter.pflanze ? GROSSE_RAEUBER.filter(n => n !== esser) : NICHT_FUTTER;
+    const andere = ablenkerFuer(esser, futter);
     return { art: "wasFrisst", esser: glied(esser), richtig: futter, optionen: mische([futter, ...mische(andere).slice(0, 2).map(glied)]) };
   },
 };
@@ -92,15 +113,18 @@ const ARTEN = {
 const DREI = ["Wald", "Wiese", "Weiher"];
 const VIER = ["Wald", "Wiese", "Weiher", "Gebirge"];
 const BILD_NOETIG = ["s1", "s2", "s3", "s4"];
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.zuordnen(DREI, 2, true)],
-  s2: [() => ARTEN.zuordnen(DREI, 3, true)],
-  s3: [() => ARTEN.zuordnen(VIER, 4, true)],
-  s4: [() => ARTEN.kette(3, true), () => ARTEN.zuordnen(VIER, 4, true)],
-  s5: [() => ARTEN.kette(4, false), ARTEN.wasFrisst],
-  s6: [() => ARTEN.zuordnen(VIER, 4, false), () => ARTEN.kette(null, false), ARTEN.wasFrisst],
+// Je Stufe die Arten als [Art, Angaben …] (zuordnen: Räume, Zahl der Körbe, mitBild; kette: Länge, mitBild; mehrfach
+// genannt = häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus mit NIMMT die Stufen je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["zuordnen", DREI, 2, true]],
+  s2: [["zuordnen", DREI, 3, true]],
+  s3: [["zuordnen", VIER, 4, true]],
+  s4: [["kette", 3, true], ["zuordnen", VIER, 4, true]],
+  s5: [["kette", 4, false], ["wasFrisst"]],
+  s6: [["zuordnen", VIER, 4, false], ["kette", null, false], ["wasFrisst"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
@@ -206,7 +230,7 @@ LS.spiel({
       return;
     }
     if (a.art === "wasFrisst") {
-      ctx.flaeche.append(el("div", { class: "frage", text: `Was frisst ${ARTIKEL[a.esser.name]} ${a.esser.name}?` }));
+      ctx.flaeche.append(el("div", { class: "frage", text: wasFrisstFrage(a.esser.name) }));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 130,
         inhalt: g => ({ bild: g.bild || "", text: g.name }),

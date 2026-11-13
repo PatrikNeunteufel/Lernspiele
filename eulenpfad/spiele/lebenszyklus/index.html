@@ -47,13 +47,23 @@ const ZYKLEN_FREI = ZYKLEN.filter(z => FREI.has(z[3]));
 const GEBURT_FREI = FREI.has("geburt") ? GEBURT : [];
 const FRAGEN_FREI = FREI.has("fragen") ? ZYKLUS_FRAGEN : [];
 
-const zyklen = n => ZYKLEN_FREI.filter(z => z[0] <= n && z[0] >= n - 2).map(([, name, stadien]) => ({ name, stadien }));
+/** Zyklus (Zeile aus zyklen.js) in Stufe n: die Zyklen der letzten drei Stufen — auch für die Prüfansicht (pruefung.js). */
+const zyklusInStufe = (z, n) => z[0] <= n && z[0] >= n - 2;
+const zyklen = n => ZYKLEN_FREI.filter(z => zyklusInStufe(z, n)).map(([, name, stadien]) => ({ name, stadien }));
+/**
+ * Welche Zyklen eine Art nehmen kann (stadien, Zusatz aus STUFE_ARTEN): ordnen ab einer Mindestzahl Stadien,
+ * „Was kommt nach …?“ nur bei mindestens vier — auch für die Prüfansicht (pruefung.js).
+ */
+const NIMMT = {
+  ordnen: (stadien, mindestens = 0) => stadien.length >= mindestens,
+  naechstes: stadien => stadien.length >= 4,
+};
 const GEBURT_TEXT = { Ei: { bild: "🥚", text: "aus dem Ei" }, Beutel: { bild: "👜", text: "im Beutel" }, lebend: { bild: "🍼", text: "lebend geboren" } };
 
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   ordnen(n, mindestens = 0) {
-    const z = waehle(zyklen(n).filter(x => x.stadien.length >= mindestens));
+    const z = waehle(zyklen(n).filter(x => NIMMT.ordnen(x.stadien, mindestens)));
     return z ? { art: "ordnen", z } : null;
   },
   geburt() {
@@ -63,7 +73,7 @@ const ARTEN = {
   },
   naechstes(n) {
     // Was kommt nach …? (nicht das letzte Stadium)
-    const z = waehle(zyklen(n).filter(x => x.stadien.length >= 4));
+    const z = waehle(zyklen(n).filter(x => NIMMT.naechstes(x.stadien)));
     if (!z) return null;
     const i = Math.floor(Math.random() * (z.stadien.length - 1));
     const vor = z.stadien[i][1];
@@ -78,16 +88,19 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.ordnen(1)],
-  s2: [() => ARTEN.ordnen(2)],
-  s3: [ARTEN.geburt, () => ARTEN.ordnen(3)],
-  s4: [() => ARTEN.ordnen(4), () => ARTEN.naechstes(4), ARTEN.geburt],
-  s5: [ARTEN.frage, () => ARTEN.naechstes(5), () => ARTEN.ordnen(5)],
+// Je Stufe die Arten als [Art, Stufennummer, Mindestzahl Stadien] (mehrfach genannt = häufiger). Als Daten — auch
+// für die Prüfansicht (pruefung.js), die daraus mit zyklusInStufe und NIMMT die Stufen je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["ordnen", 1]],
+  s2: [["ordnen", 2]],
+  s3: [["geburt"], ["ordnen", 3]],
+  s4: [["ordnen", 4], ["naechstes", 4], ["geburt"]],
+  s5: [["frage"], ["naechstes", 5], ["ordnen", 5]],
   // Königsstufe: Wissensfragen und fünfstufige Zyklen
-  s6: [ARTEN.frage, () => ARTEN.ordnen(6, 5), () => ARTEN.ordnen(6, 5), () => ARTEN.naechstes(6)],
+  s6: [["frage"], ["ordnen", 6, 5], ["ordnen", 6, 5], ["naechstes", 6]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...zusatz]) => () => ARTEN[art](...zusatz))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {

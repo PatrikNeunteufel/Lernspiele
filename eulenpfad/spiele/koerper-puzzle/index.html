@@ -51,6 +51,10 @@ const SINNE_FREI = nurFrei("sinne", SINNE);
 const FRAGEN = KOERPER_FRAGEN.filter(f => FREI.has(f[5]));
 const WEGE_FREI = nurFrei("wege", WEGE);
 
+/** Wie eine Frage ([ab Stufe, …]) in die Fragen der Stufe n kommt: "eigen", "davor" (ab und zu eine der Stufe
+ *  davor) oder null — auch für die Prüfansicht (pruefung.js). */
+const frageIn = (f, n) => (f[0] === n ? "eigen" : f[0] === n - 1 ? "davor" : null);
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   teil(n = 3) {
@@ -72,9 +76,9 @@ const ARTEN = {
   },
   frage(n) {
     // Fragen dieser Stufe, ab und zu eine der Stufe davor; ohne freie Frage dieser Stufe keine Aufgabe.
-    const eigene = FRAGEN.filter(f => f[0] === n);
+    const eigene = FRAGEN.filter(f => frageIn(f, n) === "eigen");
     if (!eigene.length) return null;
-    const liste = FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const liste = FRAGEN.filter(f => { const wie = frageIn(f, n); return wie === "eigen" || (wie === "davor" && Math.random() < 0.3); });
     const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
@@ -85,17 +89,20 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [ARTEN.teil, ARTEN.finde],
-  s2: [ARTEN.sinn, ARTEN.finde],
-  s3: [() => ARTEN.frage(3), ARTEN.sinn],
+// Je Stufe die Arten als [Art, Zahl] (mehrfach genannt = häufiger; Zahl: Antworten bei teil und finde, Stufe
+// der Fragen bei frage) — als Daten auch für die Prüfansicht (pruefung.js), die die Stufen einer Liste daraus liest.
+const STUFE_ARTEN = {
+  s1: [["teil"], ["finde"]],
+  s2: [["sinn"], ["finde"]],
+  s3: [["frage", 3], ["sinn"]],
   // gemischt: Gelenke und Schutz, Sinne und Körperteile mit mehr Auswahl
-  s4: [() => ARTEN.frage(3), () => ARTEN.frage(3), ARTEN.sinn, () => ARTEN.teil(4), () => ARTEN.finde(4)],
-  s5: [() => ARTEN.frage(5)],
+  s4: [["frage", 3], ["frage", 3], ["sinn"], ["teil", 4], ["finde", 4]],
+  s5: [["frage", 5]],
   // Königsstufe: Blutkreislauf, Haut, Wege durch den Körper
-  s6: [() => ARTEN.frage(6), () => ARTEN.frage(6), ARTEN.weg],
+  s6: [["frage", 6], ["frage", 6], ["weg"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, n]) => () => ARTEN[art](n))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {

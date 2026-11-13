@@ -58,6 +58,11 @@ const SCHWER_AB = 4;
 
 /** Vor allem neue Inhalte dieser Stufe, dazu etwas aus der Stufe davor; Königsstufe: alles Schwere. */
 const passend = (liste, n) => liste.filter(x => (n === 6 ? x.ab >= SCHWER_AB : x.ab === n || x.ab === n - 1));
+/**
+ * Fragen einer Stufe: die passenden; gibt es keine, alle bis zu dieser Stufe — auch für die Prüfansicht
+ * (pruefung.js), die damit die Stufen je Frage liest.
+ */
+const fragenFuer = (fragen, n) => (passend(fragen, n).length ? passend(fragen, n) : fragen.filter(x => x.ab <= n));
 
 // In einer Runde jede Aussage und Frage höchstens einmal.
 let gebraucht = new Set();
@@ -75,7 +80,7 @@ const ARTEN = {
     return liste.length ? { art: "aussage", a: frisch(liste) } : null;
   },
   frage: n => {
-    const liste = passend(FRAGEN, n).length ? passend(FRAGEN, n) : FRAGEN.filter(x => x.ab <= n);
+    const liste = fragenFuer(FRAGEN, n);
     if (!liste.length) return null;
     const f = frisch(liste);
     return { art: "frage", f, optionen: mische([f.richtig, ...f.falsch]) };
@@ -89,15 +94,20 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.aussage(1), () => ARTEN.aussage(1), () => ARTEN.frage(1)],
-  s2: [() => ARTEN.aussage(2), () => ARTEN.frage(2)],
-  s3: [() => ARTEN.aussage(3), () => ARTEN.frage(3)],
-  s4: [() => ARTEN.aussage(4), () => ARTEN.frage(4), ARTEN.jahr],
-  s5: [() => ARTEN.aussage(5), () => ARTEN.frage(5), ARTEN.anpassung, ARTEN.jahr],
-  s6: [() => ARTEN.aussage(6), () => ARTEN.frage(6), ARTEN.anpassung, ARTEN.jahr],
+// Je Stufe die Arten als [Art, Stufennummer für passend] (mehrfach genannt = häufiger). Als Daten — auch für die
+// Prüfansicht (pruefung.js), die daraus die Stufen je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["aussage", 1], ["aussage", 1], ["frage", 1]],
+  s2: [["aussage", 2], ["frage", 2]],
+  s3: [["aussage", 3], ["frage", 3]],
+  s4: [["aussage", 4], ["frage", 4], ["jahr"]],
+  s5: [["aussage", 5], ["frage", 5], ["anpassung"], ["jahr"]],
+  s6: [["aussage", 6], ["frage", 6], ["anpassung"], ["jahr"]],
 };
+// Königsstufe: Karten des Jahres ohne Jahreszeit — man ordnet nach dem, was passiert (auch für pruefung.js).
+const JAHR_OHNE_ZEIT = "s6";
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, n]) => () => ARTEN[art](n))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
@@ -202,7 +212,7 @@ LS.spiel({
     } else if (a.art === "jahr") {
       kopf.append(el("div", { class: "aussage frage", text: "Das Jahr einer Fledermaus — fang beim Winter an." }));
       // Königsstufe: Karten ohne Jahreszeit — man ordnet nach dem, was passiert.
-      const ohneZeit = ctx.stufe === "s6";
+      const ohneZeit = ctx.stufe === JAHR_OHNE_ZEIT;
       LS.reihenfolge(ctx, {
         reihe: a.reihe, breite: 220, ablage: s => s.split(": ")[0],
         inhalt: s => (ohneZeit ? s.split(": ")[1] : s),

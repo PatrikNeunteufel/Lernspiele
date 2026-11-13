@@ -2093,3 +2093,16 @@
   Son-Lauscher `STUFE_ARTEN`, `kniffligGeschrieben` und `ABLENKER_E`; Au café `paareVon`, `zumOrdnen`, `personenBis`,
   `ANTWORT_JE_STUFE`, `ORDNEN_JE_STUFE`, `TU_VOUS_JE_STUFE` und `ablenkerFuer` mit wählbaren Dialogen. Prüfstand und
   Fingerabdrücke unverändert.
+- **Anleitungen:** Ohne „Meine Klasse“ steht das Zeichen (✓ ● ▲) oben links auf der Karte, und der Rand hat seine
+  Farbe; über den Karten steht die Legende (vorher: „zeigt der Rand“). Hinweis Patrik.
+- **Prüfung je Eintrag, NMG Block 1** (LP5 a, LERN-51, T4 a): `pruefung.js` für Tier-Sortierer, Lebensraum,
+  Fledermaus-Forscher, Lebenszyklus-Puzzle, Körper-Puzzle, Magnet-Labor, Schwimmt oder sinkt?, Schweiz-Karten-Suche,
+  Kompass-Spiel und Früher und heute (40 Listen). Gruppen mit den Namen der Körbe wie im Spiel, Stufen je Eintrag aus den
+  Spielen; Schweiz-Karten-Suche zeigt jedes Gebiet und jeden Ort auf der Karte des Spiels, Magnet-Labor die Pol-Aufgaben
+  mit seinem Stabmagneten. Damit keine Prüfansicht einen Aufgabenschritt nachbaut, im Spiel neu (Aufgaben unverändert,
+  je Stufe 400 bis 600 Aufgaben mit festem Startwert vorher und nachher gleich): die Stufentabelle als Daten
+  `STUFE_ARTEN` in Tier-Sortierer, Lebensraum, Fledermaus-Forscher, Lebenszyklus-Puzzle, Körper-Puzzle, Magnet-Labor,
+  Schwimmt oder sinkt? und Früher und heute, dazu je nach Spiel `NIMMT`, `frageIn`, `FRAGE_NIMMT`, `fragenFuer`,
+  `zyklusInStufe`, `KNIFFLIG_KOERBE`, `frisstPaare`, `ablenkerFuer`, `wasFrisstFrage`, `STAEBE`, `WIRKUNG`, `POL_FUER`,
+  `korbDinge`, `paarAblenker`, `dazwischenAblenker`, `gabEs`; Schweiz-Karten-Suche `zieleAus`, `karteZeichnen`,
+  `punktZeichnen` und Ziele der Stufen auch ohne Freigabe. Prüfstand und Fingerabdrücke unverändert.

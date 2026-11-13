@@ -61,19 +61,28 @@ const SVG = "http://www.w3.org/2000/svg";
 
 const FREI = new Set(LS.freieListen(SPIEL_ID));
 const ortName = o => ORT_NAMEN[o.name] || o.name.replace(/ \([A-Z]{2}\)$/, "");
-const KANTONE = FREI.has("kantone") ? KARTE.kantone.map(k => ({ ...k, kurz: KANTONE_NAMEN[k.nr][0], anzeige: KANTONE_NAMEN[k.nr][1] })) : [];
-const WAHLKREISE = FREI.has("wahlkreise-sg") ? KARTE.wahlkreise.map(w => ({ ...w, anzeige: w.name })) : [];
-const HAUPTORTE = FREI.has("hauptorte") ? KARTE.orte.filter(o => o.hauptort).map(o => ({ ...o, anzeige: ortName(o) })) : [];
-const STAEDTE = FREI.has("staedte") ? KARTE.orte.filter(o => !o.hauptort && o.einwohner >= STADT_MIN).map(o => ({ ...o, anzeige: ortName(o) })) : [];
+/** Ziele je Liste aus den Rohdaten (karte.js, orte.js) mit dem Namen, den das Kind sieht (anzeige), nur aus den Listen
+    in frei — auch für die Prüfansicht (pruefung.js), dort mit allen Listen. */
+function zieleAus(frei) {
+  return {
+    kantone: frei.has("kantone") ? KARTE.kantone.map(k => ({ ...k, kurz: KANTONE_NAMEN[k.nr][0], anzeige: KANTONE_NAMEN[k.nr][1] })) : [],
+    wahlkreise: frei.has("wahlkreise-sg") ? KARTE.wahlkreise.map(w => ({ ...w, anzeige: w.name })) : [],
+    hauptorte: frei.has("hauptorte") ? KARTE.orte.filter(o => o.hauptort).map(o => ({ ...o, anzeige: ortName(o) })) : [],
+    staedte: frei.has("staedte") ? KARTE.orte.filter(o => !o.hauptort && o.einwohner >= STADT_MIN).map(o => ({ ...o, anzeige: ortName(o) })) : [],
+  };
+}
+const ZIELE = zieleAus(FREI);
+const { kantone: KANTONE, wahlkreise: WAHLKREISE, hauptorte: HAUPTORTE, staedte: STAEDTE } = ZIELE;
 
 // Je Stufe: was gesucht wird. Basisklasse 4 (OP NMG.8.4.d): Stufe 1 = 3. Klasse, Stufe 5 = 5. Klasse.
+// ziele(z) wählt aus den Zielen z (Standard: aus den freien Listen) — z auch für die Prüfansicht (pruefung.js).
 const STUFE = {
-  s1: { art: "gebiet", ziele: () => WAHLKREISE, ansicht: "sg" },
-  s2: { art: "gebiet", ziele: () => KANTONE.filter(k => OSTSCHWEIZ.includes(k.nr)) },
-  s3: { art: "gebiet", ziele: () => KANTONE },
-  s4: { art: "punkt", ziele: () => HAUPTORTE },
-  s5: { art: "punkt", ziele: () => STAEDTE, mit: () => [...HAUPTORTE, ...STAEDTE] },
-  s6: { art: "erkennen", ziele: () => [...KANTONE, ...HAUPTORTE] },  // Königsstufe: markiert — wie heisst es?
+  s1: { art: "gebiet", ziele: (z = ZIELE) => z.wahlkreise, ansicht: "sg" },
+  s2: { art: "gebiet", ziele: (z = ZIELE) => z.kantone.filter(k => OSTSCHWEIZ.includes(k.nr)) },
+  s3: { art: "gebiet", ziele: (z = ZIELE) => z.kantone },
+  s4: { art: "punkt", ziele: (z = ZIELE) => z.hauptorte },
+  s5: { art: "punkt", ziele: (z = ZIELE) => z.staedte, mit: (z = ZIELE) => [...z.hauptorte, ...z.staedte] },
+  s6: { art: "erkennen", ziele: (z = ZIELE) => [...z.kantone, ...z.hauptorte] },  // Königsstufe: markiert — wie heisst es?
 };
 
 function aufgabeErzeugen(stufe) {
@@ -117,6 +126,30 @@ const svgEl = (tag, attr = {}) => {
   for (const [k, v] of Object.entries(attr)) e.setAttribute(k, v);
   return e;
 };
+
+/**
+ * Stumme Karte: Ausschnitt St. Gallen mit den Wahlkreisen (ansicht "sg") oder die ganze Schweiz mit den Kantonen und der
+ * Landesgrenze. klasse(g) ergänzt die Klasse eines Gebiets. Gibt { svg, pfade: [[Gebiet aus karte.js, Pfad], …] } —
+ * auch für die Prüfansicht (pruefung.js).
+ */
+function karteZeichnen(ansicht, klasse = () => "") {
+  const gebiete = ansicht === "sg" ? KARTE.wahlkreise : KARTE.kantone;
+  const [vx, vy, vb, vh] = ansicht === "sg" ? ausschnitt(gebiete) : [0, 0, KARTE.breite, KARTE.hoehe];
+  const svg = svgEl("svg", { class: "karte-svg szenenbild bildkachel", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
+  svg.style.setProperty("--seiten", (vb / vh).toFixed(3));
+  const pfade = gebiete.map(g => [g, svgEl("path", { d: g.d, class: "gebiet" + klasse(g) })]);
+  for (const [, pfad] of pfade) svg.append(pfad);
+  if (ansicht !== "sg") svg.append(svgEl("path", { d: KARTE.land, class: "land" }));
+  return { svg, pfade };
+}
+
+/** Punkt eines Orts: Gruppe mit dem sichtbaren Kreis (klasse ergänzt seine Klasse) — auch für die Prüfansicht (pruefung.js). */
+function punktZeichnen(o, klasse = "") {
+  const gruppe = svgEl("g", {});
+  const kreis = svgEl("circle", { cx: o.x, cy: o.y, r: 2.6, class: "punkt" + klasse });
+  gruppe.append(kreis);
+  return { gruppe, kreis };
+}
 
 const STUFEN_TEXT = {
   s1: "Kanton St. Gallen: die Wahlkreise Toggenburg, Rheintal, See-Gaster …",
@@ -163,9 +196,9 @@ LS.spiel({
     // Karte: Ausschnitt St. Gallen (Stufe 1) oder die ganze Schweiz
     const gebiete = p.ansicht === "sg" ? KARTE.wahlkreise : KARTE.kantone;
     ctx.tipp(tippsFuer(p, ziel, gebiete));
-    const [vx, vy, vb, vh] = p.ansicht === "sg" ? ausschnitt(gebiete) : [0, 0, KARTE.breite, KARTE.hoehe];
-    const svg = svgEl("svg", { class: "karte-svg szenenbild bildkachel", viewBox: `${vx} ${vy} ${vb} ${vh}`, role: "img", "aria-label": "Stumme Karte" });
-    svg.style.setProperty("--seiten", (vb / vh).toFixed(3));
+    // Flächen: Kantone bzw. Wahlkreise; klickbar, wenn ein Gebiet gesucht ist
+    const auswahlGebiete = p.art === "gebiet" ? (p.ansicht === "sg" ? WAHLKREISE : KANTONE) : [];
+    const { svg, pfade } = karteZeichnen(p.ansicht, () => (auswahlGebiete.length ? " wahl" : p.art === "punkt" ? " blass" : ""));
     if (p.art === "erkennen") svg.classList.add("mit-wahl");
     const flaechen = new Map();
     let fertig = false;
@@ -186,24 +219,17 @@ LS.spiel({
     };
     const zeigeZiel = () => (flaechen.get(ziel) || svg.querySelector(".ziel"))?.classList.add("richtig");
 
-    // Flächen: Kantone bzw. Wahlkreise; klickbar, wenn ein Gebiet gesucht ist
-    const auswahlGebiete = p.art === "gebiet" ? (p.ansicht === "sg" ? WAHLKREISE : KANTONE) : [];
-    for (const g of gebiete) {
+    for (const [g, pfad] of pfade) {
       const daten = auswahlGebiete.find(x => x.d === g.d) || KANTONE.find(x => x.d === g.d) || g;
-      const pfad = svgEl("path", { d: g.d, class: "gebiet" + (auswahlGebiete.length ? " wahl" : p.art === "punkt" ? " blass" : "") });
       if (auswahlGebiete.length) pfad.addEventListener("click", () => (daten === ziel ? richtigGetippt(pfad) : falschGetippt(daten, pfad)));
       if (p.art === "erkennen" && daten === ziel) pfad.classList.add("markiert");
       flaechen.set(daten, pfad);
-      svg.append(pfad);
     }
-    if (p.ansicht !== "sg") svg.append(svgEl("path", { d: KARTE.land, class: "land" }));
 
     // Punkte: Hauptorte bzw. Städte; der grosse, unsichtbare Kreis ist die Tippfläche
     const punkte = p.art === "punkt" ? (p.mit ? p.mit() : p.ziele()) : p.art === "erkennen" && !istKanton ? [ziel] : [];
     for (const o of punkte) {
-      const g = svgEl("g", {});
-      const sichtbar = svgEl("circle", { cx: o.x, cy: o.y, r: 2.6, class: "punkt" + (p.art === "erkennen" ? " markiert" : "") + (o === ziel ? " ziel" : "") });
-      g.append(sichtbar);
+      const { gruppe: g, kreis: sichtbar } = punktZeichnen(o, (p.art === "erkennen" ? " markiert" : "") + (o === ziel ? " ziel" : ""));
       if (p.art === "punkt") {
         const treffer = svgEl("circle", { cx: o.x, cy: o.y, r: 6, class: "treffer" });
         treffer.addEventListener("click", () => (o === ziel ? richtigGetippt(sichtbar) : falschGetippt(o, sichtbar)));

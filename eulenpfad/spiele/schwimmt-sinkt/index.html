@@ -52,10 +52,21 @@ const WASSER_FREI = FREI.has("wasser") ? WASSER_DINGE : [];
 const MATERIAL_FREI = FREI.has("material") ? MATERIAL_DINGE : [];
 const FRAGEN = STOFF_FRAGEN.filter(f => FREI.has(f[5]));
 
+/**
+ * Nimmt die Art (mit ihrem Zusatz aus STUFE_ARTEN) diesen Eintrag, unabhängig von der Freigabe — auch für die
+ * Prüfansicht (pruefung.js). Fragen: „immer“, „manchmal“ (ab und zu eine der Stufe davor) oder null.
+ */
+const NIMMT = {
+  wasser: (d, einfach) => !einfach || WASSER_EINFACH.includes(d[1]),
+  material: () => true,
+  frage: (f, n) => (f[0] === n ? "immer" : f[0] === n - 1 ? "manchmal" : null),
+  frageBis: (f, n) => (f[0] <= n ? "immer" : null),
+};
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   wasser(einfach = false) {
-    const liste = einfach ? WASSER_FREI.filter(d => WASSER_EINFACH.includes(d[1])) : WASSER_FREI;
+    const liste = WASSER_FREI.filter(d => NIMMT.wasser(d, einfach));
     if (!liste.length) return null;
     const [bild, name, schwimmt] = waehle(liste);
     return { art: "wasser", bild, name, richtig: schwimmt ? "schwimmt" : "sinkt" };
@@ -69,29 +80,36 @@ const ARTEN = {
   frage(n) {
     // Fragen dieser Stufe, ab und zu eine der Stufe davor; ohne freie Frage dieser Stufe keine Aufgabe.
     if (!FRAGEN.some(f => f[0] === n)) return null;
-    const liste = FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const liste = FRAGEN.filter(f => {
+      const nimmt = NIMMT.frage(f, n);
+      return nimmt === "immer" || (nimmt === "manchmal" && Math.random() < 0.3);
+    });
     const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
   /** Irgendeine Frage bis zu dieser Stufe (Königsstufe). */
   frageBis(n) {
-    const liste = FRAGEN.filter(f => f[0] <= n);
+    const liste = FRAGEN.filter(f => NIMMT.frageBis(f, n));
     if (!liste.length) return null;
     const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [() => ARTEN.wasser(true)],
-  s2: [() => ARTEN.wasser()],
-  s3: [() => ARTEN.material(), () => ARTEN.wasser()],
-  s4: [() => ARTEN.frage(4), () => ARTEN.material()],
-  s5: [() => ARTEN.frage(5), () => ARTEN.wasser()],
+// Je Stufe die Arten mit ihrem Zusatz (wasser: nur einfache Dinge; material: Zahl der Körbe; frage, frageBis: Stufe;
+// mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus mit NIMMT die Stufen
+// je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["wasser", true]],
+  s2: [["wasser"]],
+  s3: [["material", 3], ["wasser"]],
+  s4: [["frage", 4], ["material", 3]],
+  s5: [["frage", 5], ["wasser"]],
   // Königsstufe: alles gemischt — Wasser, Material mit allen Körben, alle Fragen
-  s6: [() => ARTEN.wasser(), () => ARTEN.material(5), () => ARTEN.frageBis(6), () => ARTEN.frageBis(6)],
+  s6: [["wasser"], ["material", 5], ["frageBis", 6], ["frageBis", 6]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, zusatz]) => () => ARTEN[art](zusatz))]));
 
 /** Wie viele verschiedene Arten eine Stufe mit den freien Listen hergibt — ctx.serie("art") nur bei mehreren. */
 const ARTEN_JE_STUFE = Object.fromEntries(Object.entries(STUFE).map(([s, neue]) => [s, new Set(neue.map(neu => neu()?.art).filter(Boolean)).size]));

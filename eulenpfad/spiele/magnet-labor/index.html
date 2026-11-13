@@ -47,6 +47,13 @@ const { waehle, mische, el } = LS;
 // „ab Stufe“ in versuche.js = Nummer der Spielstufe (s1–s6).
 const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 const ANDERER_POL = { N: "S", S: "N" };
+/** Wie ein Stabmagnet liegen kann (Pole von links nach rechts) — auch für die Prüfansicht (pruefung.js). */
+const STAEBE = [["N", "S"], ["S", "N"]];
+/** Was zwei Stabmagnete tun: Die einander zugewandten Pole entscheiden — auch für die Prüfansicht (pruefung.js). */
+const WIRKUNG = (links, rechts) => (links[1] === rechts[0] ? "abstossen" : "anziehen");
+/** Welcher Pol rechts in der Mitte stehen muss, damit sich die Magnete anziehen oder abstossen (ziel) — auch für die
+ *  Prüfansicht (pruefung.js). */
+const POL_FUER = (links, ziel) => (ziel === "abstossen" ? links[1] : ANDERER_POL[links[1]]);
 const KOERBE = { ja: { bild: "🧲", text: "zieht an" }, nein: { bild: "🚫", text: "zieht nicht an" } };
 const ID = "magnet-labor";
 
@@ -58,6 +65,12 @@ const DINGE = FREI.has("dinge") ? MAGNET_DINGE : [];
 const FRAGEN = MAGNET_FRAGEN.filter(f => FREI.has(f[5]));
 const POLE = FREI.has("kompass-pole");
 
+/**
+ * Nimmt die Fragen-Art der Stufe n diese Frage: „immer“ (Frage dieser Stufe), „manchmal“ (ab und zu eine der Stufe
+ * davor) oder null — unabhängig von der Freigabe, auch für die Prüfansicht (pruefung.js).
+ */
+const FRAGE_NIMMT = (f, n) => (f[0] === n ? "immer" : f[0] === n - 1 ? "manchmal" : null);
+
 // Jede Art liefert null, wenn die freien Listen für sie nichts hergeben.
 const ARTEN = {
   ding() {
@@ -68,39 +81,43 @@ const ARTEN = {
   pole() {
     // zwei Stabmagnete, die einander zugewandten Pole entscheiden
     if (!POLE) return null;
-    const links = waehle([["N", "S"], ["S", "N"]]);
-    const rechts = waehle([["N", "S"], ["S", "N"]]);
-    const gleich = links[1] === rechts[0];
-    return { art: "pole", links, rechts, richtig: gleich ? "abstossen" : "anziehen", optionen: ["anziehen", "abstossen"] };
+    const links = waehle(STAEBE);
+    const rechts = waehle(STAEBE);
+    return { art: "pole", links, rechts, richtig: WIRKUNG(links, rechts), optionen: ["anziehen", "abstossen"] };
   },
   poleWahl() {
     // Pole schwer: Welcher Pol muss rechts in der Mitte stehen, damit sie sich anziehen / abstossen?
     if (!POLE) return null;
-    const links = waehle([["N", "S"], ["S", "N"]]);
+    const links = waehle(STAEBE);
     const ziel = waehle(["anziehen", "abstossen"]);
-    const richtig = ziel === "abstossen" ? links[1] : ANDERER_POL[links[1]];
-    return { art: "poleWahl", links, ziel, richtig, optionen: ["N", "S"] };
+    return { art: "poleWahl", links, ziel, richtig: POL_FUER(links, ziel), optionen: ["N", "S"] };
   },
   frage(n) {
     // Fragen dieser Stufe, ab und zu eine der Stufe davor; ohne freie Frage dieser Stufe keine Aufgabe.
     if (!FRAGEN.some(f => f[0] === n)) return null;
-    const liste = FRAGEN.filter(f => f[0] === n || (f[0] === n - 1 && Math.random() < 0.3));
+    const liste = FRAGEN.filter(f => {
+      const nimmt = FRAGE_NIMMT(f, n);
+      return nimmt === "immer" || (nimmt === "manchmal" && Math.random() < 0.3);
+    });
     const [, frage, richtig, f1, f2] = waehle(liste);
     return { art: "frage", frage, richtig, optionen: mische([richtig, f1, f2]) };
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger).
-const STUFE = {
-  s1: [ARTEN.ding],
-  s2: [ARTEN.pole, ARTEN.ding],
-  s3: [() => ARTEN.frage(3), ARTEN.pole, ARTEN.ding],
-  s4: [() => ARTEN.frage(4), ARTEN.pole],
+// Je Stufe die Arten mit ihrem Zusatz (bei frage: die Stufe der Fragen; mehrfach genannt = häufiger). Als Daten —
+// auch für die Prüfansicht (pruefung.js), die daraus mit FRAGE_NIMMT die Stufen je Eintrag liest.
+const STUFE_ARTEN = {
+  s1: [["ding"]],
+  s2: [["pole"], ["ding"]],
+  s3: [["frage", 3], ["pole"], ["ding"]],
+  s4: [["frage", 4], ["pole"]],
   // Kompass und Pole, schwer
-  s5: [() => ARTEN.frage(5), () => ARTEN.frage(5), ARTEN.poleWahl],
+  s5: [["frage", 5], ["frage", 5], ["poleWahl"]],
   // Königsstufe: Strom — Stromkreis, Leiter, Elektromagnet, Sicherheit
-  s6: [() => ARTEN.frage(6)],
+  s6: [["frage", 6]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, zusatz]) => () => ARTEN[art](zusatz))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {
