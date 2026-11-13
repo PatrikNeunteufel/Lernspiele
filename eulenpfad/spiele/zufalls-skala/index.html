@@ -497,7 +497,9 @@ LS.spiel({
       if (!fuenf) ctx.serie("antwort", a.loesung);
       if (a.art !== "summeSkala") ctx.serie("ding", a.s.ding);
       f.append(a.s.ding === "summe" ? zweiWuerfelSvg() : el("div", { class: "situationen" }, situationEl(a.s)),
-        el("div", { class: "frage" }, ...(a.s.ding === "summe" ? ["Du würfelst mit zwei Würfeln. ", ...ereignisTeile(a.s, a.e)] : ereignisTeile(a.s, a.e))));
+        // ZS2 a (LERN_Session38): die Frage dazu, sonst liest sich die Aussage als Frage nach der Farbe
+        el("div", { class: "frage" }, ...(a.s.ding === "summe" ? ["Du würfelst mit zwei Würfeln. ", ...ereignisTeile(a.s, a.e)] : ereignisTeile(a.s, a.e)),
+          el("br"), "Wie wahrscheinlich ist das?"));
       const box = LS.auswahl(ctx, {
         optionen: fuenf ? FUENF : DREI, richtig: a.loesung, loesung: loesungText, lob: `Genau: ${loesungText}`, breite: fuenf ? 110 : 140,
         inhalt: w => (fuenf ? { ...STUFEN_TEXT_FUENF[w], text: TRENNUNG[w] || STUFEN_TEXT_FUENF[w].text } : STUFEN_TEXT[w]),

@@ -2131,4 +2131,5 @@
 - **Zufalls-Skala (ZS1 a, Hinweis Patrik):** „oder“ nur bei Säckchen und Rädern mit mindestens zwei Farben, eine der
   beiden genannten kommt vor (vorher ganz orange und „orange oder gelb“; 89 % der Oder-Aufgaben in Stufe 1 nannten eine
   fehlende Farbe). Oder-Aufgaben in Stufe 1 jetzt möglich 530 / sicher 380 von 20 000 (vorher sicher 2045, möglich 530,
-  unmöglich 548); im Generator geprüft.
+  unmöglich 548); im Generator geprüft. Unter der Aussage neu die Frage „Wie wahrscheinlich ist das?“ (ZS2 a; vorher
+  liess sich „Sie ist orange oder gelb.“ als Frage nach der Farbe lesen).
