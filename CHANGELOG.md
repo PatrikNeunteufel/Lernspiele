@@ -2169,4 +2169,5 @@
   die Verschiebung auch in keinem Hinweis zu einer falschen Antwort beim Knacken; `pruefeAufgabe` meldet beides. Die
   Wörter bleiben. Prüfansicht: ⛔ bei gesperrten Geheimwörtern, neuer Abschnitt „Gesperrte Schlüssel“ (Fingerabdruck der
   Liste dadurch neu, Prüfstand ohne Fingerabdruck unverändert). Je Stufe 20 000 Startwerte mit und ohne Sperre: geändert
-  nur Aufgaben mit gesperrtem Paar (Stufe 3: 61, 4: 186, 5: 324, 6: 80), mit Sperre keine mehr.
+  nur Aufgaben mit gesperrtem Paar (Stufe 3: 61, 4: 186, 5: 324, 6: 80), mit Sperre keine mehr. Bewusst nicht gesperrt
+  (GK2 a): kurze Zufallstreffer in sonst sinnlosen Geheimwörtern — KZ (13, etwa KZXVI), POO (TPOOF), TIT (GPZTIT).

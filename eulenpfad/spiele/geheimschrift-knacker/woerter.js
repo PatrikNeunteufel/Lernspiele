@@ -29,8 +29,9 @@ const GEHEIM_WOERTER = [
 /* Gesperrte Schlüssel (Entscheid GK1 a, LERN_Session38): Mit diesen Schlüsseln wird aus dem Wort ein anstössiges
    Geheimwort. Das Wort bleibt in der Liste; das Spiel verschlüsselt es nur nie mit diesen Schlüsseln und zeigt auch
    in keinem Hinweis diese Verschiebung. Gefunden mit einer Suche nach anstössigen Teilwörtern (Deutsch, Englisch)
-   über alle Wörter und Schlüssel 1–25; die Prüfansicht zeigt alle Geheimwörter zum Nachsehen. Neue Funde hier
-   ergänzen: Wort in Grossbuchstaben, dahinter die Schlüssel. */
+   über alle Wörter und Schlüssel 1–25; die Prüfansicht zeigt alle Geheimwörter zum Nachsehen. Bewusst nicht gesperrt
+   (Entscheid GK2 a): kurze Zufallstreffer in sonst sinnlosen Geheimwörtern wie KZ (KZXVI), POO (TPOOF), TIT (GPZTIT).
+   Neue Funde hier ergänzen: Wort in Grossbuchstaben, dahinter die Schlüssel. */
 const GEHEIM_SPERRE = {
   PUZZLE: [19], // INSSEX
   MAUS: [6],    // SGAY
