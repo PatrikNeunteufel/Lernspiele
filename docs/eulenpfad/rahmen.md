@@ -559,7 +559,9 @@ zieht ohne Zurücklegen; nur der Übertritts-Check bleibt eine gleichmässige St
 - Wechsel nach jeder oder nach drei Aufgaben.
 
 Die Einstellungen stehen im Profil (`mix`). Teil des Mix ist jedes Spiel, das das Kind sehen darf und
-das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog.
+das die Stufe anbietet; im Endlos-Mix nur Stufen mit `endlos` im Katalog. Nie dabei sind Spiele mit `mix: false` im
+Katalog (Entscheid ZM1 b, LERN_Session40): Eine Aufgabe ist dort ein ganzes Rätsel, beim Sudoku 90 s bis 15 min, die
+übrigen Spiele in Stufe 3 im Median 20 s. Das gilt auch für den Übertritts-Check; das Testskript lässt sie im Mix aus.
 
 - **Übertritts-Check 6. Klasse** (Entscheid H1 a, LERN_Session9; `UEBERTRITT` in `mix.js`): Mischung
   „🎒 Übertritts-Check“ statt „frei“. Fächer und Stufe stehen dann fest: alle sichtbaren Spiele in
@@ -1565,6 +1567,7 @@ und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku
   den Vorgaben und den richtig eingetragenen Zahlen, nie mit der Zahl.
 - **Runde:** `anzahl` je Stufe (Abschnitt 4.1): ein 9 × 9 ist allein eine Runde. Handgriffe (`ctx.schritte`): je leeres
   Feld antippen und die Zahl, das erste Feld ist schon gewählt. Endlos in allen Stufen (EN1 a: mehr als 100 verschiedene
-  Rätsel je Stufe).
+  Rätsel je Stufe). Nicht im Zufallsmix (`mix: false`, ZM1 b, Abschnitt 9); das Sudoku-Duell mit seinen kurzen Zügen
+  gehört hinein.
 - **Abschluss-Animation:** Bild `sudoku` im Muster BAUEN (Abschnitt 24): das Rätsel der Stufe aus dem Katalog füllt sich
   Feld um Feld; `feier.js` prüft, dass jede Zahl je Zeile, Spalte und Kasten einmal steht.

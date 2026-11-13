@@ -704,6 +704,8 @@ if (opt.mix !== 0) {
   console.log(`\nZufallsmix (${ids.length} Spiele):\n`);
   for (const id of ids) {
     const s = kat.SPIELE.find(x => x.id === id);
+    // mix: false im Katalog (Sudoku, LERN_Session40): mix.js nimmt das Spiel nie in eine Runde
+    if (s?.mix === false) { console.log(`🎲 ${id.padEnd(24)} nicht im Mix (Katalog mix: false)`); continue; }
     const faelle = [["s3", false], ...(s?.endlos?.length ? [[s.endlos[0], true]] : [])];
     const zeile = [];
     for (const [stufe, endlos] of faelle) {

@@ -1538,6 +1538,10 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "zahlen-sudoku": {
+      "am": "2026-11-13",
+      "von": "Patrik"
+    },
     "zehntel-lupe": {
       "am": "2026-11-11",
       "von": "Patrik"

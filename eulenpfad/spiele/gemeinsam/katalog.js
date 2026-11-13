@@ -12,7 +12,8 @@
    'knoepfeVorlesen': true/false — Antwortknöpfe durch langes Drücken vorlesen; ohne Angabe überall ausser in
    Deutsch (dort sind Buchstaben und Wörter auf den Knöpfen Stoff).
    'art': wie das Kind antwortet, die wichtigste Art zuerst (Schlüssel aus SPIELWEISEN; Entscheid SP1 a,
-   LERN_Session11) — für die Spieltabelle im Portal; das Testskript prüft, dass jedes Spiel sie trägt. */
+   LERN_Session11) — für die Spieltabelle im Portal; das Testskript prüft, dass jedes Spiel sie trägt.
+   'mix': false — nie im Zufallsmix, weil eine Aufgabe ein ganzes Rätsel ist (Sudoku; Entscheid ZM1 b, LERN_Session40). */
 
 // bild: Zeichen des Themas für seinen Block im Tab Spiele (Entscheid GR1 a, LERN_Session32); name kurz im Block,
 // titel lang hinter ⓘ
@@ -1790,6 +1791,8 @@ const SPIELE = [
     feier: { muster: "reise", bilder: "schach", ziele: { s1: { weiss: { b6: "K", h1: "T" }, schwarz: { b8: "K" }, zuege: [["h1", "h8"]] }, s2: { weiss: { b6: "K", h1: "D" }, schwarz: { a8: "K" }, zuege: [["h1", "h8"]] }, s3: { weiss: { e1: "K", a7: "T", h1: "T" }, schwarz: { e8: "K" }, zuege: [["h1", "h8"]] }, s4: { weiss: { g6: "K", e7: "S", c7: "L" }, schwarz: { h8: "K" }, zuege: [["c7", "e5"]] }, s5: { weiss: { a1: "K", g5: "S" }, schwarz: { h8: "K", g8: "T", g7: "B", h7: "B" }, zuege: [["g5", "f7"]] }, s6: { weiss: { g1: "K", c4: "D", h6: "S" }, schwarz: { h8: "K", d8: "T", g7: "B", h7: "B" }, zuege: [["c4", "g8"], ["d8", "g8"], ["h6", "f7"]] } } } },
   // Sudoku-Familie (LERN-56, SU1 a–SU3 a; Baustein spiele/gemeinsam/sudoku.js): erstes Spiel, Basisklasse 4 (SU1 a)
   { id: "zahlen-sudoku", art: ["antippen"], klasse: 4, neu: "LERN_Session40", bild: "#️⃣", name: "Zahlen-Sudoku", thema: "logik", farbe: "var(--deko-5)",
+    // nicht im Zufallsmix (Entscheid ZM1 b, LERN_Session40): ein ganzes Rätsel ist keine Kurzaufgabe
+    mix: false,
     pfad: "spiele/zahlen-sudoku/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 90, s2: 120, s3: 240, s4: 300, s5: 600, s6: 900 },
     beschreibung: "Jede Zahl genau einmal in jeder Zeile, Spalte und jedem Kasten — von 4 × 4 bis 9 × 9",
     lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }],

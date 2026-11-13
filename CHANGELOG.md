@@ -2339,3 +2339,6 @@
     `docs/eulenpfad/lernziele/lehrplan_sg_session40.md`; Ideenliste weiterer Logikrätsel
     `docs/eulenpfad/spielideen/logikraetsel.md` (Zusatz Patrik zu SU2 a).
   - Rahmen: `def.anzahl` auch je Stufe (`{ s1: 3, …, s6: 1 }`), ein 9 × 9 ist allein eine Runde.
+  - **Entscheid ZM1 b:** Sudoku nicht im Zufallsmix — Katalogfeld `mix: false`, `mix.js` nimmt solche Spiele nie
+    (auch nicht im Übertritts-Check), das Testskript lässt sie im Mix aus (rahmen.md 9). Grund: eine Aufgabe ist ein
+    ganzes Rätsel (90 s bis 15 min), die übrigen Spiele brauchen in Stufe 3 im Median 20 s.
