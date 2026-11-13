@@ -2678,15 +2678,18 @@ const LS = (() => {
       // Ähnliche Spiele (Wunsch Patrik, LERN_Session10): die Startseite zeigt sie als Liste (start/spiele.js, ?aehnlich=).
       karte.append(el("div", { class: "knopfzeile" }, hatRegeln(def.id) ? regelnLink(false) : null,
         el("a", { class: "knopf hell klein", href: `${START}?aehnlich=${def.id}#spiele`, text: "🔗 Ähnliche Spiele" })));
-      // Inhalte prüfen (LP1 a, LP4 a, LERN_Session11): Aufsicht, Lehrperson und Entwicklung sehen je eigene Liste des
-      // Spiels einen Knopf, sobald das Spiel eine pruefung.js hat; ?pruefen=<liste> öffnet sie gleich (Verwaltung).
+      // Inhalte prüfen (LP1 a, LP4 a, LERN_Session11): Aufsicht und Lehrperson sehen je eigene Liste des Spiels einen
+      // kleinen Knopf, sobald das Spiel eine pruefung.js hat; im Entwickler-Modus nicht — dort stehen die Listen in der
+      // Entwickler-Leiste, auf jeder Seite des Spiels (DP1 a, LERN_Session38). ?pruefen=<liste> öffnet sie in beiden
+      // Rollen gleich (Verwaltung).
       const eigeneListen = spielListen(def.id).filter(l => !l.von);
-      if (eigeneListen.length && (istAufsicht(name) || LS.entwicklung?.aktiv?.())) {
+      const entwickler = !!LS.entwicklung?.aktiv?.();
+      if (eigeneListen.length && (istAufsicht(name) || entwickler)) {
         ladeSkript("pruefung.js").then(() => {
           const defs = pruefungDefinition(def.id);
           if (!defs || !document.body.contains(karte)) return;
           const mit = eigeneListen.filter(l => defs[l.id]);
-          if (mit.length) karte.append(el("div", { class: "knopfzeile pruef-zeile" }, el("span", { class: "leise", text: "🔍 Inhalte prüfen:" }),
+          if (mit.length && !entwickler) karte.append(el("div", { class: "knopfzeile pruef-zeile" }, el("span", { class: "leise", text: "🔍 Inhalte prüfen:" }),
             ...mit.map(l => el("button", { type: "button", class: "knopf hell klein", text: `${l.geprueft ? "✓" : "○"} ${l.name}`, onclick: () => listenPruefen(def.id, l.id) }))));
           const gefragt = new URLSearchParams(location.search).get("pruefen");
           if (gefragt && mit.some(l => l.id === gefragt)) listenPruefen(def.id, gefragt);

@@ -2234,6 +2234,13 @@
   `listenpruefung.js` (`inhaltVon`, `opt.lokal.alle`), Entwickler-Server und `entwicklung_abgleich.py` speichern `zeile`
   und `zellen` (geprüft, Ungültiges fällt weg), Eulenpfad und Lernsteig binden die lokalen Haken aller Listen an, Stil
   `pruef-bekannt` in beiden Apps. Neu `tools/haken_nachtragen.js`: 252 bisherige Haken nachgetragen. Tests in
-  `pruefe_kern.js` und `pruefe_server.py`. Wetter und Jahreszeiten
+  `pruefe_kern.js` und `pruefe_server.py`. ÜB2 a: Zeilen aus lauter bekannten Zellen werden nicht übernommen, nur grau
+  — eine Zeile sagt etwas über den Zusammenhang ihrer Zellen (über alle Spiele 1089 solche Zeilen).
+- **Prüfansicht: zugeklappte Gruppen (Hinweis Patrik, Kern 1.45.1):** Ganz geprüfte Gruppen sind beim Öffnen zu (LP1 a),
+  ohne Pfeil war aber nicht zu sehen, dass man sie aufklappen kann, und „↺ alle aufheben“ liess sie zu. Jetzt ein Pfeil
+  ▸/▾ vor jeder Gruppe (Stile beider Apps), und „alle aufheben“ klappt die Gruppe samt Untergruppen auf.
+- **„🔍 Inhalte prüfen“ auf dem Startblatt (DP1 a):** im Entwickler-Modus weggelassen — die Listen stehen in der
+  Entwickler-Leiste, auf jeder Seite des Spiels; für Aufsicht und Lehrperson kleine Knöpfe nebeneinander statt der
+  grossen Spielknöpfe (`.pruef-zeile` in stil.css). `?pruefen=<liste>` öffnet die Liste in beiden Rollen. Wetter und Jahreszeiten
   (wetter-jahreszeiten): 🌅, Korb Herbst 🍄, 🌿, kahler Laubbaum als Zeichnung (`bilder.js`, baumKahl), 🩱 Badekleid;
   bilder.js eingebunden.

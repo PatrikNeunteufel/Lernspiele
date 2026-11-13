@@ -3,6 +3,11 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.45.1 — 2026-11-13 (LERN_Session38)
+- `listenpruefung.js`: „↺ alle aufheben“ klappt die Gruppe samt Untergruppen auf. Vorher blieb eine ganz geprüfte,
+  zugeklappte Gruppe nach dem Aufheben zu, und ihre Einträge waren nicht zu sehen (Hinweis Patrik). Dazu in den Stilen
+  beider Apps ein Pfeil ▸/▾ vor jeder Gruppe (`display: flex` an `summary` hatte ihn verschwinden lassen).
+
 ## 1.45.0 — 2026-11-13 (LERN_Session38)
 - `listenpruefung.js`, schon geprüft (Entscheid ÜB1 a): Jeder Haken trägt Fingerabdrücke `zeile` (Spalten, Prüffrage,
   Zellen und Bild zusammen) und `zellen` (je Zelle und das Bild), nie den Wortlaut. Zellen, die dieselbe Person in einer

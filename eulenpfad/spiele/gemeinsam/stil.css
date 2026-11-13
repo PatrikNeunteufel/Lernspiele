@@ -640,6 +640,10 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 /* Farbe als Inhalt einer Liste (Bemerkung 36): Feld in der Farbe vor dem Code, mit Rand für helle Farben wie Weiss */
 .pruef-farbfeld { display: inline-block; width: 1.4em; height: 1.4em; margin-right: 6px; vertical-align: -0.35em; border-radius: 50%; border: 1px solid var(--text-leise); }
 .listen-dialog .knopf.klein { min-height: 34px; padding: 2px 10px; font-size: 15px; }
+/* Startblatt, „🔍 Inhalte prüfen“ der Aufsicht (DP1 a, LERN_Session38): kleine Knöpfe nebeneinander statt der grossen
+   Spielknöpfe — sie sind für Erwachsene, nicht für Kinderfinger */
+.knopfzeile.pruef-zeile { justify-content: flex-start; gap: 6px; }
+.pruef-zeile .knopf.klein { min-height: 34px; width: auto; padding: 2px 10px; font-size: 14px; font-weight: 700; }
 .listen-dialog textarea { font: inherit; width: 100%; border-radius: 10px; border: 2px solid var(--rand); padding: 8px; }
 /* Prüfansicht je Eintrag (listenpruefung.js, LERN_Session11): Linien zwischen den Zeilen, Spalten so breit wie ihr
    Inhalt, Abschnitte und Gruppen aufklappbar (ganz geprüfte zu). */
@@ -647,6 +651,10 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 .pruef-gruppe { border: 2px solid var(--trennlinie); border-radius: 12px; margin: 8px 0; padding: 4px 10px; background: var(--karte); }
 .pruef-gruppe.fertig { border-color: var(--trennlinie-fertig); }
 .pruef-gruppe > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
+/* display: flex nimmt der Zusammenfassung ihren Pfeil — ohne ihn sah man nicht, dass sich eine geprüfte, zugeklappte
+   Gruppe öffnen lässt (Hinweis Patrik LERN_Session38) */
+.pruef-gruppe > summary::before { content: "▸"; color: var(--leise); }
+.pruef-gruppe[open] > summary::before { content: "▾"; }
 .pruef-gruppe .pruef-gruppe { margin-left: 4px; }
 .pruef-zahl { color: var(--text-leise); font-size: 14px; }
 .pruef-rahmen { overflow-x: auto; }

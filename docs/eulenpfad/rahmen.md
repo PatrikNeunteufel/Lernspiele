@@ -900,8 +900,9 @@ Kern 1.31.0 in `kern/listenpruefung.js` (LK1 a, docs/kern/rahmen.md 4.27), `spie
   `eintraege()` (Rohdaten wie im Spiel), `zeile(e)` (Zellen), `gruppe?(e)` (Untergruppen), `bild?(e)` (Bild, vom Spiel
   gezeichnet). Eine Liste mit gemischtem Inhalt bekommt mehrere Abschnitte; jeder ist für sich abzuhaken.
 - **Laden:** Die Spielseite bindet nichts zusätzlich ein. `LS.listenPruefen(spiel, liste)` lädt `listenpruefung.js` und
-  `pruefung.js` nach und öffnet die Ansicht — vom Startblatt („🔍 Inhalte prüfen“, Aufsicht und Entwicklung), aus der
-  Entwickler-Leiste und über `?pruefen=<liste>` (Verwaltung → Freigabe, „🔍 prüfen“). Ohne pruefung.js bleibt die alte
+  `pruefung.js` nach und öffnet die Ansicht — vom Startblatt („🔍 Inhalte prüfen“, kleine Knöpfe nur für Aufsicht und
+  Lehrperson; im Entwickler-Modus nicht, DP1 a), aus der Entwickler-Leiste und über `?pruefen=<liste>` (Verwaltung →
+  Freigabe, „🔍 prüfen“, in beiden Rollen). Ohne pruefung.js bleibt die alte
   Tabelle aus `docs/eulenpfad/pruefung/listen.json` (nur Entwickler-Modus).
 - **Haken je Eintrag** hängen am Fingerabdruck von Abschnitt und Rohdaten (`<abschnitt>:<cyrb53>`): Ändert sich ein
   Eintrag, ist sein Haken weg. Abschnitte und Gruppen klappen auf und zu; ganz geprüfte sind beim Öffnen zu. „✓ alle“ je
@@ -910,7 +911,8 @@ Kern 1.31.0 in `kern/listenpruefung.js` (LK1 a, docs/kern/rahmen.md 4.27), `spie
 - **Schon geprüft** (ÜB1 a, LERN_Session38, Kern 1.45.0): Jeder Haken trägt Fingerabdrücke `zeile` (Spalten, Prüffrage,
   Zellen, Bild) und `zellen` (je Zelle und das Bild). Was dieselbe Person schon in einer anderen Zeile oder Liste abgehakt
   hat, steht grau („schon geprüft“); eine genau gleiche Zeile gilt als geprüft („✓ übernommen“, aufhebbar). Bekannte
-  Zellen allein haken nie ab. Alte Haken ohne Fingerabdrücke trägt `node tools/haken_nachtragen.js` nach.
+  Zellen allein haken nie ab (ÜB2 a: eine Zeile sagt etwas über den Zusammenhang ihrer Zellen). Alte Haken ohne
+  Fingerabdrücke trägt `node tools/haken_nachtragen.js` nach.
 - **Entwicklung** (Entwickler-Modus): Haken in `spiele/gemeinsam/pruefstand-eintraege.json`; ist alles abgehakt, steht die
   Liste in `pruefstand.js` mit `hash` (Fingerabdruck der ganzen Liste). Bemerkungen je Eintrag (mit `schluessel`) stehen
   in der Ansicht und lassen sich entfernen (Status „erledigt … (in der Prüfansicht entfernt)“).

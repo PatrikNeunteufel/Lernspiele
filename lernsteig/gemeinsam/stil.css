@@ -59,6 +59,9 @@ button, input { font: inherit; color: inherit; }
 .pruef-gruppe { border: 2px solid var(--trennlinie); border-radius: 12px; margin: 8px 0; padding: 4px 10px; background: var(--karte); }
 .pruef-gruppe.fertig { border-color: var(--gut); }
 .pruef-gruppe > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
+/* display: flex nimmt der Zusammenfassung ihren Pfeil — ohne ihn sieht man nicht, dass sich eine Gruppe öffnen lässt */
+.pruef-gruppe > summary::before { content: "▸"; color: var(--leise); }
+.pruef-gruppe[open] > summary::before { content: "▾"; }
 .pruef-zahl { color: var(--leise); font-size: 14px; }
 .pruef-rahmen { overflow-x: auto; }
 .pruef-tabelle { border-collapse: collapse; width: auto; min-width: 100%; font-size: 15px; }

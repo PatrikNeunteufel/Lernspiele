@@ -243,6 +243,8 @@
           const an = !eintraege.every(e => meine[e.schluessel]);
           for (const e of eintraege) if (!(an && bemerkungZu(e).length)) setze(e, an);
           for (const k of kaestchen) if (eintraege.includes(k.e)) k.box.checked = !!meine[k.e.schluessel];
+          // Aufgehoben: aufklappen, auch die Untergruppen — sonst sieht man die Einträge nicht (Hinweis Patrik LERN_Session38)
+          if (!an) { d.open = true; for (const u of d.querySelectorAll("details")) u.open = true; }
           aktualisiereGruppen(); merke();
         });
         gruppen.push(g);

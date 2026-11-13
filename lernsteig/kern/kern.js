@@ -1,4 +1,4 @@
-/* kern 1.45.0 · Prüfsumme sha256:596ff321bdbabf198c14ee52191c92bdfb3aae0cb8c8a4c17cc9b8627a198e57 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.45.0 · Prüfsumme sha256:07dd19ef4a5207650428d812b9c5727f59b5ae03eb6d1af7ac1743f409d14ad4 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -4698,6 +4698,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
           const an = !eintraege.every(e => meine[e.schluessel]);
           for (const e of eintraege) if (!(an && bemerkungZu(e).length)) setze(e, an);
           for (const k of kaestchen) if (eintraege.includes(k.e)) k.box.checked = !!meine[k.e.schluessel];
+          // Aufgehoben: aufklappen, auch die Untergruppen — sonst sieht man die Einträge nicht (Hinweis Patrik LERN_Session38)
+          if (!an) { d.open = true; for (const u of d.querySelectorAll("details")) u.open = true; }
           aktualisiereGruppen(); merke();
         });
         gruppen.push(g);
