@@ -59,6 +59,9 @@ const THEMEN = [
   { id: "erzaehlen", bild: "📚", fach: "Deutsch", name: "Erzählen", titel: "Geschichten in der richtigen Abfolge ordnen und nacherzählen", quelle: "Lehrplan SG D.3.B.1, D.4.D.1" },
   { id: "gemeinschaft", bild: "🏘️", fach: "NMG", name: "Gemeinschaft", titel: "Zusammenleben in der Gemeinde und öffentliche Einrichtungen", quelle: "Lehrplan SG NMG.10.3" },
   { id: "englisch-dialog", bild: "👋", fach: "Englisch", name: "Dialoge", titel: "Kontakt aufnehmen: begrüssen, fragen, antworten, bestellen", quelle: "Lehrplan SG FS1E.3.A.1" },
+  // Sudoku-Familie (LERN-56, SU2 a, LERN_Session13): logisches Schliessen ohne Gegner; das Sudoku-Duell gehört zu Strategie.
+  // Lernziel als Annahme (docs/eulenpfad/lernziele/lehrplan_sg_session40.md, mit dem Lehrplan abzugleichen)
+  { id: "logik", bild: "🧠", fach: "Mathe", name: "Logikrätsel", titel: "Sudoku und andere Rätsel: logisch schliessen und begründen", quelle: "Lehrplan SG MA.1.B.1 (Annahme)" },
 ];
 
 /** Fächer in der Reihenfolge der Themen (Startseite, Zufallsmix). */
@@ -1785,6 +1788,21 @@ const SPIELE = [
     lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }],
     // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "reise", bilder: "schach", ziele: { s1: { weiss: { b6: "K", h1: "T" }, schwarz: { b8: "K" }, zuege: [["h1", "h8"]] }, s2: { weiss: { b6: "K", h1: "D" }, schwarz: { a8: "K" }, zuege: [["h1", "h8"]] }, s3: { weiss: { e1: "K", a7: "T", h1: "T" }, schwarz: { e8: "K" }, zuege: [["h1", "h8"]] }, s4: { weiss: { g6: "K", e7: "S", c7: "L" }, schwarz: { h8: "K" }, zuege: [["c7", "e5"]] }, s5: { weiss: { a1: "K", g5: "S" }, schwarz: { h8: "K", g8: "T", g7: "B", h7: "B" }, zuege: [["g5", "f7"]] }, s6: { weiss: { g1: "K", c4: "D", h6: "S" }, schwarz: { h8: "K", d8: "T", g7: "B", h7: "B" }, zuege: [["c4", "g8"], ["d8", "g8"], ["h6", "f7"]] } } } },
+  // Sudoku-Familie (LERN-56, SU1 a–SU3 a; Baustein spiele/gemeinsam/sudoku.js): erstes Spiel, Basisklasse 4 (SU1 a)
+  { id: "zahlen-sudoku", art: ["antippen"], klasse: 4, neu: "LERN_Session40", bild: "#️⃣", name: "Zahlen-Sudoku", thema: "logik", farbe: "var(--deko-5)",
+    pfad: "spiele/zahlen-sudoku/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 90, s2: 120, s3: 240, s4: 300, s5: 600, s6: 900 },
+    beschreibung: "Jede Zahl genau einmal in jeder Zeile, Spalte und jedem Kasten — von 4 × 4 bis 9 × 9",
+    lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (feier.js, BAUEN · sudoku): das Rätsel der Stufe füllt sich Feld um Feld
+    feier: { muster: "bauen", bilder: "sudoku", ziele: {
+      s1: { n: 4, kh: 2, kb: 2, loesung: "1423234141323214", leer: [2, 4, 6, 8, 11, 12] },
+      s2: { n: 4, kh: 2, kb: 2, loesung: "4321213434121243", leer: [1, 2, 4, 5, 6, 8, 9, 10, 13, 14] },
+      s3: { n: 6, kh: 2, kb: 3, loesung: "163524524631452163631245316452245316", leer: [0, 1, 4, 5, 6, 10, 11, 16, 19, 20, 21, 25, 26, 30, 32, 33, 34, 35] },
+      s4: { n: 6, kh: 2, kb: 3, loesung: "654123123456231564465312312645546231", leer: [0, 3, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 21, 22, 23, 24, 28, 30, 31, 32, 34] },
+      s5: { n: 9, kh: 3, kb: 3, loesung: "591386742823417596674952183789524631165893274342761958417239865956148327238675419",
+        leer: [2, 4, 6, 9, 10, 11, 13, 15, 18, 19, 21, 22, 25, 26, 27, 28, 30, 32, 33, 34, 35, 37, 38, 41, 42, 46, 47, 52, 54, 55, 58, 59, 62, 63, 65, 66, 68, 69, 70, 71, 72, 73, 75, 76, 77] },
+      s6: { n: 9, kh: 3, kb: 3, loesung: "613594827845372169972168534759816342134259786286437915367921458421785693598643271",
+        leer: [0, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 24, 26, 28, 29, 30, 31, 33, 34, 35, 37, 38, 41, 43, 46, 49, 50, 53, 54, 56, 57, 58, 60, 61, 62, 64, 65, 66, 67, 68, 69, 70, 72, 73, 75, 77, 79, 80] } } } },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */
@@ -1803,7 +1821,7 @@ const LERNZIELE = [
   { lz: "MA.1.A.2", niveau: "Lehrplan SG", text: "Zahlen und Brüche ordnen, auf dem Zahlenstrahl zeigen und ablesen, Ergebnisse überschlagen" },
   { lz: "MA.1.A.4", niveau: "Lehrplan SG", text: "Anzahlen angleichen; Rechengesetze und Rechentricks nutzen; auf Zehner, Hunderter und Tausender runden" },
   { lz: "MA.1.C.2", niveau: "Lehrplan SG", text: "Rechnungen und Brüche veranschaulichen: Stellenwert legen, Malkreuz, Kreis- und Rechteckmodell" },
-  { lz: "MA.1.B.1", niveau: "Lehrplan SG", text: "Zahlenmauern und offene Aufgaben: Summen, Produkte und Operationen erforschen" },
+  { lz: "MA.1.B.1", niveau: "Lehrplan SG", text: "Zahlenmauern und offene Aufgaben: Summen, Produkte und Operationen erforschen; Beziehungen erforschen und heuristische Strategien verwenden (Sudoku)" },
   { lz: "MA.1.B.2", niveau: "Lehrplan SG", text: "Division mit Rest mit der Umkehraufgabe begründen; Ergebnisse mit Umkehraufgabe und Überschlag prüfen" },
   { lz: "MA.2.A.2", niveau: "Lehrplan SG", text: "Figuren im Raster spiegeln, symmetrisch ergänzen und verschieben; Körper kippen und drehen" },
   { lz: "MA.2.C.4", niveau: "Lehrplan SG", text: "Positionen und Figuren im Koordinatensystem bestimmen und zeichnen" },

@@ -4132,7 +4132,42 @@ var LS_FEIER = (function () {
     return svg;
   }
 
-  Object.assign(BILDER.bauen, { spiegelraster, formen, pixel, pentomino, wuerfelbau, netz, rechtecke, geo, zaehler, quader });
+  // ----- Sudoku-Familie (BAUEN · sudoku, LERN-56, LERN_Session40) -----
+  /**
+   * Das Rätsel der Stufe wie im Spiel: Die Vorgaben stehen, die leeren Felder füllen sich nacheinander mit ihrer Zahl.
+   * ziele je Stufe: { n, kh, kb (Kasten Höhe × Breite), loesung: "…" Zeile um Zeile, leer: [Feld …] }. Geprüft: jede Zahl
+   * 1 … n genau einmal in jeder Zeile, Spalte und jedem Kasten, leere Felder im Raster und verschieden.
+   */
+  function sudoku(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || ![4, 6, 9].includes(z.n) || z.kh * z.kb !== z.n || z.n % z.kh || z.n % z.kb) return null;
+    const n = z.n, w = [...String(z.loesung)].map(Number), leer = z.leer || [];
+    if (w.length !== n * n || w.some(v => !(v >= 1 && v <= n))) return null;
+    const kasten = i => Math.floor(Math.floor(i / n) / z.kh) * (n / z.kb) + Math.floor((i % n) / z.kb);
+    const einheit = f => Array.from({ length: n }, (_, k) => new Set(w.filter((_, i) => f(i) === k)).size === n).every(Boolean);
+    if (!einheit(i => Math.floor(i / n)) || !einheit(i => i % n) || !einheit(kasten)) return null;
+    if (!leer.length || new Set(leer).size !== leer.length || leer.some(i => !(Number.isInteger(i) && i >= 0 && i < n * n))) return null;
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "sudoku", "data-anzahl": leer.length });
+    svg.appendChild(tagGrund());
+    const c = Math.min(26, 132 / n), x0 = (BREITE - n * c) / 2, y0 = (HOEHE - n * c) / 2;
+    svg.appendChild(s("rect", { x: x0, y: y0, width: n * c, height: n * c, fill: "#ffffff" }));
+    svg.appendChild(gitter(x0, y0, n, n, c));
+    // Kästen mit kräftigen Linien wie im Spiel
+    for (let k = 0; k <= n; k += z.kb) svg.appendChild(s("line", { x1: x0 + k * c, y1: y0, x2: x0 + k * c, y2: y0 + n * c, stroke: "#2d3047", "stroke-width": 1.6 }));
+    for (let k = 0; k <= n; k += z.kh) svg.appendChild(s("line", { x1: x0, y1: y0 + k * c, x2: x0 + n * c, y2: y0 + k * c, stroke: "#2d3047", "stroke-width": 1.6 }));
+    const gross = Math.max(8, c * 0.62), mitte = i => [x0 + ((i % n) + 0.5) * c, y0 + (Math.floor(i / n) + 0.5) * c + gross * 0.36];
+    const offen = new Set(leer);
+    w.forEach((v, i) => { if (!offen.has(i)) svg.appendChild(text(...mitte(i), v, { gross })); });
+    const je = (DAUER * 0.85) / leer.length;
+    leer.forEach((i, k) => svg.appendChild(erscheine(s("g", { "data-stueck": "zahl", "data-wert": w[i] },
+      s("rect", { x: x0 + (i % n) * c + 1, y: y0 + Math.floor(i / n) * c + 1, width: c - 2, height: c - 2, rx: 2, fill: "#e3f6ea" }),
+      text(...mitte(i), w[i], { gross, farbe: "#2b6cd1" })), 0.2 + k * je, ruhig, 0.12)));
+    if (sterne >= 2) svg.appendChild(glanz(x0 + n * c + 16, y0 + 10, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(Math.max(x0 - 24, 24), 30, ruhig));
+    return svg;
+  }
+
+  Object.assign(BILDER.bauen, { spiegelraster, formen, pixel, pentomino, wuerfelbau, netz, rechtecke, geo, zaehler, quader, sudoku });
   Object.assign(BILDER.reise, { koordinaten, kipper });
   Object.assign(BILDER.sammeln, { merken });
 

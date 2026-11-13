@@ -144,7 +144,7 @@ LS.spiel({
   id: "<id>",                     // wie Ordner und Katalog
   einleitung: "…",                // sagt die Eule im Startbild
   hilfe: "…",                     // „❓ So geht das Spiel“: Bedienung dieses Spiels (oder stufe => Text), Abschnitt 14
-  anzahl: 8,                      // Aufgaben je Runde
+  anzahl: 8,                      // Aufgaben je Runde; oder je Stufe { s1: 3, …, s6: 1 } (Sudoku, LERN_Session40)
   stufen: { s1: "…", …, s6: "…" },// alle sechs Stufen mit kurzer Beschreibung ✔
   aufgabe(ctx) { … },             // zeichnet eine Aufgabe in ctx.flaeche
 });
@@ -1531,3 +1531,40 @@ AN3-K a). Zu festen Zeiten bleibt es still, etwa im Unterricht. Eingestellt in V
 - **Test:** `node tools/pruefe_spiele.js ruhe` — Regeln mit fester Uhrzeit (Wochentag, Ende ausgeschlossen, zwei
   Zeitspannen, je Spiel, Kopfhörer), ungültige Zeitspannen, Spiele mit Ton (ruht, ausgeblendet, mit Kopfhörern), ein
   Klang entsteht in der Ruhezeit nicht (WebAudio ersetzt), Abgleich und Sicherung.
+
+## 26. Sudoku-Familie (`sudoku.js`)
+
+LERN-56, Entscheide SU1 a–SU3 a (LERN_Session13), gebaut ab LERN_Session40. Ein Baustein für alle Sudoku-Spiele
+(Ideenliste und Stand: [spielideen/logikraetsel.md](spielideen/logikraetsel.md)); jede Seite lädt `../gemeinsam/sudoku.js`
+und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku/index.html`.
+
+- **Raster:** `SUDOKU.raster(n, gebiete, art)` — n × n Felder, Zahlen 1 … n, Feld i = Zeile · n + Spalte; `gebiete` je Feld
+  die Nummer seines Gebiets, für Kästen `SUDOKU.kaesten(n, kh, kb)` (Höhe × Breite: 2 × 2, 2 × 3, 3 × 3), für das
+  Gebiets-Sudoku unregelmässig (`art` „gebiet“). Für Löser und Bedienung ist beides dasselbe; die kräftigen Linien folgen
+  den Gebieten.
+- **Schritte des menschlichen Lösers** (`SUDOKU.schritt`): „einer“ — in dieses Feld passt nur noch eine Zahl;
+  „versteckt“ — diese Zahl hat in der Zeile, Spalte oder im Gebiet nur noch einen Platz. Der Generator stellt nur Rätsel,
+  die sich mit den Schritten der Stufe ganz lösen lassen; damit haben sie genau eine Lösung, und der dritte Tipp findet
+  immer ein Feld. `braucht: "versteckt"` verlangt, dass ohne diesen Schritt nicht weiterzukommen ist (Knifflig,
+  Königsstufe).
+- **Generator** (`SUDOKU.erzeuge`): volles Raster in zufälliger Ordnung (`LS.mische`, im Testskript mit Startwert), dann
+  Felder leeren, solange es lösbar bleibt, bis die Zahl der Stufe erreicht ist; unter einer Millisekunde je 9 × 9.
+- **Prüfung** (`SUDOKU.maengel` für `pruefeAufgabe`): Lösung gültig, Vorgaben passen, genau eine Lösung — unabhängig vom
+  Generator durch Probieren gezählt (`SUDOKU.zaehleLoesungen`) —, mit den Schritten der Stufe lösbar, richtige Zahl
+  leerer Felder.
+- **Bedienung** (`SUDOKU.spiel(ctx, opt)`): Feld antippen, dann eine Zahl; ✏️ schreibt Notizen (nie bewertet), ⌫ leert
+  das Feld, „✓ Fertig“ prüft. Breit steht die Zahlenleiste als Block rechts neben dem Raster, schmal in einer Reihe
+  darunter; so steht auch das 9 × 9 ganz im Bild (`tools/bildhoehe.js`). Ziffern auf der Tastatur über `LS.kurztasten`.
+- **Fehler (SU3 a):** Steht die Zahl schon in derselben Zeile, Spalte oder demselben Gebiet, wackeln beide Felder, die
+  Zahl bleibt nicht stehen, die Eule sagt, wo („Die 4 steht schon in dieser Zeile.“) — ein Fehler. Eine Zahl ohne
+  Widerspruch, die trotzdem falsch ist, zeigt erst „✓ Fertig“: die Felder leuchten, ein Fehler, das Kind korrigiert sie.
+  `ctx.falsch` ohne Lösungstext: Die Aufgabe bleibt offen, die Runde endet nicht nach drei Fehlern. Ist das letzte Feld
+  richtig gefüllt, ist die Aufgabe gelöst.
+- **Tipps:** 1. „Nicht sicher? Schreib die möglichen Zahlen klein ins Feld (✏️).“ (Zusatz Patrik zu SU3 a); 2. wie man
+  ein Feld mit nur einer Zahl oder den einzigen Platz einer Zahl sucht; 3. ein solches Feld leuchtet auf — gefunden aus
+  den Vorgaben und den richtig eingetragenen Zahlen, nie mit der Zahl.
+- **Runde:** `anzahl` je Stufe (Abschnitt 4.1): ein 9 × 9 ist allein eine Runde. Handgriffe (`ctx.schritte`): je leeres
+  Feld antippen und die Zahl, das erste Feld ist schon gewählt. Endlos in allen Stufen (EN1 a: mehr als 100 verschiedene
+  Rätsel je Stufe).
+- **Abschluss-Animation:** Bild `sudoku` im Muster BAUEN (Abschnitt 24): das Rätsel der Stufe aus dem Katalog füllt sich
+  Feld um Feld; `feier.js` prüft, dass jede Zahl je Zeile, Spalte und Kasten einmal steht.

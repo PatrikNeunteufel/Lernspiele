@@ -2326,3 +2326,16 @@
   in ihren eigenen Stilen nur, was für sie gesetzt ist; nachgeladene Skripte gehören zu den Seiten ihres Ordners. Je App
   allein hätte nicht gereicht: `eulenpfad/anleitung/anleitung.css` setzt `--leise` auch, aber keine Seite lädt es mit
   `stil.css`. Elf Gegenproben; gegen `stil.css` aus `5c953d4` meldet sie den Fehler von oben, heute keinen.
+- **Sudoku-Familie (LERN-56, SU1 a–SU3 a aus LERN_Session13), Baustein und erstes Spiel:**
+  - Baustein `spiele/gemeinsam/sudoku.js` und `sudoku.css` (rahmen.md 26): Raster mit beliebigen Gebieten, Löser durch
+    Probieren (zählt die Lösungen), menschlicher Löser mit den Schritten „einer“ und „versteckt“, Generator (nur Rätsel,
+    die sich mit den Schritten der Stufe lösen lassen; unter 1 ms je 9 × 9), Bedienung mit ✏️-Notizen, ⌫, „✓ Fertig“.
+    Fehler nach SU3 a: Widerspruch sofort (Feld wackelt, Eule sagt wo, ein Fehler), falsch ohne Widerspruch erst bei
+    „✓ Fertig“ (Felder leuchten). Drei Tipps, der erste mit ✏️ (Zusatz Patrik), der dritte zeigt ein Feld.
+  - Neues Spiel **Zahlen-Sudoku (zahlen-sudoku)**, Basisklasse 4, neu und ungeprüft: 4 × 4 mit 6 und 10 leeren Feldern,
+    6 × 6 mit 18 und 24, 9 × 9 mit 45 und 54; Knifflig und Königsstufe brauchen den Schritt „versteckt“. Endlos in allen
+    Stufen, Abschluss-Animation (Bild `sudoku` in `feier.js`).
+  - Neues Thema „🧠 Logikrätsel“ (SU2 a); Lernziel als Annahme MA.1.B.1.f und .h (Wortlaut aus strategie_raetsel.md),
+    `docs/eulenpfad/lernziele/lehrplan_sg_session40.md`; Ideenliste weiterer Logikrätsel
+    `docs/eulenpfad/spielideen/logikraetsel.md` (Zusatz Patrik zu SU2 a).
+  - Rahmen: `def.anzahl` auch je Stufe (`{ s1: 3, …, s6: 1 }`), ein 9 × 9 ist allein eine Runde.

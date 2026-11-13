@@ -695,6 +695,11 @@ const PRUEFSTAND = {
       "am": "2026-11-12",
       "von": "Patrik"
     },
+    "datei-typen/endungen": {
+      "am": "2026-11-13",
+      "hash": "1p65gadhcv7",
+      "von": "Patrik"
+    },
     "diagramm-detektiv/umfragen": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1407,6 +1412,10 @@ const PRUEFSTAND = {
     },
     "rede-zeichen": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "roboter-pfad": {
+      "am": "2026-11-13",
       "von": "Patrik"
     },
     "sachaufgaben-kompass": {

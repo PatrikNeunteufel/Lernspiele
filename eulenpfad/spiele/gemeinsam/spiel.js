@@ -2453,7 +2453,8 @@ const LS = (() => {
    * Startet ein Spiel.
    * def.id, def.titel, def.einleitung
    * def.stufen: { s1: "Beschreibung", …, s6: "…" } — welche Stufen der SKALA das Spiel anbietet
-   * def.anzahl: Aufgaben je Runde
+   * def.anzahl: Aufgaben je Runde — eine Zahl oder je Stufe { s1: 3, …, s6: 1 } (LERN_Session40: ein 9 × 9-Sudoku ist
+   *   allein eine Runde, ein 4 × 4 nicht, SU1 a)
    * def.aufgabe(ctx): zeichnet Aufgabe ctx.nr in ctx.flaeche. Ruft ctx.richtig() oder
    *   ctx.falsch(hinweis, loesungText) auf. ctx.sag(text) lässt die Eule sprechen.
    * def.lob: eigene Lobliste für richtig auf Anhieb statt LOB (LB2 a: Lob in der Fremdsprache, etwa ["Great!", "Yes!"]);
@@ -2762,14 +2763,15 @@ const LS = (() => {
       // Zeit je Aufgabe ab „bereit“ ohne Pausen, sagt, wann die Lösung kommt und die Serie vorbei ist, und baut Eintrag und
       // Rekord mit einer Liste je Aufgabe (bis LERN_Session18: aufgabenZeiten und fehlerAufgaben). Oberfläche, Uhr, Lob
       // und Sterne bleiben hier.
-      const L = KERN.runde.lauf({ endlos, anzahl: endlos || mix ? Infinity : def.anzahl });
+      const proRunde = typeof def.anzahl === "object" ? def.anzahl[stufe.id] : def.anzahl; // je Stufe (Sudoku) oder fest
+      const L = KERN.runde.lauf({ endlos, anzahl: endlos || mix ? Infinity : proRunde });
       let uhr = null;            // laufender Timer der aktuellen Aufgabe
       let aufgabeLauf = 0;       // zählt die gestellten Aufgaben; ein später Uhrstart der vorigen (ctx.uhrWarten) bleibt wirkungslos
       // Wiederholungen (Vorgabe Patrik 2026-10-31; RA5 a, RA6 a, KERN.runde.auswahl): In einer Runde kommt höchstens eine
       // Aufgabe ein zweites Mal, nie direkt hintereinander. Gibt die Stufe nicht genug verschiedene Aufgaben her, endet
       // die Runde früher (anzahl wird kleiner). Endlos: keine Aufgabe zweimal; findet sich keine neue mehr, ist alles
       // geschafft (bis LERN_Session18: keine der letzten 30).
-      let anzahl = endlos || mix ? Infinity : def.anzahl;
+      let anzahl = endlos || mix ? Infinity : proRunde;
       // Gedächtnis über Runden (Wunsch Patrik, LERN_Session11; RA5 a): je Person, Spiel und Stufe die Fingerabdrücke der
       // schon gestellten Aufgaben, auch für Serien. Eine Aufgabe kommt erst wieder, wenn (fast) alle verschiedenen einmal
       // dran waren; dann beginnt ein neuer Durchgang. Nur dieses Gerät, höchstens 400 je Stufe. Bis LERN_Session18 nach
@@ -2785,7 +2787,7 @@ const LS = (() => {
 
       const punkte = el("div", { class: "fortschritt" + (endlos ? " endlos" : "") });
       if (endlos) punkte.textContent = "♾ 0";
-      else for (let i = 0; i < def.anzahl; i++) punkte.append(el("span"));
+      else for (let i = 0; i < proRunde; i++) punkte.append(el("span"));
       const karte = el("div", { class: "karte" });
       const flaeche = el("div");
       // Notizen (NZ1 a): wurden in dieser Aufgabe Notizfelder angeboten, und hat das Kind eines benutzt?

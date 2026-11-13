@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlen-Sudoku</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/sudoku.css">
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>#️⃣ Zahlen-Sudoku</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../../version.js"></script>
+<script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/sudoku.js"></script>
+<script>
+"use strict";
+// Sudoku-Familie (LERN-56, SU1 a–SU3 a, LERN_Session13): das Zahlen-Sudoku, Basisklasse 4. Lernziel als Annahme
+// (docs/eulenpfad/lernziele/lehrplan_sg_session40.md): Lehrplan SG MA.1.B.1.f „erforschen Beziehungen“ (Stufe 1–4),
+// .h „heuristische Strategien verwenden … Annahmen treffen“ (Stufe 5–6).
+// Regel: Jede Zahl steht in jeder Zeile, jeder Spalte und jedem Kasten genau einmal.
+
+// Je Stufe: Grösse n, Kasten kh × kb, leere Felder, erlaubte Schritte (einer: ein Feld mit nur einer möglichen Zahl;
+// versteckt: eine Zahl mit nur einem Platz in Zeile, Spalte oder Kasten), braucht: dieser Schritt muss vorkommen.
+// Die Leerzahlen sind gemessen (LERN_Session40): mit „versteckt“ nötig gelingt 6 × 6 bis 24 leere Felder sicher.
+const STUFE = {
+  s1: { n: 4, kh: 2, kb: 2, leer: 6, techniken: ["einer"] },                                  // 3. Klasse
+  s2: { n: 4, kh: 2, kb: 2, leer: 10, techniken: ["einer", "versteckt"] },
+  s3: { n: 6, kh: 2, kb: 3, leer: 18, techniken: ["einer", "versteckt"] },                    // Klassenziel
+  s4: { n: 6, kh: 2, kb: 3, leer: 24, techniken: ["einer", "versteckt"], braucht: "versteckt" },
+  s5: { n: 9, kh: 3, kb: 3, leer: 45, techniken: ["einer", "versteckt"] },                    // 5. Klasse
+  s6: { n: 9, kh: 3, kb: 3, leer: 54, techniken: ["einer", "versteckt"], braucht: "versteckt" }, // Königsstufe
+};
+const RASTER = {};
+const rasterDer = stufe => {
+  const p = STUFE[stufe];
+  return (RASTER[stufe] = RASTER[stufe] || SUDOKU.raster(p.n, SUDOKU.kaesten(p.n, p.kh, p.kb)));
+};
+const regel = p => ({ leer: p.leer, techniken: new Set(p.techniken), braucht: p.braucht || null });
+
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  const a = SUDOKU.erzeuge(rasterDer(stufe), { ...regel(p), mische: LS.mische, versuche: 300 });
+  if (!a) throw new Error(`Zahlen-Sudoku ${stufe}: kein Rätsel gefunden`);
+  return a;
+}
+
+/** Mängel: Lösung gültig, Vorgaben passen, genau eine Lösung (durch Probieren gezählt), mit den Schritten der Stufe lösbar. */
+function pruefeAufgabe(a, stufe) {
+  return SUDOKU.maengel(rasterDer(stufe), a, regel(STUFE[stufe]));
+}
+
+LS.spiel({
+  id: "zahlen-sudoku",
+  einleitung: "Fülle das Sudoku! Jede Zahl steht in jeder Zeile, jeder Spalte und jedem Kasten genau einmal.",
+  hilfe: "Tipp auf ein leeres Feld, dann auf eine Zahl unten. Mit ✏️ schreibst du kleine Zahlen als Notiz ins Feld. ⌫ leert das Feld. Sind alle Felder voll, drückst du „✓ Fertig“.",
+  anzahl: { s1: 3, s2: 3, s3: 2, s4: 2, s5: 1, s6: 1 },
+  stufen: {
+    s1: "4 × 4 mit vielen Zahlen — in jedes leere Feld passt nur eine.",
+    s2: "4 × 4 mit wenigen Zahlen.",
+    s3: "6 × 6 mit Kästen aus 2 × 3 Feldern.",
+    s4: "6 × 6 mit wenigen Zahlen — such für eine Zahl ihren einzigen Platz.",
+    s5: "Das grosse Sudoku: 9 × 9.",
+    s6: "Endgegner: 9 × 9 mit wenigen Zahlen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const { loesung, vorgabe } = aufgabeErzeugen(ctx.stufe);
+    SUDOKU.spiel(ctx, {
+      raster: rasterDer(ctx.stufe), vorgabe, loesung,
+      auftrag: `Jede Zahl von 1 bis ${p.n} einmal in jeder Zeile, Spalte und jedem Kasten.`,
+    });
+    if (ctx.nr === 0) ctx.sag("Tipp auf ein leeres Feld. Welche Zahl fehlt dort noch?");
+  },
+});
+</script>
+</body>
+</html>

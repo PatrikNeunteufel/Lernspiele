@@ -1,0 +1,75 @@
+/* Sudoku-Familie (LERN-56, SU1 a–SU3 a): Raster, Zahlenleiste und Werkzeuge des Bausteins spiele/gemeinsam/sudoku.js.
+   Geladen nach stil.css von jeder Sudoku-Seite; nur Farben aus stil.css und kern.css (DM4 a). */
+
+.sd-auftrag { text-align: center; color: var(--text-leise); font-size: 15px; margin: 0 0 8px; }
+
+/* Raster und Steuerung: breit nebeneinander (Zahlen als Tastenblock rechts), schmal untereinander (Zahlen in einer
+   Reihe). So steht die ganze Aufgabe im Bild (BH3 a), auch das 9 × 9. */
+.sd-spiel { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 28px; }
+.sd-steuerung { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: 200px; }
+
+/* Feldgrösse nach Breite und Bildhöhe (H1 a: mit Untergrenze), höchstens 68 px */
+.sd-brett {
+  --sd-zelle: clamp(30px, min(calc((100vw - 360px) / var(--sd-n)), calc((100vh - 350px) / var(--sd-n))), 68px);
+  display: grid;
+  grid-template-columns: repeat(var(--sd-n), var(--sd-zelle));
+  width: max-content;
+}
+@media (max-width: 699px) {
+  .sd-auftrag { font-size: 13px; margin-bottom: 4px; }
+  .sd-spiel { flex-direction: column; gap: 8px; }
+  .sd-steuerung { width: min(100%, 520px); gap: 6px; }
+  .sd-brett { --sd-zelle: clamp(30px, min(calc((100vw - 56px) / var(--sd-n)), calc((100vh - 500px) / var(--sd-n))), 68px); }
+}
+.sd-feld {
+  width: var(--sd-zelle);
+  height: var(--sd-zelle);
+  padding: 0;
+  border: 1px solid var(--rand);
+  background: var(--k-feld);
+  color: var(--knopf);
+  font-family: inherit;
+  font-size: calc(var(--sd-zelle) * .56);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+/* Ränder der Kästen und Gebiete kräftig (aus den Gebieten gesetzt, auch unregelmässige) */
+.sd-feld.sd-oben { border-top: 3px solid var(--text); }
+.sd-feld.sd-links { border-left: 3px solid var(--text); }
+.sd-feld.sd-unten { border-bottom: 3px solid var(--text); }
+.sd-feld.sd-rechts { border-right: 3px solid var(--text); }
+.sd-feld.sd-vorgabe { color: var(--text); font-weight: 900; cursor: default; opacity: 1; }
+.sd-feld.sd-nachbar { background: var(--feld-leise); }
+.sd-feld.sd-gleich { background: var(--gut-hell); }
+.sd-feld.sd-gewaehlt { background: var(--aktiv); box-shadow: inset 0 0 0 3px var(--knopf); }
+.sd-feld.sd-leuchtet { background: var(--hinweis-hell); }
+.sd-feld.sd-tipp { box-shadow: inset 0 0 0 4px var(--gut); }
+.sd-feld.falsch { animation: wackeln .4s; }
+.sd-brett.sd-notizmodus .sd-feld:not(.sd-vorgabe) { cursor: cell; }
+.sd-brett.sd-geloest .sd-feld { background: var(--gut-hell); }
+
+/* Notizen: kleine Zahlen im Feld, 2 × 2 beim 4 × 4, sonst 3 Spalten */
+.sd-notizen {
+  display: grid;
+  grid-template-columns: repeat(var(--sd-nk, 3), 1fr);
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  font-size: max(10px, calc(var(--sd-zelle) * .24));
+  font-weight: 700;
+  color: var(--text-leise);
+}
+
+/* Zahlen: breit ein Block mit 2 (4 × 4) oder 3 Spalten, schmal alle in einer Reihe */
+.sd-zahlen { display: grid; grid-template-columns: repeat(var(--sd-tasten, 3), 58px); justify-content: center; gap: 6px; }
+.sd-zahl { height: 52px; min-width: 0; padding: 0; font-size: 22px; font-weight: 800; }
+.sd-werkzeuge { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+@media (max-width: 699px) {
+  .sd-zahlen { grid-template-columns: repeat(var(--sd-n), minmax(0, 1fr)); gap: 4px; }
+  .sd-zahl { height: 42px; font-size: 20px; }
+  /* die drei Werkzeuge in einer Reihe: eine zweite kostete 55 px Bildhöhe */
+  .sd-werkzeuge { flex-wrap: nowrap; gap: 6px; }
+  .sd-werkzeug { flex: 1 1 0; min-width: 0; padding-inline: 6px; font-size: 17px; white-space: nowrap; }
+}
+.sd-werkzeug.an { background: var(--knopf); color: var(--k-knopf-text); }
