@@ -2377,7 +2377,7 @@ Jahrzahlen bitte nachprüfen.
 | 1291 | 1291 | 📜 | Uri, Schwyz und Unterwalden schliessen den Bundesbrief | Mittelalter | ☐ |
 | 1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
 | 1492 | 1492 | svg:karavelle | Kolumbus erreicht Amerika | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
-| 1803 | 1803 | 🏛️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
+| 1803 | 1803 | 🗺️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
 | 1847 | 1847 | 🚂 | Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden | Neuzeit | ☐ |
 | 1848 | 1848 | svg:schweiz | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
 | 1886 | 1886 | svg:motorwagen | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
@@ -2407,9 +2407,9 @@ Jahrzahlen bitte nachprüfen.
 | Steinzeit | svg:pfahlbau | Pfahlbauten am Seeufer | ☐ |
 | Römerzeit | svg:roemerstrasse | Soldaten bauen Strassen über die Alpenpässe | ☐ |
 | Römerzeit | 🏺 | In Augusta Raurica wohnen Römer | ☐ |
-| Mittelalter | 🏰 | Ritter wohnen auf Burgen | ☐ |
+| Mittelalter | 🛡️ | Ritter wohnen auf Burgen | ☐ |
 | Mittelalter | 📜 | Mönche schreiben Bücher von Hand ab | ☐ |
-| Neuzeit | 🏭 | In Fabriken arbeiten Maschinen | ☐ |
+| Neuzeit | ⚙️ | In Fabriken arbeiten Maschinen | ☐ |
 | Neuzeit | 🚂 | Die ersten Eisenbahnen fahren | ☐ |
 | Neuzeit | 💡 | Die Häuser bekommen elektrisches Licht | ☐ |
 

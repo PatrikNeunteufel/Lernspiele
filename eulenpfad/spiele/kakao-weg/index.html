@@ -101,13 +101,14 @@ const WEGE_FREI = LS.spielListen(ID).length ? LS.freieListen(ID).includes("wege"
 const PRODUKTE = WEGE_FREI ? WEGE : [];
 const produkt = id => WEGE.find(p => p.id === id);
 
-/** Wer einen Schritt macht (Feld „wer“ in woerter.js). */
+/** Wer einen Schritt macht (Feld „wer“ in woerter.js). Kein Korbbild ist das Bild eines Schritts (BI1 a,
+    LERN_Session38: vorher Lastwagen 🚚 → Korb 🚚 Transport, Laden 🏪 → Korb 🏪 Laden). */
 const WER = {
   hof: { bild: "🧑‍🌾", text: "Landwirtschaft", klein: "Bauernhof, Plantage, Wald" },
-  fabrik: { bild: "🏭", text: "Fabrik, Werkstatt", klein: "Mühle, Käserei, Bäckerei …" },
-  transport: { bild: "🚚", text: "Transport", klein: "Lastwagen, Zug, Schiff" },
-  gross: { bild: "🏬", text: "Grossverteiler", klein: "Lager, Verteilzentrum" },
-  laden: { bild: "🏪", text: "Laden", klein: "Verkauf" },
+  fabrik: { bild: "🛠️", text: "Fabrik, Werkstatt", klein: "Mühle, Käserei, Bäckerei …" },
+  transport: { bild: "🛣️", text: "Transport", klein: "Lastwagen, Zug, Schiff" },
+  gross: { bild: "🗄️", text: "Grossverteiler", klein: "Lager, Verteilzentrum" },
+  laden: { bild: "🏷️", text: "Laden", klein: "Verkauf" },
   haushalt: { bild: "🏠", text: "Haushalt", klein: "wir kaufen ein" },
 };
 

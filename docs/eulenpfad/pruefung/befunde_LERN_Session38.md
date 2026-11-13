@@ -13,7 +13,7 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Plan-Leser | in Arbeit seit 2026-11-13 (LERN_Session38); Stufentext behoben, Rest offen | unten |
 | Instrumenten-Kenner | erledigt 2026-11-13 (LERN_Session38, BI1 a, IK2 a) | unten |
 | Wassertropfen-Reise | erledigt 2026-11-13 (LERN_Session38, WT1 a) | unten |
-| „Bild verrät“ in zehn Spielen | offen (BI1 a, Zählung) | Tabelle unten |
+| „Bild verrät“ in zehn Spielen | erledigt 2026-11-13 (LERN_Session38, BI1 a; neun behoben, ein Scheinfund) | Tabelle unten |
 | Lärm-Wächter | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Bilder (BI1) und Lärm-Skala offen | unten |
 | übrige | offen | unten |
 
@@ -49,13 +49,13 @@ eine Stichprobe, im vollen Lauf können weitere Fälle auftauchen) — **offen, 
 | Schwimmt oder sinkt (schwimmt-sinkt) | 6 — **behoben** (Materialproben als Zeichnung) | Holz 🪵, Papier 📄, Metall 🔩, Kunststoff 🧴 (Stufen 3, 4, 6) |
 | Kulturen-Koffer (kulturen-koffer) | 4, im vollen Lauf dazu Früher 🏺, Heute 📱 — **behoben** (🛖, Anch, ⛏️, 🏚️, 🖋️, ⏳, 🆕) | Pfahlbauer, Altes Ägypten (Zeichnung), Bauwerk 🏛, Text 📜 (Stufen 1, 2, 3, 5) |
 | Znüni-Teller (znueni-teller) | 4 — **behoben** (🚰, 🌳, 🌱, 🌾, 🐄, 🧁) | Gemüse 🥕, Süsses und Salziges 🍬, Getränke 💧, Brot … 🍞 (Stufen 2, 3, 4, 6) |
-| Gefühle-Radar (gefuehle-radar) | 3 | müde 😴, fröhlich 😀, wütend 😠 (Stufe 1) |
-| Kakao-Weg (kakao-weg) | 2 | Laden 🏪, Transport 🚚 (Stufe 3) |
-| Zeitstrahl-Sortierer (zeitstrahl-sortierer) | 2 | Mittelalter 🏰 (Stufen 5, 6) |
-| Datei-Typen (datei-typen) | 1 | Ton 🎵 (Stufe 1) |
-| Gemeinde-Helfer (gemeinde-helfer) | 1 | Schule 🏫 (Stufe 1) |
-| Geschichten-Ordner (geschichten-ordner) | 1 | „Oma liest den Brief“ 📖 — 📖 steht auch vor dem Titel der Geschichte |
-| Lebensraum (lebensraum) | 1 | Wald 🌲 (Stufe 3) |
+| Gefühle-Radar (gefuehle-radar) | 3 — **behoben** (das grosse Gesicht ist ein anderes Gesicht desselben Gefühls als auf dem Knopf, `andereGesichter`) | müde 😴, fröhlich 😀, wütend 😠 (Stufe 1) |
+| Kakao-Weg (kakao-weg) | 2, im vollen Lauf dazu Milch 🥛 — **behoben** (Körbe 🛠️, 🛣️, 🗄️, 🏷️; Schritte Schoggi ⚙️, Milch 📦, Saftpresse 🗜️ statt des Produktbilds) | Laden 🏪, Transport 🚚 (Stufe 3) |
+| Zeitstrahl-Sortierer (zeitstrahl-sortierer) | 2 — **behoben** (Merkmale 🛡️ Ritter, ⚙️ Fabriken; 1803 🗺️ statt 🏛️ der Römerzeit) | Mittelalter 🏰 (Stufen 5, 6) |
+| Datei-Typen (datei-typen) | 1 — **behoben** (Körbe 🌄 Bild, 🔊 Ton) | Ton 🎵 (Stufe 1) |
+| Gemeinde-Helfer (gemeinde-helfer) | 1 — **Scheinfund**: 👩‍🏫 Lehrerin enthält technisch 🏫; die Prüfung zählt zusammengesetzte Emojis jetzt als ein Bild | Schule 🏫 (Stufe 1) |
+| Geschichten-Ordner (geschichten-ordner) | 1 — **behoben** (🔖 vor dem Titel) | „Oma liest den Brief“ 📖 — 📖 steht auch vor dem Titel der Geschichte |
+| Lebensraum (lebensraum) | 1 — **behoben** (Körbe als gezeichnete Landschaften: lrWald, lrWiese, lrWeiher, lrGebirge) | Wald 🌲 (Stufe 3) |
 
 Nicht erfasst, weil nur ähnlich und nicht gleich: Wetter und Jahreszeiten ☀️ zum Korb 🌞, 🍂 zum Korb 🍁.
 

@@ -97,10 +97,13 @@ const STUFE = {
 
 const paarKey = paar => paar.join("+");
 
+/** Gesichter eines Gefühls ohne das Bild seines Antwortknopfs (BI1 a) — auch für die Prüfansicht (pruefung.js). */
+const andereGesichter = g => g.gesichter.filter(x => x !== g.bild);
+
 /** Vorrat einer Aufgabenart in einer Stufe. */
 function vorrat(art, stufe) {
   switch (art) {
-    case "gesicht": return DA ? GRUND : [];
+    case "gesicht": return DA ? GRUND.filter(id => andereGesichter(GEFUEHL[id]).length) : [];
     case "bild": return BILDER;
     case "satz": return SAETZE;
     case "situation": return SITUATIONEN.filter(s => s.gruppe === STUFE[stufe].gruppe);
@@ -134,7 +137,9 @@ function aufgabeErzeugen(stufe) {
   switch (art) {
     case "gesicht": {
       const g = GEFUEHL[q];
-      const gesicht = waehle(g.gesichter);
+      // Nie das Gesicht des Antwortknopfs (gefuehlInhalt): sonst fände das Kind die Antwort durch Vergleichen der Bilder
+      // statt durch Erkennen des Gefühls (BI1 a, LERN_Session38)
+      const gesicht = waehle(andereGesichter(g));
       return { art, gefuehl: q, gesicht, optionen: mische([q, ...mische(g.ablenker).slice(0, 2)]), richtig: q, kennung: `gesicht:${gesicht}` };
     }
     case "bild": {
@@ -187,6 +192,7 @@ function pruefeAufgabe(a, stufe) {
     case "gesicht":
       gefuehlOptionen();
       if (!GEFUEHL[a.gefuehl]?.gesichter.includes(a.gesicht)) m.push("Gesicht passt nicht zum Gefühl");
+      if (a.gesicht === GEFUEHL[a.gefuehl]?.bild) m.push("Gesicht gleich dem Bild der Antwort");
       if (a.optionen.some(o => o !== a.gefuehl && !GEFUEHL[a.gefuehl]?.ablenker.includes(o))) m.push("Ablenker nicht aus der Liste des Gefühls");
       break;
     case "bild":

@@ -19,6 +19,8 @@
                      "fabrik" (Fabrik oder Werkstatt: Mühle, Käserei, Bäckerei …), "transport",
                      "gross" (Grossverteiler: Lager, Verteilzentrum), "laden", "haushalt" (wir kaufen).
                      Leer (""), wenn es nicht eindeutig ist — dann fragt das Spiel dort nicht „Wer macht das?“.
+                     Bild nie gleich dem Bild des Produkts (das steht über den Schritten) und nie gleich einem Korb
+                     „Wer macht das?“ — sonst verrät es den Schritt (BI1 a, LERN_Session38).
    Jeder Satz nennt sein Produkt oder seinen Rohstoff, damit er in einem anderen Weg sicher nicht passt. */
 
 const WEGE = [
@@ -31,7 +33,7 @@ const WEGE = [
       ["Ein Schiff bringt die Säcke mit Kakaobohnen über das Meer nach Europa.", "transport", "🚢"],
       ["Zug oder Lastwagen bringen die Kakaobohnen in eine Schoggifabrik in der Schweiz.", "transport", "🚆"],
       ["In der Schoggifabrik werden die Kakaobohnen geröstet und fein gemahlen.", "fabrik", "🏭"],
-      ["Kakaomasse, Zucker und Milchpulver werden lange gerührt, zu Tafeln gegossen und verpackt.", "fabrik", "🍫"],
+      ["Kakaomasse, Zucker und Milchpulver werden lange gerührt, zu Tafeln gegossen und verpackt.", "fabrik", "⚙️"],
       ["Im Verteilzentrum des Grossverteilers werden die Schoggitafeln auf die Läden verteilt.", "gross", "🏬"],
       ["Wir kaufen im Laden eine Tafel Schoggi.", "haushalt", "🛍️"],
     ],
@@ -58,7 +60,7 @@ const WEGE = [
       ["Zweimal am Tag melkt der Bauer die Kühe.", "hof", "🪣"],
       ["Ein Milchsammelwagen holt die Milch auf dem Bauernhof ab.", "transport", "🚛"],
       ["In der Molkerei wird die Milch kurz erhitzt, damit sie länger hält.", "fabrik", "🏭"],
-      ["Maschinen füllen die Milch in Flaschen und Packungen ab.", "fabrik", "🥛"],
+      ["Maschinen füllen die Milch in Flaschen und Packungen ab.", "fabrik", "📦"],
       ["Gekühlte Lastwagen bringen die Milchpackungen ins Verteilzentrum.", "transport", "🚚"],
       ["Im Laden stellt ein Verkäufer die Milch ins Kühlregal.", "laden", "🧊"],
       ["Wir kaufen eine Packung Milch.", "haushalt", "🛍️"],
@@ -99,7 +101,7 @@ const WEGE = [
       ["Im Herbst werden die reifen Mostäpfel von den Bäumen geschüttelt und aufgelesen.", "hof", "🍎"],
       ["Mit dem Traktor kommen die Äpfel in die Mosterei.", "", "🚜"],
       ["In der Mosterei werden die Äpfel gewaschen und zerkleinert.", "fabrik", "💧"],
-      ["Eine Presse presst den Saft aus den Äpfeln.", "fabrik", "🧃"],
+      ["Eine Presse presst den Saft aus den Äpfeln.", "fabrik", "🗜️"],
       ["Der Apfelsaft wird kurz erhitzt, damit er lange hält, und in Flaschen abgefüllt.", "fabrik", "🍶"],
       ["Lastwagen bringen die Apfelsaftflaschen ins Verteilzentrum des Grossverteilers.", "transport", "🚚"],
       ["Im Laden stehen die Apfelsaftflaschen im Getränkeregal.", "laden", "🏪"],

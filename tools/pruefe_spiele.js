@@ -101,10 +101,12 @@ const TREIBER = `
   let serien = {};
   let korbFarbe = new Map(); // KF1 a: Farbe je Korb in der laufenden Runde
   // BI1 a: Bilder eines Teils (Emoji im Text, Zeichnungen der Bildersammlung) und Bilder der Aufgabe ohne die Knöpfe
+  const zerleger = new Intl.Segmenter("de", { granularity: "grapheme" });
   const zeichen = e => {
     const s = new Set();
     const lauf = n => {
-      if (n.nodeType === 3) { for (const m of n.data.match(/\\p{Extended_Pictographic}/gu) || []) s.add(m); return; }
+      // je Schriftzeichen (Graphem), damit zusammengesetzte Emojis eins bleiben: 👩‍🏫 ist nicht 🏫
+      if (n.nodeType === 3) { for (const { segment } of zerleger.segment(n.data)) if (/\\p{Extended_Pictographic}/u.test(segment)) s.add(segment.replace(/\\uFE0F/g, "")); return; }
       if (n.classList?.contains("gezeichnet")) { s.add("svg:" + (n.innerHTML || "").length + ":" + (n.innerHTML || "").slice(0, 200)); return; }
       (n.childNodes || []).forEach(lauf);
     };

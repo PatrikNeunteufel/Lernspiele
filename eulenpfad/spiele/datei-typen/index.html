@@ -53,10 +53,11 @@ const { waehle, mische, el } = LS;
 // Freigabe (Entscheid L4 a): Kennt der Katalog die Liste nicht, gilt sie als frei.
 const LISTE_FREI = LS.spielListen("datei-typen").length ? LS.freieListen("datei-typen").includes("endungen") : true;
 
+// Kein Korbbild ist das Bild eines Dings (BI1 a, LERN_Session38: vorher „ein Lied“ 🎵 → Korb 🎵 Ton, 🖼️ ebenso)
 const ARTEN = {
   text:  { name: "Text", bild: "📄" },
-  bild:  { name: "Bild", bild: "🖼️" },
-  ton:   { name: "Ton", bild: "🎵" },
+  bild:  { name: "Bild", bild: "🌄" },
+  ton:   { name: "Ton", bild: "🔊" },
   video: { name: "Video", bild: "🎬" },
 };
 const KORB_ARTEN = ["text", "bild", "ton", "video"];

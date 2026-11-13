@@ -27,10 +27,10 @@
         + `${stufenVon("gespraech")}: ein Gespräch → Stimmung der zweiten Person, dann was ihr hilft. `
         + `${stufenVon("paar")}: zwei Gefühle zugleich, oder die passende freundliche Antwort. Stufen 1–3 nur Grundgefühle.`,
       abschnitte: [
-        { id: "gefuehl", titel: "Gefühle mit Gesichtern", spalten: ["Gefühl", "Gesichter (Stufe 1)", "klar unpassend (Ablenker Stufe 1)", "Tipp zum Gesicht", "Tipp zum Satz"],
+        { id: "gefuehl", titel: "Gefühle mit Gesichtern", spalten: ["Gefühl", "Gesichter (Stufe 1, nie das Bild des Knopfs)", "klar unpassend (Ablenker Stufe 1)", "Tipp zum Gesicht", "Tipp zum Satz"],
           hinweis: "Zeigt jedes Gesicht dieses Gefühl und kein anderes? Passt jeder Ablenker klar nicht zum Gesicht? Die Tipps beschreiben, was man sieht oder tut, und nennen das Gefühl nicht. Grundgefühle laufen ab Stufe 1, feinere erst ab Stufe 4.",
           eintraege: () => GS_GEFUEHLE, gruppe: g => (g.gruppe === "grund" ? "Grundgefühle (ab Stufe 1)" : "feinere Gefühle (ab Stufe 4)"),
-          zeile: g => [gf(g.id), g.gesichter.join(" "), gfListe(g.ablenker), GESICHT_TIPP[g.id] || "–", SIGNAL_TIPP[g.id] || "–"] },
+          zeile: g => [gf(g.id), g.gruppe === "grund" ? andereGesichter(g).join(" ") || "—" : "—", gfListe(g.ablenker), GESICHT_TIPP[g.id] || "–", SIGNAL_TIPP[g.id] || "–"] },
         { id: "bild", titel: `Was ist passiert? Bilder (${stufenVon("bild")})`, spalten: ["Bild", "Wort", "Gefühl"],
           hinweis: "Je Gefühl eine Gruppe. Das Kind sieht ein Gesicht und wählt eins von drei Bildern; die beiden anderen stammen von Gefühlen, die zu diesem Gesicht klar nicht passen. Weckt das Bild bei fast jedem Kind genau dieses Gefühl? Ist nichts darunter, das ängstigt, über eine Alltagsangst hinaus?",
           eintraege: () => GS_BILDER, gruppe: nachGefuehl, zeile: b => [b.bild, b.text, gf(b.gefuehl)] },

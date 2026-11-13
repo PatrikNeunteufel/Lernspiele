@@ -2200,3 +2200,12 @@
   🐄 Milch/Ei/Fisch/Fleisch, 🧁 Süsses und Salziges — kein Bild eines Lebensmittels. Kulturen-Koffer (kulturen-koffer):
   🛖 Pfahlbauer, Anch (`bilder.js`, anch) für Altes Ägypten, Quellenarten ⛏️ Fundstück, 🏚️ Bauwerk, 🖋️ Text, Körbe
   ⏳ Früher und 🆕 Heute (der volle Lauf fand dort Amphore 🏺 und Handy 📱, die die verkürzte Zählung nicht traf).
+- **„Bild verrät“ behoben, Durchgang 2 (BI1 a):** Gefühle-Radar (gefuehle-radar): das grosse Gesicht ist nie das Bild
+  des Antwortknopfs, sondern ein anderes Gesicht desselben Gefühls (`andereGesichter`, `pruefeAufgabe` meldet es).
+  Kakao-Weg (kakao-weg): Körbe 🛠️ Fabrik, 🛣️ Transport, 🗄️ Grossverteiler, 🏷️ Laden; Schritte mit dem Bild ihres
+  Produkts bekommen ein eigenes (Schoggi ⚙️, Milch abfüllen 📦, Saftpresse 🗜️). Zeitstrahl-Sortierer
+  (zeitstrahl-sortierer): Merkmale 🛡️ Ritter und ⚙️ Fabriken statt der Bilder ihrer Zeitalter, 1803 🗺️ statt 🏛️.
+  Datei-Typen (datei-typen): Körbe 🌄 Bild, 🔊 Ton. Geschichten-Ordner (geschichten-ordner): 🔖 vor dem Titel.
+  Lebensraum (lebensraum): Körbe als gezeichnete Landschaften (`bilder.js`: lrWald, lrWiese, lrWeiher, lrGebirge).
+  Prüfung „Bild verrät“: Emojis je Schriftzeichen (Graphem), 👩‍🏫 zählt nicht mehr als 🏫 (Scheinfund im
+  Gemeinde-Helfer).

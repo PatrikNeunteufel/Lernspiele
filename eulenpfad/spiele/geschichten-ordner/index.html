@@ -234,7 +234,8 @@ LS.spiel({
     const lesearm = a.art === "bilder";
     const go = el("div", { class: `go ${lesearm ? "go-bilder" : "go-liste"}` });
     ctx.flaeche.append(go);
-    if (!lesearm) go.append(el("div", { class: "vorgabe go-titel", text: `📖 ${a.titel}` }));
+    // 🔖 vor dem Titel, nicht 📖: das trägt schon ein Schritt („Oma liest den Brief“) und stünde sonst doppelt (BI1 a)
+    if (!lesearm) go.append(el("div", { class: "vorgabe go-titel", text: `🔖 ${a.titel}` }));
 
     // Ordnen mit dem Baustein: Teile sind die Schritte (Objekte), gezeigt je nach Stufe.
     const ordnen = (teile, inhalt, ablage, loesung) => {

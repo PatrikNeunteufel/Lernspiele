@@ -677,6 +677,26 @@ const BILDER = (() => {
         + `<rect x="14" y="26" width="70" height="46" fill="#f4f0e6" stroke="#9a9488" stroke-width="2" transform="rotate(4 49 49)"/>`
         + `<rect x="12" y="20" width="72" height="48" fill="#ffffff" stroke="#9a9488" stroke-width="2.4"/>` },
 
+    // Körbe der Lebensräume (lebensraum, BI1 a): Landschaften statt eines Tiers oder einer Pflanze der Karten (vorher
+    // Fichte 🌲 → Korb 🌲 Wald, Gänseblümchen 🌼 → Korb 🌼 Wiese)
+    lrWald: { name: "Wald (Nadel- und Laubbäume)", box: "0 0 100 100",
+      svg: GRAS + [[18, 30], [44, 18], [80, 26]].map(([x, y]) => `<rect x="${x - 3}" y="74" width="6" height="14" fill="#7a4f26"/>`
+        + `<path d="M${x} ${y} L${x + 16} 78 L${x - 16} 78 Z" fill="#2f7d4a"/><path d="M${x} ${y + 14} L${x + 13} ${y + 36} L${x - 13} ${y + 36} Z" fill="#3a9159"/>`).join("")
+        + `<rect x="59" y="66" width="6" height="22" fill="#7a4f26"/><circle cx="62" cy="54" r="15" fill="#5aa84a"/>` },
+    lrWiese: { name: "Wiese (Gras und Blumen)", box: "0 0 100 100",
+      svg: `<rect x="0" y="52" width="100" height="48" fill="#8cc86a"/>` + GRAS
+        + [[16, 62, "#ffffff"], [34, 74, "#f2c12e"], [52, 60, "#e0569a"], [70, 72, "#ffffff"], [86, 60, "#f2c12e"], [26, 86, "#e0569a"], [60, 86, "#ffffff"]]
+          .map(([x, y, f]) => `<path d="M${x} ${y} v10" stroke="#3a7d2c" stroke-width="2"/>` + rund(5, x, y, `<ellipse cx="${x}" cy="${y - 4}" rx="2.6" ry="4" fill="${f}"/>`)
+            + `<circle cx="${x}" cy="${y}" r="2.2" fill="#f2a12e"/>`).join("") },
+    lrWeiher: { name: "Weiher (Wasser mit Schilf)", box: "0 0 100 100",
+      svg: `<ellipse cx="50" cy="70" rx="46" ry="22" fill="#6fb3e0"/><path d="M18 70 Q34 64 50 70 T82 70" stroke="#b8def5" stroke-width="2.5" fill="none"/>`
+        + `<ellipse cx="62" cy="76" rx="9" ry="4" fill="#5aa84a"/>`
+        + [[10, 30], [16, 22], [22, 34], [86, 28], [92, 36]].map(([x, y]) => `<path d="M${x} 72 Q${x + 2} ${(y + 72) / 2} ${x} ${y}" stroke="#4f7d2c" stroke-width="2.6" fill="none"/>`
+          + `<rect x="${x - 2.5}" y="${y}" width="5" height="12" rx="2.5" fill="#7a4f26"/>`).join("") },
+    lrGebirge: { name: "Gebirge (Berge mit Schnee)", box: "0 0 100 100",
+      svg: `<path d="M0 90 L30 30 L50 62 L68 22 L100 90 Z" fill="#8a929e"/>`
+        + `<path d="M30 30 L22 46 L30 42 L36 48 Z M68 22 L59 40 L68 36 L76 42 Z" fill="#ffffff"/>` + GRAS },
+
     // Korb „Altes Ägypten“ (kulturen-koffer, BI1 a): das Lebenszeichen Anch statt der Pyramiden einer Karte
     anch: { name: "Anch, ägyptisches Zeichen für Leben", box: "0 0 100 100",
       svg: `<ellipse cx="50" cy="28" rx="14" ry="18" fill="none" stroke="#d6a52a" stroke-width="9"/>`
