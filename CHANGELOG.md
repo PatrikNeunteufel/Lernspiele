@@ -2321,3 +2321,8 @@
   trugen nur `am` und `von` — vermutlich lief der Entwickler-Server noch mit dem Stand vor Kern 1.45 und verwarf die
   Fingerabdrücke still. Mit `tools/haken_nachtragen.js` ergänzt (alle 444 Haken jetzt mit Fingerabdruck). Im Lernsteig
   gibt es keine Haken je Eintrag (`pruefstand-eintraege.json` leer), dort ist nichts nachzutragen.
+- **Neue Prüfung, Punkt 10 in `tools/pruefe_skripte.js`:** jede CSS-Variable ohne Ersatzwert muss gesetzt sein, wo sie
+  gilt — eine Datei nutzt nur, was eine der Seiten setzt, die sie laden (selbst oder in einer ihrer Dateien), eine Seite
+  in ihren eigenen Stilen nur, was für sie gesetzt ist; nachgeladene Skripte gehören zu den Seiten ihres Ordners. Je App
+  allein hätte nicht gereicht: `eulenpfad/anleitung/anleitung.css` setzt `--leise` auch, aber keine Seite lädt es mit
+  `stil.css`. Elf Gegenproben; gegen `stil.css` aus `5c953d4` meldet sie den Fehler von oben, heute keinen.

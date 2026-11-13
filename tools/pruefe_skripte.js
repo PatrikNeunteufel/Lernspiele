@@ -30,6 +30,10 @@
 //      ein Bild ohne Rahmen hat keine Legende; class="hoch" nur bei einem Bild höchstens halb so breit wie die Karte; keine
 //      Nummer von Hand (class="nr", „(1)“ in der Bildunterschrift); jede Bilddatei hat den Fingerabdruck aus der Liste
 //      (sonst ist sie neuer als die Liste) und wird benutzt, jeder Eintrag der Liste ebenso.
+//  10. jede CSS-Variable ohne Ersatzwert (var(--x)) ist definiert, wo sie gilt (LERN_Session40: var(--leise) in stil.css
+//      des Eulenpfads gab es nur in Lernsteig und Anleitungen, schon geprüfte Zellen standen darum nicht grau): eine Datei
+//      darf nutzen, was eine der Seiten setzt, die sie laden — selbst oder in einer ihrer Dateien —, eine Seite in ihren
+//      eigenen Stilen und Skripten nur, was für sie gesetzt ist. Nachgeladene Skripte gehören zu den Seiten ihres Ordners.
 // Fehler im Verhalten fängt sie nicht; dafür sind die Seitentests da.
 // Aufruf: node tools/pruefe_skripte.js — läuft mit den kurzen Prüfungen (node tools/pruefe.js); Ende mit Code 1 bei Fehlern.
 "use strict";
@@ -299,6 +303,68 @@ function pruefeAnleitung(seiten, liste, abdruck, dateienImOrdner) {
   return fehler;
 }
 
+// 10. Farb- und andere CSS-Variablen ohne Definition (LERN_Session40): stil.css des Eulenpfads nahm var(--leise), das es
+// nur im Lernsteig gibt — schon geprüfte Zellen standen darum nicht grau, und keine Prüfung merkte es. Gezählt wird je
+// Datei, was die Seiten setzen, die sie laden: eulenpfad/anleitung/anleitung.css setzt --leise auch, aber keine Seite lädt
+// es zusammen mit stil.css.
+const VAR_DEF = /(--[a-zA-Z][\w-]*)["']?\s*:/g;            // --x: in Stilen, "--x": und style="--x: …" in Skripten
+const VAR_SETZEN = /setProperty\(\s*["'`](--[\w-]+)["'`]/g; // el.style.setProperty("--x", …)
+const VAR_NUTZUNG = /var\(\s*(--[\w-]+)\s*\)/g;            // nur ohne Ersatzwert; var(--x-${n}) (zusammengesetzt) nicht
+const ohneKommentare = t => t.replace(/<!--[\s\S]*?-->/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+/**
+ * Mängel nach Punkt 10. dateien: { wo: Text } der .css- und .js-Dateien, seiten: { wo: Text } der .html-Seiten (wo
+ * relativ zur Wurzel, mit /). Eine Seite lädt ihre <link href> und <script src>; eine Datei, die keine Seite so lädt
+ * (nachgeladen mit LS.ladeSkript wie pruefung.js und listenpruefung.js), gehört zu den Seiten in ihrem Ordner und zu
+ * denen, die etwas aus ihrem Ordner laden. Definiert für eine Seite ist, was sie selbst oder eine ihrer Dateien mit
+ * „--x:“ oder setProperty setzt. Eine Datei darf nutzen, was mindestens eine ihrer Seiten definiert (eine Seite kann eine
+ * Variable für ihre eigenen Teile setzen), eine Seite in ihren eigenen Stilen und Skripten nur, was für sie definiert ist.
+ * Dateien ohne Seite (kern/ ausserhalb der Apps) prüft Punkt 10 nicht. Gibt [Text] zurück.
+ */
+function pruefeVariablen(dateien, seiten) {
+  const defs = t => new Set([...t.matchAll(VAR_DEF), ...t.matchAll(VAR_SETZEN)].map(m => m[1]));
+  const nutzungen = t => new Set([...t.matchAll(VAR_NUTZUNG)].map(m => m[1]));
+  const ordnerVon = wo => path.posix.dirname(wo);
+  const d = Object.fromEntries(Object.entries(dateien).map(([wo, t]) => [wo, ohneKommentare(t)]));
+  const s = Object.fromEntries(Object.entries(seiten).map(([wo, t]) => [wo, ohneKommentare(t)]));
+  // Was jede Seite lädt
+  const laedt = {};
+  for (const [wo, t] of Object.entries(s)) {
+    const ziele = [...t.matchAll(/<link\s[^>]*href\s*=\s*["']([^"']+\.css)(?:[?#][^"']*)?["']/gi), ...t.matchAll(/<script\s[^>]*src\s*=\s*["']([^"']+)["']/gi)]
+      .map(m => path.posix.normalize(path.posix.join(ordnerVon(wo), decodeURI(m[1].split(/[?#]/)[0]))));
+    laedt[wo] = new Set(ziele.filter(z => z in d));
+  }
+  const geladen = new Set(Object.values(laedt).flatMap(l => [...l]));
+  for (const f of Object.keys(d).filter(f => !geladen.has(f))) {
+    for (const wo of Object.keys(s)) if (ordnerVon(wo) === ordnerVon(f) || [...laedt[wo]].some(z => ordnerVon(z) === ordnerVon(f))) laedt[wo].add(f);
+  }
+  const fuerSeite = Object.fromEntries(Object.keys(s).map(wo => [wo, new Set([...defs(s[wo]), ...[...laedt[wo]].flatMap(f => [...defs(d[f])])])]));
+  const m = [];
+  for (const [f, t] of Object.entries(d)) {
+    const welt = Object.keys(s).filter(wo => laedt[wo].has(f));
+    if (!welt.length) continue;
+    for (const v of nutzungen(t)) if (!welt.some(wo => fuerSeite[wo].has(v))) m.push(`${f}: var(${v}) setzt keine Seite, die die Datei lädt (Punkt 10)`);
+  }
+  for (const [wo, t] of Object.entries(s)) for (const v of nutzungen(t)) if (!fuerSeite[wo].has(v)) m.push(`${wo}: var(${v}) ist für die Seite nicht definiert (Punkt 10)`);
+  return m;
+}
+// Gegenproben zu Punkt 10: [dateien, seiten, erwartete Zahl Meldungen, Name]
+const GP_SEITE = '<link rel="stylesheet" href="stil.css"><script src="s.js"></script>';
+const GEGENPROBEN_VARIABLEN = [
+  [{ "a/stil.css": ":root { --text-leise: grau; } .x { color: var(--leise); }" }, { "a/s.html": GP_SEITE }, 1, "Name aus einer anderen App (LERN_Session40)"],
+  [{ "a/stil.css": ".x { color: var(--leise); }", "a/anleitung/anleitung.css": ":root { --leise: grau; }" },
+    { "a/s.html": GP_SEITE, "a/anleitung/x.html": '<link rel="stylesheet" href="anleitung.css">' }, 1, "nur in einem Stil, den keine Seite mit lädt"],
+  [{ "a/stil.css": ":root { --text-leise: grau; } .x { color: var(--text-leise); }" }, { "a/s.html": GP_SEITE }, 0, "definiert"],
+  [{ "a/stil.css": ".x { color: var(--leise, grau); }" }, { "a/s.html": GP_SEITE }, 0, "mit Ersatzwert"],
+  [{ "a/stil.css": "/* var(--alt) */ .x { color: red; }" }, { "a/s.html": GP_SEITE }, 0, "im Kommentar"],
+  [{ "a/stil.css": ".x { color: var(--szene); }" }, { "a/s.html": GP_SEITE + "<style>:root { --szene: blau; }</style>", "a/t.html": GP_SEITE }, 0, "von einer der Seiten gesetzt"],
+  [{ "a/s.js": 'el.style.setProperty("--breite", "3px");' }, { "a/s.html": GP_SEITE + "<style>.x { width: var(--breite); }</style>" }, 0, "von einem Skript gesetzt"],
+  [{ "a/s.js": 'el("div", { style: "--farbe: rot" });' }, { "a/s.html": GP_SEITE + "<style>.x { color: var(--farbe); }</style>" }, 0, "im Stil-Text eines Skripts"],
+  [{}, { "a/s.html": "<style>:root { --nur-hier: 1px; }</style>", "a/t.html": "<style>.x { width: var(--nur-hier); }</style>" }, 1, "nur in einer anderen Seite"],
+  [{ "a/s.js": "x.style.color = `var(--deko-${n})`;" }, { "a/s.html": GP_SEITE }, 0, "zusammengesetzter Name"],
+  [{ "a/g/stil.css": ":root { --k: 1; }", "a/g/s.js": "", "a/g/nach.js": "x = 'var(--k)'; y = 'var(--fehlt)';" },
+    { "a/spiel/index.html": '<link rel="stylesheet" href="../g/stil.css"><script src="../g/s.js"></script>' }, 1, "nachgeladen, gehört zu den Seiten des Ordners"],
+];
+
 // Gegenproben zu Punkt 9: [Seite, erwartete Zahl Fehler, Name]
 const GP_LISTE = { x: { breit: { schluessel: ["a", "b"], breite: 816, fingerabdruck: "f" }, schmal: { schluessel: ["a", "b"], breite: 390, fingerabdruck: "f" } } };
 const gpFigur = (legende, extra = "") => `<figure${extra}><picture><source media="(max-width: 600px)" srcset="bilder/x-schmal.webp"><img src="bilder/x-breit.webp" alt=""></picture>${legende}</figure>`;
@@ -341,6 +407,17 @@ function pruefe(wurzel = WURZEL, ordner = ORDNER) {
   for (const [html, soll, name] of GEGENPROBEN_ANLEITUNG) {
     const ist = pruefeAnleitung({ "probe.html": html }, GP_LISTE, () => "f", ["x-breit.webp", "x-schmal.webp"]).length;
     if (ist !== soll) fehler.push(`Gegenprobe Punkt 9 „${name}“: ${ist} statt ${soll} Fehler`);
+  }
+  for (const [g, s, soll, name] of GEGENPROBEN_VARIABLEN) {
+    const ist = pruefeVariablen(g, s).length;
+    if (ist !== soll) fehler.push(`Gegenprobe Punkt 10 „${name}“: ${ist} statt ${soll} Meldungen`);
+  }
+  // 10. Variablen je Seite und den Dateien, die sie lädt (jeder Ordner für sich; die Kopie des Kerns in <app>/kern/ zählt zur App)
+  for (const o of ordner) {
+    const start = path.join(wurzel, o);
+    if (!fs.existsSync(start)) continue;
+    const text = liste => Object.fromEntries(liste.map(f => [path.relative(wurzel, f).replace(/\\/g, "/"), fs.readFileSync(f, "utf8")]));
+    fehler.push(...pruefeVariablen(text([...dateien(start, ".css"), ...dateien(start, ".js")]), text(dateien(start, ".html"))));
   }
   // 9. Anleitungen (nur, wenn eulenpfad mitgeprüft wird)
   const anleitung = path.join(wurzel, ANLEITUNG);
@@ -442,4 +519,4 @@ if (require.main === module) {
   process.exit(fehler.length ? 1 : 0);
 }
 
-module.exports = { pruefe, pruefeCss, festeFarben };
+module.exports = { pruefe, pruefeCss, festeFarben, pruefeVariablen };
