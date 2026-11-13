@@ -1,6 +1,7 @@
 // Nimmt die Bilder für die Anleitungen auf: eulenpfad/anleitung/bilder/<name>-<fassung>.webp (LERN_Session7,
 // neu aufgebaut LERN_Session37 nach docs/eulenpfad/konzept_anleitungen.md, AL3 a, AL4 a, AL7 a).
 // Aufruf: node tools/anleitung_bilder.js [Basis-URL, Vorgabe http://localhost:8765] [--fassung=breit|schmal]
+//   [--nur=k04-aufgabe,…] (nur diese Bilder schreiben; der Ablauf läuft ganz, die übrigen Bilder bleiben unberührt)
 // Der Server muss das Repo ausliefern (python tools/entwickler_server.py oder python -m http.server 8765).
 //
 // Chrome läuft ohne Fenster mit einem eigenen, leeren Profil in einem temporären Ordner: Daten im
@@ -22,6 +23,7 @@ const path = require("path");
 const argumente = process.argv.slice(2);
 const BASIS = (argumente.find(a => !a.startsWith("--")) || "http://localhost:8765").replace(/\/$/, "");
 const NUR_FASSUNG = argumente.find(a => a.startsWith("--fassung="))?.split("=")[1] || null;
+const NUR_BILDER = argumente.find(a => a.startsWith("--nur="))?.split("=")[1].split(",") || null;
 const ZIEL = path.join(__dirname, "..", "eulenpfad", "anleitung", "bilder");
 const RAHMEN_DATEI = path.join(__dirname, "..", "docs", "eulenpfad", "anleitung_rahmen.json");
 const PORT = 9333;
@@ -95,6 +97,8 @@ const klick = text => js(`const k = [...document.querySelectorAll("button, a, su
  * das kleinste Element, dessen Text ihn enthält; wennDa: fehlt das Element, entfällt der Rahmen. Die Nummer folgt der
  * Lage (AL4 a): Zeilen von oben nach unten — zwei Rahmen stehen in einer Zeile, wenn sie sich in der Höhe mindestens zur
  * Hälfte des kleineren überdecken —, in der Zeile von links nach rechts. Ergebnis: die Schlüssel in dieser Reihenfolge.
+ * alle: ein Rahmen um alle sichtbaren Treffer von css zusammen; eng: nur um den Inhalt (Text, Bilder), nicht um die
+ * volle Breite eines Blocks.
  */
 async function rahmen(ziele) {
   const ids = ziele.map(z => z.id);
@@ -105,7 +109,8 @@ async function rahmen(ziele) {
     const funde = [];
     for (const z of ziele) {
       // nur sichtbare Elemente: ein zugeklapptes Element hätte keine Fläche, der Rahmen stünde im Leeren
-      let e = z.css ? [...document.querySelectorAll(z.css)].find(x => x.offsetParent !== null && x.getBoundingClientRect().width > 0) : null;
+      const sichtbar = z.css ? [...document.querySelectorAll(z.css)].filter(x => x.offsetParent !== null && x.getBoundingClientRect().width > 0) : [];
+      let e = sichtbar[0] || null;
       if (z.text) {
         const kandidaten = [...document.querySelectorAll("body *")].filter(x => x.offsetParent !== null && x.textContent.includes(z.text) && !x.classList.contains("anl-rahmen"));
         e = kandidaten.filter(x => ![...x.children].some(c => c.textContent.includes(z.text) && c.offsetParent !== null)).sort((a, b) => a.textContent.length - b.textContent.length)[0];
@@ -113,7 +118,15 @@ async function rahmen(ziele) {
       }
       // Nur der sichtbare Teil: ein Element in einem Scrollbereich (Notizblock auf dem Handy) kann darunter verdeckt
       // liegen; dann stünde der Rahmen über etwas anderem (LERN_Session37)
-      let r = e?.getBoundingClientRect();
+      // eng: nur so weit, wie der Inhalt reicht (Text, Bilder), nicht die volle Breite des Blocks — sonst fasst der
+      // Rahmen um eine Zahl auch den 💡 daneben (k04, Hinweis Patrik LERN_Session37); alle: über alle sichtbaren
+      // Treffer von css zusammen (Zahl und Auftrag sind eine Aufgabe)
+      const flaeche = x => { if (!z.eng) return x.getBoundingClientRect(); const g = document.createRange(); g.selectNodeContents(x);
+        // Schrift hat keinen Innenabstand wie ein Block: etwas Luft, sonst liegt der Rahmen auf den Buchstaben
+        const q = g.getBoundingClientRect(), luft = 6; return new DOMRect(q.left - luft, q.top - luft, q.width + 2 * luft, q.height + 2 * luft); };
+      const teile = (z.alle ? sichtbar : e ? [e] : []).map(flaeche).filter(q => q.width > 0 && q.height > 0);
+      let r = teile.length ? teile.reduce((a, q) => { const l = Math.min(a.left, q.left), t = Math.min(a.top, q.top);
+        return new DOMRect(l, t, Math.max(a.right, q.right) - l, Math.max(a.bottom, q.bottom) - t); }) : undefined;
       for (let a = e?.parentElement; r && a && a !== document.body; a = a.parentElement) {
         if (!/(auto|scroll|hidden)/.test(getComputedStyle(a).overflowY)) continue;
         const k = a.getBoundingClientRect();
@@ -225,6 +238,11 @@ async function bild(name, { css = null, ab = null, maxHoehe = AUSSCHNITT_MAX, ra
     clip: { x: b.x, y: b.y, width: b.w, height: b.h, scale: 1 } });
   if (laenger) await groesse();
   const daten = Buffer.from(r.data, "base64");
+  if (NUR_BILDER && !NUR_BILDER.includes(name)) {
+    await js(`document.querySelectorAll(".anl-rahmen, #anl-ab").forEach(e => e.remove());`);
+    rahmenJetzt = null;
+    return;
+  }
   fs.writeFileSync(path.join(ZIEL, `${name}-${fassung}.webp`), daten);
   liste[name] ??= {};
   // Schlüssel auch bei einem Ausschnitt nach Element (css): die Rahmen stehen dann darin
@@ -479,7 +497,7 @@ async function kind() {
   await bild("k03-stufen");
 
   await gehe("/eulenpfad/spiele/runden-rutsche/index.html?stufe=s1");
-  await rahmen([{ id: "aufgabe", css: ".zahl-gross" }, { id: "antworten", css: ".ziele" }]);
+  await rahmen([{ id: "aufgabe", css: ".zahl-gross, .auf", alle: true, eng: true }, { id: "antworten", css: ".ziele" }]);
   await bild("k04-aufgabe");
   await rahmen([{ id: "hilfe", css: ".hilfe-knopf" }, { id: "tipp", css: ".tipp-knopf" }, { id: "melden", css: ".melden" }, { id: "vorlesen", css: ".vorlesen", wennDa: true }]);
   await bild("k11-hilfe-tipp");
@@ -555,7 +573,7 @@ async function main() {
       await kind();
     }
     // Nach einem vollen Lauf: Bilder, die keine Aufnahme mehr haben, und ihre Einträge entfernen
-    if (!NUR_FASSUNG) {
+    if (!NUR_FASSUNG && !NUR_BILDER) {
       for (const datei of fs.readdirSync(ZIEL).filter(d => d.endsWith(".webp") && !aufgenommen.has(d.replace(/\.webp$/, "")))) {
         fs.rmSync(path.join(ZIEL, datei)); console.log(`– ${datei} (keine Aufnahme mehr)`);
       }
