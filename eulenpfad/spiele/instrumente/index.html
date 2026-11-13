@@ -45,18 +45,25 @@ const ID = "instrumente";
 // die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
 const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : INSTRUMENT_LISTEN);
 /** Instrument aus einer Zeile von INSTRUMENTE — auch für die Prüfansicht (pruefung.js). */
-const instrumentVon = ([bild, name, gruppe, spielart, genauer, auch = []]) => ({ bild, name, gruppe, spielart, genauer, auch });
+const instrumentVon = ([bild, name, gruppe, spielart, genauer, auch = [], auchGruppe = []]) =>
+  ({ bild, name, gruppe, spielart, genauer, auch, auchGruppe });
+const VIER_GRUPPEN = ["Schlaginstrument", "Saiteninstrument", "Blasinstrument", "Tasteninstrument"];
+/** Körbe in Stufe 3: die vier Gruppen ohne die, die beim Instrument ebenso richtig sind (auchGruppe, IK2 a) — auch für
+    die Prüfansicht (pruefung.js). */
+const gruppenKoerbe = i => VIER_GRUPPEN.filter(g => !i.auchGruppe.includes(g));
 const I = INSTRUMENTE.map(instrumentVon).filter(i => FREI.has(INSTRUMENT_LISTE_JE_GRUPPE[i.gruppe]));
 const FRAGEN = INSTRUMENT_FRAGEN.filter(f => FREI.has(f[4]));
 
 // Schulinstrumente ohne Emoji (Triangel, Klangstab, Schlagholz) stehen in der Bildersammlung (bilder.js, B1 a).
 
+// Bilder der Körbe zeigen, wie der Ton entsteht, nie ein Instrument einer Karte (BI1 a, LERN_Session38: vorher trug
+// etwa die Trompete 🎺 dasselbe Bild wie der Korb Blechblasinstrument 🎺); Zeichnungen in bilder.js
 const GRUPPEN = {
-  Schlaginstrument: "🥁", Saiteninstrument: "🎸", Blasinstrument: "🎺", Tasteninstrument: "🎹",
-  Holzblasinstrument: "🪈", Blechblasinstrument: "🎺", Streichinstrument: "🎻", Zupfinstrument: "🎸",
+  Schlaginstrument: "🥢", Saiteninstrument: "svg:saiten", Blasinstrument: "💨", Tasteninstrument: "svg:taste",
+  Holzblasinstrument: "svg:rohrblatt", Blechblasinstrument: "svg:mundstueck", Streichinstrument: "svg:bogen", Zupfinstrument: "🤏",
 };
 const FALLEN = /Saxofon|Querflöte/;
-const SPIELARTEN = { schlagen: "🥢", zupfen: "🤏", streichen: "🎻", blasen: "💨", schütteln: "🫨", "Tasten drücken": "🎹" };
+const SPIELARTEN = { schlagen: "🥢", zupfen: "🤏", streichen: "svg:bogen", blasen: "💨", schütteln: "🫨", "Tasten drücken": "svg:taste" };
 
 /**
  * Nimmt die Art (mit ihrem Zusatz aus STUFE_ARTEN) dieses Instrument, unabhängig von der Freigabe — auch für die
@@ -93,7 +100,7 @@ const ARTEN = {
   gruppe() {
     const x = waehle(I);
     if (!x) return null;
-    return { art: "korb", nach: "gruppe", x, richtig: x.gruppe, koerbe: ["Schlaginstrument", "Saiteninstrument", "Blasinstrument", "Tasteninstrument"], info: GRUPPEN };
+    return { art: "korb", nach: "gruppe", x, richtig: x.gruppe, koerbe: gruppenKoerbe(x), info: GRUPPEN };
   },
   genauer() {
     const x = waehle(I.filter(i => NIMMT.genauer(i)));
@@ -171,6 +178,7 @@ function pruefeAufgabe(a, stufe) {
   if ((stufe === "s1" || stufe === "s2") && a.x && !a.x.bild) m.push("Instrument ohne Bild in Stufe 1–2");
   if (a.koerbe && a.koerbe.some(k => !a.info[k])) m.push("Korb ohne Bild");
   if (a.nach === "spielart" && a.koerbe.some(k => a.x.auch.includes(k))) m.push("Spielweise als falsch daneben, die auch richtig ist");
+  if (a.nach === "gruppe" && a.koerbe.some(k => a.x.auchGruppe.includes(k))) m.push("Gruppe als falsch daneben, die auch richtig ist");
   return m;
 }
 
@@ -220,7 +228,9 @@ LS.spiel({
         // Der Hinweis nennt die Gruppe nicht — sonst stünde die Lösung darin.
         hinweis: FALLEN.test(a.x.name) && a.info === GRUPPEN && a.koerbe.includes("Holzblasinstrument")
           ? "Achtung, Falle! Nicht das Material zählt, sondern wie der Ton entsteht: mit einem Rohrblatt oder einer Kante — oder mit den Lippen im Mundstück?"
-          : "Wie entsteht der Ton? Schlägt man, zupft man, streicht man oder bläst man?",
+          : a.nach === "gruppe" && a.x.auchGruppe.length
+            ? `${a.x.name === "Klavier" ? "Im Klavier sind Saiten und kleine Hämmer. " : ""}Aber womit spielst du es?`
+            : "Wie entsteht der Ton? Schlägt man, zupft man, streicht man oder bläst man?",
         loesung: `${a.x.name}: ${a.richtig}.`,
       });
       // Hier ist die Spielweise oder Gruppe gefragt, nicht der Name: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12).

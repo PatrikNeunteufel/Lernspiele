@@ -3,7 +3,8 @@
 //
 // Gemeldet wird: Ausnahmen, Endlosschleifen (Zeitlimit), sichtbarer Text mit NaN, undefined,
 // null, Infinity oder [object …], unplausible Protokolleinträge, Hinweise, die die Lösung verraten
-// (über LS.pruefung.haken, LERN-19). Bietet ein Spiel die Funktionen
+// (über LS.pruefung.haken, LERN-19), richtige Antworten, die als einzige dasselbe Bild wie die Aufgabe tragen
+// („Bild verrät“, BI1 a, LERN_Session38). Bietet ein Spiel die Funktionen
 // aufgabeErzeugen(stufe) und pruefeAufgabe(aufgabe, stufe) an, werden zusätzlich viele
 // Zufallsaufgaben fachlich geprüft (pruefeAufgabe liefert eine Liste von Mängeln).
 //
@@ -99,7 +100,30 @@ const TREIBER = `
   // Serienbremse: je Merkmal aus ctx.serie höchstens LS.SERIE_MAX gleiche hintereinander in einer Runde.
   let serien = {};
   let korbFarbe = new Map(); // KF1 a: Farbe je Korb in der laufenden Runde
+  // BI1 a: Bilder eines Teils (Emoji im Text, Zeichnungen der Bildersammlung) und Bilder der Aufgabe ohne die Knöpfe
+  const zeichen = e => {
+    const s = new Set();
+    const lauf = n => {
+      if (n.nodeType === 3) { for (const m of n.data.match(/\\p{Extended_Pictographic}/gu) || []) s.add(m); return; }
+      if (n.classList?.contains("gezeichnet")) { s.add("svg:" + (n.innerHTML || "").length + ":" + (n.innerHTML || "").slice(0, 200)); return; }
+      (n.childNodes || []).forEach(lauf);
+    };
+    lauf(e);
+    return s;
+  };
+  const aufgabeBilder = flaeche => {
+    const s = new Set();
+    const lauf = n => {
+      if (n !== flaeche && n.nodeType === 1 && klickbar(n)) return;
+      if (n.nodeType === 3 || n.classList?.contains("gezeichnet")) { for (const z of zeichen(n)) s.add(z); return; }
+      (n.childNodes || []).forEach(lauf);
+    };
+    lauf(flaeche);
+    return s;
+  };
+  const bildAufgabe = new Map(); // Bilder der Aufgabe je Nummer, beim Stellen aufgenommen
   LS.pruefung.haken = (art, a) => {
+    if (art === "gestellt" && a.flaeche) bildAufgabe.set(a.nr, aufgabeBilder(a.flaeche));
     if (art === "gestellt") {
       if (a.nr === 0) serien = {};
       for (const [name, wert] of Object.entries(a.serien || {})) {
@@ -191,6 +215,25 @@ const TREIBER = `
       return;
     }
     const tastatur = !geklickt || geklickt.closest(".tastatur");
+    // BI1 a (LERN_Session38): Trägt die richtige Antwort ein Bild, das auch die Aufgabe zeigt und keine andere Antwort,
+    // findet das Kind sie durch Vergleichen der Bilder (Trompete 🎺 → Korb 🎺 Blechblasinstrument).
+    if (!tastatur && a.flaeche && a.flaeche.contains(geklickt)) {
+      const knopfVon = e => (e === a.flaeche || !e ? null : klickbar(e) ? e : knopfVon(e.parentNode));
+      const antwort = knopfVon(geklickt) || geklickt;
+      const andere = a.flaeche.querySelectorAll("*").filter(e => klickbar(e) && e !== antwort && !e.contains(antwort) && !antwort.contains(e)
+        && !KEIN_WERT.test(text(e)) && !e.classList.contains("vorlesen") && !e.classList.contains("melden") && !e.classList.contains("blase"));
+      // Bilder der Aufgabe beim Stellen (danach zeigt manches Spiel die Lösung als Bild, etwa „⚖ im Gleichgewicht“)
+      const inAufgabe = bildAufgabe.get(a.nr) || aufgabeBilder(a.flaeche);
+      const beiAnderen = new Set(andere.flatMap(e => [...zeichen(e)]));
+      const verraten = [...zeichen(antwort)].filter(z => inAufgabe.has(z) && !beiAnderen.has(z));
+      // Zeigt die Aufgabe auch Bilder anderer Antworten (ein Diagramm, eine Reihe zum Ordnen), ist es kein Verrat: Das
+      // Kind muss dort ohnehin unter mehreren gezeigten wählen.
+      const andereInAufgabe = [...beiAnderen].some(z => inAufgabe.has(z));
+      // Besteht die Antwort nur aus einem Bild (Merkspiele, „Welches passt nicht?“), ist das Bild selbst die Antwort.
+      if (verraten.length && andere.length && !andereInAufgabe && text(antwort))
+        melde("Bild verrät", "die richtige Antwort «" + text(antwort).slice(0, 40) + "» trägt dasselbe Bild wie die Aufgabe ("
+          + verraten.map(z => z.startsWith("svg:") ? "Zeichnung" : z).join(" ") + ")", "bild " + text(antwort).slice(0, 40));
+    }
     for (const h of hinweise.get(a.nr) || []) {
       const ergebnis = h.loesung.includes("=") ? h.loesung.split("=").pop().trim().replace(/[.!]$/, "") : "";
       const loesung = tastatur ? ergebnis : text(geklickt);

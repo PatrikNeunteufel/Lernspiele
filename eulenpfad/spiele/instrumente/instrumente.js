@@ -1,7 +1,9 @@
 // Inhalte für den Instrumenten-Kenner (Lehrplan SG MU.4.C.1).
-// [Bild (Emoji oder svg:<name>), Name, Gruppe, Spielweise, genauere Gruppe oder null, auch]
+// [Bild (Emoji oder svg:<name>), Name, Gruppe, Spielweise, genauere Gruppe oder null, auch, auchGruppe]
 // auch: weitere Spielweisen, die ebenso richtig sind; das Spiel stellt sie nie als falsche Antwort daneben
 // (Geige und Cello zupft man auch, Pizzicato; die Handglocke schwingt oder schüttelt man; im Klavier schlagen Hämmer).
+// auchGruppe: weitere Gruppen, die ebenso richtig sind (Stufe 3); nie als falscher Korb daneben (IK2 a: das Klavier
+// hat Saiten und Hämmer, gespielt wird es über die Tasten).
 // Gruppe: Schlaginstrument, Saiteninstrument, Blasinstrument, Tasteninstrument
 // Saxofon und Querflöte sind aus Metall, zählen aber zu den Holzblasinstrumenten (Ton mit Rohrblatt
 // bzw. Anblaskante, nicht mit den Lippen wie bei Blechblasinstrumenten).
@@ -30,7 +32,7 @@ const INSTRUMENTE = [
   ["🎻", "Geige", "Saiteninstrument", "streichen", "Streichinstrument", ["zupfen"]],
   [null, "Cello", "Saiteninstrument", "streichen", "Streichinstrument", ["zupfen"]],
   [null, "Harfe", "Saiteninstrument", "zupfen", "Zupfinstrument"],
-  ["🎹", "Klavier", "Tasteninstrument", "Tasten drücken", null, ["schlagen"]],
+  ["🎹", "Klavier", "Tasteninstrument", "Tasten drücken", null, ["schlagen"], ["Saiteninstrument", "Schlaginstrument"]],
   ["🎺", "Trompete", "Blasinstrument", "blasen", "Blechblasinstrument"],
   [null, "Posaune", "Blasinstrument", "blasen", "Blechblasinstrument"],
   ["🎷", "Saxofon", "Blasinstrument", "blasen", "Holzblasinstrument"],

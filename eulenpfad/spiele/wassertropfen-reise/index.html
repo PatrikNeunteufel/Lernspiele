@@ -70,6 +70,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="woerter.js"></script>
 <script>
 "use strict";
@@ -120,10 +121,10 @@ const VORGANG = Object.fromEntries(VORGAENGE.map(v => [v.id, v]));
 /** Zwei Wege eines Tropfens; die Reise ist ein Kreis, nach der letzten Station kommt wieder die erste. */
 const WEGE = [
   { id: "boden", satz: "Unterwegs versickert der Tropfen im Boden.", stationen: [
-    { text: "Meer", bild: "🌊" }, { text: "Wasserdampf", bild: "♨️" }, { text: "Wolke", bild: "☁️" }, { text: "Regen", bild: "🌧️" },
+    { text: "Meer", bild: "🌊" }, { text: "Wasserdampf", bild: "svg:wasserdampf" }, { text: "Wolke", bild: "☁️" }, { text: "Regen", bild: "🌧️" },
     { text: "Grundwasser", bild: "🟫" }, { text: "Quelle", bild: "⛲" }, { text: "Fluss", bild: "🏞️" }] },
   { id: "berg", satz: "Unterwegs fällt der Tropfen als Schnee auf einen Berg.", stationen: [
-    { text: "Meer", bild: "🌊" }, { text: "Wasserdampf", bild: "♨️" }, { text: "Wolke", bild: "☁️" }, { text: "Schnee", bild: "🌨️" },
+    { text: "Meer", bild: "🌊" }, { text: "Wasserdampf", bild: "svg:wasserdampf" }, { text: "Wolke", bild: "☁️" }, { text: "Schnee", bild: "🌨️" },
     { text: "Schmelzwasser", bild: "💧" }, { text: "Bach", bild: "🏔️" }, { text: "Fluss", bild: "🏞️" }] },
 ];
 
@@ -381,7 +382,7 @@ function zeigeReise(ctx, a) {
   const loesung = [a.start, ...a.reihe].join(" → ");
   ctx.kennung(`reise|${a.weg}|${a.start}|${a.reihe.length}`);
   ctx.flaeche.append(kreislaufGrafik().svg,
-    el("div", { class: "frage", html: `Der Tropfen startet: <b>${s.bild} ${s.text}</b>. ${weg.satz} Tippe die nächsten ${a.reihe.length} Stationen der Reihe nach.` }));
+    el("div", { class: "frage", html: `Der Tropfen startet: <b>${LS.mitBildText(s.bild, s.text)}</b>. ${weg.satz} Tippe die nächsten ${a.reihe.length} Stationen der Reihe nach.` }));
   LS.reihenfolge(ctx, { reihe: a.reihe, inhalt: stationInhalt(weg), hinweis: TIPP_REISE, loesung, pfeile: true, breite: 120 });
 }
 
@@ -390,7 +391,7 @@ function zeigeDanach(ctx, a) {
   const s = weg.stationen.find(x => x.text === a.jetzt);
   ctx.kennung(`danach|${a.weg}|${a.jetzt}`);
   ctx.flaeche.append(kreislaufGrafik().svg,
-    el("div", { class: "frage", html: `${weg.satz}<br>Der Tropfen ist hier: <b>${s.bild} ${s.text}</b>. Wohin kommt er als Nächstes?` }));
+    el("div", { class: "frage", html: `${weg.satz}<br>Der Tropfen ist hier: <b>${LS.mitBildText(s.bild, s.text)}</b>. Wohin kommt er als Nächstes?` }));
   LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt: stationInhalt(weg), hinweis: TIPP_REISE,
     loesung: `${a.jetzt} → ${a.richtig}`, breite: 130 });
 }

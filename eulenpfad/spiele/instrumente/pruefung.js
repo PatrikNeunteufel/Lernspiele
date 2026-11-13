@@ -36,14 +36,15 @@
       + "vorkommt: ohne Bild nicht beim Namen und nicht in der Spielweise mit Bild, ohne genauere Gruppe nicht bei Holz/Blech "
       + "oder Streichen/Zupfen, bei den Fallen nur Saxofon und Querflöte.",
     abschnitte: [{
-      id: liste, titel: `${GRUPPEN[gruppe]} ${gruppe}e`,
-      spalten: ["Bild", "Name", "Spielweise", "auch richtig", "Genauere Gruppe", "Zwei Körbe", "Stufen"],
+      id: liste, titel: LS.mitBildText(GRUPPEN[gruppe], `${gruppe}e`), // Zeichnungen nicht im Titel (nur Text)
+      spalten: ["Bild", "Name", "Spielweise", "auch richtig", "Körbe Stufe 3", "Genauere Gruppe", "Zwei Körbe", "Stufen"],
       hinweis,
       eintraege: () => INSTRUMENTE.filter(e => INSTRUMENT_LISTE_JE_GRUPPE[e[2]] === liste),
-      ...(liste === "saiten" || liste === "blas" ? { gruppe: e => genauerText(instrumentVon(e)).replace(" (Falle)", "") } : {}),
+      ...(liste === "saiten" || liste === "blas" ? { gruppe: e => { const g = instrumentVon(e).genauer; return g ? LS.mitBildText(GRUPPEN[g], g) : "—"; } } : {}),
       zeile: e => {
         const i = instrumentVon(e);
-        return [i.bild || "—", i.name, mitBild(SPIELARTEN[i.spielart], i.spielart), i.auch.join(", ") || "—", genauerText(i),
+        return [i.bild || "—", i.name, mitBild(SPIELARTEN[i.spielart], i.spielart), [...i.auch, ...i.auchGruppe].join(", ") || "—",
+          gruppenKoerbe(i).length < 4 ? gruppenKoerbe(i).join(" / ") : "alle vier", genauerText(i),
           i.genauer ? genauerPaar(i).join(" / ") : "—", stufenVon(i)];
       },
     }],

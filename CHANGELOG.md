@@ -2185,3 +2185,12 @@
   Ballon; ein naher Knall kann sofort schaden) — nie das harmlosere bei „Was ist schlimmer?“; Schutzmittel, die
   ebenfalls helfen, nie als falscher Korb (zehn Situationen); Tipp „Was schwingt?“ mit Blatt Papier; Dämmungsfrage
   nach dem Hall im Übungsraum. Prüfliste `wortlisten_zur_pruefung.md` neu erzeugt.
+- **Bilder, die die Lösung verraten (BI1 a, IK2 a, WT1 a):** Instrumenten-Kenner (instrumente): Körbe mit eigenen
+  Zeichnungen in `bilder.js` (saiten, taste, rohrblatt, mundstueck, bogen; dazu 🥢, 💨, 🤏), die zeigen, wie der Ton
+  entsteht — nie ein Instrument einer Karte (vorher Trompete 🎺 → Korb 🎺 Blechblasinstrument); Klavier in Stufe 3 nur
+  neben Körben, die sicher falsch sind (`auchGruppe`, `gruppenKoerbe`; Saiten und Hämmer im Hinweis). Wassertropfen-Reise
+  (wassertropfen-reise): Station Wasserdampf als Zeichnung `wasserdampf` (gestrichelte Pfeile über dem Wasser) statt ♨️;
+  im Satz nur der Name (`LS.mitBildText`). Neue Prüfung „Bild verrät“ in `tools/pruefe_spiele.js` (die richtige Antwort
+  trägt als einzige ein Bild der Aufgabe beim Stellen), dafür geben die Haken „gestellt“ und „richtig“ die Fläche mit
+  (spiel.js). Zählung mit verkürztem Lauf über alle Spiele: 25 Funde in zehn weiteren Spielen, in der Befund-Datei, noch
+  nicht behoben — `pruefe_spiele.js` meldet sie dort als Fehler.

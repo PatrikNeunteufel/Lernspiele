@@ -3266,7 +3266,7 @@ const LS = (() => {
             if (erledigt) return;
             erledigt = true;
             const mitErklaerung = versuche > 0 && !!(text || erklaerung);
-            pruefung.haken?.("richtig", { nr, vorab: loesungVorab, erklaerung: mitErklaerung });
+            pruefung.haken?.("richtig", { nr, vorab: loesungVorab, erklaerung: mitErklaerung, flaeche });
             zusatzJetzt();
             L.richtig();
             abschliessen(true);
@@ -3361,7 +3361,7 @@ const LS = (() => {
           const wahlErg = messen ? { weiter: true } : wahl.pruefe(k, serien, versuch);
           if (wahlErg.nehmen) {
             L.gestellt();
-            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: wahlErg.serieErzwungen });
+            pruefung.haken?.("gestellt", { nr, kennung: k, schritte, serien, tipps: tipps.length, serieErzwungen: wahlErg.serieErzwungen, flaeche });
             schritteFest = true;
             // Notizblock (NB2 a): wenn die Aufgabe Notizen oder den Block anbietet. Der Knopf steht in der Zeile von „Melden“,
             // nicht beim Feld — dort zerrisse er den Aufbau mancher Spiele (Rechen-Maschine: das Feld sitzt auf dem Pfeil).

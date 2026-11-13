@@ -1505,7 +1505,7 @@ Bild „svg:…“ = im Spiel gezeichnet; leer = kein Bild, nur ab Stufe 3.
 | 🎻 | Geige | Saiteninstrument | streichen | Streichinstrument | zupfen | ☐ |
 |  | Cello | Saiteninstrument | streichen | Streichinstrument | zupfen | ☐ |
 |  | Harfe | Saiteninstrument | zupfen | Zupfinstrument | ☐ |
-| 🎹 | Klavier | Tasteninstrument | Tasten drücken |  | schlagen | ☐ |
+| 🎹 | Klavier | Tasteninstrument | Tasten drücken |  | schlagen | Saiteninstrument,Schlaginstrument | ☐ |
 | 🎺 | Trompete | Blasinstrument | blasen | Blechblasinstrument | ☐ |
 |  | Posaune | Blasinstrument | blasen | Blechblasinstrument | ☐ |
 | 🎷 | Saxofon | Blasinstrument | blasen | Holzblasinstrument | ☐ |

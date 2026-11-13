@@ -11,8 +11,9 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 |---|---|---|
 | Geheimschrift-Knacker | erledigt 2026-11-13 (LERN_Session38, GK1 a, GK2 a) | `GEHEIM_SPERRE` |
 | Plan-Leser | in Arbeit seit 2026-11-13 (LERN_Session38); Stufentext behoben, Rest offen | unten |
-| Instrumenten-Kenner | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Entscheide BI1, IK2 offen | unten |
-| Wassertropfen-Reise | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Entscheid WT1 offen | unten |
+| Instrumenten-Kenner | erledigt 2026-11-13 (LERN_Session38, BI1 a, IK2 a) | unten |
+| Wassertropfen-Reise | erledigt 2026-11-13 (LERN_Session38, WT1 a) | unten |
+| „Bild verrät“ in zehn Spielen | offen (BI1 a, Zählung) | Tabelle unten |
 | Lärm-Wächter | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Bilder (BI1) und Lärm-Skala offen | unten |
 | übrige | offen | unten |
 
@@ -32,6 +33,31 @@ weiche Stoffe senken den Nachhall, gegen Schall durch die Wand braucht es Masse 
   als falscher Korb (Baustelle, Motorräder, Party, Bahnlinie, Presslufthammer, Knallkörper, Autobahn, Blasmusik,
   Fabrik, Helikopter); Tipp „Was schwingt?“ mit Blatt Papier statt „Pa!“; Dämmungsfrage nach dem Hall im Übungsraum
   statt nach dem Lärm der Nachbarn durch die Wand.
+
+**Entscheide BI1 a, IK2 a, WT1 a (2026-11-13), umgesetzt:** Körbe des Instrumenten-Kenners mit eigenen Zeichnungen
+(`bilder.js`: saiten, taste, rohrblatt, mundstueck, bogen; dazu 🥢, 💨, 🤏), nie ein Instrument einer Karte; Klavier
+in Stufe 3 nur neben Körben, die sicher falsch sind (`auchGruppe`); Station Wasserdampf als Zeichnung (gestrichelte
+Pfeile über dem Wasser). Neue Prüfung in `tools/pruefe_spiele.js`: „Bild verrät“ — die richtige Antwort trägt als
+einzige ein Bild, das die Aufgabe beim Stellen zeigt (nicht, wenn die Aufgabe auch Bilder anderer Antworten zeigt, und
+nicht bei Antworten nur aus einem Bild).
+
+**Zählung „Bild verrät“** (verkürzter Lauf über alle Spiele: 2 Runden je Stufe, 50 Generator-Aufgaben, ohne Kind-Lauf;
+eine Stichprobe, im vollen Lauf können weitere Fälle auftauchen) — **offen, je Spiel zu beheben**:
+
+| Spiel | Funde | Beispiele |
+|---|---|---|
+| Schwimmt oder sinkt (schwimmt-sinkt) | 6 | Holz 🪵, Papier 📄, Metall 🔩, Kunststoff 🧴 (Stufen 3, 4, 6) |
+| Kulturen-Koffer (kulturen-koffer) | 4 | Pfahlbauer, Altes Ägypten (Zeichnung), Bauwerk 🏛, Text 📜 (Stufen 2, 3, 5) |
+| Znüni-Teller (znueni-teller) | 4 | Gemüse 🥕, Süsses und Salziges 🍬, Getränke 💧, Brot … 🍞 (Stufen 2, 3, 4, 6) |
+| Gefühle-Radar (gefuehle-radar) | 3 | müde 😴, fröhlich 😀, wütend 😠 (Stufe 1) |
+| Kakao-Weg (kakao-weg) | 2 | Laden 🏪, Transport 🚚 (Stufe 3) |
+| Zeitstrahl-Sortierer (zeitstrahl-sortierer) | 2 | Mittelalter 🏰 (Stufen 5, 6) |
+| Datei-Typen (datei-typen) | 1 | Ton 🎵 (Stufe 1) |
+| Gemeinde-Helfer (gemeinde-helfer) | 1 | Schule 🏫 (Stufe 1) |
+| Geschichten-Ordner (geschichten-ordner) | 1 | „Oma liest den Brief“ 📖 — 📖 steht auch vor dem Titel der Geschichte |
+| Lebensraum (lebensraum) | 1 | Wald 🌲 (Stufe 3) |
+
+Nicht erfasst, weil nur ähnlich und nicht gleich: Wetter und Jahreszeiten ☀️ zum Korb 🌞, 🍂 zum Korb 🍁.
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

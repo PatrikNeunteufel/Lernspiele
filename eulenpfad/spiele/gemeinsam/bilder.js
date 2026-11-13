@@ -48,6 +48,34 @@ const BILDER = (() => {
       svg: `<rect x="10" y="58" width="80" height="22" rx="4" fill="#c58b52" stroke="#7a4f26" stroke-width="3"/><rect x="18" y="40" width="64" height="14" rx="4" fill="#b9bfd6" stroke="#6b6f8a" stroke-width="3"/><line x1="70" y1="10" x2="52" y2="36" stroke="#8a8fa8" stroke-width="4" stroke-linecap="round"/><circle cx="72" cy="10" r="6" fill="#e0569a"/>` },
     schlagholz: { name: "Schlagholz", box: "0 0 100 100",
       svg: `<rect x="8" y="30" width="62" height="14" rx="7" transform="rotate(-20 39 37)" fill="#c58b52" stroke="#7a4f26" stroke-width="3"/><rect x="30" y="58" width="62" height="14" rx="7" transform="rotate(15 61 65)" fill="#c58b52" stroke="#7a4f26" stroke-width="3"/>` },
+    // Körbe der Gruppen und Spielweisen (BI1 a, LERN_Session38): zeigen, wie der Ton entsteht, nie ein Instrument einer
+    // Karte — sonst fände das Kind den Korb durch Vergleichen der Bilder (Trompete 🎺 → Blechblasinstrument 🎺).
+    saiten: { name: "Saiten, eine schwingt (Saiteninstrument)", box: "0 0 100 100",
+      svg: `<rect x="6" y="18" width="10" height="64" rx="3" fill="#b7814f"/><rect x="84" y="18" width="10" height="64" rx="3" fill="#b7814f"/>`
+        + `<line x1="16" y1="30" x2="84" y2="30" stroke="#6b6f8a" stroke-width="3"/><line x1="16" y1="70" x2="84" y2="70" stroke="#6b6f8a" stroke-width="3"/>`
+        + `<path d="M16 50 Q24 40 33 50 T50 50 T67 50 T84 50" fill="none" stroke="#d9822b" stroke-width="3.5"/>`
+        + `<path d="M50 38 v-6 M44 39 l-3 -5 M56 39 l3 -5" stroke="#d9822b" stroke-width="2.4" stroke-linecap="round"/>` },
+    // eine einzelne Taste mit drückendem Finger, keine Tastatur: sonst gliche sie dem Klavier der Karte 🎹
+    taste: { name: "Finger drückt eine Taste (Tasteninstrument)", box: "0 0 100 100",
+      svg: `<path d="M14 62 L86 62 L86 90 Q86 94 82 94 L18 94 Q14 94 14 90 Z" fill="#c9ced8"/>`
+        + `<rect x="18" y="54" width="64" height="30" rx="6" fill="#ffffff" stroke="#3a3d4a" stroke-width="3.5"/>`
+        + `<rect x="40" y="8" width="20" height="44" rx="10" fill="#f2c9a0" stroke="#b5835a" stroke-width="3"/>`
+        + `<path d="M44 16 h12" stroke="#b5835a" stroke-width="2" stroke-linecap="round"/>`
+        + `<path d="M22 18 v18 m-6 -6 l6 7 l6 -7 M78 18 v18 m-6 -6 l6 7 l6 -7" stroke="#4d93dc" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` },
+    rohrblatt: { name: "Mundstück mit Rohrblatt (Holzblasinstrument)", box: "2 22 96 58",
+      svg: `<path d="M8 40 L62 34 L92 38 L92 62 L62 66 L8 52 Z" fill="#2a2c35"/>`
+        + `<path d="M8 53 L62 66 L62 72 L10 58 Z" fill="#e6c77a" stroke="#a88a3c" stroke-width="2"/>`
+        + `<rect x="54" y="30" width="10" height="46" rx="3" fill="#c3c8d2" stroke="#7d8494" stroke-width="2"/>`
+        + `<path d="M14 66 q4 6 8 0 q4 -6 8 0 q4 6 8 0" fill="none" stroke="#d9822b" stroke-width="2.6" stroke-linecap="round"/>` },
+    mundstueck: { name: "Lippen am Kesselmundstück (Blechblasinstrument)", box: "2 24 96 52",
+      svg: `<ellipse cx="18" cy="42" rx="12" ry="7" fill="#e2687a"/><ellipse cx="18" cy="58" rx="12" ry="7" fill="#d4566a"/>`
+        + `<path d="M30 30 Q44 30 50 44 L92 46 L92 54 L50 56 Q44 70 30 70 Z" fill="#d7dbe3" stroke="#7d8494" stroke-width="3" stroke-linejoin="round"/>`
+        + `<path d="M24 50 l4 -5 l4 10 l4 -10 l4 10" fill="none" stroke="#d9822b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>` },
+    bogen: { name: "Bogen streicht über die Saiten (Streichinstrument, streichen)", box: "0 0 100 100",
+      svg: `<line x1="40" y1="6" x2="40" y2="94" stroke="#6b6f8a" stroke-width="2.5"/><line x1="52" y1="6" x2="52" y2="94" stroke="#6b6f8a" stroke-width="2.5"/><line x1="64" y1="6" x2="64" y2="94" stroke="#6b6f8a" stroke-width="2.5"/>`
+        + `<path d="M6 70 L92 34" stroke="#7a4f26" stroke-width="5" stroke-linecap="round"/>`
+        + `<path d="M10 76 L90 43" stroke="#c9bd9e" stroke-width="3" stroke-linecap="round"/><path d="M10 76 L6 70 M90 43 L92 34" stroke="#7a4f26" stroke-width="3" stroke-linecap="round"/>`
+        + `<rect x="2" y="66" width="12" height="12" rx="2" transform="rotate(-22 8 72)" fill="#2a2c35"/>` },
 
     // ---------- Tiere und Pflanzen ohne Emoji (tier-sortierer/tiere.js, lebensraum/nahrung.js) ----------
     luchs: { name: "Luchs (Kopf: Ohrpinsel, Backenbart, Tupfen)", box: "-4 -6 108 108",
@@ -625,5 +653,12 @@ const BILDER = (() => {
         + `<rect x="68" y="72" width="24" height="16" fill="#e6c477" stroke="#b8934a" stroke-width="1.6"/>`
         + `<path d="M66 72 V62 h3 v3 h3 v-3 h3 V72 Z M85 72 V62 h3 v3 h3 v-3 h3 V72 Z" fill="#e6c477" stroke="#b8934a" stroke-width="1.6"/>`
         + `<path d="M77 82 a3 3 0 0 1 6 0 V88 h-6 Z" fill="#b8934a"/><path d="M80 72 V52" stroke="#6b4a2b" stroke-width="1.6"/><path d="M80 52 L90 55.5 L80 59 Z" fill="#e2483d"/>` },
+
+    // ---------- Wasserkreislauf (wassertropfen-reise, Entscheid WT1 a) ----------
+    // Wasserdampf ist unsichtbar: aufsteigende, gestrichelte Pfeile über dem Wasser, keine Wolke und kein Dampf
+    wasserdampf: { name: "Wasserdampf steigt unsichtbar auf (gestrichelte Pfeile über dem Wasser)", box: "0 0 100 100",
+      svg: WASSER
+        + [22, 50, 78].map((x, i) => `<path d="M${x} ${76 - i % 2 * 6} V${22 + i % 2 * 6}" stroke="#6f9fc8" stroke-width="4" stroke-dasharray="7 6" stroke-linecap="round"/>`
+          + `<path d="M${x - 9} ${32 + i % 2 * 6} L${x} ${20 + i % 2 * 6} L${x + 9} ${32 + i % 2 * 6}" fill="none" stroke="#6f9fc8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`).join("") },
   };
 })();
