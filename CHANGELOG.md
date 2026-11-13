@@ -2072,3 +2072,14 @@
   nachbaut, stehen drei davon jetzt als Funktion oder Konstante im Spiel und werden von beiden benutzt:
   Geschichten-Ordner `zeitwortSaetze` und `lueckenVon`, Wortarten-Probe `satzAufgabe`, Gattungs-Kenner `S4_GATTUNG`
   (Aufgaben unverändert). Prüfstand und Fingerabdrücke unverändert (keine dieser Listen hat einen `hash`).
+- **Prüfung je Eintrag, Englisch** (LP5 a, LERN-51, T4 a): `pruefung.js` für English Word-Match (acht Listen),
+  Wort-Zwillinge, Sentence-Builder, Listen & Tap (die zwei eigenen Listen), Sound-Sorter, Weather-Report und
+  Hello-Dialog; Spelling-Bee leiht nur und braucht keine. Die Beschreibungen der sechs geliehenen Word-Match-Listen
+  nennen, wie Listen & Tap und Spelling-Bee sie nutzen. Gemischte Listen in Abschnitte getrennt: Sound-Sorter Wörter
+  je Laut und die Laute der Körbe, Listen & Tap Farben, Formen und Anfänge bzw. Tiere und Orte (vom Spiel gezeichnet),
+  Weather-Report Wetterwörter, Wetterbilder, Durchsagen, Fragen je Durchsage, Wege (mit Plan), Mannschaften, Orte und
+  Häuser, Hello-Dialog je Tabelle. Damit keine Prüfansicht einen Aufgabenschritt nachbaut, im Spiel neu: Sentence-Builder
+  `inStufe`, Wort-Zwillinge Stufentabelle als Daten `STUFE_ARTEN`, Sound-Sorter `HOEREN_VOKALE` und `inStufe5`,
+  Listen & Tap `anweisungSatz`, `woSatz` und `VERBEN_JE_STUFE`, Weather-Report der Filter der Durchsagen als drittes
+  Element in `STUFE` (Aufgaben unverändert). Weather-Report: Resultat-Frage bei mehreren Spielen jetzt „What was the
+  score in the football match?“ (vorher ohne „in“). Prüfstand und Fingerabdrücke unverändert.

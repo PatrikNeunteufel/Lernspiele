@@ -146,7 +146,7 @@ function frageZu(d, fakt, n) {
   const k = (x, y) => `${a}|${x}|${y}|${b}`;
   const kand = [k(tb, ta), k(ta + 1, tb), k(ta, tb + 1), k(Math.max(0, ta - 1), tb), k(ta, Math.max(0, tb - 1)), k(ta + 2, tb)];
   const optionen = [...new Set([k(ta, tb), ...mische(kand)])].filter((o, i) => i === 0 || o !== k(ta, tb)).slice(0, n);
-  return { en: `What was the score${sport}?`, de: `Wie ist das Resultat${fakt.mehrere ? ` (${s.sport})` : ""}?`, optionen: mische(optionen), richtig: k(ta, tb),
+  return { en: `What was the score${sport && ` in${sport}`}?`, de: `Wie ist das Resultat${fakt.mehrere ? ` (${s.sport})` : ""}?`, optionen: mische(optionen), richtig: k(ta, tb),
     inhalt: "resultat", loesung: `${a} ${enZahl0(ta)}, ${b} ${enZahl0(tb)} = ${ta} : ${tb}` };
 }
 const enZahl0 = n => (n === 0 ? "nil" : enZahl(n));
@@ -225,13 +225,16 @@ const ARTEN = {
 
 const eins = d => (d.angaben || []).length === 1 && !d.spiele;
 const zweiAngaben = d => (d.angaben || []).length === 2 && !d.spiele;
-// Je Stufe: [Art, Erzeuger]. Basisklasse 5: s1 4. Klasse, s5 6. Klasse.
+const jede = () => true;
+// Je Stufe: [Art, Erzeuger, Filter der Durchsagen]. Der Filter steht als drittes Element dabei, damit die Prüfansicht
+// (pruefung.js) liest, in welcher Stufe eine Frage drankommt. Basisklasse 5: s1 4. Klasse, s5 6. Klasse.
 const STUFE = {
   s1: [["wort", () => ARTEN.wort()]],
-  s2: [["wetter-wetter", () => ARTEN.frage("wetter", eins, ["wetter"], 4)]],
-  s3: [["wetter-wetter", () => ARTEN.frage("wetter", zweiAngaben, ["wetter"], 4)], ["wetter-wetter", () => ARTEN.frage("wetter", zweiAngaben, ["wetter"], 4)],
-    ["wetter-grad", () => ARTEN.frage("wetter", zweiAngaben, ["grad"], 4)]],
-  s4: [["sport-sieger", () => ARTEN.frage("sport", () => true, ["sieger"], 3)], ["sport-resultat", () => ARTEN.frage("sport", () => true, ["resultat"], 4)]],
+  s2: [["wetter-wetter", () => ARTEN.frage("wetter", eins, ["wetter"], 4), eins]],
+  s3: [["wetter-wetter", () => ARTEN.frage("wetter", zweiAngaben, ["wetter"], 4), zweiAngaben],
+    ["wetter-wetter", () => ARTEN.frage("wetter", zweiAngaben, ["wetter"], 4), zweiAngaben],
+    ["wetter-grad", () => ARTEN.frage("wetter", zweiAngaben, ["grad"], 4), zweiAngaben]],
+  s4: [["sport-sieger", () => ARTEN.frage("sport", jede, ["sieger"], 3), jede], ["sport-resultat", () => ARTEN.frage("sport", jede, ["resultat"], 4), jede]],
   s5: [["weg", () => ARTEN.weg()]],
   // Königsstufe: längere Durchsage, zwei Fragen nacheinander, beide müssen stimmen
   s6: [["zwei", () => ARTEN.zwei()]],

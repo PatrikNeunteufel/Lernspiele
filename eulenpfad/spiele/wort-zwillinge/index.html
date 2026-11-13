@@ -105,16 +105,20 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger). Basisklasse 4: s1 = 3. Klasse, s5 = 5. Klasse.
-const STUFE = {
-  s1: [() => ARTEN.bild(["gleich"], 3)],
-  s2: [() => ARTEN.bild(["gleich", "aehnlich"], 4)],
-  s3: [() => ARTEN.deutsch(["gleich", "aehnlich"], 4), () => ARTEN.bild(["aehnlich"], 4)],
-  s4: [() => ARTEN.englisch(["gleich", "aehnlich"], 4), () => ARTEN.deutsch(["aehnlich"], 4)],
-  s5: [() => ARTEN.freund(4)],
+// Je Stufe die Arten als [Art, Listen der Zwillinge, Zahl der Antworten] (mehrfach genannt = häufiger); freund und
+// entscheid ohne Listen (falsche Freunde, entscheid dazu alle freien Zwillinge). Als Daten, damit die Prüfansicht
+// (pruefung.js) die Stufen eines Paars daraus liest. Basisklasse 4: s1 = 3. Klasse, s5 = 5. Klasse.
+const STUFE_ARTEN = {
+  s1: [["bild", ["gleich"], 3]],
+  s2: [["bild", ["gleich", "aehnlich"], 4]],
+  s3: [["deutsch", ["gleich", "aehnlich"], 4], ["bild", ["aehnlich"], 4]],
+  s4: [["englisch", ["gleich", "aehnlich"], 4], ["deutsch", ["aehnlich"], 4]],
+  s5: [["freund", null, 4]],
   // Königsstufe: falsche Freunde, Zwilling oder falscher Freund entscheiden, englischen Zwilling unter fünf ähnlichen finden
-  s6: [() => ARTEN.freund(4), () => ARTEN.entscheid(), () => ARTEN.englisch(["gleich", "aehnlich"], 5)],
+  s6: [["freund", null, 4], ["entscheid", null], ["englisch", ["gleich", "aehnlich"], 5]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, listen, n]) => () => (listen ? ARTEN[art](listen, n) : ARTEN[art](n)))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {

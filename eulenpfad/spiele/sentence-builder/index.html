@@ -66,11 +66,15 @@ const STUFE = {
 };
 
 /** Sätze, die in der Stufe mit den freien Listen gehen. */
-function vorrat(stufe) {
+/** Nimmt die Stufe diesen Satz (Liste, Wortzahl, falsche Karte), unabhängig von der Freigabe — auch für die Prüfansicht. */
+function inStufe([en, , liste], stufe) {
   const st = STUFE[stufe];
-  return SAETZE.filter(([en, , liste]) => FREI.has(liste) && st.listen.includes(liste)
-    && (!st.max || woerterVon(en).length <= st.max) && (!st.min || woerterVon(en).length >= st.min)
-    && (!st.verwechsler || verwechsler(woerterVon(en))));
+  return st.listen.includes(liste) && (!st.max || woerterVon(en).length <= st.max) && (!st.min || woerterVon(en).length >= st.min)
+    && (!st.verwechsler || !!verwechsler(woerterVon(en)));
+}
+
+function vorrat(stufe) {
+  return SAETZE.filter(s => FREI.has(s[2]) && inStufe(s, stufe));
 }
 
 /** Eine Aufgabe: Satz, Übersetzung, Wörter in richtiger Reihenfolge, Karten gemischt (mit überzähliger Karte); null ohne Vorrat. */

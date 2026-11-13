@@ -73,6 +73,11 @@ const ALLE_VERBEN = ANWEISUNG_VERBEN;
 const ort = (tier, ding, praep) => `${tier}|${ding}|${praep}`;
 const teile = schluessel => schluessel.split("|");
 const TIER_BILD = Object.fromEntries(WO_TIERE);
+/** Die gesprochenen Sätze — auch für die Prüfansicht (pruefung.js). */
+const anweisungSatz = (verb, farbe, form) => `${verb} ${farbe} ${form}.`;
+const woSatz = (tier, praep, ding) => `The ${tier} is ${praep} the ${ding}.`;
+/** Wie viele Anfänge der Anweisung (ANWEISUNG_VERBEN, von vorn) eine Stufe nimmt — auch für die Prüfansicht. */
+const VERBEN_JE_STUFE = { s3: 1, s4: 1, s5: ALLE_VERBEN.length, s6: ALLE_VERBEN.length };
 
 // Jede Art liefert null, wenn die freien Listen für sie nicht genug hergeben.
 const ARTEN = {
@@ -97,7 +102,7 @@ const ARTEN = {
     const andereForm = waehle([0, 1, 2].filter(i => i !== form));
     const pflicht = [bild(farbe, form), bild(farbe, andereForm), bild(andereFarbe, form)];
     const rest = mische(farben.flatMap(f => [0, 1, 2].map(i => bild(f, i))).filter(b => !pflicht.includes(b))).slice(0, n - 3);
-    const text = `${waehle(verben)} ${farbe} ${ANWEISUNG_FORMEN[form]}.`;
+    const text = anweisungSatz(waehle(verben), farbe, ANWEISUNG_FORMEN[form]);
     return { art: "anweisung", farbe, form: ANWEISUNG_FORMEN[form], sprich: text, richtig: pflicht[0], optionen: mische([...pflicht, ...rest]),
       loesung: `„${text}“ → ${pflicht[0]}` };
   },
@@ -117,7 +122,7 @@ const ARTEN = {
       const rest = mische(alle.filter(o => ![richtig, gleicherOrt, gleichesT].includes(o))).slice(0, n - 3);
       andere = [gleicherOrt, gleichesT, ...rest];
     }
-    const text = `The ${tier} is ${praep} the ${ding}.`;
+    const text = woSatz(tier, praep, ding);
     return { art: "wo", sprich: text, richtig, optionen: mische([richtig, ...andere]), gleichesTier, loesung: `„${text}“` };
   },
 };
@@ -126,11 +131,11 @@ const ARTEN = {
 const STUFE = {
   s1: [() => ARTEN.wort(["farben", "tiere", "zahlen"], 4)],
   s2: [() => ARTEN.wort(WM_THEMEN, 4)],
-  s3: [() => ARTEN.anweisung(4, ALLE_VERBEN.slice(0, 1)), () => ARTEN.wort(WM_THEMEN, 4)],
-  s4: [() => ARTEN.wo(4, true), () => ARTEN.anweisung(4, ALLE_VERBEN.slice(0, 1))],
-  s5: [() => ARTEN.wo(4, false), () => ARTEN.anweisung(6, ALLE_VERBEN)],
+  s3: [() => ARTEN.anweisung(4, ALLE_VERBEN.slice(0, VERBEN_JE_STUFE.s3)), () => ARTEN.wort(WM_THEMEN, 4)],
+  s4: [() => ARTEN.wo(4, true), () => ARTEN.anweisung(4, ALLE_VERBEN.slice(0, VERBEN_JE_STUFE.s4))],
+  s5: [() => ARTEN.wo(4, false), () => ARTEN.anweisung(6, ALLE_VERBEN.slice(0, VERBEN_JE_STUFE.s5))],
   // Königsstufe: sechs Bilder, Tier und Ort ändern sich, alle Anweisungen, Wörter aus allen Themen
-  s6: [() => ARTEN.wo(6, false), () => ARTEN.anweisung(6, ALLE_VERBEN), () => ARTEN.wort(WM_THEMEN, 6)],
+  s6: [() => ARTEN.wo(6, false), () => ARTEN.anweisung(6, ALLE_VERBEN.slice(0, VERBEN_JE_STUFE.s6)), () => ARTEN.wort(WM_THEMEN, 6)],
 };
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */

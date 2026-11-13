@@ -69,7 +69,9 @@ const S5_LAUTE = {
   "o-lang": { beispiel: "home", muster: MIT_E },
   "oo-lang": { beispiel: "moon", muster: /oo/ },
 };
-const s5Woerter = () => WOERTER.filter(([w, l]) => S5_LAUTE[l] && !S5_LAUTE[l].muster.test(w));
+/** Kommt das Wort in Stufe 5 vor (langer Laut, anders geschrieben als das Beispiel)? Auch für die Prüfansicht (pruefung.js). */
+const inStufe5 = ([w, l]) => !!S5_LAUTE[l] && !S5_LAUTE[l].muster.test(w);
+const s5Woerter = () => WOERTER.filter(inStufe5);
 // Paare für die Beschriftung der Körbe in Stufe 4 (nur Wörter aus der freien Liste).
 const STUMM_PAARE = [["bit", "bite"], ["kit", "kite"], ["pin", "pine"], ["hop", "hope"], ["not", "note"], ["cap", "cape"], ["tap", "tape"], ["mad", "made"], ["plan", "plane"]]
   .filter(p => p.every(laut));
@@ -141,10 +143,13 @@ const ARTEN = {
   },
 };
 
+/** Vokale, deren Laute die Stufen 2 und 3 hören lassen — auch für die Prüfansicht (pruefung.js). */
+const HOEREN_VOKALE = { s2: ["i"], s3: ["i", "a", "o"] };
+
 const STUFE = {
   s1: [() => ARTEN.bild()],
-  s2: [() => ARTEN.hoeren(["i"])],
-  s3: [() => ARTEN.hoeren(["i", "a", "o"])],
+  s2: [() => ARTEN.hoeren(HOEREN_VOKALE.s2)],
+  s3: [() => ARTEN.hoeren(HOEREN_VOKALE.s3)],
   s4: [() => ARTEN.stummesE()],
   s5: [() => ARTEN.gleicherLaut()],
   s6: [() => ARTEN.anders()],
