@@ -86,9 +86,12 @@ const ABLENKER = {
   ou: ["au", "on", "oi"], au: ["ou", "on", "an"], on: ["an", "ou", "in"], an: ["on", "in", "ou"],
   in: ["an", "on", "ou"], ch: ["c", "s", "j"], oi: ["ou", "au", "on"],
 };
+// Bei é und è: eine Schreibweise des anderen e-Lauts (bei é zufällig è oder ê) und das e ohne Akzent — als Daten
+// auch für die Prüfansicht (pruefung.js).
+const ABLENKER_E = { "é": [["è", "ê"], "e"], "è": [["é"], "e"] };
 function ablenkerFuer(w) {
-  if (w.laut === "é") return [waehle(["è", "ê"]), "e"];
-  if (w.laut === "è") return ["é", "e"];
+  const e = ABLENKER_E[w.laut];
+  if (e) return [e[0].length > 1 ? waehle(e[0]) : e[0][0], e[1]];
   return mische(ABLENKER[w.laut]).slice(0, 2);
 }
 
@@ -97,6 +100,8 @@ const beispielFuer = (laut, w) => SON_LAUTE[laut].beispiele.find(b => b !== nack
 
 const S1_LAUTE = ["ou", "au", "on", "oi", "é", "ch"];
 const NASAL = ["an", "in", "on"];
+/** Stufe 4 lesen: Schreibweise anders als die erste ihres Lauts (enfant, pain, nom) — kommt öfter dran; auch für die Prüfansicht (pruefung.js). */
+const kniffligGeschrieben = w => w.gr !== SON_LAUTE[w.laut].schrift[0];
 
 const ARTEN = {
   /** Stufe 1: zwei Wörter hören — klingen sie am Schluss gleich? */
@@ -129,7 +134,7 @@ const ARTEN = {
     const pool = mitLaut(NASAL);
     if (!pool.length) return null;
     // Lieber Wörter, deren Schreibweise anders ist als die erste ihres Lauts (enfant, pain, nom).
-    const knifflig = pool.filter(w => w.gr !== SON_LAUTE[w.laut].schrift[0]);
+    const knifflig = pool.filter(kniffligGeschrieben);
     const w = waehle(knifflig.length && Math.random() < 0.6 ? knifflig : pool);
     return { art: "lesen", wort: w.anzeige, richtig: w.laut, koerbe: mische(NASAL) };
   },
@@ -147,14 +152,18 @@ const ARTEN = {
   },
 };
 
-const STUFE = {
-  s1: [() => ARTEN.paar()],
-  s2: [() => ARTEN.hoeren(["ou", "au"], 2)],
-  s3: [() => ARTEN.hoeren(["ou", "au", "on", "ch"], 3)],
-  s4: [() => ARTEN.hoeren(NASAL, 3), () => ARTEN.lesen()],
-  s5: [() => ARTEN.hoeren(["é", "è"], 2), () => ARTEN.luecke()],
-  s6: [() => ARTEN.tippen()],
+// Je Stufe die Arten als [Art, Laute der Körbe, Zahl der Körbe] (Laute und Körbe nur beim Hören). Als Daten — auch
+// für die Prüfansicht (pruefung.js), die die Stufen eines Worts und eines Lauts daraus liest.
+const STUFE_ARTEN = {
+  s1: [["paar"]],
+  s2: [["hoeren", ["ou", "au"], 2]],
+  s3: [["hoeren", ["ou", "au", "on", "ch"], 3]],
+  s4: [["hoeren", NASAL, 3], ["lesen"]],
+  s5: [["hoeren", ["é", "è"], 2], ["luecke"]],
+  s6: [["tippen"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, laute, n]) => () => (laute ? ARTEN[art](laute, n) : ARTEN[art]()))]));
 
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {

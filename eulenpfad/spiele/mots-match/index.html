@@ -141,16 +141,21 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten. Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
-const STUFE = {
-  s1: [() => ARTEN.bildZuFr(["farben", "tiere", "essen"], 3, "auto")],
-  s2: [() => ARTEN.bildZuFr(ALLE_THEMEN, 4, "knopf"), () => ARTEN.frZuBild(ALLE_THEMEN, 4, "knopf")],
-  s3: [() => ARTEN.frZuBild(ALLE_THEMEN, 4, null), () => ARTEN.deZuFr(ALLE_THEMEN, 4)],
-  s4: [() => ARTEN.hoerZuBild(ALLE_THEMEN, 5, false)],
-  s5: [() => ARTEN.aehnlich(4)],
+// Je Stufe die Arten als [Art, Themen, Zahl der Antworten, Zusatz] (Zusatz: Ton bei bildZuFr/frZuBild, alleThemen
+// bei hoerZuBild); aehnlich und deZuFrAehnlich ohne Themen (ähnliche Wörter aus allen freien Themen).
+// Als Daten — auch für die Prüfansicht (pruefung.js), die daraus die Stufen je Thema liest.
+// Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
+const STUFE_ARTEN = {
+  s1: [["bildZuFr", ["farben", "tiere", "essen"], 3, "auto"]],
+  s2: [["bildZuFr", ALLE_THEMEN, 4, "knopf"], ["frZuBild", ALLE_THEMEN, 4, "knopf"]],
+  s3: [["frZuBild", ALLE_THEMEN, 4, null], ["deZuFr", ALLE_THEMEN, 4]],
+  s4: [["hoerZuBild", ALLE_THEMEN, 5, false]],
+  s5: [["aehnlich", null, 4]],
   // Königsstufe: ähnliche Wörter mit falschem Artikel, hören unter sechs Bildern aus allen Themen, Deutsch → Französisch
-  s6: [() => ARTEN.aehnlich(5), () => ARTEN.hoerZuBild(ALLE_THEMEN, 6, true), () => ARTEN.deZuFrAehnlich(5)],
+  s6: [["aehnlich", null, 5], ["hoerZuBild", ALLE_THEMEN, 6, true], ["deZuFrAehnlich", null, 5]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, themen, n, zusatz]) => () => (themen ? ARTEN[art](themen, n, zusatz) : ARTEN[art](n)))]));
 const ANZAHL = { s1: 3, s2: 4, s3: 4, s4: 5, s5: 4, s6: { aehnlich: 5, hoerZuBild: 6, deZuFrAehnlich: 5 } };
 const THEMEN_DER_STUFE = { s1: ["farben", "tiere", "essen"] };
 

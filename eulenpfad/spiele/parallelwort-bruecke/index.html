@@ -74,18 +74,21 @@ function aehnliche(ziel, pool, feld, n) {
   return pool.filter(w => w !== ziel).sort((a, b) => nah(a) - nah(b)).slice(0, n - 1);
 }
 
+/** Kann das Wort Ziel einer Bild-Aufgabe sein (bild, hoerBild)? Mit Bild und einem der Kennzeichen — auch für die Prüfansicht (pruefung.js). */
+const bildZiel = (w, kennz) => !!w.bild && kennz.includes(w.kennz);
+
 // Jede Art liefert null, wenn die freien Listen nicht genug hergeben.
 const ARTEN = {
   /** Französisches Wort lesen → Bild. */
   bild(kennz, n) {
-    const pool = BRUECKEN.filter(w => w.bild && kennz.includes(w.kennz));
+    const pool = BRUECKEN.filter(w => bildZiel(w, kennz));
     if (pool.length < n) return null;
     const ziel = waehle(pool);
     return { art: "bild", ziel, richtig: ziel.bild, optionen: mische([ziel, ...mische(pool.filter(w => w !== ziel)).slice(0, n - 1)].map(w => w.bild)) };
   },
   /** Nur hören → Bild. */
   hoerBild(kennz, n) {
-    const pool = BRUECKEN.filter(w => w.bild && kennz.includes(w.kennz));
+    const pool = BRUECKEN.filter(w => bildZiel(w, kennz));
     if (pool.length < n) return null;
     const ziel = waehle(pool);
     return { art: "hoerBild", ziel, richtig: ziel.bild, optionen: mische([ziel, ...mische(pool.filter(w => w !== ziel)).slice(0, n - 1)].map(w => w.bild)) };
@@ -130,16 +133,20 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten. Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
-const STUFE = {
-  s1: [() => ARTEN.bild(["gleich"], 3)],
-  s2: [() => ARTEN.bild(["gleich", "aehnlich"], 4), () => ARTEN.hoerBild(["gleich", "aehnlich"], 4)],
-  s3: [() => ARTEN.deutsch(4), () => ARTEN.franz(4)],
-  s4: [() => ARTEN.satz(4)],
-  s5: [() => ARTEN.freund(4), () => ARTEN.entscheid()],
+// Je Stufe die Arten als [Art, Kennzeichen (nur bild und hoerBild), Zahl der Antworten]. Basisklasse 5: s1 Einstieg
+// ohne Vorkenntnisse, s5 = 6. Klasse. Als Daten — auch für die Prüfansicht (pruefung.js), die die Stufen eines
+// Eintrags daraus liest.
+const STUFE_ARTEN = {
+  s1: [["bild", ["gleich"], 3]],
+  s2: [["bild", ["gleich", "aehnlich"], 4], ["hoerBild", ["gleich", "aehnlich"], 4]],
+  s3: [["deutsch", null, 4], ["franz", null, 4]],
+  s4: [["satz", null, 4]],
+  s5: [["freund", null, 4], ["entscheid", null]],
   // Königsstufe: falsche Freunde unter fünf Antworten, Brücke oder Falle, ähnliche französische Wörter, Sätze
-  s6: [() => ARTEN.freund(5), () => ARTEN.entscheid(), () => ARTEN.franz(5), () => ARTEN.satz(5)],
+  s6: [["freund", null, 5], ["entscheid", null], ["franz", null, 5], ["satz", null, 5]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, kennz, n]) => () => (kennz ? ARTEN[art](kennz, n) : ARTEN[art](n)))]));
 const ANZAHL = { s1: 3, s2: 4, s3: 4, s4: 4, s5: { freund: 4, entscheid: 2 }, s6: { freund: 5, entscheid: 2, franz: 5, satz: 5 } };
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */

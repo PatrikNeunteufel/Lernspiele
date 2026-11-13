@@ -57,8 +57,10 @@ const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["nomen"])
 const VOKAL = /^[aeiouyhàâéèêîïôœ]/i;
 const ALLE = NOMEN.map(([wort, genus, plural, bild, de, ausnahme = ""]) => ({ wort, genus, plural, bild, de, ausnahme, vokal: VOKAL.test(wort) }));
 const POOL = FREI.has("nomen") ? ALLE : [];
-const AUSNAHMEN = POOL.filter(w => w.ausnahme && w.ausnahme !== "gleich");
-const OHNE_GLEICH = POOL.filter(w => w.ausnahme !== "gleich");
+/** Unterscheiden sich Einzahl und Mehrzahl (nicht la souris – les souris)? — auch für die Prüfansicht (pruefung.js). */
+const mehrzahlAnders = w => w.ausnahme !== "gleich";
+const AUSNAHMEN = POOL.filter(w => w.ausnahme && mehrzahlAnders(w));
+const OHNE_GLEICH = POOL.filter(mehrzahlAnders);
 
 /** Bestimmter und unbestimmter Artikel der Einzahl. */
 const bestimmt = w => (w.vokal ? "l’" : w.genus === "m" ? "le" : "la");
@@ -69,11 +71,25 @@ const sprechText = t => t.replace(/’/g, "'");
 const LOB = ["Bravo !", "Super !", "Très bien !", "Génial !"];
 const drei = b => b + b + b;
 
+/**
+ * Nimmt die Art (mit ihrem Zusatz aus STUFE_ARTEN: Körbe oder mitBild) dieses Wort, unabhängig von der Freigabe —
+ * auch für die Prüfansicht (pruefung.js). Ohne Bild nur Wörter, deren Mehrzahl man sieht.
+ */
+const NIMMT = {
+  bestimmt: (w, koerbe) => koerbe.includes("l’") || !w.vokal,
+  unbestimmt: () => true,
+  hoerZahl: () => true,
+  mitLes: (w, mitBild) => mitBild || mehrzahlAnders(w),
+  mitDes: (w, mitBild) => mitBild || mehrzahlAnders(w),
+  mehrzahl: mehrzahlAnders,
+  einzahl: mehrzahlAnders,
+};
+
 // Jede Art liefert null, wenn die freien Listen nicht genug hergeben.
 const ARTEN = {
   /** Einzahl: le / la (s1) oder le / la / l’. */
   bestimmt(koerbe) {
-    const pool = POOL.filter(w => koerbe.includes("l’") || !w.vokal);
+    const pool = POOL.filter(w => NIMMT.bestimmt(w, koerbe));
     if (!pool.length) return null;
     const w = waehle(pool);
     return { art: "bestimmt", w, form: w.wort, mehrzahl: false, mitBild: true, koerbe, richtig: bestimmt(w), sprich: mit(bestimmt(w), w.wort) };
@@ -95,7 +111,7 @@ const ARTEN = {
   },
   /** Einzahl oder Mehrzahl: le / la / l’ / les. Ohne Bild nur Wörter, deren Mehrzahl man sieht. */
   mitLes(mitBild) {
-    const pool = mitBild ? POOL : OHNE_GLEICH;
+    const pool = POOL.filter(w => NIMMT.mitLes(w, mitBild));
     if (!pool.length) return null;
     const w = waehle(pool);
     const mehrzahl = Math.random() < 0.5;
@@ -104,7 +120,7 @@ const ARTEN = {
   },
   /** Einzahl oder Mehrzahl: un / une / des. */
   mitDes(mitBild) {
-    const pool = mitBild ? POOL : OHNE_GLEICH;
+    const pool = POOL.filter(w => NIMMT.mitDes(w, mitBild));
     if (!pool.length) return null;
     const w = waehle(pool);
     const mehrzahl = Math.random() < 0.5;
@@ -141,16 +157,20 @@ const ARTEN = {
   },
 };
 
-// Je Stufe die Arten (mehrfach genannt = häufiger). Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
-const STUFE = {
-  s1: [() => ARTEN.bestimmt(["le", "la"])],
-  s2: [() => ARTEN.bestimmt(["le", "la", "l’"])],
-  s3: [() => ARTEN.unbestimmt(), () => ARTEN.unbestimmt(), () => ARTEN.bestimmt(["le", "la", "l’"])],
-  s4: [() => ARTEN.hoerZahl(), () => ARTEN.mitLes(true), () => ARTEN.mitDes(true)],
-  s5: [() => ARTEN.mehrzahl(true)],
+// Je Stufe die Arten als [Art, Zusatz] (Zusatz: Körbe bei bestimmt, mitBild bei mitLes, mitDes, mehrzahl; mehrfach
+// genannt = häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus mit NIMMT die Stufen je Wort liest.
+// Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 = 6. Klasse.
+const STUFE_ARTEN = {
+  s1: [["bestimmt", ["le", "la"]]],
+  s2: [["bestimmt", ["le", "la", "l’"]]],
+  s3: [["unbestimmt"], ["unbestimmt"], ["bestimmt", ["le", "la", "l’"]]],
+  s4: [["hoerZahl"], ["mitLes", true], ["mitDes", true]],
+  s5: [["mehrzahl", true]],
   // Königsstufe: ohne Bild, bestimmt und unbestimmt, Mehrzahl bilden und zurück zur Einzahl
-  s6: [() => ARTEN.mitLes(false), () => ARTEN.mitDes(false), () => ARTEN.mehrzahl(false), () => ARTEN.einzahl()],
+  s6: [["mitLes", false], ["mitDes", false], ["mehrzahl", false], ["einzahl"]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, zusatz]) => () => ARTEN[art](zusatz))]));
 
 /** Zufällige Art der Stufe, die mit den freien Listen etwas hergibt; null, wenn keine. */
 function aufgabeErzeugen(stufe) {

@@ -2083,3 +2083,13 @@
   Listen & Tap `anweisungSatz`, `woSatz` und `VERBEN_JE_STUFE`, Weather-Report der Filter der Durchsagen als drittes
   Element in `STUFE` (Aufgaben unverändert). Weather-Report: Resultat-Frage bei mehreren Spielen jetzt „What was the
   score in the football match?“ (vorher ohne „in“). Prüfstand und Fingerabdrücke unverändert.
+- **Prüfung je Eintrag, Französisch** (LP5 a, LERN-51, T4 a): `pruefung.js` für Mots-Match (fünf Listen),
+  Wörter-Brücke, Le ou la?, Son-Lauscher und Au café; Nombres-Rallye, Quelle heure und Calendrier haben keine
+  Inhaltslisten. Gemischte Listen in Abschnitte getrennt: Wörter-Brücke Brücken, Fallen und Sätze, Son-Lauscher Wörter
+  je Laut und die Laute der Körbe, Au café Sprecher, Situationen, Formeln, Befinden, Dialoge, Antworten, Bestellungen,
+  Sachen, tu/vous und Personen. Damit keine Prüfansicht einen Aufgabenschritt nachbaut, im Spiel neu (Aufgaben
+  unverändert, je Stufe mehrere hundert Aufgaben mit festem Startwert vorher und nachher gleich): Mots-Match
+  `STUFE_ARTEN`; Le ou la? `STUFE_ARTEN`, `NIMMT` und `mehrzahlAnders`; Wörter-Brücke `STUFE_ARTEN` und `bildZiel`;
+  Son-Lauscher `STUFE_ARTEN`, `kniffligGeschrieben` und `ABLENKER_E`; Au café `paareVon`, `zumOrdnen`, `personenBis`,
+  `ANTWORT_JE_STUFE`, `ORDNEN_JE_STUFE`, `TU_VOUS_JE_STUFE` und `ablenkerFuer` mit wählbaren Dialogen. Prüfstand und
+  Fingerabdrücke unverändert.

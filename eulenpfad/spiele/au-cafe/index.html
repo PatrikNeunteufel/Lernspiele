@@ -98,15 +98,17 @@ const PLAUSIBEL = {
   preis: ["bezahlen", "dank", "abschied", "bestellung"],
   abschied: ["abschied", "dank"],
 };
-/** Alle Paare Replik → Antwort, die als Aufgabe taugen. */
-const PAARE = DIALOGE.flatMap(d => d.repliken.slice(0, -1).map((r, i) => ({ d, i, frage: r, antwort: d.repliken[i + 1] }))
+/** Alle Paare Replik → Antwort aus diesen Dialogen, die als Aufgabe taugen — auch für die Prüfansicht (pruefung.js). */
+const paareVon = dialoge => dialoge.flatMap(d => d.repliken.slice(0, -1).map((r, i) => ({ d, i, frage: r, antwort: d.repliken[i + 1] }))
   .filter(p => PLAUSIBEL[schluessel(p.frage)]?.includes(schluessel(p.antwort))));
+const PAARE = paareVon(DIALOGE);
 const ALLE_REPLIKEN = DIALOGE.flatMap(d => d.repliken);
-/** Ablenker zu einem Paar: Repliken aus den Themen, die sicher nicht passen. */
-const ablenkerFuer = (p, themen) => {
+/** Ablenker zu einem Paar: Repliken aus den Themen, die sicher nicht passen. dialoge: Standard die freien —
+    die Prüfansicht (pruefung.js) gibt alle. */
+const ablenkerFuer = (p, themen, dialoge = DIALOGE) => {
   const ok = PLAUSIBEL[schluessel(p.frage)];
   const texte = new Set();
-  return DIALOGE.filter(d => themen.includes(d.thema)).flatMap(d => d.repliken).filter(r => !ok.includes(schluessel(r)) && !ok.includes(r[3]) && r[1] !== p.antwort[1] && !texte.has(r[1]) && texte.add(r[1]));
+  return dialoge.filter(d => themen.includes(d.thema)).flatMap(d => d.repliken).filter(r => !ok.includes(schluessel(r)) && !ok.includes(r[3]) && r[1] !== p.antwort[1] && !texte.has(r[1]) && texte.add(r[1]));
 };
 
 // ---------- Aufgaben als Daten ----------
@@ -156,7 +158,7 @@ const ARTEN = {
   },
   /** Gespräch ordnen: Dialoge mit min–max Repliken (mindestens drei, sonst ist die Reihenfolge offen). */
   ordnen(min, max) {
-    const dialoge = DIALOGE.filter(d => d.repliken.length >= Math.max(3, min) && d.repliken.length <= max);
+    const dialoge = DIALOGE.filter(d => zumOrdnen(d, min, max));
     if (!dialoge.length) return null;
     const d = waehle(dialoge);
     return { art: "ordnen", dialog: d.id, reihe: d.repliken.map((_, i) => i), frage: "Bring das Gespräch in die richtige Reihenfolge.",
@@ -204,7 +206,7 @@ const ARTEN = {
   /** tu oder vous? bisStufe: welche Personen (6 = auch mehrere Personen). */
   tuVous(bisStufe) {
     if (!FREI.has("dialoge")) return null;
-    const person = waehle(CAFE_PERSONEN.filter(p => p[3] <= bisStufe));
+    const person = waehle(personenBis(bisStufe));
     const paar = waehle(CAFE_TU_VOUS);
     const form = person[2];
     return { art: "tuVous", person: person[1], form, bild: person[0], situation: `Du sprichst ${person[1]}. ${paar[2]}`,
@@ -220,15 +222,33 @@ function nahePreise(p) {
   return [...new Set([p + 10, p - 10, p + 1, p - 1, p + 2, p - 2].filter(x => x >= 2 && x <= 20 && x !== p))];
 }
 
+/** Taugt der Dialog zum Ordnen mit min–max Repliken? Mindestens drei, sonst ist die Reihenfolge offen
+    — auch für die Prüfansicht (pruefung.js). */
+const zumOrdnen = (d, min, max) => d.repliken.length >= Math.max(3, min) && d.repliken.length <= max;
+/** Personen für tu oder vous bis zu dieser Stufe — auch für die Prüfansicht (pruefung.js). */
+const personenBis = bisStufe => CAFE_PERSONEN.filter(p => p[3] <= bisStufe);
+
+// Angaben der Aufgaben je Stufe — auch für die Prüfansicht (pruefung.js).
+/** Welche Antwort passt? [Zahl der Antworten, Themen, nur hören] */
+const ANTWORT_JE_STUFE = {
+  s2: [3, ["gruss", "vorstellen"], false],
+  s3: [4, ["gruss", "vorstellen", "bestellen"], false],
+  s5: [4, ["gruss", "vorstellen", "bestellen"], true],
+};
+/** Gespräch ordnen: [kleinste, grösste Zahl Repliken] */
+const ORDNEN_JE_STUFE = { s3: [3, 4], s6: [5, 6] };
+/** tu oder vous: Personen bis zu dieser Stufe (CAFE_PERSONEN, „ab Stufe“) */
+const TU_VOUS_JE_STUFE = { s4: 4, s6: 6 };
+
 // Je Stufe: [Art, Erzeuger]. Basisklasse 5: s1 Einstieg ohne Vorkenntnisse, s5 6. Klasse.
 const STUFE = {
   s1: [["formel", () => ARTEN.formel()], ["formel", () => ARTEN.formel()], ["formelHoeren", () => ARTEN.formelHoeren()]],
-  s2: [["befinden", () => ARTEN.befinden()], ["antwort", () => ARTEN.antwort(3, ["gruss", "vorstellen"], false)]],
-  s3: [["ordnen", () => ARTEN.ordnen(3, 4)], ["antwort", () => ARTEN.antwort(4, ["gruss", "vorstellen", "bestellen"], false)]],
-  s4: [["bestellenWas", () => ARTEN.bestellenWas(false)], ["bestellenPreis", () => ARTEN.bestellenPreis()], ["tuVous", () => ARTEN.tuVous(4)]],
-  s5: [["antwortHoeren", () => ARTEN.antwort(4, ["gruss", "vorstellen", "bestellen"], true)], ["bestellenHoeren", () => ARTEN.bestellenWas(true)]],
+  s2: [["befinden", () => ARTEN.befinden()], ["antwort", () => ARTEN.antwort(...ANTWORT_JE_STUFE.s2)]],
+  s3: [["ordnen", () => ARTEN.ordnen(...ORDNEN_JE_STUFE.s3)], ["antwort", () => ARTEN.antwort(...ANTWORT_JE_STUFE.s3)]],
+  s4: [["bestellenWas", () => ARTEN.bestellenWas(false)], ["bestellenPreis", () => ARTEN.bestellenPreis()], ["tuVous", () => ARTEN.tuVous(TU_VOUS_JE_STUFE.s4)]],
+  s5: [["antwortHoeren", () => ARTEN.antwort(...ANTWORT_JE_STUFE.s5)], ["bestellenHoeren", () => ARTEN.bestellenWas(true)]],
   // Königsstufe: nur hören und beides wissen, lange Gespräche ordnen, tu/vous auch bei mehreren Personen
-  s6: [["bestellenBeides", () => ARTEN.bestellenBeides()], ["ordnen", () => ARTEN.ordnen(5, 6)], ["tuVous", () => ARTEN.tuVous(6)]],
+  s6: [["bestellenBeides", () => ARTEN.bestellenBeides()], ["ordnen", () => ARTEN.ordnen(...ORDNEN_JE_STUFE.s6)], ["tuVous", () => ARTEN.tuVous(TU_VOUS_JE_STUFE.s6)]],
 };
 
 /** Eine Aufgabe der Stufe; null, wenn die freien Inhalte nichts hergeben. */
