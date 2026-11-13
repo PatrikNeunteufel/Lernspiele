@@ -2112,3 +2112,14 @@
   eingebauter Browser).
 - **Session-Abschluss:** Report `docs/eulenpfad/report/LERN_Session37_2026-11-13.md` (mit den inhaltlichen
   Auffälligkeiten aller Blöcke), Handover (weiter mit NMG Block 2).
+
+## 2026-11-13 — LERN_Session38
+- **Anleitung k04:** Rahmen 1 „Das ist die Aufgabe“ um Zahl und Auftrag zusammen, ohne 💡 (Hinweis Patrik).
+  `tools/anleitung_bilder.js`: Rahmen-Ziele mit `alle` (ein Rahmen über alle Treffer) und `eng` (um den Inhalt statt die
+  Blockbreite); `--nur=<bild,…>` schreibt nur diese Bilder, die übrigen bleiben unberührt.
+- **Korbfarben (KF1 a, Hinweis Patrik zum Tier-Sortierer):** `LS.koerbe` färbt je Korb statt je Platz. Ein Korb behält
+  seine Farbe die ganze Runde, auch gemischt; jede Runde verteilt sie neu, damit sich keine Farbe über Runden an einen Korb
+  bindet; in einer Aufgabe nie zweimal dieselbe (bei mehr Körben als Farben weicht einer aus). Betraf gemischte Körbe in
+  Tier-Sortierer, Instrumente, Son-Lauscher, Sound-Sorter, Znüni-Teller und Auge-Entdecker; Spiele mit eigener Farbe
+  (`opt.farbe`) unverändert. Neuer Prüfer „Korbfarbe“ in `tools/pruefe_spiele.js` (Gegenprobe mit Farbe nach Platz: 230
+  Meldungen im Tier-Sortierer).

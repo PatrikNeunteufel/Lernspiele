@@ -98,6 +98,7 @@ const TREIBER = `
   const handgriffe = []; // Endlos: Handgriffe je gestellte Aufgabe, für die Übersicht
   // Serienbremse: je Merkmal aus ctx.serie höchstens LS.SERIE_MAX gleiche hintereinander in einer Runde.
   let serien = {};
+  let korbFarbe = new Map(); // KF1 a: Farbe je Korb in der laufenden Runde
   LS.pruefung.haken = (art, a) => {
     if (art === "gestellt") {
       if (a.nr === 0) serien = {};
@@ -120,6 +121,18 @@ const TREIBER = `
     // Der Klick, der löst, ist noch nicht gezählt (er läuft gerade).
     if (art === "richtig" && endlos && klicks - klicksBeiStart + 1 < schritte)
       melde("Handgriffe", "mit " + (klicks - klicksBeiStart + 1) + " Klicks gelöst, das Spiel nennt " + schritte, "zu viele");
+    // KF1 a (LERN_Session38): Ein Korb behält seine Farbe die ganze Runde, in einer Aufgabe kommt keine Farbe zweimal vor.
+    // Muss ein Korb wechseln (mehr Körbe als Farben, etwa die Wortfamilien), meldet der Baustein erzwungen: kein Fund.
+    if (art === "koerbe") {
+      const doppelt = a.koerbe.map(k => k[1]).filter((f, i, l) => l.indexOf(f) !== i);
+      if (doppelt.length) melde("Korbfarbe", "zwei Körbe mit derselben Farbe " + doppelt[0] + ": " + a.koerbe.map(k => k[0]).join(", "), "doppelt " + a.koerbe.map(k => k[0]).join("|"));
+      for (const [wert, f] of a.koerbe) {
+        if (!a.eigen && !a.erzwungen && korbFarbe.has(wert) && korbFarbe.get(wert) !== f)
+          melde("Korbfarbe", "Korb «" + wert + "» wechselt in der Runde die Farbe", "wechsel " + wert);
+        korbFarbe.set(wert, f);
+      }
+      return;
+    }
     // LB1 a (LERN_Session18): Auf Anhieb richtig steht in der Blase nur ein Lob aus der Liste des Rahmens — keine
     // Rechnung, keine Begründung (die kommen nur nach einem Fehlversuch).
     if (art === "gelobt") {
@@ -129,7 +142,7 @@ const TREIBER = `
       return;
     }
     // Neue Aufgabe: Hinweise einer übersprungenen Aufgabe mit derselben Nummer vergessen.
-    if (art === "aufgabe") { hinweise.delete(a.nr); return; }
+    if (art === "aufgabe") { hinweise.delete(a.nr); if (a.nr === 0) korbFarbe = new Map(); return; }
     if (art === "gestellt" && a.tipps) mitTipp = true;
     // Abschluss-Animation (feier.js, Entscheide AN1–AN3 a, LERN_Session27): im Schlussbild gezeigt; je Stufe ein Bild,
     // Schmuck der Stufe 2 ab 2 Sternen, der Stufe 3 bei 3 Sternen; mit „Bewegung reduzieren“ keine Bewegung, sonst Bewegung.

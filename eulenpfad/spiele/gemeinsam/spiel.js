@@ -2302,6 +2302,37 @@ const LS = (() => {
   const KORB_FARBEN = ["var(--deko-6)", "var(--deko-3)", "var(--deko-5)", "var(--deko-2)", "var(--deko-1)", "var(--deko-4)"];
 
   /**
+   * Farben der Körbe einer Aufgabe (KF1 a, LERN_Session38): Die Farbe gehört zum Korb, nicht zu seinem Platz — ein Korb
+   * behält sie die ganze Runde, auch wenn die Körbe gemischt stehen. Jede Runde verteilt sie neu (runde.folge), damit
+   * sich über Runden keine Farbe an einen Korb bindet: Erkannt wird der Korb am Namen, die Farbe hilft nur beim
+   * Wiederfinden. In einer Aufgabe nie zweimal dieselbe Farbe; hat ein Korb seine schon an einen anderen der Aufgabe
+   * verloren (eine Art mit mehr Körben als Farben), bekommt er eine freie, und erzwungen meldet das.
+   * runde: { folge, je } aus ctx.korbFarben; werte: die Körbe der Aufgabe. Ergebnis: { farben, erzwungen }.
+   */
+  function korbFarbenRunde(runde, werte) {
+    runde.folge ??= mische(KORB_FARBEN);
+    const belegt = new Set();
+    const farben = werte.map(w => {
+      const f = runde.je.get(w);
+      if (!f || belegt.has(f)) return null;
+      belegt.add(f);
+      return f;
+    });
+    let erzwungen = false;
+    werte.forEach((w, i) => {
+      if (farben[i]) return;
+      if (runde.je.has(w)) erzwungen = true;
+      const vergeben = new Set(runde.je.values());
+      const frei = runde.folge.filter(f => !belegt.has(f));
+      const f = frei.find(x => !vergeben.has(x)) || frei[0] || runde.folge[i % runde.folge.length];
+      runde.je.set(w, f);
+      belegt.add(f);
+      farben[i] = f;
+    });
+    return { farben, erzwungen };
+  }
+
+  /**
    * Farbe als Schrift (DM6 a): aus „var(--deko-N)“ wird „var(--deko-N-schrift)“ (mindestens 4,5 auf Weiss); jede andere
    * Farbe (Stellen, Knopf, eigene Werte eines Spiels) kommt unverändert zurück.
    */
@@ -2323,12 +2354,18 @@ const LS = (() => {
    * Karte und Körbe: Die Karte (Bild und Name) gehört in genau einen Korb; bei richtiger Wahl
    * fliegt sie hinein. Hängt Karte und Körbe an ctx.flaeche an.
    * opt.karte: { bild, text } der Karte
-   * opt.koerbe: Werte der Körbe; opt.korbInhalt(wert): { bild, text, klein }; opt.farbe(wert, i): CSS-Farbe
+   * opt.koerbe: Werte der Körbe; opt.korbInhalt(wert): { bild, text, klein }; opt.farbe(wert, i): CSS-Farbe (ohne:
+   * je Korb fest in der Runde, korbFarbenRunde)
    * opt.richtig, opt.hinweis(wert), opt.loesung, opt.lob wie bei auswahl
    */
   function koerbe(ctx, opt) {
     ctx.loesung(opt.loesung || opt.korbInhalt?.(opt.richtig)?.text || loesungFuer(opt, opt.richtig));
     ctx.schritte(1, true);
+    const { farben, erzwungen } = opt.farbe ? { farben: opt.koerbe.map((w, i) => opt.farbe(w, i)), erzwungen: false }
+      : korbFarbenRunde(ctx.korbFarben || { folge: null, je: new Map() }, opt.koerbe);
+    // Für die Prüfung je Korb ein lesbarer Name (Körbe können Objekte sein, etwa die Wortfamilien)
+    const korbName = w => { const t = opt.korbInhalt?.(w); return typeof w !== "object" ? String(w) : typeof t === "string" ? t : t?.text ?? JSON.stringify(w); };
+    pruefung.haken?.("koerbe", { nr: ctx.nr, eigen: !!opt.farbe, erzwungen, koerbe: opt.koerbe.map((w, i) => [korbName(w), farben[i]]) });
     const karte = el("div", { class: "korb-karte" },
       opt.karte.bild ? bild(opt.karte.bild) : null, el("b", { text: opt.karte.text }));
     const box = el("div", { class: "korb-reihe" });
@@ -2336,7 +2373,7 @@ const LS = (() => {
     opt.koerbe.forEach((wert, i) => {
       const k = el("button", { type: "button", class: "korb-knopf" });
       wahlInhalt(k, opt.korbInhalt ? opt.korbInhalt(wert) : String(wert));
-      const f = flaeche(opt.farbe ? opt.farbe(wert, i) : KORB_FARBEN[i % KORB_FARBEN.length]); // Schrift darauf (G1 a)
+      const f = flaeche(farben[i]); // Schrift darauf (G1 a)
       k.style.setProperty("--k", f.grund);
       k.style.setProperty("--korb-auf", f.schrift);
       k.addEventListener("click", () => {
@@ -2738,6 +2775,7 @@ const LS = (() => {
       const karte = el("div", { class: "karte" });
       const flaeche = el("div");
       // Notizen (NZ1 a): wurden in dieser Aufgabe Notizfelder angeboten, und hat das Kind eines benutzt?
+      const korbFarben = { folge: null, je: new Map() }; // KF1 a: Farbe je Korb, fest in der Runde (korbFarbenRunde)
       let notizAngeboten = false;
       let notizBenutzt = false;
       let blockBenutzt = false; // Notizblock (NB3 a): hat das Kind darin geschrieben?
@@ -3112,6 +3150,7 @@ const LS = (() => {
         const ctx = {
           stufe: stufe.id,
           geordnet: geordnet(name, def.id, stufe.id),
+          korbFarben, // für LS.koerbe (KF1 a)
           /** Wert einer Spieloption aus def.optionen für diese Stufe („nach Stufe“ schon aufgelöst). */
           option: id => optionWert(name, def, id, stufe.id),
           nr,
