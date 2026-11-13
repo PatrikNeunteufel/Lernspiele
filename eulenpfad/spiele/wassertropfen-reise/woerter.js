@@ -6,8 +6,8 @@
    Inhaltsliste (Entscheid L4 a): eine Liste, Id „fragen“ (Katalog, Eintrag „wassertropfen-reise“).
 
    Schreibweise je Eintrag:
-     stufe       1 = Aggregatzustände (Spielstufe 1), 3 = Wasserkreislauf (ab Spielstufe 3),
-                 4 = knifflige Fragen (ab Spielstufe 4), 5 = Boden, Grundwasser, Kläranlage (ab Spielstufe 5)
+     stufe       1 = Aggregatzustände (Spielstufe 1), 3 = Wasserkreislauf (Spielstufen 3 und 4),
+                 4 = knifflige Fragen (Spielstufen 4 und 6), 5 = Boden, Grundwasser, Kläranlage (Spielstufen 5 und 6)
      bild        Emoji zur Frage
      frage       die Frage
      richtig     die richtige Antwort

@@ -2171,3 +2171,8 @@
   Liste dadurch neu, Prüfstand ohne Fingerabdruck unverändert). Je Stufe 20 000 Startwerte mit und ohne Sperre: geändert
   nur Aufgaben mit gesperrtem Paar (Stufe 3: 61, 4: 186, 5: 324, 6: 80), mit Sperre keine mehr. Bewusst nicht gesperrt
   (GK2 a): kurze Zufallstreffer in sonst sinnlosen Geheimwörtern — KZ (13, etwa KZXVI), POO (TPOOF), TIT (GPZTIT).
+- **Inhaltliche Befunde der Prüfansichten gesammelt:** `docs/eulenpfad/pruefung/befunde_LERN_Session38.md` — was die
+  Agenten beim Bau der Prüfansichten von NMG Block 2 und 3, MI, Musik und den letzten Spielen fachlich gemeldet haben
+  (13 Berichte, nichts geändert, Sachangaben ohne Netzabruf). Gleich behoben: Plan-Leser (plan-leser) Stufentext nennt
+  den Massstab je Plan aus `PLAN_MASSSTAB` („1 Feld = 1 m im Schulzimmer, 10 m im Quartier“, vorher fest 10 m auch im
+  Schulzimmer); Wassertropfen-Reise (wassertropfen-reise) Kommentar zu den Spielstufen der Fragen in `woerter.js`.

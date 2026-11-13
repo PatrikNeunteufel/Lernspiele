@@ -93,7 +93,7 @@
 // d/e Skizzen und Pläne lesen und herstellen; f Karten und Pläne mit Massstab (Orientierungspunkt
 // 2. Zyklus, Ende 4. Klasse). Basisklasse 4: s1 3. Klasse, s5 5. Klasse, s6 Königsstufe.
 // Abgrenzung zum Kompass-Spiel (NMG.8.4, Himmelsrichtungen): hier Legende, Zeichen, Lage auf dem
-// Plan („rechts neben“, „zwischen“), Massstab (1 Feld = 10 m) und Wege aus der Sicht des Gehenden
+// Plan („rechts neben“, „zwischen“), Massstab (1 Feld = 1 m bis 100 m je Plan und Stufe) und Wege aus der Sicht des Gehenden
 // (links oder rechts abbiegen). Dinge und Zeichen in plaene.js.
 
 const { zufall, waehle, mische, el } = LS;
@@ -293,12 +293,16 @@ function aufgabeErzeugen(stufe) {
   return null;
 }
 
+// Massstab je freiem Plan aus PLAN_MASSSTAB, etwa „1 m im Schulzimmer, 10 m im Quartier“ (vorher stand fest der
+// Massstab des Quartiers, auch wenn das Schulzimmer kam)
+const PLAN_ORT = { schulzimmer: "im Schulzimmer", quartier: "im Quartier" };
+const massstabText = stufe => LISTEN.map(l => `${PLAN_MASSSTAB[l][stufe].join(" m und ")} m ${PLAN_ORT[l]}`).join(", ");
 const STUFEN_TEXT = {
   s1: "Legende lesen: Was bedeutet das Zeichen?",
   s2: "Zählen und Lage: rechts neben, über, unter.",
-  s3: "Massstab: 1 Feld = 10 m. Wie weit ist es?",
+  s3: `Massstab: 1 Feld = ${massstabText("s3")}. Wie weit ist es?`,
   s4: "Wege messen und abbiegen: links oder rechts?",
-  s5: "Wege beschreiben, Massstab 50 m und 100 m.",
+  s5: `Wege beschreiben, Massstab ${massstabText("s5")}.`,
   s6: "Lange Wege beschreiben und messen.",
 };
 const STUFEN = Object.fromEntries(Object.entries(STUFEN_TEXT).filter(([s]) => aufgabeErzeugen(s)));
