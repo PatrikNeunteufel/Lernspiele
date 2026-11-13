@@ -161,8 +161,10 @@ function situation(p, ding = waehle(p.dinge)) {
 function ereignis(s) {
   if (s.ding === "rad" || s.ding === "sack") {
     const da = [...new Set(s.teile)];
-    const art = waehle(["farbe", "farbe", "nichtFarbe", "oder"]);
-    const f = Math.random() < 0.8 ? waehle(da) : zufall(0, FARBEN.length - 1);
+    // ZS1 a (LERN_Session38): „oder“ nur bei mindestens zwei Farben, eine der beiden kommt vor — sonst fragte die
+    // Aufgabe Logik statt Zufall ab (ganz orange, „orange oder gelb“; beide Farben fehlen = verkapptes unmöglich)
+    const art = waehle(da.length > 1 ? ["farbe", "farbe", "nichtFarbe", "oder"] : ["farbe", "farbe", "nichtFarbe"]);
+    const f = art === "oder" || Math.random() < 0.8 ? waehle(da) : zufall(0, FARBEN.length - 1);
     if (art === "oder") {
       const g = waehle(FARBEN.map((_, i) => i).filter(i => i !== f));
       return { art, f: Math.min(f, g), g: Math.max(f, g) };
@@ -296,6 +298,11 @@ function pruefeAufgabe(a, stufe) {
     if (s.ding === "karten" && (s.n < 4 || s.n > 10)) m.push("Kartenzahl nicht in der Stufe");
   };
   if (a.s) situationOk(a.s);
+  if (a.e?.art === "oder" && a.s?.teile) {
+    const da = new Set(a.s.teile);
+    if (da.size < 2) m.push("„oder“ bei nur einer Farbe");
+    if (!da.has(a.e.f) && !da.has(a.e.g)) m.push("„oder“ mit zwei fehlenden Farben");
+  }
   if (a.art === "drei" && stufeDrei(chance(a.s, a.e)) !== a.loesung) m.push("Stufe falsch");
   if ((a.art === "fuenf" || a.art === "summeSkala") && stufeFuenf(chance(a.s, a.e)) !== a.loesung) m.push("Stufe falsch oder Grenzfall");
   if (a.art === "vergleich") {

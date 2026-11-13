@@ -2128,3 +2128,7 @@
   Schalter auf Karte und Stufenwahl mit eigenen Worten („Körbe nach Stufe“, `LS.reihenfolgeSchalter`), Profiltext ergänzt.
 - **Tageslauf-Sonne (TS1 a):** Auftrag „Was kommt zuerst, was danach? Tipp die Bilder der Reihe nach an: vom Morgen bis in
   die Nacht.“ statt „Was machst du zuerst am Tag?“ (nicht jedes Bild ist etwas, das das Kind tut), Tipps ebenso.
+- **Zufalls-Skala (ZS1 a, Hinweis Patrik):** „oder“ nur bei Säckchen und Rädern mit mindestens zwei Farben, eine der
+  beiden genannten kommt vor (vorher ganz orange und „orange oder gelb“; 89 % der Oder-Aufgaben in Stufe 1 nannten eine
+  fehlende Farbe). Oder-Aufgaben in Stufe 1 jetzt möglich 530 / sicher 380 von 20 000 (vorher sicher 2045, möglich 530,
+  unmöglich 548); im Generator geprüft.
