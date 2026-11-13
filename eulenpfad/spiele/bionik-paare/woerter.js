@@ -13,7 +13,8 @@
    gruppen (ähnliche Vorbilder: kommen nie zusammen als Antworten vor, damit es eindeutig bleibt).
 
    Emojis: Für Klette, Eisvogel, Mohn, Riesenseerose, Termiten und Tannenzapfen gibt es kein eigenes
-   Zeichen; dort steht ein allgemeines (Pflanze, Vogel, Hügel). Der Name ist massgebend.
+   Zeichen; dort steht ein allgemeines (Pflanze, Vogel, Hügel). Der Name ist massgebend. Ahornsamen, Wabenplatte
+   und Wand mit Klappen sind gezeichnet („svg:…“ aus spiele/gemeinsam/bilder.js, BI1 a).
 
    Überschneidung: Der Fledermaus-Forscher (Basisklasse 2, Liste „anpassungen“) ordnet Merkmal und
    Nutzen bei der Fledermaus zu; die Fledermaus kommt hier nicht vor. */
@@ -36,7 +37,7 @@ const BIONIK_PAARE = [
     eigenschaft: "Feine Rillen verringern den Widerstand.", kurz: "feine Rillen",
     problem: "Du möchtest, dass ein Flugzeug weniger Treibstoff braucht, weil die Luft leichter vorbeiströmt.",
     text: "Eine Folie mit winzigen Rillen wie bei der Haifischhaut wird auf Flugzeuge geklebt. Sie verringert den Luftwiderstand.",
-    gruppen: ["schwimmen", "flugzeug"] },
+    gruppen: ["schwimmen", "flugzeug", "widerstand"] },
   { id: "eule", vorbild: "Eule", vbild: "🦉", erfindung: "leiser Ventilator", ebild: "🌀",
     kann: "Sie fliegt fast lautlos, so hört die Maus sie nicht kommen.",
     eigenschaft: "Gezackte Federränder machen den Flug leise.", kurz: "gezackter Federrand",
@@ -54,14 +55,14 @@ const BIONIK_PAARE = [
     eigenschaft: "Ein langer, spitzer Schnabel dringt fast ohne Spritzer ins Wasser ein.", kurz: "spitzer Schnabel",
     problem: "Ein schneller Zug macht beim Ausfahren aus dem Tunnel einen lauten Knall. Wie wird er leiser?",
     text: "Ingenieure in Japan gaben dem Shinkansen-Schnellzug eine lange Nase wie ein Eisvogelschnabel. Er wurde leiser und brauchte weniger Strom.",
-    gruppen: ["vogel", "leise"] },
+    gruppen: ["vogel", "leise", "widerstand"] },
   { id: "gecko", vorbild: "Gecko", vbild: "🦎", erfindung: "Haftband ohne Klebstoff", ebild: "🩹",
     kann: "Er läuft an glatten Wänden hoch und sogar kopfüber an der Decke.",
     eigenschaft: "Millionen feiner Härchen an den Zehen haften an glatten Flächen.", kurz: "feine Härchen",
     problem: "Du möchtest ein Band, das an Glas hält, keine Spuren macht und viele Male wieder verwendet werden kann.",
-    text: "Die Zehen des Geckos tragen Millionen winziger Härchen. Forschende bauen Haftbänder mit solchen Härchen nach.",
+    text: "Die Zehen des Geckos tragen Millionen winziger Härchen. Forschende bauen Haftbänder mit solchen Härchen nach (in Entwicklung).",
     gruppen: ["haften"] },
-  { id: "ahorn", vorbild: "Ahornsamen", vbild: "🍁", erfindung: "Mini-Drohne, die sich im Flug dreht", ebild: "🚁",
+  { id: "ahorn", vorbild: "Ahornsamen", vbild: "svg:ahornSamen", erfindung: "Mini-Drohne, die sich im Flug dreht", ebild: "🚁",
     kann: "Seine Samen drehen sich beim Fallen wie ein kleiner Propeller und segeln langsam weit weg.",
     eigenschaft: "Ein einziger Flügel dreht sich wie ein Propeller und bremst den Fall.", kurz: "ein einziger Flügel",
     problem: "Du möchtest ein ganz kleines Fluggerät, das mit nur einem Flügel fliegt und sanft landet.",
@@ -73,7 +74,7 @@ const BIONIK_PAARE = [
     problem: "Du brauchst einen ganz dünnen Faden, der trotzdem sehr stark ist und nicht reisst.",
     text: "Spinnenseide ist für ihr Gewicht reissfester als Stahl. Forschende stellen sie künstlich her, zum Beispiel für Fäden in der Medizin (in Entwicklung).",
     gruppen: ["faden"] },
-  { id: "biene", vorbild: "Biene", vbild: "🐝", erfindung: "Wabenplatte im Leichtbau", ebild: "⬢",
+  { id: "biene", vorbild: "Biene", vbild: "🐝", erfindung: "Wabenplatte im Leichtbau", ebild: "svg:wabenplatte",
     kann: "Sie baut Waben aus Sechsecken: Mit wenig Wachs entsteht viel Platz, und die Wabe ist stabil.",
     eigenschaft: "Sechseckige Zellen sind leicht und stabil.", kurz: "Sechsecke",
     problem: "Du möchtest eine Platte, die sehr leicht und trotzdem stabil ist, zum Beispiel für den Boden eines Flugzeugs.",
@@ -81,7 +82,7 @@ const BIONIK_PAARE = [
     gruppen: ["bauen", "flugzeug"] },
   { id: "termiten", vorbild: "Termitenhügel", vbild: "⛰️", erfindung: "Bürohaus mit natürlicher Lüftung", ebild: "🏢",
     kann: "Termiten bauen Hügel mit vielen Luftschächten. Drinnen bleibt es auch in grosser Hitze angenehm.",
-    eigenschaft: "Luftschächte lassen warme Luft nach oben entweichen.", kurz: "Luftschächte",
+    eigenschaft: "Viele Luftschächte lassen frische Luft durch den Bau strömen.", kurz: "Luftschächte",
     problem: "Du möchtest ein Haus in einem heissen Land, das fast ohne Klimaanlage kühl bleibt.",
     text: "Das Eastgate Centre in Harare (Simbabwe) wurde nach dem Vorbild von Termitenbauten gebaut. Luftschächte kühlen es fast ohne Klimaanlage.",
     gruppen: ["haus", "bauen"] },
@@ -127,7 +128,7 @@ const BIONIK_PAARE = [
     problem: "Du möchtest etwas unter Wasser festkleben, zum Beispiel in der Medizin oder an einem Schiff.",
     text: "Miesmuscheln machen einen Klebstoff, der im Wasser hält. Forschende entwickeln danach Kleber für die Medizin (in Entwicklung).",
     gruppen: ["haften"] },
-  { id: "zapfen", vorbild: "Tannenzapfen", vbild: "🌲", erfindung: "Wand, die sich bei Nässe von selbst schliesst", ebild: "🏗️",
+  { id: "zapfen", vorbild: "Tannenzapfen", vbild: "🌲", erfindung: "Wand, die sich bei Nässe von selbst schliesst", ebild: "svg:klappenWand",
     kann: "Seine Schuppen öffnen sich bei trockenem Wetter und schliessen sich bei Nässe – ganz ohne Muskeln.",
     eigenschaft: "Schuppen bewegen sich von selbst, wenn sich die Feuchtigkeit ändert.", kurz: "bewegt sich bei Feuchtigkeit",
     problem: "Du möchtest eine Hauswand mit Klappen, die sich bei Regen von selbst schliessen, ohne Motor und ohne Strom.",

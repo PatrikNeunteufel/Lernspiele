@@ -22,6 +22,11 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Schulweg-Profi | erledigt 2026-11-13 (LERN_Session38); Fussgängerstreifen als sicherster Ort vertretbar | Durchgang 4 unten |
 | Echt oder erfunden? | erledigt 2026-11-13 (LERN_Session38, EO1 a) | Durchgang 4 unten |
 | Wetter und Jahreszeiten | erledigt 2026-11-13 (LERN_Session38); Grenzfälle der Jahreszeiten vertretbar | Durchgang 4 unten |
+| Datei-Typen | erledigt 2026-11-13 (LERN_Session39); .pdf, .avi, .bmp und GROESSEN vertretbar | Durchgang 5 unten |
+| Blutkreislauf-Lotse | erledigt 2026-11-13 (LERN_Session39) | Durchgang 5 unten |
+| Bionik-Paare | in Arbeit seit 2026-11-13 (LERN_Session39); behoben, Riesenseerose als Entscheid offen | Durchgang 5 unten |
+| Gemeinde-Helfer | erledigt 2026-11-13 (LERN_Session39); ID, Einkaufszentrum, Turnhalle, Abläufe vertretbar (ZU PRÜFEN) | Durchgang 5 unten |
+| Kulturen-Koffer | in Arbeit seit 2026-11-13 (LERN_Session39); behoben, Vase, Grosse Mauer, Katze, Augusta Raurica offen | Durchgang 5 unten |
 | übrige | offen | unten |
 
 **Behoben in LERN_Session38** (Belege: Wasserdampf unsichtbar [chemie.de, Lexikon Wasserdampf](https://www.chemie.de/lexikon/Wasserdampf.html);
@@ -96,6 +101,26 @@ stimmt, sie steht aber in der Verordnung, nicht im Gesetz):
   einen kleinen Drachen, der den Zahn aus der Dose holt (EO1 a).
 - Wetter und Jahreszeiten: 🌅 statt ☀️ (glich dem Korb 🌞), Korb Herbst 🍄 statt 🍁 (glich 🍂), 🌿 statt 🌱 bei „Die
   Bäume bekommen neue Blätter“, kahler Laubbaum gezeichnet (`bilder.js`, baumKahl) statt 🌳, 🩱 statt 👙 beim Badekleid.
+
+**Durchgang 5 (LERN_Session39)** — Belege, je mit Reichweite: Websuche (Standard), zitiert ist nur, was die Treffer im
+Wortlaut tragen. PET: Kanton Basel-Stadt, [Abfall-ABC PET-Getränkeflaschen](https://www.bs.ch/themen/umwelt-und-bauen/abfall-und-sauberkeit/abfall-abc/pet-getraenkeflaschen):
+„alle Verkaufsstellen sind verpflichtet, PET-Flaschen zurückzunehmen“. Kompass: Wikipedia, [Compass](https://en.wikipedia.org/wiki/Compass):
+„first invented as a device for divination as early as the Chinese Han dynasty“; die Nadel beschreibt erst Shen Kuo (Song-Zeit,
+Jahr je nach Quelle 1086 oder 1088, nur aus der Zusammenfassung der Suche). Linke Kammer: höherer Druck im Körperkreislauf
+als im Lungenkreislauf (etwa 120 gegen 25 mmHg) nur aus der Zusammenfassung der Suche ([dr-gumpert.de](https://www.dr-gumpert.de/html/linke_herzkammer.html),
+[DocCheck Flexikon](https://flexikon.doccheck.com/de/Kardiovaskul%C3%A4res_System)) — die Erklärung nennt darum keine Zahl.
+Termiten: [Harvard Magazine 2015](https://www.harvardmagazine.com/2015/10/harvard-study-finds-that-termite-mound-functions-as-lung-that-sneezes-carbon-dioxide)
+(Zusammenfassung: Luftstrom durch tägliche Temperaturwechsel, nicht als Kamin). Gecko-Haftband: kein Beleg für ein Produkt
+im Handel gefunden, darum „(in Entwicklung)“ wie Spinne und Muschel. Riesenseerose: nur populäre Quellen (Gartengeschichte,
+Bildlegenden), kein Primärbeleg — als Entscheid vorgelegt.
+- Datei-Typen: .gif mit `nieNeben: ["video"]`.
+- Blutkreislauf-Lotse: Themen atmen und gefaesse mit eigenem Tipp; Erklärung der linken Kammer.
+- Bionik-Paare: Gruppe „widerstand“ (hai, eisvogel); Gecko „(in Entwicklung)“; Termiten „Viele Luftschächte lassen
+  frische Luft durch den Bau strömen“; Bilder ahornSamen, wabenplatte, klappenWand.
+- Gemeinde-Helfer: Feld `auch` (Anliegen und Stellen); Sofa als Sperrgut statt Kühlschrank, Glasflaschen und Konfigläser;
+  Ablenker beim Schwimmen Bibliothek und Spital statt Schule; Tipp „öffentlich“ als Frage.
+- Kulturen-Koffer: Tonkrug als Ding entfernt; `auch` ergänzt; China, Kompass, Schriftzeichen, Cäsar, Bauwerk, Rätsel
+  Griechen 2; Bilder flechtwand, mosaik, seeuferDorf.
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

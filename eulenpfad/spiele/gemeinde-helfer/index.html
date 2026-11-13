@@ -116,7 +116,7 @@ function koerbeFuer(a, p) {
   const k = [a.ziel];
   if (ablenkerAlsKorb(a, p)) k.push(a.ablenker);
   const extra = p.privat ? [waehle(PRIVAT)] : [];
-  const rest = mische(p.pool.filter(id => !k.includes(id)));
+  const rest = mische(p.pool.filter(id => !k.includes(id) && !(a.auch || []).includes(id)));
   while (k.length + extra.length < p.n && rest.length) k.push(rest.pop());
   return mische([...k, ...extra]);
 }
@@ -141,7 +141,7 @@ const ARTEN = {
   },
   stelle() {
     const a = waehle(GEMEINDE_STELLEN_ANLIEGEN);
-    const rest = mische(Object.keys(S).filter(id => id !== a.ziel && id !== a.ablenker)).slice(0, 2);
+    const rest = mische(Object.keys(S).filter(id => id !== a.ziel && id !== a.ablenker && !(a.auch || []).includes(id))).slice(0, 2);
     return { art: "stelle", a, optionen: mische([a.ziel, a.ablenker, ...rest]) };
   },
   ebene() {
@@ -195,6 +195,7 @@ function pruefeAufgabe(a, stufe) {
     else if (!z.oeffentlich) m.push("Ziel ist ein privater Betrieb");
     if (!E[a.a.ablenker]) m.push(`Ablenker ${a.a.ablenker} unbekannt`);
     if (a.a.ablenker === a.a.ziel) m.push("Ablenker gleich Ziel");
+    if ((a.a.auch || []).some(id => a.koerbe.includes(id) || id === a.a.ablenker)) m.push("Korb, der ebenfalls passt");
     if (!a.koerbe.includes(a.a.ziel)) m.push("richtige Einrichtung fehlt unter den Körben");
     if (doppelt(a.koerbe)) m.push("Körbe doppelt");
     if (a.koerbe.some(id => !E[id])) m.push("unbekannter Korb");
@@ -229,6 +230,7 @@ function pruefeAufgabe(a, stufe) {
     if (!GEMEINDE_STELLEN_ANLIEGEN.includes(a.a)) m.push("Anliegen nicht aus der Liste");
     if (!S[a.a.ziel] || !S[a.a.ablenker]) m.push("Stelle unbekannt");
     if (!a.optionen.includes(a.a.ziel)) m.push("richtige Stelle fehlt");
+    if ((a.a.auch || []).some(id => a.optionen.includes(id))) m.push("Stelle, die ebenfalls zuständig ist");
     if (doppelt(a.optionen) || a.optionen.length !== 4) m.push("Stellen zur Wahl falsch");
   }
   if (a.art === "ebene") {
@@ -358,7 +360,7 @@ LS.spiel({
         korbInhalt: id => ({ bild: SPHAERE[id].bild, text: SPHAERE[id].text, klein: SPHAERE[id].klein }),
         farbe: id => SPHAERE[id].farbe,
         hinweis: id => (id === "privat"
-          ? `${e.name}: ${e.tut}. Das bezahlt die Gemeinde mit den Steuern von allen. Gehört es einer einzelnen Person?`
+          ? `${e.name}: ${e.tut}. Ist das für alle da, oder hat es jemand gegründet, um damit Geld zu verdienen?`
           : `${e.name}: ${e.tut}. Das ist ein Laden: Jemand hat ihn gegründet und verdient damit Geld. Gehört er allen?`),
         loesung,
         lob: e.oeffentlich ? `Genau: ${e.name} gehört allen in der Gemeinde.` : `Genau: ${e.name} gehört einer Person oder Firma.`,

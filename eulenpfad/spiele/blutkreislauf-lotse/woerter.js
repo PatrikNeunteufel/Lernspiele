@@ -32,7 +32,7 @@ const KREISLAUF_FRAGEN = [
     "Blutgefässe sind Röhren, die durch den ganzen Körper gehen. Das Herz pumpt das Blut hindurch."],
   [1, "blut", "Wohin pumpt das Herz das Blut?", "in den ganzen Körper, vom Kopf bis zu den Zehen", "nur in den Kopf", "nur in die Beine",
     "Das Blut kommt überall hin: in den Kopf, in die Arme, in den Bauch und in die Beine."],
-  [1, "lunge", "Wie viele Lungenflügel hast du?", "zwei", "einen", "vier",
+  [1, "atmen", "Wie viele Lungenflügel hast du?", "zwei", "einen", "vier",
     "Du hast einen rechten und einen linken Lungenflügel. Das Herz liegt dazwischen."],
 
   // Stufe 5: Puls und Bewegung
@@ -86,12 +86,12 @@ const KREISLAUF_FRAGEN = [
     "Muskeln und Organe brauchen Sauerstoff, um aus der Nahrung Energie zu gewinnen. Dabei entsteht Kohlendioxid."],
 
   // Stufe 5: Herz und Blutgefässe
-  [5, "kreislauf", "Wie heissen die feinsten Blutgefässe, durch die der Sauerstoff in den Körper gelangt?", "Haargefässe (Kapillaren)", "Herzklappen", "Lungenflügel",
+  [5, "gefaesse", "Wie heissen die feinsten Blutgefässe, durch die der Sauerstoff in den Körper gelangt?", "Haargefässe (Kapillaren)", "Herzklappen", "Lungenflügel",
     "Haargefässe sind dünner als ein Haar. Durch ihre dünne Wand gelangen Sauerstoff und Nährstoffe in den Körper."],
   [5, "herz", "Wozu hat das Herz Klappen?", "Damit das Blut nur in eine Richtung fliesst.", "Damit das Herz Luft holen kann.", "Damit das Blut kälter wird.",
     "Die Herzklappen sind wie Ventile: Sie gehen nur in eine Richtung auf."],
   [5, "herz", "Warum hat die linke Herzkammer die dickste Wand?", "Sie pumpt das Blut durch den ganzen Körper.", "Sie pumpt das Blut nur zur Lunge.", "Sie muss das Herz warm halten.",
-    "Der Weg durch den Körper ist viel länger als der Weg zur Lunge. Darum braucht die linke Kammer am meisten Kraft."],
+    "Die linke Kammer drückt das Blut durch den ganzen Körper bis in die Zehen, durch Millionen feiner Gefässe. Dafür braucht sie viel mehr Druck als die rechte Kammer für den kurzen Weg zur Lunge. Darum ist ihr Muskel am dicksten."],
   [5, "herz", "Wie oft schlägt das Herz eines Erwachsenen an einem Tag ungefähr?", "etwa 100 000-mal", "etwa 1000-mal", "etwa 100-mal",
     "Bei 70 Schlägen in der Minute sind es in 24 Stunden etwa 100 000 Schläge."],
   [5, "kreislauf", "Welches Blutgefäss ist eine Arterie und führt trotzdem sauerstoffarmes Blut?", "die Lungenarterie", "die Aorta", "die Lungenvene",
@@ -108,4 +108,6 @@ const KREISLAUF_TIPPS = {
   puls: "Der Puls ist der Stoss, den jeder Herzschlag in den Arterien macht. Lies genau und rechne nach.",
   bewegung: "Stell dir vor, du bist gerade gerannt. Was spürst du in deiner Brust?",
   kreislauf: "Arterien führen vom Herzen weg, Venen zum Herzen hin.",
+  atmen: "Atme tief ein und leg die Hände links und rechts an deine Rippen. Wo hebt sich deine Brust?",
+  gefaesse: "Prüf zuerst: Welche der Antworten sind überhaupt Blutgefässe?",
 };

@@ -186,12 +186,14 @@ function pruefeAufgabe(a, stufe) {
       const nameArt = DATEI_ENDUNGEN.filter(x => x.namen.includes(a.name)).map(x => x.art);
       if (a.art === "korb" && !nameArt.includes(a.richtig)) m.push("Name passt nicht zur Art");
       if (a.art === "falle" && (!nameArt.length || nameArt.includes(a.richtig))) m.push("Falle täuscht nicht");
+      if (a.art === "falle" && DATEI_ENDUNGEN.some(x => x.namen.includes(a.name) && x.nieNeben?.includes(a.richtig))) m.push("Name passt auch zur Art");
       break;
     }
     case "welche": {
       const arten = a.optionen.map(o => endungVon(o)?.art);
       if (new Set(arten).size !== 4 || arten.some(x => !KORB_ARTEN.includes(x))) m.push("nicht vier verschiedene Arten");
       if (arten.filter(x => x === a.gesucht).length !== 1 || endungVon(a.richtig)?.art !== a.gesucht) m.push("Lösung nicht eindeutig");
+      if (a.optionen.some(o => endungVon(o)?.nieNeben?.includes(a.gesucht))) m.push("Ablenker leicht mit der gesuchten Art verwechselt");
       break;
     }
     case "programm": {

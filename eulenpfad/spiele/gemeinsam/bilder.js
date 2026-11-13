@@ -326,6 +326,28 @@ const BILDER = (() => {
         + `<ellipse cx="50" cy="14" rx="13" ry="3.5" fill="#8d5229"/>`
         + `<path d="M27 46 L33 40 L39 46 L45 40 L51 46 L57 40 L63 46 L69 40 L74 46" stroke="#7a4421" stroke-width="2" fill="none"/>`
         + `<path d="M26 54 H74" stroke="#7a4421" stroke-width="1.6"/>` },
+    // Kulturen-Koffer (BI1 a, Befund LERN_Session38): 🧺 zeigte einen Korb statt der Wand, 🧩 ein Puzzleteil statt des
+    // Mosaiks, 🏞️ eine Landschaft ohne Dorf
+    flechtwand: { name: "Flechtwerkwand (geflochtene Äste zwischen Pfosten, zum Teil mit Lehm verschmiert)", box: "0 0 100 100",
+      svg: [14, 38, 62, 86].map(x => `<rect x="${x - 3}" y="8" width="6" height="86" rx="2" fill="#7a4f26"/>`).join("")
+        + [16, 28, 40, 52, 64, 76].map((y, i) => `<path d="M8 ${y} Q20 ${y + (i % 2 ? -5 : 5)} 32 ${y} T56 ${y} T80 ${y} T92 ${y}" stroke="#b98a55" stroke-width="6" fill="none" stroke-linecap="round"/>`).join("")
+        + `<path d="M8 66 Q30 58 52 64 Q74 70 92 62 V94 H8 Z" fill="#a8835a" stroke="#7d5f3c" stroke-width="1.6"/>`
+        + `<path d="M18 78 q6 -2 12 1 M50 84 q8 -3 14 0 M72 76 q5 -2 10 1" stroke="#8d6c47" stroke-width="1.6" fill="none"/>` },
+    mosaik: { name: "Mosaik (Bild aus vielen kleinen Steinchen: ein Fisch, Rand aus Quadraten)", box: "0 0 100 100",
+      svg: `<rect x="4" y="4" width="92" height="92" fill="#efe4cc"/>`
+        + Array.from({ length: 22 }, (_, i) => { const s = i < 11 ? [8 + i * 8, 8] : [8 + (i - 11) * 8, 86]; return `<rect x="${s[0]}" y="${s[1]}" width="6" height="6" fill="${i % 2 ? "#b8322a" : "#2f5f8a"}"/>`; }).join("")
+        + Array.from({ length: 8 }, (_, i) => `<rect x="8" y="${16 + i * 8.6}" width="6" height="6" fill="${i % 2 ? "#2f5f8a" : "#b8322a"}"/><rect x="86" y="${16 + i * 8.6}" width="6" height="6" fill="${i % 2 ? "#b8322a" : "#2f5f8a"}"/>`).join("")
+        + [[30, 44], [36, 40], [42, 38], [48, 38], [54, 40], [60, 44], [30, 56], [36, 60], [42, 62], [48, 62], [54, 60], [60, 56],
+          [36, 50], [42, 46], [48, 50], [54, 46], [42, 54], [54, 54], [66, 50], [72, 44], [72, 56], [78, 40], [78, 60], [48, 44], [48, 56], [60, 50]]
+          .map(([x, y], i) => `<rect x="${x - 2.6}" y="${y - 2.6}" width="5.2" height="5.2" fill="${i % 3 ? "#d98a2b" : "#e8b04a"}" stroke="#efe4cc" stroke-width="0.6"/>`).join("")
+        + `<rect x="34.4" y="45.4" width="5.2" height="5.2" fill="#1b1b1f"/>` },
+    seeuferDorf: { name: "Dorf am Seeufer (Holzhäuser mit Schilfdach am Ufer, See, Einbaum)", box: "0 0 100 100",
+      svg: `<rect x="0" y="0" width="100" height="100" fill="#d8eef9"/><path d="M0 60 Q30 54 60 58 T100 56 V100 H0 Z" fill="#8cc8ee"/>`
+        + `<path d="M0 62 Q16 50 40 52 L46 60 Q24 66 0 72 Z" fill="#9dc46b"/>`
+        + `<path d="M56 70 q10 3 22 0 q-2 4 -11 4 q-9 0 -11 -4 Z" fill="#7a4f26"/>`
+        + [[14, 40], [32, 36], [50, 42]].map(([x, y]) => `<rect x="${x - 2}" y="${y + 16}" width="2.6" height="12" fill="#6b4a2b"/><rect x="${x + 9}" y="${y + 16}" width="2.6" height="12" fill="#6b4a2b"/>`
+          + `<rect x="${x - 4}" y="${y + 6}" width="18" height="11" fill="#b98a55"/><rect x="${x + 3}" y="${y + 9}" width="4" height="8" fill="#4a3420"/>`
+          + `<path d="M${x - 8} ${y + 7} L${x + 5} ${y - 6} L${x + 18} ${y + 7} Z" fill="#cfa94e" stroke="#9a7a2c" stroke-width="1.2"/>`).join("") },
     steinbeil: { name: "Steinbeil der Pfahlbauer (geschliffene Steinklinge in Hirschgeweih, Holzschaft)", box: "0 0 100 100",
       svg: `<path d="M24 94 Q30 60 52 30" stroke="#8b5e34" stroke-width="10" fill="none" stroke-linecap="round"/>`
         + `<path d="M28 84 Q33 64 46 44" stroke="#a8743f" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
@@ -695,6 +717,33 @@ const BILDER = (() => {
         + `<path d="M44 60 L38 74 L50 64 Z M66 60 L64 72 L72 62 Z" fill="#4c6878"/>`
         + `<path d="M8 50 L32 47" stroke="#ffffff" stroke-width="1.6" stroke-dasharray="2 2"/>`
         + `<circle cx="38" cy="47" r="5.5" fill="#ffffff"/><circle cx="38" cy="47" r="3.2" fill="#1b1b1f"/>` },
+
+    // Bionik-Paare (BI1 a, Befund LERN_Session38): 🍁 zeigte ein Ahornblatt statt des Samens, ⬢ ist ein kleines
+    // Schriftzeichen, 🏗️ ein Kran statt der Wand mit Klappen
+    ahornSamen: { name: "Ahornsamen (Samen mit einem einzigen Flügel, dreht sich beim Fallen)", box: "0 0 100 100",
+      svg: `<path d="M20 30 A34 34 0 0 1 70 14" stroke="#8a929e" stroke-width="2.4" stroke-dasharray="4 4" fill="none"/>`
+        + `<path d="M64 8 L72 14 L63 19" stroke="#8a929e" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+        + `<path d="M34 66 Q56 36 80 30 Q96 28 94 44 Q90 60 70 66 Q54 72 42 78 Z" fill="#e3c27e" fill-opacity="0.9" stroke="#9a7438" stroke-width="2"/>`
+        + `<path d="M34 66 Q56 36 80 30 Q96 28 94 44" stroke="#7a5526" stroke-width="4" fill="none" stroke-linecap="round"/>`
+        + `<path d="M44 70 Q64 52 92 40 M46 74 Q66 62 88 52 M50 76 Q66 70 80 62" stroke="#c4a060" stroke-width="1.2" fill="none"/>`
+        + `<ellipse cx="32" cy="74" rx="12" ry="9" transform="rotate(-35 32 74)" fill="#a5743f" stroke="#6e4b2c" stroke-width="2.2"/>` },
+    wabenplatte: { name: "Wabenplatte (Platte, innen lauter Sechsecke wie eine Bienenwabe)", box: "0 0 100 100",
+      svg: `<rect x="6" y="24" width="88" height="52" rx="3" fill="#e6c477" stroke="#9a7438" stroke-width="2.4"/>`
+        + [0, 1, 2, 3].flatMap(r => [0, 1, 2, 3, 4, 5].map(c => [16 + c * 14 + (r % 2) * 7, 32 + r * 12]))
+          .filter(([x]) => x < 90)
+          .map(([x, y]) => `<path d="M${x} ${y - 7} L${x + 6} ${y - 3.5} L${x + 6} ${y + 3.5} L${x} ${y + 7} L${x - 6} ${y + 3.5} L${x - 6} ${y - 3.5} Z" fill="#f4dfa0" stroke="#9a7438" stroke-width="1.6"/>`).join("")
+        + `<rect x="6" y="14" width="88" height="10" rx="3" fill="#cfd5dd" stroke="#6f7884" stroke-width="2"/>` },
+    // Wand mit Holzschuppen wie die Schuppen eines Zapfens: links offen (abstehend, Spalt dahinter), rechts im Regen
+    // geschlossen (flach, überlappend)
+    klappenWand: { name: "Wand mit Holzschuppen (links trocken und offen, rechts im Regen geschlossen)", box: "0 0 100 100",
+      svg: `<rect x="6" y="22" width="88" height="72" rx="2" fill="#e8dcc6" stroke="#8a7a62" stroke-width="2.4"/><path d="M50 22 V94" stroke="#8a7a62" stroke-width="2"/>`
+        + `<circle cx="22" cy="10" r="7" fill="#f2c12e"/>`
+        + [[62, 4], [74, 9], [86, 3], [68, 15], [82, 16]].map(([x, y]) => `<path d="M${x} ${y} q-3 5 0 7 q3 -2 0 -7 Z" fill="#4d93dc"/>`).join("")
+        + [0, 1, 2, 3].flatMap(r => [0, 1, 2].map(c => [r, 12 + c * 13, 28 + r * 16]))
+          .map(([, x, y]) => `<rect x="${x}" y="${y}" width="12" height="15" fill="#3a2c20"/>`
+            + `<path d="M${x} ${y} L${x - 4} ${y + 7} Q${x + 6} ${y + 11} ${x + 16} ${y + 7} L${x + 12} ${y} Z" fill="#c58b52" stroke="#7a4f26" stroke-width="1.5"/>`).join("")
+        + [0, 1, 2, 3].flatMap(r => [0, 1, 2].map(c => [56 + c * 12, 26 + r * 16]))
+          .map(([x, y]) => `<path d="M${x} ${y} V${y + 16} Q${x + 6} ${y + 21} ${x + 12} ${y + 16} V${y} Z" fill="#b07a45" stroke="#7a4f26" stroke-width="1.5"/>`).join("") },
 
     // Körbe der Lebensräume (lebensraum, BI1 a): Landschaften statt eines Tiers oder einer Pflanze der Karten (vorher
     // Fichte 🌲 → Korb 🌲 Wald, Gänseblümchen 🌼 → Korb 🌼 Wiese)

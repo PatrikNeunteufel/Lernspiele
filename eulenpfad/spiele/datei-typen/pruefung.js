@@ -48,7 +48,7 @@
           eintraege: () => DATEI_ENDUNGEN, gruppe: e => artName(e.art),
           zeile: e => [`.${e.endung}`, e.wozu, programmText(e.programm), FALSCHE_PROGRAMME[e.art].map(programmText).join(", "),
             e.namen.map(n => datei(n, e.endung)).join(", "),
-            stufenText(a => a.vorrat.includes(e))] },
+            stufenText(a => a.vorrat.includes(e)) + (e.nieNeben ? ` · nie neben ${e.nieNeben.map(k => ARTEN[k].name).join(", ")}` : "")] },
         { id: "programm", titel: "Programme", spalten: ["Bild", "Programm", "klein darunter", "richtig für", "falsche Antwort bei"],
           hinweis: "Stimmen Name, Bild und Beispiel (Schweizer Schulen, gängige Programme)? „Falsche Antwort bei“: Kann das "
             + "Programm eine dieser Dateien doch öffnen, wäre die Aufgabe nicht eindeutig.",

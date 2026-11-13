@@ -20,13 +20,14 @@
        ebene: „gemeinde“, „kanton“, „bund“ oder null, wenn es je Kanton verschieden ist
        umschreibung: Tipp ohne den Namen („die Leute, die Brände löschen“)
        klar: true = eindeutig genug für Stufe 1 (2. Klasse, Bild-Karten)
-   - Anliegen: { satz, kurz, ziel, schwierigkeit, ablenker, hinweis }
+   - Anliegen: { satz, kurz, ziel, schwierigkeit, ablenker, hinweis, auch }
        satz: ganzer Satz ab Stufe 2; kurz: Bild-Zeichen und 2–3 Wörter für Stufe 1 (nur bei klaren Zielen)
        schwierigkeit: 1 einfach, 2 mittel, 3 Falle (nächstliegender Ablenker passt fast)
        ablenker: Id der Einrichtung, die am ehesten verwechselt wird; sie kommt als Korb dazu
        hinweis: nur bei Fallen — was den Unterschied ausmacht, ohne den Namen des Ziels
+       auch: Einrichtungen, die ebenfalls passen (die Klasse geht mit der Schule ins Schwimmbad) — nie als Korb
    - Notruf: { nummer, name, bild, situationen }
-   - Stelle (Stufe 5, NMG.10.3.e): { id, name, bild, tut, umschreibung } und Anliegen { satz, ziel, ablenker }
+   - Stelle (Stufe 5, NMG.10.3.e): { id, name, bild, tut, umschreibung } und Anliegen { satz, ziel, ablenker, auch }
    - Ebene (Stufe 5): { name, bild, ebene } — nur eindeutige Fälle
    - Ablauf (Stufe 6): { titel, bild, schritte: [{ text, kurz }] } in der richtigen Reihenfolge */
 
@@ -114,11 +115,11 @@ const GEMEINDE_ANLIEGEN = [
   { satz: "Du hast dein Mathebuch im Klassenzimmer liegen lassen und holst es.", ziel: "schule", schwierigkeit: 2, ablenker: "fundbuero" },
   // ---------- Schwimmbad ----------
   { satz: "Es ist heiss, und du möchtest baden gehen.", kurz: "☀️ Baden gehen", ziel: "schwimmbad", schwierigkeit: 1, ablenker: "spital" },
-  { satz: "Du willst endlich richtig schwimmen lernen.", kurz: "🩱 Schwimmen lernen", ziel: "schwimmbad", schwierigkeit: 1, ablenker: "schule" },
-  { satz: "Deine Klasse hat heute Schwimmunterricht.", ziel: "schwimmbad", schwierigkeit: 2, ablenker: "schule" },
+  { satz: "Du willst endlich richtig schwimmen lernen.", kurz: "🩱 Schwimmen lernen", ziel: "schwimmbad", schwierigkeit: 1, ablenker: "bibliothek", auch: ["schule"] },
+  { satz: "Deine Klasse hat heute Schwimmunterricht. Wohin geht ihr?", ziel: "schwimmbad", schwierigkeit: 2, ablenker: "spital", auch: ["schule"] },
   // ---------- Abfallentsorgung ----------
-  { satz: "Der alte Kühlschrank muss weg.", ziel: "entsorgung", schwierigkeit: 2, ablenker: "werkhof" },
-  { satz: "Ihr habt eine Kiste voll leerer Flaschen und Gläser gesammelt.", ziel: "entsorgung", schwierigkeit: 2, ablenker: "supermarkt" },
+  { satz: "Das alte Sofa ist kaputt und muss als Sperrgut weg.", ziel: "entsorgung", schwierigkeit: 2, ablenker: "gemeindehaus", auch: ["werkhof"] }, // ZU PRÜFEN: die Sammelstelle liegt oft beim Werkhof
+  { satz: "Ihr habt eine Kiste voll leerer Glasflaschen und Konfigläser gesammelt.", ziel: "entsorgung", schwierigkeit: 2, ablenker: "supermarkt" }, // PET-Flaschen nimmt jede Verkaufsstelle zurück, Glas die Sammelstelle
   { satz: "Der Kehrichtsack vor dem Haus soll abgeholt werden.", ziel: "entsorgung", schwierigkeit: 2, ablenker: "werkhof" }, // ZU PRÜFEN: in manchen Gemeinden holt der Werkhof den Kehricht
   // ---------- Fundbüro ----------
   { satz: "Dein Velo ist weg, und du weisst nicht mehr, wo du es abgestellt hast.", ziel: "fundbuero", schwierigkeit: 3, ablenker: "polizei",
@@ -164,7 +165,7 @@ const GEMEINDE_STELLEN = [
 const GEMEINDE_STELLEN_ANLIEGEN = [
   { satz: "Du verstehst die Hausaufgabe nicht.", ziel: "lehrperson", ablenker: "schulleitung" },
   { satz: "Du hast dein Heft verloren und brauchst ein neues.", ziel: "lehrperson", ablenker: "hauswart" },
-  { satz: "Ein Kind in deiner Klasse wird immer wieder geärgert.", ziel: "lehrperson", ablenker: "gemeinderat" },
+  { satz: "Ein Kind in deiner Klasse wird immer wieder geärgert.", ziel: "lehrperson", ablenker: "gemeinderat", auch: ["schulleitung"] },
   { satz: "Du wirst am Montag fehlen, weil du zum Zahnarzt musst.", ziel: "lehrperson", ablenker: "schulleitung" },
   { satz: "Die Heizung im Schulzimmer ist seit Tagen kalt.", ziel: "hauswart", ablenker: "lehrperson" },
   { satz: "Im Gang des Schulhauses ist eine Lampe kaputt.", ziel: "hauswart", ablenker: "verwaltung" },

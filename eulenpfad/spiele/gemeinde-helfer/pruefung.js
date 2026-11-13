@@ -60,7 +60,8 @@
         zeile: a => {
           const fest = anliegenStufen(a).filter(s => ablenkerAlsKorb(a, ANLIEGEN_STUFE[s]));
           const ablenker = mitBild(E[a.ablenker]) + (fest.length ? ` (sicher als Korb: ${fest.length === 1 ? "Stufe" : "Stufen"} ${liste(fest)})` : " (nie sicher als Korb)");
-          return [a.satz, a.kurz || "—", schwierigkeit[a.schwierigkeit], ablenker, a.hinweis || "—", liste(anliegenStufen(a))];
+          const auch = a.auch ? ` · passt auch, nie als Korb: ${a.auch.map(id => mitBild(E[id])).join(", ")}` : "";
+          return [a.satz, a.kurz || "—", schwierigkeit[a.schwierigkeit], ablenker + auch, a.hinweis || "—", liste(anliegenStufen(a))];
         },
       }, {
         id: "notruf", titel: "Notrufnummern", spalten: ["Nummer", "Stelle", "Bild"],
@@ -88,7 +89,7 @@
           + "richtig (etwa die Schulleitung, wenn ein Kind geärgert wird)?",
         eintraege: () => GEMEINDE_STELLEN_ANLIEGEN,
         gruppe: a => mitBild(S[a.ziel]),
-        zeile: a => [a.satz, mitBild(S[a.ablenker])],
+        zeile: a => [a.satz, mitBild(S[a.ablenker]) + (a.auch ? ` · auch zuständig, nie zur Wahl: ${a.auch.map(id => mitBild(S[id])).join(", ")}` : "")],
       }, {
         id: "ebene", titel: "Gemeinde, Kanton oder Bund?", spalten: ["Bild", "Name"],
         hinweis: `${stufenText("ebene")}. Je Ebene eine Gruppe. Ist die Ebene in der ganzen Schweiz eindeutig `

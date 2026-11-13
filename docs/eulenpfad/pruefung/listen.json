@@ -19628,7 +19628,7 @@
           ],
           [
             "1",
-            "lunge",
+            "atmen",
             "Wie viele Lungenflügel hast du?",
             "zwei",
             "einen",
@@ -19835,7 +19835,7 @@
           ],
           [
             "5",
-            "kreislauf",
+            "gefaesse",
             "Wie heissen die feinsten Blutgefässe, durch die der Sauerstoff in den Körper gelangt?",
             "Haargefässe (Kapillaren)",
             "Herzklappen",
@@ -19858,7 +19858,7 @@
             "Sie pumpt das Blut durch den ganzen Körper.",
             "Sie pumpt das Blut nur zur Lunge.",
             "Sie muss das Herz warm halten.",
-            "Der Weg durch den Körper ist viel länger als der Weg zur Lunge. Darum braucht die linke Kammer am meisten Kraft."
+            "Die linke Kammer drückt das Blut durch den ganzen Körper bis in die Zehen, durch Millionen feiner Gefässe. Dafür braucht sie viel mehr Druck als die rechte Kammer für den kurzen Weg zur Lunge. Darum ist ihr Muskel am dicksten."
           ],
           [
             "5",
@@ -20164,7 +20164,7 @@
             "id: lotus; vorbild: Lotusblatt; vbild: 🪷; erfindung: Fassadenfarbe, die sich selbst reinigt; ebild: 🏠; kann: Seine Blätter bleiben sauber: Regentropfen rollen ab und nehmen den Schmutz mit.; eigenschaft: Wassertropfen perlen ab und nehmen den Schmutz mit.; kurz: Wasser perlt ab; problem: Du möchtest eine Hauswand, die der Regen von selbst sauber wäscht.; text: Die Blätter der Lotuspflanze haben winzige Noppen mit Wachs. Fassadenfarben mit diesem Lotus-Effekt bleiben länger sauber.; gruppen: haus"
           ],
           [
-            "id: hai; vorbild: Haifischhaut; vbild: 🦈; erfindung: Folie, die Flugzeugen Treibstoff spart; ebild: 🛩️; kann: Seine Haut hat winzige Schuppen mit feinen Rillen. So gleitet er mit wenig Widerstand durchs Wasser.; eigenschaft: Feine Rillen verringern den Widerstand.; kurz: feine Rillen; problem: Du möchtest, dass ein Flugzeug weniger Treibstoff braucht, weil die Luft leichter vorbeiströmt.; text: Eine Folie mit winzigen Rillen wie bei der Haifischhaut wird auf Flugzeuge geklebt. Sie verringert den Luftwiderstand.; gruppen: schwimmen · flugzeug"
+            "id: hai; vorbild: Haifischhaut; vbild: 🦈; erfindung: Folie, die Flugzeugen Treibstoff spart; ebild: 🛩️; kann: Seine Haut hat winzige Schuppen mit feinen Rillen. So gleitet er mit wenig Widerstand durchs Wasser.; eigenschaft: Feine Rillen verringern den Widerstand.; kurz: feine Rillen; problem: Du möchtest, dass ein Flugzeug weniger Treibstoff braucht, weil die Luft leichter vorbeiströmt.; text: Eine Folie mit winzigen Rillen wie bei der Haifischhaut wird auf Flugzeuge geklebt. Sie verringert den Luftwiderstand.; gruppen: schwimmen · flugzeug · widerstand"
           ],
           [
             "id: eule; vorbild: Eule; vbild: 🦉; erfindung: leiser Ventilator; ebild: 🌀; kann: Sie fliegt fast lautlos, so hört die Maus sie nicht kommen.; eigenschaft: Gezackte Federränder machen den Flug leise.; kurz: gezackter Federrand; problem: Du möchtest einen Ventilator, der viel leiser brummt.; text: Die Federn am Flügelrand der Eule sind wie ein feiner Kamm gezackt. Ventilatoren mit gezackten Flügelkanten sind leiser.; gruppen: vogel · leise · rotor"
@@ -20173,22 +20173,22 @@
             "id: storch; vorbild: Storch; vbild: 🐦; erfindung: Flugzeugflügel; ebild: ✈️; kann: Er gleitet mit seinen grossen, gewölbten Flügeln lange durch die Luft, fast ohne zu schlagen.; eigenschaft: Gewölbte Flügel tragen in der Luft.; kurz: gewölbte Flügel; problem: Du möchtest ein Fluggerät bauen, das einen Menschen durch die Luft trägt.; text: Otto Lilienthal beobachtete Störche. Er merkte, dass gewölbte Flügel besser tragen als flache, und flog ab 1891 mit seinem Gleitflugzeug.; gruppen: vogel · flugzeug · flug"
           ],
           [
-            "id: eisvogel; vorbild: Eisvogel; vbild: 🐦; erfindung: Nase des Shinkansen-Schnellzugs; ebild: 🚄; kann: Er stösst mit seinem langen, spitzen Schnabel ins Wasser, fast ohne zu spritzen.; eigenschaft: Ein langer, spitzer Schnabel dringt fast ohne Spritzer ins Wasser ein.; kurz: spitzer Schnabel; problem: Ein schneller Zug macht beim Ausfahren aus dem Tunnel einen lauten Knall. Wie wird er leiser?; text: Ingenieure in Japan gaben dem Shinkansen-Schnellzug eine lange Nase wie ein Eisvogelschnabel. Er wurde leiser und brauchte weniger Strom.; gruppen: vogel · leise"
+            "id: eisvogel; vorbild: Eisvogel; vbild: 🐦; erfindung: Nase des Shinkansen-Schnellzugs; ebild: 🚄; kann: Er stösst mit seinem langen, spitzen Schnabel ins Wasser, fast ohne zu spritzen.; eigenschaft: Ein langer, spitzer Schnabel dringt fast ohne Spritzer ins Wasser ein.; kurz: spitzer Schnabel; problem: Ein schneller Zug macht beim Ausfahren aus dem Tunnel einen lauten Knall. Wie wird er leiser?; text: Ingenieure in Japan gaben dem Shinkansen-Schnellzug eine lange Nase wie ein Eisvogelschnabel. Er wurde leiser und brauchte weniger Strom.; gruppen: vogel · leise · widerstand"
           ],
           [
-            "id: gecko; vorbild: Gecko; vbild: 🦎; erfindung: Haftband ohne Klebstoff; ebild: 🩹; kann: Er läuft an glatten Wänden hoch und sogar kopfüber an der Decke.; eigenschaft: Millionen feiner Härchen an den Zehen haften an glatten Flächen.; kurz: feine Härchen; problem: Du möchtest ein Band, das an Glas hält, keine Spuren macht und viele Male wieder verwendet werden kann.; text: Die Zehen des Geckos tragen Millionen winziger Härchen. Forschende bauen Haftbänder mit solchen Härchen nach.; gruppen: haften"
+            "id: gecko; vorbild: Gecko; vbild: 🦎; erfindung: Haftband ohne Klebstoff; ebild: 🩹; kann: Er läuft an glatten Wänden hoch und sogar kopfüber an der Decke.; eigenschaft: Millionen feiner Härchen an den Zehen haften an glatten Flächen.; kurz: feine Härchen; problem: Du möchtest ein Band, das an Glas hält, keine Spuren macht und viele Male wieder verwendet werden kann.; text: Die Zehen des Geckos tragen Millionen winziger Härchen. Forschende bauen Haftbänder mit solchen Härchen nach (in Entwicklung).; gruppen: haften"
           ],
           [
-            "id: ahorn; vorbild: Ahornsamen; vbild: 🍁; erfindung: Mini-Drohne, die sich im Flug dreht; ebild: 🚁; kann: Seine Samen drehen sich beim Fallen wie ein kleiner Propeller und segeln langsam weit weg.; eigenschaft: Ein einziger Flügel dreht sich wie ein Propeller und bremst den Fall.; kurz: ein einziger Flügel; problem: Du möchtest ein ganz kleines Fluggerät, das mit nur einem Flügel fliegt und sanft landet.; text: Der Ahornsamen hat nur einen Flügel und dreht sich beim Fallen. Ingenieure haben kleine Drohnen gebaut, die sich genauso drehen.; gruppen: flug · samen · rotor"
+            "id: ahorn; vorbild: Ahornsamen; vbild: svg:ahornSamen; erfindung: Mini-Drohne, die sich im Flug dreht; ebild: 🚁; kann: Seine Samen drehen sich beim Fallen wie ein kleiner Propeller und segeln langsam weit weg.; eigenschaft: Ein einziger Flügel dreht sich wie ein Propeller und bremst den Fall.; kurz: ein einziger Flügel; problem: Du möchtest ein ganz kleines Fluggerät, das mit nur einem Flügel fliegt und sanft landet.; text: Der Ahornsamen hat nur einen Flügel und dreht sich beim Fallen. Ingenieure haben kleine Drohnen gebaut, die sich genauso drehen.; gruppen: flug · samen · rotor"
           ],
           [
             "id: spinne; vorbild: Spinnenfaden; vbild: 🕷️; erfindung: Kunstfaser für Fäden in der Medizin; ebild: 🧵; kann: Sie spinnt Fäden, die dünner als ein Haar und trotzdem sehr reissfest sind.; eigenschaft: Dünne Fäden sind sehr reissfest und dehnbar.; kurz: dünn und dehnbar; problem: Du brauchst einen ganz dünnen Faden, der trotzdem sehr stark ist und nicht reisst.; text: Spinnenseide ist für ihr Gewicht reissfester als Stahl. Forschende stellen sie künstlich her, zum Beispiel für Fäden in der Medizin (in Entwicklung).; gruppen: faden"
           ],
           [
-            "id: biene; vorbild: Biene; vbild: 🐝; erfindung: Wabenplatte im Leichtbau; ebild: ⬢; kann: Sie baut Waben aus Sechsecken: Mit wenig Wachs entsteht viel Platz, und die Wabe ist stabil.; eigenschaft: Sechseckige Zellen sind leicht und stabil.; kurz: Sechsecke; problem: Du möchtest eine Platte, die sehr leicht und trotzdem stabil ist, zum Beispiel für den Boden eines Flugzeugs.; text: Wabenplatten haben innen Sechsecke wie eine Bienenwabe. Man braucht sie in Flugzeugen, Türen und Möbeln.; gruppen: bauen · flugzeug"
+            "id: biene; vorbild: Biene; vbild: 🐝; erfindung: Wabenplatte im Leichtbau; ebild: svg:wabenplatte; kann: Sie baut Waben aus Sechsecken: Mit wenig Wachs entsteht viel Platz, und die Wabe ist stabil.; eigenschaft: Sechseckige Zellen sind leicht und stabil.; kurz: Sechsecke; problem: Du möchtest eine Platte, die sehr leicht und trotzdem stabil ist, zum Beispiel für den Boden eines Flugzeugs.; text: Wabenplatten haben innen Sechsecke wie eine Bienenwabe. Man braucht sie in Flugzeugen, Türen und Möbeln.; gruppen: bauen · flugzeug"
           ],
           [
-            "id: termiten; vorbild: Termitenhügel; vbild: ⛰️; erfindung: Bürohaus mit natürlicher Lüftung; ebild: 🏢; kann: Termiten bauen Hügel mit vielen Luftschächten. Drinnen bleibt es auch in grosser Hitze angenehm.; eigenschaft: Luftschächte lassen warme Luft nach oben entweichen.; kurz: Luftschächte; problem: Du möchtest ein Haus in einem heissen Land, das fast ohne Klimaanlage kühl bleibt.; text: Das Eastgate Centre in Harare (Simbabwe) wurde nach dem Vorbild von Termitenbauten gebaut. Luftschächte kühlen es fast ohne Klimaanlage.; gruppen: haus · bauen"
+            "id: termiten; vorbild: Termitenhügel; vbild: ⛰️; erfindung: Bürohaus mit natürlicher Lüftung; ebild: 🏢; kann: Termiten bauen Hügel mit vielen Luftschächten. Drinnen bleibt es auch in grosser Hitze angenehm.; eigenschaft: Viele Luftschächte lassen frische Luft durch den Bau strömen.; kurz: Luftschächte; problem: Du möchtest ein Haus in einem heissen Land, das fast ohne Klimaanlage kühl bleibt.; text: Das Eastgate Centre in Harare (Simbabwe) wurde nach dem Vorbild von Termitenbauten gebaut. Luftschächte kühlen es fast ohne Klimaanlage.; gruppen: haus · bauen"
           ],
           [
             "id: seerose; vorbild: Riesenseerose; vbild: 🍃; erfindung: Glasdach des Kristallpalasts; ebild: 🏛️; kann: Ihre riesigen Blätter liegen flach auf dem Wasser. Ein Netz aus dicken Rippen auf der Unterseite stützt sie.; eigenschaft: Ein Netz aus Rippen trägt eine grosse, dünne Fläche.; kurz: tragende Rippen; problem: Du möchtest ein grosses, leichtes Dach aus Glas bauen, das trotzdem stabil ist.; text: Joseph Paxton züchtete die Riesenseerose und studierte die Rippen ihrer Blätter. Danach baute er 1851 in London den Kristallpalast aus Eisen und Glas.; gruppen: haus · bauen"
@@ -20212,7 +20212,7 @@
             "id: muschel; vorbild: Miesmuschel; vbild: 🦪; erfindung: Kleber, der unter Wasser hält; ebild: 🧴; kann: Sie klebt sich mit feinen Fäden an Felsen fest und hält auch bei starken Wellen.; eigenschaft: Klebrige Fäden halten auch unter Wasser.; kurz: klebrige Fäden; problem: Du möchtest etwas unter Wasser festkleben, zum Beispiel in der Medizin oder an einem Schiff.; text: Miesmuscheln machen einen Klebstoff, der im Wasser hält. Forschende entwickeln danach Kleber für die Medizin (in Entwicklung).; gruppen: haften"
           ],
           [
-            "id: zapfen; vorbild: Tannenzapfen; vbild: 🌲; erfindung: Wand, die sich bei Nässe von selbst schliesst; ebild: 🏗️; kann: Seine Schuppen öffnen sich bei trockenem Wetter und schliessen sich bei Nässe – ganz ohne Muskeln.; eigenschaft: Schuppen bewegen sich von selbst, wenn sich die Feuchtigkeit ändert.; kurz: bewegt sich bei Feuchtigkeit; problem: Du möchtest eine Hauswand mit Klappen, die sich bei Regen von selbst schliessen, ohne Motor und ohne Strom.; text: Architekten in Stuttgart bauten nach dem Vorbild des Zapfens Wände aus Holz, deren Klappen sich bei Feuchtigkeit von selbst schliessen.; gruppen: haus"
+            "id: zapfen; vorbild: Tannenzapfen; vbild: 🌲; erfindung: Wand, die sich bei Nässe von selbst schliesst; ebild: svg:klappenWand; kann: Seine Schuppen öffnen sich bei trockenem Wetter und schliessen sich bei Nässe – ganz ohne Muskeln.; eigenschaft: Schuppen bewegen sich von selbst, wenn sich die Feuchtigkeit ändert.; kurz: bewegt sich bei Feuchtigkeit; problem: Du möchtest eine Hauswand mit Klappen, die sich bei Regen von selbst schliessen, ohne Motor und ohne Strom.; text: Architekten in Stuttgart bauten nach dem Vorbild des Zapfens Wände aus Holz, deren Klappen sich bei Feuchtigkeit von selbst schliessen.; gruppen: haus"
           ],
           [
             "id: schlange; vorbild: Schlange; vbild: 🐍; erfindung: Suchroboter für Verschüttete; ebild: 🔎; kann: Sie hat keine Beine und schlängelt sich trotzdem durch enge Spalten und Röhren.; eigenschaft: Viele kleine Gelenke lassen den Körper durch enge Spalten gleiten.; kurz: viele kleine Gelenke; problem: Ein Roboter soll durch enge Röhren und zwischen Trümmern kriechen und Verschüttete suchen.; text: Schlangenroboter bestehen aus vielen kleinen Gliedern. Sie wurden schon nach Erdbeben eingesetzt, um Verschüttete zu suchen.; gruppen: roboter"
@@ -24076,7 +24076,7 @@
             "endung: png; art: bild; haeufig: ja; programm: bildbetrachter; wozu: Grafiken und Bildschirmfotos; namen: zeichnung · logo · bildschirmfoto"
           ],
           [
-            "endung: gif; art: bild; programm: bildbetrachter; wozu: kleine Bilder, auch bewegte; namen: lachkatze · animation · smiley"
+            "endung: gif; art: bild; programm: bildbetrachter; wozu: kleine Bilder, auch bewegte; namen: lachkatze · animation · smiley; nieNeben: video"
           ],
           [
             "endung: bmp; art: bild; programm: bildbetrachter; wozu: Bilder, nicht zusammengepresst, darum gross; namen: malbild · skizze · zeichnung"
@@ -28016,24 +28016,24 @@
             "🩱 Schwimmen lernen",
             "schwimmbad",
             "1",
-            "schule"
+            "bibliothek"
           ],
           [
-            "Deine Klasse hat heute Schwimmunterricht.",
+            "Deine Klasse hat heute Schwimmunterricht. Wohin geht ihr?",
             "",
             "schwimmbad",
             "2",
-            "schule"
+            "spital"
           ],
           [
-            "Der alte Kühlschrank muss weg.",
+            "Das alte Sofa ist kaputt und muss als Sperrgut weg.",
             "",
             "entsorgung",
             "2",
-            "werkhof"
+            "gemeindehaus"
           ],
           [
-            "Ihr habt eine Kiste voll leerer Flaschen und Gläser gesammelt.",
+            "Ihr habt eine Kiste voll leerer Glasflaschen und Konfigläser gesammelt.",
             "",
             "entsorgung",
             "2",
@@ -31487,7 +31487,7 @@
             "🐉",
             "Altes China",
             "false",
-            "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass"
+            "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden das Papier"
           ],
           [
             "svg:tempel",
@@ -31547,7 +31547,7 @@
             "ein langer Stamm, der in den Seeboden geschlagen wurde und ein Haus trägt"
           ],
           [
-            "🧺",
+            "svg:flechtwand",
             "Wand aus Flechtwerk",
             "Pfahlbauer",
             "bau",
@@ -31556,7 +31556,7 @@
             "eine Hauswand aus geflochtenen Ästen, mit Lehm verschmiert"
           ],
           [
-            "🏞️",
+            "svg:seeuferDorf",
             "Dorf am Seeufer",
             "Pfahlbauer",
             "bau",
@@ -31570,17 +31570,8 @@
             "Pfahlbauer",
             "ding",
             "3",
-            "",
+            "Römer, Alte Griechen",
             "ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt"
-          ],
-          [
-            "svg:tonkrug",
-            "Tonkrug",
-            "Pfahlbauer",
-            "ding",
-            "3",
-            "Altes Ägypten, Römer, Alte Griechen, Altes China",
-            "ein Gefäss aus gebranntem Ton für Körner und Wasser"
           ],
           [
             "🪨",
@@ -31606,7 +31597,7 @@
             "Pfahlbauer",
             "ding",
             "4",
-            "Altes Ägypten, Römer",
+            "Altes Ägypten, Römer, Alte Griechen, Altes China",
             "ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden"
           ],
           [
@@ -31619,7 +31610,7 @@
             "ein grosser Tonkrug mit zwei Henkeln und spitzem Boden für Wein und Öl"
           ],
           [
-            "🧩",
+            "svg:mosaik",
             "Mosaik",
             "Römer",
             "ding",
@@ -31723,7 +31714,7 @@
             "Römer",
             "ding",
             "2",
-            "Alte Griechen",
+            "Alte Griechen, Altes China",
             "ein Schutz aus Metall für den Kopf eines Soldaten"
           ],
           [
@@ -31840,7 +31831,7 @@
             "Altes Ägypten",
             "ding",
             "3",
-            "Römer, Alte Griechen",
+            "Römer, Alte Griechen, Altes China",
             "ein Boot mit Segel, das Steine und Getreide über den grossen Fluss brachte"
           ],
           [
@@ -31877,7 +31868,7 @@
             "ding",
             "5",
             "",
-            "ein Gerät mit einer Nadel, die immer nach Norden zeigt"
+            "ein Gerät, das immer in dieselbe Himmelsrichtung zeigt — zuerst ein Löffel aus Magnetstein, später eine Nadel"
           ],
           [
             "🍵",
@@ -31904,7 +31895,7 @@
             "wort",
             "5",
             "",
-            "eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort"
+            "eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein Wort oder einen Teil davon"
           ],
           [
             "🏛️",
@@ -32647,7 +32638,7 @@
           ],
           [
             "📜",
-            "Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz.",
+            "Der Bericht des Feldherrn Cäsar über die Helvetier, die im Gebiet der heutigen Schweiz lebten.",
             "Text",
             "Römer"
           ],
@@ -32795,7 +32786,7 @@
           ],
           [
             "Alte Griechen",
-            "Unsere Buchstaben heissen Alpha, Beta, Gamma.<br>Wir erzählten Geschichten über Götter wie Zeus.<br>Unsere Schauspieler trugen Masken."
+            "Unsere Schauspieler trugen Masken.<br>Wir erzählten Geschichten über Götter wie Zeus.<br>Unsere Buchstaben heissen Alpha, Beta, Gamma."
           ]
         ]
       }

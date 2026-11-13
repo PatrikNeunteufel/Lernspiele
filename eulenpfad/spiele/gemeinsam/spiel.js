@@ -2183,6 +2183,9 @@ const LS = (() => {
     }
     return el("span", { class: `${klasse} gezeichnet bildkachel`, html: `<svg viewBox="${z.box}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${z.svg}</svg>` });
   }
+  /** „svg:<name>“ in einem Text; Namen in bilder.js tragen auch Grossbuchstaben (baumKahl, stoffHolz). Auch für
+      tools/pruefe_pruefansicht.js, das jeden Namen in den Zellen gegen die Bildersammlung prüft. */
+  const ZEICHNUNG_IM_TEXT = /(svg:[A-Za-z0-9-]+)/;
   /**
    * Zelle einer Prüfansicht: Text, in dem jedes „svg:<name>“ als Zeichnung erscheint (z. B. „svg:waschbrett / Waschbrett“).
    * Gibt ein <td> zurück; title nennt den Rohtext, damit sich Bild und Name abgleichen lassen.
@@ -2195,7 +2198,7 @@ const LS = (() => {
       feld.style.background = code;
       return el("td", { class: `${klasse} pruef-farbe`.trim() }, feld, code);
     }
-    const teile = String(text ?? "").split(/(svg:[a-z0-9-]+)/);
+    const teile = String(text ?? "").split(ZEICHNUNG_IM_TEXT);
     if (teile.length === 1) return el("td", { class: klasse, text: teile[0] });
     // Nur ein Bild: gross (Bildspalte); Bilder im Text: so gross wie die Emojis daneben
     const allein = teile.length === 3 && !teile[0].trim() && !teile[2].trim();
@@ -3688,7 +3691,7 @@ const LS = (() => {
     beiAenderung, abgleichDaten, sicherung, gesperrt, freischalten, spielStand: () => spielStand,
     angezeigt, istAusgeblendet, darfAusblenden, ausblenden, zeigen,
     MELDUNG_ARTEN, MELDUNG_STATUS, ANREGUNG_ARTEN, ANREGUNG_STATUS, istAnregung, anregungen, neueAnregung,
-    bild, istZeichnung, mitBildText, zelleMitBildern,
+    bild, istZeichnung, mitBildText, zelleMitBildern, ZEICHNUNG_IM_TEXT,
     neueKorrektur, korrekturen, entferneMeldung, fingerabdruck, listenPruefung, pruefungDefinition, pruefungLokal, setzePruefungLokal, pruefungLokalAlle,
     listenPruefen, katalogEintrag,
     meldungen, meldungenVon, gefundeneFehler, ungeleseneMeldungen, meldenErlaubt, neueMeldung,

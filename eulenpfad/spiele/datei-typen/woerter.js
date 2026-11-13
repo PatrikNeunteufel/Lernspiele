@@ -26,7 +26,9 @@ const DATEI_PROGRAMME = {
 /**
  * Endungen. art: text, bild, ton, video (die vier Körbe) oder praesentation, tabelle, archiv, webseite
  * (nur in der Frage nach dem Programm). haeufig: kommt schon in Stufe 2 vor. namen: Dateinamen, die
- * zur Art passen (ohne Endung).
+ * zur Art passen (ohne Endung). nieNeben: Arten, mit denen ein Kind die Endung verwechseln kann (.gif zeigt auch
+ * bewegte Bilder) — die Endung steht nie als falsche Antwort neben der gesuchten Datei dieser Art, und ihre Namen
+ * dienen bei Dateien dieser Art nicht als Falle.
  */
 const DATEI_ENDUNGEN = [
   { endung: "txt",  art: "text", haeufig: true, programm: "texteditor", wozu: "nur Text, ohne Schriftarten und Farben", namen: ["notizen", "einkaufsliste", "ideen"] },
@@ -35,7 +37,7 @@ const DATEI_ENDUNGEN = [
   { endung: "jpg",  art: "bild", haeufig: true, programm: "bildbetrachter", wozu: "Fotos", namen: ["ferienfoto", "klassenfoto", "selfie"] },
   { endung: "jpeg", art: "bild", programm: "bildbetrachter", wozu: "Fotos (gleich wie .jpg)", namen: ["foto", "bergfoto", "geburtstagsfoto"] },
   { endung: "png",  art: "bild", haeufig: true, programm: "bildbetrachter", wozu: "Grafiken und Bildschirmfotos", namen: ["zeichnung", "logo", "bildschirmfoto"] },
-  { endung: "gif",  art: "bild", programm: "bildbetrachter", wozu: "kleine Bilder, auch bewegte", namen: ["lachkatze", "animation", "smiley"] },
+  { endung: "gif",  art: "bild", programm: "bildbetrachter", wozu: "kleine Bilder, auch bewegte", namen: ["lachkatze", "animation", "smiley"], nieNeben: ["video"] },
   { endung: "bmp",  art: "bild", programm: "bildbetrachter", wozu: "Bilder, nicht zusammengepresst, darum gross", namen: ["malbild", "skizze", "zeichnung"] },
   { endung: "mp3",  art: "ton", haeufig: true, programm: "musik", wozu: "Lieder und Hörspiele", namen: ["lied", "lieblingssong", "hoerspiel"] },
   { endung: "wav",  art: "ton", programm: "musik", wozu: "Töne, nicht zusammengepresst, darum gross", namen: ["trommelwirbel", "klingelton", "vogelstimme"] },

@@ -45,7 +45,7 @@ const KK_KULTUREN = [
   { id: "aegypten", name: "Altes Ägypten", bild: "svg:anch", bei: "im Alten Ägypten", leute: "Die alten Ägypter", schweiz: false, farbe: "var(--deko-6)",
     kurz: "lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König" },
   { id: "china", name: "Altes China", bild: "🐉", bei: "im Alten China", leute: "Die Menschen im Alten China", schweiz: false, farbe: "var(--deko-1)",
-    kurz: "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass" },
+    kurz: "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden das Papier" },
   { id: "griechen", name: "Alte Griechen", bild: "svg:tempel", bei: "bei den alten Griechen", leute: "Die alten Griechen", schweiz: false, farbe: "var(--deko-2)",
     kurz: "lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele" },
 ];
@@ -60,25 +60,23 @@ const KK_DINGE = [
     umschreibung: "ein Werkzeug zum Holzhacken mit einer geschliffenen Klinge aus Stein" },
   { bild: "🪵", name: "Holzpfahl", kultur: "pfahlbauer", art: "ding", ab: 2,
     umschreibung: "ein langer Stamm, der in den Seeboden geschlagen wurde und ein Haus trägt" },
-  { bild: "🧺", name: "Wand aus Flechtwerk", kultur: "pfahlbauer", art: "bau", ab: 2, alt: true,
+  { bild: "svg:flechtwand", name: "Wand aus Flechtwerk", kultur: "pfahlbauer", art: "bau", ab: 2, alt: true,
     umschreibung: "eine Hauswand aus geflochtenen Ästen, mit Lehm verschmiert" }, // ZU PRÜFEN: Flechtwerkwände mit Lehm
-  { bild: "🏞️", name: "Dorf am Seeufer", kultur: "pfahlbauer", art: "bau", ab: 2,
+  { bild: "svg:seeuferDorf", name: "Dorf am Seeufer", kultur: "pfahlbauer", art: "bau", ab: 2,
     umschreibung: "ein Dorf aus Holzhäusern, das direkt am Ufer eines Sees stand" },
-  { bild: "svg:webgewicht", name: "Webgewicht", kultur: "pfahlbauer", art: "ding", ab: 3,
+  { bild: "svg:webgewicht", name: "Webgewicht", kultur: "pfahlbauer", art: "ding", ab: 3, auch: ["roemer", "griechen"],
     umschreibung: "ein Stück Ton mit einem Loch, das am Webstuhl die Fäden spannt" },
-  { bild: "svg:tonkrug", name: "Tonkrug", kultur: "pfahlbauer", art: "ding", ab: 3, auch: ["aegypten", "roemer", "griechen", "china"],
-    umschreibung: "ein Gefäss aus gebranntem Ton für Körner und Wasser" },
   { bild: "🪨", name: "Steinzeit", kultur: "pfahlbauer", art: "wort", ab: 3,
     umschreibung: "die Zeit, in der Werkzeuge aus Stein gemacht wurden, lange bevor es Metall gab" },
   { bild: "svg:bronzebeil", name: "Bronzezeit", kultur: "pfahlbauer", art: "wort", ab: 4,
     umschreibung: "die Zeit, in der Beile und Schmuck aus dem Metall Bronze gegossen wurden" }, // ZU PRÜFEN: Pfahlbauer lebten auch in der Bronzezeit
-  { bild: "svg:mahlstein", name: "Mahlstein", kultur: "pfahlbauer", art: "ding", ab: 4, auch: ["aegypten", "roemer"],
+  { bild: "svg:mahlstein", name: "Mahlstein", kultur: "pfahlbauer", art: "ding", ab: 4, auch: ["aegypten", "roemer", "griechen", "china"],
     umschreibung: "ein flacher Stein, auf dem Körner mit einem zweiten Stein zu Mehl zerrieben wurden" },
 
   // ---------- Römer (in der Schweiz: Augusta Raurica, Aventicum) ----------
   { bild: "🏺", name: "Amphore", kultur: "roemer", art: "ding", ab: 1, alt: true, auch: ["griechen"],
     umschreibung: "ein grosser Tonkrug mit zwei Henkeln und spitzem Boden für Wein und Öl" },
-  { bild: "🧩", name: "Mosaik", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
+  { bild: "svg:mosaik", name: "Mosaik", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
     umschreibung: "ein Bild auf dem Boden, aus tausenden kleinen Steinchen gelegt" },
   { bild: "svg:aquaedukt", name: "Aquädukt", kultur: "roemer", art: "bau", ab: 1, alt: true,
     umschreibung: "eine Wasserleitung auf hohen Bögen, die frisches Wasser in die Stadt bringt" },
@@ -100,7 +98,7 @@ const KK_DINGE = [
     umschreibung: "Zahlen, die mit Buchstaben geschrieben werden — heute noch auf manchen Uhren" },
   { bild: "svg:hypokaust", name: "Bodenheizung", kultur: "roemer", art: "bau", ab: 3,
     umschreibung: "warme Luft von einem Feuer strömt unter dem Boden durch und heizt das Haus" }, // ZU PRÜFEN: Hypokaust
-  { bild: "svg:helm-roemisch", name: "Soldatenhelm", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen"],
+  { bild: "svg:helm-roemisch", name: "Soldatenhelm", kultur: "roemer", art: "ding", ab: 2, auch: ["griechen", "china"],
     umschreibung: "ein Schutz aus Metall für den Kopf eines Soldaten" },
   { bild: "svg:wachstafel", name: "Wachstafel", kultur: "roemer", art: "ding", ab: 4, auch: ["griechen"],
     umschreibung: "ein Brettchen mit Wachs, in das man mit einem Griffel schreibt und das Geschriebene wieder glattstreicht" },
@@ -128,7 +126,7 @@ const KK_DINGE = [
     umschreibung: "ein Mann, der lesen und schreiben konnte und alles aufschrieb, was der König wollte" },
   { bild: "🐈", name: "Heilige Katze", kultur: "aegypten", art: "wort", ab: 3,
     umschreibung: "ein Haustier, das verehrt wurde und dem niemand etwas tun durfte" }, // ZU PRÜFEN: Katzen als heilige Tiere
-  { bild: "svg:nilboot", name: "Segelboot auf dem Fluss", kultur: "aegypten", art: "ding", ab: 3, auch: ["roemer", "griechen"],
+  { bild: "svg:nilboot", name: "Segelboot auf dem Fluss", kultur: "aegypten", art: "ding", ab: 3, auch: ["roemer", "griechen", "china"],
     umschreibung: "ein Boot mit Segel, das Steine und Getreide über den grossen Fluss brachte" },
 
   // ---------- Altes China (ab Stufe 5) ----------
@@ -139,13 +137,13 @@ const KK_DINGE = [
   { bild: "📄", name: "Papier", kultur: "china", art: "ding", ab: 5,
     umschreibung: "ein dünnes Blatt zum Schreiben, aus zerstampften Pflanzenfasern gemacht — eine Erfindung aus dem Osten" },
   { bild: "svg:kompass-china", name: "Kompass", kultur: "china", art: "ding", ab: 5,
-    umschreibung: "ein Gerät mit einer Nadel, die immer nach Norden zeigt" },
+    umschreibung: "ein Gerät, das immer in dieselbe Himmelsrichtung zeigt — zuerst ein Löffel aus Magnetstein, später eine Nadel" },
   { bild: "🍵", name: "Tee", kultur: "china", art: "ding", ab: 5,
     umschreibung: "ein heisses Getränk aus getrockneten Blättern" }, // ZU PRÜFEN: Tee schon im alten China
   { bild: "🍚", name: "Reis", kultur: "china", art: "ding", ab: 5,
     umschreibung: "kleine weisse Körner, die in überschwemmten Feldern wachsen" },
   { bild: "svg:schriftzeichen", name: "Schriftzeichen", kultur: "china", art: "wort", ab: 5,
-    umschreibung: "eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein ganzes Wort" },
+    umschreibung: "eine Schrift mit tausenden verschiedenen Zeichen, jedes für ein Wort oder einen Teil davon" },
 
   // ---------- Alte Griechen (ab Stufe 5) ----------
   { bild: "🏛️", name: "Tempel mit Säulen", kultur: "griechen", art: "bau", ab: 5, auch: ["roemer", "aegypten"],
@@ -284,7 +282,7 @@ const KK_GAB = [
     LERN_Session38: vorher 🏛️ und 📜 auch auf Quellen) — wie bei den Kulturen (🛖 Pfahlbauer, Anch für Ägypten). */
 const KK_QUELLENARTEN = {
   fund: { name: "Fundstück", bild: "⛏️", erklaerung: "ein Gegenstand, den jemand ausgegraben hat" },
-  bau: { name: "Bauwerk", bild: "🏚️", erklaerung: "ein Gebäude oder seine Reste, die noch stehen" },
+  bau: { name: "Bauwerk", bild: "🏚️", erklaerung: "ein Gebäude, ein Denkmal aus Stein oder ihre Reste, die noch stehen" },
   bild: { name: "Bild", bild: "🖼️", erklaerung: "etwas Gemaltes oder Gezeichnetes aus jener Zeit" },
   text: { name: "Text", bild: "🖋️", erklaerung: "etwas Geschriebenes aus jener Zeit" },
 };
@@ -298,7 +296,7 @@ const KK_QUELLEN = [
   { text: "Die Ruinen des Theaters von Augusta Raurica.", bild: "🏛️", art: "bau", kultur: "roemer" },
   { text: "Ein Helm eines Legionärs, der beim Pflügen aus der Erde kam.", bild: "svg:helm-roemisch", art: "fund", kultur: "roemer" },
   { text: "Eine Münze mit dem Kopf eines Kaisers.", bild: "svg:muenze-roemisch", art: "fund", kultur: "roemer" },
-  { text: "Der Bericht des Feldherrn Cäsar über die Menschen in der Schweiz.", bild: "📜", art: "text", kultur: "roemer" }, // ZU PRÜFEN: Cäsar schrieb über die Helvetier
+  { text: "Der Bericht des Feldherrn Cäsar über die Helvetier, die im Gebiet der heutigen Schweiz lebten.", bild: "📜", art: "text", kultur: "roemer" }, // ZU PRÜFEN: Cäsar schrieb über die Helvetier
   { text: "Eine Malerei an einer Hauswand: ein Festmahl mit Wein.", bild: "🎨", art: "bild", kultur: "roemer" },
   { text: "Ein Brief auf Papyrus, mit Tinte geschrieben.", bild: "📜", art: "text", kultur: "aegypten" },
   { text: "Eine Pyramide in der Wüste, die noch heute steht.", bild: "svg:pyramiden", art: "bau", kultur: "aegypten" },
@@ -329,5 +327,5 @@ const KK_RAETSEL = [
   { kultur: "china", hinweise: ["Wir lebten weit weg im Osten.", "Wir erfanden das Papier und den Kompass.", "Unsere Mauer ist tausende Kilometer lang."] },
   { kultur: "china", hinweise: ["Wir machten einen glänzenden Stoff aus den Fäden von Raupen.", "Unser Glückszeichen ist der Drache.", "Wir schrieben mit tausenden verschiedenen Schriftzeichen."] },
   { kultur: "griechen", hinweise: ["Wir lebten vor über 2000 Jahren am Meer, in vielen kleinen Städten.", "Wir erfanden Wettkämpfe, die es heute noch alle vier Jahre gibt.", "Unsere Tempel hatten viele Säulen, unsere Theater waren unter freiem Himmel."] },
-  { kultur: "griechen", hinweise: ["Unsere Buchstaben heissen Alpha, Beta, Gamma.", "Wir erzählten Geschichten über Götter wie Zeus.", "Unsere Schauspieler trugen Masken."] },
+  { kultur: "griechen", hinweise: ["Unsere Schauspieler trugen Masken.", "Wir erzählten Geschichten über Götter wie Zeus.", "Unsere Buchstaben heissen Alpha, Beta, Gamma."] },
 ];

@@ -116,7 +116,7 @@ const FREI = new Set(LS.spielListen("blutkreislauf-lotse").length ? LS.freieList
 const fragenFuer = n => KREISLAUF_FRAGEN.filter(f => f[0] === n);
 const fragenDerStufe = n => (FREI.has(LISTE) ? fragenFuer(n) : []);
 /** Bild über einer Frage, je Thema (Feld 1) — auch für die Prüfansicht (pruefung.js). */
-const THEMA_BILD = { herz: "❤️", blut: "🩸", lunge: "🫁", puls: "💓", bewegung: "🏃", kreislauf: "🔄" };
+const THEMA_BILD = { herz: "❤️", blut: "🩸", lunge: "🫁", atmen: "🫁", puls: "💓", bewegung: "🏃", kreislauf: "🔄", gefaesse: "🔬" };
 
 // ---------- Stationen ----------
 

@@ -2246,3 +2246,27 @@
   aufgelöst, LERN-51 erledigt). Wetter und Jahreszeiten
   (wetter-jahreszeiten): 🌅, Korb Herbst 🍄, 🌿, kahler Laubbaum als Zeichnung (`bilder.js`, baumKahl), 🩱 Badekleid;
   bilder.js eingebunden.
+
+## 2026-11-13 — LERN_Session39
+
+- **Befunde aus den Prüfansichten (BF1 a), Durchgang 5** (Befund-Datei `docs/eulenpfad/pruefung/befunde_LERN_Session38.md`):
+  - Datei-Typen (datei-typen): Feld `nieNeben` — .gif steht nie als falsche Antwort neben der gesuchten Video-Datei, und
+    ihre Namen dienen bei Videos nicht als Falle (`pruefeAufgabe` meldet beides); die Prüfansicht zeigt es.
+  - Blutkreislauf-Lotse (blutkreislauf-lotse): eigene Tipps für „Wie viele Lungenflügel?“ (Thema atmen) und die
+    Haargefässe (Thema gefaesse, 🔬); die dicke Wand der linken Kammer mit dem höheren Druck erklärt statt mit dem
+    längeren Weg.
+  - Bionik-Paare (bionik-paare): Gruppe „widerstand“ für Haifischhaut und Eisvogel, Gecko „(in Entwicklung)“, Termiten
+    ohne das Kaminmodell; Ahornsamen, Wabenplatte und Wand mit Klappen gezeichnet (`bilder.js`: ahornSamen,
+    wabenplatte, klappenWand; BI1 a), bilder.js eingebunden.
+  - Gemeinde-Helfer (gemeinde-helfer): Feld `auch` (Einrichtung oder Stelle, die ebenfalls passt, nie als Korb oder zur
+    Wahl): Schule beim Schwimmen, Werkhof beim Sperrgut, Schulleitung beim Ärgern; Sofa statt Kühlschrank (den nimmt
+    auch der Handel zurück), Glasflaschen statt Flaschen (PET nimmt jede Verkaufsstelle zurück); Tipp „öffentlich“
+    ohne „bezahlt die Gemeinde mit den Steuern“.
+  - Kulturen-Koffer (kulturen-koffer): Tonkrug als Ding entfernt (kam in keiner Stufe vor); `auch` bei Webgewicht,
+    Mahlstein, Soldatenhelm und Segelboot ergänzt; China „erfanden das Papier“ (der Kompass mit Nadel ist jünger),
+    Kompass und Schriftzeichen genauer; Cäsar über die Helvetier; Bauwerk schliesst Denkmäler ein (Sphinx); Rätsel der
+    Griechen vom Allgemeinen zum Konkreten; Flechtwerk, Mosaik und Dorf am Seeufer gezeichnet (flechtwand, mosaik,
+    seeuferDorf).
+- **Prüfansicht: Zeichnungen mit Grossbuchstaben (Fehler):** `LS.zelleMitBildern` erkannte nur `svg:[a-z0-9-]+` — Namen
+  wie `baumKahl`, `stoffHolz`, `lrWald` erschienen in der Prüfansicht als ❔. Jetzt `LS.ZEICHNUNG_IM_TEXT`;
+  `tools/pruefe_pruefansicht.js` prüft jede Zeichnung in den Zellen gegen die Bildersammlung.

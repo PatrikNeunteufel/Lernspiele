@@ -57,6 +57,7 @@
 <main class="buehne"></main>
 
 <script src="../gemeinsam/avatare.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
@@ -141,7 +142,7 @@ function pruefeAufgabe(a, stufe) {
 
 // ---------- Darstellung ----------
 
-const teil = (bild, text, klasse, klein) => el("div", { class: `bionik-teil ${klasse}` }, el("span", { class: "bild", text: bild }), el("span", { text }), klein ? el("small", { text: klein }) : null);
+const teil = (bild, text, klasse, klein) => el("div", { class: `bionik-teil ${klasse}` }, LS.bild(bild), el("span", { text }), klein ? el("small", { text: klein }) : null);
 const pfeil = () => el("span", { class: "bionik-pfeil", "aria-hidden": "true", text: "→" });
 
 /** Karteninhalt im Feld: Vorbild (v), Erfindung (e) oder abgeschaute Eigenschaft (k). */
@@ -165,7 +166,7 @@ function finden(ctx, a, arten) {
   for (const k of karten) {
     const inh = KARTE[k.x](k.p);
     const knopf = el("button", { type: "button", class: `bionik-karte art-${k.x}`, "data-karte": `${k.p.id}:${k.x}` },
-      el("span", { class: "bild", text: inh.bild }), el("span", { text: inh.text }), el("small", { text: inh.klein }));
+      LS.bild(inh.bild), el("span", { text: inh.text }), el("small", { text: inh.klein }));
     k.knopf = knopf;
     knopf.addEventListener("click", () => {
       if (fertig || ctx.vorbei() || knopf.classList.contains("gefunden")) return;
@@ -203,7 +204,7 @@ function loesungsTexte(a) {
   const p = P[a.richtig];
   const inh = { kann: { text: p.kann }, erfindung: { bild: p.ebild, text: p.erfindung }, vorbild: { bild: p.vbild, text: p.vorbild },
     eigenschaft: { text: p.eigenschaft }, problem: { bild: p.vbild, text: p.vorbild } }[a.art];
-  return [`${inh.bild || ""}${inh.text}`];
+  return [`${inh.bild && !LS.istZeichnung(inh.bild) ? inh.bild : ""}${inh.text}`];
 }
 
 /** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): Denkweg vom Vorbild zur Erfindung, ohne die Lösung zu nennen. */
@@ -268,7 +269,7 @@ LS.spiel({
         f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild")),
           el("div", { class: "frage", text: `${p.vorbild}: Was kann dieses Vorbild besonders?` }));
         Object.assign(opt, { inhalt: id => ({ text: P[id].kann }), breite: 300, loesung: `${p.vorbild}: ${p.kann}`, lob: `Richtig! ${p.kann}`,
-          hinweis: id => `Das passt zu einem anderen Vorbild: ${P[id].vbild} ${P[id].vorbild}.` });
+          hinweis: id => `Das passt zu einem anderen Vorbild: ${LS.mitBildText(P[id].vbild, P[id].vorbild)}.` });
         break;
       case "erfindung":
         f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild", "Vorbild"), pfeil(), teil("?", "", "erfindung offen", "Erfindung")),

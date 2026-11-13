@@ -48,6 +48,11 @@ function pruefeSpiel(spiel) {
           else z.forEach((c, j) => {
             if (c === undefined || c === null || (typeof c === "string" && !c.trim() && c !== "")) fehler.push(wo + " Zeile " + i + " Spalte " + a.spalten[j] + ": " + c);
             if (typeof c === "string" && /undefined|NaN|\\[object/.test(c)) fehler.push(wo + " Zeile " + i + " Spalte " + a.spalten[j] + ": " + c);
+            // Jede Zeichnung „svg:<name>“ in der Zelle so, wie die Prüfansicht sie zerlegt, und in der Bildersammlung
+            if (typeof c === "string") String(c).split(LS.ZEICHNUNG_IM_TEXT).filter((t, n) => n % 2).forEach(t => {
+              if (typeof BILDER === "undefined" || !BILDER[t.slice(4)]) fehler.push(wo + " Zeile " + i + " Spalte " + a.spalten[j] + ": Zeichnung " + t + " fehlt");
+            });
+            if (typeof c === "string" && String(c).split(LS.ZEICHNUNG_IM_TEXT).some((t, n) => !(n % 2) && /svg:/.test(t))) fehler.push(wo + " Zeile " + i + " Spalte " + a.spalten[j] + ": svg-Name nicht erkannt: " + c);
           });
           if (a.gruppe) { try { gruppen.add(a.gruppe(x)); } catch (f) { fehler.push(wo + " Zeile " + i + ": gruppe() wirft " + f.message); } }
           if (a.bild) { try { a.bild(x); } catch (f) { fehler.push(wo + " Zeile " + i + ": bild() wirft " + f.message); } }
