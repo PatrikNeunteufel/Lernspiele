@@ -85,9 +85,10 @@ const K = Object.fromEntries(KK_KULTUREN.map(k => [k.id, k]));
 const ALLE = KK_KULTUREN.map(k => k.id);
 const NEU = ["china", "griechen"]; // erst ab Stufe 5
 const NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
+// Körbe ohne Bild eines Dings (BI1 a, LERN_Session38: vorher Amphore 🏺 → Korb 🏺 Früher, Handy 📱 → Korb 📱 Heute)
 const ZEIT = {
-  frueher: { bild: "🏺", text: "Früher", farbe: "var(--deko-3)" },
-  heute: { bild: "📱", text: "Heute", farbe: "var(--deko-6)" },
+  frueher: { bild: "⏳", text: "Früher", farbe: "var(--deko-3)" },
+  heute: { bild: "🆕", text: "Heute", farbe: "var(--deko-6)" },
 };
 const WAHR = { ja: { bild: "✅", text: "Stimmt" }, nein: { bild: "❌", text: "Stimmt nicht" } };
 const GAB = { ja: { bild: "✅", text: "Ja, gab es schon" }, nein: { bild: "❌", text: "Nein, gab es noch nicht" } };

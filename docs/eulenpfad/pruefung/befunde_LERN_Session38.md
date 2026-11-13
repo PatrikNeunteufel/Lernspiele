@@ -46,9 +46,9 @@ eine Stichprobe, im vollen Lauf können weitere Fälle auftauchen) — **offen, 
 
 | Spiel | Funde | Beispiele |
 |---|---|---|
-| Schwimmt oder sinkt (schwimmt-sinkt) | 6 | Holz 🪵, Papier 📄, Metall 🔩, Kunststoff 🧴 (Stufen 3, 4, 6) |
-| Kulturen-Koffer (kulturen-koffer) | 4 | Pfahlbauer, Altes Ägypten (Zeichnung), Bauwerk 🏛, Text 📜 (Stufen 2, 3, 5) |
-| Znüni-Teller (znueni-teller) | 4 | Gemüse 🥕, Süsses und Salziges 🍬, Getränke 💧, Brot … 🍞 (Stufen 2, 3, 4, 6) |
+| Schwimmt oder sinkt (schwimmt-sinkt) | 6 — **behoben** (Materialproben als Zeichnung) | Holz 🪵, Papier 📄, Metall 🔩, Kunststoff 🧴 (Stufen 3, 4, 6) |
+| Kulturen-Koffer (kulturen-koffer) | 4, im vollen Lauf dazu Früher 🏺, Heute 📱 — **behoben** (🛖, Anch, ⛏️, 🏚️, 🖋️, ⏳, 🆕) | Pfahlbauer, Altes Ägypten (Zeichnung), Bauwerk 🏛, Text 📜 (Stufen 1, 2, 3, 5) |
+| Znüni-Teller (znueni-teller) | 4 — **behoben** (🚰, 🌳, 🌱, 🌾, 🐄, 🧁) | Gemüse 🥕, Süsses und Salziges 🍬, Getränke 💧, Brot … 🍞 (Stufen 2, 3, 4, 6) |
 | Gefühle-Radar (gefuehle-radar) | 3 | müde 😴, fröhlich 😀, wütend 😠 (Stufe 1) |
 | Kakao-Weg (kakao-weg) | 2 | Laden 🏪, Transport 🚚 (Stufe 3) |
 | Zeitstrahl-Sortierer (zeitstrahl-sortierer) | 2 | Mittelalter 🏰 (Stufen 5, 6) |

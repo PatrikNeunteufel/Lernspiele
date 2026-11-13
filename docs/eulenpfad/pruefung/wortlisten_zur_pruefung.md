@@ -6364,9 +6364,9 @@ Fakten bitte nachprüfen.
 
 | Bild | Name | Schweiz | Kurztext | ☐ |
 |---|---|---|---|---|
-| svg:pfahlbau | Pfahlbauer | true | lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen | ☐ |
+| 🛖 | Pfahlbauer | true | lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen | ☐ |
 | 🛡️ | Römer | true | kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder | ☐ |
-| svg:pyramiden | Altes Ägypten | false | lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König | ☐ |
+| svg:anch | Altes Ägypten | false | lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König | ☐ |
 | 🐉 | Altes China | false | lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass | ☐ |
 | svg:tempel | Alte Griechen | false | lebten vor über 2000 Jahren am Meer, bauten Tempel mit Säulen und erfanden die Olympischen Spiele | ☐ |
 

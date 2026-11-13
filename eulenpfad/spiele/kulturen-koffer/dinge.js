@@ -38,11 +38,11 @@
    Kulturen China und Griechen kommen erst ab Stufe 5 (Aussagen, Fragen und Quellen zu ihnen ebenso). */
 
 const KK_KULTUREN = [
-  { id: "pfahlbauer", name: "Pfahlbauer", bild: "svg:pfahlbau", bei: "bei den Pfahlbauern", leute: "Die Pfahlbauer", schweiz: true, farbe: "var(--deko-5)",
+  { id: "pfahlbauer", name: "Pfahlbauer", bild: "🛖", bei: "bei den Pfahlbauern", leute: "Die Pfahlbauer", schweiz: true, farbe: "var(--deko-5)",
     kurz: "lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen" },
   { id: "roemer", name: "Römer", bild: "🛡️", bei: "bei den Römern", leute: "Die Römer", schweiz: true, farbe: "var(--deko-3)",
     kurz: "kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder" },
-  { id: "aegypten", name: "Altes Ägypten", bild: "svg:pyramiden", bei: "im Alten Ägypten", leute: "Die alten Ägypter", schweiz: false, farbe: "var(--deko-6)",
+  { id: "aegypten", name: "Altes Ägypten", bild: "svg:anch", bei: "im Alten Ägypten", leute: "Die alten Ägypter", schweiz: false, farbe: "var(--deko-6)",
     kurz: "lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König" },
   { id: "china", name: "Altes China", bild: "🐉", bei: "im Alten China", leute: "Die Menschen im Alten China", schweiz: false, farbe: "var(--deko-1)",
     kurz: "lebten vor über 2000 Jahren weit im Osten, bauten eine riesige Mauer und erfanden Papier und Kompass" },
@@ -280,12 +280,13 @@ const KK_GAB = [
   { ding: "Flugzeug", bild: "✈️", kultur: "griechen", ja: false, grund: "Flugzeuge gibt es erst seit gut 100 Jahren." },
 ];
 
-/** Quellenarten (Stufe 5): Woher wissen wir das? */
+/** Quellenarten (Stufe 5): Woher wissen wir das? Ihr Bild ist nie das Bild einer Quelle oder eines Dings (BI1 a,
+    LERN_Session38: vorher 🏛️ und 📜 auch auf Quellen) — wie bei den Kulturen (🛖 Pfahlbauer, Anch für Ägypten). */
 const KK_QUELLENARTEN = {
-  fund: { name: "Fundstück", bild: "🏺", erklaerung: "ein Gegenstand, den jemand ausgegraben hat" },
-  bau: { name: "Bauwerk", bild: "🏛️", erklaerung: "ein Gebäude oder seine Reste, die noch stehen" },
+  fund: { name: "Fundstück", bild: "⛏️", erklaerung: "ein Gegenstand, den jemand ausgegraben hat" },
+  bau: { name: "Bauwerk", bild: "🏚️", erklaerung: "ein Gebäude oder seine Reste, die noch stehen" },
   bild: { name: "Bild", bild: "🖼️", erklaerung: "etwas Gemaltes oder Gezeichnetes aus jener Zeit" },
-  text: { name: "Text", bild: "📜", erklaerung: "etwas Geschriebenes aus jener Zeit" },
+  text: { name: "Text", bild: "🖋️", erklaerung: "etwas Geschriebenes aus jener Zeit" },
 };
 
 /** Quellen (Stufe 5): Beispiel → Quellenart. Der Text nennt die Art nicht beim Namen. */

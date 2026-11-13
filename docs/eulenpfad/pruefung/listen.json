@@ -7337,37 +7337,37 @@
         "zeilen": [
           [
             "Getränk",
-            "💧",
+            "🚰",
             "Getränke",
             "Am meisten brauchst du Wasser oder ungesüssten Tee."
           ],
           [
             "Frucht",
-            "🍎",
+            "🌳",
             "Früchte",
             "Früchte wachsen an Bäumen und Sträuchern und geben viele Vitamine."
           ],
           [
             "Gemüse",
-            "🥕",
+            "🌱",
             "Gemüse",
             "Gemüse sind Blätter, Blüten, Wurzeln oder Zwiebeln von Pflanzen — voller Vitamine."
           ],
           [
             "Stärke",
-            "🍞",
+            "🌾",
             "Brot, Teigwaren, Kartoffeln",
             "Brot, Teigwaren, Reis und Kartoffeln geben Kraft für lange Zeit."
           ],
           [
             "Eiweiss",
-            "🥚",
+            "🐄",
             "Milch, Ei, Fisch, Fleisch",
             "Milch, Käse, Eier, Fisch und Fleisch helfen beim Wachsen."
           ],
           [
             "Süsses",
-            "🍬",
+            "🧁",
             "Süsses und Salziges",
             "Süsses und Salziges schmeckt gut — aber nur ab und zu und wenig."
           ]
@@ -31466,7 +31466,7 @@
         ],
         "zeilen": [
           [
-            "svg:pfahlbau",
+            "🛖",
             "Pfahlbauer",
             "true",
             "lebten vor mehreren tausend Jahren an Seen in der Schweiz, in Häusern auf Pfählen"
@@ -31478,7 +31478,7 @@
             "kamen vor über 2000 Jahren in die Schweiz und bauten Städte, Strassen und warme Bäder"
           ],
           [
-            "svg:pyramiden",
+            "svg:anch",
             "Altes Ägypten",
             "false",
             "lebten vor mehreren tausend Jahren am Fluss Nil, bauten Pyramiden und hatten einen Pharao als König"

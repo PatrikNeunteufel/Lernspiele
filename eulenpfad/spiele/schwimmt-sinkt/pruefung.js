@@ -69,7 +69,7 @@
         id: "ding", titel: "Dinge", spalten: ["Bild", "Ding", "Stufen"],
         hinweis: "Je Material eine Gruppe (Korb wie im Spiel). Ist das Ding ganz oder fast ganz aus diesem Material, so "
           + "dass kein anderer Korb auch passt (Deckel, Rahmen, Griffe)? Zeigt das Bild das Ding eindeutig?",
-        eintraege: () => MATERIAL_DINGE, gruppe: ([, , m]) => `${MATERIALIEN[m] || ""} ${m}`.trim(),
+        eintraege: () => MATERIAL_DINGE, gruppe: ([, , m]) => LS.mitBildText(MATERIALIEN[m], m),
         zeile: d => [d[0], d[1], stufenVon(d, "material")],
       }, {
         id: "korb", titel: "Körbe (Material zur Wahl)", spalten: ["Bild", "Material"],

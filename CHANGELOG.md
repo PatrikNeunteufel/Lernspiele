@@ -2194,3 +2194,9 @@
   trägt als einzige ein Bild der Aufgabe beim Stellen), dafür geben die Haken „gestellt“ und „richtig“ die Fläche mit
   (spiel.js). Zählung mit verkürztem Lauf über alle Spiele: 25 Funde in zehn weiteren Spielen, in der Befund-Datei, noch
   nicht behoben — `pruefe_spiele.js` meldet sie dort als Fehler.
+- **„Bild verrät“ behoben, Durchgang 1 (BI1 a):** Schwimmt oder sinkt (schwimmt-sinkt): Materialkörbe als Proben
+  (`bilder.js`: stoffHolz, stoffMetall, stoffGlas mit Ball dahinter, stoffKunststoff, stoffPapier) statt Gegenständen
+  der Karten. Znüni-Teller (znueni-teller): Gruppenkörbe 🚰 Getränke, 🌳 Früchte, 🌱 Gemüse, 🌾 Brot/Teigwaren/Kartoffeln,
+  🐄 Milch/Ei/Fisch/Fleisch, 🧁 Süsses und Salziges — kein Bild eines Lebensmittels. Kulturen-Koffer (kulturen-koffer):
+  🛖 Pfahlbauer, Anch (`bilder.js`, anch) für Altes Ägypten, Quellenarten ⛏️ Fundstück, 🏚️ Bauwerk, 🖋️ Text, Körbe
+  ⏳ Früher und 🆕 Heute (der volle Lauf fand dort Amphore 🏺 und Handy 📱, die die verkürzte Zählung nicht traf).

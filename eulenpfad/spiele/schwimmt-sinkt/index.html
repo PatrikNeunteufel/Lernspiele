@@ -28,6 +28,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="stoffe.js"></script>
 <script>
 "use strict";
@@ -41,7 +42,9 @@ const STUFE_NR = { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 };
 const WASSER = { schwimmt: { bild: "🛟", text: "schwimmt" }, sinkt: { bild: "⬇️", text: "sinkt" } };
 /** Name auf der Korbkarte ist Sachkunde, kein Lesestoff: Die Eule liest ihn mit vor (rahmen.md Abschnitt 12). */
 const vorlesbar = ({ karte }) => karte.querySelector("b").classList.add("frage");
-const MATERIALIEN = { Holz: "🪵", Metall: "🔩", Glas: "🫙", Kunststoff: "🧴", Papier: "📄" };
+// Körbe zeigen den Stoff als Probe, nie einen Gegenstand einer Karte (BI1 a, LERN_Session38: vorher Holzklotz 🪵 →
+// Korb 🪵 Holz); Zeichnungen in bilder.js
+const MATERIALIEN = { Holz: "svg:stoffHolz", Metall: "svg:stoffMetall", Glas: "svg:stoffGlas", Kunststoff: "svg:stoffKunststoff", Papier: "svg:stoffPapier" };
 
 const ID = "schwimmt-sinkt";
 

@@ -654,6 +654,35 @@ const BILDER = (() => {
         + `<path d="M66 72 V62 h3 v3 h3 v-3 h3 V72 Z M85 72 V62 h3 v3 h3 v-3 h3 V72 Z" fill="#e6c477" stroke="#b8934a" stroke-width="1.6"/>`
         + `<path d="M77 82 a3 3 0 0 1 6 0 V88 h-6 Z" fill="#b8934a"/><path d="M80 72 V52" stroke="#6b4a2b" stroke-width="1.6"/><path d="M80 52 L90 55.5 L80 59 Z" fill="#e2483d"/>` },
 
+    // ---------- Materialproben (schwimmt-sinkt, Körbe; BI1 a) ----------
+    // Der Stoff selbst als Probe, kein Gegenstand — sonst gliche der Korb einer Karte (Holzklotz 🪵 → Korb 🪵 Holz)
+    stoffHolz: { name: "Holz (Brett mit Maserung)", box: "4 18 92 64",
+      svg: `<rect x="8" y="22" width="84" height="56" rx="4" fill="#c58b52" stroke="#7a4f26" stroke-width="3"/>`
+        + `<path d="M8 36 Q30 30 50 37 T92 34 M8 52 Q28 46 46 53 Q60 58 92 50 M8 66 Q34 60 58 67 T92 64" fill="none" stroke="#8d5a2b" stroke-width="2.4"/>`
+        + `<ellipse cx="62" cy="46" rx="7" ry="4" fill="none" stroke="#8d5a2b" stroke-width="2.4"/>` },
+    stoffMetall: { name: "Metall (glänzende Platte mit Nieten)", box: "4 18 92 64",
+      svg: `<rect x="8" y="22" width="84" height="56" rx="4" fill="#7f8794" stroke="#4a505b" stroke-width="3"/>`
+        + `<path d="M20 70 L52 30 L64 30 L32 70 Z" fill="#e4e8ee"/><path d="M42 70 L74 30 L80 30 L48 70 Z" fill="#d3d8e0"/>`
+        + [[16, 30], [84, 30], [16, 70], [84, 70]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#5f6673"/>`).join("") },
+    stoffGlas: { name: "Glas (durchsichtige Scheibe, ein Ball dahinter ist zu sehen)", box: "4 18 92 64",
+      svg: `<circle cx="62" cy="52" r="16" fill="#e2483d"/><rect x="8" y="22" width="84" height="56" rx="4" fill="#d9f0fb" fill-opacity="0.45" stroke="#6fa8c8" stroke-width="3"/>`
+        + `<path d="M22 66 L44 34 M32 66 L54 34" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>`
+        + `<path d="M66 64 L80 44" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>` },
+    stoffKunststoff: { name: "Kunststoff (bunte Plastikkügelchen)", box: "4 12 92 64",
+      svg: [[24, 40, "#e2483d"], [44, 32, "#4d93dc"], [64, 40, "#f2c12e"], [80, 30, "#6aa84f"], [30, 62, "#6aa84f"], [52, 56, "#e0569a"],
+        [72, 62, "#4d93dc"], [16, 24, "#f2c12e"], [86, 54, "#e2483d"]]
+        .map(([x, y, f]) => `<circle cx="${x}" cy="${y}" r="9" fill="${f}" stroke="#3a3d4a" stroke-width="1.5"/><circle cx="${x - 3}" cy="${y - 3}" r="2.5" fill="#ffffff" fill-opacity="0.8"/>`).join("") },
+    stoffPapier: { name: "Papier (Stapel Blätter)", box: "4 14 92 72",
+      svg: `<rect x="16" y="34" width="70" height="46" fill="#e8e3d8" stroke="#9a9488" stroke-width="2" transform="rotate(-6 51 57)"/>`
+        + `<rect x="14" y="26" width="70" height="46" fill="#f4f0e6" stroke="#9a9488" stroke-width="2" transform="rotate(4 49 49)"/>`
+        + `<rect x="12" y="20" width="72" height="48" fill="#ffffff" stroke="#9a9488" stroke-width="2.4"/>` },
+
+    // Korb „Altes Ägypten“ (kulturen-koffer, BI1 a): das Lebenszeichen Anch statt der Pyramiden einer Karte
+    anch: { name: "Anch, ägyptisches Zeichen für Leben", box: "0 0 100 100",
+      svg: `<ellipse cx="50" cy="28" rx="14" ry="18" fill="none" stroke="#d6a52a" stroke-width="9"/>`
+        + `<path d="M22 50 H78 M50 46 V94" stroke="#d6a52a" stroke-width="10" stroke-linecap="round"/>`
+        + `<path d="M22 50 H78 M50 46 V94" stroke="#a87b12" stroke-width="2" stroke-linecap="round" fill="none" transform="translate(2 2)" opacity="0.4"/>` },
+
     // ---------- Wasserkreislauf (wassertropfen-reise, Entscheid WT1 a) ----------
     // Wasserdampf ist unsichtbar: aufsteigende, gestrichelte Pfeile über dem Wasser, keine Wolke und kein Dampf
     wasserdampf: { name: "Wasserdampf steigt unsichtbar auf (gestrichelte Pfeile über dem Wasser)", box: "0 0 100 100",

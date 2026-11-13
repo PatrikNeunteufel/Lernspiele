@@ -30,13 +30,15 @@ const LEBENSMITTEL = [
 ];
 
 // Gruppen: Name im Korb und Erklärung
+// Das Bild eines Korbs ist nie das Bild eines Lebensmittels (BI1 a, LERN_Session38: vorher Karotte 🥕 → Korb 🥕
+// Gemüse): Wasserhahn, Baum, Keimling, Getreide, Kuh, Cupcake.
 const GRUPPEN_ZNUENI = {
-  Getränk: { bild: "💧", name: "Getränke", erklaerung: "Am meisten brauchst du Wasser oder ungesüssten Tee." },
-  Frucht: { bild: "🍎", name: "Früchte", erklaerung: "Früchte wachsen an Bäumen und Sträuchern und geben viele Vitamine." },
-  Gemüse: { bild: "🥕", name: "Gemüse", erklaerung: "Gemüse sind Blätter, Blüten, Wurzeln oder Zwiebeln von Pflanzen — voller Vitamine." },
-  Stärke: { bild: "🍞", name: "Brot, Teigwaren, Kartoffeln", erklaerung: "Brot, Teigwaren, Reis und Kartoffeln geben Kraft für lange Zeit." },
-  Eiweiss: { bild: "🥚", name: "Milch, Ei, Fisch, Fleisch", erklaerung: "Milch, Käse, Eier, Fisch und Fleisch helfen beim Wachsen." },
-  Süsses: { bild: "🍬", name: "Süsses und Salziges", erklaerung: "Süsses und Salziges schmeckt gut — aber nur ab und zu und wenig." },
+  Getränk: { bild: "🚰", name: "Getränke", erklaerung: "Am meisten brauchst du Wasser oder ungesüssten Tee." },
+  Frucht: { bild: "🌳", name: "Früchte", erklaerung: "Früchte wachsen an Bäumen und Sträuchern und geben viele Vitamine." },
+  Gemüse: { bild: "🌱", name: "Gemüse", erklaerung: "Gemüse sind Blätter, Blüten, Wurzeln oder Zwiebeln von Pflanzen — voller Vitamine." },
+  Stärke: { bild: "🌾", name: "Brot, Teigwaren, Kartoffeln", erklaerung: "Brot, Teigwaren, Reis und Kartoffeln geben Kraft für lange Zeit." },
+  Eiweiss: { bild: "🐄", name: "Milch, Ei, Fisch, Fleisch", erklaerung: "Milch, Käse, Eier, Fisch und Fleisch helfen beim Wachsen." },
+  Süsses: { bild: "🧁", name: "Süsses und Salziges", erklaerung: "Süsses und Salziges schmeckt gut — aber nur ab und zu und wenig." },
 };
 
 // Znüni zur Wahl (Stufe 4): [ausgewogen, nicht ausgewogen, nicht ausgewogen] — je eine Liste von Bildern
