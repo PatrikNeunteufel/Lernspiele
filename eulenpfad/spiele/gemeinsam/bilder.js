@@ -677,6 +677,13 @@ const BILDER = (() => {
         + `<rect x="14" y="26" width="70" height="46" fill="#f4f0e6" stroke="#9a9488" stroke-width="2" transform="rotate(4 49 49)"/>`
         + `<rect x="12" y="20" width="72" height="48" fill="#ffffff" stroke="#9a9488" stroke-width="2.4"/>` },
 
+    // Kahler Laubbaum im Winter (wetter-jahreszeiten): 🌳 zeigt einen belaubten Baum (Befund LERN_Session38)
+    baumKahl: { name: "Kahler Laubbaum im Winter (ohne Blätter, Schnee am Boden)", box: "0 0 100 100",
+      svg: `<rect x="0" y="86" width="100" height="14" fill="#eef4fa"/>`
+        + `<path d="M50 88 V46 M50 64 L32 46 M50 58 L70 38 M50 46 L42 24 M50 46 L58 22 M32 46 L22 36 M32 46 L30 30 M70 38 L82 30 M70 38 L72 24"`
+        + ` stroke="#6e4b2c" stroke-width="5" stroke-linecap="round" fill="none"/>`
+        + `<path d="M50 88 V60" stroke="#6e4b2c" stroke-width="9" stroke-linecap="round"/>` },
+
     // Fischsaurier vom Monte San Giorgio (erdzeit-leiter): ein Meeresreptil, kein Delfin — lange, schmale Schnauze mit
     // Zähnen, sehr grosses Auge, Flossen als Paddel, senkrechte Schwanzflosse (vorher 🐬, ein Säugetier)
     fischsaurier: { name: "Fischsaurier (Ichthyosaurier, Meeresreptil)", box: "0 0 100 100",

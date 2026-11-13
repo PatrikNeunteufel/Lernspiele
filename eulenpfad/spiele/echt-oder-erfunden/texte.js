@@ -46,18 +46,22 @@ const AUSSAGEN = [
   ["🦉", "Die Eule ist in der Nacht wach.", true, false],
   ["🦉", "Die Eule erklärt den Kindern das Einmaleins.", false, false],
   ["🐴", "Ein Pferd frisst Heu im Stall.", true, false],
-  ["🦄", "Ein Einhorn grast auf der Wiese.", false, false],
+  ["🐴", "Ein Pferd mit einem langen Horn auf der Stirn fliegt über die Wolken.", false, false],
 ];
 
-// Woran man eine erfundene Geschichte erkennt — Liste geschichten. Die Merkmale schliessen sich aus;
-// jede erfundene Geschichte hat genau eines.
+// Woran man eine erfundene Geschichte erkennt — Liste geschichten. Jede erfundene Geschichte hat genau eines.
+// „zauber“ und „mensch“ schliessen sich nicht aus (zaubern kann auch kein Mensch): MERKMAL_AUCH nennt sie füreinander,
+// das Spiel stellt sie darum nie als falsche Antwort nebeneinander (Befund LERN_Session38).
+// „erfundenes Wesen“ statt „Fabelwesen“: Fabelwesen gehören ins Märchen, nicht in die Fabel — das verwirrte neben der
+// Textsorte Fabel.
 const MERKMALE = {
   tier: "Ein Tier spricht wie ein Mensch.",
   ding: "Ein Ding bewegt sich oder spricht von selbst.",
-  wesen: "Ein Fabelwesen kommt vor (Drache, Riese, Fee).",
+  wesen: "Ein erfundenes Wesen kommt vor (Drache, Riese, Fee).",
   zauber: "Jemand zaubert.",
   mensch: "Ein Mensch kann etwas, das kein Mensch kann.",
 };
+const MERKMAL_AUCH = { zauber: ["mensch"], mensch: ["zauber"] };
 
 // [Sätze, Nummer des erfundenen Satzes (0, 1, 2; -1 = alles kann wirklich passieren), Merkmal] — Liste geschichten
 const GESCHICHTEN = [
@@ -121,7 +125,7 @@ const STAUNEN = [
 
 // Textsorten mit ihrem Merkmal — Liste textsorten
 const TEXTSORTEN = {
-  maerchen: { name: "Märchen", merkmal: "Es beginnt mit «Es war einmal», und es gibt Zauber oder Fabelwesen." },
+  maerchen: { name: "Märchen", merkmal: "Es beginnt mit «Es war einmal», und es gibt Zauber oder erfundene Wesen." },
   sage: { name: "Sage", merkmal: "Sie spielt an einem Ort, den es wirklich gibt, und erzählt etwas Seltsames." },
   fabel: { name: "Fabel", merkmal: "Tiere sprechen wie Menschen, und am Schluss steht eine Lehre." },
   sachtext: { name: "Sachtext", merkmal: "Er erklärt, wie etwas wirklich ist." },
@@ -138,9 +142,9 @@ const TEXTSORTEN_TEXTE = [
   ["sage", "Im Toggenburg liegt ein grosser Felsblock mitten in einer Wiese. Die Alten sagen, ein Riese habe ihn vor vielen hundert Jahren dorthin geworfen."],
   ["sage", "Auf einer Burg über dem Rheintal soll ein Ritter einen Schatz versteckt haben. Wer ihn in der Neujahrsnacht sucht, hört nur den Wind in den Mauern."],
   ["fabel", "Eine Maus und ein Elefant wollten über einen Bach. Der Elefant lachte: «Du bist viel zu klein!» Doch im Schlamm blieb er stecken, und die Maus holte Hilfe. Lehre: Auch die Kleinen können den Grossen helfen."],
-  ["fabel", "Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Wer prahlt, schaut nicht, wohin er fliegt.»"],
+  ["fabel", "Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Siehst du?» Lehre: Wer prahlt, schaut nicht, wohin er fliegt."],
   ["fabel", "Zwei Ziegen trafen sich auf einem schmalen Steg. «Geh zurück!», rief die eine. «Nein, du!», rief die andere. Sie stiessen mit den Hörnern, bis beide ins Wasser fielen. Lehre: Wer nachgibt, kommt weiter."],
-  ["fabel", "Ein Eichhörnchen versteckte alle Nüsse nur für sich. Im Winter fand es die Verstecke nicht mehr. Da teilten die anderen Eichhörnchen ihre Nüsse mit ihm. Lehre: Teilen macht alle satt."],
+  ["fabel", "Ein Eichhörnchen rief: «Diese Nüsse sind alle meine!» Es versteckte sie nur für sich. Im Winter fand es die Verstecke nicht mehr. Da sagten die anderen Eichhörnchen: «Komm, iss mit uns.» Lehre: Teilen macht alle satt."],
   ["sachtext", "Der Igel ist ein Säugetier. Er frisst Käfer, Würmer und Schnecken. Im Winter hält er Winterschlaf in einem Nest aus Laub."],
   ["sachtext", "Die Biene sammelt Nektar aus Blüten. Im Bienenstock wird daraus Honig. Ein Bienenvolk hat eine Königin, die Eier legt."],
   ["sachtext", "Der Säntis ist ein Berg in der Ostschweiz. Er ist 2502 Meter hoch. Auf dem Gipfel steht eine Wetterstation."],

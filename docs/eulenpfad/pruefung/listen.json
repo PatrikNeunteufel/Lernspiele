@@ -12251,7 +12251,7 @@
             "am linken Strassenrand, den Autos entgegen",
             "am rechten Strassenrand",
             "in der Mitte der Strasse",
-            "So siehst du die Autos kommen. Das verlangt das Strassenverkehrsgesetz."
+            "So siehst du die Autos kommen. Das verlangen die Verkehrsregeln."
           ],
           [
             "6",
@@ -12368,7 +12368,7 @@
           [
             "5",
             "velo",
-            "🔴",
+            "🚲",
             "Welche Farbe hat das Licht hinten am Velo?",
             "rot",
             "weiss",
@@ -12526,7 +12526,7 @@
           ],
           [
             "3",
-            "☀️",
+            "🌅",
             "Die Tage sind am längsten",
             "Sommer"
           ],
@@ -12538,7 +12538,7 @@
           ],
           [
             "3",
-            "🌱",
+            "🌿",
             "Die Bäume bekommen neue Blätter",
             "Frühling"
           ],
@@ -12574,7 +12574,7 @@
           ],
           [
             "3",
-            "🌳",
+            "svg:baumKahl",
             "Die Laubbäume sind kahl",
             "Winter"
           ]
@@ -12607,7 +12607,7 @@
             "🌧️",
             "Es regnet. Du gehst zur Schule.",
             "🧥 Regenjacke",
-            "👙 Badekleid",
+            "🩱 Badekleid",
             "🩴 Flipflops"
           ],
           [
@@ -12643,13 +12643,13 @@
             "Es ist eisig kalt.",
             "🧣 Schal und Mütze",
             "👕 nur ein T-Shirt",
-            "👙 Badekleid"
+            "🩱 Badekleid"
           ],
           [
             "🌬️",
             "Es ist windig und kühl.",
             "🧥 Jacke",
-            "👙 Badekleid",
+            "🩱 Badekleid",
             "🩴 Flipflops"
           ]
         ]
@@ -14262,8 +14262,8 @@
             "nein"
           ],
           [
-            "🦄",
-            "Ein Einhorn grast auf der Wiese.",
+            "🐴",
+            "Ein Pferd mit einem langen Horn auf der Stirn fliegt über die Wolken.",
             "nein",
             "nein"
           ]
@@ -14438,7 +14438,7 @@
           ],
           [
             "wesen",
-            "Ein Fabelwesen kommt vor (Drache, Riese, Fee)."
+            "Ein erfundenes Wesen kommt vor (Drache, Riese, Fee)."
           ],
           [
             "zauber",
@@ -14580,7 +14580,7 @@
         "zeilen": [
           [
             "maerchen",
-            "name: Märchen; merkmal: Es beginnt mit «Es war einmal», und es gibt Zauber oder Fabelwesen."
+            "name: Märchen; merkmal: Es beginnt mit «Es war einmal», und es gibt Zauber oder erfundene Wesen."
           ],
           [
             "sage",
@@ -14642,7 +14642,7 @@
           ],
           [
             "fabel",
-            "Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Wer prahlt, schaut nicht, wohin er fliegt.»"
+            "Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Siehst du?» Lehre: Wer prahlt, schaut nicht, wohin er fliegt."
           ],
           [
             "fabel",
@@ -14650,7 +14650,7 @@
           ],
           [
             "fabel",
-            "Ein Eichhörnchen versteckte alle Nüsse nur für sich. Im Winter fand es die Verstecke nicht mehr. Da teilten die anderen Eichhörnchen ihre Nüsse mit ihm. Lehre: Teilen macht alle satt."
+            "Ein Eichhörnchen rief: «Diese Nüsse sind alle meine!» Es versteckte sie nur für sich. Im Winter fand es die Verstecke nicht mehr. Da sagten die anderen Eichhörnchen: «Komm, iss mit uns.» Lehre: Teilen macht alle satt."
           ],
           [
             "sachtext",

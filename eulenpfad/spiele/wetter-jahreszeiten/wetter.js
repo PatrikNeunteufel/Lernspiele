@@ -27,27 +27,27 @@ const WJ_JAHRESZEITEN = [
   [1, "🎃", "Kürbisse ernten", "Herbst"],
   [3, "⛈️", "Am Nachmittag gibt es oft heftige Gewitter", "Sommer"],
   [3, "🍒", "Die Kirschen sind reif", "Sommer"],
-  [3, "☀️", "Die Tage sind am längsten", "Sommer"],
+  [3, "🌅", "Die Tage sind am längsten", "Sommer"],
   [3, "🐦", "Die Schwalben kommen aus dem Süden zurück", "Frühling"],
-  [3, "🌱", "Die Bäume bekommen neue Blätter", "Frühling"],
+  [3, "🌿", "Die Bäume bekommen neue Blätter", "Frühling"],
   [3, "🐸", "Die Frösche wandern zum Weiher", "Frühling"],
   [3, "🐿️", "Die Eichhörnchen verstecken Vorräte", "Herbst"],
   [3, "🍇", "Die Trauben werden geerntet", "Herbst"],
   [3, "🌙", "Die Nächte sind am längsten", "Winter"],
   [3, "🦔", "Der Igel hält Winterschlaf", "Winter"],
-  [3, "🌳", "Die Laubbäume sind kahl", "Winter"],
+  [3, "svg:baumKahl", "Die Laubbäume sind kahl", "Winter"],
 ];
 
 // [Bild, Wetter, richtig, falsch, falsch] — Liste kleidung; Kleidung als „Bild Name“.
 const WJ_KLEIDUNG = [
   ["🌧️", "Es regnet stark.", "☂️ Regenschirm", "🕶️ Sonnenbrille", "🩳 kurze Hosen"],
-  ["🌧️", "Es regnet. Du gehst zur Schule.", "🧥 Regenjacke", "👙 Badekleid", "🩴 Flipflops"],
+  ["🌧️", "Es regnet. Du gehst zur Schule.", "🧥 Regenjacke", "🩱 Badekleid", "🩴 Flipflops"],
   ["☀️", "Die Sonne scheint, es ist heiss.", "🧴 Sonnencreme", "🧤 Handschuhe", "🧣 Schal"],
   ["🥵", "Ein heisser Sommertag.", "🩳 kurze Hosen", "🧤 Handschuhe", "🧣 Schal"],
   ["😎", "Du bist lange draussen an der Sonne.", "👒 Sonnenhut", "🧤 Handschuhe", "🧣 Schal"],
   ["🌨️", "Es schneit und ist kalt.", "🧤 Handschuhe", "🩳 kurze Hosen", "🩴 Flipflops"],
-  ["🥶", "Es ist eisig kalt.", "🧣 Schal und Mütze", "👕 nur ein T-Shirt", "👙 Badekleid"],
-  ["🌬️", "Es ist windig und kühl.", "🧥 Jacke", "👙 Badekleid", "🩴 Flipflops"],
+  ["🥶", "Es ist eisig kalt.", "🧣 Schal und Mütze", "👕 nur ein T-Shirt", "🩱 Badekleid"],
+  ["🌬️", "Es ist windig und kühl.", "🧥 Jacke", "🩱 Badekleid", "🩴 Flipflops"],
 ];
 
 // [Bild, Name] — Liste symbole (auch für den Wetterbericht)

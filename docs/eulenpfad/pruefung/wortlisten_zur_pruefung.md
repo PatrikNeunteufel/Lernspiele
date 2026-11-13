@@ -2235,12 +2235,12 @@ Verkehrsregeln aus dem Gedächtnis belegt (SVG, VTS) — bitte besonders prüfen
 | 3 | queren | 🚙 | Warum ist es gefährlich, zwischen parkierten Autos über die Strasse zu gehen? | Die Autofahrer sehen dich nicht. | Dort ist der Weg länger. | Dort ist es zu laut. | Hinter einem parkierten Auto bist du versteckt. Die Autofahrer sehen dich erst spät. | ☐ |
 | 3 | queren | ⚽ | Dein Ball rollt auf die Strasse. Was machst du? | am Rand stehen bleiben | sofort nachrennen | rufen und hinterherrennen | Bleib stehen. Erst wenn kein Auto kommt, holst du den Ball — oder du fragst einen Erwachsenen. | ☐ |
 | 3 | queren | 🌙 | Es ist dunkel. Wie sehen dich die Autofahrer schon von weitem? | mit hellen Kleidern und Leuchtstreifen | mit dunklen Kleidern | mit einer Mütze | Helle Kleider und Leuchtstreifen sieht man im Scheinwerferlicht schon von weitem. | ☐ |
-| 6 | queren | 🛣️ | Es gibt kein Trottoir. Wo gehst du? | am linken Strassenrand, den Autos entgegen | am rechten Strassenrand | in der Mitte der Strasse | So siehst du die Autos kommen. Das verlangt das Strassenverkehrsgesetz. | ☐ |
+| 6 | queren | 🛣️ | Es gibt kein Trottoir. Wo gehst du? | am linken Strassenrand, den Autos entgegen | am rechten Strassenrand | in der Mitte der Strasse | So siehst du die Autos kommen. Das verlangen die Verkehrsregeln. | ☐ |
 | 6 | queren | 🚗 | Warum kann ein Auto nicht sofort anhalten? | Es braucht einen Bremsweg. | Es fährt zu leise. | Autos halten nur bei Rot. | Auch mit voller Bremse rollt ein Auto noch ein Stück weiter, bis es steht. | ☐ |
 | 6 | queren | 🛣️ | Ein Auto hält, aber auf der zweiten Spur kommt noch eines. Was machst du? | warten und schauen, ob auch das zweite hält | losgehen, weil das erste hält | schnell rennen | Jede Spur zählt: Erst wenn auch das zweite Auto steht, gehst du. | ☐ |
 | 5 | velo | 🚲 | Auf welcher Seite der Strasse fährst du Velo? | rechts | links | in der Mitte | In der Schweiz fahren alle Fahrzeuge rechts. | ☐ |
 | 5 | velo | ↩️ | Du willst mit dem Velo links abbiegen. Was machst du vorher? | zurückschauen und den linken Arm ausstrecken | einfach abbiegen | klingeln und sofort abbiegen | Mit dem Handzeichen zeigst du den anderen, wohin du fährst. | ☐ |
-| 5 | velo | 🔴 | Welche Farbe hat das Licht hinten am Velo? | rot | weiss | grün | Vorne leuchtet das Velolicht weiss, hinten rot. | ☐ |
+| 5 | velo | 🚲 | Welche Farbe hat das Licht hinten am Velo? | rot | weiss | grün | Vorne leuchtet das Velolicht weiss, hinten rot. | ☐ |
 | 5 | velo | 🔦 | Welche Farbe hat das Licht vorne am Velo? | weiss | rot | blau | Vorne leuchtet das Velolicht weiss, hinten rot. | ☐ |
 | 5 | velo | 🔔 | Was braucht ein Velo, damit andere dich hören? | eine Glocke | einen Korb | einen Gepäckträger | Eine Glocke gehört an jedes Velo. | ☐ |
 | 5 | velo | 🚴 | Was schützt beim Velofahren deinen Kopf? | ein Velohelm | eine Mütze | eine Sonnenbrille | Der Helm schützt den Kopf, wenn du stürzt. | ☐ |
@@ -2276,28 +2276,28 @@ Verkehrsregeln aus dem Gedächtnis belegt (SVG, VTS) — bitte besonders prüfen
 | 1 | 🎃 | Kürbisse ernten | Herbst | ☐ |
 | 3 | ⛈️ | Am Nachmittag gibt es oft heftige Gewitter | Sommer | ☐ |
 | 3 | 🍒 | Die Kirschen sind reif | Sommer | ☐ |
-| 3 | ☀️ | Die Tage sind am längsten | Sommer | ☐ |
+| 3 | 🌅 | Die Tage sind am längsten | Sommer | ☐ |
 | 3 | 🐦 | Die Schwalben kommen aus dem Süden zurück | Frühling | ☐ |
-| 3 | 🌱 | Die Bäume bekommen neue Blätter | Frühling | ☐ |
+| 3 | 🌿 | Die Bäume bekommen neue Blätter | Frühling | ☐ |
 | 3 | 🐸 | Die Frösche wandern zum Weiher | Frühling | ☐ |
 | 3 | 🐿️ | Die Eichhörnchen verstecken Vorräte | Herbst | ☐ |
 | 3 | 🍇 | Die Trauben werden geerntet | Herbst | ☐ |
 | 3 | 🌙 | Die Nächte sind am längsten | Winter | ☐ |
 | 3 | 🦔 | Der Igel hält Winterschlaf | Winter | ☐ |
-| 3 | 🌳 | Die Laubbäume sind kahl | Winter | ☐ |
+| 3 | svg:baumKahl | Die Laubbäume sind kahl | Winter | ☐ |
 
 ### Kleidung
 
 | Bild | Wetter | richtig | falsch | falsch | ☐ |
 |---|---|---|---|---|---|
 | 🌧️ | Es regnet stark. | ☂️ Regenschirm | 🕶️ Sonnenbrille | 🩳 kurze Hosen | ☐ |
-| 🌧️ | Es regnet. Du gehst zur Schule. | 🧥 Regenjacke | 👙 Badekleid | 🩴 Flipflops | ☐ |
+| 🌧️ | Es regnet. Du gehst zur Schule. | 🧥 Regenjacke | 🩱 Badekleid | 🩴 Flipflops | ☐ |
 | ☀️ | Die Sonne scheint, es ist heiss. | 🧴 Sonnencreme | 🧤 Handschuhe | 🧣 Schal | ☐ |
 | 🥵 | Ein heisser Sommertag. | 🩳 kurze Hosen | 🧤 Handschuhe | 🧣 Schal | ☐ |
 | 😎 | Du bist lange draussen an der Sonne. | 👒 Sonnenhut | 🧤 Handschuhe | 🧣 Schal | ☐ |
 | 🌨️ | Es schneit und ist kalt. | 🧤 Handschuhe | 🩳 kurze Hosen | 🩴 Flipflops | ☐ |
-| 🥶 | Es ist eisig kalt. | 🧣 Schal und Mütze | 👕 nur ein T-Shirt | 👙 Badekleid | ☐ |
-| 🌬️ | Es ist windig und kühl. | 🧥 Jacke | 👙 Badekleid | 🩴 Flipflops | ☐ |
+| 🥶 | Es ist eisig kalt. | 🧣 Schal und Mütze | 👕 nur ein T-Shirt | 🩱 Badekleid | ☐ |
+| 🌬️ | Es ist windig und kühl. | 🧥 Jacke | 🩱 Badekleid | 🩴 Flipflops | ☐ |
 
 ### Wettersymbole
 
@@ -2607,7 +2607,7 @@ Zeichen frei erfunden.
 | 🦉 | Die Eule ist in der Nacht wach. | ja | nein | ☐ |
 | 🦉 | Die Eule erklärt den Kindern das Einmaleins. | nein | nein | ☐ |
 | 🐴 | Ein Pferd frisst Heu im Stall. | ja | nein | ☐ |
-| 🦄 | Ein Einhorn grast auf der Wiese. | nein | nein | ☐ |
+| 🐴 | Ein Pferd mit einem langen Horn auf der Stirn fliegt über die Wolken. | nein | nein | ☐ |
 
 ### Merkmale
 
@@ -2615,7 +2615,7 @@ Zeichen frei erfunden.
 |---|---|---|
 | tier | Ein Tier spricht wie ein Mensch. | ☐ |
 | ding | Ein Ding bewegt sich oder spricht von selbst. | ☐ |
-| wesen | Ein Fabelwesen kommt vor (Drache, Riese, Fee). | ☐ |
+| wesen | Ein erfundenes Wesen kommt vor (Drache, Riese, Fee). | ☐ |
 | zauber | Jemand zaubert. | ☐ |
 | mensch | Ein Mensch kann etwas, das kein Mensch kann. | ☐ |
 
@@ -2689,7 +2689,7 @@ Fakten bitte nachprüfen.
 
 | Sorte | Angaben | ☐ |
 |---|---|---|
-| maerchen | name: Märchen; merkmal: Es beginnt mit «Es war einmal», und es gibt Zauber oder Fabelwesen. | ☐ |
+| maerchen | name: Märchen; merkmal: Es beginnt mit «Es war einmal», und es gibt Zauber oder erfundene Wesen. | ☐ |
 | sage | name: Sage; merkmal: Sie spielt an einem Ort, den es wirklich gibt, und erzählt etwas Seltsames. | ☐ |
 | fabel | name: Fabel; merkmal: Tiere sprechen wie Menschen, und am Schluss steht eine Lehre. | ☐ |
 | sachtext | name: Sachtext; merkmal: Er erklärt, wie etwas wirklich ist. | ☐ |
@@ -2709,9 +2709,9 @@ Selbst geschrieben; die Sagen spielen an echten Orten.
 | sage | Im Toggenburg liegt ein grosser Felsblock mitten in einer Wiese. Die Alten sagen, ein Riese habe ihn vor vielen hundert Jahren dorthin geworfen. | ☐ |
 | sage | Auf einer Burg über dem Rheintal soll ein Ritter einen Schatz versteckt haben. Wer ihn in der Neujahrsnacht sucht, hört nur den Wind in den Mauern. | ☐ |
 | fabel | Eine Maus und ein Elefant wollten über einen Bach. Der Elefant lachte: «Du bist viel zu klein!» Doch im Schlamm blieb er stecken, und die Maus holte Hilfe. Lehre: Auch die Kleinen können den Grossen helfen. | ☐ |
-| fabel | Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Wer prahlt, schaut nicht, wohin er fliegt.» | ☐ |
+| fabel | Ein Spatz prahlte: «Ich bin der schnellste Vogel im Wald!» Er flog so wild, dass er gegen einen Ast prallte. Die Eule sagte ruhig: «Siehst du?» Lehre: Wer prahlt, schaut nicht, wohin er fliegt. | ☐ |
 | fabel | Zwei Ziegen trafen sich auf einem schmalen Steg. «Geh zurück!», rief die eine. «Nein, du!», rief die andere. Sie stiessen mit den Hörnern, bis beide ins Wasser fielen. Lehre: Wer nachgibt, kommt weiter. | ☐ |
-| fabel | Ein Eichhörnchen versteckte alle Nüsse nur für sich. Im Winter fand es die Verstecke nicht mehr. Da teilten die anderen Eichhörnchen ihre Nüsse mit ihm. Lehre: Teilen macht alle satt. | ☐ |
+| fabel | Ein Eichhörnchen rief: «Diese Nüsse sind alle meine!» Es versteckte sie nur für sich. Im Winter fand es die Verstecke nicht mehr. Da sagten die anderen Eichhörnchen: «Komm, iss mit uns.» Lehre: Teilen macht alle satt. | ☐ |
 | sachtext | Der Igel ist ein Säugetier. Er frisst Käfer, Würmer und Schnecken. Im Winter hält er Winterschlaf in einem Nest aus Laub. | ☐ |
 | sachtext | Die Biene sammelt Nektar aus Blüten. Im Bienenstock wird daraus Honig. Ein Bienenvolk hat eine Königin, die Eier legt. | ☐ |
 | sachtext | Der Säntis ist ein Berg in der Ostschweiz. Er ist 2502 Meter hoch. Auf dem Gipfel steht eine Wetterstation. | ☐ |

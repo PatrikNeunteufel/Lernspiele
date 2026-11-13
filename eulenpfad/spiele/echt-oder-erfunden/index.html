@@ -105,7 +105,7 @@ const ARTEN = {
     if (!liste.length) return null;
     const i = waehle(liste);
     const richtig = GESCHICHTEN[i][2];
-    const andere = mische(Object.keys(MERKMALE).filter(k => k !== richtig)).slice(0, 2);
+    const andere = mische(Object.keys(MERKMALE).filter(k => k !== richtig && !MERKMAL_AUCH[richtig]?.includes(k))).slice(0, 2);
     return { art: "merkmal", nr: i, richtig, optionen: mische([richtig, ...andere]) };
   },
   staunen() {
@@ -176,6 +176,7 @@ function pruefeAufgabe(a, stufe) {
   if (a.art === "geschichte" && a.richtig !== (g[1] < 0 ? "echt" : "erfunden")) m.push("Lösung falsch");
   if (a.art === "welcherSatz" && (g[1] < 0 || g[0][g[1]] !== a.richtig || new Set(g[0]).size !== 3)) m.push("erfundener Satz falsch");
   if (a.art === "merkmal" && (g[1] < 0 || g[2] !== a.richtig || !MERKMALE[a.richtig])) m.push("Merkmal falsch");
+  if (a.art === "merkmal" && a.optionen.some(k => MERKMAL_AUCH[a.richtig]?.includes(k))) m.push("Ablenker trifft ebenso zu");
   if (a.art === "staunen" && a.richtig !== (STAUNEN[a.nr][1] ? "stimmt" : "erfunden")) m.push("Lösung falsch");
   if ((a.art === "textsorte" || a.art === "textmerkmal") && TEXTSORTEN_TEXTE[a.nr][0] !== a.richtig) m.push("Textsorte falsch");
   // Inhalt der Aufgabe ohne ß
@@ -188,7 +189,7 @@ function pruefeAufgabe(a, stufe) {
 
 const KORB = {
   echt: { bild: "🌍", text: "Kann es geben" },
-  erfunden: { bild: "🦄", text: "Erfunden" },
+  erfunden: { bild: "💭", text: "Erfunden" }, // nicht 🦄: das stand auch auf einer Aussage (BI1 a)
   stimmt: { bild: "✅", text: "Das stimmt" },
 };
 const HINWEIS = {

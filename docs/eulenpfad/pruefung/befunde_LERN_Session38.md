@@ -19,6 +19,9 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Zeitstrahl-Sortierer | erledigt 2026-11-13 (LERN_Session38); Pfahlbauten und Urgrosseltern vertretbar | Durchgang 3 unten |
 | Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session38); schwache Ablenker und Bleistiftmine im Versuch offen | Durchgang 3 unten |
 | Energie-Wandler | erledigt 2026-11-13 (LERN_Session38); Bilder (Staubsauger 🧹 …) offen | Durchgang 3 unten |
+| Schulweg-Profi | erledigt 2026-11-13 (LERN_Session38); Fussgängerstreifen als sicherster Ort vertretbar | Durchgang 4 unten |
+| Echt oder erfunden? | erledigt 2026-11-13 (LERN_Session38) bis auf die Zahnfee (Entscheid EO1) | Durchgang 4 unten |
+| Wetter und Jahreszeiten | erledigt 2026-11-13 (LERN_Session38); Grenzfälle der Jahreszeiten vertretbar | Durchgang 4 unten |
 | übrige | offen | unten |
 
 **Behoben in LERN_Session38** (Belege: Wasserdampf unsichtbar [chemie.de, Lexikon Wasserdampf](https://www.chemie.de/lexikon/Wasserdampf.html);
@@ -80,6 +83,18 @@ Ichthyosaurier sind Meeresreptilien ([Universität Zürich, Monte San Giorgio](h
   beiden Enden bekommt keinen Strom mehr“.
 - Energie-Wandler: `auch` für Flusskraftwerk (Lageenergie), Sonnenkollektor (Wärme), Elektroherd (Licht) — nie als
   falsche Antwort.
+
+**Durchgang 4** (Beleg Schulweg: VRV Art. 46 Abs. 1, SR 741.11, „Auf der Fahrbahn gehen die Fussgänger rechts statt links,
+wenn sie nur dort die Möglichkeit zum Ausweichen haben …“ — links ist die Regel, auch innerorts; die Aussage im Spiel
+stimmt, sie steht aber in der Verordnung, nicht im Gesetz):
+- Schulweg-Profi: Erklärung „Das verlangen die Verkehrsregeln.“ statt „das Strassenverkehrsgesetz“; Bild 🚲 statt 🔴 bei
+  „Welche Farbe hat das Licht hinten am Velo?“.
+- Echt oder erfunden?: Korb „Erfunden“ 💭 statt 🦄; die Aussage zum Einhorn mit 🐴 („Ein Pferd mit einem langen Horn …
+  fliegt über die Wolken“), damit jedes Bild einmal echt und einmal erfunden ist; `MERKMAL_AUCH` (zaubern und „kann,
+  was kein Mensch kann“ nie als falsche Antwort nebeneinander, `pruefeAufgabe` meldet es); „erfundenes Wesen“ statt
+  „Fabelwesen“; Fabel vom Eichhörnchen mit sprechenden Tieren; Fabel vom Spatz mit „Lehre:“.
+- Wetter und Jahreszeiten: 🌅 statt ☀️ (glich dem Korb 🌞), Korb Herbst 🍄 statt 🍁 (glich 🍂), 🌿 statt 🌱 bei „Die
+  Bäume bekommen neue Blätter“, kahler Laubbaum gezeichnet (`bilder.js`, baumKahl) statt 🌳, 🩱 statt 👙 beim Badekleid.
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

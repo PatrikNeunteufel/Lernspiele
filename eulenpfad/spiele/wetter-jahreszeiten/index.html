@@ -44,6 +44,7 @@
 <script src="../gemeinsam/katalog.js"></script>
 <script src="../gemeinsam/pruefstand.js"></script>
 <script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="wetter.js"></script>
 <script>
 "use strict";
@@ -63,8 +64,9 @@ const SYMBOLE = FREI.has("symbole") ? WJ_SYMBOLE : [];
 const FRAGEN = FREI.has("fragen") ? WJ_FRAGEN : [];
 
 const ZEITEN = ["Frühling", "Sommer", "Herbst", "Winter"];
-// Korb-Bilder, die auf keiner Karte vorkommen (sonst verrät das Bild den Korb)
-const ZEIT_KORB = { Frühling: { bild: "🌼", text: "Frühling" }, Sommer: { bild: "🌞", text: "Sommer" }, Herbst: { bild: "🍁", text: "Herbst" }, Winter: { bild: "🧊", text: "Winter" } };
+// Korb-Bilder, die auf keiner Karte vorkommen und keinem Kartenbild gleichen (sonst verrät das Bild den Korb; LERN_Session38:
+// 🍁 Herbst glich 🍂 „Die Blätter werden bunt“, darum 🍄)
+const ZEIT_KORB = { Frühling: { bild: "🌼", text: "Frühling" }, Sommer: { bild: "🌞", text: "Sommer" }, Herbst: { bild: "🍄", text: "Herbst" }, Winter: { bild: "🧊", text: "Winter" } };
 const ZEIT_FARBE = { Frühling: "var(--deko-5)", Sommer: "var(--deko-4)", Herbst: "var(--deko-3)", Winter: "var(--deko-6)" };
 const TAGE = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 const grad = v => `${zahlText(v)} °C`;
