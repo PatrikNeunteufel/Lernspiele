@@ -2305,3 +2305,7 @@
     „Fundstück“ nicht zur Wahl; Prüfansicht mit Spalte „passt auch“.
   - Königs-Falle (koenig-falle): Hinweis bei Kg7 „nicht am Rand“ statt „mitten auf dem Brett“.
   - Damit sind alle Befunde aus den Prüfansichten bearbeitet (Befund-Datei, Stand-Tabelle).
+- **Voller Eulenpfad-Lauf auf `5cc948b`** (1840 s, 1014 Kombinationen Spiel × Stufe): ein Fund, „Bild verrät“ im
+  Hello-Dialog (hello-dialog), Stufe 1 — die Antworten „Good morning!“ und „Good night!“ trugen 🌞 und 🌙 wie zwei
+  Situationen; jetzt 🐓 und 😴. Danach Hello-Dialog einzeln „Keine Fehler.“, alle übrigen Spiele im vollen Lauf ohne
+  Fehler.

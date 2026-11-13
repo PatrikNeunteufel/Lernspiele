@@ -703,6 +703,11 @@ const PRUEFSTAND = {
       "am": "2026-11-07",
       "von": "Patrik"
     },
+    "energie-wandler/geraete": {
+      "am": "2026-11-13",
+      "hash": "iv39oo36u9",
+      "von": "Patrik"
+    },
     "erdzeit-leiter/ereignisse": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -1068,6 +1073,11 @@ const PRUEFSTAND = {
       "am": "2026-11-12",
       "von": "Patrik"
     },
+    "wassertropfen-reise/fragen": {
+      "am": "2026-11-13",
+      "hash": "lkd345kyh6",
+      "von": "Patrik"
+    },
     "weather-report/durchsagen": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1152,6 +1162,11 @@ const PRUEFSTAND = {
       "am": "2026-11-12",
       "von": "Patrik"
     },
+    "znueni-teller/lebensmittel": {
+      "am": "2026-11-13",
+      "hash": "1ibfls54fgm",
+      "von": "Patrik"
+    },
     "znueni-teller/region-saison": {
       "am": "2026-11-12",
       "von": "Patrik"
@@ -1230,6 +1245,10 @@ const PRUEFSTAND = {
       "am": "2026-11-07",
       "von": "Patrik"
     },
+    "energie-wandler": {
+      "am": "2026-11-13",
+      "von": "Patrik"
+    },
     "erdzeit-leiter": {
       "am": "2026-11-06",
       "von": "Patrik"
@@ -1268,6 +1287,10 @@ const PRUEFSTAND = {
     },
     "glace-kombinator": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "hebel-wippe": {
+      "am": "2026-11-13",
       "von": "Patrik"
     },
     "hello-dialog": {
@@ -1472,6 +1495,10 @@ const PRUEFSTAND = {
     },
     "vergleichs-krokodil": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "wassertropfen-reise": {
+      "am": "2026-11-13",
       "von": "Patrik"
     },
     "weather-report": {

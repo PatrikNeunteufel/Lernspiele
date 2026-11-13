@@ -34,8 +34,10 @@ const DIALOG_S1_ANTWORTEN = {
   hello: ["Hello!", "🙋"],
   goodbye: ["Goodbye!", "👋"],
   thanks: ["Thank you!", "🙏"],
-  morning: ["Good morning!", "🌞"],
-  night: ["Good night!", "🌙"],
+  // Bilder nie gleich dem Bild einer Situation (BI1 a, voller Lauf LERN_Session39: vorher 🌞 und 🌙 wie die Situationen
+  // „Good morning, class!“ und „Good night, sleep well.“)
+  morning: ["Good morning!", "🐓"],
+  night: ["Good night!", "😴"],
 };
 
 const DIALOG_SITUATIONEN = [
