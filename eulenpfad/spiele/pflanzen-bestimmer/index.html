@@ -364,9 +364,35 @@ const MERKMALE = [
 ];
 const MERKMAL = Object.fromEntries(MERKMALE.map(m => [m.id, m]));
 
+// Merkmale, die die Aufgabe „Welche Pflanze passt zu allen Merkmalen?“ nennt: [Schlüssel, Name im Spiel].
+const MERK = [["blatt", "Blatt"], ["rand", "Blattrand"], ["stellung", "Blätter"], ["farbe", "Blüte"]];
+const merkmalWert = (p, k) => (k === "farbe" ? p.bluete?.farbe : p[k]);
+/** Merkmale aus MERK, die von der Pflanze bekannt sind — auch für die Prüfansicht (pruefung.js). */
+const bekannteMerkmale = p => MERK.filter(([k]) => merkmalWert(p, k));
+const imMerkmalPool = p => !!p.blatt && p.blatt !== "nadelförmig";
+
+/**
+ * Nimmt die Art (mit ihren Angaben aus STUFE_ARTEN) diese Pflanze, unabhängig von der Freigabe — auch für die
+ * Prüfansicht (pruefung.js), die daraus die Stufen je Pflanze liest. Der Schlüssel nimmt jede Pflanze mit Blatt oder
+ * Blüte als Kandidat; ob er sie von den übrigen trennt, entscheidet erst die Auswahl. Die Blütenteile (TEILE, GRUPPEN,
+ * FUNKTIONEN) nehmen keine Pflanze.
+ */
+const NIMMT = {
+  laubNadel: p => p.gruppe === "Laubbaum" || p.gruppe === "Nadelbaum",
+  form: p => !!p.blatt,
+  formBild: p => !!p.blatt,
+  rand: (p, drei) => !!p.rand && p.blatt !== "nadelförmig" && (drei || p.rand !== "gekerbt"),
+  stellung: p => !!p.stellung,
+  schluessel: p => !!(p.blatt || p.bluete),
+  merkmale: p => imMerkmalPool(p) && bekannteMerkmale(p).length >= 2,
+  teilName: () => false,
+  teilTippen: () => false,
+  funktion: () => false,
+};
+
 /** Schlüssel: Kandidaten und die Fragen, die das Ziel als einziges übrig lassen. */
 function schluessel(n) {
-  const pool = PFL.filter(p => p.blatt || p.bluete);
+  const pool = PFL.filter(p => NIMMT.schluessel(p));
   if (pool.length < n) return null;
   for (let versuch = 0; versuch < 300; versuch++) {
     const ziel = waehle(pool);
@@ -452,32 +478,32 @@ function zeiger(svg, [x, y]) {
 
 const ARTEN = {
   laubNadel: () => {
-    const p = PFL.filter(x => x.gruppe === "Laubbaum" || x.gruppe === "Nadelbaum");
+    const p = PFL.filter(x => NIMMT.laubNadel(x));
     if (!p.length) return null;
     const z = waehle(p);
     return { art: "laubNadel", name: z.name, richtig: z.gruppe };
   },
   form: () => {
-    const p = PFL.filter(x => x.blatt);
+    const p = PFL.filter(x => NIMMT.form(x));
     if (!p.length) return null;
     const z = waehle(p);
     return { art: "form", name: z.name, richtig: z.blatt, optionen: mische([z.blatt, ...mische(FORMEN.filter(f => f !== z.blatt)).slice(0, 3)]) };
   },
   formBild: () => {
-    const p = PFL.filter(x => x.blatt);
+    const p = PFL.filter(x => NIMMT.formBild(x));
     const formen = mische([...new Set(p.map(x => x.blatt))]).slice(0, 3);
     if (formen.length < 3) return null;
     const namen = formen.map(f => waehle(p.filter(x => x.blatt === f)).name);
     return { art: "formBild", form: formen[0], richtig: namen[0], optionen: mische(namen) };
   },
   rand: drei => {
-    const p = PFL.filter(x => x.rand && x.blatt !== "nadelförmig" && (drei || x.rand !== "gekerbt"));
+    const p = PFL.filter(x => NIMMT.rand(x, drei));
     if (!p.length) return null;
     const z = waehle(p);
     return { art: "rand", name: z.name, richtig: z.rand, optionen: drei ? ["glatt", "gesägt", "gekerbt"] : ["glatt", "gesägt"] };
   },
   stellung: () => {
-    const p = PFL.filter(x => x.stellung);
+    const p = PFL.filter(x => NIMMT.stellung(x));
     if (!p.length) return null;
     const z = waehle(p);
     return { art: "stellung", name: z.name, richtig: z.stellung };
@@ -485,19 +511,17 @@ const ARTEN = {
   schluessel: n => schluessel(n),
   merkmale: () => {
     // Zwei oder drei Merkmale nennen; genau eine von vier Zeichnungen passt zu allen.
-    const MERK = [["blatt", "Blatt"], ["rand", "Blattrand"], ["stellung", "Blätter"], ["farbe", "Blüte"]];
-    const wert = (p, k) => (k === "farbe" ? p.bluete?.farbe : p[k]);
-    const pool = PFL.filter(p => p.blatt && p.blatt !== "nadelförmig");
+    const pool = PFL.filter(imMerkmalPool);
     for (let versuch = 0; versuch < 200; versuch++) {
       const z = waehle(pool);
       if (!z) return null;
-      const bekannt = MERK.filter(([k]) => wert(z, k));
-      if (bekannt.length < 2) continue;
+      if (!NIMMT.merkmale(z)) continue;
+      const bekannt = bekannteMerkmale(z);
       const genannt = mische(bekannt).slice(0, LS.zufall(2, Math.min(3, bekannt.length)));
-      const passt = p => genannt.every(([k]) => wert(p, k) === wert(z, k));
-      const andere = mische(pool.filter(p => p !== z && genannt.every(([k]) => wert(p, k)) && !passt(p))).slice(0, 3);
+      const passt = p => genannt.every(([k]) => merkmalWert(p, k) === merkmalWert(z, k));
+      const andere = mische(pool.filter(p => p !== z && genannt.every(([k]) => merkmalWert(p, k)) && !passt(p))).slice(0, 3);
       if (andere.length < 3) continue;
-      return { art: "merkmale", merkmale: genannt.map(([k, n]) => [k, n, wert(z, k)]), richtig: z.name, optionen: mische([z.name, ...andere.map(p => p.name)]) };
+      return { art: "merkmale", merkmale: genannt.map(([k, n]) => [k, n, merkmalWert(z, k)]), richtig: z.name, optionen: mische([z.name, ...andere.map(p => p.name)]) };
     }
     return null;
   },
@@ -514,15 +538,20 @@ const ARTEN = {
   },
 };
 
-const STUFE = {
-  s1: [() => ARTEN.laubNadel()],
-  s2: [() => ARTEN.form(), () => ARTEN.form(), () => ARTEN.formBild()],
-  s3: [() => ARTEN.rand(false), () => ARTEN.stellung()],
-  s4: [() => ARTEN.schluessel(4)],
-  s5: [() => ARTEN.teilName(false), () => ARTEN.teilTippen(), () => ARTEN.funktion()],
+// Je Stufe die Arten als [Art, Angaben …] (rand: mit gekerbt; schluessel: Zahl der Kandidaten; teilName: mit
+// Unterteilen; mehrfach genannt = häufiger). Als Daten — auch für die Prüfansicht (pruefung.js), die daraus mit NIMMT
+// die Stufen je Pflanze liest.
+const STUFE_ARTEN = {
+  s1: [["laubNadel"]],
+  s2: [["form"], ["form"], ["formBild"]],
+  s3: [["rand", false], ["stellung"]],
+  s4: [["schluessel", 4]],
+  s5: [["teilName", false], ["teilTippen"], ["funktion"]],
   // Königsstufe: längerer Schlüssel, mehrere Merkmale zugleich, gekerbter Rand, Teile von Stempel und Staubblatt.
-  s6: [() => ARTEN.schluessel(6), () => ARTEN.schluessel(6), () => ARTEN.merkmale(), () => ARTEN.rand(true), () => ARTEN.teilName(true)],
+  s6: [["schluessel", 6], ["schluessel", 6], ["merkmale"], ["rand", true], ["teilName", true]],
 };
+const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
+  [s, arten.map(([art, ...angaben]) => () => ARTEN[art](...angaben))]));
 
 function aufgabeErzeugen(stufe) {
   for (const art of mische(STUFE[stufe])) {

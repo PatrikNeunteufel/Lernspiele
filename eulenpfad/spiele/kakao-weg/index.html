@@ -181,6 +181,9 @@ function schrittAuswahl(p, n) {
   return mische(alle).slice(0, n).sort((a, b) => a - b);
 }
 
+/** Schritte, bei denen „Wer macht das?“ gefragt wird (Feld „wer“ nicht leer) — auch für die Prüfansicht (pruefung.js). */
+const werSchritte = p => p.schritte.map((x, i) => i).filter(i => p.schritte[i][1]);
+
 /** Schritte anderer Wege, die an dieser Stelle sicher nicht passen (nicht derselbe, nicht verwandt). */
 function fremdeSchritte(p) {
   return WEGE.filter(q => q.id !== p.id && !(p.verwandt || []).includes(q.id) && !(q.verwandt || []).includes(p.id))
@@ -203,8 +206,7 @@ function aufgabeErzeugen(stufe) {
       return { art, produkt: p.id, luecke, optionen: mische([{ produkt: p.id, i: luecke }, ...andere]) };
     }
     if (art === "wer") {
-      const moeglich = p.schritte.map((x, i) => i).filter(i => p.schritte[i][1]);
-      return { art, produkt: p.id, i: waehle(moeglich) };
+      return { art, produkt: p.id, i: waehle(werSchritte(p)) };
     }
     if (art === "herkunft" || art === "transport") return { art, produkt: p.id };
     if (art === "verschoben") {
@@ -327,6 +329,8 @@ function paar(klasse, links, rechts) {
   h.append(el("div", {}, ...links), el("div", {}, ...rechts));
   return h;
 }
+/** Lösung zu „Wie kommt es zu uns?“ — auch für die Prüfansicht (pruefung.js). */
+const transportText = t => `${TRANSPORT[t].text} (${TRANSPORT[t].klein})`;
 const wegText = (p, idx) => idx.map(i => p.schritte[i][0]).join(" → ");
 
 // Für das Prüfskript im Scratchpad: die laufende Aufgabe.
@@ -421,7 +425,7 @@ LS.spiel({
       });
     } else if (a.art === "transport") {
       ctx.serie("antwort", p.transport);
-      const loesung = `${TRANSPORT[p.transport].text} (${TRANSPORT[p.transport].klein})`;
+      const loesung = transportText(p.transport);
       f.append(el("div", { class: "produkt" }, el("span", { class: "gross", text: p.bild }), `${p.name} — Rohstoff: ${p.rohstoff}`),
         el("div", { class: "frage", text: "Wie kommt es zu uns?" }),
         el("div", { class: "hinweiszeile", text: `So beginnt der Weg: ${p.schritte[0][0]}` }));

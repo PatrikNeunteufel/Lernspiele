@@ -2145,3 +2145,13 @@
 - **Prüftabellen (PT1 a):** lange Spalten mindestens 8em statt 12em breit — die breitesten Tabellen (Wassertropfen-Reise,
   Velo-Fragen, Erdzeit-Leiter, Kurzschluss) passen bei 1024 px ganz in den Dialog, hell und dunkel angesehen; seitliches
   Scrollen bleibt als Notlösung.
+- **Prüfung je Eintrag, NMG Block 3 (LP5 a, LERN-51, T4 a):** `pruefung.js` für Pflanzen-Bestimmer, Blutkreislauf-Lotse,
+  Energie-Wandler, Bionik-Paare, Kakao-Weg, Gemeinde-Helfer, Kulturen-Koffer und Lärm-Wächter (acht Listen, je in
+  mehrere Abschnitte geteilt); Blätter, Nadelzweige, Ohr und Wandlerketten vom Spiel gezeichnet; alle Tabellen bei 1024 px
+  ohne seitliches Scrollen. Damit keine Prüfansicht einen Aufgabenschritt nachbaut, im Spiel neu: Pflanzen-Bestimmer
+  `STUFE_ARTEN`, `NIMMT`, `MERK`, `merkmalWert`, `bekannteMerkmale`, `imMerkmalPool`; Blutkreislauf-Lotse `fragenFuer`,
+  `THEMA_BILD`; Energie-Wandler `vorratFuer`, `ABLENKER`, `ketteText`; Kakao-Weg `werSchritte`, `transportText`;
+  Gemeinde-Helfer `ablenkerAlsKorb`; Kulturen-Koffer `kulturInStufe`, `gabFrage`; Lärm-Wächter `KLAR_LAUT_LEISE`,
+  `lautKorb`, `ORDNEN_LAUT`, `STILL_ORT`, `SCHLIMMER_PAARE`, `andereKoerbe`, `ANTWORT`, `mitArtikel` (Aufgaben unverändert:
+  je Stufe 400 bis 500 Aufgaben mit festen Startwerten vorher und nachher byte-gleich). Prüfstand und Fingerabdrücke
+  unverändert.

@@ -108,10 +108,13 @@ const ANLIEGEN_STUFE = {
   s6: { filter: a => a.schwierigkeit === 3, n: 5, pool: OEFFENTLICH, privat: true },
 };
 
+/** Steht der nächstliegende Ablenker in dieser Stufe sicher als Korb da? — auch für die Prüfansicht (pruefung.js). */
+const ablenkerAlsKorb = (a, p) => p.pool.includes(a.ablenker);
+
 /** Körbe: Ziel, der nächstliegende Ablenker (wenn erlaubt), weitere aus dem Pool, dazu extra; gemischt. */
 function koerbeFuer(a, p) {
   const k = [a.ziel];
-  if (p.pool.includes(a.ablenker)) k.push(a.ablenker);
+  if (ablenkerAlsKorb(a, p)) k.push(a.ablenker);
   const extra = p.privat ? [waehle(PRIVAT)] : [];
   const rest = mische(p.pool.filter(id => !k.includes(id)));
   while (k.length + extra.length < p.n && rest.length) k.push(rest.pop());

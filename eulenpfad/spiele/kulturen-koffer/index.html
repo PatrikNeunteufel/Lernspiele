@@ -120,6 +120,11 @@ function koerbeFuer(d, p) {
   return mische([d.kultur, ...andere]);
 }
 
+/** Aussagen und „Gab es das schon?“ zu China und den Griechen erst ab Stufe 5 — auch für die Prüfansicht (pruefung.js). */
+const kulturInStufe = (x, stufe) => NR[stufe] >= 5 || !NEU.includes(x.kultur);
+/** Frage zu „Gab es das schon?“ — auch für die Prüfansicht (pruefung.js). */
+const gabFrage = g => `Gab es das ${K[g.kultur].bei} schon?`;
+
 const ARTEN = {
   altHeute() {
     const alt = Math.random() < 0.5;
@@ -142,10 +147,10 @@ const ARTEN = {
     return { art: "erzaehl", s: waehle(KK_SAETZE), koerbe: mische(ZUORDNEN.s3.kulturen) };
   },
   aussage(stufe) {
-    return { art: "aussage", x: waehle(KK_AUSSAGEN.filter(x => NR[stufe] >= 5 || !NEU.includes(x.kultur))) };
+    return { art: "aussage", x: waehle(KK_AUSSAGEN.filter(x => kulturInStufe(x, stufe))) };
   },
   gab(stufe) {
-    return { art: "gab", g: waehle(KK_GAB.filter(g => NR[stufe] >= 5 || !NEU.includes(g.kultur))) };
+    return { art: "gab", g: waehle(KK_GAB.filter(g => kulturInStufe(g, stufe))) };
   },
   quelle() {
     return { art: "quelle", q: waehle(KK_QUELLEN), optionen: Object.keys(KK_QUELLENARTEN) };
@@ -435,7 +440,7 @@ LS.spiel({
       const k = K[g.kultur];
       const richtig = g.ja ? "ja" : "nein";
       const loesung = `${GAB[richtig].bild} ${GAB[richtig].text}: ${g.grund}`;
-      kk.append(karteText(g.bild, g.ding), el("div", { class: "frage", text: `Gab es das ${k.bei} schon?` }));
+      kk.append(karteText(g.bild, g.ding), el("div", { class: "frage", text: gabFrage(g) }));
       const box = LS.auswahl(ctx, {
         optionen: ["ja", "nein"], richtig, breite: 150,
         inhalt: id => ({ bild: GAB[id].bild, text: GAB[id].text }),

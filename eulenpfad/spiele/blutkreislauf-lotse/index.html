@@ -112,7 +112,11 @@ const SVGNS = "http://www.w3.org/2000/svg";
 
 const LISTE = "fragen";
 const FREI = new Set(LS.spielListen("blutkreislauf-lotse").length ? LS.freieListen("blutkreislauf-lotse") : [LISTE]);
-const fragenDerStufe = n => (FREI.has(LISTE) ? KREISLAUF_FRAGEN.filter(f => f[0] === n) : []);
+/** Fragen der Liste mit Stufennummer n (Feld 0), ohne Freigabe — auch für die Prüfansicht (pruefung.js). */
+const fragenFuer = n => KREISLAUF_FRAGEN.filter(f => f[0] === n);
+const fragenDerStufe = n => (FREI.has(LISTE) ? fragenFuer(n) : []);
+/** Bild über einer Frage, je Thema (Feld 1) — auch für die Prüfansicht (pruefung.js). */
+const THEMA_BILD = { herz: "❤️", blut: "🩸", lunge: "🫁", puls: "💓", bewegung: "🏃", kreislauf: "🔄" };
 
 // ---------- Stationen ----------
 
@@ -512,7 +516,7 @@ LS.spiel({
 
     if (a.art === "frage") {
       const [, thema, frage, richtig, f1, f2, erklaerung] = KREISLAUF_FRAGEN[a.frage];
-      const bildZeichen = { herz: "❤️", blut: "🩸", lunge: "🫁", puls: "💓", bewegung: "🏃", kreislauf: "🔄" }[thema];
+      const bildZeichen = THEMA_BILD[thema];
       f.append(el("div", { class: "frage-bild", "aria-hidden": "true", text: bildZeichen }), el("div", { class: "frage", text: frage }));
       LS.auswahl(ctx, { optionen: mische([richtig, f1, f2]), richtig, breite: 220,
         hinweis: KREISLAUF_TIPPS[thema], loesung: `${richtig}. ${erklaerung}`, lob: "Richtig!", erklaerung });

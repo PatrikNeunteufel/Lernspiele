@@ -107,6 +107,31 @@ const artenIn = stufe => (FREI.has(LISTE) ? STUFE[stufe].arten : []);
 const nurMoegliche = texte => Object.fromEntries(Object.entries(texte).filter(([s]) => artenIn(s).length));
 const ohneKern = ENERGIE_GERAETE.filter(g => g.von !== "kern");
 
+/** Woraus eine Aufgabenart wählt: Geräte, Ketten der Stufe oder Fragen — auch für die Prüfansicht (pruefung.js). */
+function vorratFuer(art, stufe) {
+  switch (art) {
+    case "strom": return ENERGIE_GERAETE.filter(x => x.strom !== null && x.strom !== undefined);
+    case "woher": case "wohin": case "paar": return ohneKern;
+    case "erneuerbar": return ENERGIE_GERAETE.filter(x => x.erneuerbar === true || x.erneuerbar === false);
+    case "kraftwerk": return ENERGIE_GERAETE.filter(x => x.kraftwerk);
+    case "fehlt": case "mitte": case "ordnen": case "falsch": return kettenIn(stufe);
+    case "frage": return ENERGIE_FRAGEN;
+  }
+  return [];
+}
+/** Energieformen, aus denen das Spiel die falschen Antworten zum Gerät zieht — auch für die Prüfansicht (pruefung.js).
+ *  wohin: bei zwei Formen nachher werden je zwei davon zu einer falschen Antwort verbunden. */
+const ABLENKER = {
+  woher: g => ALLTAG.filter(f => f !== g.von && !auchVon(g).includes(f)),
+  wohin: g => ALLTAG.filter(f => !g.zu.includes(f) && !auchVon(g).includes(f) && f !== g.von),
+  kraftwerk: g => [...ALLTAG, "kern"].filter(f => f !== g.von && !auchVon(g).includes(f) && !g.zu.includes(f)),
+};
+/** Die ganze Kette in Worten, wie sie nach der Antwort steht — auch für die Prüfansicht (pruefung.js). */
+function ketteText(k) {
+  const { vor, ende } = formenDerKette(k);
+  return k.geraete.map((n, i) => `${formText(vor[i])} → ${n}`).join(" → ") + ` → ${formText(ende)}`;
+}
+
 // ---------- Aufgaben als Daten ----------
 
 function aufgabeErzeugen(stufe) {
@@ -121,18 +146,18 @@ function aufgabeErzeugen(stufe) {
 function erzeuge(art, stufe) {
   switch (art) {
     case "strom": {
-      const g = waehle(ENERGIE_GERAETE.filter(x => x.strom !== null && x.strom !== undefined));
+      const g = waehle(vorratFuer(art, stufe));
       return { art, geraet: g.name, richtig: g.strom ? "ja" : "nein", optionen: ["ja", "nein"] };
     }
     case "woher": {
-      const g = waehle(ohneKern);
-      const pool = ALLTAG.filter(f => f !== g.von && !auchVon(g).includes(f));
+      const g = waehle(vorratFuer(art, stufe));
+      const pool = ABLENKER.woher(g);
       return { art, geraet: g.name, richtig: g.von, optionen: mische([g.von, ...mische(pool).slice(0, 2)]) };
     }
     case "wohin": {
-      const g = waehle(ohneKern);
+      const g = waehle(vorratFuer(art, stufe));
       const richtig = g.zu.join("+");
-      const pool = ALLTAG.filter(f => !g.zu.includes(f) && !auchVon(g).includes(f) && f !== g.von);
+      const pool = ABLENKER.wohin(g);
       let falsche;
       if (g.zu.length === 1) falsche = mische(pool).slice(0, 2);
       else {
@@ -143,7 +168,7 @@ function erzeuge(art, stufe) {
       return { art, geraet: g.name, richtig, optionen: mische([richtig, ...falsche]) };
     }
     case "paar": {
-      const g = waehle(ohneKern);
+      const g = waehle(vorratFuer(art, stufe));
       const richtig = `${g.von}>${g.zu.join("+")}`;
       const umgekehrt = `${g.zu.join("+")}>${g.von}`;
       const andere = mische(ohneKern.filter(x => x !== g)).map(x => `${x.von}>${x.zu.join("+")}`)
@@ -151,7 +176,7 @@ function erzeuge(art, stufe) {
       return { art, geraet: g.name, richtig, optionen: mische([richtig, umgekehrt, andere]) };
     }
     case "fehlt": {
-      const k = waehle(kettenIn(stufe));
+      const k = waehle(vorratFuer(art, stufe));
       const j = Math.floor(Math.random() * k.geraete.length);
       const { vor, ende } = formenDerKette(k);
       const nachher = j < k.geraete.length - 1 ? [vor[j + 1]] : ende.split("+");
@@ -159,7 +184,7 @@ function erzeuge(art, stufe) {
       return { art, kette: ENERGIE_KETTEN.indexOf(k), stelle: j, richtig: k.geraete[j], optionen: mische([k.geraete[j], ...falsche]) };
     }
     case "mitte": {
-      const k = waehle(kettenIn(stufe));
+      const k = waehle(vorratFuer(art, stufe));
       const j = Math.floor(Math.random() * (k.geraete.length - 1));
       const { vor } = formenDerKette(k);
       const a = G[k.geraete[j]], b = G[k.geraete[j + 1]];
@@ -168,21 +193,21 @@ function erzeuge(art, stufe) {
       return { art, kette: ENERGIE_KETTEN.indexOf(k), stelle: j, richtig, optionen: mische([richtig, ...mische(pool).slice(0, 2)]) };
     }
     case "erneuerbar": {
-      const g = waehle(ENERGIE_GERAETE.filter(x => x.erneuerbar === true || x.erneuerbar === false));
+      const g = waehle(vorratFuer(art, stufe));
       return { art, geraet: g.name, richtig: g.erneuerbar ? "ja" : "nein", optionen: ["ja", "nein"] };
     }
     case "kraftwerk": {
-      const g = waehle(ENERGIE_GERAETE.filter(x => x.kraftwerk));
-      const pool = [...ALLTAG, "kern"].filter(f => f !== g.von && !auchVon(g).includes(f) && !g.zu.includes(f));
+      const g = waehle(vorratFuer(art, stufe));
+      const pool = ABLENKER.kraftwerk(g);
       return { art, geraet: g.name, richtig: g.von, optionen: mische([g.von, ...mische(pool).slice(0, 2)]) };
     }
     case "frage": {
-      const i = Math.floor(Math.random() * ENERGIE_FRAGEN.length);
+      const i = Math.floor(Math.random() * vorratFuer(art, stufe).length);
       const [, r, f1, f2] = ENERGIE_FRAGEN[i];
       return { art, frage: i, richtig: r, optionen: mische([r, f1, f2]) };
     }
     case "ordnen": {
-      const k = waehle(kettenIn(stufe));
+      const k = waehle(vorratFuer(art, stufe));
       const { vor, ende } = formenDerKette(k);
       const reihe = [];
       k.geraete.forEach((n, i) => reihe.push(`f:${vor[i]}`, `g:${n}`));
@@ -190,7 +215,7 @@ function erzeuge(art, stufe) {
       return { art, kette: ENERGIE_KETTEN.indexOf(k), reihe };
     }
     case "falsch": {
-      const k = waehle(kettenIn(stufe));
+      const k = waehle(vorratFuer(art, stufe));
       const j = Math.floor(Math.random() * k.geraete.length);
       const { vor, ende } = formenDerKette(k);
       const nachher = j < k.geraete.length - 1 ? [vor[j + 1]] : ende.split("+");
@@ -389,8 +414,7 @@ LS.spiel({
     }
 
     if (a.art === "fehlt" || a.art === "mitte") {
-      const { vor, ende } = formenDerKette(k);
-      const ganz = k.geraete.map((n, i) => `${formText(vor[i])} → ${n}`).join(" → ") + ` → ${formText(ende)}`;
+      const ganz = ketteText(k);
       const loesung = a.art === "fehlt" ? `Es fehlt: ${a.richtig}. Die Kette: ${ganz}.` : `Dazwischen: ${formText(a.richtig)}. Die Kette: ${ganz}.`;
       f.append(el("div", { class: "anfang", text: `Am Anfang: ${k.anfang}` }),
         ketteEl(k, a.art === "fehlt" ? { offenesGeraet: a.stelle } : { offeneForm: a.stelle + 1 }),

@@ -151,29 +151,53 @@ function wirkungFuer(sit, id) {
   return null;
 }
 
+// Was die Arten aus den Listen nehmen und was dort richtig ist, unabhängig von der Freigabe — auch für die
+// Prüfansicht (pruefung.js).
+/** Stufe 1 nimmt nur klare Fälle (Lärm-Skala 1–2 gegen 4–5); der passende Korb. */
+const KLAR_LAUT_LEISE = g => g.laut <= 2 || g.laut >= 4;
+const lautKorb = g => (g.laut >= 4 ? "laut" : "leise");
+/** Stufe 2 „Ordnen“: je ein Geräusch dieser Lärm-Stufen, von leise nach laut. */
+const ORDNEN_LAUT = [1, 3, 5];
+/** „Wo ist es still?“: ein stiller Ort gegen zwei laute. */
+const STILL_ORT = { still: o => o.laut === 1, laut: o => o.laut >= 4 };
+/** „Was ist schlimmer für die Ohren?“ je Art des Paars: a (schlimmer) und b (zum Vergleich, mit a). */
+const SCHLIMMER_PAARE = {
+  "lang-kurz": { a: x => x.laut >= 4 && x.dauer === "lang", b: (x, a) => x.laut >= 4 && x.dauer === "kurz" && x.laut <= a.laut },
+  "laut-leise": { a: x => x.laut >= 4 && x.dauer === "lang", b: x => x.laut <= 2 && x.dauer === "lang" },
+  "kurz-leise": { a: x => x.laut === 5 && x.dauer === "kurz", b: x => x.laut <= 2 && x.dauer === "lang" },
+};
+/** Körbe, die in Stufe 3 neben dem passenden Schutz stehen können: alles, was hier weder gut noch ein wenig hilft. */
+const andereKoerbe = (sit, liste) => liste.map(s => s.id).filter(id => !sit.schutz.includes(id) && !sit.wenig.includes(id));
+/** Antworten der Ja/Nein-Arten, wie das Kind sie sieht. */
+const ANTWORT = {
+  schadet: w => (w ? { bild: "⚠️", text: "Ja, das schadet" } : { bild: "🙂", text: "Nein, das ist in Ordnung" }),
+  schwingt: w => ({ bild: w ? "✅" : "❌", text: w ? "Stimmt" : "Stimmt nicht" }),
+};
+const mitArtikel = t => `${t.artikel} ${t.name}`;
+
 const gross = s => s.charAt(0).toUpperCase() + s.slice(1);
-const nom = id => `${TEIL[id].artikel} ${TEIL[id].name}`;
+const nom = id => mitArtikel(TEIL[id]);
 const akk = id => `${TEIL[id].artikel === "der" ? "den" : TEIL[id].artikel} ${TEIL[id].name}`;
 
 const ARTEN = {
   lautleise() {
-    const g = waehle(GERAEUSCHE.filter(x => x.laut <= 2 || x.laut >= 4));
-    return { art: "lautleise", g: g.id, richtig: g.laut >= 4 ? "laut" : "leise" };
+    const g = waehle(GERAEUSCHE.filter(KLAR_LAUT_LEISE));
+    return { art: "lautleise", g: g.id, richtig: lautKorb(g) };
   },
   ordnen() {
-    const reihe = [1, 3, 5].map(l => waehle(GERAEUSCHE.filter(x => x.laut === l)).id);
+    const reihe = ORDNEN_LAUT.map(l => waehle(GERAEUSCHE.filter(x => x.laut === l)).id);
     return { art: "ordnen", reihe };
   },
   still() {
-    const ruhig = waehle(ORTE.filter(o => o.laut === 1));
-    const laute = mische(ORTE.filter(o => o.laut >= 4)).slice(0, 2);
+    const ruhig = waehle(ORTE.filter(STILL_ORT.still));
+    const laute = mische(ORTE.filter(STILL_ORT.laut)).slice(0, 2);
     return { art: "still", richtig: ruhig.name, optionen: mische([ruhig.name, ...laute.map(o => o.name)]) };
   },
   schutz() {
     const i = zufall(0, SITUATIONEN.length - 1);
     const sit = SITUATIONEN[i];
     const richtig = waehle(sit.schutz);
-    const andere = mische(SCHUTZ.map(s => s.id).filter(id => !sit.schutz.includes(id) && !sit.wenig.includes(id))).slice(0, 2);
+    const andere = mische(andereKoerbe(sit, SCHUTZ)).slice(0, 2);
     return { art: "schutz", sit: i, richtig, koerbe: mische([richtig, ...andere]) };
   },
   schadet() {
@@ -189,18 +213,10 @@ const ARTEN = {
     return { art: "wirkung", sit: i, schutz, richtig: wirkungFuer(sit, schutz) };
   },
   schlimmer() {
-    const typ = waehle(["lang-kurz", "laut-leise", "kurz-leise"]);
-    let a, b;
-    if (typ === "lang-kurz") {
-      a = waehle(GERAEUSCHE.filter(x => x.laut >= 4 && x.dauer === "lang"));
-      b = waehle(GERAEUSCHE.filter(x => x.laut >= 4 && x.dauer === "kurz" && x.laut <= a.laut));
-    } else if (typ === "laut-leise") {
-      a = waehle(GERAEUSCHE.filter(x => x.laut >= 4 && x.dauer === "lang"));
-      b = waehle(GERAEUSCHE.filter(x => x.laut <= 2 && x.dauer === "lang"));
-    } else {
-      a = waehle(GERAEUSCHE.filter(x => x.laut === 5 && x.dauer === "kurz"));
-      b = waehle(GERAEUSCHE.filter(x => x.laut <= 2 && x.dauer === "lang"));
-    }
+    const typ = waehle(Object.keys(SCHLIMMER_PAARE));
+    const paar = SCHLIMMER_PAARE[typ];
+    const a = waehle(GERAEUSCHE.filter(paar.a));
+    const b = waehle(GERAEUSCHE.filter(x => paar.b(x, a)));
     return { art: "schlimmer", typ, richtig: a.id, optionen: mische([a.id, b.id]) };
   },
   "ohr-tippen"() {
@@ -515,7 +531,7 @@ function schadet(ctx, a, lw) {
   lw.append(el("div", { class: "frage", text: "Schadet das den Ohren?" }), karteMit("👂", a.text));
   LS.auswahl(ctx, {
     optionen: [true, false], richtig: a.richtig, breite: 190,
-    inhalt: w => (w ? { bild: "⚠️", text: "Ja, das schadet" } : { bild: "🙂", text: "Nein, das ist in Ordnung" }),
+    inhalt: ANTWORT.schadet,
     hinweis: "Überleg: Ist es sehr laut? Dauert es lange? Beides zusammen ist am schlimmsten — Leises schadet nie.",
     loesung: `„${a.text}“ — ${a.richtig ? "das schadet den Ohren" : "das schadet den Ohren nicht"}.`,
     lob: a.richtig ? "Richtig, das schadet den Ohren!" : "Richtig, das ist für die Ohren in Ordnung.",
@@ -615,7 +631,7 @@ function schwingt(ctx, a, lw) {
   LS.auswahl(ctx, {
     optionen: [true, false], richtig: a.richtig, breite: 150,
     loesung: `„${a.text}“ — das ${a.richtig ? "stimmt" : "stimmt nicht"}.`,
-    inhalt: w => ({ bild: w ? "✅" : "❌", text: w ? "Stimmt" : "Stimmt nicht" }),
+    inhalt: ANTWORT.schwingt,
     hinweis: "Überleg noch einmal: Ein Ton kommt immer von etwas, das schwingt. Passt der Satz dazu?",
     lob: a.richtig ? "Richtig, das ist so!" : "Richtig, so ist es nicht!",
   });
