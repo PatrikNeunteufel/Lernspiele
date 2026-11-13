@@ -26,8 +26,9 @@ const LISTENPRUEFUNG = (() => {
       gespeichert: "✓ Korrektur gespeichert — senden unter Verwaltung → Meldungen.",
     },
   });
-  async function oeffne(spielId, listeId) {
-    const ok = await ansicht.oeffne(LS.pruefungDefinition(spielId), spielId, listeId);
+  /** nachher(): nach dem Schliessen, wenn gespeichert ist (Kern 1.44.0) — etwa die Entwickler-Leiste neu zeichnen. */
+  async function oeffne(spielId, listeId, nachher) {
+    const ok = await ansicht.oeffne(LS.pruefungDefinition(spielId), spielId, listeId, nachher);
     if (!ok) alert("Für diese Liste gibt es noch keine Prüfansicht (pruefung.js).");
     return ok;
   }

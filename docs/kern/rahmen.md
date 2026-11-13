@@ -743,7 +743,7 @@ Eulenpfad rahmen.md 17). Eine Inhalts-Id (Spiel, Übung) meldet ihre Listen mit 
 |---|---|
 | `eintraegeVon(def)` | `[{ roh, abschnitt, schluessel, zellen, gruppe }]`; Schlüssel `<abschnitt>:<Fingerabdruck der Rohdaten>` (`KERN.runden.fingerabdruck`), im Format des Entwickler-Servers |
 | `listenHash(eintraege)` | Fingerabdruck der ganzen Liste (alle Schlüssel, sortiert) — steht beim Prüfstand einer ganz geprüften Liste |
-| `ansicht(opt).oeffne(defs, id, liste)` | Dialog `listen-dialog pruef-dialog`; `false` ohne Definition. `opt`: `eintraegeUrl`, `entwicklung()`, `ich()`, `lokal { lies, schreibe }`, `setzeFrei(id, liste, wert)`, `liste(id, liste)` → `{ name, geprueft }`, `titel(id)`, `zelle(text, klasse)`, `feld` (Name der Id in Bemerkungen), `wer` („Kinder“, „Jugendliche“), `korrektur` (oder `null`: ohne ✏️) |
+| `ansicht(opt).oeffne(defs, id, liste, nachher?)` | Dialog `listen-dialog pruef-dialog`; `false` ohne Definition; `nachher()` nach dem Schliessen, wenn alles gespeichert ist (seit 1.44.0). `opt`: `eintraegeUrl`, `entwicklung()`, `ich()`, `lokal { lies, schreibe }`, `setzeFrei(id, liste, wert)`, `liste(id, liste)` → `{ name, geprueft }`, `titel(id)`, `zelle(text, klasse)`, `feld` (Name der Id in Bemerkungen), `wer` („Kinder“, „Jugendliche“), `korrektur` (oder `null`: ohne ✏️) |
 
 Die Entwicklung hakt über den Entwickler-Server ab (`/entwicklung/eintraege`), eine Aufsicht für ihr Gerät und gibt die
 Liste dort frei. Aussehen gibt die App (Klassen `listen-dialog`, `pruef-*`). Tests in `pruefe_kern.js` (Schlüssel,

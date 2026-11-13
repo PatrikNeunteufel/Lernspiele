@@ -2329,6 +2329,39 @@ console.log("listenpruefung.js");
     gleich("data-farben" in ohne, false, "farben.kopf.js ohne Speicher: hell, ohne Fehler");
   }
 
+  // ---------- listenpruefung: nachher() erst nach dem Speichern (1.44.0, Hinweis Patrik LERN_Session38) ----------
+  {
+    console.log("listenpruefung.js: nachher()");
+    const vm = require("vm"), fs = require("fs");
+    const c = vm.createContext({ __seite: { html: "<html><head></head><body></body></html>", search: "", seed: 1 }, console, URL, URLSearchParams, structuredClone });
+    vm.runInContext(fs.readFileSync(path.join(__dirname, "pruef_dom.js"), "utf8"), c);
+    // Das Ersatz-DOM kennt keinen <dialog>: öffnen merkt sich nur den Zustand, schliessen löst „close“ aus
+    vm.runInContext(`Element.prototype.showModal = function () { this.open = true; };
+      Element.prototype.close = function () { this.open = false; this.dispatchEvent(new Event("close")); };
+      globalThis.fetch = async () => ({ json: async () => ({}) });`, c);
+    vm.runInContext(fs.readFileSync(path.join(WURZEL, "eulenpfad", "kern", "kern.js"), "utf8"), c);
+    const aufrufe = [];
+    let loesen = null;
+    let nachherAm = null;
+    c.__ent = { aktiv: () => true, name: () => "Test", server: async () => false,
+      setzeEintraege: d => { aufrufe.push(d); return new Promise(r => { loesen = r; }); } };
+    c.__def = { liste: { beschreibung: "", abschnitte: [{ id: "w", titel: "Wörter", spalten: ["Wort"], eintraege: () => ["Haus"], zeile: w => [w] }] } };
+    c.__nachher = () => { nachherAm = aufrufe.length && !loesen ? "nach" : "vor"; };
+    const ansicht = vm.runInContext(`KERN.listenpruefung.ansicht({ eintraegeUrl: "x", entwicklung: () => __ent,
+      lokal: { lies: () => ({}), schreibe() {} }, setzeFrei() {} })`, c);
+    gleich(await ansicht.oeffne(c.__def, "spiel", "liste", c.__nachher), true, "oeffne mit nachher");
+    const box = vm.runInContext(`document.querySelector("dialog input[type=checkbox]")`, c);
+    box.checked = true;
+    vm.runInContext(`(b => b.dispatchEvent(new Event("change")))`, c)(box);
+    vm.runInContext(`document.querySelector("dialog").close()`, c);
+    for (let i = 0; i < 5; i++) await null;
+    gleich(aufrufe.length === 1 && nachherAm === null, true, "Schliessen speichert sofort, nachher wartet auf den Server");
+    gleich(aufrufe[0]?.komplett, true, "ganz abgehakt: komplett an den Server");
+    const l = loesen; loesen = null; l(true);
+    for (let i = 0; i < 10; i++) await null;
+    gleich(nachherAm, "nach", "nachher nach dem Speichern");
+  }
+
   // ---------- Kopien in den Apps ----------
 console.log("Kopien (tools/kern_verteilen.py --pruefe)");
 faelle++;

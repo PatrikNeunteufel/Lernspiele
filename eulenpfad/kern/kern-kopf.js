@@ -1,4 +1,4 @@
-/* kern 1.43.0 · Prüfsumme sha256:73e182518766b4a2b8bc6f08348e89eef9a3e291914f7865759974e5ddbf3247 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.44.0 · Prüfsumme sha256:73e182518766b4a2b8bc6f08348e89eef9a3e291914f7865759974e5ddbf3247 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/farben.kopf.js ---- */
 /* Kern — Farben vor dem ersten Bild (Entscheide DM1 a, DM2 a, docs/konzept_darkmode.md; docs/kern/rahmen.md 4.29).
    Läuft im <head> jeder Seite vor allem anderen, ohne KERN und ohne Abhängigkeit, damit eine dunkle Seite nicht erst hell

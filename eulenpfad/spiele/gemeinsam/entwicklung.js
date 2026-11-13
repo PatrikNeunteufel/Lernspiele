@@ -126,7 +126,9 @@ LS.entwicklung = (() => {
               title: l.geprueft ? `geprüft ${l.geprueft.am}${l.geprueft.von ? " · " + l.geprueft.von : ""}` : "noch nicht geprüft",
               text: `${l.geprueft ? "✓" : "○"} ${l.name}`,
               // Neue Prüfansicht je Eintrag, wo das Spiel eine pruefung.js hat (LP1 a); sonst die alte Tabelle.
-              onclick: async () => { if (!(await LS.listenPruefen(stand.spiel, l.id))) zeigeListe(eintrag, l, zeichne); } })))));
+              // Nach dem Schliessen neu zeichnen: eine ganz abgehakte Liste steht dann gleich als ✓ geprüft da
+              // (Hinweis Patrik LERN_Session38: vorher erst nach dem Neuladen)
+              onclick: async () => { if (!(await LS.listenPruefen(stand.spiel, l.id, zeichne))) zeigeListe(eintrag, l, zeichne); } })))));
         auf.open = listenOffen;
         auf.addEventListener("toggle", () => { listenOffen = auf.open; });
         leiste.append(auf);

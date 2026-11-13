@@ -823,13 +823,13 @@ const LS = (() => {
    * Prüfansicht einer Liste öffnen (nur auf der Seite des Spiels, das sie besitzt). Lädt listenpruefung.js und
    * pruefung.js des Spiels nach; false, wenn das Spiel noch keine Prüfansicht hat.
    */
-  async function listenPruefen(spielId, listeId) {
+  async function listenPruefen(spielId, listeId, nachher) {
     try {
       await ladeSkript("../gemeinsam/listenpruefung.js");
       await ladeSkript("pruefung.js");
     } catch { return false; }
     if (!pruefungDefinition(spielId)?.[listeId]) return false;
-    await LISTENPRUEFUNG.oeffne(spielId, listeId);
+    await LISTENPRUEFUNG.oeffne(spielId, listeId, nachher); // nachher(): nach dem Schliessen, wenn gespeichert ist
     return true;
   }
   /** Muss das Spiel als Ganzes noch angesehen werden (neu und nicht geprüft)? */

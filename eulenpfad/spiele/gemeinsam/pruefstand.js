@@ -983,9 +983,19 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "schwimmt-sinkt/eigenschaften": {
+      "am": "2026-11-13",
+      "hash": "243yns891dh",
+      "von": "Patrik"
+    },
     "schwimmt-sinkt/material": {
       "am": "2026-11-13",
       "hash": "y451ggrddu",
+      "von": "Patrik"
+    },
+    "schwimmt-sinkt/schwimmen-sinken": {
+      "am": "2026-11-13",
+      "hash": "cbt2ny6ixk",
       "von": "Patrik"
     },
     "schwimmt-sinkt/wasser": {
@@ -1011,6 +1021,31 @@ const PRUEFSTAND = {
     },
     "sound-sorter/woerter": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "stromkreis-bauer/einfach": {
+      "am": "2026-11-13",
+      "hash": "26esnnatl1a",
+      "von": "Patrik"
+    },
+    "stromkreis-bauer/kurzschluss": {
+      "am": "2026-11-13",
+      "hash": "1qkf9joadm6",
+      "von": "Patrik"
+    },
+    "stromkreis-bauer/leiter": {
+      "am": "2026-11-13",
+      "hash": "1bzsffixeb5",
+      "von": "Patrik"
+    },
+    "stromkreis-bauer/schalter": {
+      "am": "2026-11-13",
+      "hash": "9dhn8mn7a5",
+      "von": "Patrik"
+    },
+    "stromkreis-bauer/serie-parallel": {
+      "am": "2026-11-13",
+      "hash": "6ewwpxjpa1",
       "von": "Patrik"
     },
     "tageslauf-sonne/taetigkeiten": {

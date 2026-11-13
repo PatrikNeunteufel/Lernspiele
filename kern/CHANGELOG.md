@@ -3,6 +3,12 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.44.0 — 2026-11-13 (LERN_Session38)
+- `listenpruefung.js`: `ansicht(opt).oeffne(defs, id, liste, nachher)` — `nachher()` läuft nach dem Schliessen, wenn
+  auch das letzte Speichern fertig ist (Speichern jetzt als Kette, `laufend`). Damit kann die App ihren Prüfstand neu
+  zeigen: Die Entwickler-Leiste des Eulenpfads zeigte eine ganz abgehakte Liste erst nach dem Neuladen als geprüft
+  (Hinweis Patrik). Ohne `nachher` unverändert.
+
 ## 1.43.0 — 2026-11-12 (LERN_Session34)
 - `farben.css`: Bildkachel (DM3 a, Darkmode Schritt 4) — der helle Satz unter `:root, .bildkachel`, damit Zeichnungen in
   einem Element mit dieser Klasse auch im dunklen Modus ihre hellen Farben behalten; `--k-bildgrund` in einem eigenen

@@ -385,6 +385,24 @@
    "von": "Patrik"
   }
  },
+ "schwimmt-sinkt/eigenschaften": {
+  "frage:11icjuibylq": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "frage:13bsru98fsf": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "frage:6wf3xubp69": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "frage:afy9w3sf78": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
  "schwimmt-sinkt/material": {
   "ding:13d93q4vg50": {
    "am": "2026-11-13",
@@ -455,6 +473,24 @@
    "von": "Patrik"
   },
   "korb:rqva1gwozo": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
+ "schwimmt-sinkt/schwimmen-sinken": {
+  "frage:1335e23kg34": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "frage:2ec0eiesnk1": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "frage:7p1vpb0v5j": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "frage:na63e7fvjf": {
    "am": "2026-11-13",
    "von": "Patrik"
   }
@@ -557,6 +593,436 @@
    "von": "Patrik"
   },
   "einfach:w3ye98d4ey": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
+ "stromkreis-bauer/einfach": {
+  "einfach:10zx1dog8mr": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:15684q3utdy": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:1ilbjarkqt": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:1na12cl1cfk": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:1tqz96ai2vd": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:1u0sfuaa8bj": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:1z0l9hqfhcu": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:23amwjgou93": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:2a2ygluny7e": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:2feo32c5hhx": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:2gk3ahwv7h2": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:adq6ldb96g": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:gnjgzmosld": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:izyvflohzx": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:uuwqy8ub6p": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "einfach:w4irw5cklh": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
+ "stromkreis-bauer/kurzschluss": {
+  "kurzschluss:138e0ofb9cg": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:1bd16c5zor5": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:1jtjegb3b4a": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:1orlg83v4su": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:1oxpfn91ekt": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:1zqm125jex3": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:1zr70zp7wl4": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:216gbgppn27": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:2f2gdyl85k1": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:2ftplygtgay": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:7l9jwrwj9h": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:obmbpnd5z": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:oce5zoq8rl": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "kurzschluss:yy7wgnsttf": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
+ "stromkreis-bauer/leiter": {
+  "gegenstand:11j3k6n7bxh": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1c5t74sqb1n": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1mdik5c6me1": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1o8hw2efdg1": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1tjn3fxoqp": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1v3wfhla4ww": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1xetb5vpgil": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:1yn39w2i27f": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:21demwoxcjt": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:25gvpoeo93n": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:25o8536sog": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:2adgwsms40r": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:66zl769ap9": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:6sn0k46u6z": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:go185n1r02": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:isoqx5pwpa": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:r7gnn8fbz8": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:w2i5o5spz4": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:yc96wsr5yb": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "gegenstand:zrp73r7zrz": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "luecke:12it71dvlr2": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "luecke:1letvogidu3": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "luecke:2599q44xshc": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "luecke:2eqr21c8ap1": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "luecke:7jbds72x1p": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "luecke:emk6mz5y5": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
+ "stromkreis-bauer/schalter": {
+  "schalter:14aabpq4ag7": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:1j7lixdft65": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:1l37lay2was": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:1o4koughod8": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:1r4nkgog2ps": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:1wm45fc5x1u": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:1wvk74abcmw": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:28su1c4q0xq": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:29zmmstgxh": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:2cyew4cly8p": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:40il0cykix": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:6ttqbwi15k": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:co0zeeqonh": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:cxz68nchum": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "schalter:y1q392213k": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  }
+ },
+ "stromkreis-bauer/serie-parallel": {
+  "serie-parallel:10shl46zb6d": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:120ywi4cio0": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:122vcv0foi1": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:131zc7506ph": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:13tsfj9gaq8": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:16x47jemzn": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:19ayeut7bxm": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1d5drtls5k3": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1dj925kxjnh": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1e13uojgglf": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1fgjmhquspy": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1fxbcfytsnf": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1g0h5xlzmr": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1ka4f2f523v": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1r79zkdm3yn": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1wl6hos17yf": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1y7ga26tr7l": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:1z361c73aab": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:20guboln6ba": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:22aaptadv6q": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:23tlk1t937m": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:266y5wgms4b": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:275x5jqpqud": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:2bl50zbg257": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:2fa033nyo2w": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:2y0jj1hsef": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:b24ldf0z2k": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:gvecid1af6": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:hdakyr9hom": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:pyf9y3vwpe": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:qvqskun81n": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:tqmqm2mtrs": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:wlka0fdn5y": {
+   "am": "2026-11-13",
+   "von": "Patrik"
+  },
+  "serie-parallel:ywmsf9uk9h": {
    "am": "2026-11-13",
    "von": "Patrik"
   }

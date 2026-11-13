@@ -1,4 +1,4 @@
-/* kern 1.43.0 · Prüfsumme sha256:61d4cb49955b81e716de9322a36ef4a7dcf128c3ee2a3a483b25ad15cd6faca5 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.44.0 · Prüfsumme sha256:27b26fc9b9bde07351229aa621bd069c5ec45572b3e6a1c23911523a25347e04 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -4468,7 +4468,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
    KERN.listenpruefung.eintraegeVon(def)  → [{ roh, abschnitt, schluessel, zellen, gruppe }]
    KERN.listenpruefung.listenHash(liste)  → Fingerabdruck der ganzen Liste (alle Schlüssel)
-   KERN.listenpruefung.ansicht(opt)       → { oeffne(defs, id, listeId) } — Dialog; false ohne Definition
+   KERN.listenpruefung.ansicht(opt)       → { oeffne(defs, id, listeId, nachher?) } — Dialog; false ohne Definition;
+                                            nachher() nach dem Schliessen, wenn alles gespeichert ist (seit 1.44.0)
      opt.el            KERN.el (Standard)
      opt.eintraegeUrl  Adresse von pruefstand-eintraege.json (relativ zur Seite)
      opt.entwicklung   () → KERN.entwicklung-Objekt der App oder null
@@ -4512,7 +4513,7 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       return eintraegeDaten;
     }
 
-    async function oeffne(defs, id, listeId) {
+    async function oeffne(defs, id, listeId, nachher) {
       const def = defs?.[listeId];
       if (!def) return false;
       const ent = typeof o.entwicklung === "function" ? o.entwicklung() : null;
@@ -4551,7 +4552,9 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
       // Speichern: Entwicklung gebündelt an den Server, Aufsicht sofort im Browser
       let offen = { setzen: new Set(), entfernen: new Set() };
       let timer = null;
-      const sichern = async () => {
+      let laufend = Promise.resolve(); // das letzte Speichern — nachher() wartet darauf
+      const sichern = () => (laufend = laufend.then(speichern).catch(() => {})); // ein Fehler hält die Kette nicht an
+      const speichern = async () => {
         const komplett = alle.every(e => meine[e.schluessel]);
         if (entwickler) {
           const ok = await ent.setzeEintraege({ liste: quelle, setzen: [...offen.setzen], entfernen: [...offen.entfernen], komplett, hash: listenHash(alle) });
@@ -4693,7 +4696,15 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
           : `Ihre Haken gelten auf diesem Gerät. ✓E = von der Entwicklung geprüft.${kor ? " ✏️ schlägt der Entwicklung eine Korrektur vor." : ""}` }),
         stand, kopf, meldung, ...abschnitte);
       aktualisiereGruppen();
-      dialog.addEventListener("close", () => { if (offen.setzen.size || offen.entfernen.size) sichern(); dialog.remove(); });
+      // Beim Schliessen Offenes sofort speichern; nachher() erst danach, damit die App den neuen Prüfstand zeigt (die
+      // Entwickler-Leiste des Eulenpfads zeichnete ihre Listen vorher erst beim Neuladen neu, Hinweis Patrik LERN_Session38)
+      dialog.addEventListener("close", async () => {
+        clearTimeout(timer);
+        if (offen.setzen.size || offen.entfernen.size) sichern();
+        dialog.remove();
+        await laufend;
+        nachher?.();
+      });
       document.body.append(dialog);
       dialog.showModal();
       return true;
@@ -4748,4 +4759,4 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
 /* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */
-globalThis.KERN.version = "1.43.0";
+globalThis.KERN.version = "1.44.0";

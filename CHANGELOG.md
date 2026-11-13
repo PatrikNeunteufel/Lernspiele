@@ -2220,6 +2220,13 @@
   (VRV Art. 46 Abs. 1, nicht das Gesetz), 🚲 statt 🔴 beim Rücklicht. Echt oder erfunden? (echt-oder-erfunden): Korb
   💭 statt 🦄, Einhorn-Aussage mit 🐴, `MERKMAL_AUCH` für zaubern und „kann, was kein Mensch kann“, „erfundenes Wesen“
   statt „Fabelwesen“, Fabeln vom Eichhörnchen (Tiere sprechen) und vom Spatz („Lehre:“), Zahnfee ersetzt durch einen
-  kleinen Drachen (EO1 a: ob die Zahnfee erfunden ist, entscheidet die Familie). Wetter und Jahreszeiten
+  kleinen Drachen (EO1 a: ob die Zahnfee erfunden ist, entscheidet die Familie).
+- **Prüfansicht: geprüfte Liste gleich als geprüft gezeigt (Hinweis Patrik, Kern 1.44.0):** Eine ganz abgehakte Liste
+  stand im Prüfstand (`pruefstand.js`), die Entwickler-Leiste im Spiel zeigte sie aber erst nach dem Neuladen als ✓, weil
+  sie nach dem Schliessen der Prüfansicht nicht neu zeichnete. Kern `listenpruefung.js`: `oeffne(defs, id, liste,
+  nachher)` ruft `nachher()` nach dem Schliessen, wenn auch das letzte Speichern fertig ist (Speichern als Kette);
+  Eulenpfad: `LS.listenPruefen(spiel, liste, nachher)`, die Leiste gibt ihr `zeichne` mit. Kern verteilt, Test in
+  `pruefe_kern.js` (nachher erst nach dem Speichern). Dazu Patriks Prüfvermerke: Schwimmt oder sinkt, Listen
+  eigenschaften und schwimmen-sinken. Wetter und Jahreszeiten
   (wetter-jahreszeiten): 🌅, Korb Herbst 🍄, 🌿, kahler Laubbaum als Zeichnung (`bilder.js`, baumKahl), 🩱 Badekleid;
   bilder.js eingebunden.
