@@ -80,7 +80,9 @@ const GESCHICHTEN = [
   [["Mia geht mit ihrem Grossvater in den Wald.", "Ein Fuchs sagt zu ihnen: «Guten Tag, ihr zwei!»", "Dann sammeln sie Tannzapfen."], 1, "tier"],
   [["Luca hat Geburtstag.", "Er bläst die Kerzen auf dem Kuchen aus.", "Da schwebt er plötzlich wie ein Ballon bis zur Zimmerdecke."], 2, "mensch"],
   [["Es schneit die ganze Nacht.", "Am Morgen winkt der Schneemann im Garten den Kindern zu.", "Nora zieht ihre Stiefel an."], 1, "ding"],
-  [["Ben verliert einen Zahn.", "Er legt ihn unter das Kopfkissen.", "In der Nacht kommt eine winzige Fee mit Flügeln und holt ihn ab."], 2, "wesen"],
+  // Drache statt Zahnfee (EO1 a, LERN_Session38): an die Zahnfee glauben viele Kinder dieses Alters, ob sie „erfunden“
+  // ist, entscheidet die Familie
+  [["Ben verliert einen Zahn.", "Er legt ihn in eine kleine Dose.", "In der Nacht kommt ein kleiner Drache durchs Fenster und holt ihn ab."], 2, "wesen"],
   [["Die Klasse besucht einen Bauernhof.", "Eine Kuh erklärt den Kindern, wie man Käse macht.", "Zum Zvieri gibt es Brot und Käse."], 1, "tier"],
   [["Aylin pflückt Äpfel.", "Ein Mann schwingt einen Zauberstab, und alle Äpfel werden zu Gold.", "Aylin staunt."], 1, "zauber"],
   [["Tim sucht seine Katze.", "Er findet sie im Garten.", "Die Katze sagt: «Ich habe nur eine Maus gesucht.»"], 2, "tier"],

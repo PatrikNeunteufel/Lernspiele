@@ -20,7 +20,7 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session38); schwache Ablenker und Bleistiftmine im Versuch offen | Durchgang 3 unten |
 | Energie-Wandler | erledigt 2026-11-13 (LERN_Session38); Bilder (Staubsauger 🧹 …) offen | Durchgang 3 unten |
 | Schulweg-Profi | erledigt 2026-11-13 (LERN_Session38); Fussgängerstreifen als sicherster Ort vertretbar | Durchgang 4 unten |
-| Echt oder erfunden? | erledigt 2026-11-13 (LERN_Session38) bis auf die Zahnfee (Entscheid EO1) | Durchgang 4 unten |
+| Echt oder erfunden? | erledigt 2026-11-13 (LERN_Session38, EO1 a) | Durchgang 4 unten |
 | Wetter und Jahreszeiten | erledigt 2026-11-13 (LERN_Session38); Grenzfälle der Jahreszeiten vertretbar | Durchgang 4 unten |
 | übrige | offen | unten |
 
@@ -92,7 +92,8 @@ stimmt, sie steht aber in der Verordnung, nicht im Gesetz):
 - Echt oder erfunden?: Korb „Erfunden“ 💭 statt 🦄; die Aussage zum Einhorn mit 🐴 („Ein Pferd mit einem langen Horn …
   fliegt über die Wolken“), damit jedes Bild einmal echt und einmal erfunden ist; `MERKMAL_AUCH` (zaubern und „kann,
   was kein Mensch kann“ nie als falsche Antwort nebeneinander, `pruefeAufgabe` meldet es); „erfundenes Wesen“ statt
-  „Fabelwesen“; Fabel vom Eichhörnchen mit sprechenden Tieren; Fabel vom Spatz mit „Lehre:“.
+  „Fabelwesen“; Fabel vom Eichhörnchen mit sprechenden Tieren; Fabel vom Spatz mit „Lehre:“; Zahnfee ersetzt durch
+  einen kleinen Drachen, der den Zahn aus der Dose holt (EO1 a).
 - Wetter und Jahreszeiten: 🌅 statt ☀️ (glich dem Korb 🌞), Korb Herbst 🍄 statt 🍁 (glich 🍂), 🌿 statt 🌱 bei „Die
   Bäume bekommen neue Blätter“, kahler Laubbaum gezeichnet (`bilder.js`, baumKahl) statt 🌳, 🩱 statt 👙 beim Badekleid.
 

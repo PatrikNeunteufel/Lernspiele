@@ -983,6 +983,16 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "schwimmt-sinkt/material": {
+      "am": "2026-11-13",
+      "hash": "y451ggrddu",
+      "von": "Patrik"
+    },
+    "schwimmt-sinkt/wasser": {
+      "am": "2026-11-13",
+      "hash": "8bquedl1ra",
+      "von": "Patrik"
+    },
     "sentence-builder/er-sie-saetze": {
       "am": "2026-11-11",
       "von": "Patrik"

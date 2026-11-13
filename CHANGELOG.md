@@ -2219,6 +2219,7 @@
 - **Befunde abgearbeitet, Durchgang 4 (BF1 a):** Schulweg-Profi (schulweg-profi): „Das verlangen die Verkehrsregeln.“
   (VRV Art. 46 Abs. 1, nicht das Gesetz), 🚲 statt 🔴 beim Rücklicht. Echt oder erfunden? (echt-oder-erfunden): Korb
   💭 statt 🦄, Einhorn-Aussage mit 🐴, `MERKMAL_AUCH` für zaubern und „kann, was kein Mensch kann“, „erfundenes Wesen“
-  statt „Fabelwesen“, Fabeln vom Eichhörnchen (Tiere sprechen) und vom Spatz („Lehre:“). Wetter und Jahreszeiten
+  statt „Fabelwesen“, Fabeln vom Eichhörnchen (Tiere sprechen) und vom Spatz („Lehre:“), Zahnfee ersetzt durch einen
+  kleinen Drachen (EO1 a: ob die Zahnfee erfunden ist, entscheidet die Familie). Wetter und Jahreszeiten
   (wetter-jahreszeiten): 🌅, Korb Herbst 🍄, 🌿, kahler Laubbaum als Zeichnung (`bilder.js`, baumKahl), 🩱 Badekleid;
   bilder.js eingebunden.
