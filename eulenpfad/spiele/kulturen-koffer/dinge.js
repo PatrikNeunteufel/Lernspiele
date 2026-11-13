@@ -32,7 +32,8 @@
    - Erzählsatz (Stufe 3): { satz, kultur } — Ich-Satz ohne den Namen der Kultur
    - Aussage (Stufe 4): { text, wahr, kultur, grund } — nur eindeutige Fälle; grund erklärt die Lösung
    - Gab es das schon? (Stufe 4): { ding, bild, kultur, ja, grund } — nur eindeutige Fälle
-   - Quelle (Stufe 5): { text, bild, art, kultur } mit art fund (Fundstück), bau (Bauwerk), bild (Bild), text (Text);
+   - Quelle (Stufe 5): { text, bild, art, kultur, auch } mit art fund (Fundstück), bau (Bauwerk), bild (Bild), text (Text);
+       auch: Quellenarten, die ebenfalls passen (die bemalte Vase ist auch ein Fundstück) — nie zur Wahl;
        der Text nennt die Quellenart nicht beim Namen
    - Rätsel (Stufe 6): { kultur, hinweise: [drei Sätze] } — ohne den Namen der Kultur, vom Allgemeinen zum Konkreten
    Kulturen China und Griechen kommen erst ab Stufe 5 (Aussagen, Fragen und Quellen zu ihnen ebenso). */
@@ -306,12 +307,14 @@ const KK_QUELLEN = [
   { text: "Die Sphinx, ein Löwe mit Menschenkopf aus Stein.", bild: "🦁", art: "bau", kultur: "aegypten" },
   { text: "Eine Zeichnung eines Pharaos auf seinem Wagen.", bild: "svg:pharao", art: "bild", kultur: "aegypten" },
   // ab Stufe 5 (China und Griechen)
-  { text: "Ein Stück der Grossen Mauer, das über die Berge läuft.", bild: "🧱", art: "bau", kultur: "china" },
+  // Die heutige Grosse Mauer stammt grösstenteils aus der Ming-Zeit (vor rund 600 Jahren); von den Mauern vor über
+  // 2000 Jahren stehen Reste aus gestampfter Erde (Befund LERN_Session38, Beleg in der Befund-Datei)
+  { text: "Reste einer Mauer aus gestampfter Erde, die vor über 2000 Jahren im Norden gebaut wurde.", bild: "🧱", art: "bau", kultur: "china" },
   { text: "Ein Stück Seidenstoff aus einem alten Grab.", bild: "🧵", art: "fund", kultur: "china" },
   { text: "Schriftzeichen auf dünnen Streifen aus Bambus.", bild: "🎋", art: "text", kultur: "china" }, // ZU PRÜFEN: Bambusstreifen als Schriftträger
   { text: "Eine Malerei auf Seide: ein Kaiser mit seinen Dienern.", bild: "🎨", art: "bild", kultur: "china" },
   { text: "Die Säulen eines Tempels, die noch auf einem Hügel stehen.", bild: "🏛️", art: "bau", kultur: "griechen" },
-  { text: "Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen.", bild: "svg:vase-laeufer", art: "bild", kultur: "griechen" },
+  { text: "Eine Zeichnung auf einer Vase: Läufer bei den Wettkämpfen.", bild: "svg:vase-laeufer", art: "bild", kultur: "griechen", auch: ["fund"] },
   { text: "Ein Theaterstück, das vor über 2000 Jahren aufgeschrieben wurde und das wir heute noch lesen.", bild: "📜", art: "text", kultur: "griechen" },
   { text: "Ein Helm aus Bronze, den ein Taucher im Meer gefunden hat.", bild: "svg:helm-griechisch", art: "fund", kultur: "griechen" },
 ];

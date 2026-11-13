@@ -30,8 +30,8 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Blutkreislauf-Lotse | erledigt 2026-11-13 (LERN_Session39) | Durchgang 5 unten |
 | Bionik-Paare | erledigt 2026-11-13 (LERN_Session39, BK1 a) | Durchgang 5 unten |
 | Gemeinde-Helfer | erledigt 2026-11-13 (LERN_Session39); ID, Einkaufszentrum, Turnhalle, Abläufe vertretbar (ZU PRÜFEN) | Durchgang 5 unten |
-| Kulturen-Koffer | in Arbeit seit 2026-11-13 (LERN_Session39); behoben, Vase, Grosse Mauer, Katze, Augusta Raurica offen | Durchgang 5 unten |
-| übrige | offen | unten |
+| Kulturen-Koffer | erledigt 2026-11-13 (LERN_Session39); Heilige Katze und Augusta Raurica vertretbar | Durchgänge 5 und 8 unten |
+| Königs-Falle | erledigt 2026-11-13 (LERN_Session39); Figuren ohne Rolle, mehrere Mattzüge vertretbar | Durchgang 8 unten |
 
 **Behoben in LERN_Session38** (Belege: Wasserdampf unsichtbar [chemie.de, Lexikon Wasserdampf](https://www.chemie.de/lexikon/Wasserdampf.html);
 Pizzicato „das Zupfen einzelner Saiten mit den Fingern (ohne Bogen)“ (Raabe, Unterrichtsmaterial R0289); Klavier
@@ -165,6 +165,16 @@ Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die 
   Nacht bei Gute Nacht, Teddy, Gutenachtgeschichte vertretbar (vor dem Schlafen). Bilder ohne Satz beim Ordnen und bei
   „Welches passt nicht?“ vertretbar: Langes Drücken liest den Satz vor (die Hilfe sagt es); nur Bilder mit eindeutiger
   Tageszeit liessen für Mittag und Nachmittag keins übrig (Spaghetti, Suppe, Guetzli, Sirup passen auch anderswo).
+
+**Durchgang 8 (LERN_Session39)** — Beleg Grosse Mauer: [Shanghai Daily](https://www.shine.cn/feature/art-culture/1808311419/)
+(nur aus der Zusammenfassung der Suche: von der 2012 noch bestehenden Mauer stammen fast 9000 km aus der Ming-Zeit;
+ältere Abschnitte der Han-Zeit stehen als gestampfte Erde, etwa bei Jiayuguan):
+- Kulturen-Koffer: Quelle „Reste einer Mauer aus gestampfter Erde, die vor über 2000 Jahren im Norden gebaut wurde.“
+  statt „Ein Stück der Grossen Mauer, das über die Berge läuft.“; Feld `auch` bei den Quellen — die Vase ist Bild und
+  Fundstück, „Fundstück“ steht dort nicht zur Wahl. Heilige Katze vertretbar (eine Katze zu töten war verboten; die
+  Tempelopfer sind eine Feinheit, ZU PRÜFEN markiert); Augusta Raurica in Stufe 1 vertretbar (es entscheidet das Bild).
+- Königs-Falle: bei Kg7 „Der schwarze König steht nicht am Rand.“ statt „mitten auf dem Brett“. Figuren ohne Rolle und
+  mehrere Mattzüge nach der Antwort vertretbar (das Spiel nimmt jedes Matt an).
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

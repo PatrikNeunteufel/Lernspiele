@@ -118,7 +118,7 @@ const STELLUNGEN = [
   { stufe: "s4", fen: "8/8/4N3/5KR1/5N1k/8/8/8 w - - 0 1", hinweis: "Der schwarze König steht am rechten Rand. Dein Springer bewacht ein wichtiges Feld.", loesung: "Turm g5 → g4 matt" },
   { stufe: "s4", fen: "8/8/8/8/4R1K1/6BB/8/6k1 w - - 0 1", hinweis: "Der schwarze König steht am unteren Rand. Dein Läufer bewacht ein wichtiges Feld.", loesung: "Turm e4 → e1 matt" },
   { stufe: "s4", fen: "5k2/6N1/2Q3KB/4p3/8/8/8/8 w - - 0 1", hinweis: "Der schwarze König steht am oberen Rand. Dein Springer bewacht ein wichtiges Feld.", loesung: "Dame c6 → e8 matt" },
-  { stufe: "s4", fen: "7N/6k1/4Q1N1/6K1/8/8/8/8 w - - 0 1", hinweis: "Der schwarze König steht mitten auf dem Brett. Dein Springer bewacht ein wichtiges Feld.", loesung: "Dame e6 → f7 matt" },
+  { stufe: "s4", fen: "7N/6k1/4Q1N1/6K1/8/8/8/8 w - - 0 1", hinweis: "Der schwarze König steht nicht am Rand. Dein Springer bewacht ein wichtiges Feld.", loesung: "Dame e6 → f7 matt" },
   { stufe: "s4", fen: "8/6p1/4k1K1/1N6/5Q2/8/8/8 w - - 0 1", hinweis: "Der schwarze König steht mitten auf dem Brett. Dein Springer bewacht ein wichtiges Feld.", loesung: "Dame f4 → d6 matt" },
   { stufe: "s4", fen: "8/2N5/3R4/k7/8/2K5/8/8 w - - 0 1", hinweis: "Der schwarze König steht am linken Rand. Dein Springer bewacht ein wichtiges Feld.", loesung: "Turm d6 → a6 matt" },
   { stufe: "s4", fen: "8/8/8/5K2/B7/8/5Q2/2k5 w - - 0 1", hinweis: "Der schwarze König steht am unteren Rand. Dein Läufer bewacht ein wichtiges Feld.", loesung: "Dame f2 → c2 matt" },

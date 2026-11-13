@@ -2299,3 +2299,9 @@
   - Taschengeld-Planer (taschengeld-planer): „Blumen als Geschenk“ statt „Blumen für Mama“; Sparziel nie Bedarf (Velohelm,
     Turnschuhe …); Packgrössen je Ware statt 5, 6 oder 10 für alle (Feld Pack in woerter.js, Annahmen ZU PRÜFEN), die
     Prüfansicht zeigt sie, `pruefeAufgabe` meldet andere.
+- **Befunde, Durchgang 8 (letzter):**
+  - Kulturen-Koffer (kulturen-koffer): Quelle zum Alten China „Reste einer Mauer aus gestampfter Erde …“ statt eines
+    Stücks der heutigen Grossen Mauer (grösstenteils Ming-Zeit); Feld `auch` bei den Quellen, die bemalte Vase hat
+    „Fundstück“ nicht zur Wahl; Prüfansicht mit Spalte „passt auch“.
+  - Königs-Falle (koenig-falle): Hinweis bei Kg7 „nicht am Rand“ statt „mitten auf dem Brett“.
+  - Damit sind alle Befunde aus den Prüfansichten bearbeitet (Befund-Datei, Stand-Tabelle).

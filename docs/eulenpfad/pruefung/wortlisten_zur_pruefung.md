@@ -6570,7 +6570,7 @@ Quellenart: Fundstück, Bauwerk, Bild, Text.
 | 🪲 | Ein Glücksbringer in Käferform aus einem Grab. | Fundstück | Altes Ägypten | ☐ |
 | 🦁 | Die Sphinx, ein Löwe mit Menschenkopf aus Stein. | Bauwerk | Altes Ägypten | ☐ |
 | svg:pharao | Eine Zeichnung eines Pharaos auf seinem Wagen. | Bild | Altes Ägypten | ☐ |
-| 🧱 | Ein Stück der Grossen Mauer, das über die Berge läuft. | Bauwerk | Altes China | ☐ |
+| 🧱 | Reste einer Mauer aus gestampfter Erde, die vor über 2000 Jahren im Norden gebaut wurde. | Bauwerk | Altes China | ☐ |
 | 🧵 | Ein Stück Seidenstoff aus einem alten Grab. | Fundstück | Altes China | ☐ |
 | 🎋 | Schriftzeichen auf dünnen Streifen aus Bambus. | Text | Altes China | ☐ |
 | 🎨 | Eine Malerei auf Seide: ein Kaiser mit seinen Dienern. | Bild | Altes China | ☐ |
@@ -7032,7 +7032,7 @@ Selbst gebaut und von der Regel-Maschine geprüft (genau ein Mattzug, s6 Matt in
 | s4 | 8/8/4N3/5KR1/5N1k/8/8/8 | Der schwarze König steht am rechten Rand. Dein Springer bewacht ein wichtiges Feld. | Turm g5 → g4 matt | ☐ |
 | s4 | 8/8/8/8/4R1K1/6BB/8/6k1 | Der schwarze König steht am unteren Rand. Dein Läufer bewacht ein wichtiges Feld. | Turm e4 → e1 matt | ☐ |
 | s4 | 5k2/6N1/2Q3KB/4p3/8/8/8/8 | Der schwarze König steht am oberen Rand. Dein Springer bewacht ein wichtiges Feld. | Dame c6 → e8 matt | ☐ |
-| s4 | 7N/6k1/4Q1N1/6K1/8/8/8/8 | Der schwarze König steht mitten auf dem Brett. Dein Springer bewacht ein wichtiges Feld. | Dame e6 → f7 matt | ☐ |
+| s4 | 7N/6k1/4Q1N1/6K1/8/8/8/8 | Der schwarze König steht nicht am Rand. Dein Springer bewacht ein wichtiges Feld. | Dame e6 → f7 matt | ☐ |
 | s4 | 8/6p1/4k1K1/1N6/5Q2/8/8/8 | Der schwarze König steht mitten auf dem Brett. Dein Springer bewacht ein wichtiges Feld. | Dame f4 → d6 matt | ☐ |
 | s4 | 8/2N5/3R4/k7/8/2K5/8/8 | Der schwarze König steht am linken Rand. Dein Springer bewacht ein wichtiges Feld. | Turm d6 → a6 matt | ☐ |
 | s4 | 8/8/8/5K2/B7/8/5Q2/2k5 | Der schwarze König steht am unteren Rand. Dein Läufer bewacht ein wichtiges Feld. | Dame f2 → c2 matt | ☐ |

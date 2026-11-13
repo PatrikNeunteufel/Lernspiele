@@ -88,13 +88,13 @@
         eintraege: () => Object.values(KK_QUELLENARTEN),
         zeile: q => [q.bild, q.name, q.erklaerung],
       }, {
-        id: "quelle", titel: "Woher wissen wir das?", spalten: ["Bild", "Quelle", "Kultur"],
+        id: "quelle", titel: "Woher wissen wir das?", spalten: ["Bild", "Quelle", "Kultur", "passt auch (nie zur Wahl)"],
         hinweis: `${stufenText("quelle")}. Je Quellenart eine Gruppe. Ist die Quelle eindeutig von dieser Art und von `
-          + "keiner anderen (etwa eine Malerei auf einer Vase: Bild oder Fundstück)? Nennt der Text die Art nicht? Stimmt die "
-          + "Sache, und gehört sie zur Kultur?",
+          + "keiner anderen? Passt eine zweite Art ebenso (etwa die Malerei auf einer Vase: Bild und Fundstück), steht sie unter "
+          + "„passt auch“ und nie zur Wahl. Nennt der Text die Art nicht? Stimmt die Sache, und gehört sie zur Kultur?",
         eintraege: () => KK_QUELLEN,
         gruppe: q => KK_QUELLENARTEN[q.art]?.name || q.art,
-        zeile: q => [q.bild, q.text, kulturName(q.kultur)],
+        zeile: q => [q.bild, q.text, kulturName(q.kultur), (q.auch || []).map(id => KK_QUELLENARTEN[id].name).join(", ") || "—"],
       }, {
         id: "raetsel", titel: "Welche Kultur bin ich?", spalten: ["Hinweis 1", "Hinweis 2", "Hinweis 3"],
         hinweis: `${stufenText("raetsel")}, zur Wahl alle fünf Kulturen. Je Kultur eine Gruppe. Gehen die Hinweise `

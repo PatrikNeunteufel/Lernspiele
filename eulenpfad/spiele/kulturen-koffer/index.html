@@ -154,7 +154,8 @@ const ARTEN = {
     return { art: "gab", g: waehle(KK_GAB.filter(g => kulturInStufe(g, stufe))) };
   },
   quelle() {
-    return { art: "quelle", q: waehle(KK_QUELLEN), optionen: Object.keys(KK_QUELLENARTEN) };
+    const q = waehle(KK_QUELLEN);
+    return { art: "quelle", q, optionen: Object.keys(KK_QUELLENARTEN).filter(id => !(q.auch || []).includes(id)) };
   },
   raetsel() {
     return { art: "raetsel", r: waehle(KK_RAETSEL), optionen: mische(ALLE) };
@@ -248,9 +249,10 @@ function pruefeAufgabe(a, stufe) {
   if (a.art === "quelle") {
     if (!KK_QUELLEN.includes(a.q)) m.push("Quelle nicht aus der Liste");
     if (!KK_QUELLENARTEN[a.q.art]) m.push(`Quellenart ${a.q.art} unbekannt`);
+    if ((a.q.auch || []).some(id => a.optionen.includes(id))) m.push("Quellenart, die ebenfalls passt, zur Wahl");
     else if (nameIn(KK_QUELLENARTEN[a.q.art].name, a.q.text)) m.push("Quellentext nennt die Quellenart");
     if (!K[a.q.kultur]) m.push(`Kultur ${a.q.kultur} unbekannt`);
-    if (doppelt(a.optionen) || a.optionen.length !== 4 || !a.optionen.includes(a.q.art)) m.push("Quellenarten zur Wahl falsch");
+    if (doppelt(a.optionen) || a.optionen.length !== 4 - (a.q.auch || []).length || !a.optionen.includes(a.q.art)) m.push("Quellenarten zur Wahl falsch");
   }
   if (a.art === "raetsel") {
     if (!KK_RAETSEL.includes(a.r)) m.push("Rätsel nicht aus der Liste");
