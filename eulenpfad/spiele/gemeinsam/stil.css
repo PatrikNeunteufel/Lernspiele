@@ -654,7 +654,9 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 .pruef-tabelle th, .pruef-tabelle td { border-bottom: 1px solid var(--trennlinie); background: none; padding: 6px 10px; vertical-align: top; }
 .pruef-tabelle th { white-space: nowrap; }
 .pruef-tabelle td { width: 1%; white-space: nowrap; }
-.pruef-tabelle td.lang { width: auto; white-space: normal; min-width: 12em; }
+/* PT1 a (LERN_Session38): 8em statt 12em — bei vier bis fünf langen Spalten passt die Zeile so in den Dialog; was nur
+   seitlich zu sehen ist, wird beim Abhaken leicht übersehen. Seitliches Scrollen bleibt als Notlösung. */
+.pruef-tabelle td.lang { width: auto; white-space: normal; min-width: 8em; }
 .pruef-tabelle .pruef-haken input { width: 22px; height: 22px; }
 .pruef-e { margin-left: 4px; font-size: 12px; font-weight: 800; color: var(--gut); }
 .pruef-bild svg { width: 110px; height: auto; display: block; }

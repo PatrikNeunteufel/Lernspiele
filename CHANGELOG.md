@@ -2142,3 +2142,6 @@
   `VORRAT_ALLE`, `KANDIDATEN`, `zusatzText`, `legendeName`, `legendeZeichen`, `kurzformen`, `wareAus` (Aufgaben unverändert:
   je Stufe 400 bis 500 Aufgaben mit festen Startwerten vorher und nachher byte-gleich). Prüfstand und Fingerabdrücke
   unverändert.
+- **Prüftabellen (PT1 a):** lange Spalten mindestens 8em statt 12em breit — die breitesten Tabellen (Wassertropfen-Reise,
+  Velo-Fragen, Erdzeit-Leiter, Kurzschluss) passen bei 1024 px ganz in den Dialog, hell und dunkel angesehen; seitliches
+  Scrollen bleibt als Notlösung.
