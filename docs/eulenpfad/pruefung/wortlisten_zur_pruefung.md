@@ -4187,7 +4187,7 @@ Energieformen: el = name: elektrische Energie; bild: ⚡; bew = name: Bewegungse
 
 | Gerät | ☐ |
 |---|---|
-| name: Föhn; bild: 💇; strom: ja; von: el; zu: waerme · bew; text: Im Föhn wird ein Draht heiss, und ein kleiner Motor dreht den Ventilator: Warme Luft strömt hinaus. | ☐ |
+| name: Föhn; bild: svg:foehn; strom: ja; von: el; zu: waerme · bew; text: Im Föhn wird ein Draht heiss, und ein kleiner Motor dreht den Ventilator: Warme Luft strömt hinaus. | ☐ |
 | name: Wasserkocher; bild: 🫖; strom: ja; von: el; zu: waerme; text: Eine Heizplatte im Boden wird heiss und erwärmt das Wasser. | ☐ |
 | name: Toaster; bild: 🍞; strom: ja; von: el; zu: waerme; auch: licht; text: Die Drähte im Toaster glühen und rösten das Brot. | ☐ |
 | name: Bügeleisen; bild: 👔; strom: ja; von: el; zu: waerme; text: Die Platte des Bügeleisens wird heiss und glättet die Kleider. | ☐ |
@@ -4195,10 +4195,10 @@ Energieformen: el = name: elektrische Energie; bild: ⚡; bew = name: Bewegungse
 | name: LED-Lampe; bild: 💡; strom: ja; von: el; zu: licht; auch: waerme; text: Die Lampe macht aus elektrischer Energie Licht. Ein kleiner Teil wird zu Wärme. | ☐ |
 | name: Bildschirm; bild: 📺; strom: ja; von: el; zu: licht; auch: waerme; text: Der Bildschirm leuchtet: Aus elektrischer Energie wird Licht, ein wenig auch Wärme. | ☐ |
 | name: Taschenlampe; bild: 🔦; strom: ja; von: chem; zu: licht; auch: el · waerme; text: Die Batterie gibt aus ihrer chemischen Energie Strom ab. Die Lampe macht daraus Licht. | ☐ |
-| name: Staubsauger; bild: 🧹; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Motor dreht ein Gebläse. Es saugt die Luft mit dem Staub an. | ☐ |
+| name: Staubsauger; bild: svg:staubsauger; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Motor dreht ein Gebläse. Es saugt die Luft mit dem Staub an. | ☐ |
 | name: Ventilator; bild: 🌀; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht die Flügel und bewegt die Luft. | ☐ |
 | name: Mixer; bild: 🥤; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht die Messer. | ☐ |
-| name: Bohrmaschine; bild: 🪛; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht den Bohrer. | ☐ |
+| name: Bohrmaschine; bild: svg:bohrmaschine; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht den Bohrer. | ☐ |
 | name: Waschmaschine; bild: 🧺; strom: ja; von: el; zu: bew · waerme; text: Der Motor dreht die Trommel, und eine Heizung wärmt das Wasser. | ☐ |
 | name: Zug der SBB; bild: 🚆; strom: ja; von: el; zu: bew; auch: waerme; text: Die Züge der SBB fahren mit Strom aus der Fahrleitung. Elektromotoren treiben die Räder an. | ☐ |
 | name: Lift; bild: 🛗; strom: ja; von: el; zu: lage; auch: bew · waerme; text: Der Motor zieht die Kabine hoch. Oben hat sie mehr Lageenergie als unten. | ☐ |
@@ -4207,8 +4207,8 @@ Energieformen: el = name: elektrische Energie; bild: ⚡; bew = name: Bewegungse
 | name: Holzofen; bild: 🪵; strom: nein; von: chem; zu: waerme; auch: licht; erneuerbar: ja; text: Holz brennt und gibt Wärme ab. Holz ist erneuerbar: Im Wald wachsen neue Bäume nach. | ☐ |
 | name: Batterie; bild: 🔋; strom: null; von: chem; zu: el; text: Eine Batterie speichert chemische Energie. Im Stromkreis gibt sie elektrische Energie ab. | ☐ |
 | name: Velodynamo; bild: 🚲; strom: nein; von: bew; zu: el; auch: waerme; text: Das Rad dreht den Dynamo. Er ist ein kleiner Generator und macht aus Bewegung Strom für die Velolampe. | ☐ |
-| name: Generator; bild: ⚙️; strom: nein; von: bew; zu: el; auch: waerme; text: Ein Generator macht aus einer Drehbewegung elektrische Energie. In jedem Kraftwerk dreht sich einer. | ☐ |
-| name: Velobremse beim Bremsen; bild: 🛑; strom: nein; von: bew; zu: waerme; text: Die Bremsklötze reiben am Rad. Aus Bewegungsenergie wird Wärme: Die Bremse wird warm. | ☐ |
+| name: Generator; bild: svg:generator; strom: nein; von: bew; zu: el; auch: waerme; text: Ein Generator macht aus einer Drehbewegung elektrische Energie. In jedem Kraftwerk dreht sich einer. | ☐ |
+| name: Velobremse beim Bremsen; bild: svg:velobremse; strom: nein; von: bew; zu: waerme; text: Die Bremsklötze reiben am Rad. Aus Bewegungsenergie wird Wärme: Die Bremse wird warm. | ☐ |
 | name: Kuckucksuhr mit Gewichten; bild: 🕰️; strom: nein; von: lage; zu: bew; text: Die schweren Gewichte sinken langsam nach unten. Ihre Lageenergie treibt das Uhrwerk an. | ☐ |
 | name: Solarzelle; bild: 🔆; strom: nein; von: licht; zu: el; auch: waerme; erneuerbar: ja; kraftwerk: ja; text: Die Solarzelle macht aus Sonnenlicht direkt elektrische Energie. | ☐ |
 | name: Muskeln; bild: 💪; strom: null; von: chem; zu: bew; auch: waerme; text: Die Muskeln gewinnen aus der Nahrung Energie für die Bewegung. Dabei wird dir auch warm. | ☐ |
@@ -6768,10 +6768,10 @@ Lärm-Skala 1 (sehr leise) bis 5 (sehr laut), grobe Reihung.
 | 🐦 | Ein Vogel zwitschert | 2 | lang | im Garten am Morgen | ☐ |
 | 🚰 | Wasser aus dem Hahn | 2 | lang | in der Küche | ☐ |
 | 📻 | Leise Musik aus dem Radio | 2 | lang | in der Küche | ☐ |
-| 🧹 | Staubsauger | 3 | lang | zu Hause beim Putzen | ☐ |
+| svg:staubsauger | Staubsauger | 3 | lang | zu Hause beim Putzen | ☐ |
 | 🔔 | Die Schulglocke | 3 | kurz | im Schulhaus | ☐ |
 | 🐕 | Ein Hund bellt | 3 | kurz | auf der Strasse | ☐ |
-| 💨 | Haarföhn | 3 | lang | im Badezimmer | ☐ |
+| svg:foehn | Haarföhn | 3 | lang | im Badezimmer | ☐ |
 | 🏫 | Die Pause auf dem Schulhof | 3 | lang | auf dem Pausenplatz | ☐ |
 | 🚲 | Eine Velo-Klingel | 3 | kurz | auf dem Schulweg | ☐ |
 | 🚜 | Rasenmäher | 4 | lang | im Garten | ☐ |
@@ -6816,14 +6816,14 @@ Wirkung 2 hilft gut, 1 ein wenig, 0 nicht.
 
 | Bild | Name | Wirkung | Umschreibung | Hinweis | ☐ |
 |---|---|---|---|---|---|
-| 👂 | Ohrstöpsel | 2 | etwas Kleines, Weiches, das du dir in beide Ohren steckst | Ohrstöpsel steckt man in die Ohren, wenn man weiss, dass es lange laut wird. | ☐ |
-| 🎧 | Gehörschutz | 2 | grosse Kapseln, die du über beide Ohren setzt — wie dicke Kopfhörer ohne Musik | Ein Gehörschutz sind dicke Kapseln über den Ohren, für Maschinen und Motoren. | ☐ |
+| svg:ohrstoepsel | Ohrstöpsel | 2 | etwas Kleines, Weiches, das du dir in beide Ohren steckst | Ohrstöpsel steckt man in die Ohren, wenn man weiss, dass es lange laut wird. | ☐ |
+| svg:gehoerschutz | Gehörschutz | 2 | grosse Kapseln, die du über beide Ohren setzt — wie dicke Kopfhörer ohne Musik | Ein Gehörschutz sind dicke Kapseln über den Ohren, für Maschinen und Motoren. | ☐ |
 | 🔉 | Kopfhörer leiser stellen | 2 | am Regler drehen, bis die Musik angenehm ist | Leiser stellen hilft nur, wenn der Lärm aus deinen eigenen Kopfhörern kommt. | ☐ |
 | 🚶 | Abstand nehmen | 2 | ein Stück weiter weg gehen — je weiter weg, desto ruhiger | Abstand nehmen hilft, wenn du selbst weggehen kannst: Weiter weg ist es ruhiger. | ☐ |
 | 🪟 | Fenster schliessen | 2 | den Lärm von draussen aussperren, damit er nicht ins Zimmer kommt | Das Fenster zu schliessen hilft nur drinnen, wenn der Lärm von draussen kommt. | ☐ |
 | 🧱 | Lärmschutzwand | 2 | eine hohe Mauer zwischen der Strasse oder den Gleisen und den Häusern | Eine Lärmschutzwand ist eine hohe Mauer an einer Strasse oder Bahnlinie. Die baut man nicht an ein Fest. | ☐ |
 | 🙉 | Hände auf die Ohren | 1 | schnell die Ohren zuhalten — hilft nur kurz und nicht ganz dicht | Die Hände auf den Ohren helfen nur kurz und nicht dicht. Für langen Lärm gibt es Besseres. | ☐ |
-| 🤫 | Pause in der Stille | 1 | zwischendurch an einen ruhigen Ort gehen und die Ohren ausruhen lassen | Eine Pause in der Stille tut den Ohren gut, aber der Lärm ist danach noch da. | ☐ |
+| 🧘 | Pause in der Stille | 1 | zwischendurch an einen ruhigen Ort gehen und die Ohren ausruhen lassen | Eine Pause in der Stille tut den Ohren gut, aber der Lärm ist danach noch da. | ☐ |
 | 🕶️ | Sonnenbrille aufsetzen | 0 |  | Eine Sonnenbrille schützt die Augen vor Licht. Deine Ohren merken davon nichts. | ☐ |
 | 🙈 | Augen schliessen | 0 |  | Mit geschlossenen Augen hörst du genau gleich viel. | ☐ |
 | 🧤 | Handschuhe anziehen | 0 |  | Handschuhe wärmen die Hände. Mit den Ohren haben sie nichts zu tun. | ☐ |
@@ -6922,12 +6922,12 @@ Die erste Antwort ist die richtige.
 
 | Bild | Stoff | dämpft | ☐ |
 |---|---|---|---|
-| 🧶 | Dicker Teppich | true | ☐ |
-| 🪟 | Schwerer Vorhang | true | ☐ |
+| svg:teppich | Dicker Teppich | true | ☐ |
+| svg:vorhang | Schwerer Vorhang | true | ☐ |
 | ❄️ | Frischer Schnee | true | ☐ |
-| 🛏️ | Kissen | true | ☐ |
+| svg:kissen | Kissen | true | ☐ |
 | 🧣 | Wolldecke | true | ☐ |
-| 🧱 | Glatte Fliesen | false | ☐ |
+| svg:fliesen | Glatte Fliesen | false | ☐ |
 | 🪞 | Glasscheibe | false | ☐ |
 | 🏢 | Betonwand | false | ☐ |
 | 🔩 | Metallplatte | false | ☐ |

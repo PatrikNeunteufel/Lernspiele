@@ -14,11 +14,12 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Instrumenten-Kenner | erledigt 2026-11-13 (LERN_Session38, BI1 a, IK2 a) | unten |
 | Wassertropfen-Reise | erledigt 2026-11-13 (LERN_Session38, WT1 a) | unten |
 | „Bild verrät“ in zehn Spielen | erledigt 2026-11-13 (LERN_Session38, BI1 a; neun behoben, ein Scheinfund) | Tabelle unten |
-| Lärm-Wächter | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Bilder (BI1) und Lärm-Skala offen | unten |
+| Lärm-Wächter | erledigt 2026-11-13 (LERN_Session39); Skala vertretbar | Durchgang 6 unten |
+| Kakao-Weg | in Arbeit seit 2026-11-13 (LERN_Session39); Papierweg als Entscheid KW1 offen | Durchgang 6 unten |
 | Erdzeit-Leiter | erledigt 2026-11-13 (LERN_Session38) bis auf die Schreibweise „2 500 000“ | Durchgang 3 unten |
 | Zeitstrahl-Sortierer | erledigt 2026-11-13 (LERN_Session38); Pfahlbauten und Urgrosseltern vertretbar | Durchgang 3 unten |
-| Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session38); schwache Ablenker und Bleistiftmine im Versuch offen | Durchgang 3 unten |
-| Energie-Wandler | erledigt 2026-11-13 (LERN_Session38); Bilder (Staubsauger 🧹 …) offen | Durchgang 3 unten |
+| Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session39); Bleistiftmine im Versuch vertretbar | Durchgang 6 unten |
+| Energie-Wandler | erledigt 2026-11-13 (LERN_Session39) | Durchgang 6 unten |
 | Schulweg-Profi | erledigt 2026-11-13 (LERN_Session38); Fussgängerstreifen als sicherster Ort vertretbar | Durchgang 4 unten |
 | Echt oder erfunden? | erledigt 2026-11-13 (LERN_Session38, EO1 a) | Durchgang 4 unten |
 | Wetter und Jahreszeiten | erledigt 2026-11-13 (LERN_Session38); Grenzfälle der Jahreszeiten vertretbar | Durchgang 4 unten |
@@ -121,6 +122,24 @@ Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die 
   Ablenker beim Schwimmen Bibliothek und Spital statt Schule; Tipp „öffentlich“ als Frage.
 - Kulturen-Koffer: Tonkrug als Ding entfernt; `auch` ergänzt; China, Kompass, Schriftzeichen, Cäsar, Bauwerk, Rätsel
   Griechen 2; Bilder flechtwand, mosaik, seeuferDorf.
+
+**Durchgang 6 (LERN_Session39)** — Belege, Websuche (Standard) und ein Seitenabruf:
+- Stromkreis-Bauer: Bei „Warum brennt die Lampe nicht?“ kommen als falsche Gründe zuerst die, deren Teil (Schalter,
+  Gegenstand, oranger Draht) im Bild vorkommt (`grundImBild`, `falscheGruende`; `pruefeAufgabe` meldet es). Bleistiftmine
+  im Versuch: nicht geändert — sie leitet, nur schwach; der Name sagt „Mine“.
+- Energie-Wandler: Föhn, Staubsauger, Bohrmaschine, Generator und Velobremse gezeichnet (`bilder.js`), bilder.js eingebunden.
+- Lärm-Wächter: Gehörschutz, Ohrstöpsel, Vorhang, Fliesen, Teppich und Kissen gezeichnet, Staubsauger und Föhn aus dem
+  Energie-Wandler, Pause in der Stille 🧘 statt 🤫 (glich dem Flüstern). Skala nicht geändert: Föhn etwa 75–98 dB, Mixer
+  etwa 70–80 dB, über 80 auf höchster Stufe (nur aus der Zusammenfassung der Suche: [Ratgeber Haartrockner](https://testundtipps.de/familie-haustiere/koerperpflege/haartrockner/haartrockner-leise),
+  [antwort.net Handmixer](https://www.antwort.net/a/antwort.net/wie-laut-ist-ein-durchschnittlicher-handmixer-im-betrieb.html)) —
+  der Föhn ist nicht leiser, aber Stufe 3 kommt nur beim Ordnen zwischen 1 und 5 vor, nie gegen den Mixer. Schulglocke:
+  kein Messwert gefunden.
+- Kakao-Weg, Papier: BAFU, [Papier und Karton](https://www.bafu.admin.ch/de/papier-und-karton) (veröffentlicht 26.10.2021):
+  „Zur Herstellung von 1,2 Millionen Tonnen Papier werden in der Schweiz jährlich ca. 1 Mio. Tonnen Faserstoffe benötigt.“
+  und „90% davon werden durch die Wiederverwertung von Altpapier gewonnen.“ Die einzige Zellulosefabrik der Schweiz
+  (Attisholz) schloss Ende 2008 ([SRF](https://www.srf.ch/news/schweiz/groesste-industriebrache-von-der-zelluloseproduktion-zum-hippen-dorf-an-der-aare),
+  nur aus der Zusammenfassung der Suche). Der Weg „Forstwarte fällen Bäume für Papierholz … in die Papierfabrik“ mit
+  Herkunft Schweiz stimmt so nicht — Entscheid KW1.
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

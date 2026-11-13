@@ -53,6 +53,7 @@
 <script src="../gemeinsam/avatare.js"></script>
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
@@ -296,7 +297,7 @@ function pruefeAufgabe(a, stufe) {
 // ---------- Darstellung ----------
 
 function glied(inhalt, klasse) {
-  return el("div", { class: `glied ${klasse}` }, el("span", { class: "bild", text: inhalt.bild }), el("span", { text: inhalt.text }));
+  return el("div", { class: `glied ${klasse}` }, LS.bild(inhalt.bild), el("span", { text: inhalt.text }));
 }
 const offen = () => glied({ bild: "?", text: "" }, "form offen");
 const pfeilK = () => el("span", { class: "pfeil-k", "aria-hidden": "true", text: "→" });
@@ -316,7 +317,7 @@ function ketteEl(k, { offenesGeraet = -1, offeneForm = -1, geraete = k.geraete, 
 
 /** Texte der Knöpfe, die der Reihe nach richtig sind (für Prüfskripte). */
 function loesungsTexte(a) {
-  const t = inh => `${inh.bild}${inh.text}`;
+  const t = inh => `${inh.bild && !LS.istZeichnung(inh.bild) ? inh.bild : ""}${inh.text}`;
   switch (a.art) {
     case "strom": case "erneuerbar": return [t(jaNein(a.art)(a.richtig))];
     case "woher": case "wohin": case "kraftwerk": case "mitte": return [t(formInhalt(a.richtig))];
@@ -436,7 +437,7 @@ LS.spiel({
     if (a.art === "ordnen") {
       const loesung = a.reihe.map(w => teilInhalt(w).text).join(" → ");
       f.append(el("div", { class: "frage", text: `Am Anfang: ${k.anfang}. Bau die Kette: Tipp der Reihe nach Energie, Wandler, Energie …` }));
-      LS.reihenfolge(ctx, { reihe: a.reihe, inhalt: teilInhalt, ablage: w => `${teilInhalt(w).bild} ${teilInhalt(w).text}`, pfeile: true, breite: 160, loesung,
+      LS.reihenfolge(ctx, { reihe: a.reihe, inhalt: teilInhalt, ablage: w => LS.mitBildText(teilInhalt(w).bild, teilInhalt(w).text), pfeile: true, breite: 160, loesung,
         hinweis: "Das kommt noch nicht. Was kommt aus dem letzten Teil heraus, und welcher Wandler nimmt genau das auf?", lob: "Die ganze Kette stimmt! 🎉" }).box.classList.add("ew-kurz");
       return;
     }

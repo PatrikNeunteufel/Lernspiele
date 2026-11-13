@@ -2271,3 +2271,12 @@
 - **Prüfansicht: Zeichnungen mit Grossbuchstaben (Fehler):** `LS.zelleMitBildern` erkannte nur `svg:[a-z0-9-]+` — Namen
   wie `baumKahl`, `stoffHolz`, `lrWald` erschienen in der Prüfansicht als ❔. Jetzt `LS.ZEICHNUNG_IM_TEXT`;
   `tools/pruefe_pruefansicht.js` prüft jede Zeichnung in den Zellen gegen die Bildersammlung.
+- **Befunde, Durchgang 6:**
+  - Stromkreis-Bauer (stromkreis-bauer): Bei „Warum brennt die Lampe nicht?“ kommen als falsche Gründe zuerst die, deren
+    Teil im Bild vorkommt — kein offener Schalter ohne Schalter, kein Gegenstand ohne Lücke, kein Kurzschluss ohne orangen
+    Draht, solange es andere gibt (`falscheGruende`, `pruefeAufgabe` meldet es).
+  - Energie-Wandler (energie-wandler): Föhn, Staubsauger, Bohrmaschine, Generator und Velobremse gezeichnet (`bilder.js`;
+    vorher 💇, 🧹, 🪛, ⚙️, 🛑), bilder.js eingebunden.
+  - Lärm-Wächter (laerm-waechter): Gehörschutz, Ohrstöpsel, Vorhang, Fliesen, Teppich und Kissen gezeichnet, Staubsauger
+    und Föhn wie im Energie-Wandler, Pause in der Stille 🧘; Lösungstexte über `LS.mitBildText`, bilder.js eingebunden.
+    Skala unverändert (Stufe 3 kommt nur beim Ordnen zwischen 1 und 5 vor).

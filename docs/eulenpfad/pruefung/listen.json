@@ -19902,7 +19902,7 @@
         ],
         "zeilen": [
           [
-            "name: Föhn; bild: 💇; strom: ja; von: el; zu: waerme · bew; text: Im Föhn wird ein Draht heiss, und ein kleiner Motor dreht den Ventilator: Warme Luft strömt hinaus."
+            "name: Föhn; bild: svg:foehn; strom: ja; von: el; zu: waerme · bew; text: Im Föhn wird ein Draht heiss, und ein kleiner Motor dreht den Ventilator: Warme Luft strömt hinaus."
           ],
           [
             "name: Wasserkocher; bild: 🫖; strom: ja; von: el; zu: waerme; text: Eine Heizplatte im Boden wird heiss und erwärmt das Wasser."
@@ -19926,7 +19926,7 @@
             "name: Taschenlampe; bild: 🔦; strom: ja; von: chem; zu: licht; auch: el · waerme; text: Die Batterie gibt aus ihrer chemischen Energie Strom ab. Die Lampe macht daraus Licht."
           ],
           [
-            "name: Staubsauger; bild: 🧹; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Motor dreht ein Gebläse. Es saugt die Luft mit dem Staub an."
+            "name: Staubsauger; bild: svg:staubsauger; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Motor dreht ein Gebläse. Es saugt die Luft mit dem Staub an."
           ],
           [
             "name: Ventilator; bild: 🌀; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht die Flügel und bewegt die Luft."
@@ -19935,7 +19935,7 @@
             "name: Mixer; bild: 🥤; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht die Messer."
           ],
           [
-            "name: Bohrmaschine; bild: 🪛; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht den Bohrer."
+            "name: Bohrmaschine; bild: svg:bohrmaschine; strom: ja; von: el; zu: bew; auch: waerme; text: Ein Elektromotor dreht den Bohrer."
           ],
           [
             "name: Waschmaschine; bild: 🧺; strom: ja; von: el; zu: bew · waerme; text: Der Motor dreht die Trommel, und eine Heizung wärmt das Wasser."
@@ -19962,10 +19962,10 @@
             "name: Velodynamo; bild: 🚲; strom: nein; von: bew; zu: el; auch: waerme; text: Das Rad dreht den Dynamo. Er ist ein kleiner Generator und macht aus Bewegung Strom für die Velolampe."
           ],
           [
-            "name: Generator; bild: ⚙️; strom: nein; von: bew; zu: el; auch: waerme; text: Ein Generator macht aus einer Drehbewegung elektrische Energie. In jedem Kraftwerk dreht sich einer."
+            "name: Generator; bild: svg:generator; strom: nein; von: bew; zu: el; auch: waerme; text: Ein Generator macht aus einer Drehbewegung elektrische Energie. In jedem Kraftwerk dreht sich einer."
           ],
           [
-            "name: Velobremse beim Bremsen; bild: 🛑; strom: nein; von: bew; zu: waerme; text: Die Bremsklötze reiben am Rad. Aus Bewegungsenergie wird Wärme: Die Bremse wird warm."
+            "name: Velobremse beim Bremsen; bild: svg:velobremse; strom: nein; von: bew; zu: waerme; text: Die Bremsklötze reiben am Rad. Aus Bewegungsenergie wird Wärme: Die Bremse wird warm."
           ],
           [
             "name: Kuckucksuhr mit Gewichten; bild: 🕰️; strom: nein; von: lage; zu: bew; text: Die schweren Gewichte sinken langsam nach unten. Ihre Lageenergie treibt das Uhrwerk an."
@@ -33759,7 +33759,7 @@
             "in der Küche"
           ],
           [
-            "🧹",
+            "svg:staubsauger",
             "Staubsauger",
             "3",
             "lang",
@@ -33780,7 +33780,7 @@
             "auf der Strasse"
           ],
           [
-            "💨",
+            "svg:foehn",
             "Haarföhn",
             "3",
             "lang",
@@ -34007,14 +34007,14 @@
         ],
         "zeilen": [
           [
-            "👂",
+            "svg:ohrstoepsel",
             "Ohrstöpsel",
             "2",
             "etwas Kleines, Weiches, das du dir in beide Ohren steckst",
             "Ohrstöpsel steckt man in die Ohren, wenn man weiss, dass es lange laut wird."
           ],
           [
-            "🎧",
+            "svg:gehoerschutz",
             "Gehörschutz",
             "2",
             "grosse Kapseln, die du über beide Ohren setzt — wie dicke Kopfhörer ohne Musik",
@@ -34056,7 +34056,7 @@
             "Die Hände auf den Ohren helfen nur kurz und nicht dicht. Für langen Lärm gibt es Besseres."
           ],
           [
-            "🤫",
+            "🧘",
             "Pause in der Stille",
             "1",
             "zwischendurch an einen ruhigen Ort gehen und die Ohren ausruhen lassen",
@@ -34571,12 +34571,12 @@
         ],
         "zeilen": [
           [
-            "🧶",
+            "svg:teppich",
             "Dicker Teppich",
             "true"
           ],
           [
-            "🪟",
+            "svg:vorhang",
             "Schwerer Vorhang",
             "true"
           ],
@@ -34586,7 +34586,7 @@
             "true"
           ],
           [
-            "🛏️",
+            "svg:kissen",
             "Kissen",
             "true"
           ],
@@ -34596,7 +34596,7 @@
             "true"
           ],
           [
-            "🧱",
+            "svg:fliesen",
             "Glatte Fliesen",
             "false"
           ],

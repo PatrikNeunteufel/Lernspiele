@@ -745,6 +745,70 @@ const BILDER = (() => {
         + [0, 1, 2, 3].flatMap(r => [0, 1, 2].map(c => [56 + c * 12, 26 + r * 16]))
           .map(([x, y]) => `<path d="M${x} ${y} V${y + 16} Q${x + 6} ${y + 21} ${x + 12} ${y + 16} V${y} Z" fill="#b07a45" stroke="#7a4f26" stroke-width="1.5"/>`).join("") },
 
+    // Energie-Wandler (BI1 a, Befund LERN_Session38): die Emojis zeigten etwas anderes — Föhn 💇 (Haarschnitt),
+    // Staubsauger 🧹 (Besen), Bohrmaschine 🪛 (Schraubenzieher), Generator ⚙️ (Zahnrad), Velobremse 🛑 (Stoppschild)
+    foehn: { name: "Föhn (Haartrockner, warme Luft strömt vorne hinaus)", box: "0 0 100 100",
+      svg: `<path d="M14 30 H58 Q70 30 70 42 Q70 54 58 54 H14 Q8 54 8 42 Q8 30 14 30 Z" fill="#e2483d" stroke="#9e2c24" stroke-width="2.2"/>`
+        + `<rect x="66" y="34" width="10" height="16" rx="2" fill="#4a505b"/>`
+        + `<path d="M30 54 L26 88 Q32 92 40 88 L44 54 Z" fill="#e2483d" stroke="#9e2c24" stroke-width="2.2"/>`
+        + `<circle cx="22" cy="42" r="7" fill="#f4a39c" stroke="#9e2c24" stroke-width="1.6"/>`
+        + [36, 42, 48].map(y => `<path d="M80 ${y} q5 -4 10 0 t10 0" stroke="#e8902b" stroke-width="2.6" fill="none" stroke-linecap="round"/>`).join("") },
+    staubsauger: { name: "Staubsauger (Gerät auf Rädern mit Schlauch und Bodendüse)", box: "0 0 100 100",
+      svg: `<path d="M44 66 Q44 26 70 22 L76 20" stroke="#4a505b" stroke-width="5" fill="none" stroke-linecap="round"/>`
+        + `<path d="M76 20 L84 84" stroke="#8a929e" stroke-width="5" stroke-linecap="round"/><rect x="72" y="82" width="22" height="7" rx="3" fill="#4a505b"/>`
+        + `<path d="M8 84 Q8 56 32 54 L48 54 Q58 56 58 70 L58 84 Z" fill="#4d93dc" stroke="#2f5f8a" stroke-width="2.2"/>`
+        + `<circle cx="18" cy="86" r="6" fill="#3a3d4a"/><circle cx="48" cy="86" r="6" fill="#3a3d4a"/>`
+        + `<path d="M20 64 H40" stroke="#2f5f8a" stroke-width="2" stroke-linecap="round"/>` },
+    bohrmaschine: { name: "Bohrmaschine (elektrisches Werkzeug mit Griff und Bohrer)", box: "0 0 100 100",
+      svg: `<path d="M10 30 H62 Q70 30 70 38 V50 Q70 56 62 56 H10 Q6 56 6 50 V36 Q6 30 10 30 Z" fill="#f2a12e" stroke="#a86a12" stroke-width="2.2"/>`
+        + `<rect x="70" y="36" width="10" height="14" fill="#4a505b"/><path d="M80 43 H96" stroke="#8a929e" stroke-width="4"/>`
+        + `<path d="M82 40 L86 46 M88 40 L92 46" stroke="#5f6673" stroke-width="1.6"/>`
+        + `<path d="M24 56 L18 88 Q24 92 36 90 L40 56 Z" fill="#3a3d4a" stroke="#1b1b1f" stroke-width="2"/>`
+        + `<rect x="38" y="58" width="6" height="12" rx="2" fill="#e2483d"/>`
+        + [16, 24, 32].map(x => `<path d="M${x} 36 V50" stroke="#a86a12" stroke-width="2"/>`).join("") },
+    generator: { name: "Generator (eine Kurbel dreht die Achse, aus dem Kasten kommt Strom)", box: "0 0 100 100",
+      svg: `<rect x="34" y="30" width="44" height="40" rx="6" fill="#8a929e" stroke="#4a505b" stroke-width="2.4"/>`
+        + `<circle cx="56" cy="50" r="12" fill="#cfd5dd" stroke="#4a505b" stroke-width="2"/><path d="M50 44 L62 56 M62 44 L50 56" stroke="#4a505b" stroke-width="2"/>`
+        + `<path d="M34 50 H18" stroke="#4a505b" stroke-width="5"/><path d="M18 50 V28 H8" stroke="#7a4f26" stroke-width="5" stroke-linecap="round" fill="none"/>`
+        + `<path d="M6 20 A16 16 0 0 0 6 42" stroke="#8a929e" stroke-width="2" stroke-dasharray="3 3" fill="none"/>`
+        + `<path d="M84 34 L76 52 H86 L78 72" stroke="#f2c12e" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round"/>` },
+    velobremse: { name: "Velobremse (Bremsklötze drücken auf die Felge, es wird warm)", box: "0 0 100 100",
+      svg: `<path d="M8 96 A70 70 0 0 1 96 18" stroke="#3a3d4a" stroke-width="9" fill="none"/>`
+        + `<path d="M20 96 A60 60 0 0 1 96 30" stroke="#b8bec8" stroke-width="4" fill="none"/>`
+        + `<path d="M50 96 L60 50 M70 96 L66 58" stroke="#8a929e" stroke-width="1.6"/>`
+        + `<rect x="34" y="34" width="9" height="16" rx="2" transform="rotate(-40 38 42)" fill="#e2483d" stroke="#9e2c24" stroke-width="1.6"/>`
+        + `<rect x="52" y="22" width="9" height="16" rx="2" transform="rotate(-40 56 30)" fill="#e2483d" stroke="#9e2c24" stroke-width="1.6"/>`
+        + `<path d="M36 36 L30 20 Q40 10 54 16 L58 26" stroke="#4a505b" stroke-width="3" fill="none"/>`
+        + [[72, 50], [80, 58], [88, 66]].map(([x, y]) => `<path d="M${x} ${y} q-4 -6 0 -12 t0 -12" stroke="#e8902b" stroke-width="2.6" fill="none" stroke-linecap="round"/>`).join("") },
+
+    // Lärm-Wächter (BI1 a, Befund LERN_Session38): Gehörschutz glich den Kopfhörern 🎧 der Situation, Ohrstöpsel
+    // zeigten nur ein Ohr 👂, Vorhang ein Fenster 🪟 (wie „Fenster schliessen“), Fliesen Ziegel 🧱 (wie die
+    // Lärmschutzwand), Teppich ein Wollknäuel 🧶, Kissen ein Bett 🛏️
+    gehoerschutz: { name: "Gehörschutz (zwei dicke Kapseln am Bügel, über beide Ohren)", box: "0 0 100 100",
+      svg: `<path d="M24 56 Q24 12 50 12 Q76 12 76 56" stroke="#3a3d4a" stroke-width="7" fill="none" stroke-linecap="round"/>`
+        + [20, 80].map(x => `<rect x="${x - 13}" y="48" width="26" height="38" rx="12" fill="#f2a12e" stroke="#a86a12" stroke-width="2.4"/>`
+          + `<rect x="${x - 7}" y="56" width="14" height="22" rx="6" fill="#e08a14"/>`).join("") },
+    ohrstoepsel: { name: "Ohrstöpsel (zwei kleine, weiche Schaumstoff-Stöpsel)", box: "0 0 100 100",
+      svg: [[34, 50, -20], [66, 54, 15]].map(([x, y, r]) => `<g transform="rotate(${r} ${x} ${y})"><rect x="${x - 11}" y="${y - 22}" width="22" height="44" rx="10" fill="#f2c12e" stroke="#b08a12" stroke-width="2.2"/>`
+        + `<path d="M${x - 9} ${y - 8} H${x + 9} M${x - 9} ${y + 6} H${x + 9}" stroke="#d6a41c" stroke-width="1.6"/></g>`).join("") },
+    vorhang: { name: "Schwerer Vorhang (dicker Stoff in Falten an einer Stange)", box: "0 0 100 100",
+      svg: `<rect x="6" y="10" width="88" height="5" rx="2.5" fill="#7a4f26"/>`
+        + [12, 26, 40, 60, 74, 88].map((x, i) => `<path d="M${x - 7} 14 Q${x} ${50 + (i % 2) * 6} ${x - 4} 92 H${x + 4} Q${x + 8} ${50 + (i % 2) * 6} ${x + 7} 14 Z" fill="${i % 2 ? "#8e2f4f" : "#a83a5e"}"/>`).join("")
+        + `<path d="M46 14 V92 M54 14 V92" stroke="#6e2440" stroke-width="2"/>` },
+    fliesen: { name: "Glatte Fliesen (glänzende Platten an einer Wand)", box: "0 0 100 100",
+      svg: `<rect x="6" y="6" width="88" height="88" fill="#b8c4cf"/>`
+        + [0, 1, 2, 3].flatMap(r => [0, 1, 2, 3].map(c => [8 + c * 22, 8 + r * 22]))
+          .map(([x, y]) => `<rect x="${x}" y="${y}" width="20" height="20" rx="1.5" fill="#e6f0f6"/><path d="M${x + 4} ${y + 14} L${x + 14} ${y + 4}" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"/>`).join("") },
+    teppich: { name: "Dicker Teppich (weicher Teppich mit Fransen und Muster)", box: "0 0 100 100",
+      svg: `<path d="M14 30 L86 30 L94 72 L6 72 Z" fill="#c0504d" stroke="#8a3330" stroke-width="2.2"/>`
+        + `<path d="M22 38 L78 38 L84 64 L16 64 Z" fill="none" stroke="#f2c12e" stroke-width="3"/>`
+        + `<path d="M50 42 L62 51 L50 60 L38 51 Z" fill="#f2c12e"/>`
+        + Array.from({ length: 12 }, (_, i) => `<path d="M${8 + i * 7.6} 72 v8" stroke="#8a3330" stroke-width="2" stroke-linecap="round"/>`).join("") },
+    kissen: { name: "Kissen (weiches, dickes Kopfkissen)", box: "0 0 100 100",
+      svg: `<path d="M12 30 Q50 20 88 30 Q96 50 88 72 Q50 82 12 72 Q4 50 12 30 Z" fill="#cfe3f5" stroke="#6f97bc" stroke-width="2.4"/>`
+        + `<path d="M30 50 Q50 44 70 50" stroke="#9ab8d6" stroke-width="2" fill="none"/>`
+        + [[12, 30], [88, 30], [88, 72], [12, 72]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#6f97bc"/>`).join("") },
+
     // Körbe der Lebensräume (lebensraum, BI1 a): Landschaften statt eines Tiers oder einer Pflanze der Karten (vorher
     // Fichte 🌲 → Korb 🌲 Wald, Gänseblümchen 🌼 → Korb 🌼 Wiese)
     lrWald: { name: "Wald (Nadel- und Laubbäume)", box: "0 0 100 100",

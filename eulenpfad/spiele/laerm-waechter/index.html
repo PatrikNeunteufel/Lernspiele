@@ -60,6 +60,7 @@
 <script src="../gemeinsam/avatare.js"></script>
 <script src="../../version.js"></script>
 <script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/bilder.js"></script>
 <script src="../gemeinsam/spiel.js"></script>
 <script src="../gemeinsam/feier.js"></script>
 <script src="../gemeinsam/abgleich.js"></script>
@@ -458,7 +459,7 @@ function lautLeise(ctx, a, lw) {
   ctx.tipp([TIPP_VORSTELLEN, `Du hörst es ${g.ort}. Kannst du dort noch flüstern — und wirst trotzdem verstanden?`,
     "Überleg: Erschrickst du, oder tut es in den Ohren weh? Oder könntest du dabei einschlafen?"]);
   lw.append(el("div", { class: "auftrag", text: "Laut oder leise?" }));
-  const loesung = `${g.bild} ${g.name} ist ${a.richtig}.`;
+  const loesung = `${LS.mitBildText(g.bild, g.name)} ist ${a.richtig}.`;
   const { karte } = LS.koerbe(ctx, {
     karte: { bild: g.bild, text: g.name },
     koerbe: ["leise", "laut"], richtig: a.richtig,
@@ -482,9 +483,9 @@ function ordnen(ctx, a, lw) {
   LS.reihenfolge(ctx, {
     reihe, breite: 170, pfeile: true,
     inhalt: id => ({ bild: G[id].bild, text: G[id].name }),
-    ablage: id => `${G[id].bild} ${G[id].name}`,
+    ablage: id => LS.mitBildText(G[id].bild, G[id].name),
     hinweis: "Das kommt später dran. Welches der übrigen Geräusche ist das leiseste?",
-    loesung: reihe.map(id => `${G[id].bild} ${G[id].name}`).join(" → "),
+    loesung: reihe.map(id => LS.mitBildText(G[id].bild, G[id].name)).join(" → "),
     lob: "Richtig geordnet — von ganz leise bis sehr laut!",
   });
   if (ctx.nr === 0) ctx.sag("Tipp die Geräusche der Reihe nach an: zuerst das leiseste.");
@@ -512,7 +513,7 @@ function schutz(ctx, a, lw) {
   ctx.tipp(["Stell dir den Lärm vor: Musst du die Ohren zuhalten? Was macht ihn an deinen Ohren kleiner?",
     `Gesucht ist: ${r.umschreibung}.`, sit.tipp]);
   lw.append(el("div", { class: "auftrag", text: "Was schützt deine Ohren?" }));
-  const loesung = `${r.bild} ${r.name}: ${r.umschreibung}.`;
+  const loesung = `${LS.mitBildText(r.bild, r.name)}: ${r.umschreibung}.`;
   const { karte } = LS.koerbe(ctx, {
     karte: { bild: sit.bild, text: sit.text },
     koerbe: a.koerbe, richtig: a.richtig,
@@ -548,7 +549,7 @@ function wirkung(ctx, a, lw) {
     a.richtig === 0 ? "Hat das überhaupt etwas mit den Ohren zu tun?" : `Das tust du: ${s.umschreibung}.`,
     `Der Lärm ist ${sit.laut} von 5 und ${sit.dauer === "lang" ? "dauert lange" : "dauert nur kurz"}. Reicht das, was du tust, für die ganze Zeit — und dicht an den Ohren?`]);
   lw.append(el("div", { class: "frage", text: "Wie gut hilft das?" }), karteMit(sit.bild, sit.text), skala(sit.laut),
-    el("p", { class: "lw-massnahme" }, "Du machst: ", el("b", { text: `${s.bild} ${s.name}` })));
+    el("p", { class: "lw-massnahme" }, "Du machst: ", el("b", { text: LS.mitBildText(s.bild, s.name) })));
   const w = WIRKUNG[a.richtig];
   LS.auswahl(ctx, {
     optionen: [2, 1, 0], richtig: a.richtig, breite: 170,
@@ -571,7 +572,7 @@ function schlimmer(ctx, a, lw) {
     optionen: a.optionen, richtig: a.richtig,
     inhalt: id => ({ bild: G[id].bild, text: G[id].name, klein: `Lärm ${G[id].laut} von 5 · ${dauerText(G[id].dauer)}` }),
     hinweis: "Überleg: Wie laut ist es — und wie lange dauert es? Laut und lang zusammen ist am schlimmsten.",
-    loesung: `${r.bild} ${r.name}. ${SCHLIMMER_WARUM[a.typ]}`,
+    loesung: `${LS.mitBildText(r.bild, r.name)}. ${SCHLIMMER_WARUM[a.typ]}`,
     lob: `Genau! ${SCHLIMMER_WARUM[a.typ]}`,
   });
   box.classList.add("lw-paar");
@@ -662,7 +663,7 @@ function daempfer(ctx, a, lw) {
     optionen: a.optionen, richtig: a.richtig, breite: 170,
     inhalt: n => ({ bild: DAEMPFER.find(x => x.name === n).bild, text: n }),
     hinweis: n => `${n}: hart und glatt — daran prallt der Schall ab und kommt zurück. Was ist weich?`,
-    loesung: `${d.bild} ${d.name}: weich — schluckt den Schall.`,
+    loesung: `${LS.mitBildText(d.bild, d.name)}: weich — schluckt den Schall.`,
     lob: `Genau: ${d.name} ist weich und schluckt den Schall.`,
   });
   if (ctx.nr === 0) ctx.sag("Tipp auf das, was den Schall am besten schluckt.");

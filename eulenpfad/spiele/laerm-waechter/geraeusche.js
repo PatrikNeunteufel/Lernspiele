@@ -71,10 +71,10 @@ const LAERM_GERAEUSCHE = [
   { id: "wasserhahn", bild: "🚰", name: "Wasser aus dem Hahn", laut: 2, dauer: "lang", ort: "in der Küche" },
   { id: "radio", bild: "📻", name: "Leise Musik aus dem Radio", laut: 2, dauer: "lang", ort: "in der Küche" },
   // ---------- 3: mittel ----------
-  { id: "staubsauger", bild: "🧹", name: "Staubsauger", laut: 3, dauer: "lang", ort: "zu Hause beim Putzen" },
+  { id: "staubsauger", bild: "svg:staubsauger", name: "Staubsauger", laut: 3, dauer: "lang", ort: "zu Hause beim Putzen" },
   { id: "glocke", bild: "🔔", name: "Die Schulglocke", laut: 3, dauer: "kurz", ort: "im Schulhaus" },
   { id: "hund", bild: "🐕", name: "Ein Hund bellt", laut: 3, dauer: "kurz", ort: "auf der Strasse" },
-  { id: "foehn", bild: "💨", name: "Haarföhn", laut: 3, dauer: "lang", ort: "im Badezimmer" },
+  { id: "foehn", bild: "svg:foehn", name: "Haarföhn", laut: 3, dauer: "lang", ort: "im Badezimmer" },
   { id: "pausenplatz", bild: "🏫", name: "Die Pause auf dem Schulhof", laut: 3, dauer: "lang", ort: "auf dem Pausenplatz" },
   { id: "velo", bild: "🚲", name: "Eine Velo-Klingel", laut: 3, dauer: "kurz", ort: "auf dem Schulweg" },
   // ---------- 4: laut ----------
@@ -115,10 +115,10 @@ const LAERM_ORTE = [
 ];
 
 const LAERM_SCHUTZ = [
-  { id: "ohrstoepsel", name: "Ohrstöpsel", bild: "👂", wirkung: 2,
+  { id: "ohrstoepsel", name: "Ohrstöpsel", bild: "svg:ohrstoepsel", wirkung: 2,
     umschreibung: "etwas Kleines, Weiches, das du dir in beide Ohren steckst",
     hinweis: "Ohrstöpsel steckt man in die Ohren, wenn man weiss, dass es lange laut wird." },
-  { id: "gehoerschutz", name: "Gehörschutz", bild: "🎧", wirkung: 2,
+  { id: "gehoerschutz", name: "Gehörschutz", bild: "svg:gehoerschutz", wirkung: 2,
     umschreibung: "grosse Kapseln, die du über beide Ohren setzt — wie dicke Kopfhörer ohne Musik",
     hinweis: "Ein Gehörschutz sind dicke Kapseln über den Ohren, für Maschinen und Motoren." },
   { id: "leiser", name: "Kopfhörer leiser stellen", bild: "🔉", wirkung: 2,
@@ -136,7 +136,7 @@ const LAERM_SCHUTZ = [
   { id: "haende", name: "Hände auf die Ohren", bild: "🙉", wirkung: 1,
     umschreibung: "schnell die Ohren zuhalten — hilft nur kurz und nicht ganz dicht",
     hinweis: "Die Hände auf den Ohren helfen nur kurz und nicht dicht. Für langen Lärm gibt es Besseres." },
-  { id: "pause", name: "Pause in der Stille", bild: "🤫", wirkung: 1,
+  { id: "pause", name: "Pause in der Stille", bild: "🧘", wirkung: 1,
     umschreibung: "zwischendurch an einen ruhigen Ort gehen und die Ohren ausruhen lassen",
     hinweis: "Eine Pause in der Stille tut den Ohren gut, aber der Lärm ist danach noch da." },
   // Ablenker: hilft nicht
@@ -311,12 +311,12 @@ const LAERM_PHAENOMENE = [
 ];
 
 const LAERM_DAEMPFER = [
-  { bild: "🧶", name: "Dicker Teppich", daempft: true },
-  { bild: "🪟", name: "Schwerer Vorhang", daempft: true },
+  { bild: "svg:teppich", name: "Dicker Teppich", daempft: true },
+  { bild: "svg:vorhang", name: "Schwerer Vorhang", daempft: true },
   { bild: "❄️", name: "Frischer Schnee", daempft: true },
-  { bild: "🛏️", name: "Kissen", daempft: true },
+  { bild: "svg:kissen", name: "Kissen", daempft: true },
   { bild: "🧣", name: "Wolldecke", daempft: true },
-  { bild: "🧱", name: "Glatte Fliesen", daempft: false },
+  { bild: "svg:fliesen", name: "Glatte Fliesen", daempft: false },
   { bild: "🪞", name: "Glasscheibe", daempft: false },
   { bild: "🏢", name: "Betonwand", daempft: false },
   { bild: "🔩", name: "Metallplatte", daempft: false },

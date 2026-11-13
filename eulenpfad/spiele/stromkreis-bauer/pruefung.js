@@ -73,7 +73,7 @@
     + "X Draht lose, G Lücke; LA0 = Lampe A herausgedreht; [ … / … ] zwei Zweige. Zusatz: pol = beide Drähte am Pluspol, "
     + "umgekehrt = Batterie andersherum, kurz:<Platz> = zusätzlicher Draht (orange). ";
   const WARUM = `Steht „Warum?“ bei den Stufen, ist der Grund im Lösungstext (bei der Lücke: in der Spalte „Warum?“) die richtige Antwort; daneben stehen zwei andere aus ${Object.keys(GRUENDE).length} Gründen `
-    + `(${Object.values(GRUENDE).map(t => `„${t}“`).join(", ")}), zufällig gewählt: Keiner davon darf auf das Bild auch passen.`;
+    + `(${Object.values(GRUENDE).map(t => `„${t}“`).join(", ")}), zufällig gewählt, zuerst solche, deren Teil (Schalter, Gegenstand, oranger Draht) im Bild vorkommt: Keiner davon darf auf das Bild auch passen.`;
 
   /** Abschnitt für eine Liste mit Schaltbildern ohne Lücke; mitKurz: mit der Kurzschluss-Frage. */
   const schaltAbschnitt = (liste, titel, hinweis, gruppe, mitKurz) => ({

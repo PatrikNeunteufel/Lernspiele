@@ -174,6 +174,15 @@ const GRUENDE = {
     Drähte am gleichen Pol, hängt am anderen Pol kein Draht — „Ein Draht ist nicht angeschlossen“ stimmt dann auch
     (Befund LERN_Session38). */
 const AUCH_GRUND = { pol: ["draht"] };
+/** Kommt das Teil, von dem der Grund spricht, im Bild vor? Ein offener Schalter ohne Schalter, ein Gegenstand ohne
+    Lücke, ein Kurzschluss ohne orangen Draht sind als falsche Antwort eindeutig, aber für das Kind sinnlos (Befund
+    LERN_Session38); sie kommen nur dazu, wenn es zu wenige andere gibt. */
+const grundImBild = (s, k) => ({ schalter: plaetze(s).some(c => c === "S0" || c === "S1"), gegenstand: plaetze(s).includes("G"), kurz: !!s.kurz })[k] ?? true;
+/** Zwei falsche Gründe zu einer Schaltung: zuerst die, deren Teil im Bild vorkommt. */
+function falscheGruende(s, richtig) {
+  const k = mische(Object.keys(GRUENDE).filter(x => x !== richtig && !AUCH_GRUND[richtig]?.includes(x)));
+  return [...k.filter(x => grundImBild(s, x)), ...k.filter(x => !grundImBild(s, x))].slice(0, 2);
+}
 function maengel(s, g) {
   const m = [];
   for (const c of plaetze(s)) {
@@ -275,7 +284,7 @@ const ARTEN = {
     if (!alle.length) return null;
     const [i, d] = waehle(alle);
     const richtig = warumGrund(SCH[i], GEGENSTAENDE[d]);
-    const andere = mische(Object.keys(GRUENDE).filter(k => k !== richtig && !AUCH_GRUND[richtig]?.includes(k))).slice(0, 2);
+    const andere = falscheGruende(SCH[i], richtig);
     return { art: "warum", sch: i, ding: d, richtig, optionen: mische([richtig, ...andere]) };
   },
   /** Kurzschluss-Schaltungen: brennt die Lampe, oder gibt es einen Kurzschluss? */
@@ -358,6 +367,8 @@ function pruefeAufgabe(a, stufe) {
   } else if (a.art === "warum") {
     if (warumGrund(s, g) !== a.richtig) m.push("Grund falsch oder nicht eindeutig");
     if (a.optionen.some(k => AUCH_GRUND[a.richtig]?.includes(k))) m.push("Ablenker trifft ebenso zu");
+    const ungenutzt = Object.keys(GRUENDE).filter(k => !a.optionen.includes(k) && !AUCH_GRUND[a.richtig]?.includes(k) && grundImBild(s, k));
+    if (ungenutzt.length && a.optionen.some(k => !grundImBild(s, k))) m.push("Ablenker ohne sein Teil im Bild, obwohl ein passender frei war");
   } else if (a.art === "welche") {
     if (a.richtig !== welcheText(e.brennt, lampenVon(s))) m.push("Lösung falsch");
     if (e.kurzschluss && e.brennt.size) m.push("Kurzschluss, aber Lampe brennt");

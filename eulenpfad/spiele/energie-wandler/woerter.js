@@ -11,7 +11,7 @@
    waerme = Wärme, licht = Licht, chem = chemische Energie (in Nahrung, Holz, Benzin, Batterie),
    lage = Lageenergie, kern = Kernenergie (nur Kernkraftwerk, nur Stufe 5).
 
-   Je Gerät: name, bild (Emoji), strom (braucht es Strom aus Steckdose oder Batterie? true/false;
+   Je Gerät: name, bild (Emoji oder „svg:…“ aus spiele/gemeinsam/bilder.js, BI1 a), strom (braucht es Strom aus Steckdose oder Batterie? true/false;
    null = Frage passt nicht und kommt in Stufe 1 nicht vor), von (Energieform vorher), zu (Formen
    nachher, die man nutzt), auch (Formen, die auch mitspielen — sie kommen nie als falsche Antwort vor,
    z. B. die Wärme, die fast jedes Gerät nebenbei abgibt), erneuerbar (nur bei Energiequellen),
@@ -29,7 +29,7 @@ const ENERGIEFORMEN = {
 
 const ENERGIE_GERAETE = [
   // Geräte im Haushalt, mit Strom
-  { name: "Föhn", bild: "💇", strom: true, von: "el", zu: ["waerme", "bew"],
+  { name: "Föhn", bild: "svg:foehn", strom: true, von: "el", zu: ["waerme", "bew"],
     text: "Im Föhn wird ein Draht heiss, und ein kleiner Motor dreht den Ventilator: Warme Luft strömt hinaus." },
   { name: "Wasserkocher", bild: "🫖", strom: true, von: "el", zu: ["waerme"],
     text: "Eine Heizplatte im Boden wird heiss und erwärmt das Wasser." },
@@ -46,13 +46,13 @@ const ENERGIE_GERAETE = [
     text: "Der Bildschirm leuchtet: Aus elektrischer Energie wird Licht, ein wenig auch Wärme." },
   { name: "Taschenlampe", bild: "🔦", strom: true, von: "chem", zu: ["licht"], auch: ["el", "waerme"],
     text: "Die Batterie gibt aus ihrer chemischen Energie Strom ab. Die Lampe macht daraus Licht." },
-  { name: "Staubsauger", bild: "🧹", strom: true, von: "el", zu: ["bew"], auch: ["waerme"],
+  { name: "Staubsauger", bild: "svg:staubsauger", strom: true, von: "el", zu: ["bew"], auch: ["waerme"],
     text: "Ein Motor dreht ein Gebläse. Es saugt die Luft mit dem Staub an." },
   { name: "Ventilator", bild: "🌀", strom: true, von: "el", zu: ["bew"], auch: ["waerme"],
     text: "Ein Elektromotor dreht die Flügel und bewegt die Luft." },
   { name: "Mixer", bild: "🥤", strom: true, von: "el", zu: ["bew"], auch: ["waerme"],
     text: "Ein Elektromotor dreht die Messer." },
-  { name: "Bohrmaschine", bild: "🪛", strom: true, von: "el", zu: ["bew"], auch: ["waerme"],
+  { name: "Bohrmaschine", bild: "svg:bohrmaschine", strom: true, von: "el", zu: ["bew"], auch: ["waerme"],
     text: "Ein Elektromotor dreht den Bohrer." },
   { name: "Waschmaschine", bild: "🧺", strom: true, von: "el", zu: ["bew", "waerme"],
     text: "Der Motor dreht die Trommel, und eine Heizung wärmt das Wasser." },
@@ -72,9 +72,9 @@ const ENERGIE_GERAETE = [
     text: "Eine Batterie speichert chemische Energie. Im Stromkreis gibt sie elektrische Energie ab." },
   { name: "Velodynamo", bild: "🚲", strom: false, von: "bew", zu: ["el"], auch: ["waerme"],
     text: "Das Rad dreht den Dynamo. Er ist ein kleiner Generator und macht aus Bewegung Strom für die Velolampe." },
-  { name: "Generator", bild: "⚙️", strom: false, von: "bew", zu: ["el"], auch: ["waerme"],
+  { name: "Generator", bild: "svg:generator", strom: false, von: "bew", zu: ["el"], auch: ["waerme"],
     text: "Ein Generator macht aus einer Drehbewegung elektrische Energie. In jedem Kraftwerk dreht sich einer." },
-  { name: "Velobremse beim Bremsen", bild: "🛑", strom: false, von: "bew", zu: ["waerme"],
+  { name: "Velobremse beim Bremsen", bild: "svg:velobremse", strom: false, von: "bew", zu: ["waerme"],
     text: "Die Bremsklötze reiben am Rad. Aus Bewegungsenergie wird Wärme: Die Bremse wird warm." },
   { name: "Kuckucksuhr mit Gewichten", bild: "🕰️", strom: false, von: "lage", zu: ["bew"],
     text: "Die schweren Gewichte sinken langsam nach unten. Ihre Lageenergie treibt das Uhrwerk an." },
