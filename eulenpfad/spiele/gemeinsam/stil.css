@@ -653,7 +653,7 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 .pruef-gruppe > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; cursor: pointer; padding: 4px 0; }
 /* display: flex nimmt der Zusammenfassung ihren Pfeil — ohne ihn sah man nicht, dass sich eine geprüfte, zugeklappte
    Gruppe öffnen lässt (Hinweis Patrik LERN_Session38) */
-.pruef-gruppe > summary::before { content: "▸"; color: var(--leise); }
+.pruef-gruppe > summary::before { content: "▸"; color: var(--text-leise); }
 .pruef-gruppe[open] > summary::before { content: "▾"; }
 .pruef-gruppe .pruef-gruppe { margin-left: 4px; }
 .pruef-zahl { color: var(--text-leise); font-size: 14px; }
@@ -668,7 +668,7 @@ td.pruef-text-bild .bild.gezeichnet { vertical-align: -0.2em; display: inline-bl
 .pruef-tabelle .pruef-haken input { width: 22px; height: 22px; }
 .pruef-e { margin-left: 4px; font-size: 12px; font-weight: 800; color: var(--gut); }
 /* ÜB1 a (LERN_Session38): schon in einer anderen Zeile oder Liste geprüft — grau, damit das Neue auffällt */
-.pruef-tabelle td.pruef-bekannt { color: var(--leise); }
+.pruef-tabelle td.pruef-bekannt { color: var(--text-leise); }
 .pruef-tabelle td.pruef-bekannt.pruef-bild svg { opacity: 0.55; }
 .pruef-bild svg { width: 110px; height: auto; display: block; }
 .pruef-tabelle tr.mit-bemerkung td { background: var(--bemerkung); }

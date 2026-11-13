@@ -2311,3 +2311,13 @@
   Fehler.
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session39_2026-11-13.md`, Handover nachgeführt (alle Befunde der
   Prüfansichten bearbeitet, voller Lauf auf `5cc948b`, nächster Schritt Push).
+
+## 2026-11-13 — LERN_Session40
+- **Prüfansicht nach Kern 1.45 angesehen** (hell und dunkel, 1024 und 375 px, Schwimmt oder sinkt?): schon geprüfte
+  Zellen standen nicht grau — `stil.css` nahm `var(--leise)`, das es im Eulenpfad nicht gibt (dort `--text-leise`);
+  ebenso der Pfeil ▸/▾ vor den Gruppen. Beide auf `--text-leise`; sonst keine undefinierte Farbe in Eulenpfad, Lernsteig,
+  Gratwanderung.
+- **Haken ohne Fingerabdruck nachgetragen:** 192 Haken vom 13.11. (Energie-Wandler, Wassertropfen-Reise, Znüni-Teller)
+  trugen nur `am` und `von` — vermutlich lief der Entwickler-Server noch mit dem Stand vor Kern 1.45 und verwarf die
+  Fingerabdrücke still. Mit `tools/haken_nachtragen.js` ergänzt (alle 444 Haken jetzt mit Fingerabdruck). Im Lernsteig
+  gibt es keine Haken je Eintrag (`pruefstand-eintraege.json` leer), dort ist nichts nachzutragen.
