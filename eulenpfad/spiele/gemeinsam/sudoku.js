@@ -216,8 +216,9 @@ const SUDOKU = (() => {
 
   /**
    * Das Rätsel als Aufgabe in ctx.flaeche: Felder, Zahlenleiste, ✏️ Notizen, ⌫, „✓ Fertig“.
-   * opt: { raster, vorgabe, loesung, zeichen(v) → Text des Werts (Standard die Zahl), name(v) → Wort für die Eule,
-   *        auftrag: Text über dem Raster }
+   * opt: { raster, vorgabe, loesung, zeichen(v) → Text des Werts (Standard die Zahl), name(v) → Wort für Knöpfe und
+   *        Felder („Hund“), nennung(v) → mit Artikel für die Eule („der Hund“, Standard „die 4“), tipps: drei eigene
+   *        Tipp-Texte (der dritte zeigt ein Feld), notizText: Erklärung am ✏️-Knopf, auftrag: Text über dem Raster }
    * Fehler nach SU3 a: Ein Widerspruch (die Zahl steht schon in derselben Einheit) wird sofort gezeigt, das Feld wackelt
    * und die Zahl bleibt nicht stehen — das zählt als Fehler. Falsch ohne Widerspruch zeigt erst „✓ Fertig“: die Felder
    * leuchten, das zählt als Fehler, das Kind korrigiert sie. Notizen werden nie bewertet. Ist das letzte Feld richtig
@@ -228,6 +229,8 @@ const SUDOKU = (() => {
     const r = opt.raster, n = r.n;
     const zeichen = opt.zeichen || (v => String(v));
     const name = opt.name || (v => String(v));
+    const nennung = opt.nennung || (v => `die ${name(v)}`);
+    const gross = t => t.charAt(0).toUpperCase() + t.slice(1);
     const werte = opt.vorgabe.slice();
     const notizen = Array.from({ length: n * n }, () => new Set());
     const falschMarke = new Set();
@@ -240,7 +243,8 @@ const SUDOKU = (() => {
     // Handgriffe (HG1 a): je leeres Feld antippen und die Zahl wählen; das erste leere Feld ist schon gewählt, und das
     // letzte richtige Feld löst die Aufgabe ohne „✓ Fertig“
     ctx.schritte(2 * opt.vorgabe.filter(v => !v).length - 1);
-    ctx.tipp([
+    // Tipps: der dritte zeigt ein Feld (beiTipp). Bilder-Sudoku gibt eigene Texte mit („welches Tier“ statt „welche Zahl“).
+    ctx.tipp(opt.tipps || [
       "Nicht sicher? Schreib die möglichen Zahlen klein ins Feld (✏️).",
       `Such ein Feld, in das nur noch eine Zahl passt: Schau seine Zeile, seine Spalte und ${gebietWort} an. Oder such für eine Zahl den einzigen Platz, wo sie noch hin kann.`,
       "Schau dir das Feld an, das jetzt leuchtet: Welche Zahl fehlt dort noch?",
@@ -266,7 +270,7 @@ const SUDOKU = (() => {
       brett.append(f);
     }
 
-    const zahlen = el("div", { class: "sd-zahlen" });
+    const zahlen = el("div", { class: "sd-zahlen" + (opt.zeichen ? " sd-bildtasten" : "") }); // Bilder gross (Kindergarten)
     const zahlKnoepfe = [];
     for (let v = 1; v <= n; v++) {
       const k = el("button", { type: "button", class: "knopf hell sd-zahl", text: zeichen(v), "aria-label": name(v) });
@@ -275,7 +279,7 @@ const SUDOKU = (() => {
       zahlen.append(k);
     }
     const notizKnopf = el("button", { type: "button", class: "knopf hell klein sd-werkzeug", text: "✏️ Notizen", "aria-pressed": "false",
-      title: "Kleine Zahlen als Notiz ins Feld schreiben" });
+      title: opt.notizText || "Kleine Zahlen als Notiz ins Feld schreiben" });
     notizKnopf.addEventListener("click", () => {
       notizModus = !notizModus;
       notizKnopf.setAttribute("aria-pressed", String(notizModus));
@@ -316,7 +320,7 @@ const SUDOKU = (() => {
         const dort = r.einheiten[u].felder.find(k => k !== i && werte[k] === v);
         if (dort !== undefined) {
           wackle(felder[i]); wackle(felder[dort]);
-          ctx.falsch(`Die ${name(v)} steht schon ${EINHEIT_SATZ[r.einheiten[u].art]}.`);
+          ctx.falsch(`${gross(nennung(v))} steht schon ${EINHEIT_SATZ[r.einheiten[u].art]}.`);
           return;
         }
       }

@@ -1806,6 +1806,21 @@ const SPIELE = [
         leer: [2, 4, 6, 9, 10, 11, 13, 15, 18, 19, 21, 22, 25, 26, 27, 28, 30, 32, 33, 34, 35, 37, 38, 41, 42, 46, 47, 52, 54, 55, 58, 59, 62, 63, 65, 66, 68, 69, 70, 71, 72, 73, 75, 76, 77] },
       s6: { n: 9, kh: 3, kb: 3, loesung: "613594827845372169972168534759816342134259786286437915367921458421785693598643271",
         leer: [0, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 20, 22, 24, 26, 28, 29, 30, 31, 33, 34, 35, 37, 38, 41, 43, 46, 49, 50, 53, 54, 56, 57, 58, 60, 61, 62, 64, 65, 66, 67, 68, 69, 70, 72, 73, 75, 77, 79, 80] } } } },
+  // Bilder-Sudoku (LERN-56, SU1 a): 4 × 4 mit Tieren, Basisklasse 1 (Stufe 1 = Kindergarten)
+  { id: "bilder-sudoku", art: ["antippen"], klasse: 1, neu: "LERN_Session40", bild: "🐾", name: "Bilder-Sudoku", thema: "logik", farbe: "var(--deko-3)",
+    // nicht im Zufallsmix (Entscheid ZM1 b, LERN_Session40): ein ganzes Rätsel ist keine Kurzaufgabe
+    mix: false,
+    pfad: "spiele/bilder-sudoku/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 40, s2: 60, s3: 80, s4: 100, s5: 120, s6: 150 },
+    beschreibung: "Jedes Tier genau einmal in jeder Zeile, Spalte und jedem Kasten — Sudoku ohne Zahlen",
+    lernziele: [{ lz: "MA.1.B.1", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (feier.js, BAUEN · sudoku): das Rätsel der Stufe füllt sich Feld um Feld, mit den Tieren
+    feier: { muster: "bauen", bilder: "sudoku", zeichen: ["🐶", "🐱", "🐰", "🐸"], ziele: {
+      s1: { n: 4, kh: 2, kb: 2, loesung: "2341143241233214", leer: [5, 6, 15] },
+      s2: { n: 4, kh: 2, kb: 2, loesung: "1324421324313142", leer: [3, 6, 8, 13, 14] },
+      s3: { n: 4, kh: 2, kb: 2, loesung: "2431312412434312", leer: [4, 5, 6, 9, 10, 12, 14] },
+      s4: { n: 4, kh: 2, kb: 2, loesung: "4231312424131342", leer: [0, 1, 2, 3, 4, 6, 7, 10, 13] },
+      s5: { n: 4, kh: 2, kb: 2, loesung: "1243431234212134", leer: [0, 1, 2, 3, 6, 8, 9, 10, 11, 12, 15] },
+      s6: { n: 4, kh: 2, kb: 2, loesung: "3412124343212134", leer: [1, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14] } } } },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */

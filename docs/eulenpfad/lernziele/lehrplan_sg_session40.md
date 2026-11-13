@@ -18,7 +18,21 @@ Annahme.
 |---|---|---|
 | MA.1.B.1 (`.f` Beziehungen erforschen: in welches Feld passt nur eine Zahl, wo hat eine Zahl nur einen Platz; `.h` Annahmen treffen und prüfen mit den ✏️-Notizen) | Zahlen-Sudoku | s1 4 × 4, 6 leere Felder, nur „ein Feld, eine Zahl“ · s2 4 × 4, 10 leer · s3 6 × 6 (Kästen 2 × 3), 18 leer · s4 6 × 6, 24 leer, eine Zahl mit nur einem Platz nötig · s5 9 × 9, 45 leer · s6 9 × 9, 54 leer, eine Zahl mit nur einem Platz nötig |
 
+**Bilder-Sudoku, Basisklasse 1** (SU1 a: „Basis Kindergarten/1. Klasse“; Spiele für den Kindergarten haben Basisklasse
+1, Stufe 1 ist der Kindergarten): s3 = Klassenziel 1. Klasse, s5 = 2. Klasse.
+
+| Lernziel | Spiel | Stufen im Spiel (s1 → s6) |
+|---|---|---|
+| MA.1.B.1 (1. Zyklus; Beziehungen erforschen ohne Zahlen: in welches Feld passt nur noch ein Tier) | Bilder-Sudoku | immer 4 × 4 mit 🐶 🐱 🐰 🐸; leere Felder s1 3 · s2 5 · s3 7 · s4 9 · s5 11 · s6 12 |
+
 ## Annahmen (mit dem Lehrmittel abzugleichen)
+
+- **Bilder-Sudoku zu MA.1.B.1 im 1. Zyklus:** Den Wortlaut der Kompetenzstufen des 1. Zyklus (`.a` bis `.c`) habe ich
+  nicht gelesen; gelesen sind nur `.f` und `.h` (2. Zyklus). Vor der Freigabe den Wortlaut von MA.1.B.1 im 1. Zyklus
+  nachlesen.
+- **Bilder-Sudoku, Stufen nur über die Zahl leerer Felder:** Ein 4 × 4 lässt sich bis 12 leere Felder immer mit „in
+  dieses Feld passt nur noch ein Tier“ lösen (gemessen, je 300 Rätsel); schwerere Schritte gibt es dort nicht. Ob 12 leere
+  Felder (nur vier Tiere vorgegeben) in der Königsstufe für die 1./2. Klasse passen, zeigt erst das Spielen.
 
 - **Zahlen-Sudoku zu MA.1.B.1.f und .h:** Der Lehrplan nennt Sudoku nicht. Führt das Lehrmittel (Schweizer Zahlenbuch,
   mathbuch) Sudoku unter einem anderen Thema, kippt SU2 a (so in der Vorlage vermerkt).

@@ -64,10 +64,15 @@
 /* Zahlen: breit ein Block mit 2 (4 × 4) oder 3 Spalten, schmal alle in einer Reihe */
 .sd-zahlen { display: grid; grid-template-columns: repeat(var(--sd-tasten, 3), 58px); justify-content: center; gap: 6px; }
 .sd-zahl { height: 52px; min-width: 0; padding: 0; font-size: 22px; font-weight: 800; }
+/* Bilder statt Zahlen (Bilder-Sudoku): grosse Bilder auf den Knöpfen, wie im Raster */
+.sd-zahlen.sd-bildtasten { grid-template-columns: repeat(var(--sd-tasten, 3), 76px); }
+.sd-bildtasten .sd-zahl { height: 68px; font-size: 40px; }
 .sd-werkzeuge { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 @media (max-width: 699px) {
   .sd-zahlen { grid-template-columns: repeat(var(--sd-n), minmax(0, 1fr)); gap: 4px; }
+  .sd-zahlen.sd-bildtasten { grid-template-columns: repeat(var(--sd-n), minmax(0, 1fr)); }
   .sd-zahl { height: 42px; font-size: 20px; }
+  .sd-bildtasten .sd-zahl { height: 58px; font-size: 36px; }
   /* die drei Werkzeuge in einer Reihe: eine zweite kostete 55 px Bildhöhe */
   .sd-werkzeuge { flex-wrap: nowrap; gap: 6px; }
   .sd-werkzeug { flex: 1 1 0; min-width: 0; padding-inline: 6px; font-size: 17px; white-space: nowrap; }

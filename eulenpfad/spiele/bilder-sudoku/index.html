@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bilder-Sudoku</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/sudoku.css">
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🐾 Bilder-Sudoku</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../../version.js"></script>
+<script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/feier.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/sudoku.js"></script>
+<script>
+"use strict";
+// Sudoku-Familie (LERN-56, SU1 a, LERN_Session13): das Bilder-Sudoku, Basisklasse 1 (Kindergarten in Stufe 1) — 4 × 4
+// mit Tieren statt Zahlen, logisch schliessen ganz ohne Zahlen. Lernziel als Annahme
+// (docs/eulenpfad/lernziele/lehrplan_sg_session40.md): Lehrplan SG MA.1.B.1, 1. Zyklus.
+// Regel: Jedes Tier steht in jeder Zeile, jeder Spalte und jedem Kasten genau einmal.
+
+// Die vier Tiere: deutlich verschiedene Formen und Farben. nennung für die Eule („Der Hund steht schon …“).
+const TIERE = [
+  { bild: "🐶", name: "Hund", nennung: "der Hund" },
+  { bild: "🐱", name: "Katze", nennung: "die Katze" },
+  { bild: "🐰", name: "Hase", nennung: "der Hase" },
+  { bild: "🐸", name: "Frosch", nennung: "der Frosch" },
+];
+
+// Je Stufe nur die Zahl der leeren Felder: Ein 4 × 4 lässt sich bis 12 leere Felder immer mit „in dieses Feld passt nur
+// noch ein Tier“ lösen (gemessen LERN_Session40, je 300 Rätsel), der Schritt „versteckt“ wird nie nötig.
+const STUFE = { s1: { leer: 3 }, s2: { leer: 5 }, s3: { leer: 7 }, s4: { leer: 9 }, s5: { leer: 11 }, s6: { leer: 12 } };
+const RASTER = SUDOKU.raster(4, SUDOKU.kaesten(4, 2, 2));
+const regel = stufe => ({ leer: STUFE[stufe].leer, techniken: new Set(["einer"]) });
+
+function aufgabeErzeugen(stufe) {
+  const a = SUDOKU.erzeuge(RASTER, { ...regel(stufe), mische: LS.mische, versuche: 100 });
+  if (!a) throw new Error(`Bilder-Sudoku ${stufe}: kein Rätsel gefunden`);
+  return a;
+}
+
+/** Mängel: Lösung gültig, Vorgaben passen, genau eine Lösung (durch Probieren gezählt), ohne „versteckt“ lösbar. */
+function pruefeAufgabe(a, stufe) {
+  return SUDOKU.maengel(RASTER, a, regel(stufe));
+}
+
+LS.spiel({
+  id: "bilder-sudoku",
+  einleitung: "Setz die Tiere ein! Jedes Tier wohnt in jeder Zeile, jeder Spalte und jedem Kasten genau einmal.",
+  hilfe: "Tipp auf ein leeres Feld, dann unten auf ein Tier. Mit ✏️ malst du kleine Tiere als Notiz ins Feld. ⌫ leert das Feld. Sind alle Felder voll, drückst du „✓ Fertig“.",
+  anzahl: { s1: 4, s2: 3, s3: 3, s4: 3, s5: 2, s6: 2 },
+  stufen: {
+    s1: "Nur drei Tiere fehlen.",
+    s2: "Fünf Tiere fehlen.",
+    s3: "Sieben Tiere fehlen.",
+    s4: "Neun Tiere fehlen — mehr als die Hälfte.",
+    s5: "Elf Tiere fehlen.",
+    s6: "Endgegner: Nur vier Tiere sind schon da.",
+  },
+
+  aufgabe(ctx) {
+    const { loesung, vorgabe } = aufgabeErzeugen(ctx.stufe);
+    SUDOKU.spiel(ctx, {
+      raster: RASTER, vorgabe, loesung,
+      zeichen: v => TIERE[v - 1].bild, name: v => TIERE[v - 1].name, nennung: v => TIERE[v - 1].nennung,
+      tipps: [
+        "Nicht sicher? Mal die Tiere, die noch passen, klein ins Feld (✏️).",
+        "Such ein Feld, in das nur noch ein Tier passt: Schau seine Zeile, seine Spalte und seinen Kasten an.",
+        "Schau dir das Feld an, das jetzt leuchtet: Welches Tier fehlt dort noch?",
+      ],
+      notizText: "Kleine Tiere als Notiz ins Feld malen",
+      auftrag: "Jedes Tier einmal in jeder Zeile, Spalte und jedem Kasten.",
+    });
+    if (ctx.nr === 0) ctx.sag("Tipp auf ein leeres Feld. Welches Tier fehlt dort noch?");
+  },
+});
+</script>
+</body>
+</html>

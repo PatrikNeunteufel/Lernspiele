@@ -1557,6 +1557,10 @@ und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku
 - **Bedienung** (`SUDOKU.spiel(ctx, opt)`): Feld antippen, dann eine Zahl; ✏️ schreibt Notizen (nie bewertet), ⌫ leert
   das Feld, „✓ Fertig“ prüft. Breit steht die Zahlenleiste als Block rechts neben dem Raster, schmal in einer Reihe
   darunter; so steht auch das 9 × 9 ganz im Bild (`tools/bildhoehe.js`). Ziffern auf der Tastatur über `LS.kurztasten`.
+- **Bilder statt Zahlen** (Bilder-Sudoku): `zeichen(v)` gibt das Bild, `name(v)` das Wort für Knöpfe und Felder („Hund“),
+  `nennung(v)` den Satzteil für die Eule („der Hund“ → „Der Hund steht schon in dieser Zeile.“), `tipps` drei eigene
+  Tipp-Texte, `notizText` die Erklärung am ✏️-Knopf. Mit `zeichen` werden die Knöpfe gross (`sd-bildtasten`), so gross
+  wie die Bilder im Raster; die Kurztasten liegen dann auf A S D F. Die Abschluss-Animation nimmt `feier.zeichen`.
 - **Fehler (SU3 a):** Steht die Zahl schon in derselben Zeile, Spalte oder demselben Gebiet, wackeln beide Felder, die
   Zahl bleibt nicht stehen, die Eule sagt, wo („Die 4 steht schon in dieser Zeile.“) — ein Fehler. Eine Zahl ohne
   Widerspruch, die trotzdem falsch ist, zeigt erst „✓ Fertig“: die Felder leuchten, ein Fehler, das Kind korrigiert sie.

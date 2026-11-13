@@ -14,13 +14,14 @@ beliebigen Gebieten, Löser, Generator, Bedienung mit ✏️-Notizen; Fehler nac
 | Spiel | Basisklasse | was es übt | Status |
 |---|---|---|---|
 | Zahlen-Sudoku | 4 | Zahlen 1 … n in Zeile, Spalte, Kasten; 4 × 4 → 6 × 6 → 9 × 9 | erledigt 2026-11-13 (LERN_Session40), neu und ungeprüft |
-| Bilder-Sudoku | KG/1 | dasselbe mit Tieren statt Zahlen, 4 × 4 | offen |
+| Bilder-Sudoku | KG/1 | dasselbe mit Tieren statt Zahlen, 4 × 4 | erledigt 2026-11-13 (LERN_Session40), neu und ungeprüft |
 | Gebiets-Sudoku | 4 | unregelmässige Gebiete statt Kästen (Zusatz Patrik) | offen |
 | Vergleichs-Sudoku | 3 | < und > zwischen Nachbarfeldern statt vieler Vorgaben | offen |
 | Käfig-Sudoku | 5 | Summen in Zellgruppen, oben auch −, ×, : | offen |
 | Sudoku-Duell | 5 | abwechselnd mit der Eule regelkonform setzen (Thema Strategie) | offen |
 
-Was der Baustein für die übrigen noch braucht: `zeichen` und `name` für Bilder (schon vorgesehen), ein Erzeuger
+Was der Baustein für die übrigen noch braucht (Bilder kann er seit dem Bilder-Sudoku: `zeichen`, `name`, `nennung`, eigene
+`tipps`): ein Erzeuger
 unregelmässiger Gebiete (Gebiets-Sudoku), Zusatzbedingungen im Löser und im menschlichen Löser (< und >, Summen), ein Zug
 der Eule (Duell).
 

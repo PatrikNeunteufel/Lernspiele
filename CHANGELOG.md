@@ -2342,3 +2342,8 @@
   - **Entscheid ZM1 b:** Sudoku nicht im Zufallsmix — Katalogfeld `mix: false`, `mix.js` nimmt solche Spiele nie
     (auch nicht im Übertritts-Check), das Testskript lässt sie im Mix aus (rahmen.md 9). Grund: eine Aufgabe ist ein
     ganzes Rätsel (90 s bis 15 min), die übrigen Spiele brauchen in Stufe 3 im Median 20 s.
+  - Neues Spiel **Bilder-Sudoku (bilder-sudoku)**, Basisklasse 1 (Stufe 1 Kindergarten), neu und ungeprüft: 4 × 4 mit
+    🐶 🐱 🐰 🐸, Stufen über die leeren Felder (3, 5, 7, 9, 11, 12; ein 4 × 4 braucht bis 12 leere Felder nie mehr als
+    „in dieses Feld passt nur ein Tier“, gemessen), 4 bis 2 Rätsel je Runde, Endlos in allen Stufen, nicht im Mix,
+    Abschluss-Animation mit den Tieren. Baustein dafür um `nennung`, eigene `tipps`, `notizText` und grosse Bildknöpfe
+    erweitert (rahmen.md 26); Zahlen-Sudoku unverändert (gleiche Klickzahlen im Spieltest).
