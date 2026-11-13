@@ -99,18 +99,26 @@ const STUFE = {
 
 const vorrat = stufe => SAETZE.filter(s => STUFE[stufe].gruppen.includes(s[0]));
 
+/** Ein Satz der Liste als Aufgabe, ohne den Zufall der Stufe: Satz in Teilen, Wortart, Falle, Beleg und die Probe, die
+    klappt — auch für die Prüfansicht (pruefung.js). */
+function satzAufgabe([gruppe, quelle, artRoh, beleg]) {
+  const m = quelle.match(/^(.*)\[([^\]]+)\](.*)$/);
+  const art = artRoh.replace("!", "");
+  const wortart = wortartVon(art);
+  return {
+    gruppe, quelle, vor: m[1], wort: m[2], nach: m[3], satz: m[1] + m[2] + m[3], art, wortart, falle: artRoh.startsWith("!"),
+    beleg: beleg || "", probe: Object.keys(PROBEN).find(k => PROBEN[k].art === wortart),
+  };
+}
+
 function aufgabeErzeugen(stufe) {
   const liste = vorrat(stufe);
   if (!liste.length) return null;
-  const [gruppe, quelle, artRoh, beleg] = waehle(liste);
-  const m = quelle.match(/^(.*)\[([^\]]+)\](.*)$/);
-  const falle = artRoh.startsWith("!");
-  const art = artRoh.replace("!", "");
-  const wortart = wortartVon(art);
+  const a = satzAufgabe(waehle(liste));
+  const { wortart, art } = a;
   const p = STUFE[stufe];
   return {
-    gruppe, quelle, vor: m[1], wort: m[2], nach: m[3], satz: m[1] + m[2] + m[3], art, wortart, falle, beleg: beleg || "",
-    probe: Object.keys(PROBEN).find(k => PROBEN[k].art === wortart),
+    ...a,
     proben: p.proben,
     wortarten: mische(Object.keys(WORTARTEN).filter(w => p.liste || ["N", "V", "A"].includes(w))),
     partikelArt: p.partikelArt && wortart === "PART" ? art : null,

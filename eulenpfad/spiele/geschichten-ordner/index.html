@@ -103,6 +103,17 @@ const schritteFuer = (stufe, art) => (art === "luecken" ? null : STUFE[stufe].sc
 const vorrat = (stufe, art) => VORRAT.filter(g => g.gruppe === STUFE[stufe].gruppe
   && (schritteFuer(stufe, art) === null || g.schritte.length === schritteFuer(stufe, art)));
 
+/** Sätze mit Zeitwort (Art „zeitwoerter“) in der richtigen Reihenfolge — auch für die Prüfansicht (pruefung.js). */
+function zeitwortSaetze(g) {
+  return g.schritte.map((s, i) => `${ZEITWOERTER[i]} ${s.nach}`);
+}
+
+/** Die drei Lücken der Königsstufe (Art „luecken“): erster, zweiter und letzter Schritt mit ihrem Zeitwort — auch für die Prüfansicht. */
+function lueckenVon(g) {
+  const n = g.schritte.length;
+  return [0, 1, n - 1].map((i, j) => ({ nach: g.schritte[i].nach, wort: LUECKEN[j] }));
+}
+
 function aufgabeErzeugen(stufe) {
   const p = STUFE[stufe];
   const art = waehle(p.arten);
@@ -111,11 +122,8 @@ function aufgabeErzeugen(stufe) {
   const g = waehle(liste);
   const a = { art, titel: g.titel, gruppe: g.gruppe, schritte: g.schritte, tipp: g.tipp };
   if (art === "ablenker") a.ablenker = g.ablenker;
-  if (art === "zeitwoerter") a.saetze = g.schritte.map((s, i) => `${ZEITWOERTER[i]} ${s.nach}`);
-  if (art === "luecken") {
-    const n = g.schritte.length;
-    a.luecken = [0, 1, n - 1].map((i, j) => ({ nach: g.schritte[i].nach, wort: LUECKEN[j] }));
-  }
+  if (art === "zeitwoerter") a.saetze = zeitwortSaetze(g);
+  if (art === "luecken") a.luecken = lueckenVon(g);
   return a;
 }
 

@@ -109,6 +109,8 @@ const STUFE = {
   s5: { gattungen: SIEBEN, merkmal: true },
   s6: { arten: ["fremd", "raten"] },
 };
+/** Stufe 4: aus welcher Gattung die Texte der Aufgabenarten mit Text kommen — auch für die Prüfansicht (pruefung.js). */
+const S4_GATTUNG = { moral: "fabel", sage: "sage" };
 
 function aufgabeErzeugen(stufe) {
   if (!TEXTE.length) return null;
@@ -120,8 +122,8 @@ function aufgabeErzeugen(stufe) {
   }
   if (stufe === "s4") {
     const art = waehle(p.arten);
-    if (art === "moral") { const t = waehle(texteVon("fabel")); return { art, t, optionen: mische(t.moral) }; }
-    if (art === "sage") { const t = waehle(texteVon("sage")); return { art, t, optionen: mische(t.typisch) }; }
+    if (art === "moral") { const t = waehle(texteVon(S4_GATTUNG.moral)); return { art, t, optionen: mische(t.moral) }; }
+    if (art === "sage") { const t = waehle(texteVon(S4_GATTUNG.sage)); return { art, t, optionen: mische(t.typisch) }; }
     const gattung = waehle(FUENF);
     return { art, gattung, merkmal: waehle(korbMerkmale(gattung)), koerbe: FUENF };
   }

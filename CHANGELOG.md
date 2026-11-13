@@ -2062,3 +2062,13 @@
 - **`tools/pruefe_skripte.js` Punkt 9** (AL5 a): Legenden gegen die Liste der Rahmen (Schlüssel und Reihenfolge in beiden
   Fassungen), keine Nummern von Hand, jedes Bild mit beiden Fassungen, unverändert seit der Aufnahme und benutzt; mit
   acht Gegenproben.
+- **Prüfung je Eintrag, Block 4 Deutsch** (LP5 a, LERN-51, T4 a): `pruefung.js` für Sachtext-Spurensuche, Korrektur-Stift,
+  Hör-Reporter, Wortarten-Probe, Gefühle-Radar, Geschichten-Ordner, Hör-Geschichte, Gattungs-Kenner und Figuren-Spiegel
+  (je eine Liste). Gemischte Listen in Abschnitte getrennt: Sachtexte und Berichte getrennt von ihren Fragen (je Text
+  eine Gruppe, der Haken einer Frage hängt am Text), Korrektur-Stift je Fehlerart, Wortarten-Probe je Satzgruppe und
+  Pronomenliste, Gefühle-Radar je Vorrat (Gesichter, Bilder, Sätze, Situationen, Körpersignale, Gespräche, Paare,
+  Antworten), Geschichten-Ordner je Form, Hör-Geschichte und Figuren-Spiegel je Gruppe, Gattungs-Kenner mit Texten,
+  Mischtexten und Merkmalen. Stufen aus den Stufentabellen der Spiele. Damit keine Prüfansicht einen Schritt der Aufgabe
+  nachbaut, stehen drei davon jetzt als Funktion oder Konstante im Spiel und werden von beiden benutzt:
+  Geschichten-Ordner `zeitwortSaetze` und `lueckenVon`, Wortarten-Probe `satzAufgabe`, Gattungs-Kenner `S4_GATTUNG`
+  (Aufgaben unverändert). Prüfstand und Fingerabdrücke unverändert (keine dieser Listen hat einen `hash`).
