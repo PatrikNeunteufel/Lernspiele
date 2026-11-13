@@ -677,6 +677,18 @@ const BILDER = (() => {
         + `<rect x="14" y="26" width="70" height="46" fill="#f4f0e6" stroke="#9a9488" stroke-width="2" transform="rotate(4 49 49)"/>`
         + `<rect x="12" y="20" width="72" height="48" fill="#ffffff" stroke="#9a9488" stroke-width="2.4"/>` },
 
+    // Fischsaurier vom Monte San Giorgio (erdzeit-leiter): ein Meeresreptil, kein Delfin — lange, schmale Schnauze mit
+    // Zähnen, sehr grosses Auge, Flossen als Paddel, senkrechte Schwanzflosse (vorher 🐬, ein Säugetier)
+    fischsaurier: { name: "Fischsaurier (Ichthyosaurier, Meeresreptil)", box: "0 0 100 100",
+      svg: `<path d="M0 18 Q12 14 25 18 T50 18 T75 18 T100 18 V100 H0 Z" fill="#bfe2f6"/>`
+        + `<circle cx="80" cy="30" r="2.5" fill="#ffffff"/><circle cx="86" cy="24" r="1.8" fill="#ffffff"/>`
+        + `<path d="M6 50 L34 44 Q52 36 70 42 Q80 46 86 50 L96 36 L92 52 L98 66 L86 56 Q74 62 56 62 Q40 62 34 56 Z" fill="#5f7d8e"/>`
+        + `<path d="M34 56 Q52 64 70 58 Q54 58 36 54 Z" fill="#c9d6dd"/>`
+        + `<path d="M52 38 L60 26 L64 40 Z" fill="#4c6878"/>`
+        + `<path d="M44 60 L38 74 L50 64 Z M66 60 L64 72 L72 62 Z" fill="#4c6878"/>`
+        + `<path d="M8 50 L32 47" stroke="#ffffff" stroke-width="1.6" stroke-dasharray="2 2"/>`
+        + `<circle cx="38" cy="47" r="5.5" fill="#ffffff"/><circle cx="38" cy="47" r="3.2" fill="#1b1b1f"/>` },
+
     // Körbe der Lebensräume (lebensraum, BI1 a): Landschaften statt eines Tiers oder einer Pflanze der Karten (vorher
     // Fichte 🌲 → Korb 🌲 Wald, Gänseblümchen 🌼 → Korb 🌼 Wiese)
     lrWald: { name: "Wald (Nadel- und Laubbäume)", box: "0 0 100 100",

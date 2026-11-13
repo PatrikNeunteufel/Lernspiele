@@ -49,7 +49,7 @@ const ZS_EREIGNISSE = [
   [1450, "um 1450", "📖", "Gutenberg druckt Bücher mit beweglichen Buchstaben", ZS_UEBERGANG],
   [1492, "1492", "svg:karavelle", "Kolumbus erreicht Amerika", ZS_UEBERGANG],
   [1803, "1803", "🗺️", "St. Gallen wird ein Kanton", "Neuzeit"],
-  [1847, "1847", "🚂", "Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden", "Neuzeit"],
+  [1847, "1847", "🚂", "Die erste Bahnlinie ganz in der Schweiz führt von Zürich nach Baden", "Neuzeit"],
   [1848, "1848", "svg:schweiz", "Die Schweiz wird ein Bundesstaat", "Neuzeit"],
   [1886, "1886", "svg:motorwagen", "Carl Benz baut das erste Auto mit Benzinmotor", "Neuzeit"],
   [1903, "1903", "svg:wright-flyer", "Die Brüder Wright fliegen mit dem ersten Motorflugzeug", "Neuzeit"],

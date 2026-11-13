@@ -2209,3 +2209,10 @@
   Lebensraum (lebensraum): Körbe als gezeichnete Landschaften (`bilder.js`: lrWald, lrWiese, lrWeiher, lrGebirge).
   Prüfung „Bild verrät“: Emojis je Schriftzeichen (Graphem), 👩‍🏫 zählt nicht mehr als 🏫 (Scheinfund im
   Gemeinde-Helfer).
+- **Befunde abgearbeitet, Durchgang 3 (BF1 a, Belege in der Befund-Datei):** Erdzeit-Leiter (erdzeit-leiter): „nur ihre
+  Nachfahren, die Vögel, überleben“, „Frühmenschen machen Werkzeuge aus Stein“, „Gletscher bedecken das Mittelland und
+  grosse Teile der Schweiz“, Fischsaurier als Zeichnung (`bilder.js`, fischsaurier) statt 🐬, Zeitalter-Körbe 🧫 🦂 🦎
+  statt der Ereignisbilder. Zeitstrahl-Sortierer (zeitstrahl-sortierer): „Die erste Bahnlinie ganz in der Schweiz führt
+  von Zürich nach Baden“. Stromkreis-Bauer (stromkreis-bauer): Hinweis zum Korb mit Graphit, `AUCH_GRUND` (gleicher Pol
+  → nie „Draht nicht angeschlossen“ als falsche Antwort, `pruefeAufgabe` meldet es), Tipp zum Kurzschluss genauer.
+  Energie-Wandler (energie-wandler): `auch` für Flusskraftwerk, Sonnenkollektor und Elektroherd.

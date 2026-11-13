@@ -37,7 +37,8 @@ const ENERGIE_GERAETE = [
     text: "Die Drähte im Toaster glühen und rösten das Brot." },
   { name: "Bügeleisen", bild: "👔", strom: true, von: "el", zu: ["waerme"],
     text: "Die Platte des Bügeleisens wird heiss und glättet die Kleider." },
-  { name: "Elektroherd", bild: "🍳", strom: true, von: "el", zu: ["waerme"],
+  // auch licht: eine Kochplatte kann rot glühen, wie die Drähte im Toaster (LERN_Session38)
+  { name: "Elektroherd", bild: "🍳", strom: true, von: "el", zu: ["waerme"], auch: ["licht"],
     text: "Die Kochplatte macht aus elektrischer Energie Wärme zum Kochen." },
   { name: "LED-Lampe", bild: "💡", strom: true, von: "el", zu: ["licht"], auch: ["waerme"],
     text: "Die Lampe macht aus elektrischer Energie Licht. Ein kleiner Teil wird zu Wärme." },
@@ -97,13 +98,15 @@ const ENERGIE_GERAETE = [
     text: "Erdgas verbrennt in einer Flamme und gibt Wärme ab. Erdgas wächst nicht nach." },
   { name: "Ölheizung", bild: "🛢️", strom: null, von: "chem", zu: ["waerme"], erneuerbar: false,
     text: "Heizöl verbrennt im Heizkessel und wärmt das Wasser für die Heizung. Erdöl wächst nicht nach." },
-  { name: "Sonnenkollektor", bild: "🌞", strom: null, von: "licht", zu: ["waerme"], erneuerbar: true,
+  // auch waerme: man sagt auch „Sonnenwärme“ — Wärme ist darum bei „vorher?“ nie eine falsche Antwort (LERN_Session38)
+  { name: "Sonnenkollektor", bild: "🌞", strom: null, von: "licht", zu: ["waerme"], auch: ["waerme"], erneuerbar: true,
     text: "Die Sonne erwärmt den Sonnenkollektor auf dem Dach. Er heizt damit Wasser." },
 
   // Kraftwerke
   { name: "Speicherkraftwerk (Stausee)", bild: "🧱", strom: null, von: "lage", zu: ["el"], auch: ["bew"], erneuerbar: true, kraftwerk: true,
     text: "Das Wasser aus dem hoch gelegenen Stausee schiesst durch Rohre hinunter, dreht die Turbine und den Generator." },
-  { name: "Flusskraftwerk", bild: "🏞️", strom: null, von: "bew", zu: ["el"], erneuerbar: true, kraftwerk: true,
+  // auch lage: am Wehr fällt das Wasser ein Stück hinunter — „Lageenergie“ ist darum nie eine falsche Antwort (LERN_Session38)
+  { name: "Flusskraftwerk", bild: "🏞️", strom: null, von: "bew", zu: ["el"], auch: ["lage"], erneuerbar: true, kraftwerk: true,
     text: "Das fliessende Wasser des Flusses dreht die Turbine, und der Generator macht daraus Strom." },
   { name: "Windrad", bild: "🌬️", strom: null, von: "bew", zu: ["el"], erneuerbar: true, kraftwerk: true,
     text: "Der Wind dreht die Flügel, und ein Generator macht daraus Strom." },

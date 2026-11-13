@@ -2378,7 +2378,7 @@ Jahrzahlen bitte nachprüfen.
 | 1450 | um 1450 | 📖 | Gutenberg druckt Bücher mit beweglichen Buchstaben | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
 | 1492 | 1492 | svg:karavelle | Kolumbus erreicht Amerika | Übergang vom Mittelalter zur Neuzeit — wird nicht gefragt | ☐ |
 | 1803 | 1803 | 🗺️ | St. Gallen wird ein Kanton | Neuzeit | ☐ |
-| 1847 | 1847 | 🚂 | Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden | Neuzeit | ☐ |
+| 1847 | 1847 | 🚂 | Die erste Bahnlinie ganz in der Schweiz führt von Zürich nach Baden | Neuzeit | ☐ |
 | 1848 | 1848 | svg:schweiz | Die Schweiz wird ein Bundesstaat | Neuzeit | ☐ |
 | 1886 | 1886 | svg:motorwagen | Carl Benz baut das erste Auto mit Benzinmotor | Neuzeit | ☐ |
 | 1903 | 1903 | svg:wright-flyer | Die Brüder Wright fliegen mit dem ersten Motorflugzeug | Neuzeit | ☐ |
@@ -3969,24 +3969,24 @@ Zeit in Millionen Jahren, gerundet — bitte nachprüfen.
 | mio: 370; bild: 🐸; text: Erste Vierbeiner (Amphibien) kriechen an Land.; zeitalter: Erdaltertum | ☐ |
 | mio: 300; bild: 🌴; text: Riesige Sumpfwälder aus Farnen. Daraus wird später Steinkohle.; zeitalter: Erdaltertum | ☐ |
 | mio: 250; bild: 🌋; text: Das grösste Artensterben: Die meisten Meerestiere sterben aus.; zeitalter: Erdaltertum; grenze: ja | ☐ |
-| mio: 240; bild: 🐬; text: Am Monte San Giorgio im Tessin ist Meer. Darin schwimmen Fischsaurier.; zeitalter: Erdmittelalter | ☐ |
+| mio: 240; bild: svg:fischsaurier; text: Am Monte San Giorgio im Tessin ist Meer. Darin schwimmen Fischsaurier.; zeitalter: Erdmittelalter | ☐ |
 | mio: 230; bild: 🦖; text: Erste Dinosaurier.; zeitalter: Erdmittelalter | ☐ |
 | mio: 210; bild: 🦕; text: Der Plateosaurus lebt dort, wo heute Frick im Aargau liegt.; zeitalter: Erdmittelalter | ☐ |
 | mio: 200; bild: 🐭; text: Erste Säugetiere, klein wie Mäuse.; zeitalter: Erdmittelalter | ☐ |
 | mio: 160; bild: 🌊; text: Die Schweiz liegt unter einem warmen Meer. Der Kalk des Juras entsteht.; zeitalter: Erdmittelalter | ☐ |
 | mio: 150; bild: 🪶; text: Der Urvogel Archaeopteryx lebt.; zeitalter: Erdmittelalter | ☐ |
 | mio: 130; bild: 🌸; text: Erste Blütenpflanzen blühen.; zeitalter: Erdmittelalter | ☐ |
-| mio: 66; bild: ☄️; text: Ein riesiger Asteroid schlägt ein. Die Dinosaurier sterben aus — nur die Vögel überleben.; zeitalter: Erdmittelalter; grenze: ja | ☐ |
+| mio: 66; bild: ☄️; text: Ein riesiger Asteroid schlägt ein. Die Dinosaurier sterben aus — nur ihre Nachfahren, die Vögel, überleben.; zeitalter: Erdmittelalter; grenze: ja | ☐ |
 | mio: 50; bild: 🐋; text: Die Vorfahren der Wale gehen ins Wasser.; zeitalter: Erdneuzeit | ☐ |
 | mio: 30; bild: 🏔️; text: Die Alpen falten sich auf.; zeitalter: Erdneuzeit | ☐ |
 | mio: 10; bild: ⛰️; text: Das Juragebirge faltet sich auf.; zeitalter: Erdneuzeit | ☐ |
 | mio: 6; bild: svg:vormensch; text: Erste Vormenschen gehen auf zwei Beinen.; zeitalter: Erdneuzeit | ☐ |
 | mio: 3; bild: 🦴; text: Die Vormenschen-Frau „Lucy“ lebt in Afrika.; zeitalter: Erdneuzeit | ☐ |
-| jahre: 2500000; bild: svg:fruehmensch; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit | ☐ |
+| jahre: 2500000; bild: svg:fruehmensch; text: Frühmenschen machen Werkzeuge aus Stein.; zeitalter: Erdneuzeit | ☐ |
 | mio: 1; bild: 🔥; text: Frühmenschen nutzen das Feuer.; zeitalter: Erdneuzeit | ☐ |
 | jahre: 300000; bild: svg:homo-sapiens-frueh; text: Der heutige Mensch (Homo sapiens) entsteht in Afrika.; zeitalter: Erdneuzeit | ☐ |
 | jahre: 40000; bild: svg:neandertaler; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit | ☐ |
-| jahre: 20000; bild: 🧊; text: Höhepunkt der letzten Eiszeit: Gletscher bedecken fast die ganze Schweiz.; zeitalter: Erdneuzeit | ☐ |
+| jahre: 20000; bild: 🧊; text: Höhepunkt der letzten Eiszeit: Gletscher bedecken das Mittelland und grosse Teile der Schweiz.; zeitalter: Erdneuzeit | ☐ |
 | jahre: 12000; bild: 🌤️; text: Die letzte Eiszeit geht zu Ende.; zeitalter: Erdneuzeit | ☐ |
 
 ## 52. Pflanzen-Bestimmer (Lehrplan SG NMG.2.4)
@@ -4191,7 +4191,7 @@ Energieformen: el = name: elektrische Energie; bild: ⚡; bew = name: Bewegungse
 | name: Wasserkocher; bild: 🫖; strom: ja; von: el; zu: waerme; text: Eine Heizplatte im Boden wird heiss und erwärmt das Wasser. | ☐ |
 | name: Toaster; bild: 🍞; strom: ja; von: el; zu: waerme; auch: licht; text: Die Drähte im Toaster glühen und rösten das Brot. | ☐ |
 | name: Bügeleisen; bild: 👔; strom: ja; von: el; zu: waerme; text: Die Platte des Bügeleisens wird heiss und glättet die Kleider. | ☐ |
-| name: Elektroherd; bild: 🍳; strom: ja; von: el; zu: waerme; text: Die Kochplatte macht aus elektrischer Energie Wärme zum Kochen. | ☐ |
+| name: Elektroherd; bild: 🍳; strom: ja; von: el; zu: waerme; auch: licht; text: Die Kochplatte macht aus elektrischer Energie Wärme zum Kochen. | ☐ |
 | name: LED-Lampe; bild: 💡; strom: ja; von: el; zu: licht; auch: waerme; text: Die Lampe macht aus elektrischer Energie Licht. Ein kleiner Teil wird zu Wärme. | ☐ |
 | name: Bildschirm; bild: 📺; strom: ja; von: el; zu: licht; auch: waerme; text: Der Bildschirm leuchtet: Aus elektrischer Energie wird Licht, ein wenig auch Wärme. | ☐ |
 | name: Taschenlampe; bild: 🔦; strom: ja; von: chem; zu: licht; auch: el · waerme; text: Die Batterie gibt aus ihrer chemischen Energie Strom ab. Die Lampe macht daraus Licht. | ☐ |
@@ -4219,9 +4219,9 @@ Energieformen: el = name: elektrische Energie; bild: ⚡; bew = name: Bewegungse
 | name: Automotor (Benzin); bild: 🚗; strom: null; von: chem; zu: bew; auch: waerme; erneuerbar: nein; text: Benzin verbrennt im Motor. Ein grosser Teil wird zu Wärme, der Rest bewegt das Auto. Benzin wird aus Erdöl gemacht, und Erdöl wächst nicht nach. | ☐ |
 | name: Gasherd (Erdgas); bild: 🍲; strom: null; von: chem; zu: waerme; auch: licht; erneuerbar: nein; text: Erdgas verbrennt in einer Flamme und gibt Wärme ab. Erdgas wächst nicht nach. | ☐ |
 | name: Ölheizung; bild: 🛢️; strom: null; von: chem; zu: waerme; erneuerbar: nein; text: Heizöl verbrennt im Heizkessel und wärmt das Wasser für die Heizung. Erdöl wächst nicht nach. | ☐ |
-| name: Sonnenkollektor; bild: 🌞; strom: null; von: licht; zu: waerme; erneuerbar: ja; text: Die Sonne erwärmt den Sonnenkollektor auf dem Dach. Er heizt damit Wasser. | ☐ |
+| name: Sonnenkollektor; bild: 🌞; strom: null; von: licht; zu: waerme; auch: waerme; erneuerbar: ja; text: Die Sonne erwärmt den Sonnenkollektor auf dem Dach. Er heizt damit Wasser. | ☐ |
 | name: Speicherkraftwerk (Stausee); bild: 🧱; strom: null; von: lage; zu: el; auch: bew; erneuerbar: ja; kraftwerk: ja; text: Das Wasser aus dem hoch gelegenen Stausee schiesst durch Rohre hinunter, dreht die Turbine und den Generator. | ☐ |
-| name: Flusskraftwerk; bild: 🏞️; strom: null; von: bew; zu: el; erneuerbar: ja; kraftwerk: ja; text: Das fliessende Wasser des Flusses dreht die Turbine, und der Generator macht daraus Strom. | ☐ |
+| name: Flusskraftwerk; bild: 🏞️; strom: null; von: bew; zu: el; auch: lage; erneuerbar: ja; kraftwerk: ja; text: Das fliessende Wasser des Flusses dreht die Turbine, und der Generator macht daraus Strom. | ☐ |
 | name: Windrad; bild: 🌬️; strom: null; von: bew; zu: el; erneuerbar: ja; kraftwerk: ja; text: Der Wind dreht die Flügel, und ein Generator macht daraus Strom. | ☐ |
 | name: Kernkraftwerk; bild: 🏭; strom: null; von: kern; zu: el; auch: waerme; erneuerbar: nein; kraftwerk: ja; text: Im Kernkraftwerk wird Uran gespalten. Die Wärme macht Dampf, der eine Turbine und den Generator dreht. Uran wächst nicht nach. | ☐ |
 | name: Biogasanlage; bild: 🐄; strom: null; von: chem; zu: el · waerme; erneuerbar: ja; kraftwerk: ja; text: Aus Gülle und Grünabfällen entsteht Biogas. Ein Motor verbrennt es und treibt einen Generator an: Es gibt Strom und Wärme. | ☐ |

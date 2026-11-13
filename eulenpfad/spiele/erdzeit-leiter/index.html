@@ -112,10 +112,12 @@ function dauerText(j, fall = "nom") {
 const vorText = e => `vor etwa ${dauerText(jahreVon(e), "dat")}`;
 const verhaeltnis = (a, b) => Math.max(jahreVon(a), jahreVon(b)) / Math.min(jahreVon(a), jahreVon(b));
 
+// Bilder nie gleich dem Bild eines Ereignisses (BI1 a, LERN_Session38: vorher 🦠 erste Einzeller, 🐟 erste Fische und
+// 🦕 Plateosaurus auf der Karte wie im Korb): Kulturschale mit Einzellern, Seeskorpion, Echse für die Reptilien
 const ZEITALTER = [
-  { name: "Erdurzeit", bild: "🦠", von: 4600, bis: 541 },
-  { name: "Erdaltertum", bild: "🐟", von: 541, bis: 252 },
-  { name: "Erdmittelalter", bild: "🦕", von: 252, bis: 66 },
+  { name: "Erdurzeit", bild: "🧫", von: 4600, bis: 541 },
+  { name: "Erdaltertum", bild: "🦂", von: 541, bis: 252 },
+  { name: "Erdmittelalter", bild: "🦎", von: 252, bis: 66 },
   { name: "Erdneuzeit", bild: "🦣", von: 66, bis: 0 },
 ];
 const zeitalterSpanne = z => (z.bis ? `vor ${z.von} bis ${z.bis} Millionen Jahren` : `seit ${z.von} Millionen Jahren`);

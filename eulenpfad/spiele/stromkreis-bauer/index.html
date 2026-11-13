@@ -170,6 +170,10 @@ const GRUENDE = {
   pol: "Beide Drähte sind am gleichen Pol.",
   kurz: "Kurzschluss: Der Strom fliesst an der Lampe vorbei.",
 };
+/** Gründe, die bei diesem Grund im Bild ebenso zutreffen und darum nie als falsche Antwort daneben stehen: Sind beide
+    Drähte am gleichen Pol, hängt am anderen Pol kein Draht — „Ein Draht ist nicht angeschlossen“ stimmt dann auch
+    (Befund LERN_Session38). */
+const AUCH_GRUND = { pol: ["draht"] };
 function maengel(s, g) {
   const m = [];
   for (const c of plaetze(s)) {
@@ -271,7 +275,7 @@ const ARTEN = {
     if (!alle.length) return null;
     const [i, d] = waehle(alle);
     const richtig = warumGrund(SCH[i], GEGENSTAENDE[d]);
-    const andere = mische(Object.keys(GRUENDE).filter(k => k !== richtig)).slice(0, 2);
+    const andere = mische(Object.keys(GRUENDE).filter(k => k !== richtig && !AUCH_GRUND[richtig]?.includes(k))).slice(0, 2);
     return { art: "warum", sch: i, ding: d, richtig, optionen: mische([richtig, ...andere]) };
   },
   /** Kurzschluss-Schaltungen: brennt die Lampe, oder gibt es einen Kurzschluss? */
@@ -353,6 +357,7 @@ function pruefeAufgabe(a, stufe) {
     if (a.richtig !== (g[2] ? "leitet" : "nicht")) m.push("Lösung falsch");
   } else if (a.art === "warum") {
     if (warumGrund(s, g) !== a.richtig) m.push("Grund falsch oder nicht eindeutig");
+    if (a.optionen.some(k => AUCH_GRUND[a.richtig]?.includes(k))) m.push("Ablenker trifft ebenso zu");
   } else if (a.art === "welche") {
     if (a.richtig !== welcheText(e.brennt, lampenVon(s))) m.push("Lösung falsch");
     if (e.kurzschluss && e.brennt.size) m.push("Kurzschluss, aber Lampe brennt");
@@ -460,7 +465,8 @@ const HINWEIS = {
   brennt: "Fahre mit dem Finger vom Pluspol (+) durch die Lampe zum Minuspol (−). Ist der Weg überall geschlossen?",
   kurz: "Schau dir den orangen Draht genau an: Kann der Strom einen Weg ohne Lampe nehmen?",
   kurzfrage: "Ein Kurzschluss heisst: Plus und Minus sind direkt verbunden, ohne Lampe dazwischen.",
-  korb: "Ist der Gegenstand aus Metall? Oder aus Holz, Kunststoff, Gummi, Papier, Stoff, Wachs oder Stein?",
+  // Nicht „aus Metall?“ allein: die Bleistiftmine (Graphit) leitet auch (Befund LERN_Session38)
+  korb: "Woraus ist der Gegenstand? Metall und die Bleistiftmine (Graphit) leiten — Holz, Kunststoff, Gummi, Papier, Stoff, Wachs und Stein nicht.",
   warum: "Suche die Stelle, an der der Strom nicht weiterkommt oder die Lampe umgeht.",
   welche: "Verfolge den Strom von + nach −. Ein Weg durch eine Lampe muss ganz geschlossen sein.",
 };
@@ -482,7 +488,7 @@ function tippsFuer(a, s, g) {
       ? "Wo sich der Draht teilt, hat jeder Zweig seinen eigenen Weg. Prüf jeden Zweig für sich — und auch die Teile davor und danach."
       : "Lampen hintereinander (in Serie) teilen sich einen Weg: Ist er irgendwo offen, bleiben alle dunkel."];
     const zusatz = [herausgedreht(s).length ? "Eine herausgedrehte Lampe unterbricht ihren Weg." : "",
-      s.kurz ? "Der orange Draht ist ein Weg ohne Lampe. Was er überbrückt, bekommt keinen Strom mehr." : ""].filter(Boolean);
+      s.kurz ? "Der orange Draht ist ein Weg ohne Lampe. Jede Lampe zwischen seinen beiden Enden bekommt keinen Strom mehr." : ""].filter(Boolean);
     if (zusatz.length) t.push(zusatz.join(" "));
     return t;
   }

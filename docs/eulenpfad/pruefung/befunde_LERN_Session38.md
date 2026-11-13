@@ -15,6 +15,10 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Wassertropfen-Reise | erledigt 2026-11-13 (LERN_Session38, WT1 a) | unten |
 | „Bild verrät“ in zehn Spielen | erledigt 2026-11-13 (LERN_Session38, BI1 a; neun behoben, ein Scheinfund) | Tabelle unten |
 | Lärm-Wächter | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Bilder (BI1) und Lärm-Skala offen | unten |
+| Erdzeit-Leiter | erledigt 2026-11-13 (LERN_Session38) bis auf die Schreibweise „2 500 000“ | Durchgang 3 unten |
+| Zeitstrahl-Sortierer | erledigt 2026-11-13 (LERN_Session38); Pfahlbauten und Urgrosseltern vertretbar | Durchgang 3 unten |
+| Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session38); schwache Ablenker und Bleistiftmine im Versuch offen | Durchgang 3 unten |
+| Energie-Wandler | erledigt 2026-11-13 (LERN_Session38); Bilder (Staubsauger 🧹 …) offen | Durchgang 3 unten |
 | übrige | offen | unten |
 
 **Behoben in LERN_Session38** (Belege: Wasserdampf unsichtbar [chemie.de, Lexikon Wasserdampf](https://www.chemie.de/lexikon/Wasserdampf.html);
@@ -58,6 +62,24 @@ eine Stichprobe, im vollen Lauf können weitere Fälle auftauchen) — **offen, 
 | Lebensraum (lebensraum) | 1 — **behoben** (Körbe als gezeichnete Landschaften: lrWald, lrWiese, lrWeiher, lrGebirge) | Wald 🌲 (Stufe 3) |
 
 Nicht erfasst, weil nur ähnlich und nicht gleich: Wetter und Jahreszeiten ☀️ zum Korb 🌞, 🍂 zum Korb 🍁.
+
+**Durchgang 3** (Belege: erste Bahnlinie ganz in der Schweiz Zürich–Baden 1847, die Linie Mulhouse–Basel kam 1844
+([Wikipedia, Zürich–Baden](https://en.wikipedia.org/wiki/Zurich%E2%80%93Baden_railway_line): „the first line opened in
+Switzerland, apart from a line from Mulhouse, France to Basel“); älteste Steinwerkzeuge Lomekwi rund 3,3 Mio. Jahre
+([Live Science 2015](https://www.livescience.com/50908-oldest-stone-tools-predate-humans.html), Harmand et al., Nature 521);
+beim letzteiszeitlichen Maximum Mittelland und Teile des Juras vergletschert, der Napf weitgehend eisfrei
+([swisstopo-Karte LGM](https://opendata.swiss/en/dataset/die-schweiz-wahrend-des-letzteiszeitlichen-maximums-lgm-1-500000), [UZH](https://www.geo.uzh.ch/dam/jcr:fe37cfa7-c295-405e-8d17-c34397f04fab/01%20Reussgletscher.pdf));
+Ichthyosaurier sind Meeresreptilien ([Universität Zürich, Monte San Giorgio](https://nmz.uzh.ch/en/permanentexhibition/monte_san_giorgio.html))):
+- Erdzeit-Leiter: „nur ihre Nachfahren, die Vögel, überleben“; „Frühmenschen machen Werkzeuge aus Stein“ (nicht „die
+  ersten“); „Gletscher bedecken das Mittelland und grosse Teile der Schweiz“; Fischsaurier gezeichnet (`bilder.js`,
+  fischsaurier) statt 🐬; Zeitalter-Körbe 🧫, 🦂, 🦎 statt 🦠, 🐟, 🦕 der Ereignisse (vom normalen Lauf als „Bild verrät“
+  gefunden, nicht von der verkürzten Zählung).
+- Zeitstrahl-Sortierer: „Die erste Bahnlinie ganz in der Schweiz führt von Zürich nach Baden“.
+- Stromkreis-Bauer: Hinweis zum Korb nennt Metall und Graphit als Leiter; bei „Beide Drähte am gleichen Pol“ nie „Ein
+  Draht ist nicht angeschlossen“ als falsche Antwort (`AUCH_GRUND`); Tipp zum Kurzschluss: „Jede Lampe zwischen seinen
+  beiden Enden bekommt keinen Strom mehr“.
+- Energie-Wandler: `auch` für Flusskraftwerk (Lageenergie), Sonnenkollektor (Wärme), Elektroherd (Licht) — nie als
+  falsche Antwort.
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

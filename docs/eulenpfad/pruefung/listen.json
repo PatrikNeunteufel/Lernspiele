@@ -13033,7 +13033,7 @@
             "1847",
             "1847",
             "🚂",
-            "Die erste Eisenbahn der Schweiz fährt von Zürich nach Baden",
+            "Die erste Bahnlinie ganz in der Schweiz führt von Zürich nach Baden",
             "Neuzeit"
           ],
           [
@@ -19323,7 +19323,7 @@
             "mio: 250; bild: 🌋; text: Das grösste Artensterben: Die meisten Meerestiere sterben aus.; zeitalter: Erdaltertum; grenze: ja"
           ],
           [
-            "mio: 240; bild: 🐬; text: Am Monte San Giorgio im Tessin ist Meer. Darin schwimmen Fischsaurier.; zeitalter: Erdmittelalter"
+            "mio: 240; bild: svg:fischsaurier; text: Am Monte San Giorgio im Tessin ist Meer. Darin schwimmen Fischsaurier.; zeitalter: Erdmittelalter"
           ],
           [
             "mio: 230; bild: 🦖; text: Erste Dinosaurier.; zeitalter: Erdmittelalter"
@@ -19344,7 +19344,7 @@
             "mio: 130; bild: 🌸; text: Erste Blütenpflanzen blühen.; zeitalter: Erdmittelalter"
           ],
           [
-            "mio: 66; bild: ☄️; text: Ein riesiger Asteroid schlägt ein. Die Dinosaurier sterben aus — nur die Vögel überleben.; zeitalter: Erdmittelalter; grenze: ja"
+            "mio: 66; bild: ☄️; text: Ein riesiger Asteroid schlägt ein. Die Dinosaurier sterben aus — nur ihre Nachfahren, die Vögel, überleben.; zeitalter: Erdmittelalter; grenze: ja"
           ],
           [
             "mio: 50; bild: 🐋; text: Die Vorfahren der Wale gehen ins Wasser.; zeitalter: Erdneuzeit"
@@ -19362,7 +19362,7 @@
             "mio: 3; bild: 🦴; text: Die Vormenschen-Frau „Lucy“ lebt in Afrika.; zeitalter: Erdneuzeit"
           ],
           [
-            "jahre: 2500000; bild: svg:fruehmensch; text: Frühmenschen machen die ersten Steinwerkzeuge.; zeitalter: Erdneuzeit"
+            "jahre: 2500000; bild: svg:fruehmensch; text: Frühmenschen machen Werkzeuge aus Stein.; zeitalter: Erdneuzeit"
           ],
           [
             "mio: 1; bild: 🔥; text: Frühmenschen nutzen das Feuer.; zeitalter: Erdneuzeit"
@@ -19374,7 +19374,7 @@
             "jahre: 40000; bild: svg:neandertaler; text: Die letzten Neandertaler sterben aus.; zeitalter: Erdneuzeit"
           ],
           [
-            "jahre: 20000; bild: 🧊; text: Höhepunkt der letzten Eiszeit: Gletscher bedecken fast die ganze Schweiz.; zeitalter: Erdneuzeit"
+            "jahre: 20000; bild: 🧊; text: Höhepunkt der letzten Eiszeit: Gletscher bedecken das Mittelland und grosse Teile der Schweiz.; zeitalter: Erdneuzeit"
           ],
           [
             "jahre: 12000; bild: 🌤️; text: Die letzte Eiszeit geht zu Ende.; zeitalter: Erdneuzeit"
@@ -19914,7 +19914,7 @@
             "name: Bügeleisen; bild: 👔; strom: ja; von: el; zu: waerme; text: Die Platte des Bügeleisens wird heiss und glättet die Kleider."
           ],
           [
-            "name: Elektroherd; bild: 🍳; strom: ja; von: el; zu: waerme; text: Die Kochplatte macht aus elektrischer Energie Wärme zum Kochen."
+            "name: Elektroherd; bild: 🍳; strom: ja; von: el; zu: waerme; auch: licht; text: Die Kochplatte macht aus elektrischer Energie Wärme zum Kochen."
           ],
           [
             "name: LED-Lampe; bild: 💡; strom: ja; von: el; zu: licht; auch: waerme; text: Die Lampe macht aus elektrischer Energie Licht. Ein kleiner Teil wird zu Wärme."
@@ -19998,13 +19998,13 @@
             "name: Ölheizung; bild: 🛢️; strom: null; von: chem; zu: waerme; erneuerbar: nein; text: Heizöl verbrennt im Heizkessel und wärmt das Wasser für die Heizung. Erdöl wächst nicht nach."
           ],
           [
-            "name: Sonnenkollektor; bild: 🌞; strom: null; von: licht; zu: waerme; erneuerbar: ja; text: Die Sonne erwärmt den Sonnenkollektor auf dem Dach. Er heizt damit Wasser."
+            "name: Sonnenkollektor; bild: 🌞; strom: null; von: licht; zu: waerme; auch: waerme; erneuerbar: ja; text: Die Sonne erwärmt den Sonnenkollektor auf dem Dach. Er heizt damit Wasser."
           ],
           [
             "name: Speicherkraftwerk (Stausee); bild: 🧱; strom: null; von: lage; zu: el; auch: bew; erneuerbar: ja; kraftwerk: ja; text: Das Wasser aus dem hoch gelegenen Stausee schiesst durch Rohre hinunter, dreht die Turbine und den Generator."
           ],
           [
-            "name: Flusskraftwerk; bild: 🏞️; strom: null; von: bew; zu: el; erneuerbar: ja; kraftwerk: ja; text: Das fliessende Wasser des Flusses dreht die Turbine, und der Generator macht daraus Strom."
+            "name: Flusskraftwerk; bild: 🏞️; strom: null; von: bew; zu: el; auch: lage; erneuerbar: ja; kraftwerk: ja; text: Das fliessende Wasser des Flusses dreht die Turbine, und der Generator macht daraus Strom."
           ],
           [
             "name: Windrad; bild: 🌬️; strom: null; von: bew; zu: el; erneuerbar: ja; kraftwerk: ja; text: Der Wind dreht die Flügel, und ein Generator macht daraus Strom."
