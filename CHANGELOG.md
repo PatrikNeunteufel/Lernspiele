@@ -2123,3 +2123,8 @@
   Tier-Sortierer, Instrumente, Son-Lauscher, Sound-Sorter, Znüni-Teller und Auge-Entdecker; Spiele mit eigener Farbe
   (`opt.farbe`) unverändert. Neuer Prüfer „Korbfarbe“ in `tools/pruefe_spiele.js` (Gegenprobe mit Farbe nach Platz: 230
   Meldungen im Tier-Sortierer).
+- **Platz der Körbe (KF2 a):** die sechs Spiele folgen dem Sortierschalter (Katalog `reihenfolge: "koerbe"`, `LS.koerbe` mit
+  `opt.familie`): geordnet steht jeder Korb immer am selben Platz, „nach Stufe“ = Stufe 1–3 geordnet, ab 4 gemischt.
+  Schalter auf Karte und Stufenwahl mit eigenen Worten („Körbe nach Stufe“, `LS.reihenfolgeSchalter`), Profiltext ergänzt.
+- **Tageslauf-Sonne (TS1 a):** Auftrag „Was kommt zuerst, was danach? Tipp die Bilder der Reihe nach an: vom Morgen bis in
+  die Nacht.“ statt „Was machst du zuerst am Tag?“ (nicht jedes Bild ist etwas, das das Kind tut), Tipps ebenso.

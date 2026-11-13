@@ -9,7 +9,6 @@ const UE = KERN.uebersicht;
 // Symbole der Karten-Schalter: aus = grauer Umriss, an = gold mit Verlauf wie der Favoriten-Stern.
 // Der Verlauf steht einmal im Dokument (#gold-verlauf). Die Form des Sterns kommt aus dem Kern.
 // Reihenfolge auf der Karte: Antippen schaltet weiter (nach Stufe → geordnet → gemischt → nach Stufe).
-const REIHENFOLGE_KARTE = LS.REIHENFOLGE_SCHALTER; // Werte im Rahmen, gleich auf der Stufenwahl (RS1 a)
 /** Symbol der Schalter (⏱ Uhr, ♾ Endlos, ☆ Stern, Balken, Mischen): aus spiel.js, gleich auf Karten und Stufenwahl. */
 const schalterSymbol = (art, an) => LS.schalterSymbol(art, an);
 
@@ -418,7 +417,7 @@ function zeichneSpiele(box, neu) {
     // Von der Aufsicht festgelegt (VR1 a): Symbol mit 🔒, Antippen ändert nichts.
     const festSchalter = (an, art, text) => el("span", { class: "karten-schalter fest", role: "img", "aria-label": `${text} — ${LS.FEST_TEXT}`,
       title: `${text} — ${LS.FEST_TEXT}` }, schalterSymbol(art, an), el("span", { class: "schloss", text: "🔒" }));
-    const reihenfolge = s.reihenfolge ? REIHENFOLGE_KARTE[LS.reihenfolgeFuer(name, s.id)] || REIHENFOLGE_KARTE.stufe : null;
+    const reihenfolge = s.reihenfolge ? LS.reihenfolgeSchalter(s.id, LS.reihenfolgeFuer(name, s.id)) : null;
     // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
     const schalterZeile = el("div", { class: "karten-schalter-zeile" },
         lage ? el("span", { class: "klassen-marke", role: "img", "aria-label": KLASSEN_LAGE[lage].text(s.klasse), title: KLASSEN_LAGE[lage].text(s.klasse),

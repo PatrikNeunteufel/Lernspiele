@@ -187,7 +187,8 @@ function tippsFuer(a, stufe) {
   if (a.art === "zuordnen") return stufe === "s1"
     ? ["Ist es dabei hell oder dunkel?", "Hell ist es am Tag ☀️, dunkel in der Nacht 🌙."]
     : ["Denk an deinen Tag: Machst du das nach dem Aufstehen, in der Mitte vom Tag oder vor dem Schlafen?", BOGEN_TIPP];
-  if (a.art === "ordnen") return ["Denk an deinen Tag: vom Aufstehen bis zum Schlafen.", "Was machst du zuerst, wenn du aufwachst? Das tippst du zuerst an."];
+  // TS1 a (LERN_Session38): nicht „was machst du“ — nicht jedes Bild ist etwas, das das Kind tut (🦉 ruft im Wald)
+  if (a.art === "ordnen") return ["Denk an einen Tag: vom Morgen bis in die Nacht.", "Was kommt am Morgen? Das tippst du zuerst an."];
   if (a.art === "passtNicht") return ["Überleg bei jedem Bild: Wann macht man das?", "Drei Bilder haben die gleiche Tageszeit. Ein Bild hat eine andere."];
   const t = ["Such zuerst die Sonne 🌞: Das ist heute.", a.d < 0 ? "Die Tage gehen von links nach rechts. Was schon vorbei ist, steht links."
     : "Die Tage gehen von links nach rechts. Was erst noch kommt, steht rechts."];
@@ -260,7 +261,7 @@ LS.spiel({
 
     if (a.art === "ordnen") {
       ctx.kennung(`${a.art}|${a.reihe.join("")}`);
-      f.append(el("div", { class: "auftrag", text: "Was machst du zuerst am Tag? Tipp die Bilder der Reihe nach an." }));
+      f.append(el("div", { class: "auftrag", text: "Was kommt zuerst, was danach? Tipp die Bilder der Reihe nach an: vom Morgen bis in die Nacht." }));
       const { box } = LS.reihenfolge(ctx, {
         reihe: a.reihe, inhalt: b => ({ bild: b }), ablage: b => b, pfeile: true, breite: 90,
         hinweis: "Das kommt später am Tag. Welches Bild kommt vorher?",

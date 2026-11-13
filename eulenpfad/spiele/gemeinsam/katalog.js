@@ -418,7 +418,7 @@ const SPIELE = [
     lernziele: [{ lz: "D.5.E.1", stufen: ALLE_STUFEN }],
     // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "reise", bilder: "abc", ziele: { s1: 4, s2: 8, s3: 13, s4: 18, s5: 22, s6: 26 } } },
-  { id: "tier-sortierer", art: ["sortieren", "antippen"], klasse: 3, bild: "🐾", name: "Tier-Sortierer", thema: "tiere", farbe: "var(--deko-3)",
+  { id: "tier-sortierer", art: ["sortieren", "antippen"], klasse: 3, bild: "🐾", name: "Tier-Sortierer", thema: "tiere", farbe: "var(--deko-3)", reihenfolge: "koerbe",
     pfad: "spiele/tier-sortierer/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Wildtier oder Heimtier? Säugetier oder Vogel? Nager, Raubtier, Paarhufer …",
     listen: {
@@ -665,7 +665,7 @@ const SPIELE = [
     // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "reise", bilder: "koerperweg", ziele: { s1: { teile: ["👁️", "👂", "👃"] }, s2: { teile: ["👁️", "👂", "👃", "👅", "✋"] }, s3: { gelenke: true },
       s4: { teile: ["🦷", "💪", "🦵", "🦶"] }, s5: { weg: "luft" }, s6: { weg: "essen" } } } },
-  { id: "znueni-teller", art: ["sortieren", "antippen"], klasse: 2, bild: "🍎", name: "Znüni-Teller", thema: "koerper", farbe: "var(--deko-5)",
+  { id: "znueni-teller", art: ["sortieren", "antippen"], klasse: 2, bild: "🍎", name: "Znüni-Teller", thema: "koerper", farbe: "var(--deko-5)", reihenfolge: "koerbe",
     pfad: "spiele/znueni-teller/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 8, s3: 10, s4: 15, s5: 15, s6: 19 },
     beschreibung: "Was ist gut für jeden Tag? Lebensmittel ordnen, ein feines Znüni",
     listen: {
@@ -705,7 +705,7 @@ const SPIELE = [
     // Abschluss-Animation (feier.js, Block C, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "sammeln", bilder: "wanne", ziele: { s1: { dinge: ["🪵", "🪨"] }, s2: { dinge: ["🍎", "🔑", "🕯️", "🪙"] }, s3: { dinge: ["🍃", "🥄", "🏓", "🔨", "🧊"] },
       s4: { dinge: ["🪶", "🔩", "🍌", "🥔", "💍", "🍎"] }, s5: { dinge: ["🪵", "🪨"], schiff: true }, s6: { dinge: ["🪵", "🍎", "🍃", "🕯️", "🪨", "🔩", "🔑", "🪙"] } } } },
-  { id: "instrumente", art: ["sortieren", "antippen"], klasse: 2, bild: "🎺", name: "Instrumenten-Kenner", thema: "musik", farbe: "var(--deko-2)",
+  { id: "instrumente", art: ["sortieren", "antippen"], klasse: 2, bild: "🎺", name: "Instrumenten-Kenner", thema: "musik", farbe: "var(--deko-2)", reihenfolge: "koerbe",
     pfad: "spiele/instrumente/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], zeiten: { s1: 8, s2: 10, s3: 10, s4: 12, s5: 15, s6: 19 },
     beschreibung: "Trommel, Geige, Flöte — und wie man sie spielt",
     listen: {
@@ -1240,7 +1240,7 @@ const SPIELE = [
     lernziele: [{ lz: "D.2.B.1", stufen: ALLE_STUFEN }],
     // Abschluss-Animation (feier.js, Block A, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "karte", bilder: "spurweg", ziele: { s1: 1, s2: 2, s3: 3, s4: 4, s5: 5, s6: 6 } } },
-  { id: "sound-sorter", art: ["sortieren", "antippen", "hoeren"], klasse: 5, neu: "LERN_Session8", bild: "🔊", name: "Sound-Sorter", thema: "englisch-hoeren", farbe: "var(--deko-1)",
+  { id: "sound-sorter", art: ["sortieren", "antippen", "hoeren"], klasse: 5, neu: "LERN_Session8", bild: "🔊", name: "Sound-Sorter", thema: "englisch-hoeren", farbe: "var(--deko-1)", reihenfolge: "koerbe",
     pfad: "spiele/sound-sorter/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s3", "s4", "s6"], zeiten: { s1: 11, s2: 14, s3: 14, s4: 20, s5: 19, s6: 25 },
     beschreibung: "Englische Wörter nach ihrem Laut sortieren: i wie in live oder wie in life?",
     listen: {
@@ -1363,7 +1363,7 @@ const SPIELE = [
     lernziele: [{ lz: "FS2F.5.D.2", stufen: ALLE_STUFEN }, { lz: "FS2F.5.D.1", stufen: ["s4"] }],
     // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "sammeln", bilder: "artikel", ziele: { s1: { koerbe: ["le", "la"], dinge: [["🐱"], ["🍎"], ["🐶"], ["🏠"]] }, s2: { koerbe: ["le", "la", "l’"], dinge: [["🚆"], ["🌙"], ["🌳"], ["⭐"], ["🐦"]] }, s3: { koerbe: ["un", "une"], dinge: [["🐱"], ["🍎"], ["🎁"], ["🌸"]] }, s4: { koerbe: ["le", "la", "l’", "les"], dinge: [["🐶"], ["🔑"], ["🐘"], ["🐱", true], ["🍌", true]] }, s5: { mehrzahl: ["🐱", "🎁", "🐴"] }, s6: { koerbe: ["le", "la", "l’", "les"], dinge: [["⛵"], ["🚗"], ["🏫"], ["🐄", true]], ohneBild: true } } } },
-  { id: "son-lauscher", art: ["sortieren", "antippen", "hoeren"], klasse: 5, neu: "LERN_Session8", bild: "👂", name: "Son-Lauscher", thema: "franzoesisch", farbe: "var(--deko-3)",
+  { id: "son-lauscher", art: ["sortieren", "antippen", "hoeren"], klasse: 5, neu: "LERN_Session8", bild: "👂", name: "Son-Lauscher", thema: "franzoesisch", farbe: "var(--deko-3)", reihenfolge: "koerbe",
     pfad: "spiele/son-lauscher/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s5", "s6"], zeiten: { s1: 8, s2: 10, s3: 13, s4: 14, s5: 18, s6: 23 },
     beschreibung: "Französisch hören und schreiben: ou, au, on, ch, é und die Nasallaute",
     listen: {
@@ -1639,7 +1639,7 @@ const SPIELE = [
     feier: { muster: "bauen", bilder: "zaehler", ziele: { s1: { plaene: [[[3]], [[5]]] }, s2: { plaene: [[[1, 1], [2, 1]], [[2, 2], [1, 1]]] },
       s3: { plaene: [[[3, 2], [1, 1]], [[2, 2], [2, 2]]] }, s4: { plaene: [[[2, 2], [2, 1]], [[1, 1], [1, 1]]], dazu: 3 },
       s5: { kiste: [3, 3, 2], da: 12 }, s6: { plaene: [[[1, 2], [2, 2]], [[2, 2, 1], [1, 2, 1]], [[3, 2], [2, 2], [1, 2]]] } } } },
-  { id: "auge-entdecker", art: ["sortieren", "reihenfolge", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "👁️", name: "Auge-Entdecker", thema: "koerper", farbe: "var(--deko-3)",
+  { id: "auge-entdecker", art: ["sortieren", "reihenfolge", "antippen"], klasse: 3, neu: "LERN_Session10", bild: "👁️", name: "Auge-Entdecker", thema: "koerper", farbe: "var(--deko-3)", reihenfolge: "koerbe",
     pfad: "spiele/auge-entdecker/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s3", "s4", "s5", "s6"], zeiten: { s1: 10, s2: 12, s3: 15, s4: 25, s5: 25, s6: 40 },
     beschreibung: "Augenlid, Wimpern, Iris, Pupille, Hornhaut und Bindehaut: Teile des Auges finden, benennen und ihre Aufgabe kennen",
     listen: {

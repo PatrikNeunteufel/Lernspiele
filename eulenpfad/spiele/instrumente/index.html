@@ -195,7 +195,7 @@ LS.spiel({
       const frage = a.info === SPIELARTEN ? "Wie spielt man dieses Instrument?" : "Zu welcher Gruppe gehört das Instrument?";
       ctx.flaeche.append(el("div", { class: "frage", text: frage }));
       const { karte } = LS.koerbe(ctx, {
-        karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig,
+        karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, familie: Object.keys(a.info),
         korbInhalt: k => ({ bild: a.info[k], text: k }),
         // Der Hinweis nennt die Gruppe nicht — sonst stünde die Lösung darin.
         hinweis: FALLEN.test(a.x.name) && a.info === GRUPPEN && a.koerbe.includes("Holzblasinstrument")

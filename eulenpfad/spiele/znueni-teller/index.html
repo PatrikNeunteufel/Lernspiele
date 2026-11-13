@@ -175,7 +175,7 @@ LS.spiel({
       ctx.flaeche.append(el("div", { class: "frage", text: KORB_FRAGE[a.typ] }));
       const erkl = GRUPPEN_ZNUENI[a.x.gruppe].erklaerung;
       const { karte } = LS.koerbe(ctx, {
-        karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: korbInfo,
+        karte: { bild: a.x.bild, text: a.x.name }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: korbInfo, familie: Object.keys(GRUPPEN_ZNUENI),
         // Der Hinweis erklärt den falsch gewählten Korb — die Erklärung des richtigen nennte die Lösung.
         hinweis: k => (ALLTAG[k] ? "Überleg: Viel Zucker, Fett oder Salz — nur ab und zu. Wasser, Früchte, Gemüse, Brot, Milch und Ei — jeden Tag." : `${GRUPPEN_ZNUENI[k].erklaerung} Passt ${a.x.name} dazu?`),
         loesung: `${a.x.name}: ${korbInfo(a.richtig).text}. ${erkl}`, lob: "Richtig!", erklaerung: erkl,

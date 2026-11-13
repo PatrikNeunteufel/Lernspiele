@@ -347,7 +347,7 @@ function zeichneProfil(box, neu) {
     abschnitt("🎮 Vorgaben fürs Spielen",
       el("p", { class: "leise-text", html: "<b>Vorlesen</b> — die Eule liest Aufträge und Tipps vor (🗣️ neben der Eule). „Nach Klasse“: im Kindergarten und in der 1. Klasse automatisch, sonst auf 🗣️. 🔇 in der Kopfzeile schaltet auch die Stimme stumm. Nicht im Lese-Detektiv, in Englisch und Französisch." }),
       el("div", { class: "profil-felder" }, el("label", {}, "Vorlesen", vorlesen)),
-      el("p", { class: "leise-text", html: "<b>Reihenfolge der Teile</b> — stehen Bausteine wie 3 ZT + 4 H geordnet (grösste Stelle links) oder gemischt?" }),
+      el("p", { class: "leise-text", html: "<b>Reihenfolge der Teile</b> — stehen Bausteine wie 3 ZT + 4 H geordnet (grösste Stelle links) oder gemischt? In Sortierspielen: steht jeder Korb immer am selben Platz oder jedes Mal woanders?" }),
       el("div", { class: "profil-felder" }, el("label", {}, "Global (alle Spiele)", reihenfolgeGlobal)),
       el("details", { class: "timer-details" }, el("summary", { text: `Je Spiel (${reihenfolgeSpiele.length} Spiele)` }),
         el("div", { class: "profil-felder", style: "margin-top:8px" }, ...reihenfolgeSpiele.map(({ s, wahl }) => el("label", {}, `${s.bild} ${s.name}`, wahl)))),

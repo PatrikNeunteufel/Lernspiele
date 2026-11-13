@@ -299,7 +299,7 @@ const SPIEL = {
       ctx.serie("antwort", a.richtig);
       f.append(el("div", { class: "frage", text: "Gleicher Laut, andere Schrift: In welchen Korb gehört das Wort?" }), hoerKnopf(a.wort));
       LS.koerbe(ctx, {
-        karte: { text: a.wort }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k),
+        karte: { text: a.wort }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k), familie: Object.keys(S5_LAUTE),
         hinweis: "Hör nochmal genau hin und sprich die Wörter auf den Körben leise nach.",
         loesung: `${a.wort} klingt wie ${S5_LAUTE[a.richtig].beispiel}`, lob: `Richtig: ${a.wort} klingt wie ${S5_LAUTE[a.richtig].beispiel}`,
       });

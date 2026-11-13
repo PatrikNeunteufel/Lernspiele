@@ -265,7 +265,7 @@ LS.spiel({
     ctx.flaeche.append(el("div", { class: "auftrag", text: "In welchen Korb gehört das Tier?" }));
     LS.koerbe(ctx, {
       karte: { bild: a.tier.bild || "❔", text: a.tier.name },
-      koerbe: a.koerbe, richtig: a.richtig,
+      koerbe: a.koerbe, richtig: a.richtig, familie: Object.keys(KOERBE),
       korbInhalt: name => ({ bild: KOERBE[name].bild, text: name, klein: KOERBE[name].zusatz }),
       hinweis: name => (a.falle === name ? `Das denken viele! Aber: ${KOERBE[a.richtig].erklaerung}` : `${KOERBE[name].erklaerung} Passt das zu ${a.tier.name}?`),
       loesung: `${a.tier.name}: ${a.richtig}. ${KOERBE[a.richtig].erklaerung}`,

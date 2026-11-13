@@ -492,7 +492,7 @@ function korbAufgabe(ctx, a) {
   ctx.flaeche.querySelector(".ae").append(el("div", { class: "frage", text: "Welches Teil des Auges macht das?" }));
   LS.koerbe(ctx, {
     karte: { bild: "👁️", text: `… ${satz}.` },
-    koerbe: a.optionen, richtig: a.teil,
+    koerbe: a.optionen, richtig: a.teil, familie: AUGE_TEILE.map(t => t.id),
     korbInhalt: id => ({ text: nom(id), klein: TEIL[id].zusatz }),
     hinweis: id => `Nein, das ist nicht die Aufgabe von ${nom(id)}. Überleg: ${TEIL[a.teil].lage}`,
     loesung: `${gross(nom(a.teil))} ${satz}.`,

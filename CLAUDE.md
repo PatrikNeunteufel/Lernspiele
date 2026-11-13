@@ -41,7 +41,8 @@ Rückmeldung, kurze Runden (2–5 Minuten), Belohnung über Sterne/Animation sta
 - **Reihenfolge der Teile** (Bausteine, Rätselteile): geordnet = grösste Stelle links. Einstellbar
   im Profil global und je Spiel, je Spiel auch auf der Stufenwahl (Entscheid R1 a, 2026-11-01);
   die Wahl je Spiel schlägt die globale („nach Stufe“ = Stufe 1–3 geordnet, 4–6 gemischt); Spiele lesen
-  `ctx.geordnet` und sind im Katalog mit `reihenfolge: true` markiert.
+  `ctx.geordnet` und sind im Katalog mit `reihenfolge: true` markiert. Sortierspiele mit `reihenfolge: "koerbe"`: geordnet =
+  jeder Korb immer am selben Platz (Entscheid KF2 a, 2026-11-13); die Farbe gehört zum Korb, je Runde neu verteilt (KF1 a).
 - **Fehler sind nicht schlimm:** falsche Antwort → Hinweis und neuer Versuch, kein Punktabzug,
   kein Zeitdruck als Standard. Der Timer ist eine **zuschaltbare** Zusatzschwierigkeit (Zeit um =
   ein Fehler, die Aufgabe bleibt lösbar); gemessen wird die Zeit je Aufgabe aber immer.

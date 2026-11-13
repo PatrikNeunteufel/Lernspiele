@@ -351,7 +351,7 @@ const SPIEL = {
       ctx.serie("antwort", a.richtig);
       f.append(el("div", { class: "frage", text: "Hör zu: Welchen Laut hörst du?" }), hoerKnopf(w.anzeige));
       LS.koerbe(ctx, {
-        karte: { bild: w.bild || "👂", text: "?" }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k),
+        karte: { bild: w.bild || "👂", text: "?" }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k), familie: Object.keys(SON_LAUTE),
         hinweis: "Hör nochmal genau hin (🔊) und sprich das Wort leise nach.",
         loesung: `${w.anzeige}: ${SON_LAUTE[w.laut].name}`, lob: `Richtig: ${w.anzeige}`,
       });
@@ -363,7 +363,7 @@ const SPIEL = {
       ctx.serie("antwort", a.richtig);
       f.append(el("div", { class: "frage", text: "Lies das Wort. In welchem Korb klingt der Laut gleich?" }));
       LS.koerbe(ctx, {
-        karte: { text: w.anzeige }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k),
+        karte: { text: w.anzeige }, koerbe: a.koerbe, richtig: a.richtig, korbInhalt: k => korbInhalt(a, k), familie: Object.keys(SON_LAUTE),
         hinweis: "Sprich das Wort leise. Welches Beispielwort klingt gleich?",
         loesung: `${w.anzeige} klingt wie ${beispielFuer(w.laut, w)}`, lob: `Richtig: ${w.anzeige} klingt wie ${beispielFuer(w.laut, w)}`,
       });

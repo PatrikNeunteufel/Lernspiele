@@ -528,7 +528,7 @@ const LS = (() => {
   /** Reihenfolge-Werte für die Einstellung „Teile einer Aufgabe“. */
   const REIHENFOLGEN = {
     stufe: "nach Stufe (1–3 geordnet, 4–6 gemischt)",
-    geordnet: "immer geordnet (gross links → klein rechts)",
+    geordnet: "immer geordnet (Stellen: gross links → klein rechts; Körbe: immer am selben Platz)",
     gemischt: "immer gemischt",
   };
 
@@ -2356,9 +2356,15 @@ const LS = (() => {
    * opt.karte: { bild, text } der Karte
    * opt.koerbe: Werte der Körbe; opt.korbInhalt(wert): { bild, text, klein }; opt.farbe(wert, i): CSS-Farbe (ohne:
    * je Korb fest in der Runde, korbFarbenRunde)
+   * opt.familie: alle Körbe der Art in fester Reihenfolge (KF2 a, LERN_Session38): mit ctx.geordnet stehen die Körbe so
+   * (immer am selben Platz), sonst wie in opt.koerbe; nur für Spiele mit reihenfolge: "koerbe" im Katalog
    * opt.richtig, opt.hinweis(wert), opt.loesung, opt.lob wie bei auswahl
    */
   function koerbe(ctx, opt) {
+    if (opt.familie && ctx.geordnet) {
+      const platz = w => { const i = opt.familie.indexOf(w); return i < 0 ? Infinity : i; };
+      opt = { ...opt, koerbe: [...opt.koerbe].sort((x, y) => platz(x) - platz(y)) };
+    }
     ctx.loesung(opt.loesung || opt.korbInhalt?.(opt.richtig)?.text || loesungFuer(opt, opt.richtig));
     ctx.schritte(1, true);
     const { farben, erzwungen } = opt.farbe ? { farben: opt.koerbe.map((w, i) => opt.farbe(w, i)), erzwungen: false }
@@ -2511,7 +2517,7 @@ const LS = (() => {
 
     /**
      * Schalter der Stufenwahl wie auf der Karte (Entscheid RS1 a, LERN_Session35): Reihenfolge der Teile (Spiele mit
-     * `reihenfolge: true`, R1 a), Timer, Endlos (Spiele mit Endlos-Stufen) und Favorit — je ein Symbolknopf mit dem Wort daneben,
+     * `reihenfolge: true` oder `"koerbe"`, R1 a, KF2 a), Timer, Endlos (Spiele mit Endlos-Stufen) und Favorit — je ein Symbolknopf mit dem Wort daneben,
      * dieselbe Wahl wie auf der Karte (setzeWahl, waehleTimer, Profil endlosAn; VR1 a mit 🔒, wenn die Aufsicht festlegt).
      * Darunter leise die Erklärung des zuletzt geänderten Schalters (ohne Änderung: Endlos, wenn an, sonst Timer).
      */
@@ -2529,9 +2535,9 @@ const LS = (() => {
         teile.push(el("span", { class: "schalter-teil" }, k, el("b", { class: "timer-wort", text: wort })));
       };
       if (typeof SPIELE !== "undefined" && SPIELE.find(s => s.id === def.id)?.reihenfolge) {
-        const r = REIHENFOLGE_SCHALTER[reihenfolgeFuer(name, def.id)] || REIHENFOLGE_SCHALTER.stufe;
+        const r = reihenfolgeSchalter(def.id, reihenfolgeFuer(name, def.id));
         const fest = istFest(name, "reihenfolge");
-        schalter("reihenfolge", r.an, r.symbol, r.wort, `antippen: ${REIHENFOLGE_SCHALTER[r.naechste].wort}`, fest,
+        schalter("reihenfolge", r.an, r.symbol, r.wort, `antippen: ${reihenfolgeSchalter(def.id, r.naechste).wort}`, fest,
           () => setzeWahl(name, "reihenfolge", def.id, r.naechste));
         erklaerung.reihenfolge = r.erklaerung + (fest ? ` ${FEST_TEXT}` : "");
       }
@@ -3623,6 +3629,20 @@ const LS = (() => {
     gemischt: { symbol: "mischen", an: true, naechste: "stufe", wort: "Teile gemischt", text: "Teile gemischt",
       erklaerung: "Die Teile stehen durcheinander. Das ist kniffliger." },
   };
+  // Sortierspiele (Katalog reihenfolge: "koerbe", KF2 a, LERN_Session38): derselbe Schalter, geordnet heisst dort „jeder
+  // Korb immer am selben Platz“
+  const REIHENFOLGE_KOERBE = {
+    stufe: { wort: "Körbe nach Stufe", text: "Körbe nach Stufe (1–3 am selben Platz, ab 4 gemischt)",
+      erklaerung: "Stufe 1–3 steht jeder Korb immer am selben Platz, ab Stufe 4 gemischt." },
+    geordnet: { wort: "Körbe geordnet", text: "Körbe geordnet: immer am selben Platz", erklaerung: "Jeder Korb steht immer am selben Platz." },
+    gemischt: { wort: "Körbe gemischt", text: "Körbe gemischt", erklaerung: "Die Körbe stehen jedes Mal woanders. Das ist kniffliger." },
+  };
+  /** Schalter der Reihenfolge für ein Spiel und einen Wert (stufe, geordnet, gemischt), mit den Worten seiner Art. */
+  function reihenfolgeSchalter(spiel, wert) {
+    const art = typeof SPIELE !== "undefined" ? SPIELE.find(s => s.id === spiel)?.reihenfolge : null;
+    const r = REIHENFOLGE_SCHALTER[wert] ? wert : "stufe";
+    return { ...REIHENFOLGE_SCHALTER[r], ...(art === "koerbe" ? REIHENFOLGE_KOERBE[r] : {}) };
+  }
   function schalterSymbol(art, an) {
     if (!document.getElementById("gold-verlauf")) {
       const defs = document.createElement("div");
@@ -3675,7 +3695,7 @@ const LS = (() => {
     basisKlasse, stufeFuer, klasseText, KLASSEN, klasseVon, alterVon, aufsteigen, aufstiegZuruecknehmen, neuerAufstieg, sortierungFuer, VORLESEN_ARTEN, vorlesenArt, langDruecken, losGehts, loescheRunden, zusammenfuehren,
     REIHENFOLGEN, geordnet, reihenfolgeFuer, vorgabeZeit, timerFuer, waehleTimer, zeitVorschlag,
     WAHL_ARTEN, istFest, festImProfil, FREI_EINSTELLUNG, wahlFuer, setzeWahl, wahlZuruecksetzen, setzeFest, wahlAnzahl, FEST_TEXT, avatarBild,
-    stimmeBereit, sprich: sprichInhalt, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen, schalterSymbol, REIHENFOLGE_SCHALTER,
+    stimmeBereit, sprich: sprichInhalt, spielMitStimme, rekorde, besterRekord, ranglisteFuer, endlosStufen, schalterSymbol, REIHENFOLGE_SCHALTER, reihenfolgeSchalter,
     protokoll, besteSterne, auswahl, reihenfolge, fliegen, koerbe, pruefung, RAHMEN_KLASSEN,
   };
 })();
