@@ -8016,7 +8016,8 @@
             "Glocke",
             "Schlaginstrument",
             "schlagen",
-            ""
+            "",
+            "schütteln"
           ],
           [
             "svg:triangel",
@@ -8069,14 +8070,16 @@
             "Geige",
             "Saiteninstrument",
             "streichen",
-            "Streichinstrument"
+            "Streichinstrument",
+            "zupfen"
           ],
           [
             "",
             "Cello",
             "Saiteninstrument",
             "streichen",
-            "Streichinstrument"
+            "Streichinstrument",
+            "zupfen"
           ],
           [
             "",
@@ -8168,7 +8171,8 @@
             "Klavier",
             "Tasteninstrument",
             "Tasten drücken",
-            ""
+            "",
+            "schlagen"
           ]
         ]
       }
@@ -8209,7 +8213,7 @@
           [
             "Wer leitet ein Orchester?",
             "die Dirigentin oder der Dirigent",
-            "der Pianist; das Publikum"
+            "die Pianistin oder der Pianist; das Publikum"
           ],
           [
             "Welche Instrumente spielen in einem Streichquartett?",
@@ -8235,7 +8239,7 @@
           [
             "Was schwingt bei der Gitarre, wenn ein Ton erklingt?",
             "die Saite",
-            "der Gurt; das Plektrum allein"
+            "der Gurt; das Plektrum"
           ],
           [
             "Eine Saite wird kürzer gegriffen. Wie klingt der Ton?",
@@ -8245,7 +8249,7 @@
           [
             "Was schwingt bei der Trommel?",
             "das Fell",
-            "der Stuhl; die Luft im Zimmer allein"
+            "der Stuhl; der Notenständer"
           ],
           [
             "Wie entsteht der Ton bei der Trompete?",
@@ -19130,7 +19134,7 @@
             "stufe: 1; bild: 🥛; frage: Wasser im Glas ist …; richtig: flüssig; falsch: fest · gasförmig; tipp: Was passiert, wenn du das Glas umkippst?; erklaerung: Wasser im Glas ist flüssig: Es fliesst und nimmt die Form des Gefässes an."
           ],
           [
-            "stufe: 1; bild: ♨️; frage: Wasserdampf ist …; richtig: gasförmig; falsch: fest · flüssig; tipp: Wasserdampf verteilt sich in der Luft. Kannst du ihn festhalten?; erklaerung: Wasserdampf ist gasförmig: Er verteilt sich unsichtbar in der Luft."
+            "stufe: 1; bild: 🫖; frage: Wasserdampf ist …; richtig: gasförmig; falsch: fest · flüssig; tipp: Wasserdampf verteilt sich in der Luft. Kannst du ihn festhalten?; erklaerung: Wasserdampf ist gasförmig: Er verteilt sich unsichtbar in der Luft."
           ],
           [
             "stufe: 1; bild: ❄️; frage: Ein Eiszapfen am Dach ist …; richtig: fest; falsch: flüssig · gasförmig; tipp: Ein Eiszapfen ist gefrorenes Wasser. Wie fühlt er sich an?; erklaerung: Ein Eiszapfen ist Eis, also fest."
@@ -19145,7 +19149,7 @@
             "stufe: 1; bild: 🧊; frage: Wasser wird im Tiefkühler zu Eis. Wie heisst das?; richtig: gefrieren; falsch: schmelzen · verdunsten; tipp: Aus etwas Flüssigem wird etwas Festes, weil es sehr kalt ist.; erklaerung: Wird Wasser zu Eis, gefriert es: flüssig → fest."
           ],
           [
-            "stufe: 1; bild: ♨️; frage: Aus Wasser wird Wasserdampf. Wie heisst das?; richtig: verdunsten; falsch: schmelzen · gefrieren; tipp: Aus etwas Flüssigem wird ein Gas, das in die Luft steigt.; erklaerung: Wird Wasser zu Wasserdampf, verdunstet es: flüssig → gasförmig."
+            "stufe: 1; bild: 🫖; frage: Aus Wasser wird Wasserdampf. Wie heisst das?; richtig: verdunsten; falsch: schmelzen · gefrieren; tipp: Aus etwas Flüssigem wird ein Gas, das in die Luft steigt.; erklaerung: Wird Wasser zu Wasserdampf, verdunstet es: flüssig → gasförmig."
           ],
           [
             "stufe: 1; bild: 💧; frage: Aus Wasserdampf werden wieder Tropfen. Wie heisst das?; richtig: kondensieren; falsch: schmelzen · gefrieren; tipp: Aus einem Gas wird wieder etwas Flüssiges, weil es abkühlt.; erklaerung: Wird Wasserdampf zu Tropfen, kondensiert er: gasförmig → flüssig."
@@ -19160,7 +19164,7 @@
             "stufe: 1; bild: 👕; frage: Nasse Wäsche trocknet an der Leine. Wohin geht das Wasser?; richtig: Es verdunstet in die Luft.; falsch: Es versickert in der Leine. · Es gefriert in der Wäsche.; tipp: Das Wasser verschwindet, ohne zu tropfen. Wohin kann es gehen?; erklaerung: Das Wasser verdunstet: Es wird zu Wasserdampf und geht in die Luft."
           ],
           [
-            "stufe: 1; bild: ⛄; frage: Ein Schneemann steht in der Frühlingssonne. Was wird aus ihm?; richtig: Wasser; falsch: Wolken · Sand; tipp: Schnee ist gefroren. Was passiert mit ihm, wenn es warm wird?; erklaerung: Der Schnee schmilzt und wird zu Wasser."
+            "stufe: 1; bild: ⛄; frage: Ein Schneemann steht in der Frühlingssonne. Was wird aus ihm?; richtig: Wasser; falsch: Salz · Sand; tipp: Schnee ist gefroren. Was passiert mit ihm, wenn es warm wird?; erklaerung: Der Schnee schmilzt und wird zu Wasser."
           ],
           [
             "stufe: 1; bild: 🥶; frage: Was passiert mit einer Pfütze, wenn es minus 5 °C kalt ist?; richtig: Sie gefriert.; falsch: Sie kocht. · Sie wird zu Dampf.; tipp: Minus 5 °C ist kälter als 0 °C.; erklaerung: Unter 0 °C gefriert das Wasser der Pfütze zu Eis."
@@ -19172,7 +19176,7 @@
             "stufe: 3; bild: 🌧️; frage: Wie heisst alles Wasser, das vom Himmel fällt?; richtig: Niederschlag; falsch: Grundwasser · Quellwasser; tipp: Regen, Schnee und Hagel haben einen gemeinsamen Namen.; erklaerung: Regen, Schnee und Hagel heissen zusammen Niederschlag."
           ],
           [
-            "stufe: 3; bild: 🌨️; frage: Welcher Niederschlag ist fest?; richtig: Hagel; falsch: Regen · Nieselregen; tipp: Fest heisst: aus Eis.; erklaerung: Hagelkörner sind Eis, also fest. Regen ist flüssig."
+            "stufe: 3; bild: 🧊; frage: Welcher Niederschlag ist fest?; richtig: Hagel; falsch: Regen · Nieselregen; tipp: Fest heisst: aus Eis.; erklaerung: Hagelkörner sind Eis, also fest. Regen ist flüssig."
           ],
           [
             "stufe: 3; bild: 🌊; frage: Wo verdunstet auf der Erde am meisten Wasser?; richtig: über den Meeren; falsch: in den Höhlen · im Grundwasser; tipp: Wo gibt es die grösste Wasserfläche unter der Sonne?; erklaerung: Die Meere sind riesig und liegen an der Sonne: Dort verdunstet am meisten Wasser."
@@ -19190,7 +19194,7 @@
             "stufe: 3; bild: ☀️; frage: Warum trocknet eine Pfütze an der Sonne schneller als im Schatten?; richtig: Wärme lässt Wasser schneller verdunsten.; falsch: Im Schatten regnet es mehr. · Die Sonne saugt das Wasser in den Boden.; tipp: Denk an den ersten Schritt des Wasserkreislaufs.; erklaerung: Je wärmer es ist, desto schneller verdunstet das Wasser."
           ],
           [
-            "stufe: 3; bild: 🪨; frage: Wie heisst das Wasser, das sich unter der Erde sammelt?; richtig: Grundwasser; falsch: Regenwasser · Abwasser; tipp: Es liegt unten im Boden, auf dem Grund.; erklaerung: Versickertes Wasser sammelt sich unter der Erde als Grundwasser."
+            "stufe: 3; bild: 🪨; frage: Wie heisst das Wasser, das sich unter der Erde sammelt?; richtig: Grundwasser; falsch: Regenwasser · Abwasser; tipp: Das Regenwasser ist versickert. Tief unten sammelt es sich zwischen Kies und Sand.; erklaerung: Versickertes Wasser sammelt sich unter der Erde als Grundwasser."
           ],
           [
             "stufe: 3; bild: ⛲; frage: Wo kommt Grundwasser von selbst wieder an die Oberfläche?; richtig: bei einer Quelle; falsch: bei einer Wolke · bei einem Gletscher; tipp: Dort beginnt oft ein kleiner Bach.; erklaerung: Bei einer Quelle tritt Grundwasser aus dem Boden."
@@ -34126,8 +34130,8 @@
             "Neben eurem Haus ist eine Baustelle. Du machst drinnen Hausaufgaben.",
             "4",
             "lang",
-            "fenster, ohrstoepsel",
-            "pause",
+            "fenster, ohrstoepsel, gehoerschutz",
+            "pause, abstand, haende",
             "Du bist drinnen, der Lärm kommt von draussen. Wo kommt er herein?"
           ],
           [
@@ -34172,7 +34176,7 @@
             "4",
             "lang",
             "fenster, ohrstoepsel",
-            "",
+            "abstand, haende",
             "Du liegst drinnen im Bett, der Lärm kommt von der Strasse. Wo kommt er herein?"
           ],
           [
@@ -34180,7 +34184,7 @@
             "An der Party ist die Musik so laut, dass du dein eigenes Wort nicht verstehst.",
             "5",
             "lang",
-            "abstand, ohrstoepsel",
+            "abstand, ohrstoepsel, gehoerschutz",
             "pause, haende",
             "Direkt beim Lautsprecher ist es am lautesten. Weiter weg hört man die Musik immer noch."
           ],
@@ -34190,7 +34194,7 @@
             "4",
             "lang",
             "wand, fenster",
-            "",
+            "ohrstoepsel, haende",
             "Die Züge fahren jeden Tag. Zwischen Gleise und Schulhaus kann man etwas bauen."
           ],
           [
@@ -34198,7 +34202,7 @@
             "Auf der Strasse vor dem Haus arbeitet jemand mit dem Presslufthammer.",
             "5",
             "lang",
-            "fenster, ohrstoepsel, abstand",
+            "fenster, ohrstoepsel, abstand, gehoerschutz",
             "haende",
             "Der Lärm kommt von draussen und dauert Stunden. Entweder aussperren, oder weg davon."
           ],
@@ -34217,7 +34221,7 @@
             "5",
             "kurz",
             "abstand",
-            "haende",
+            "haende, ohrstoepsel, gehoerschutz",
             "Ein Knall ganz nah ist am gefährlichsten. Was kannst du schnell tun, bevor es knallt?"
           ],
           [
@@ -34226,7 +34230,7 @@
             "4",
             "lang",
             "wand, fenster",
-            "",
+            "ohrstoepsel, haende",
             "Der Lärm hört nie auf. Zwischen Autobahn und Häuser kann man etwas Hohes bauen."
           ],
           [
@@ -34235,7 +34239,7 @@
             "4",
             "lang",
             "ohrstoepsel, abstand",
-            "pause",
+            "pause, haende",
             "Die Probe dauert eine Stunde. Musiker stecken sich dafür etwas in die Ohren, oder sie stellen sich anders hin."
           ],
           [
@@ -34244,7 +34248,7 @@
             "4",
             "lang",
             "gehoerschutz, ohrstoepsel",
-            "pause",
+            "pause, haende",
             "Die Maschinen laufen den ganzen Tag. In der Fabrik tragen alle etwas über oder in den Ohren."
           ],
           [
@@ -34252,7 +34256,7 @@
             "Ein Helikopter landet auf der Wiese nebenan.",
             "5",
             "lang",
-            "abstand, gehoerschutz",
+            "abstand, gehoerschutz, ohrstoepsel",
             "haende",
             "Je näher du stehst, desto lauter. Du kannst selbst weggehen."
           ]
@@ -34441,7 +34445,7 @@
           [
             "Wenn du sprichst, bringt deine Stimme die Luft zum Schwingen.",
             "true",
-            "Halte eine Hand vor den Mund und sag laut „Pa!“."
+            "Halte ein dünnes Blatt Papier vor den Mund und summe laut: Was macht das Blatt?"
           ],
           [
             "Eine Stimmgabel klingt erst, wenn sie schwingt.",
@@ -34560,8 +34564,8 @@
           ],
           [
             "daemmung",
-            "🏠",
-            "Deine Nachbarn üben Schlagzeug. Was hilft gegen den Lärm durch die Wand?",
+            "🥁",
+            "Im Übungsraum hallt das Schlagzeug laut von den kahlen Wänden. Was hilft?",
             "Dicke, weiche Stoffe an der Wand oder ein Teppich, die den Schall schlucken.",
             "Die Wand mit glatten Fliesen bekleben.; Das Fenster öffnen, damit der Schall hinaus kann.",
             "Du willst, dass der Schall geschluckt wird — mit etwas Weichem, nicht mit etwas Hartem."

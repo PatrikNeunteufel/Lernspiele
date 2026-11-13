@@ -45,7 +45,7 @@ const ID = "instrumente";
 // die Listen des Spiels noch nicht, gilt der ganze Inhalt mit dem Spiel als frei.
 const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : INSTRUMENT_LISTEN);
 /** Instrument aus einer Zeile von INSTRUMENTE — auch für die Prüfansicht (pruefung.js). */
-const instrumentVon = ([bild, name, gruppe, spielart, genauer]) => ({ bild, name, gruppe, spielart, genauer });
+const instrumentVon = ([bild, name, gruppe, spielart, genauer, auch = []]) => ({ bild, name, gruppe, spielart, genauer, auch });
 const I = INSTRUMENTE.map(instrumentVon).filter(i => FREI.has(INSTRUMENT_LISTE_JE_GRUPPE[i.gruppe]));
 const FRAGEN = INSTRUMENT_FRAGEN.filter(f => FREI.has(f[4]));
 
@@ -86,7 +86,8 @@ const ARTEN = {
   spielart(mitBild) {
     const x = waehle(I.filter(i => NIMMT.spielart(i, mitBild)));
     if (!x) return null;
-    const andere = mische(Object.keys(SPIELARTEN).filter(s => s !== x.spielart)).slice(0, 2);
+    // Spielweisen, die ebenso richtig sind (auch), stehen nie als falsche Antwort daneben
+    const andere = mische(Object.keys(SPIELARTEN).filter(s => s !== x.spielart && !x.auch.includes(s))).slice(0, 2);
     return { art: "korb", nach: "spielart", x, richtig: x.spielart, koerbe: mische([x.spielart, ...andere]), info: SPIELARTEN };
   },
   gruppe() {
@@ -169,6 +170,7 @@ function pruefeAufgabe(a, stufe) {
   if (!wahl.includes(a.richtig) || new Set(wahl).size !== wahl.length) m.push("Auswahl doppelt oder ohne Lösung");
   if ((stufe === "s1" || stufe === "s2") && a.x && !a.x.bild) m.push("Instrument ohne Bild in Stufe 1–2");
   if (a.koerbe && a.koerbe.some(k => !a.info[k])) m.push("Korb ohne Bild");
+  if (a.nach === "spielart" && a.koerbe.some(k => a.x.auch.includes(k))) m.push("Spielweise als falsch daneben, die auch richtig ist");
   return m;
 }
 

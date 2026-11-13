@@ -1,5 +1,26 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-13 16:33 — LERN_Session38_2026-11-13_inhaltslisten-nmg-block2 (aufgenommen 2026-11-13 17:41)
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+
+- **Angehalten — beim Weitermachen neu starten:** nichts (keine Agenten, Server oder Hintergrundbefehle aktiv).
+- **Stand:** committet bis 44bfbc6 (alle Prüfansichten, LERN-51 durch; Geheimschrift-Sperre GK1 a, GK2 a). Im
+  Arbeitsbaum fertig und geprüft, **nicht committet**: `docs/eulenpfad/pruefung/befunde_LERN_Session38.md` (neu,
+  Befunde der 13 Agentenberichte), Plan-Leser Stufentext mit Massstab je Plan, Wassertropfen-Reise Kommentar in
+  `woerter.js`, CHANGELOG. Commit-Message steht im Chat. Tests heute: Skripte, Prüfansicht und Eulenpfad
+  plan-leser wassertropfen-reise je „Keine Fehler.“
+- **Entscheid BF1 a (2026-11-13):** Befunde Spiel für Spiel abarbeiten, zwei bis drei je Durchgang; jede
+  Sachangabe zuerst mit Quelle belegen; eindeutig Falsches beheben und im Bericht ausweisen; Ermessensfragen
+  (Zahnfee, Jahreszeiten-Grenzfälle, Vereinfachungen, Familienformen) als Entscheid vorlegen.
+- **Weiter mit:**
+  1. Befunde Instrumenten-Kenner, Wassertropfen-Reise, Lärm-Wächter (die schwersten), dann die übrigen Spiele aus
+     der Befund-Datei; dort je Punkt „Behoben“ oder den Entscheid vermerken.
+  2. Je Änderung: Aufgaben mit festen Startwerten vergleichen, `pruefe_skripte`, `pruefe_pruefansicht`,
+     `pruefe_spiele` für das Spiel.
+  3. Später session-abschluss (Report mit den Nachbauten: plan-leser stufenMit, koenig-falle ZWEI, Geheimschrift
+     Braille-Text; Prüfstand-Listen ohne Fingerabdruck taschengeld-planer/waren, tageslauf-sonne/taetigkeiten
+     prüfen; LERN-51 im Handover auf erledigt). Voller Eulenpfad-Lauf nur auf Patriks Entscheid vor einem Push.
+
 ## Stand
 **2026-11-13, nach LERN_Session37** ([Report](report/LERN_Session37_2026-11-13.md)):
 - **Kern:** unverändert 1.43.0.

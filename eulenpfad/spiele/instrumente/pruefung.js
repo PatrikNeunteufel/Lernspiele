@@ -37,19 +37,20 @@
       + "oder Streichen/Zupfen, bei den Fallen nur Saxofon und Querflöte.",
     abschnitte: [{
       id: liste, titel: `${GRUPPEN[gruppe]} ${gruppe}e`,
-      spalten: ["Bild", "Name", "Spielweise", "Genauere Gruppe", "Zwei Körbe", "Stufen"],
+      spalten: ["Bild", "Name", "Spielweise", "auch richtig", "Genauere Gruppe", "Zwei Körbe", "Stufen"],
       hinweis,
       eintraege: () => INSTRUMENTE.filter(e => INSTRUMENT_LISTE_JE_GRUPPE[e[2]] === liste),
       ...(liste === "saiten" || liste === "blas" ? { gruppe: e => genauerText(instrumentVon(e)).replace(" (Falle)", "") } : {}),
       zeile: e => {
         const i = instrumentVon(e);
-        return [i.bild || "—", i.name, mitBild(SPIELARTEN[i.spielart], i.spielart), genauerText(i),
+        return [i.bild || "—", i.name, mitBild(SPIELARTEN[i.spielart], i.spielart), i.auch.join(", ") || "—", genauerText(i),
           i.genauer ? genauerPaar(i).join(" / ") : "—", stufenVon(i)];
       },
     }],
   });
   const ALLGEMEIN = "Zeigt das Bild eindeutig dieses Instrument (kein Bild: —)? Stimmt die Spielweise, und ist keine der anderen "
-    + "Spielweisen (schlagen, zupfen, streichen, blasen, schütteln, Tasten drücken) ebenso richtig — sie stehen zufällig als Ablenker daneben?";
+    + "Spielweisen (schlagen, zupfen, streichen, blasen, schütteln, Tasten drücken) ebenso richtig — sie stehen zufällig als Ablenker daneben, "
+    + "ausser denen unter „auch richtig“?";
   const frageListe = (liste, worum) => ({
     beschreibung: `Fragen ${worum} (Stufen ${FRAGE_STUFEN}): Das Kind wählt aus der richtigen und zwei falschen Antworten.`,
     abschnitte: [{

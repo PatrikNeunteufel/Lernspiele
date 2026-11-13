@@ -1497,15 +1497,15 @@ Bild „svg:…“ = im Spiel gezeichnet; leer = kein Bild, nur ab Stufe 3.
 |---|---|---|---|---|---|
 | 🥁 | Trommel | Schlaginstrument | schlagen |  | ☐ |
 | 🪇 | Rasseln | Schlaginstrument | schütteln |  | ☐ |
-| 🔔 | Glocke | Schlaginstrument | schlagen |  | ☐ |
+| 🔔 | Glocke | Schlaginstrument | schlagen |  | schütteln | ☐ |
 | svg:triangel | Triangel | Schlaginstrument | schlagen |  | ☐ |
 | svg:klangstab | Klangstab | Schlaginstrument | schlagen |  | ☐ |
 | svg:schlagholz | Schlaghölzer | Schlaginstrument | schlagen |  | ☐ |
 | 🎸 | Gitarre | Saiteninstrument | zupfen | Zupfinstrument | ☐ |
-| 🎻 | Geige | Saiteninstrument | streichen | Streichinstrument | ☐ |
-|  | Cello | Saiteninstrument | streichen | Streichinstrument | ☐ |
+| 🎻 | Geige | Saiteninstrument | streichen | Streichinstrument | zupfen | ☐ |
+|  | Cello | Saiteninstrument | streichen | Streichinstrument | zupfen | ☐ |
 |  | Harfe | Saiteninstrument | zupfen | Zupfinstrument | ☐ |
-| 🎹 | Klavier | Tasteninstrument | Tasten drücken |  | ☐ |
+| 🎹 | Klavier | Tasteninstrument | Tasten drücken |  | schlagen | ☐ |
 | 🎺 | Trompete | Blasinstrument | blasen | Blechblasinstrument | ☐ |
 |  | Posaune | Blasinstrument | blasen | Blechblasinstrument | ☐ |
 | 🎷 | Saxofon | Blasinstrument | blasen | Holzblasinstrument | ☐ |
@@ -1521,11 +1521,11 @@ Bild „svg:…“ = im Spiel gezeichnet; leer = kein Bild, nur ab Stufe 3.
 | Wie viele spielen in einem Trio? | drei | zwei; fünf | ☐ |
 | Wie viele spielen in einem Quartett? | vier | drei; acht | ☐ |
 | Wie viele spielen in einem Quintett? | fünf | vier; sechs | ☐ |
-| Wer leitet ein Orchester? | die Dirigentin oder der Dirigent | der Pianist; das Publikum | ☐ |
+| Wer leitet ein Orchester? | die Dirigentin oder der Dirigent | die Pianistin oder der Pianist; das Publikum | ☐ |
 | Welche Instrumente spielen in einem Streichquartett? | zwei Geigen, Bratsche und Cello | vier Trompeten; Klavier und drei Trommeln | ☐ |
-| Was schwingt bei der Gitarre, wenn ein Ton erklingt? | die Saite | der Gurt; das Plektrum allein | ☐ |
+| Was schwingt bei der Gitarre, wenn ein Ton erklingt? | die Saite | der Gurt; das Plektrum | ☐ |
 | Eine Saite wird kürzer gegriffen. Wie klingt der Ton? | höher | tiefer; gleich | ☐ |
-| Was schwingt bei der Trommel? | das Fell | der Stuhl; die Luft im Zimmer allein | ☐ |
+| Was schwingt bei der Trommel? | das Fell | der Stuhl; der Notenständer | ☐ |
 | Wie entsteht der Ton bei der Trompete? | Die Lippen schwingen im Mundstück. | Ein Rohrblatt schwingt.; Eine Saite schwingt. | ☐ |
 | Wie entsteht der Ton bei der Klarinette? | Ein Rohrblatt schwingt am Mundstück. | Die Lippen schwingen wie bei der Trompete.; Man zupft eine Saite. | ☐ |
 | Wie entsteht der Ton beim Klavier? | Kleine Hämmer schlagen auf Saiten. | Luft strömt durch Pfeifen.; Man zupft die Saiten mit den Fingern. | ☐ |
@@ -3902,27 +3902,27 @@ Fakten bitte nachprüfen.
 |---|---|
 | stufe: 1; bild: 🧊; frage: Eis ist …; richtig: fest; falsch: flüssig · gasförmig; tipp: Kannst du Eis in die Hand nehmen? Behält es seine Form?; erklaerung: Eis ist fest: Es behält seine Form. | ☐ |
 | stufe: 1; bild: 🥛; frage: Wasser im Glas ist …; richtig: flüssig; falsch: fest · gasförmig; tipp: Was passiert, wenn du das Glas umkippst?; erklaerung: Wasser im Glas ist flüssig: Es fliesst und nimmt die Form des Gefässes an. | ☐ |
-| stufe: 1; bild: ♨️; frage: Wasserdampf ist …; richtig: gasförmig; falsch: fest · flüssig; tipp: Wasserdampf verteilt sich in der Luft. Kannst du ihn festhalten?; erklaerung: Wasserdampf ist gasförmig: Er verteilt sich unsichtbar in der Luft. | ☐ |
+| stufe: 1; bild: 🫖; frage: Wasserdampf ist …; richtig: gasförmig; falsch: fest · flüssig; tipp: Wasserdampf verteilt sich in der Luft. Kannst du ihn festhalten?; erklaerung: Wasserdampf ist gasförmig: Er verteilt sich unsichtbar in der Luft. | ☐ |
 | stufe: 1; bild: ❄️; frage: Ein Eiszapfen am Dach ist …; richtig: fest; falsch: flüssig · gasförmig; tipp: Ein Eiszapfen ist gefrorenes Wasser. Wie fühlt er sich an?; erklaerung: Ein Eiszapfen ist Eis, also fest. | ☐ |
 | stufe: 1; bild: 🏞️; frage: Das Wasser in einem Fluss ist …; richtig: flüssig; falsch: fest · gasförmig; tipp: Das Wasser im Fluss bewegt sich talwärts.; erklaerung: Flusswasser ist flüssig: Es fliesst. | ☐ |
 | stufe: 1; bild: 🌞; frage: Eis wird an der Sonne zu Wasser. Wie heisst das?; richtig: schmelzen; falsch: gefrieren · kondensieren; tipp: Aus etwas Festem wird etwas Flüssiges. Denk an eine Glace an der Sonne.; erklaerung: Wird Eis zu Wasser, schmilzt es: fest → flüssig. | ☐ |
 | stufe: 1; bild: 🧊; frage: Wasser wird im Tiefkühler zu Eis. Wie heisst das?; richtig: gefrieren; falsch: schmelzen · verdunsten; tipp: Aus etwas Flüssigem wird etwas Festes, weil es sehr kalt ist.; erklaerung: Wird Wasser zu Eis, gefriert es: flüssig → fest. | ☐ |
-| stufe: 1; bild: ♨️; frage: Aus Wasser wird Wasserdampf. Wie heisst das?; richtig: verdunsten; falsch: schmelzen · gefrieren; tipp: Aus etwas Flüssigem wird ein Gas, das in die Luft steigt.; erklaerung: Wird Wasser zu Wasserdampf, verdunstet es: flüssig → gasförmig. | ☐ |
+| stufe: 1; bild: 🫖; frage: Aus Wasser wird Wasserdampf. Wie heisst das?; richtig: verdunsten; falsch: schmelzen · gefrieren; tipp: Aus etwas Flüssigem wird ein Gas, das in die Luft steigt.; erklaerung: Wird Wasser zu Wasserdampf, verdunstet es: flüssig → gasförmig. | ☐ |
 | stufe: 1; bild: 💧; frage: Aus Wasserdampf werden wieder Tropfen. Wie heisst das?; richtig: kondensieren; falsch: schmelzen · gefrieren; tipp: Aus einem Gas wird wieder etwas Flüssiges, weil es abkühlt.; erklaerung: Wird Wasserdampf zu Tropfen, kondensiert er: gasförmig → flüssig. | ☐ |
 | stufe: 1; bild: 🌡️; frage: Bei wie viel Grad gefriert Wasser?; richtig: 0 °C; falsch: 10 °C · 100 °C; tipp: Ab dieser Temperatur zeigt der Wetterbericht Frost an.; erklaerung: Wasser gefriert bei 0 °C. | ☐ |
 | stufe: 1; bild: 🍲; frage: Bei wie viel Grad kocht Wasser?; richtig: 100 °C; falsch: 50 °C · 0 °C; tipp: Das ist sehr heiss — heisser als jedes Badewasser.; erklaerung: Wasser kocht bei 100 °C (auf Meereshöhe; in den Bergen schon etwas früher). | ☐ |
 | stufe: 1; bild: 👕; frage: Nasse Wäsche trocknet an der Leine. Wohin geht das Wasser?; richtig: Es verdunstet in die Luft.; falsch: Es versickert in der Leine. · Es gefriert in der Wäsche.; tipp: Das Wasser verschwindet, ohne zu tropfen. Wohin kann es gehen?; erklaerung: Das Wasser verdunstet: Es wird zu Wasserdampf und geht in die Luft. | ☐ |
-| stufe: 1; bild: ⛄; frage: Ein Schneemann steht in der Frühlingssonne. Was wird aus ihm?; richtig: Wasser; falsch: Wolken · Sand; tipp: Schnee ist gefroren. Was passiert mit ihm, wenn es warm wird?; erklaerung: Der Schnee schmilzt und wird zu Wasser. | ☐ |
+| stufe: 1; bild: ⛄; frage: Ein Schneemann steht in der Frühlingssonne. Was wird aus ihm?; richtig: Wasser; falsch: Salz · Sand; tipp: Schnee ist gefroren. Was passiert mit ihm, wenn es warm wird?; erklaerung: Der Schnee schmilzt und wird zu Wasser. | ☐ |
 | stufe: 1; bild: 🥶; frage: Was passiert mit einer Pfütze, wenn es minus 5 °C kalt ist?; richtig: Sie gefriert.; falsch: Sie kocht. · Sie wird zu Dampf.; tipp: Minus 5 °C ist kälter als 0 °C.; erklaerung: Unter 0 °C gefriert das Wasser der Pfütze zu Eis. | ☐ |
 | stufe: 3; bild: ☀️; frage: Was treibt den Wasserkreislauf an?; richtig: die Sonne; falsch: der Mond · die Fische; tipp: Damit Wasser verdunstet, braucht es Wärme. Woher kommt sie?; erklaerung: Die Sonne wärmt das Wasser, es verdunstet — so beginnt der Kreislauf immer wieder. | ☐ |
 | stufe: 3; bild: 🌧️; frage: Wie heisst alles Wasser, das vom Himmel fällt?; richtig: Niederschlag; falsch: Grundwasser · Quellwasser; tipp: Regen, Schnee und Hagel haben einen gemeinsamen Namen.; erklaerung: Regen, Schnee und Hagel heissen zusammen Niederschlag. | ☐ |
-| stufe: 3; bild: 🌨️; frage: Welcher Niederschlag ist fest?; richtig: Hagel; falsch: Regen · Nieselregen; tipp: Fest heisst: aus Eis.; erklaerung: Hagelkörner sind Eis, also fest. Regen ist flüssig. | ☐ |
+| stufe: 3; bild: 🧊; frage: Welcher Niederschlag ist fest?; richtig: Hagel; falsch: Regen · Nieselregen; tipp: Fest heisst: aus Eis.; erklaerung: Hagelkörner sind Eis, also fest. Regen ist flüssig. | ☐ |
 | stufe: 3; bild: 🌊; frage: Wo verdunstet auf der Erde am meisten Wasser?; richtig: über den Meeren; falsch: in den Höhlen · im Grundwasser; tipp: Wo gibt es die grösste Wasserfläche unter der Sonne?; erklaerung: Die Meere sind riesig und liegen an der Sonne: Dort verdunstet am meisten Wasser. | ☐ |
 | stufe: 3; bild: 🟫; frage: Was heisst „versickern“?; richtig: Wasser dringt in den Boden ein.; falsch: Wasser steigt als Dampf auf. · Wasser fällt aus der Wolke.; tipp: Denk an Regen auf einer Wiese: Wo bleibt das Wasser?; erklaerung: Versickern heisst: Das Wasser dringt in den Boden ein und sinkt nach unten. | ☐ |
 | stufe: 3; bild: 🛣️; frage: Auf einer geteerten Strasse kann Regen kaum versickern. Was passiert mit ihm?; richtig: Er fliesst ab, in die Kanalisation.; falsch: Er wird sofort zu Grundwasser. · Er bleibt für immer liegen.; tipp: Teer lässt fast kein Wasser durch. Wohin kann es dann nur noch?; erklaerung: Regen auf Strassen fliesst ab: über Rinnen und Schächte in die Kanalisation. | ☐ |
 | stufe: 3; bild: 🏔️; frage: Wo ist in der Schweiz viel Wasser als Eis gespeichert?; richtig: in den Gletschern; falsch: im Grundwasser · in den Wolken; tipp: Es liegt hoch oben in den Bergen und ist sehr alt.; erklaerung: Gletscher speichern viel Wasser als Eis. Im Sommer schmilzt ein Teil davon. | ☐ |
 | stufe: 3; bild: ☀️; frage: Warum trocknet eine Pfütze an der Sonne schneller als im Schatten?; richtig: Wärme lässt Wasser schneller verdunsten.; falsch: Im Schatten regnet es mehr. · Die Sonne saugt das Wasser in den Boden.; tipp: Denk an den ersten Schritt des Wasserkreislaufs.; erklaerung: Je wärmer es ist, desto schneller verdunstet das Wasser. | ☐ |
-| stufe: 3; bild: 🪨; frage: Wie heisst das Wasser, das sich unter der Erde sammelt?; richtig: Grundwasser; falsch: Regenwasser · Abwasser; tipp: Es liegt unten im Boden, auf dem Grund.; erklaerung: Versickertes Wasser sammelt sich unter der Erde als Grundwasser. | ☐ |
+| stufe: 3; bild: 🪨; frage: Wie heisst das Wasser, das sich unter der Erde sammelt?; richtig: Grundwasser; falsch: Regenwasser · Abwasser; tipp: Das Regenwasser ist versickert. Tief unten sammelt es sich zwischen Kies und Sand.; erklaerung: Versickertes Wasser sammelt sich unter der Erde als Grundwasser. | ☐ |
 | stufe: 3; bild: ⛲; frage: Wo kommt Grundwasser von selbst wieder an die Oberfläche?; richtig: bei einer Quelle; falsch: bei einer Wolke · bei einem Gletscher; tipp: Dort beginnt oft ein kleiner Bach.; erklaerung: Bei einer Quelle tritt Grundwasser aus dem Boden. | ☐ |
 | stufe: 4; bild: ☁️; frage: Woraus besteht eine Wolke?; richtig: aus winzigen Wassertröpfchen oder Eiskristallen; falsch: aus Wasserdampf · aus Rauch; tipp: Wolken kann man sehen. Wasserdampf ist unsichtbar.; erklaerung: Wolken sind winzige Tröpfchen oder Eiskristalle. Der Wasserdampf ist kondensiert. | ☐ |
 | stufe: 4; bild: 👀; frage: Kann man Wasserdampf sehen?; richtig: Nein, er ist unsichtbar.; falsch: Ja, er ist weiss. · Ja, er ist blau.; tipp: Auch in trockener Luft ist Wasserdampf. Siehst du ihn dort?; erklaerung: Wasserdampf ist unsichtbar. Was wir über dem Kochtopf sehen, sind schon winzige Tröpfchen. | ☐ |
@@ -6838,21 +6838,21 @@ Wirkung 2 hilft gut, 1 ein wenig, 0 nicht.
 | Bild | Situation | laut | Dauer | Schutz | wenig | Tipp | ☐ |
 |---|---|---|---|---|---|---|---|
 | 🎸 | Du gehst mit deiner Familie an ein lautes Konzert. | 5 | lang | ohrstoepsel, gehoerschutz, abstand | haende, pause | Das Konzert dauert den ganzen Abend. Etwas, das du die ganze Zeit tragen kannst, oder ein Platz weiter hinten. | ☐ |
-| 🏗️ | Neben eurem Haus ist eine Baustelle. Du machst drinnen Hausaufgaben. | 4 | lang | fenster, ohrstoepsel | pause | Du bist drinnen, der Lärm kommt von draussen. Wo kommt er herein? | ☐ |
+| 🏗️ | Neben eurem Haus ist eine Baustelle. Du machst drinnen Hausaufgaben. | 4 | lang | fenster, ohrstoepsel, gehoerschutz | pause, abstand, haende | Du bist drinnen, der Lärm kommt von draussen. Wo kommt er herein? | ☐ |
 | 🚜 | Papa mäht im Garten den Rasen. Du spielst daneben. | 4 | lang | gehoerschutz, ohrstoepsel, abstand | haende | Das Mähen dauert eine halbe Stunde. Du könntest auch einfach woanders spielen. | ☐ |
 | 🎆 | Am 1. August schaut ihr das grosse Feuerwerk an. | 5 | lang | abstand, ohrstoepsel, gehoerschutz | haende | Ganz vorn ist es am lautesten. Von weiter hinten sieht man es genauso gut. | ☐ |
 | 🎧 | Du hörst mit Kopfhörern Musik. Sie ist so laut, dass Mama dich nicht rufen kann. | 5 | lang | leiser | pause | Der Lärm kommt direkt aus den Kopfhörern. Du selbst bestimmst, wie stark er ist. | ☐ |
 | 🔨 | Dein Onkel bohrt mit der Bohrmaschine Löcher in die Wand. Du hilfst ihm. | 4 | lang | gehoerschutz, ohrstoepsel, abstand | haende | Das Bohren dauert eine Weile. Handwerker tragen bei Maschinen immer etwas über oder in den Ohren. | ☐ |
-| 🏍️ | Vor dem Fenster knattern laute Motorräder vorbei. Du willst schlafen. | 4 | lang | fenster, ohrstoepsel |  | Du liegst drinnen im Bett, der Lärm kommt von der Strasse. Wo kommt er herein? | ☐ |
-| 🎉 | An der Party ist die Musik so laut, dass du dein eigenes Wort nicht verstehst. | 5 | lang | abstand, ohrstoepsel | pause, haende | Direkt beim Lautsprecher ist es am lautesten. Weiter weg hört man die Musik immer noch. | ☐ |
-| 🚆 | Eure Schule liegt direkt an der Bahnlinie. Alle paar Minuten rattert ein Zug vorbei. | 4 | lang | wand, fenster |  | Die Züge fahren jeden Tag. Zwischen Gleise und Schulhaus kann man etwas bauen. | ☐ |
-| 🚧 | Auf der Strasse vor dem Haus arbeitet jemand mit dem Presslufthammer. | 5 | lang | fenster, ohrstoepsel, abstand | haende | Der Lärm kommt von draussen und dauert Stunden. Entweder aussperren, oder weg davon. | ☐ |
+| 🏍️ | Vor dem Fenster knattern laute Motorräder vorbei. Du willst schlafen. | 4 | lang | fenster, ohrstoepsel | abstand, haende | Du liegst drinnen im Bett, der Lärm kommt von der Strasse. Wo kommt er herein? | ☐ |
+| 🎉 | An der Party ist die Musik so laut, dass du dein eigenes Wort nicht verstehst. | 5 | lang | abstand, ohrstoepsel, gehoerschutz | pause, haende | Direkt beim Lautsprecher ist es am lautesten. Weiter weg hört man die Musik immer noch. | ☐ |
+| 🚆 | Eure Schule liegt direkt an der Bahnlinie. Alle paar Minuten rattert ein Zug vorbei. | 4 | lang | wand, fenster | ohrstoepsel, haende | Die Züge fahren jeden Tag. Zwischen Gleise und Schulhaus kann man etwas bauen. | ☐ |
+| 🚧 | Auf der Strasse vor dem Haus arbeitet jemand mit dem Presslufthammer. | 5 | lang | fenster, ohrstoepsel, abstand, gehoerschutz | haende | Der Lärm kommt von draussen und dauert Stunden. Entweder aussperren, oder weg davon. | ☐ |
 | 🏎️ | Ihr schaut ein Autorennen an. Die Motoren heulen die ganze Zeit. | 5 | lang | gehoerschutz, ohrstoepsel, abstand | haende | Das Rennen dauert Stunden. Die Leute am Rennen tragen fast alle etwas über den Ohren. | ☐ |
-| 🧨 | Ein Kollege will direkt neben dir einen Knallkörper zünden. | 5 | kurz | abstand | haende | Ein Knall ganz nah ist am gefährlichsten. Was kannst du schnell tun, bevor es knallt? | ☐ |
-| 🛣️ | Neben dem Dorf führt die Autobahn vorbei. Tag und Nacht rauschen die Autos. | 4 | lang | wand, fenster |  | Der Lärm hört nie auf. Zwischen Autobahn und Häuser kann man etwas Hohes bauen. | ☐ |
-| 🎺 | Du spielst in der Blasmusik mit — direkt neben der grossen Trommel. | 4 | lang | ohrstoepsel, abstand | pause | Die Probe dauert eine Stunde. Musiker stecken sich dafür etwas in die Ohren, oder sie stellen sich anders hin. | ☐ |
-| 🏭 | Mama arbeitet in einer Fabrik mit lauten Maschinen. | 4 | lang | gehoerschutz, ohrstoepsel | pause | Die Maschinen laufen den ganzen Tag. In der Fabrik tragen alle etwas über oder in den Ohren. | ☐ |
-| 🚁 | Ein Helikopter landet auf der Wiese nebenan. | 5 | lang | abstand, gehoerschutz | haende | Je näher du stehst, desto lauter. Du kannst selbst weggehen. | ☐ |
+| 🧨 | Ein Kollege will direkt neben dir einen Knallkörper zünden. | 5 | kurz | abstand | haende, ohrstoepsel, gehoerschutz | Ein Knall ganz nah ist am gefährlichsten. Was kannst du schnell tun, bevor es knallt? | ☐ |
+| 🛣️ | Neben dem Dorf führt die Autobahn vorbei. Tag und Nacht rauschen die Autos. | 4 | lang | wand, fenster | ohrstoepsel, haende | Der Lärm hört nie auf. Zwischen Autobahn und Häuser kann man etwas Hohes bauen. | ☐ |
+| 🎺 | Du spielst in der Blasmusik mit — direkt neben der grossen Trommel. | 4 | lang | ohrstoepsel, abstand | pause, haende | Die Probe dauert eine Stunde. Musiker stecken sich dafür etwas in die Ohren, oder sie stellen sich anders hin. | ☐ |
+| 🏭 | Mama arbeitet in einer Fabrik mit lauten Maschinen. | 4 | lang | gehoerschutz, ohrstoepsel | pause, haende | Die Maschinen laufen den ganzen Tag. In der Fabrik tragen alle etwas über oder in den Ohren. | ☐ |
+| 🚁 | Ein Helikopter landet auf der Wiese nebenan. | 5 | lang | abstand, gehoerschutz, ohrstoepsel | haende | Je näher du stehst, desto lauter. Du kannst selbst weggehen. | ☐ |
 
 ### Schadet das den Ohren?
 
@@ -6897,7 +6897,7 @@ Wirkung 2 hilft gut, 1 ein wenig, 0 nicht.
 | Schall kann man mit den Augen sehen. | false | Überleg: Siehst du, was von der Glocke zu deinem Ohr fliegt? | ☐ |
 | Je stärker die Saite schwingt, desto lauter ist der Ton. | true | Zupf einmal sanft und einmal kräftig: Was ist anders am Ton? | ☐ |
 | Wenn die Lautsprecher-Membran stillsteht, kommt trotzdem Musik heraus. | false | Leg die Hand auf einen Lautsprecher, wenn Musik läuft: Was spürst du? | ☐ |
-| Wenn du sprichst, bringt deine Stimme die Luft zum Schwingen. | true | Halte eine Hand vor den Mund und sag laut „Pa!“. | ☐ |
+| Wenn du sprichst, bringt deine Stimme die Luft zum Schwingen. | true | Halte ein dünnes Blatt Papier vor den Mund und summe laut: Was macht das Blatt? | ☐ |
 | Eine Stimmgabel klingt erst, wenn sie schwingt. | true | Schlag sie an und halte sie dann fest: Was passiert mit dem Ton? | ☐ |
 
 ### Echo, Verstärkung, Dämmung
@@ -6918,7 +6918,7 @@ Die erste Antwort ist die richtige.
 | daemmung | 🛋️ | Im Zimmer mit Teppich und Vorhängen klingt es leiser als im leeren Zimmer mit Fliesen. Warum? | Weiche Stoffe schlucken den Schall, statt ihn zurückzuwerfen. | Der Teppich macht den Schall schneller.; Im leeren Zimmer ist mehr Luft für den Schall. | Was passiert mit einem Ball, der auf ein Kissen fällt — und was auf Fliesen? | ☐ |
 | daemmung | ❄️ | Nach dem Schneefall ist es draussen ganz still. Warum? | Der weiche, lockere Schnee schluckt den Schall. | Im Winter gibt es keine Geräusche.; Die Kälte lässt den Schall einfrieren. | Frischer Schnee ist weich und voller Luft — wie ein dicker Teppich. | ☐ |
 | daemmung | 🎬 | Warum hängen im Kino dicke Vorhänge und weiche Stoffe an den Wänden? | Sie schlucken den Schall, damit es im Saal nicht hallt. | Damit es im Kino wärmer ist.; Damit der Ton lauter wird. | Harte Wände werfen den Schall zurück. Was tun weiche Stoffe? | ☐ |
-| daemmung | 🏠 | Deine Nachbarn üben Schlagzeug. Was hilft gegen den Lärm durch die Wand? | Dicke, weiche Stoffe an der Wand oder ein Teppich, die den Schall schlucken. | Die Wand mit glatten Fliesen bekleben.; Das Fenster öffnen, damit der Schall hinaus kann. | Du willst, dass der Schall geschluckt wird — mit etwas Weichem, nicht mit etwas Hartem. | ☐ |
+| daemmung | 🥁 | Im Übungsraum hallt das Schlagzeug laut von den kahlen Wänden. Was hilft? | Dicke, weiche Stoffe an der Wand oder ein Teppich, die den Schall schlucken. | Die Wand mit glatten Fliesen bekleben.; Das Fenster öffnen, damit der Schall hinaus kann. | Du willst, dass der Schall geschluckt wird — mit etwas Weichem, nicht mit etwas Hartem. | ☐ |
 
 ### Was dämpft den Schall?
 

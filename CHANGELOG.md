@@ -2176,3 +2176,12 @@
   (13 Berichte, nichts geändert, Sachangaben ohne Netzabruf). Gleich behoben: Plan-Leser (plan-leser) Stufentext nennt
   den Massstab je Plan aus `PLAN_MASSSTAB` („1 Feld = 1 m im Schulzimmer, 10 m im Quartier“, vorher fest 10 m auch im
   Schulzimmer); Wassertropfen-Reise (wassertropfen-reise) Kommentar zu den Spielstufen der Fragen in `woerter.js`.
+- **Befunde abgearbeitet, Durchgang 1 (BF1 a):** je Sachangabe belegt (Quellen in der Befund-Datei).
+  Instrumenten-Kenner (instrumente): Feld `auch` — Geige und Cello zupfen (Pizzicato), Glocke schütteln, Klavier
+  schlagen stehen nie als falsche Spielweise daneben, `pruefeAufgabe` meldet es, Prüfansicht mit Spalte „auch
+  richtig“; „die Pianistin oder der Pianist“; „das Plektrum“, „der Notenständer“. Wassertropfen-Reise
+  (wassertropfen-reise): 🫖 statt ♨️ (Wasserdampf ist unsichtbar), 🧊 statt 🌨️ beim Hagel, Tipp zum Grundwasser ohne
+  „Grund“, Ablenker „Salz“ statt „Wolken“. Lärm-Wächter (laerm-waechter): Feld `knall` (Knallkörper, Startpistole,
+  Ballon; ein naher Knall kann sofort schaden) — nie das harmlosere bei „Was ist schlimmer?“; Schutzmittel, die
+  ebenfalls helfen, nie als falscher Korb (zehn Situationen); Tipp „Was schwingt?“ mit Blatt Papier; Dämmungsfrage
+  nach dem Hall im Übungsraum. Prüfliste `wortlisten_zur_pruefung.md` neu erzeugt.

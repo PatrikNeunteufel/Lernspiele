@@ -5,9 +5,36 @@ was ihnen auffiel. Geändert haben sie nichts. Die Sachangaben stammen aus ihrem
 vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewicht; sie sind Stoff für LERN-11
 (Inhaltslisten prüfen) und für Entscheide je Spiel.
 
-Bereits behoben (LERN_Session38): Geheimschrift-Knacker anstössige Geheimwörter (GK1 a, GK2 a); Plan-Leser
-Stufentext nennt den Massstab je Plan (vorher stand fest der des Quartiers); Wassertropfen-Reise Kommentar zu den
-Spielstufen der Fragen in `woerter.js`.
+## Stand der Bearbeitung (BF1 a: Spiel für Spiel, belegt; eindeutig Falsches behoben, Ermessen als Entscheid)
+
+| Spiel | Stand | Einzelheiten |
+|---|---|---|
+| Geheimschrift-Knacker | erledigt 2026-11-13 (LERN_Session38, GK1 a, GK2 a) | `GEHEIM_SPERRE` |
+| Plan-Leser | in Arbeit seit 2026-11-13 (LERN_Session38); Stufentext behoben, Rest offen | unten |
+| Instrumenten-Kenner | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Entscheide BI1, IK2 offen | unten |
+| Wassertropfen-Reise | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Entscheid WT1 offen | unten |
+| Lärm-Wächter | in Arbeit seit 2026-11-13 (LERN_Session38); behoben, Bilder (BI1) und Lärm-Skala offen | unten |
+| übrige | offen | unten |
+
+**Behoben in LERN_Session38** (Belege: Wasserdampf unsichtbar [chemie.de, Lexikon Wasserdampf](https://www.chemie.de/lexikon/Wasserdampf.html);
+Pizzicato „das Zupfen einzelner Saiten mit den Fingern (ohne Bogen)“ (Raabe, Unterrichtsmaterial R0289); Klavier
+„Tasteninstrument … Saiteninstrument … Schlaginstrument wegen der Hammertechnik“ ([delamar.de, Tasteninstrumente](https://www.delamar.de/instrumente/tasteninstrumente-uebersicht-60028/));
+Knall: Schadensschwelle bei Einzelereignissen 135 dB(A), Pyro-Cracker in 1 m 142–148 dB ([DAGA 2012](https://pub.dega-akustik.de/DAGA_2012/data/articles/000061.pdf));
+weiche Stoffe senken den Nachhall, gegen Schall durch die Wand braucht es Masse (Ratgeber [bau.de](https://bau.de/forum/bauphysik/10375.php), schwache Quelle):
+- Plan-Leser: Stufentext mit Massstab je Plan.
+- Instrumenten-Kenner: neues Feld `auch` (Geige und Cello zupfen, Glocke schütteln, Klavier schlagen) — nie als
+  falsche Spielweise daneben, `pruefeAufgabe` meldet es; „die Pianistin oder der Pianist“ statt nur männlich;
+  „das Plektrum“ statt „das Plektrum allein“, „der Notenständer“ statt „die Luft im Zimmer allein“.
+- Wassertropfen-Reise: 🫖 statt ♨️ bei den zwei Wasserdampf-Fragen; 🧊 statt 🌨️ beim Hagel; Tipp zum Grundwasser
+  ohne „Grund“; Ablenker „Salz“ statt „Wolken“ beim Schneemann; Kommentare zu den Stufen (woerter.js, index.html).
+- Lärm-Wächter: Feld `knall` (Knallkörper, Startpistole, platzender Ballon) — bei „Was ist schlimmer?“ nie das
+  harmlosere Geräusch neben langem Lärm; Schutzmittel, die ebenfalls helfen, stehen in `schutz` oder `wenig` und nie
+  als falscher Korb (Baustelle, Motorräder, Party, Bahnlinie, Presslufthammer, Knallkörper, Autobahn, Blasmusik,
+  Fabrik, Helikopter); Tipp „Was schwingt?“ mit Blatt Papier statt „Pa!“; Dämmungsfrage nach dem Hall im Übungsraum
+  statt nach dem Lärm der Nachbarn durch die Wand.
+
+Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
+mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).
 
 Mathe, Deutsch, Englisch, Französisch und NMG Block 1 (LERN_Session36, 37) stehen in den Reports jener Sitzungen.
 

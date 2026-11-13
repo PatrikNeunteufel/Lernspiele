@@ -1,5 +1,7 @@
 // Inhalte für den Instrumenten-Kenner (Lehrplan SG MU.4.C.1).
-// [Bild (Emoji oder svg:<name>), Name, Gruppe, Spielweise, genauere Gruppe oder null]
+// [Bild (Emoji oder svg:<name>), Name, Gruppe, Spielweise, genauere Gruppe oder null, auch]
+// auch: weitere Spielweisen, die ebenso richtig sind; das Spiel stellt sie nie als falsche Antwort daneben
+// (Geige und Cello zupft man auch, Pizzicato; die Handglocke schwingt oder schüttelt man; im Klavier schlagen Hämmer).
 // Gruppe: Schlaginstrument, Saiteninstrument, Blasinstrument, Tasteninstrument
 // Saxofon und Querflöte sind aus Metall, zählen aber zu den Holzblasinstrumenten (Ton mit Rohrblatt
 // bzw. Anblaskante, nicht mit den Lippen wie bei Blechblasinstrumenten).
@@ -20,15 +22,15 @@ const INSTRUMENT_LISTE_JE_GRUPPE = { Schlaginstrument: "schlag", Saiteninstrumen
 const INSTRUMENTE = [
   ["🥁", "Trommel", "Schlaginstrument", "schlagen", null],
   ["🪇", "Rasseln", "Schlaginstrument", "schütteln", null],
-  ["🔔", "Glocke", "Schlaginstrument", "schlagen", null],
+  ["🔔", "Glocke", "Schlaginstrument", "schlagen", null, ["schütteln"]],
   ["svg:triangel", "Triangel", "Schlaginstrument", "schlagen", null],
   ["svg:klangstab", "Klangstab", "Schlaginstrument", "schlagen", null],
   ["svg:schlagholz", "Schlaghölzer", "Schlaginstrument", "schlagen", null],
   ["🎸", "Gitarre", "Saiteninstrument", "zupfen", "Zupfinstrument"],
-  ["🎻", "Geige", "Saiteninstrument", "streichen", "Streichinstrument"],
-  [null, "Cello", "Saiteninstrument", "streichen", "Streichinstrument"],
+  ["🎻", "Geige", "Saiteninstrument", "streichen", "Streichinstrument", ["zupfen"]],
+  [null, "Cello", "Saiteninstrument", "streichen", "Streichinstrument", ["zupfen"]],
   [null, "Harfe", "Saiteninstrument", "zupfen", "Zupfinstrument"],
-  ["🎹", "Klavier", "Tasteninstrument", "Tasten drücken", null],
+  ["🎹", "Klavier", "Tasteninstrument", "Tasten drücken", null, ["schlagen"]],
   ["🎺", "Trompete", "Blasinstrument", "blasen", "Blechblasinstrument"],
   [null, "Posaune", "Blasinstrument", "blasen", "Blechblasinstrument"],
   ["🎷", "Saxofon", "Blasinstrument", "blasen", "Holzblasinstrument"],
@@ -44,12 +46,12 @@ const INSTRUMENT_FRAGEN = [
   ["Wie viele spielen in einem Trio?", "drei", "zwei", "fünf", "ensembles"],
   ["Wie viele spielen in einem Quartett?", "vier", "drei", "acht", "ensembles"],
   ["Wie viele spielen in einem Quintett?", "fünf", "vier", "sechs", "ensembles"], // NEU in LERN_Session2, UNGEPRÜFT
-  ["Wer leitet ein Orchester?", "die Dirigentin oder der Dirigent", "der Pianist", "das Publikum", "ensembles"],
+  ["Wer leitet ein Orchester?", "die Dirigentin oder der Dirigent", "die Pianistin oder der Pianist", "das Publikum", "ensembles"],
   ["Welche Instrumente spielen in einem Streichquartett?", "zwei Geigen, Bratsche und Cello", "vier Trompeten", "Klavier und drei Trommeln", "ensembles"],
   // Liste klang
-  ["Was schwingt bei der Gitarre, wenn ein Ton erklingt?", "die Saite", "der Gurt", "das Plektrum allein", "klang"],
+  ["Was schwingt bei der Gitarre, wenn ein Ton erklingt?", "die Saite", "der Gurt", "das Plektrum", "klang"],
   ["Eine Saite wird kürzer gegriffen. Wie klingt der Ton?", "höher", "tiefer", "gleich", "klang"],
-  ["Was schwingt bei der Trommel?", "das Fell", "der Stuhl", "die Luft im Zimmer allein", "klang"],
+  ["Was schwingt bei der Trommel?", "das Fell", "der Stuhl", "der Notenständer", "klang"],
   // NEU in LERN_Session2 (Klangerzeugung, auch für die Königsstufe), UNGEPRÜFT
   ["Wie entsteht der Ton bei der Trompete?", "Die Lippen schwingen im Mundstück.", "Ein Rohrblatt schwingt.", "Eine Saite schwingt.", "klang"],
   ["Wie entsteht der Ton bei der Klarinette?", "Ein Rohrblatt schwingt am Mundstück.", "Die Lippen schwingen wie bei der Trompete.", "Man zupft eine Saite.", "klang"],

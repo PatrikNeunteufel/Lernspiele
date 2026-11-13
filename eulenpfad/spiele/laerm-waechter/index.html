@@ -162,7 +162,8 @@ const ORDNEN_LAUT = [1, 3, 5];
 const STILL_ORT = { still: o => o.laut === 1, laut: o => o.laut >= 4 };
 /** „Was ist schlimmer für die Ohren?“ je Art des Paars: a (schlimmer) und b (zum Vergleich, mit a). */
 const SCHLIMMER_PAARE = {
-  "lang-kurz": { a: x => x.laut >= 4 && x.dauer === "lang", b: (x, a) => x.laut >= 4 && x.dauer === "kurz" && x.laut <= a.laut },
+  // Ein Knall nah am Ohr (knall) kann sofort schaden: nie das harmlosere Geräusch neben einem langen Lärm
+  "lang-kurz": { a: x => x.laut >= 4 && x.dauer === "lang", b: (x, a) => x.laut >= 4 && x.dauer === "kurz" && x.laut <= a.laut && !x.knall },
   "laut-leise": { a: x => x.laut >= 4 && x.dauer === "lang", b: x => x.laut <= 2 && x.dauer === "lang" },
   "kurz-leise": { a: x => x.laut === 5 && x.dauer === "kurz", b: x => x.laut <= 2 && x.dauer === "lang" },
 };
@@ -338,7 +339,7 @@ function pruefeAufgabe(a, stufe) {
     else {
       const x = G[a.richtig], y = G[a.optionen.find(id => id !== a.richtig)];
       const ok = {
-        "lang-kurz": x.laut >= 4 && x.dauer === "lang" && y.laut >= 4 && y.dauer === "kurz" && y.laut <= x.laut,
+        "lang-kurz": x.laut >= 4 && x.dauer === "lang" && y.laut >= 4 && y.dauer === "kurz" && y.laut <= x.laut && !y.knall,
         "laut-leise": x.laut >= 4 && x.dauer === "lang" && y.laut <= 2 && y.dauer === "lang",
         "kurz-leise": x.laut === 5 && x.dauer === "kurz" && y.laut <= 2 && y.dauer === "lang",
       }[a.typ];
