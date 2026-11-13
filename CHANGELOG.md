@@ -2293,3 +2293,9 @@
     Sonnenhut gezeichnet (`bilder.js`), auch mitten im Text; bilder.js eingebunden.
   - Tageslauf-Sonne (tageslauf-sonne): „In der Pause am Morgen isst du das Znüni.“ statt „Im Kindergarten …“.
   - Erdzeit-Leiter: „2 500 000“ bleibt (ganze Zahlen ab der 4. Klasse).
+- **Entscheide PL1 a, TG1 a, TG2 a, TG3 a:**
+  - Plan-Leser (plan-leser): Massstab so, dass der Plan so gross ist wie das, was er zeigt — Schulzimmer überall
+    1 Feld = 2 m (12 m), Quartier 50 m (Stufe 3), 50/100 m (4), 100/200 m (5), 50/100 m (6); vorher 1 m und 10 m.
+  - Taschengeld-Planer (taschengeld-planer): „Blumen als Geschenk“ statt „Blumen für Mama“; Sparziel nie Bedarf (Velohelm,
+    Turnschuhe …); Packgrössen je Ware statt 5, 6 oder 10 für alle (Feld Pack in woerter.js, Annahmen ZU PRÜFEN), die
+    Prüfansicht zeigt sie, `pruefeAufgabe` meldet andere.

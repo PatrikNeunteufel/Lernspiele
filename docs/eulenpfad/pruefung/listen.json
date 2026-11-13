@@ -18834,14 +18834,14 @@
             "Schulheft",
             "200",
             "bedarf",
-            "ja"
+            "5 · 10"
           ],
           [
             "✏️",
             "Bleistift",
             "150",
             "bedarf",
-            "ja"
+            "5 · 10"
           ],
           [
             "svg:radiergummi",
@@ -18884,7 +18884,7 @@
             "Zahnbürste",
             "300",
             "bedarf",
-            "ja"
+            "2 · 4"
           ],
           [
             "svg:sonnenhut",
@@ -18933,14 +18933,14 @@
             "Apfel zum Znüni",
             "80",
             "bedarf",
-            "ja"
+            "6"
           ],
           [
             "🥖",
             "Brötli zum Znüni",
             "100",
             "bedarf",
-            "ja"
+            "4 · 6"
           ],
           [
             "🍦",
@@ -18953,28 +18953,28 @@
             "Schoggi-Tafel",
             "200",
             "wunsch",
-            "ja"
+            "3 · 5"
           ],
           [
             "🍬",
             "Gummibärli-Säckli",
             "250",
             "wunsch",
-            "ja"
+            "3 · 5"
           ],
           [
             "🍭",
             "Lutscher",
             "100",
             "wunsch",
-            "ja"
+            "10"
           ],
           [
             "🥤",
             "Limonade (Dose)",
             "200",
             "wunsch",
-            "ja"
+            "6"
           ],
           [
             "🍿",
@@ -18987,7 +18987,7 @@
             "Kaugummi",
             "150",
             "wunsch",
-            "ja"
+            "5 · 10"
           ],
           [
             "svg:comicheft",
@@ -19000,7 +19000,7 @@
             "Sammelbilder (1 Päckli)",
             "150",
             "wunsch",
-            "ja"
+            "5 · 10"
           ],
           [
             "📰",
@@ -19049,7 +19049,7 @@
             "Freundschaftsbändeli",
             "500",
             "wunsch",
-            "ja"
+            "3 · 5"
           ],
           [
             "🎬",
@@ -19083,7 +19083,7 @@
           ],
           [
             "💐",
-            "Blumen für Mama",
+            "Blumen als Geschenk",
             "1000",
             ""
           ],
@@ -19092,14 +19092,14 @@
             "Batterien",
             "600",
             "",
-            "ja"
+            "4 · 8"
           ],
           [
             "💧",
             "Wasserflasche",
             "150",
             "",
-            "ja"
+            "6"
           ],
           [
             "☂️",
@@ -19112,7 +19112,7 @@
             "Gipfeli",
             "150",
             "",
-            "ja"
+            "4 · 6"
           ]
         ]
       }

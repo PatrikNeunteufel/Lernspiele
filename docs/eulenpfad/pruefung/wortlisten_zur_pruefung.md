@@ -3846,15 +3846,15 @@ Preis in Rappen, gerundet für die Schweiz 2026 (geschätzt).
 
 | Bild | Ware | Rappen | Bedarf / Wunsch | … | ☐ |
 |---|---|---|---|---|---|
-| 📓 | Schulheft | 200 | bedarf | ja | ☐ |
-| ✏️ | Bleistift | 150 | bedarf | ja | ☐ |
+| 📓 | Schulheft | 200 | bedarf | 5 · 10 | ☐ |
+| ✏️ | Bleistift | 150 | bedarf | 5 · 10 | ☐ |
 | svg:radiergummi | Radiergummi | 150 | bedarf | ☐ |
 | 📏 | Lineal | 250 | bedarf | ☐ |
 | 🖍️ | Farbstifte-Schachtel | 1200 | bedarf | ☐ |
 | 📐 | Geodreieck | 400 | bedarf | ☐ |
 | 🖋️ | Füllerpatronen | 350 | bedarf | ☐ |
 | 🎒 | Turnsack | 1500 | bedarf | ☐ |
-| 🪥 | Zahnbürste | 300 | bedarf | ja | ☐ |
+| 🪥 | Zahnbürste | 300 | bedarf | 2 · 4 | ☐ |
 | svg:sonnenhut | Sonnenhut | 1500 | bedarf | ☐ |
 | 🧴 | Sonnencreme | 1200 | bedarf | ☐ |
 | 🧤 | Winterhandschuhe | 1500 | bedarf | ☐ |
@@ -3862,17 +3862,17 @@ Preis in Rappen, gerundet für die Schweiz 2026 (geschätzt).
 | 🪖 | Velohelm | 5000 | bedarf | ☐ |
 | 👟 | Turnschuhe | 6000 | bedarf | ☐ |
 | svg:busbillett | Busbillett | 250 |  | ☐ |
-| 🍎 | Apfel zum Znüni | 80 | bedarf | ja | ☐ |
-| 🥖 | Brötli zum Znüni | 100 | bedarf | ja | ☐ |
+| 🍎 | Apfel zum Znüni | 80 | bedarf | 6 | ☐ |
+| 🥖 | Brötli zum Znüni | 100 | bedarf | 4 · 6 | ☐ |
 | 🍦 | Glace-Cornet | 400 | wunsch | ☐ |
-| 🍫 | Schoggi-Tafel | 200 | wunsch | ja | ☐ |
-| 🍬 | Gummibärli-Säckli | 250 | wunsch | ja | ☐ |
-| 🍭 | Lutscher | 100 | wunsch | ja | ☐ |
-| 🥤 | Limonade (Dose) | 200 | wunsch | ja | ☐ |
+| 🍫 | Schoggi-Tafel | 200 | wunsch | 3 · 5 | ☐ |
+| 🍬 | Gummibärli-Säckli | 250 | wunsch | 3 · 5 | ☐ |
+| 🍭 | Lutscher | 100 | wunsch | 10 | ☐ |
+| 🥤 | Limonade (Dose) | 200 | wunsch | 6 | ☐ |
 | 🍿 | Popcorn im Kino | 600 | wunsch | ☐ |
-| svg:kaugummi | Kaugummi | 150 | wunsch | ja | ☐ |
+| svg:kaugummi | Kaugummi | 150 | wunsch | 5 · 10 | ☐ |
 | svg:comicheft | Comic-Heft | 700 | wunsch | ☐ |
-| svg:sammelbilder | Sammelbilder (1 Päckli) | 150 | wunsch | ja | ☐ |
+| svg:sammelbilder | Sammelbilder (1 Päckli) | 150 | wunsch | 5 · 10 | ☐ |
 | 📰 | Kinder-Zeitschrift | 800 | wunsch | ☐ |
 | 📚 | Jugendbuch | 1800 | wunsch | ☐ |
 | 🃏 | Kartenspiel | 1500 | wunsch | ☐ |
@@ -3880,17 +3880,17 @@ Preis in Rappen, gerundet für die Schweiz 2026 (geschätzt).
 | 🎮 | Videospiel | 6000 | wunsch | ☐ |
 | 🎧 | Kopfhörer | 3000 | wunsch | ☐ |
 | 🧸 | Plüschtier | 2000 | wunsch | ☐ |
-| 🪢 | Freundschaftsbändeli | 500 | wunsch | ja | ☐ |
+| 🪢 | Freundschaftsbändeli | 500 | wunsch | 3 · 5 | ☐ |
 | 🎬 | Kinoeintritt | 1500 | wunsch | ☐ |
 | 🏊 | Eintritt Schwimmbad | 400 | wunsch | ☐ |
 | ⛳ | Minigolf | 800 | wunsch | ☐ |
 | 🎢 | Bahn auf dem Jahrmarkt | 500 | wunsch | ☐ |
 | 🎁 | Geburtstagsgeschenk | 2000 |  | ☐ |
-| 💐 | Blumen für Mama | 1000 |  | ☐ |
-| 🔋 | Batterien | 600 |  | ja | ☐ |
-| 💧 | Wasserflasche | 150 |  | ja | ☐ |
+| 💐 | Blumen als Geschenk | 1000 |  | ☐ |
+| 🔋 | Batterien | 600 |  | 4 · 8 | ☐ |
+| 💧 | Wasserflasche | 150 |  | 6 | ☐ |
 | ☂️ | Regenschirm | 1500 |  | ☐ |
-| 🥐 | Gipfeli | 150 |  | ja | ☐ |
+| 🥐 | Gipfeli | 150 |  | 4 · 6 | ☐ |
 
 ## 50. Wassertropfen-Reise (Lehrplan SG NMG.2.2)
 

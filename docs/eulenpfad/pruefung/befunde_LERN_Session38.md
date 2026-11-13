@@ -10,8 +10,8 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Spiel | Stand | Einzelheiten |
 |---|---|---|
 | Geheimschrift-Knacker | erledigt 2026-11-13 (LERN_Session38, GK1 a, GK2 a) | `GEHEIM_SPERRE` |
-| Plan-Leser | in Arbeit seit 2026-11-13 (LERN_Session39); Zeichen und Massstab-Feld behoben, Massstab als Entscheid PL1 offen | Durchgang 7 unten |
-| Taschengeld-Planer | in Arbeit seit 2026-11-13 (LERN_Session39); Bilder behoben, TG1–TG3 als Entscheid offen | Durchgang 7 unten |
+| Plan-Leser | erledigt 2026-11-13 (LERN_Session39, PL1 a) | Durchgang 7 unten |
+| Taschengeld-Planer | erledigt 2026-11-13 (LERN_Session39, TG1 a, TG2 a, TG3 a); Preise und Packgrössen Annahmen (ZU PRÜFEN) | Durchgang 7 unten |
 | Pflanzen-Bestimmer | erledigt 2026-11-13 (LERN_Session39); Fichte/Tanne/Eibe, Spitzahorn, Schlüsselfragen, Edelweiss vertretbar | Durchgang 7 unten |
 | Tageslauf-Sonne | erledigt 2026-11-13 (LERN_Session39); Bilder ohne Satz und Abend/Nacht vertretbar | Durchgang 7 unten |
 | Instrumenten-Kenner | erledigt 2026-11-13 (LERN_Session38, BI1 a, IK2 a) | unten |
@@ -149,7 +149,8 @@ Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die 
 **Durchgang 7 (LERN_Session39)** — ohne Netzabruf, nur nach dem Bild und dem Code:
 - Plan-Leser: Garderobe mit einem Haken (Zeichen „haken“) statt des Kreuzes der Kirche; Spital „H“, Bushaltestelle ein
   Rechteck (die Haltestellentafel); in der Legende ein Feld wie auf dem Plan neben „1 Feld = … m“ statt eines festen
-  Balkens von 40 px. Plangrösse und Massstab: Entscheid PL1.
+  Balkens von 40 px. PL1 a: Schulzimmer überall 2 m (Plan 12 m), Quartier 50 m, 50/100 m, 100/200 m, 50/100 m in den
+  Stufen 3–6 (Plan 300 m bis 1,2 km; vorher 6 m und 60 m).
 - Erdzeit-Leiter: „2 500 000 Jahren“ vertretbar — die Datei verlangt ganze Zahlen (Stufe 1 ist die 4. Klasse, noch ohne
   Dezimalzahlen); „2,5 Millionen“ ginge erst ab der 5. Klasse.
 - Pflanzen-Bestimmer: Maiglöckchen mit hängenden Glöckchen (`form: "glocken"`, Zahl null) statt des Sterns wie beim
@@ -157,7 +158,9 @@ Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die 
   nicht). Fichte/Tanne/Eibe, Spitzahorn, die Schlüsselfragen zu „schmal“ und „gesägt“, Edelweiss und die Dolden
   vertretbar.
 - Taschengeld-Planer: Radiergummi, Kaugummi, Sammelbilder, Comic-Heft, Velolicht, Busbillett und Sonnenhut gezeichnet,
-  auch mitten im Text („1 × … für“). Blumen für Mama, Bedarf als Sparziel, Pack mit 10: Entscheide TG1–TG3.
+  auch mitten im Text („1 × … für“). TG1 a „Blumen als Geschenk“; TG2 a Sparziel nie Bedarf (bleiben 7 Wünsche und 2
+  „je nach Lage“); TG3 a Packgrössen je Ware (Feld Pack, etwa Zahnbürste 2/4, Freundschaftsbändeli 3/5, Batterien 4/8),
+  Vergleich und „einzeln oder Pack“ nehmen nur sie, `pruefeAufgabe` meldet andere.
 - Tageslauf-Sonne: „In der Pause am Morgen isst du das Znüni.“ statt „Im Kindergarten …“ (Basisklasse 1). Abend oder
   Nacht bei Gute Nacht, Teddy, Gutenachtgeschichte vertretbar (vor dem Schlafen). Bilder ohne Satz beim Ordnen und bei
   „Welches passt nicht?“ vertretbar: Langes Drücken liest den Satz vor (die Hilfe sagt es); nur Bilder mit eindeutiger

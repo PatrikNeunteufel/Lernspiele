@@ -6,8 +6,8 @@
 //
 // Inhaltslisten (Entscheid L4 a), einzeln freizugeben. Der Prüfstand steht im Katalog
 // (spiele/gemeinsam/katalog.js, Spiel „plan-leser“, Feld listen).
-//   schulzimmer   PLAN_DINGE.schulzimmer   Plan eines Schulzimmers (Massstab 1 Feld = 1 m oder 2 m)
-//   quartier      PLAN_DINGE.quartier      Plan eines Quartiers (Massstab 1 Feld = 10 m bis 100 m)
+//   schulzimmer   PLAN_DINGE.schulzimmer   Plan eines Schulzimmers (Massstab 1 Feld = 2 m)
+//   quartier      PLAN_DINGE.quartier      Plan eines Quartiers (Massstab 1 Feld = 50 m bis 200 m)
 const PLAN_LISTEN = ["schulzimmer", "quartier"];
 
 // [Name mit Artikel, im Dativ („neben …“), Mehrzahl (nur bei Dingen, die mehrmals vorkommen), Zeichen, Farbe 1–7]
@@ -48,8 +48,10 @@ const PLAN_DINGE = {
   ],
 };
 
-// Massstab je Stufe: wie viele Meter ein Feld zeigt (zufällig einer der Werte)
+// Massstab je Stufe: wie viele Meter ein Feld zeigt (zufällig einer der Werte). Der Plan hat 6 × 6 Felder; der
+// Massstab muss ihn so gross machen wie das, was er zeigt (Entscheid PL1 a, LERN_Session39): Schulzimmer 12 m,
+// Quartier mit Schule, Kirche, Bahnhof, Spital und Weiher 300 m bis 1,2 km (vorher 6 m und 60 m).
 const PLAN_MASSSTAB = {
-  schulzimmer: { s3: [1], s4: [1, 2], s5: [2], s6: [1, 2] },
-  quartier: { s3: [10], s4: [10, 20], s5: [50, 100], s6: [25, 50] },
+  schulzimmer: { s3: [2], s4: [2], s5: [2], s6: [2] },
+  quartier: { s3: [50], s4: [50, 100], s5: [100, 200], s6: [50, 100] },
 };

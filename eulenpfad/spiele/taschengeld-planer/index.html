@@ -85,7 +85,7 @@ const ID = "taschengeld-planer";
 
 const FREI = new Set(LS.spielListen(ID).length ? LS.freieListen(ID) : ["waren"]);
 /** Ware aus einem Eintrag von TASCHEN_WAREN — auch für die Prüfansicht (pruefung.js). */
-const wareAus = ([bild, name, rp, art, stueck]) => ({ bild, name, rp, art, stueck: !!stueck });
+const wareAus = ([bild, name, rp, art, pack]) => ({ bild, name, rp, art, pack: pack || [], stueck: !!pack });
 const WAREN = (FREI.has("waren") ? TASCHEN_WAREN : []).map(wareAus);
 const geld = rp => LS.geldText(rp);
 const summe = liste => liste.reduce((s, w) => s + w.rp * (w.anzahl || 1), 0);
@@ -106,7 +106,8 @@ const NIMMT = {
   reicht: { kaufen: w => w.rp <= 1500 },
   rest: { kaufen: w => w.rp <= 1200 },
   woche: { regal: w => w.rp <= 1000 },
-  sparen: { sparziel: w => w.rp >= 1500 },
+  // Gespart wird für einen Wunsch, nicht für Bedarf wie Velohelm oder Turnschuhe (Entscheid TG2 a, LERN_Session39)
+  sparen: { sparziel: w => w.rp >= 1500 && w.art !== "bedarf" },
   fest: { fest: istFest },
   wunsch: { fest: istFest, wunsch: w => w.art === "wunsch" },
   sortieren: { sortieren: w => !!w.art },
@@ -203,7 +204,7 @@ const ARTEN = {
     const kand = WAREN.filter(NIMMT.vergleich.angebot);
     if (!kand.length) return null;
     const w = waehle(kand);
-    const [n1, n2] = ziehe([1, 2, 3, 4, 5, 6, 10], 2);
+    const [n1, n2] = ziehe([1, ...w.pack], 2);
     const gleich = Math.random() < 0.25;
     const p1 = Math.max(50, w.rp + zufall(-3, 2) * 10);
     const p2 = gleich ? p1 : Math.max(50, p1 + waehle([-1, 1]) * zufall(1, 4) * 10);
@@ -215,7 +216,7 @@ const ARTEN = {
     const kand = WAREN.filter(NIMMT.brauche.pack);
     if (!kand.length) return null;
     const w = waehle(kand);
-    const n = waehle([5, 6, 10]);
+    const n = waehle(w.pack);
     const k = zufall(1, n - 1);
     // Pack immer günstiger pro Stück, 10 bis 30 Prozent
     const packPreis = Math.round(n * w.rp * (1 - zufall(1, 3) / 10) / 10) * 10;
@@ -289,6 +290,7 @@ function pruefeAufgabe(a, stufe) {
   if (a.art === "vergleich") {
     const [n1, p1] = a.a, [n2, p2] = a.b;
     if (n1 === n2) m.push("gleiche Anzahl — kein Vergleich");
+    if ([n1, n2].some(n => n !== 1 && !ware(a.ware)?.pack.includes(n))) m.push("Packgrösse, die es nicht gibt");
     if (p1 % n1 || p2 % n2 || (p1 / n1) % 10 || (p2 / n2) % 10) m.push("Stückpreis nicht in ganzen 10 Rappen");
     const l = p1 / n1 === p2 / n2 ? "gleich" : p1 / n1 < p2 / n2 ? "A" : "B";
     if (l !== a.antwort) m.push("Vergleich falsch");
@@ -299,6 +301,7 @@ function pruefeAufgabe(a, stufe) {
     if (l !== a.antwort) m.push("Entscheid falsch");
     if (a.pack >= a.n * preis(a.ware)) m.push("Pack nicht günstiger pro Stück");
     if (a.k >= a.n) m.push("braucht mehr, als im Pack ist");
+    if (!ware(a.ware)?.pack.includes(a.n)) m.push("Packgrösse, die es nicht gibt");
   }
   return m;
 }

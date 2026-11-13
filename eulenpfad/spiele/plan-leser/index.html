@@ -97,7 +97,7 @@
 // d/e Skizzen und Pläne lesen und herstellen; f Karten und Pläne mit Massstab (Orientierungspunkt
 // 2. Zyklus, Ende 4. Klasse). Basisklasse 4: s1 3. Klasse, s5 5. Klasse, s6 Königsstufe.
 // Abgrenzung zum Kompass-Spiel (NMG.8.4, Himmelsrichtungen): hier Legende, Zeichen, Lage auf dem
-// Plan („rechts neben“, „zwischen“), Massstab (1 Feld = 1 m bis 100 m je Plan und Stufe) und Wege aus der Sicht des Gehenden
+// Plan („rechts neben“, „zwischen“), Massstab (1 Feld = 2 m bis 200 m je Plan und Stufe, PL1 a) und Wege aus der Sicht des Gehenden
 // (links oder rechts abbiegen). Dinge und Zeichen in plaene.js.
 
 const { zufall, waehle, mische, el } = LS;
@@ -282,7 +282,7 @@ const STUFE_ARTEN = {
   s3: [["strecke", "s3"], ["strecke", "s3"], ["lage", true]],
   s4: [["weg", "weglaenge", 2, "s4"], ["weg", "abbiegen", 2], ["strecke", "s4"]],
   s5: [["weg", "beschreiben", 3], ["weg", "weglaenge", 3, "s5"]],
-  // Königsstufe: lange Wege beschreiben und messen, Massstab 25 m oder 50 m
+  // Königsstufe: lange Wege beschreiben und messen, Massstab 50 m oder 100 m (im Schulzimmer 2 m)
   s6: [["weg", "beschreiben", 4], ["weg", "weglaenge", 4, "s6"], ["lage", true]],
 };
 const STUFE = Object.fromEntries(Object.entries(STUFE_ARTEN).map(([s, arten]) =>
@@ -297,7 +297,7 @@ function aufgabeErzeugen(stufe) {
   return null;
 }
 
-// Massstab je freiem Plan aus PLAN_MASSSTAB, etwa „1 m im Schulzimmer, 10 m im Quartier“ (vorher stand fest der
+// Massstab je freiem Plan aus PLAN_MASSSTAB, etwa „2 m im Schulzimmer, 50 m im Quartier“ (vorher stand fest der
 // Massstab des Quartiers, auch wenn das Schulzimmer kam)
 const PLAN_ORT = { schulzimmer: "im Schulzimmer", quartier: "im Quartier" };
 const massstabText = stufe => LISTEN.map(l => `${PLAN_MASSSTAB[l][stufe].join(" m und ")} m ${PLAN_ORT[l]}`).join(", ");

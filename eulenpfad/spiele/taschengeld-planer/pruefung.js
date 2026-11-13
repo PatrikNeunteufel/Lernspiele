@@ -36,13 +36,13 @@
         hinweis: "Je Art eine Gruppe. Ist die Zuordnung für ein Kind der 4. bis 6. Klasse eindeutig — Bedarf: Schule, "
           + "Gesundheit, Sicherheit, Schulweg, Znüni; Wunsch: Süsses, Spiel, Freizeit? Was beides sein kann, gehört zu "
           + "„je nach Lage“ und wird nie sortiert. Ist der Preis für ein Kind in der Schweiz heute realistisch (Kiosk, "
-          + "Papeterie, Sportgeschäft, Kino)? Gibt es die Ware wirklich im Mehrfachpack (Stufe 6 vergleicht Packungen "
-          + "bis 10 Stück)? Zeigt das Bild eindeutig die Ware, und ist der Name in Schweizer Schreibweise?",
+          + "Papeterie, Sportgeschäft, Kino)? Gibt es die Ware wirklich in diesen Packgrössen (Spalte „Mehrfachpack“; "
+          + "Stufe 6 vergleicht sie mit dem Einzelpreis)? Zeigt das Bild eindeutig die Ware, und ist der Name in Schweizer Schreibweise?",
         eintraege: () => TASCHEN_WAREN,
         gruppe: e => GRUPPE[wareAus(e).art] ?? wareAus(e).art,
         zeile: e => {
           const w = wareAus(e);
-          return [w.bild, w.name, preisText(w), w.stueck ? "ja" : "—", stufenText(w)];
+          return [w.bild, w.name, preisText(w), w.stueck ? w.pack.map(n => `${n} Stück`).join(", ") : "—", stufenText(w)];
         },
       }],
     },
