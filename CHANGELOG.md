@@ -2241,6 +2241,8 @@
   ▸/▾ vor jeder Gruppe (Stile beider Apps), und „alle aufheben“ klappt die Gruppe samt Untergruppen auf.
 - **„🔍 Inhalte prüfen“ auf dem Startblatt (DP1 a):** im Entwickler-Modus weggelassen — die Listen stehen in der
   Entwickler-Leiste, auf jeder Seite des Spiels; für Aufsicht und Lehrperson kleine Knöpfe nebeneinander statt der
-  grossen Spielknöpfe (`.pruef-zeile` in stil.css). `?pruefen=<liste>` öffnet die Liste in beiden Rollen. Wetter und Jahreszeiten
+  grossen Spielknöpfe (`.pruef-zeile` in stil.css). `?pruefen=<liste>` öffnet die Liste in beiden Rollen.
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session38_2026-11-13.md`, Handover nachgeführt (Haltepunkt
+  aufgelöst, LERN-51 erledigt). Wetter und Jahreszeiten
   (wetter-jahreszeiten): 🌅, Korb Herbst 🍄, 🌿, kahler Laubbaum als Zeichnung (`bilder.js`, baumKahl), 🩱 Badekleid;
   bilder.js eingebunden.
