@@ -15,7 +15,7 @@ vor einer Änderung je Angabe zu belegen. Die Befunde sind ungeordnet nach Gewic
 | Wassertropfen-Reise | erledigt 2026-11-13 (LERN_Session38, WT1 a) | unten |
 | „Bild verrät“ in zehn Spielen | erledigt 2026-11-13 (LERN_Session38, BI1 a; neun behoben, ein Scheinfund) | Tabelle unten |
 | Lärm-Wächter | erledigt 2026-11-13 (LERN_Session39); Skala vertretbar | Durchgang 6 unten |
-| Kakao-Weg | in Arbeit seit 2026-11-13 (LERN_Session39); Papierweg als Entscheid KW1 offen | Durchgang 6 unten |
+| Kakao-Weg | erledigt 2026-11-13 (LERN_Session39, KW1 a); Zucker vertretbar | Durchgang 6 unten |
 | Erdzeit-Leiter | erledigt 2026-11-13 (LERN_Session38) bis auf die Schreibweise „2 500 000“ | Durchgang 3 unten |
 | Zeitstrahl-Sortierer | erledigt 2026-11-13 (LERN_Session38); Pfahlbauten und Urgrosseltern vertretbar | Durchgang 3 unten |
 | Stromkreis-Bauer | erledigt 2026-11-13 (LERN_Session39); Bleistiftmine im Versuch vertretbar | Durchgang 6 unten |
@@ -139,7 +139,9 @@ Bildlegenden), kein Primärbeleg — Paar gestrichen (Entscheid BK1 a), wie die 
   und „90% davon werden durch die Wiederverwertung von Altpapier gewonnen.“ Die einzige Zellulosefabrik der Schweiz
   (Attisholz) schloss Ende 2008 ([SRF](https://www.srf.ch/news/schweiz/groesste-industriebrache-von-der-zelluloseproduktion-zum-hippen-dorf-an-der-aare),
   nur aus der Zusammenfassung der Suche). Der Weg „Forstwarte fällen Bäume für Papierholz … in die Papierfabrik“ mit
-  Herkunft Schweiz stimmt so nicht — Entscheid KW1.
+  Herkunft Schweiz stimmt so nicht — Entscheid KW1 a: Weg aus Altpapier (Rohstoff Altpapier, „aus 9 von 10 Teilen“),
+  erster Schritt „Wir bündeln Altpapier für die Papiersammlung.“ ohne „Wer macht das?“; damit ist auch „Forstwarte →
+  Landwirtschaft“ weg.
 
 Nicht geändert, weil vertretbar: Blasen im kochenden Wasser (bei „kochendem“ Wasser stimmt Wasserdampf), Station Bach
 mit 🏔️ (Weg über den Berg), Lärm-Skala Mixer/Föhn/Schulglocke (ohne belegte Messwerte; mit LERN-11 zu prüfen).

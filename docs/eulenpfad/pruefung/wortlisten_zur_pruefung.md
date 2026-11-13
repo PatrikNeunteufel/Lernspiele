@@ -4101,9 +4101,9 @@ Je Produkt die Schritte in Reihenfolge.
 | Apfelsaft | 6 | Lastwagen bringen die Apfelsaftflaschen ins Verteilzentrum des Grossverteilers. | transport | ☐ |
 | Apfelsaft | 7 | Im Laden stehen die Apfelsaftflaschen im Getränkeregal. | laden | ☐ |
 | Apfelsaft | 8 | Wir kaufen eine Flasche Apfelsaft. | haushalt | ☐ |
-| Papier | 1 | Forstwarte fällen im Wald Bäume für Papierholz. | hof | ☐ |
-| Papier | 2 | Ein Lastwagen bringt das Holz in die Papierfabrik. | transport | ☐ |
-| Papier | 3 | Das Holz wird in feine Fasern zerlegt und mit Wasser zu einem Papierbrei gemischt. | fabrik | ☐ |
+| Papier | 1 | Wir bündeln Altpapier für die Papiersammlung. |  | ☐ |
+| Papier | 2 | Ein Lastwagen bringt das Altpapier in die Papierfabrik. | transport | ☐ |
+| Papier | 3 | In der Papierfabrik wird das Altpapier mit Wasser zu einem Papierbrei aufgelöst. | fabrik | ☐ |
 | Papier | 4 | Die Papiermaschine verteilt den Papierbrei auf einem Sieb, presst und trocknet ihn. | fabrik | ☐ |
 | Papier | 5 | Das lange Papierband wird in Blätter geschnitten und verpackt. | fabrik | ☐ |
 | Papier | 6 | Im Verteilzentrum werden die Papierpakete für die Läden bereitgestellt. | gross | ☐ |

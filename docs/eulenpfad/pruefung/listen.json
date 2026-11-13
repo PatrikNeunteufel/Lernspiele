@@ -20522,19 +20522,19 @@
           [
             "Papier",
             "1",
-            "Forstwarte fällen im Wald Bäume für Papierholz.",
-            "hof"
+            "Wir bündeln Altpapier für die Papiersammlung.",
+            ""
           ],
           [
             "Papier",
             "2",
-            "Ein Lastwagen bringt das Holz in die Papierfabrik.",
+            "Ein Lastwagen bringt das Altpapier in die Papierfabrik.",
             "transport"
           ],
           [
             "Papier",
             "3",
-            "Das Holz wird in feine Fasern zerlegt und mit Wasser zu einem Papierbrei gemischt.",
+            "In der Papierfabrik wird das Altpapier mit Wasser zu einem Papierbrei aufgelöst.",
             "fabrik"
           ],
           [

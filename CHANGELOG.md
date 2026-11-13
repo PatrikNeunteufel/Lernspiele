@@ -2280,3 +2280,6 @@
   - Lärm-Wächter (laerm-waechter): Gehörschutz, Ohrstöpsel, Vorhang, Fliesen, Teppich und Kissen gezeichnet, Staubsauger
     und Föhn wie im Energie-Wandler, Pause in der Stille 🧘; Lösungstexte über `LS.mitBildText`, bilder.js eingebunden.
     Skala unverändert (Stufe 3 kommt nur beim Ordnen zwischen 1 und 5 vor).
+  - Kakao-Weg (kakao-weg): Papier aus Altpapier statt aus dem Schweizer Wald (KW1 a; BAFU: 90 % der Faserstoffe aus
+    Altpapier) — Rohstoff Altpapier, erster Schritt „Wir bündeln Altpapier für die Papiersammlung.“, Auflösen statt
+    Zerfasern; damit fällt auch „Forstwarte → Landwirtschaft“ weg.

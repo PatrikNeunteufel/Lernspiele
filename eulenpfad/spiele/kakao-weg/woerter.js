@@ -109,12 +109,16 @@ const WEGE = [
     ],
   },
   {
-    id: "papier", name: "Papier", bild: "📄", rohstoff: "Holz", herkunft: "schweiz", transport: "kurz",
-    grund: "Ungefähr ein Drittel der Schweiz ist mit Wald bedeckt.",
+    // Weg aus Altpapier (Entscheid KW1 a, LERN_Session39): BAFU, „Papier und Karton“ (2021) — „Zur Herstellung von
+    // 1,2 Millionen Tonnen Papier werden in der Schweiz jährlich ca. 1 Mio. Tonnen Faserstoffe benötigt.“ „90% davon
+    // werden durch die Wiederverwertung von Altpapier gewonnen.“ Vorher ein Weg vom Schweizer Wald in die Papierfabrik.
+    // Der erste Schritt fragt nicht „Wer macht das?“: Der Korb Haushalt heisst „wir kaufen ein“.
+    id: "papier", name: "Papier", bild: "📄", rohstoff: "Altpapier", herkunft: "schweiz", transport: "kurz",
+    grund: "In der Schweiz wird Papier fast ganz aus Altpapier gemacht: aus 9 von 10 Teilen.",
     schritte: [
-      ["Forstwarte fällen im Wald Bäume für Papierholz.", "hof", "🌲"],
-      ["Ein Lastwagen bringt das Holz in die Papierfabrik.", "transport", "🚚"],
-      ["Das Holz wird in feine Fasern zerlegt und mit Wasser zu einem Papierbrei gemischt.", "fabrik", "🪵"],
+      ["Wir bündeln Altpapier für die Papiersammlung.", "", "📰"],
+      ["Ein Lastwagen bringt das Altpapier in die Papierfabrik.", "transport", "🚚"],
+      ["In der Papierfabrik wird das Altpapier mit Wasser zu einem Papierbrei aufgelöst.", "fabrik", "💧"],
       ["Die Papiermaschine verteilt den Papierbrei auf einem Sieb, presst und trocknet ihn.", "fabrik", "⚙️"],
       ["Das lange Papierband wird in Blätter geschnitten und verpackt.", "fabrik", "✂️"],
       ["Im Verteilzentrum werden die Papierpakete für die Läden bereitgestellt.", "gross", "🏬"],
