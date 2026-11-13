@@ -2106,3 +2106,9 @@
   `zyklusInStufe`, `KNIFFLIG_KOERBE`, `frisstPaare`, `ablenkerFuer`, `wasFrisstFrage`, `STAEBE`, `WIRKUNG`, `POL_FUER`,
   `korbDinge`, `paarAblenker`, `dazwischenAblenker`, `gabEs`; Schweiz-Karten-Suche `zieleAus`, `karteZeichnen`,
   `punktZeichnen` und Ziele der Stufen auch ohne Freigabe. Prüfstand und Fingerabdrücke unverändert.
+- **Werkzeuge für die Prüfansichten ins Repo:** `tools/pruefe_pruefansicht.js <spiel …>` (Ladeprüfung jeder Zeile einer
+  Prüfansicht, Zellen = Spalten, Fingerabdruck je Liste; im Steckbrief unter Tests) und `docs/eulenpfad/auftrag_pruefansicht.md`
+  (gemeinsamer Auftrag der Agenten: Vertrag, Vorbilder, Schritt ins Spiel ziehen mit Nachweis gleicher Aufgaben, kein
+  eingebauter Browser).
+- **Session-Abschluss:** Report `docs/eulenpfad/report/LERN_Session37_2026-11-13.md` (mit den inhaltlichen
+  Auffälligkeiten aller Blöcke), Handover (weiter mit NMG Block 2).

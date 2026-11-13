@@ -1,6 +1,24 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-13, nach LERN_Session37** ([Report](report/LERN_Session37_2026-11-13.md)):
+- **Kern:** unverändert 1.43.0.
+- **Anleitungen:** neu aufgebaut nach [Konzept](konzept_anleitungen.md) (AL1 a–AL7 a): Legende je Bild, Nummer nach
+  Lage, jedes Bild breit und schmal, ein Stil für beide; Prüfer `tools/pruefe_skripte.js` Punkt 9.
+- **Inhaltslisten (LP5 a, LERN-51):** Prüfansicht für 41 weitere Spiele (Znüni-Teller, Deutsch Block 4, Englisch,
+  Französisch, NMG Block 1); Aufgabenschritte dafür in 25 Spielen ins Spiel gezogen, Aufgaben unverändert. Neu
+  `tools/pruefe_pruefansicht.js` und der Agenten-Auftrag [auftrag_pruefansicht.md](auftrag_pruefansicht.md).
+- **Tests:** Skripte „Keine Fehler.“, Kern „6068 Fälle, 0 Fehler.“, Server „59 Fälle, 0 Fehler.“, Lernsteig „0 Fehler,
+  139 Hinweise.“ (Konten „106 Fälle, 0 Fehler.“), Gratwanderung „Keine Fehler.“, Feier „169 Spiele, 6084 Bilder, keine
+  Fehler.“, Schrift „Keine Fehler.“; Eulenpfad je Block „Keine Fehler.“ — **letzter voller Lauf weiter auf `6055527`**.
+  Commits bis `154b2f0` von Patrik, nicht gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit:** (1) **Inhaltslisten NMG Block 2** (schulweg-profi … erdzeit-leiter, Liste im Report), dann Block 3,
+  MI und Musik — Agenten nach dem Auftrag, ohne eingebauten Browser; (2) inhaltliche Auffälligkeiten aus den Blöcken
+  (Report) beim Prüfen der Listen; (3) voller Eulenpfad-Lauf auf Patriks Entscheid vor dem nächsten Push; (4) **Anleitung
+  k04** (Hinweis Patrik): Rahmen 1 „Das ist die Aufgabe“ umfasst nur die Zahl (`.zahl-gross`, mit dem Tipp-Knopf 💡 darin),
+  der Auftrag „runde auf Hunderter“ steht ausserhalb — das Ziel in `tools/anleitung_bilder.js` auf Zahl und Auftrag
+  zusammen setzen (ohne 💡), Bilder neu, `pruefe_skripte` Punkt 9 ohne Fehler.
+
 **2026-11-13, nach LERN_Session36** ([Report](report/LERN_Session36_2026-11-13.md)):
 - **Kern:** unverändert 1.43.0.
 - **Inhaltslisten (LP5 a, LERN-51):** Prüfung je Eintrag für 29 weitere Spiele (Blöcke 1 Mathe, 2 und 3 Deutsch);
@@ -541,7 +559,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-48 | Gruppen: Familie, Klasse, Lerngruppe; Rolle Lehrperson, Klassenstatistik, Abgleich je Gruppe verschlüsselt | offen (Entscheide G1–G11 und G3b getroffen 2026-11-03, Bau ausstehend) | docs/konzept_gruppen.md, Abschnitt 9; docs/anleitung_zertifikat_klassenserver.md; docs/anleitung_klassenserver_internet.md; umfasst LERN-34 |
 | LERN-50 | Freiwillige Beiträge (Kaffee-Link, QR-Rechnung, GitHub Sponsors) nur für Erwachsene; Links leer bis aktiviert | in Arbeit seit 2026-11-03 (LERN_Session11); vorbereitet, Links leer — Patrik trägt sie ein, Steuern und Impressum klären | docs/anleitung_freiwillige_beitraege.md; portal/unterstuetzen.js |
 | LERN-49 | Strategie-Rätsel im Eulenpfad (Matt in 1, Atari-Go, Nim); ganze Partien Schach und Go erst im Lernsteig (S1 a) | in Arbeit seit 2026-11-03 (LERN_Session11); drei Spiele gebaut, Annahmen offen | lernziele/lehrplan_sg_session11.md; spielideen/strategie_raetsel.md |
-| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-12 (LERN_Session36, Blöcke nach T4 a); Blöcke 1 Mathe, 2 und 3 Deutsch fertig, weiter mit Block 4 Deutsch (ab sachtext-spurensuche) | rahmen.md 17; spiele/gemeinsam/listenpruefung.js |
+| LERN-51 | Alle Inhaltslisten je Eintrag prüfbar machen (`pruefung.js` je Spiel, gemischte Listen trennen; LP5 a) | in Arbeit seit 2026-11-12 (LERN_Session36, Blöcke nach T4 a); Mathe, Deutsch, Englisch, Französisch und NMG Block 1 fertig, weiter mit NMG Block 2 | rahmen.md 17; spiele/gemeinsam/listenpruefung.js; docs/eulenpfad/auftrag_pruefansicht.md |
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
 | LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |
