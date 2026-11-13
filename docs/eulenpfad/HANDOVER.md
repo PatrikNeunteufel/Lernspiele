@@ -1,6 +1,19 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-13, nach LERN_Session39** ([Report](report/LERN_Session39_2026-11-13.md)):
+- **Kern:** unverändert 1.45.1.
+- **Befunde aus den Prüfansichten:** alle bearbeitet ([Befund-Datei](pruefung/befunde_LERN_Session38.md), Durchgänge
+  5–8, kein Punkt mehr offen); Entscheide BK1 a, KW1 a, PL1 a, TG1 a–TG3 a. 24 neue Zeichnungen in `bilder.js` (BI1 a);
+  Felder „passt auch“ in Datei-Typen, Gemeinde-Helfer, Kulturen-Koffer; Prüfansicht erkennt Zeichnungen mit
+  Grossbuchstaben (`LS.ZEICHNUNG_IM_TEXT`, geprüft in `tools/pruefe_pruefansicht.js`).
+- **Tests:** **voller Eulenpfad-Lauf auf `5cc948b`** (1014 Kombinationen) mit einem Fund im Hello-Dialog, behoben und
+  einzeln „Keine Fehler.“; Skripte „Keine Fehler.“, Prüfansicht alle Spiele „Keine Fehler.“, Feier „169 Spiele, 6084
+  Bilder, keine Fehler.“. Commits bis `087571c` von Patrik, nicht gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit:** (1) Push auf master (Pages); (2) Prüfansicht nach Kern 1.45 im Browser, alte Haken im Lernsteig;
+  (3) Tasten-Abzeichen über langen Antworten (Plan-Leser s5); (4) Hook-Kandidat `CD_SITZUNG_OK` nur für ein
+  alleinstehendes `cd`.
+
 **2026-11-13, nach LERN_Session38** ([Report](report/LERN_Session38_2026-11-13.md)):
 - **Kern:** 1.45.1 (1.44.0 `nachher` beim Schliessen der Prüfansicht; 1.45.0 schon Geprüftes grau, gleiche Zeilen
   übernommen, ÜB1 a, ÜB2 a; 1.45.1 Pfeil an den Gruppen, „alle aufheben“ klappt auf).
