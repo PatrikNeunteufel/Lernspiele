@@ -781,6 +781,11 @@ const PRUEFSTAND = {
       "am": "2026-11-04",
       "von": "Patrik"
     },
+    "geschichten-ordner/geschichten": {
+      "am": "2026-11-14",
+      "hash": "1iqdvcpgbam",
+      "von": "Patrik"
+    },
     "glace-kombinator/kleider": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1092,6 +1097,26 @@ const PRUEFSTAND = {
       "am": "2026-11-11",
       "von": "Patrik"
     },
+    "wetter-jahreszeiten/fragen": {
+      "am": "2026-11-14",
+      "hash": "nos0v5m61g",
+      "von": "Patrik"
+    },
+    "wetter-jahreszeiten/jahreszeiten": {
+      "am": "2026-11-14",
+      "hash": "l1ri2v3guh",
+      "von": "Patrik"
+    },
+    "wetter-jahreszeiten/kleidung": {
+      "am": "2026-11-14",
+      "hash": "umgccpel26",
+      "von": "Patrik"
+    },
+    "wetter-jahreszeiten/symbole": {
+      "am": "2026-11-14",
+      "hash": "6iilalaku4",
+      "von": "Patrik"
+    },
     "word-match/essen": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1301,6 +1326,10 @@ const PRUEFSTAND = {
     },
     "gerecht-teiler": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "geschichten-ordner": {
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "glace-kombinator": {
@@ -1529,6 +1558,10 @@ const PRUEFSTAND = {
     },
     "weather-report": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "wetter-jahreszeiten": {
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "word-match": {

@@ -352,6 +352,9 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
    contain-intrinsic-size „auto“ merkt sich die echte Höhe, sobald ein Block einmal gezeichnet war. content-visibility
    schneidet am Rand ab (Paint-Containment); overflow-clip-margin lässt Rahmen, verschobene Karten und Lücken hinausragen. */
 .thema-block { content-visibility: auto; contain-intrinsic-size: auto 520px; overflow-clip-margin: 24px; }
+/* Dasselbe je Karte in den Listen ohne Gruppen — Treffer der Suche, ähnliche Spiele, flache Sortierung (Entscheid KV1 a,
+   LERN_Session41): Ein Buchstabe trifft fast alle Spiele; die Liste kostete gedrosselt 330 bis 460 ms, fast alles Layout. */
+.spiele-auswahl > .spiele .spielkarte { content-visibility: auto; contain-intrinsic-size: auto 300px; overflow-clip-margin: 24px; }
 .stil-hand .thema-block:nth-child(2n) { border-radius: 22px 12px 20px 14px / 12px 22px 14px 20px; }
 /* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
 .abzeichen-hinweis { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 14px; border-radius: var(--rund);
@@ -672,14 +675,16 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .aufstieg-karte { max-width: 420px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .aufstieg-bild { font-size: 72px; line-height: 1; }
 .geboren-wahl { display: flex; gap: 6px; }
-.marken { display: flex; gap: 6px; flex-wrap: wrap; }
+/* Die Erklärung eines Kürzels hängt an der ganzen Zeile (position: relative hier, nicht am Kürzel): links über der Zeile
+   und nie breiter als sie, so bleibt sie in der Karte. Karten in Listen schneiden am Rand ab (content-visibility, KV1 a);
+   am Kürzel ragte sie bis 130 px rechts hinaus (LERN_Session41). */
+.marken { display: flex; gap: 6px; flex-wrap: wrap; position: relative; }
 .marke { font-size: 13px; font-weight: 800; border-radius: 999px; padding: 2px 10px; background: var(--etikett); }
 .marke.fokus { background: var(--gold-zart); }
 button.marke { border: none; font-family: inherit; color: var(--text); cursor: help; }
-.marke.tipp { position: relative; }
 .marke.tipp:hover::after, .marke.tipp:focus::after {
   content: attr(data-tipp); position: absolute; left: 0; bottom: calc(100% + 6px); z-index: 5;
-  width: max-content; max-width: min(260px, 80vw); white-space: normal; text-align: left;
+  width: max-content; max-width: min(260px, 100%); white-space: normal; text-align: left;
   background: var(--text); color: var(--k-knopf-text); font-size: 13px; font-weight: 600; line-height: 1.35;
   padding: 6px 10px; border-radius: 8px; box-shadow: var(--schatten);
 }

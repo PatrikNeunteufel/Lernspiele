@@ -243,14 +243,24 @@ function zeichneSpiele(box, neu) {
   // das Feld bleibt (Hinweis Patrik, LERN_Session41: beim ersten Buchstaben vergingen Sekunden, solange jede Eingabe
   // die ganze Startseite neu aufbaute; wie karteNeu für die Schalter, LERN_Session35).
   const auswahlBox = el("div", { class: "spiele-auswahl" });
+  // Die Ansicht ohne Suche (Gruppen oder flache Liste) ändert sich während einer Suche nicht: Sie bleibt aufbewahrt und
+  // kommt beim Leeren der Suche zurück, statt neu gebaut zu werden (LERN_Session41: der Neubau kostete auf einem
+  // gedrosselten „Tablet“ 330 bis 370 ms). Ein Kartenschalter während der Suche verwirft sie (karteNeu).
+  let ohneSuche = null; // { knoten, ansicht }
   box.append(fachReiter, el("div", { class: "werkzeuge" },
     SPIEL_SUCHE.feld({ neu: zeichneAuswahl, beiEingabe: UE.aehnlich.schliessen, attr: suchAttr("🔍 Spiel suchen") }), filterKnopf), filterFeld, auswahlBox);
   zeichneAuswahl();
 
   /** Alles, was von der Suche abhängt: Auswahl, Weiterspielen, Zufall, Treffer, Favoriten, Gruppen. */
   function zeichneAuswahl() {
-    auswahlBox.replaceChildren();
     const spielSuche = SPIEL_SUCHE.text;
+    if (ohneSuche && !spielSuche.trim() && !UE.aehnlich.id()) {
+      auswahlBox.replaceChildren(...ohneSuche.knoten);
+      ansicht.replaceWith(ohneSuche.ansicht);
+      ansicht = ohneSuche.ansicht;
+      return;
+    }
+    auswahlBox.replaceChildren();
     // ----- Spiele auswählen -----
     // Ruhezeit (Zusatz Patrik zu AN3-K): Spiele mit Ton fehlen, wenn die Aufsicht sie dann ausblendet
     const passt = s => LS.spielSichtbar(s.id) && !LS.ruheAusgeblendet(s.id)
@@ -491,6 +501,7 @@ function zeichneSpiele(box, neu) {
       p = LS.profil(name);
       const s = SPIELE.find(x => x.id === id);
       if (!s) return;
+      if (treffer) ohneSuche = null; // die aufbewahrte Ansicht liegt nicht im Dokument und bekäme die neue Karte nicht
       for (const alt of box.querySelectorAll(`.spielkarte[data-spiel="${id}"]`)) {
         const frisch = karte(s);
         for (const c of String(alt.getAttribute("class") || "").split(/\s+/)) if (/^(luecke-|w-)/.test(c)) frisch.classList.add(c);
@@ -538,8 +549,11 @@ function zeichneSpiele(box, neu) {
       favoritenFeld?.remove();
       if (neuesFeld) favoritenPlatz.after(neuesFeld);
       favoritenFeld = neuesFeld;
-      if (neuesFeld) LS.langDruecken(auswahlBox);
+      if (neuesFeld) LS.langDruecken(box);
+      merkeOhneSuche();
     }
+    /** Ansicht ohne Suche aufbewahren (siehe ohneSuche), mit dem heutigen Favoriten-Feld. */
+    function merkeOhneSuche() { if (!treffer) ohneSuche = { knoten: [...auswahlBox.childNodes], ansicht }; }
     favoritenFeld = favoritenGruppe();
     if (favoritenFeld) auswahlBox.append(favoritenFeld);
     // Flache Sortierung: alle Spiele in einer Liste (Favoriten bleiben oben in ihrer Gruppe).
@@ -570,12 +584,14 @@ function zeichneSpiele(box, neu) {
       fachBlock.style.setProperty("--f", fachFarbe(fach));
       auswahlBox.append(fachBlock);
     }
-    // Langes Drücken auf eine Karte oder einen Stufenknopf liest vor (Kindergarten, 1. Klasse; LERN_Session8).
-    LS.langDruecken(auswahlBox);
+    // Langes Drücken auf eine Karte oder einen Stufenknopf liest vor (Kindergarten, 1. Klasse; LERN_Session8). Die
+    // Fläche ist der ganze Tab, nicht nur die Auswahl: auch Fach-Reiter, Suche und Filter lesen vor.
+    LS.langDruecken(box);
     if (!auswahl.length) {
       auswahlBox.append(el("div", { class: "karte leer-hinweis",
         text: SPIELE.some(s => LS.spielSichtbar(s.id)) ? "Für diese Auswahl gibt es noch kein Spiel. 🌱"
           : "Noch ist kein Spiel freigegeben. Die Aufsicht kann Spiele in der Verwaltung freigeben. 🌱" }));
     }
+    merkeOhneSuche();
   }
 }

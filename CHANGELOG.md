@@ -2406,3 +2406,17 @@
   die Zeile „Ansicht“ im Filter neu, das Feld bleibt. Danach: Buchstabe nach 56–88 ms (erster) bzw. 16–40 ms; die Liste
   folgt nach 175–300 ms (erster Buchstabe, leer) bzw. 55–150 ms. Test `tools/eulenpfad_seiten.js`: `__fuelle` setzt
   erst den Fokus wie beim Tippen; geprüft wird, dass die Liste erst nach dem Bild kommt und dasselbe Feld den Fokus behält.
+- **Suche leeren ohne Neubau:** Die Ansicht ohne Suche (Gruppen oder flache Liste) bleibt während einer Suche aufbewahrt
+  und kommt beim Leeren zurück (`ohneSuche` in `start/spiele.js`); zugeklappte Gruppen bleiben zu. Ein Kartenschalter
+  während der Suche verwirft sie, ein Stern ohne Suche nimmt das neue Favoriten-Feld mit. Gedrosselt 4×, 1024 px:
+  Leeren 132–152 statt 327–366 ms. Geprüft auch: Stern auf einem Treffer, dann leeren — Favorit oben, beide Sterne an.
+  Verworfen nach Messung: Karten aus einem Vorrat wiederverwenden (erster Buchstabe 145 statt 157 ms Skript, sonst im
+  Rauschen). **Behoben:** Seit dem Umbau zur Suche las langes Drücken nur noch in der Auswahl vor, nicht auf Fach-Reitern,
+  Suche und Filter — `LS.langDruecken` bekommt wieder den ganzen Tab.
+- **Entscheid KV1 a — Karten in Listen ohne Gruppen erst beim Rollen layouten:** `.spiele-auswahl > .spiele .spielkarte`
+  mit `content-visibility: auto` (wie die Themenblöcke, LZ1 a) für Treffer der Suche, ähnliche Spiele und flache
+  Sortierung. Gedrosselt 4×, 1024 px: erster Buchstabe 269–365 statt 403–439 ms, Löschen auf einen Buchstaben 247–297
+  statt 324–397 ms. Die Erklärung eines Lernziel-Kürzels (Aufsicht) ragte dabei bis 130 px rechts über die Karte und
+  wäre abgeschnitten worden (gerechnet über alle 187 Kürzel); sie hängt jetzt an der Zeile `.marken` statt am Kürzel und
+  ist nie breiter als sie — über alle Kürzel mindestens 32 px (1024 px) bzw. 56 px (375 px) innerhalb der Karte. Im Stil
+  „hand“ hell und dunkel, 1024 und 375 px, mit Rahmen und Erklärung angesehen.
