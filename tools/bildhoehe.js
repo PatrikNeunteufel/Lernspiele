@@ -1,12 +1,13 @@
 // Misst, ob die ganze Aufgabe ohne Scrollen ins Bild passt (Entscheid BH1 a, LERN_Session13).
 // Aufruf: node tools/bildhoehe.js [Basis-URL, Vorgabe http://localhost:8765] [spiel-id …]
-//         [--stufen=s1,s3,s6] [--geraete=handy,tablet,quer,desktop] [--css=datei.css] [--json=datei.json] [--port=9334]
+//         [--stufen=s1,s3,s6] [--geraete=handy,tablet,quer,desktop] [--ziehungen=5] [--css=datei.css] [--json=datei.json]
+//         [--port=9334]
 // Der Server muss das Repo ausliefern (server_starten.bat oder python tools/server.py 8765).
 //
 // Chrome läuft ohne Fenster mit einem eigenen, leeren Profil (wie tools/anleitung_bilder.js): Ein Messkind wird
 // angelegt, alle Spiele und Listen sind für es freigegeben. Je Spiel × Stufe × Gerät lädt ein iframe in der
 // Startseite die Stufe; 1,5 s nach dem Laden zählt scrollHeight − Fensterhöhe der ersten Aufgabe. Die Aufgaben
-// sind zufällig, die Zahlen schwanken darum um einige Dutzend Pixel. --css setzt zusätzliches CSS in jede Seite
+// sind zufällig: Jede Seite wird --ziehungen-mal geladen (Vorgabe 5, BW1 a), gemeldet wird je Seite der höchste Wert. --css setzt zusätzliches CSS in jede Seite
 // (zum Ausprobieren, ohne den Code zu ändern). Ende mit Code 1, wenn eine Seite seitlich überläuft.
 "use strict";
 const { spawn } = require("child_process");
@@ -44,7 +45,9 @@ const GERAETE = {
 const KLEINSTE_GRAFIK = 100;
 const ZUSAMMENGEFALLEN = 40;
 const VERGLEICH = "quer";
-const opt = { stufen: "s1,s3,s6", geraete: "handy,tablet,quer,desktop", css: null, json: null, port: "9334" }; // --port: eigener Chrome je Lauf, wenn mehrere zugleich messen
+// --ziehungen: so oft wird jede Seite geladen, jedes Mal mit einer neuen ersten Aufgabe (Entscheid BW1 a, LERN_Session42:
+// mit einer Ziehung hing das Ergebnis an der zufälligen Aufgabenart — 443 px in einem Lauf, im nächsten passte es)
+const opt = { stufen: "s1,s3,s6", geraete: "handy,tablet,quer,desktop", ziehungen: "5", css: null, json: null, port: "9334" }; // --port: eigener Chrome je Lauf, wenn mehrere zugleich messen
 const nurSpiele = [];
 let BASIS = "http://localhost:8765";
 for (const a of process.argv.slice(2)) {
@@ -54,6 +57,7 @@ for (const a of process.argv.slice(2)) {
   else nurSpiele.push(a);
 }
 const CSS = opt.css ? fs.readFileSync(opt.css, "utf8") : "";
+const ZIEHUNGEN = Math.max(1, Number(opt.ziehungen) || 1);
 const PORT = Number(opt.port);
 const BROWSER = [
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -99,19 +103,30 @@ const MESSEN = (auftraege, css) => `
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?
             tastaturImBild: t ? t.getBoundingClientRect().bottom <= a.h + 1 : null,
-            // Grafiken der Aufgabe (H1 a): je [Breite, Höhe, Klasse, Massstab oder null]
+            // Grafiken der Aufgabe (H1 a): je [Breite, Höhe, Klasse, Massstab oder null, volle Breite]
             grafiken: (() => {
               const k = d.querySelector(".karte");
               if (!k) return [];
+              const stil = x => f.contentWindow.getComputedStyle(x);
               return [...k.querySelectorAll("svg[class], canvas[class], img[class]")]
                 .filter(x => !x.closest("button, .blase, .eule-zeile, .legende, .tipp-zeile, .kopf, .wahl, label") && !x.parentElement.closest("svg"))
-                .filter(x => f.contentWindow.getComputedStyle(x).display !== "none")
+                .filter(x => stil(x).display !== "none")
                 .map(x => {
                   const r = x.getBoundingClientRect();
-                  const eigen = x.viewBox?.baseVal?.width || x.naturalWidth || 0;
+                  // Massstab des gezeichneten Inhalts: beim svg der kleinere aus Breite und Höhe der viewBox — begrenzt
+                  // max-height die Höhe, bleibt die Box breit, der Inhalt wird aber kleiner (Auge-Entdecker, BW2 a)
+                  const vb = x.viewBox?.baseVal;
+                  const mass = vb?.width ? Math.min(r.width / vb.width, vb.height ? r.height / vb.height : Infinity)
+                    : x.naturalWidth ? r.width / x.naturalWidth : null;
+                  const inhaltBreite = vb?.width ? mass * vb.width : r.width;
+                  // Volle Breite: der Inhalt füllt die Breite seines Behälters — dann begrenzt die Breite, nicht die
+                  // Bildhöhe, und die Grafik gilt nicht als geschrumpft (Entscheid BW2 a, LERN_Session42)
+                  const p = x.parentElement, ps = stil(p);
+                  const platz = p.getBoundingClientRect().width - ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
+                    .reduce((s, n) => s + (parseFloat(ps[n]) || 0), 0);
                   // Schlüssel aus allen Klassen: .rose.klein ist bewusst klein, .rose nicht (Kompass)
                   return [Math.round(r.width), Math.round(r.height), x.tagName.toLowerCase() + "." + x.getAttribute("class").trim().split(/\s+/).sort().join("."),
-                    eigen ? Math.round(r.width / eigen * 1000) / 1000 : null];
+                    mass === null ? null : Math.round(mass * 1000) / 1000, inhaltBreite >= platz - 2];
                 });
             })(),
             // Die Aufgabe selbst: unterer Rand der Spielfläche ohne die Tipp-Zeile darunter
@@ -168,8 +183,9 @@ async function main() {
     const auftraege = [];
     for (const s of spiele.filter(s => !nurSpiele.length || nurSpiele.includes(s.id)))
       for (const stufe of stufen.filter(st => s.stufen.includes(st)))
-        for (const g of geraete) auftraege.push({ id: s.id, pfad: s.pfad, stufe, geraet: g, ...GERAETE[g] });
-    console.log(`Miss ${auftraege.length} Seiten (${geraete.join(", ")}; Stufen ${stufen.join(" ")})${CSS ? " mit " + opt.css : ""} …`);
+        for (const g of geraete)
+          for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: s.id, pfad: s.pfad, stufe, geraet: g, ziehung: z, ...GERAETE[g] });
+    console.log(`Miss ${auftraege.length / ZIEHUNGEN} Seiten je ${ZIEHUNGEN}-mal (${geraete.join(", ")}; Stufen ${stufen.join(" ")})${CSS ? " mit " + opt.css : ""} …`);
     await js(MESSEN(auftraege, CSS));
     let stand = 0;
     while (stand < auftraege.length) {
@@ -179,8 +195,8 @@ async function main() {
     }
     const erg = await js("return __bh.erg");
     console.log("\n");
-    auswerten(erg, geraete, stufen);
-    if (opt.json) fs.writeFileSync(opt.json, JSON.stringify(erg, null, 1));
+    auswerten(zusammenfassen(erg), geraete, stufen);
+    if (opt.json) fs.writeFileSync(opt.json, JSON.stringify(erg, null, 1)); // jede Ziehung einzeln
     if (erg.some(e => e.seitlich > 2)) process.exitCode = 1;
   } finally {
     try { ws?.close(); } catch { /* egal */ }
@@ -190,10 +206,37 @@ async function main() {
   }
 }
 
+/**
+ * Fasst die Ziehungen je Seite (Spiel, Stufe, Gerät) zusammen (BW1 a): Überläufe als höchster Wert, die Tastatur
+ * ausserhalb, sobald eine Ziehung sie dort hat, die Grafiken aller Ziehungen; dazu wie oft die Aufgabe selbst über den
+ * Rand ragt (aufgabeUeber von ziehungen). Ziehungen mit Fehler zählen nicht; scheitern alle, trägt die Seite den Fehler.
+ */
+function zusammenfassen(erg) {
+  const je = new Map();
+  for (const e of erg) {
+    const k = `${e.id}/${e.stufe}/${e.geraet}`;
+    if (!je.has(k)) je.set(k, []);
+    je.get(k).push(e);
+  }
+  return [...je.values()].map(alle => {
+    const gut = alle.filter(e => !e.fehler);
+    if (!gut.length) return { ...alle[0], ziehungen: 0, aufgabeUeber: 0 };
+    const max = f => Math.max(...gut.map(e => e[f] ?? 0));
+    const imBild = gut.filter(e => e.tastaturImBild !== null).map(e => e.tastaturImBild);
+    return {
+      ...gut[0], ueber: max("ueber"), seitlich: max("seitlich"), aufgabe: max("aufgabe"),
+      gesperrt: gut.some(e => e.gesperrt), tastatur: gut.some(e => e.tastatur),
+      tastaturImBild: imBild.length ? imBild.every(Boolean) : null,
+      grafiken: gut.flatMap(e => e.grafiken || []),
+      ziehungen: gut.length, aufgabeUeber: gut.filter(e => e.aufgabe > 2).length,
+    };
+  });
+}
+
 /** Die geschrumpfte Grafik einer Seite (H1 a) oder null; vergleich: Map "id/stufe/klasse" → kleinster Massstab auf VERGLEICH. */
 function geschrumpft(e, vergleich) {
-  for (const [w, h, klasse, mass] of e.grafiken || []) {
-    if (Math.min(w, h) >= KLEINSTE_GRAFIK) continue;
+  for (const [w, h, klasse, mass, voll] of e.grafiken || []) {
+    if (Math.min(w, h) >= KLEINSTE_GRAFIK || voll) continue;
     const soll = vergleich.get(`${e.id}/${e.stufe}/${klasse}`);
     if (soll === undefined || mass === null ? Math.min(w, h) < ZUSAMMENGEFALLEN : mass < soll / 2) return { w, h, klasse, mass, soll };
   }
@@ -232,6 +275,13 @@ function auswerten(erg, geraete, stufen) {
         (g.soll === undefined || g.mass === null ? " (ohne Vergleich)" : ` (Massstab ${g.mass}, ${VERGLEICH}: ${g.soll})`));
     }
     process.exitCode = 1;
+  }
+  // BH1 a zählt die Aufgabe selbst (ohne Tipp-Zeile): je Seite der höchste Wert und in wie vielen Ziehungen (BW1 a)
+  const aufgabeUeber = zaehlbar.filter(e => e.aufgabe > 2).sort((a, b) => b.aufgabe - a.aufgabe);
+  if (aufgabeUeber.length) {
+    console.log(`\nAufgabe selbst über dem Rand (ohne Tipp-Zeile; höchster Wert, in wie vielen von ${ZIEHUNGEN} Ziehungen):`);
+    for (const e of aufgabeUeber)
+      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.aufgabe).padStart(4)} px  ${e.aufgabeUeber} von ${e.ziehungen}`);
   }
   const je = new Map();
   for (const e of zaehlbar.filter(e => e.ueber > 2 || e.seitlich > 2)) {

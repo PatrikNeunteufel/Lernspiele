@@ -10,7 +10,8 @@ Alle 175 Spiele, sechs Stufen, die vier Geräte von BH1 a (Handy 375×812, Table
 1366×768; nicht die sichtbare Fläche von GR1 a) — 4200 Seiten, mit dem Werkzeug nach LERN_Session41 (Handy und Tablet
 ohne Tastenmarken). Die 30 auffälligen Spiele zweimal nachgemessen. Das Werkzeug misst nur die **erste** Aufgabe jeder
 Stufe; welche das ist, entscheidet der Zufall. Darum unten getrennt: über den Rand in allen drei Läufen, und nur bei
-einer Aufgabenart (in einem oder zwei Läufen). Zahlen in px, höchster Wert der drei Läufe.
+einer Aufgabenart (in einem oder zwei Läufen). Zahlen in px, höchster Wert der drei Läufe. Seit BW1 a misst das
+Werkzeug jede Seite mehrmals (`--ziehungen`, Vorgabe 5) — die Liste ist mit einer Ziehung je Lauf entstanden.
 
 **In allen drei Läufen über dem Rand:**
 
@@ -22,6 +23,11 @@ einer Aufgabenart (in einem oder zwei Läufen). Zahlen in px, höchster Wert der
 | fahrplan-rechner | s4 | Handy 8 | — |
 | koordinaten-schatz | s2 | Laptop 7 | (s3, s4 bis 8 in ein oder zwei Läufen) |
 | son-lauscher | s6 | Handy 5 | — |
+
+weather-report s5: *erledigt 2026-11-14 (LERN_Session42)* — breit und quer Plan neben Bild, Knopf und Frage, bis 820 px
+Bildhöhe Plan enger und Bild mit „nochmal“ in einer Zeile; mit gewöhnlicher Sprechblase Handy 45 px Luft, 1024×768 und
+Laptop 165 px. `bildhoehe.js` meldet auf dem Handy noch 19 px: die Meldung „Stimme hat nicht gesprochen“ des Messbrowsers
+(rund 64 px höher als die gewöhnliche Blase).
 
 **Nur bei einer Aufgabenart** (in den anderen Läufen passt dieselbe Stufe):
 kulturen-koffer quer s5/s6 443, s4 298, Handy s5 238, Tablet s4/s6 134 · plan-leser Handy s6 333, s5 288, s1–s3 bis 53,
@@ -42,7 +48,8 @@ bei hundertertafel ragt in allen Stufen bei 1024×768 nur die Tipp-Zeile 54 px �
 **Grafik geschrumpft (H1 a):** 15 Handy-Seiten gemeldet (Runden-Rutsche, Dezimal-Rutsche, Zehntel-Lupe,
 Zahlenstrahl-Pfeil, Zeitstrahl-Sortierer, Rhythmus-Leser) — alle mit `width: 100%`, auf dem Handy also nach der
 **Breite** kleiner, nicht nach der Bildhöhe. Das Werkzeug vergleicht den Massstab nur mit 1024×768 und hält das für
-Schrumpfen (Fehlmeldung; Session 28 mass das Handy nicht).
+Schrumpfen (Fehlmeldung; Session 28 mass das Handy nicht). Behoben mit BW2 a: volle Breite gilt nicht als
+geschrumpft, der Massstab ist der des gezeichneten Inhalts (rahmen.md 20).
 
 **Gegenüber Punkt 3 unten (LERN_Session13):** punkte-blitz, laerm-waechter, stromkreis-bauer passen jetzt;
 weather-report schlechter (Handy 79 → 123, quer und Laptop 74 → 134); netz-falter Laptop 12 → bis 70 (eine Aufgabenart);
@@ -95,5 +102,6 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    Zifferntastatur nicht ganz im Bild); mit Notizen auch s2 (39–77 px). Das Messwerkzeug sieht es nicht, weil es nur
    den ersten Schritt misst (Befund Notiz-Paket A). Zu entscheiden: Notizen auf dem Handy in s2 lassen; den
    Ergebnis-Schritt selbst verdichten.
-7. **Messwerkzeug:** eine Option „alle Aufgabenarten“ oder mehrere Ziehungen je Stufe (Fälle wie energie-wandler bis
+7. **Messwerkzeug:** *erledigt 2026-11-14 (LERN_Session42, BW1 a: `--ziehungen`, Vorgabe 5; Hörspiele weiter offen).*
+   Eine Option „alle Aufgabenarten“ oder mehrere Ziehungen je Stufe (Fälle wie energie-wandler bis
    397 px zeigte erst eine Stichprobe); Hörspiele messen ohne Stimme (Eule meldet den Sprechfehler, die Blase wird länger).

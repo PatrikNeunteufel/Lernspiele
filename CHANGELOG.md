@@ -2472,3 +2472,23 @@
   (kulturen-koffer bis 443 px, sachaufgaben-kompass, netz-falter, diagramm-detektiv, hello-dialog …). Die 15 Handy-Seiten
   „Grafik geschrumpft“ sind Fehlmeldungen des Werkzeugs (Grafiken nach der Breite, nicht nach der Höhe). Liste in
   `docs/eulenpfad/bildhoehe_offen.md`, Abschnitt „Messung LERN_Session42“.
+- **`tools/bildhoehe.js` — mehrere Ziehungen (Entscheid BW1 a):** `--ziehungen=N` (Vorgabe 5) lädt jede Seite N-mal,
+  jedes Mal mit einer neuen ersten Aufgabe; gemeldet wird je Seite der höchste Wert, neu die Liste „Aufgabe selbst über
+  dem Rand“ mit der Zahl der Ziehungen (vorher hing das Ergebnis an der zufälligen Aufgabenart). Die JSON-Datei enthält
+  jede Ziehung einzeln (Feld `ziehung`).
+- **`tools/bildhoehe.js` — volle Breite ist nicht geschrumpft (Entscheid BW2 a):** Füllt der gezeichnete Inhalt einer
+  Grafik die Breite ihres Behälters, begrenzt die Breite, nicht die Bildhöhe — keine Meldung mehr (vorher 15 Handy-Seiten
+  mit Zahlenstrahlen). Der Massstab ist neu der des gezeichneten Inhalts (beim svg der kleinere aus Breite und Höhe der
+  viewBox), damit eine Grafik mit `max-height` auffällt, deren Box breit bleibt (Auge-Entdecker, Quader-Volumen,
+  Flächen-Pixel). Geprüft: die sechs Spiele der Fehlmeldungen und drei mit `max-height` auf dem Handy, drei Ziehungen,
+  „Grafik geschrumpft: 0 Seiten“; Gegenprobe mit `--css` (Runden-Rutsche, Zehntel-Lupe auf dem Handy 30 px hoch) meldet
+  alle vier Seiten, Code 1; niedrige Fenster `mix`, `handy-quer` an den acht Spielen aus LERN_Session28: keine
+  geschrumpfte Grafik. rahmen.md 20.
+- **Weather-Report (weather-report), Stufe 5 ganz im Bild (LERN-55, BH3 a):** Der Plan zur Wegbeschreibung (rund 420 px)
+  stand unter Bild, Knopf und Frage und ragte auf Handy, 1024 × 768 und Laptop über 100 px unter den Rand. Jetzt stehen
+  Bild, „nochmal“ und Frage in einer Hülle (`.wr-links`, 💡 über `data-tipp-ziel` bei der Frage), breit und quer der Plan
+  rechts daneben (`.wr-weg`); bis 820 px Bildhöhe Plan enger (Häuser 46 statt 54 px) und Bild mit „nochmal“ in einer
+  Zeile. Angesehen mit gewöhnlicher Sprechblase: Handy 375 × 812 45 px Luft (hell und dunkel), Tablet 768 × 1024 90 px,
+  1024 × 768 und 1366 × 768 165 px. `bildhoehe.js` (drei Ziehungen) meldet auf dem Handy noch 19 px, die Stimmen-Meldung
+  des Messbrowsers. Tests: Eulenpfad weather-report „Keine Fehler.“, Prüfansicht weather-report „Keine Fehler.“, Skripte
+  „Keine Fehler.“.

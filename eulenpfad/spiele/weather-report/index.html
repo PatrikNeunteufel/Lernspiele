@@ -37,6 +37,23 @@
   .wr-haus.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .wr-haus.richtig { background: var(--gut-hell); }
   .wr-start { background: var(--deko-7); display: flex; align-items: center; justify-content: center; font-size: 26px; min-height: 44px; }
+  /* Ganze Aufgabe im Bild (BH3 a, LERN_Session42; vorher ragte der Plan in Stufe 5 auf Handy, 1024 × 768 und Laptop
+     über 100 px unter den Rand): breit und quer steht er rechts neben Bild, Knopf und Frage, bis 820 px Bildhöhe enger */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .wr-weg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 24px; align-items: center; max-width: 920px; margin: 0 auto; }
+    .wr-weg .wr-plan { margin: 0; width: 100%; }
+  }
+  @media (max-height: 820px) {
+    /* Bild und „nochmal“ in einer Zeile, Frage darunter */
+    .wr-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 14px; }
+    .wr-links .wr-radio, .wr-links .wr-hoer { margin: 0 0 6px; }
+    .wr-links .frage, .wr-links .wr-de { flex-basis: 100%; }
+    .wr-haus, .wr-leer { min-height: 46px; }
+    .wr-haus { margin: 4px 8px; }
+    .wr-haus .bild { font-size: 22px; }
+    .wr-strasse.quer { min-height: 28px; }
+    .wr-start { min-height: 36px; }
+  }
 </style>
 </head>
 <body>
@@ -492,7 +509,10 @@ const SPIEL = {
         if (ctx.vorbei()) { fertig = true; zielKnopf.classList.add("richtig"); }
       });
       const zielKnopf = [...plan.querySelectorAll(".wr-haus")].find(x => x.getAttribute("aria-label") === a.belegung[a.richtig][0]);
-      f.append(plan);
+      // Bild, Knopf und Frage in einer Hülle, breit und quer der Plan daneben (BH3 a); 💡 bleibt bei der Frage
+      const links = el("div", { class: "wr-links" }, ...f.querySelectorAll(":scope > .wr-radio, :scope > .wr-hoer, :scope > .frage, :scope > .wr-de"));
+      links.querySelector(".frage").setAttribute("data-tipp-ziel", "");
+      f.append(el("div", { class: "wr-weg" }, links, plan));
       return;
     }
 

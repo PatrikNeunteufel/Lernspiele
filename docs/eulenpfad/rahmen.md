@@ -1095,13 +1095,18 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   Stelle ohne Untergrenze ab.
 - **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Server nötig; Chrome ohne Fenster, Messkind mit allem
   freigegeben). Handy und Tablet misst es ohne Tastenmarken und ohne deren Platz (`marke-platz`, Abschnitt 19), Laptop
-  und Desktop mit (Feld `maus` der Geräte; LERN_Session41). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
+  und Desktop mit (Feld `maus` der Geräte; LERN_Session41). Jede Seite lädt es `--ziehungen`-mal (Vorgabe 5,
+  Entscheid BW1 a, LERN_Session42), jedes Mal mit einer neuen ersten Aufgabe, und meldet den höchsten Wert; die Liste
+  „Aufgabe selbst über dem Rand“ nennt dazu, in wie vielen Ziehungen. Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
   selbst über dem Rand (ohne Tipp-Zeile), mit der
   Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). Dazu die Grafiken der Aufgabe (svg, canvas, img mit
   Klasse, nicht in Knöpfen, Eule mit Blase, Legende, Kopf): Geschrumpft heisst eine, deren kürzere Seite unter 100 px
   liegt und deren Massstab (gezeichnete Breite je Einheit der viewBox, bei img je Bildpixel) unter der Hälfte des
   kleinsten Massstabs derselben Klasse bei 1024 × 768 (fehlt der Vergleich, unter 40 px); sie wird aufgelistet
-  (Code 1, H1 a). 1024 × 768 wird dafür immer mitgemessen. Der Massstab hängt nicht vom Inhalt ab: Eine lange
+  (Code 1, H1 a). Massstab ist der des gezeichneten Inhalts (beim svg der kleinere aus Breite und Höhe der viewBox, so
+  fällt auch eine Grafik mit `max-height` auf, deren Box breit bleibt). Füllt der Inhalt die ganze Breite seines
+  Behälters, gilt die Grafik nicht als geschrumpft: dort begrenzt die Breite, nicht die Bildhöhe (Entscheid BW2 a,
+  LERN_Session42; vorher meldete das Handy jeden breiten Zahlenstrahl). 1024 × 768 wird dafür immer mitgemessen. Der Massstab hängt nicht vom Inhalt ab: Eine lange
   Notenzeile ist flach, aber nicht geschrumpft; Grafiken, die schon dort klein sind (Nordpfeil), bleiben ruhig.
   Die niedrigen Fenster `--geraete=mix,handy-quer` (1024 × 460, 800 × 450) müssen nicht ins Bild passen, aber ohne
   zu kleine Grafik bleiben. `--css=datei` probiert CSS aus, ohne den Code zu ändern.
