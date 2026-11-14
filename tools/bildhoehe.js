@@ -14,21 +14,24 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
+// maus: Gerät mit Maus — dort zeigt der Rahmen die Tastenmarken und gibt Knöpfen Platz dafür (TM1 a, spiel.js ktPlatz).
+// Chrome ohne Fenster meldet für alle Rahmen eine Maus; auf Geräten ohne nimmt die Messung Marken und Platz wieder weg
+// (LERN_Session41: sonst zählte das Handy bis 58 px Überlauf, den es dort nicht gibt).
 const GERAETE = {
   handy: { w: 375, h: 812 },
   tablet: { w: 768, h: 1024 },
   quer: { w: 1024, h: 768 },   // Tablet quer
-  desktop: { w: 1366, h: 768 }, // verbreiteter Laptop
+  desktop: { w: 1366, h: 768, maus: true }, // verbreiteter Laptop
   // Sichtbare Fläche im Browser (Adressleiste, Lesezeichen, Taskleiste abgezogen; Hinweis Patrik, LERN_Session13):
   "handy-sicht": { w: 375, h: 660 },    // Handy mit Safari-/Chrome-Leisten
   "tablet-sicht": { w: 768, h: 950 },   // Tablet hoch mit Leisten
   "quer-sicht": { w: 1024, h: 690 },    // Tablet quer mit Leisten
-  "laptop-sicht": { w: 1366, h: 650 },  // Laptop 1366 × 768 mit Browserleisten
-  "klein-sicht": { w: 1000, h: 500 },   // Laptop mit 200 % Skalierung (Gerät Patrik)
-  "klein-voll": { w: 1000, h: 600 },    // dasselbe im Vollbild (ohne Browserleisten)
+  "laptop-sicht": { w: 1366, h: 650, maus: true },  // Laptop 1366 × 768 mit Browserleisten
+  "klein-sicht": { w: 1000, h: 500, maus: true },   // Laptop mit 200 % Skalierung (Gerät Patrik)
+  "klein-voll": { w: 1000, h: 600, maus: true },    // dasselbe im Vollbild (ohne Browserleisten)
   // Niedrige Fenster (Entscheid H1 a, LERN_Session28): hier muss nicht alles ins Bild passen, aber keine Grafik darf
   // zusammenschrumpfen (dort wurde sie null, wo die Untergrenze fehlte).
-  mix: { w: 1024, h: 460 },             // Spielfenster im Zufallsmix, kleinste Höhe (mix.css)
+  mix: { w: 1024, h: 460, maus: true }, // Spielfenster im Zufallsmix, kleinste Höhe (mix.css)
   "handy-quer": { w: 800, h: 450 },     // Handy quer mit Leisten
 };
 // Geschrumpfte Grafik (H1 a). Grafik = svg, canvas oder img mit eigener Klasse in der Spielfläche, nicht in Knöpfen, Eule
@@ -87,6 +90,11 @@ const MESSEN = (auftraege, css) => `
       setTimeout(() => {
         try {
           const d = f.contentDocument, se = d.scrollingElement, t = d.querySelector(".tastatur");
+          // Gerät ohne Maus: keine Tastenmarken, kein Platz dafür (siehe GERAETE, maus)
+          if (!a.maus) {
+            d.documentElement.classList.remove("mit-tasten");
+            d.querySelectorAll(".marke-platz").forEach(k => k.classList.remove("marke-platz"));
+          }
           __bh.erg.push({ ...a, ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?

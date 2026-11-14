@@ -1094,7 +1094,9 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   dem Kommentar „ohne Untergrenze: <Grund>“ im Regelblock (feste Fenster). `tools/pruefe_skripte.js` weist jede
   Stelle ohne Untergrenze ab.
 - **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Server nötig; Chrome ohne Fenster, Messkind mit allem
-  freigegeben). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe selbst über dem Rand (ohne Tipp-Zeile), mit der
+  freigegeben). Handy und Tablet misst es ohne Tastenmarken und ohne deren Platz (`marke-platz`, Abschnitt 19), Laptop
+  und Desktop mit (Feld `maus` der Geräte; LERN_Session41). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
+  selbst über dem Rand (ohne Tipp-Zeile), mit der
   Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). Dazu die Grafiken der Aufgabe (svg, canvas, img mit
   Klasse, nicht in Knöpfen, Eule mit Blase, Legende, Kopf): Geschrumpft heisst eine, deren kürzere Seite unter 100 px
   liegt und deren Massstab (gezeichnete Breite je Einheit der viewBox, bei img je Bildpixel) unter der Hälfte des

@@ -11,6 +11,13 @@
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 6px; }
   .strom-zusatz { text-align: center; font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; color: var(--text-leise); margin: 0 0 6px; }
   .schaltbild { display: block; width: min(440px, 100%); margin: 0 auto 10px; }
+  /* Ganze Aufgabe im Bild (BH3 a, LERN-55; LERN_Session41): Antworten neben dem Schaltbild, wo die Breite reicht, sonst
+     darunter. „Warum brennt die Lampe nicht?“ ragte untereinander auf 1024 × 768 rund 90 px unter den Rand. */
+  .strom-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 24px; }
+  .strom-zeile .schaltbild { flex: 0 1 440px; margin: 0; }
+  /* min-width 0: das Antwortraster verlangt sonst bis über 450 px und schob die Antworten unter das Bild */
+  .strom-seite { flex: 1 1 320px; max-width: 460px; min-width: 0; }
+  .strom-seite .wahl { margin: 0; }
   .schaltbild .draht { fill: none; stroke: var(--text); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
   .schaltbild .bruecke { fill: none; stroke: var(--deko-3); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
   .schaltbild .deckel { fill: var(--karte); }
@@ -561,13 +568,14 @@ LS.spiel({
     const zusatz = zusatzText(s, g);
     if (zusatz) ctx.flaeche.append(el("div", { class: "strom-zusatz auftrag", text: zusatz }));
     const bild = schaltbild(s, g);
-    ctx.flaeche.append(bild);
+    const seite = el("div", { class: "strom-seite" });
+    ctx.flaeche.append(el("div", { class: "strom-zeile" }, bild, seite));
     const hinweis = a.art === "brennt" && s.kurz ? HINWEIS.kurz : HINWEIS[a.art];
     const inhalt = a.art === "warum" ? k => GRUENDE[k] : a.art === "welche" ? k => k : k => ANTWORT[a.art][k];
-    LS.auswahl(ctx, {
+    seite.append(LS.auswahl(ctx, {
       optionen: a.optionen, richtig: a.richtig, inhalt, hinweis, loesung, breite: a.art === "warum" ? 260 : 150,
       beiRichtig: () => zeigeLicht(bild, e.brennt),
-    });
+    }));
     if (ctx.nr === 0) ctx.sag("Schau das Schaltbild genau an. Wo kann der Strom fliessen?");
   },
 });

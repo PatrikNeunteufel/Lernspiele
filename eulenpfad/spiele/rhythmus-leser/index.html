@@ -9,7 +9,11 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .notenwahl .wahl-knopf { padding: 2px 4px; }
-  .notenwahl .noten-zeile { max-width: 120px; }
+  /* Höhe auch am Computer begrenzt (LERN-55, LERN_Session41): sonst 170 px hohe Karten, mit Platz für die Tastenmarke
+     (TM1 a) bis 30 px unter dem Rand von 1024 × 768 und 1366 × 768 */
+  .notenwahl .noten-zeile { max-width: 120px; max-height: 110px; }
+  /* Takt mit wenigen Noten: dieselbe Grenze, damit die Noten in Frage und Antworten gleich gross sind */
+  .notenblatt .noten-zeile { max-height: 110px; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
   /* Ganze Aufgabe im Bild (BH3 a): Die Notenkarten zur Wahl wachsen auf dem Handy sonst auf 170 px Höhe. */
   @media (max-width: 560px) { .notenwahl .noten-zeile { max-height: 96px; } }

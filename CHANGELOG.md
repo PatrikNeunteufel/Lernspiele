@@ -2435,3 +2435,19 @@
   Zeichen und Rahmen lassen das Tippen durch (`pointer-events: none`); geprüft: in allen 36 Feldern trifft ein Tipp auf
   das Zeichen das Feld, hell und dunkel angesehen. Dazu „Tippe auf dem Plan auf der Weiher“ → „auf den Weiher“
   (Akkusativ für männliche Dinge).
+- **Ganze Aufgabe im Bild (LERN-55, BH3 a) — Stromkreis-Bauer (stromkreis-bauer) und Rhythmus-Leser (rhythmus-leser):**
+  Stromkreis-Bauer: Antworten neben dem Schaltbild, wo die Breite reicht (`.strom-zeile`, `.strom-seite` mit
+  `min-width: 0` — das Antwortraster verlangte sonst über 450 px und brach um); „Warum brennt die Lampe nicht?“ ragte
+  untereinander 93 px unter den Rand von 1024 × 768. Rhythmus-Leser: Noten in den Antwortkarten und im Takt am Computer
+  höchstens 110 px hoch (vorher Karten 209 px, die Antwort-Noten 170 px), Frage und Antworten gleich gross. Ergebnis
+  `tools/bildhoehe.js`, alle Stufen: Tablet, 1024 × 768 und 1366 × 768 nichts mehr über den Rand (vorher bis 139 px);
+  Handy wie vorher oder besser (vorher bis 74 px, jetzt bis 58 px — „Warum“ mit Antworten unter dem Bild; verglichen mit
+  dem alten Stil über `--css`). Tests: Eulenpfad stromkreis-bauer rhythmus-leser „Keine Fehler.“, Prüfansicht
+  stromkreis-bauer „Keine Fehler.“, Feier „2 Spiele, 72 Bilder, keine Fehler.“, Kontrast hell und dunkel „Kein Text unter
+  der Untergrenze.“, Skripte „Keine Fehler.“.
+- **`tools/bildhoehe.js` misst Handy und Tablet ohne Tastenmarken:** Chrome ohne Fenster meldet für alle Rahmen eine Maus,
+  darum bekamen seit TM1 a auch Handy-Rahmen Knöpfe mit Platz für Marken, die es dort nicht gibt — die „Warum“-Aufgabe
+  des Stromkreis-Bauers zählte so 58 px Überlauf, als echtes Handy (Berührung, ohne Maus) gemessen passt sie mit 18 px
+  Luft. Neu Feld `maus` je Gerät (Laptop, Desktop, Mix); ohne Maus nimmt die Messung Marken und `marke-platz` weg.
+  Stromkreis-Bauer und Rhythmus-Leser damit: Aufgabe auf keinem Gerät mehr über dem Rand, Handy höchstens 20 px
+  (Tipp-Zeile). rahmen.md 20.
