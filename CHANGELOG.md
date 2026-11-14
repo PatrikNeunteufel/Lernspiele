@@ -2378,3 +2378,5 @@
   (Annahme). Endlos, nicht im Mix, Abschluss-Animation mit Käfigrändern. Baustein: `kaefigeAus`, Kombis je Käfig,
   Schritt „kaefig“, Widersprüche im Käfig, Ränder und Ergebnis im Raster; `mitTechnikLoesen` setzt je Durchgang alle
   Felder mit nur einer Zahl (gleiches Ergebnis, schneller).
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session40_2026-11-13.md`, Handover nachgeführt (Haltepunkt der Nacht
+  aufgelöst; Sudoku-Familie bis auf das Duell, LZ1 a, Prüfung Punkt 10; nächster Schritt Sudoku-Duell und Push).

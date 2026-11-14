@@ -1,27 +1,22 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 2026-11-14 01:37 — LERN_Session40_2026-11-13_push-master (aufgenommen 2026-11-14)
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** Spieltest der Sudoku-Spiele (Hintergrund, abgebrochen kurz vor dem
-  Ende). Fertig und ohne Fehler: alle 24 Stufen von Vergleichs-, Gebiets-, Bilder- und Zahlen-Sudoku (je 3000 Rätsel
-  fachlich), Endlos für Zahlen-, Bilder- und Gebiets-Sudoku; nur Hinweis „Einzahl?“ in vergleichs-sudoku s2 („Die 2
-  muss kleiner sein als die 1 daneben.“, Satz stimmt). Es fehlen Endlos und Mix des Vergleichs-Sudokus: neu starten mit
-  `node tools/pruefe_spiele.js vergleichs-sudoku` (rund 10 min). Sonst lief nichts; der Server auf 8765 war nicht von
-  dieser Sitzung.
-- **Stand im Arbeitsbaum (nichts committet seit `baf347f` Bilder-Sudoku):** Gebiets-Sudoku (gebiets-sudoku) und
-  Vergleichs-Sudoku (vergleichs-sudoku) fertig; Entscheid LZ1 a (schneller laden): Rahmen des Stils „hand“ erst im
-  Bild (spiel.js), Themenblöcke mit content-visibility (start.css), feier.js auf 173 Spielseiten entfernt und im
-  Leerlauf nachgeladen (LS.ladeFeier, .feier-platz, orte.js über globalThis.FEIER_KARTEN_DATEN, skripte() in
-  tools/listen_fingerabdruck.js). Geprüft: Skripte „Keine Fehler.“, Feier „173 Spiele, 6228 Bilder, keine Fehler.“,
-  Eulenpfad schweiz-karte kompass zahlenmauer „Keine Fehler.“, Bildhöhe der neuen Sudokus „Alle Aufgaben passen ins
-  Bild.“, im Browser Schlussbild, Konfetti ohne feier.js, Vorschau. Doku (rahmen.md 24, 26), CHANGELOG nachgeführt.
-  `eulenpfad/spiele/gemeinsam/pruefstand.js` ist Patriks Änderung aus dem Prüfen, nicht Teil dieses Commits.
-- **Weiter mit:** (1) `node tools/pruefe_spiele.js vergleichs-sudoku`; (2) bei „Keine Fehler.“ Patrik die
-  Commit-Message geben (Entwurf im Gespräch, Testzahlen dann nachführen); (3) Käfig-Sudoku und Sudoku-Duell (LERN-56);
-  (4) Push auf master (Pages) mit vollem Eulenpfad-Lauf nur auf Patriks Entscheid.
-
 ## Stand
+**2026-11-14, nach LERN_Session40** ([Report](report/LERN_Session40_2026-11-13.md)):
+- **Kern:** unverändert 1.45.1.
+- **Sudoku-Familie (LERN-56):** Baustein `spiele/gemeinsam/sudoku.js` (rahmen.md 26) und fünf neue Spiele, neu und
+  ungeprüft: Zahlen-, Bilder-, Gebiets-, Vergleichs-, Käfig-Sudoku; Thema „Logikrätsel“; Entscheide ZM1 b (nicht im
+  Mix), KK1 a (Käfig ohne 9 × 9). Offen: Sudoku-Duell.
+- **Laden (LZ1 a):** Rahmen erst im Bild, Themenblöcke mit content-visibility, `feier.js` auf den Spielseiten erst im
+  Leerlauf (`LS.ladeFeier`); Tab Spiele auf einem gedrosselten „Tablet“ bedienbar nach 1,2 bis 2,4 s statt 1,8 bis 4,3 s.
+- **Prüfansicht:** graue Zellen behoben (`--text-leise`), 192 Haken nachgetragen; neue Prüfung Punkt 10 in
+  `tools/pruefe_skripte.js` (undefinierte CSS-Variablen).
+- **Tests:** Skripte „Keine Fehler.“, Feier „174 Spiele, 6264 Bilder, keine Fehler.“, Eulenpfad je Sudoku-Spiel und
+  Stichprobe schweiz-karte kompass zahlenmauer „Keine Fehler.“ — **letzter voller Lauf weiter auf `5cc948b`**. Commits
+  bis `1f4954e` von Patrik, acht nicht gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit:** (1) Sudoku-Duell; (2) Push, voller Eulenpfad-Lauf vorher auf Patriks Entscheid (alle Spielseiten und
+  das Schlussbild geändert); (3) neue Sudokus ansehen und freigeben (Patrik); (4) Checkliste neu erzeugen, sobald
+  `pruefstand.js` committet ist; (5) Hook-Kandidat `sed -i` auf CRLF.
+
 **2026-11-13, nach LERN_Session39** ([Report](report/LERN_Session39_2026-11-13.md)):
 - **Kern:** unverändert 1.45.1.
 - **Befunde aus den Prüfansichten:** alle bearbeitet ([Befund-Datei](pruefung/befunde_LERN_Session38.md), Durchgänge
