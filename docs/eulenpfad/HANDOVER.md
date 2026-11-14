@@ -1,6 +1,23 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-14, nach LERN_Session42** ([Report](report/LERN_Session42_2026-11-14.md)):
+- **Kern:** unverändert 1.46.0.
+- **SVG-Flächen:** Schweiz-Karte — gefärbtes Gebiet nach vorn (Rand lag unter den Nachbarn); die übrigen sechs Spiele
+  ohne Befund.
+- **Bildhöhe (LERN-55):** alle Spiele neu gemessen ([Liste](bildhoehe_offen.md), Abschnitt „Messung LERN_Session42“);
+  `tools/bildhoehe.js` mit Ziehungen (BW1 a) und ohne Fehlmeldung bei voller Breite (BW2 a). Weather-Report s5 und
+  Kulturen-Koffer ganz im Bild; Ursache beim Kulturen-Koffer: Zeichnungen mit eigener Klasse ohne Grössenregel
+  (`stil.css` jetzt `.gezeichnet`, betraf auch die Erdzeit-Leiter).
+- **Tests:** Skripte „Keine Fehler.“; Eulenpfad schweiz-karte, weather-report, kulturen-koffer, erdzeit-leiter „Keine
+  Fehler.“; Prüfansicht weather-report, kulturen-koffer „Keine Fehler.“ — **letzter voller Lauf weiter auf `5cc948b`**.
+  Gepusht bis `e338db6`; drei Commits (`cb33d3f` bis `8561244`) nicht gepusht; `.gezeichnet` und dieser Abschluss noch zu
+  committen.
+- **Weiter mit:** (1) volle Bildhöhen-Messung mit fünf Ziehungen (rund 2,5 h) oder zuerst Sachaufgaben-Kompass,
+  Netz-Falter, Diagramm-Detektiv, Hello-Dialog, Fledermaus-Forscher; (2) Push, voller Eulenpfad-Lauf vorher auf Patriks
+  Entscheid (`stil.css` geändert); (3) Werkzeug: Stimme im Messbrowser ersetzen, Vorgabehöhe je Breite in
+  `bilder_aufnehmen.js`; (4) Sudokus ansehen und freigeben (Patrik).
+
 **2026-11-14, nach LERN_Session41** ([Report](report/LERN_Session41_2026-11-14.md)):
 - **Kern:** 1.46.0 (Suchfeld zeichnet nach dem Bild, einmal für mehrere Eingaben).
 - **Sudoku-Familie (LERN-56) vollständig:** Sudoku-Duell gebaut (DU1 a, DU2 a), Thema Strategie; alle sechs neu und
@@ -626,7 +643,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
 | LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |
-| LERN-55 | Ganze Aufgabe im Bild auf der sichtbaren Fläche (GR1 a); GR1 b (1000 × 500 ohne Vollbild) zurückgestellt | in Arbeit seit 2026-11-04 (LERN_Session13); BH1–BH3 umgesetzt, GR1 a offen | bildhoehe_offen.md; rahmen.md 20 |
+| LERN-55 | Ganze Aufgabe im Bild auf der sichtbaren Fläche (GR1 a); GR1 b (1000 × 500 ohne Vollbild) zurückgestellt | in Arbeit seit 2026-11-04 (LERN_Session13); BH1–BH3 umgesetzt, Behebung je Spiel nach der Messung LERN_Session42, GR1 a offen | bildhoehe_offen.md; rahmen.md 20 |
 | LERN-56 | Sudoku-Familie: Bilder-, Zahlen-, Vergleichs-, Käfig-, Gebiets-Sudoku, Sudoku-Duell; Thema Logikrätsel (SU1–SU3 a) | erledigt 2026-11-14 (LERN_Session41, Sudoku-Duell; Spiele neu und ungeprüft) | spielideen/logikraetsel.md; rahmen.md 26; Report LERN_Session13, Plan 2 |
 | LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
 | LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |

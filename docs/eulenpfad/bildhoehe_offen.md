@@ -29,6 +29,11 @@ Bildhöhe Plan enger und Bild mit „nochmal“ in einer Zeile; mit gewöhnliche
 Laptop 165 px. `bildhoehe.js` meldet auf dem Handy noch 19 px: die Meldung „Stimme hat nicht gesprochen“ des Messbrowsers
 (rund 64 px höher als die gewöhnliche Blase).
 
+kulturen-koffer: *erledigt 2026-11-14 (LERN_Session42)* — Ursache war keine Höhe des Spiels: Zeichnungen der
+Bildersammlung mit eigener Klasse (`LS.bild(b, "kk-bild")`) bekamen die Grössenregel nicht und wurden so breit wie die
+Karte (bis 700 px hoch; „Woher wissen wir das?“ und „Gab es das schon?“). Regel in `stil.css` an `.gezeichnet`; danach
+acht Ziehungen je Stufe und Gerät: nirgends mehr über dem Rand. Dieselbe Regel betraf die Erdzeit-Leiter (`ez-bild`).
+
 **Nur bei einer Aufgabenart** (in den anderen Läufen passt dieselbe Stufe):
 kulturen-koffer quer s5/s6 443, s4 298, Handy s5 238, Tablet s4/s6 134 · plan-leser Handy s6 333, s5 288, s1–s3 bis 53,
 Laptop s6 56 (s5/s6 Weg beschreiben: Ausnahme Punkt 4) · diagramm-wahl Handy s5 473, s6 119, s1 32 (s5 Tabelle:

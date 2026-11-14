@@ -2492,3 +2492,17 @@
   1024 × 768 und 1366 × 768 165 px. `bildhoehe.js` (drei Ziehungen) meldet auf dem Handy noch 19 px, die Stimmen-Meldung
   des Messbrowsers. Tests: Eulenpfad weather-report „Keine Fehler.“, Prüfansicht weather-report „Keine Fehler.“, Skripte
   „Keine Fehler.“.
+- **Zeichnungen mit eigener Klasse — Kulturen-Koffer (kulturen-koffer), Erdzeit-Leiter (erdzeit-leiter):** Die
+  Grössenregel für Zeichnungen der Bildersammlung hing an `.bild.gezeichnet`; `LS.bild(b, "kk-bild")` setzt aber nur
+  `kk-bild gezeichnet`, und das svg wurde so breit wie die Karte. Im Kulturen-Koffer war die Karte bei „Woher wissen wir
+  das?“ und „Gab es das damals schon?“ bis 711 px hoch, die Aufgabe ragte bis 443 px unter den Rand (LERN-55). Jetzt in
+  `stil.css` an `.gezeichnet` (setzt `LS.bild` immer), dazu `width: fit-content` — sonst zog sich die Bildkachel im
+  Dunkelmodus als Balken über die Karte; mittig setzen die beiden Spiele selbst (`margin-inline: auto`, allgemein schöbe
+  es das Bild in Knopfzeilen in die Mitte). Gemessen mit acht Ziehungen je Stufe und Gerät: Kulturen-Koffer nirgends mehr
+  über dem Rand (vorher Handy bis 238, Tablet 279, 1024 × 768 und Laptop 443 px). Angesehen: Zeichnung in beiden Spielen
+  hell und dunkel, 375 und 1024 px; Zeichnungen in Knöpfen von Energie-Wandler, Instrumente, Kakao-Weg und Tier-Sortierer
+  hell und dunkel — am Platz wie vorher. Tests: Eulenpfad kulturen-koffer erdzeit-leiter „Keine Fehler.“, Prüfansicht
+  kulturen-koffer „Keine Fehler.“, Skripte „Keine Fehler.“.
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session42_2026-11-14.md`, Handover nachgeführt (SVG-Flächen geprüft,
+  Bildhöhe neu gemessen, BW1 a, BW2 a, Weather-Report und Kulturen-Koffer im Bild; nächster Schritt volle Messung mit fünf
+  Ziehungen oder die nächsten Spiele der Liste).
