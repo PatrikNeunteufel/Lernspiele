@@ -201,10 +201,17 @@ LS.spiel({
     if (p.art === "erkennen") svg.classList.add("mit-wahl");
     const flaechen = new Map();
     let fertig = false;
+    // Ein gefärbtes Gebiet kommt nach vorn, hinter das letzte Gebiet: sonst decken später gezeichnete Nachbarn seinen
+    // Rand zu (LERN_Session42: der grüne Rand war zur Hälfte grau). Kein Gebiet umschliesst ein anderes ohne Loch
+    // (geprüft für Kantone und Wahlkreise, St. Gallen hat Löcher für die Appenzell) — nach vorn deckt also nichts zu.
+    const faerbe = (element, klasse) => {
+      element.classList.add(klasse);
+      if (element.classList.contains("gebiet")) [...svg.querySelectorAll(".gebiet")].at(-1).after(element);
+    };
 
     const falschGetippt = (getippt, element) => {
       if (fertig || ctx.vorbei()) return;
-      element.classList.add("falsch");
+      faerbe(element, "falsch");
       setTimeout(() => element.classList.remove("falsch"), 700);
       const name = getippt.kurz !== undefined ? `der Kanton ${getippt.anzeige}` : getippt.anzeige;
       ctx.falsch(`Das ist ${name}. Was du suchst, liegt weiter ${richtung(lage(getippt), lage(ziel))}.`, loesungText);
@@ -213,15 +220,15 @@ LS.spiel({
     const richtigGetippt = element => {
       if (fertig || ctx.vorbei()) return;
       fertig = true;
-      element.classList.add("richtig");
+      faerbe(element, "richtig");
       ctx.richtig(`Genau, das ist ${istKanton ? `${ziel.anzeige} (${ziel.kurz})` : ziel.anzeige}!`);
     };
-    const zeigeZiel = () => (flaechen.get(ziel) || svg.querySelector(".ziel"))?.classList.add("richtig");
+    const zeigeZiel = () => { const z = flaechen.get(ziel) || svg.querySelector(".ziel"); if (z) faerbe(z, "richtig"); };
 
     for (const [g, pfad] of pfade) {
       const daten = auswahlGebiete.find(x => x.d === g.d) || KANTONE.find(x => x.d === g.d) || g;
       if (auswahlGebiete.length) pfad.addEventListener("click", () => (daten === ziel ? richtigGetippt(pfad) : falschGetippt(daten, pfad)));
-      if (p.art === "erkennen" && daten === ziel) pfad.classList.add("markiert");
+      if (p.art === "erkennen" && daten === ziel) faerbe(pfad, "markiert");
       flaechen.set(daten, pfad);
     }
 

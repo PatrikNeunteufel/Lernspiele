@@ -2453,3 +2453,16 @@
   (Tipp-Zeile). rahmen.md 20.
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session41_2026-11-14.md`, Handover nachgeführt (Sudoku-Familie
   vollständig, Kern 1.46.0, Tastenmarken, LERN-55 für zwei Spiele; nächster Schritt Push mit Entscheid zum vollen Lauf).
+
+## 2026-11-14 — LERN_Session42
+- **Gefärbte Flächen in SVG-Bildern geprüft** (offener Punkt aus LERN_Session41, nach Bemerkung 54 im Plan-Leser):
+  Erdzeit-Leiter, Kakao-Weg, Netz-Falter, Tonleiter-Treppe, Wassertropfen-Reise und Würfel-Kipper färben nur Flächen, die
+  vor Zeichen, Zahlen und Beschriftung gezeichnet werden (Kakao-Weg und Würfel-Kipper färben nach dem Tippen gar nichts im
+  Bild) — nichts verdeckt; Wassertropfen-Reise (Bodenschichten) hell angesehen, Rahmen und Namen ganz sichtbar.
+- **Schweiz-Karte (schweiz-karte):** Der Rand eines gefärbten Gebiets (richtig, falsch, in Stufe 6 markiert) lag unter
+  den später gezeichneten Nachbarn — der grüne Rand war zur Hälfte grau, an einem markierten Nachbarn ganz rot. Jetzt
+  kommt das gefärbte Gebiet nach vorn, hinter das letzte Gebiet und unter die Landesgrenze (`faerbe`). Geprüft, dass
+  dabei nichts zugedeckt wird: kein Kanton und kein Wahlkreis umschliesst einen anderen ohne Loch (St. Gallen hat Löcher
+  für die Appenzell). Angesehen nach dem Tippen und nach dem Lösungsweg: Stufe 1 hell und dunkel, Stufe 2 und 3 hell, je
+  1024 px, Stufe 2 und 3 auch 375 px. Tests: Eulenpfad schweiz-karte „Keine
+  Fehler.“, Skripte „Keine Fehler.“.
