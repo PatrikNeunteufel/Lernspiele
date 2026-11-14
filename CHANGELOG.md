@@ -2451,3 +2451,5 @@
   Luft. Neu Feld `maus` je Gerät (Laptop, Desktop, Mix); ohne Maus nimmt die Messung Marken und `marke-platz` weg.
   Stromkreis-Bauer und Rhythmus-Leser damit: Aufgabe auf keinem Gerät mehr über dem Rand, Handy höchstens 20 px
   (Tipp-Zeile). rahmen.md 20.
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session41_2026-11-14.md`, Handover nachgeführt (Sudoku-Familie
+  vollständig, Kern 1.46.0, Tastenmarken, LERN-55 für zwei Spiele; nächster Schritt Push mit Entscheid zum vollen Lauf).

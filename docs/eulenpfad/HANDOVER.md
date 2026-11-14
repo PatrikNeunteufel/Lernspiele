@@ -1,6 +1,25 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-14, nach LERN_Session41** ([Report](report/LERN_Session41_2026-11-14.md)):
+- **Kern:** 1.46.0 (Suchfeld zeichnet nach dem Bild, einmal für mehrere Eingaben).
+- **Sudoku-Familie (LERN-56) vollständig:** Sudoku-Duell gebaut (DU1 a, DU2 a), Thema Strategie; alle sechs neu und
+  ungeprüft.
+- **Tab Spiele:** Buchstabe sofort, nur die Auswahl neu gezeichnet, Ansicht ohne Suche aufbewahrt, Karten in Listen mit
+  `content-visibility` (KV1 a); Vorlesen wieder im ganzen Tab.
+- **Tastenmarken (TM1 a):** Platz, wo die Marke auf Inhalt läge — vorher 905 Knöpfe in 74 Spielen verdeckt.
+- **Plan-Leser:** Zeichen bleibt nach dem Tippen sichtbar (Bemerkung 54), „auf den Weiher“. **Stromkreis-Bauer,
+  Rhythmus-Leser:** Aufgabe auf keinem Gerät mehr über dem Rand (LERN-55). **`bildhoehe.js`:** Handy und Tablet ohne
+  Tastenmarken (Feld `maus`); Handy-Werte seit TM1 a waren zu hoch.
+- **Tests:** Kern „6078 Fälle, 0 Fehler.“, Server „61 Fälle, 0 Fehler.“, Lernsteig „0 Fehler, 139 Hinweise.“, Skripte
+  „Keine Fehler.“, Feier „175 Spiele, 6300 Bilder, keine Fehler.“; Eulenpfad gezielt „Keine Fehler.“ (Liste im Report)
+  — **letzter voller Lauf weiter auf `5cc948b`**. Commits bis `62813e0` von Patrik, 14 nicht gepusht; dieser Abschluss
+  noch zu committen.
+- **Weiter mit:** (1) Push, voller Eulenpfad-Lauf vorher auf Patriks Entscheid (Spielseiten, Schlussbild, `spiel.js`,
+  `stil.css`, Kern geändert); (2) Sudokus und Duell ansehen und freigeben (Patrik); (3) sieben Spiele mit eingefärbten
+  SVG-Flächen auf Verdecken prüfen (Liste im Report); (4) Bildhöhe über alle Spiele mit dem korrigierten Werkzeug neu
+  messen; (5) Prüfer Tastenmarken, Hook-Kandidaten (englische Antwort, `sed -i` auf CRLF).
+
 **2026-11-14, nach LERN_Session40** ([Report](report/LERN_Session40_2026-11-13.md)):
 - **Kern:** unverändert 1.45.1.
 - **Sudoku-Familie (LERN-56):** Baustein `spiele/gemeinsam/sudoku.js` (rahmen.md 26) und fünf neue Spiele, neu und

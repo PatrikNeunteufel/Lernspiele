@@ -4346,6 +4346,176 @@
    ]
   }
  },
+ "fehler-lupe/ae-aeu": {
+  "aeu:12b9ogzc5o": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "ux507izvvl",
+   "zellen": [
+    "1gfgrvzknl4",
+    "1bwoa07ztem",
+    "2ced7hzbkgk",
+    "187zfmz2nef",
+    "dgp0x8p16g"
+   ]
+  },
+  "aeu:25j32agslrk": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "11h6yl7g5sc",
+   "zellen": [
+    "b5xg1jbq1v",
+    "181saezajcy",
+    "26c1kb2m6yn",
+    "md5x0x8u01",
+    "dgp0x8p16g"
+   ]
+  },
+  "aeu:29djpgl7dgc": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "4kymsmdti",
+   "zellen": [
+    "uycnldrh21",
+    "kh47kfehrv",
+    "hdpf5rcgiz",
+    "ojsvjr45wz",
+    "dgp0x8p16g"
+   ]
+  },
+  "aeu:jn6i3rpsmn": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1ar7rna0y58",
+   "zellen": [
+    "zlmetls6na",
+    "m526g0q5ws",
+    "1rjc8kzfdd8",
+    "1sxjfkr4tvr",
+    "dgp0x8p16g"
+   ]
+  },
+  "aeu:n9ah0eszsl": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1o2l4yabluy",
+   "zellen": [
+    "2dky70glwmc",
+    "1adz8cq5hdr",
+    "yhpxgb12h9",
+    "hwo8w6zhu6",
+    "dgp0x8p16g"
+   ]
+  },
+  "aeu:ymzlv0i3vp": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "329ztabz8z",
+   "zellen": [
+    "80bdv6rpm6",
+    "1cb9yyxbvl4",
+    "2bqnl9y54uv",
+    "t9i90zk1zj",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:11xj9pmr3fy": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "295s59twk8g",
+   "zellen": [
+    "2f0npgdnbce",
+    "18ayrh1vvek",
+    "gf1m4caaxd",
+    "ojeddoxdgl",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:13lquifhps3": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "188gma1zd8x",
+   "zellen": [
+    "g40xrt8jii",
+    "c5v0u33yjq",
+    "1qxowjq0ge4",
+    "5ll7qhoudv",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:184gewv230y": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "gu2ykn3p42",
+   "zellen": [
+    "1dxqg3fz8lc",
+    "29i8oipdt5l",
+    "104brb9c7up",
+    "1fw345uxaom",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:23a5ipfab4v": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "27syqxwxvv5",
+   "zellen": [
+    "oomsor00rh",
+    "nfzx1x5a2p",
+    "24s67ci7853",
+    "7h5gubdw9v",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:29sahmcrhdw": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "29dtjirfs85",
+   "zellen": [
+    "cdq8mlpdrd",
+    "29le3xamd60",
+    "hdg0mkge9u",
+    "9o25dnpi10",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:7fc128481i": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1ymz8qnbyov",
+   "zellen": [
+    "xuy5ldkld9",
+    "ipbzkzr34m",
+    "1yy62lj70ra",
+    "vuqusq669o",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:j80qcgbubh": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1990y7dixgf",
+   "zellen": [
+    "dhtmpyu24i",
+    "1fbm7v2xy7e",
+    "186w4ney7hx",
+    "2f2x52exber",
+    "dgp0x8p16g"
+   ]
+  },
+  "eae:xr886hp28p": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1segzysdo0o",
+   "zellen": [
+    "7z1y6l7u8v",
+    "35ajmj97uk",
+    "ivqqb9ggd2",
+    "26rb50ywohn",
+    "dgp0x8p16g"
+   ]
+  }
+ },
  "fehler-lupe/dehnungs-h": {
   "dehnung:21v9284ujuv": {
    "am": "2026-11-14",
@@ -4416,6 +4586,832 @@
     "220fkqv4qor",
     "22a93go5m2n",
     "1akljriyzc3",
+    "dgp0x8p16g"
+   ]
+  }
+ },
+ "fehler-lupe/ie-i": {
+  "ie:1701hr10m43": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2c8nr3xhcmm",
+   "zellen": [
+    "6cvd3g8vz5",
+    "1jvviv2cf6u",
+    "zfsdhw1cyr",
+    "unp6rgsf58",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:1awaafo5jzy": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1lv1p4egaxu",
+   "zellen": [
+    "u79gmv8xqj",
+    "22jls1z9c7v",
+    "t5y5r9cm98",
+    "hjl0wjjwr9",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:1gschsdchbd": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1hprhdycrdo",
+   "zellen": [
+    "t14ayvlubu",
+    "awvs53adun",
+    "wz8qyqdurz",
+    "1avruq86ouv",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:1lsrataxblq": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "21q26oduonu",
+   "zellen": [
+    "epkhm8bpyc",
+    "1irg50fl3hc",
+    "1tbqgf8gd9w",
+    "140976ud4el",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:29wzms7nhxx": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1jv1s05d30s",
+   "zellen": [
+    "4csf8a5a0m",
+    "293eaw6bwa5",
+    "20d9z3phnls",
+    "1pb3mvhrcd",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:2b7wb84zbvd": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "19ckjcn7fum",
+   "zellen": [
+    "237u9k3tun5",
+    "8if14qhdz2",
+    "4ylbq1g1ot",
+    "leo4bgrs08",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:2e2z7fw7kg": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1wzfa1sxesg",
+   "zellen": [
+    "1v0xuywdkho",
+    "1iasi437w58",
+    "2c3d15yj1l9",
+    "rf6079y4zh",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:3h2vdf6wx3": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "nx4esp24ik",
+   "zellen": [
+    "zf8oyybsv2",
+    "z64l6xetav",
+    "1yuh80j0i10",
+    "1tetjdscej9",
+    "dgp0x8p16g"
+   ]
+  },
+  "ie:oswpqwz5fl": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1fiha018ngl",
+   "zellen": [
+    "1i1j20glcfs",
+    "75wy0pwehp",
+    "14mhige1ini",
+    "zcuz8ibzge",
+    "dgp0x8p16g"
+   ]
+  }
+ },
+ "fehler-lupe/komma": {
+  "komma:1a168h6devp": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "dk68imx1dz",
+   "zellen": [
+    "4ssn9eqdz4",
+    "11tdyab32fc",
+    "1c15qoxfzqz",
+    "1gxr5bku697",
+    "2obe9x9rwr"
+   ]
+  },
+  "komma:1saofv16vb": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "16wc19z97pk",
+   "zellen": [
+    "23e9qn4zo17",
+    "1h708zljx77",
+    "f5x3j0dfbp",
+    "16yu1ipmgz",
+    "1xkao67oh1i"
+   ]
+  },
+  "komma:214qhm56emk": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1q3efgp3u8v",
+   "zellen": [
+    "d0iiqr58gk",
+    "1mfzdiju05h",
+    "6oqelnnp56",
+    "1kvb9s72ig1",
+    "1zbvtx2o5c5"
+   ]
+  },
+  "komma:56ubsnorge": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "sqs3y7hnez",
+   "zellen": [
+    "10znj6u0awc",
+    "2euwcy8qlkv",
+    "hiybe1nzsh",
+    "ivqqb9ggd2",
+    "1sfmfwxqm49"
+   ]
+  },
+  "komma:c81oyfv938": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1v6enddno7h",
+   "zellen": [
+    "zqxpe8zd4o",
+    "u6ocfwidea",
+    "1m7xvifirwb",
+    "h2hleoim9p",
+    "1ykfgm31axb"
+   ]
+  },
+  "komma:ewhfkf4qd2": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1bkmkru4luo",
+   "zellen": [
+    "11nn0ge2f9",
+    "5smmtmnvlv",
+    "1ee641zdo4q",
+    "7quyylhvpz",
+    "vpbetnoe6r"
+   ]
+  },
+  "komma:telu309n3e": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1f5gu4alha0",
+   "zellen": [
+    "hopnklm3ql",
+    "6jwddc81ve",
+    "kw5wizz1q7",
+    "gh64zlbe36",
+    "1ipt60foyvc"
+   ]
+  }
+ },
+ "fehler-lupe/kurzer-vokal": {
+  "cktz:11l6kwu2v6h": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2cksm6tlia8",
+   "zellen": [
+    "1obd1zydapb",
+    "mlzetbun75",
+    "1omelv0lrcj",
+    "1wuzm8q799x",
+    "dgp0x8p16g"
+   ]
+  },
+  "cktz:1i3kb5yu5pk": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1e8c9qoxzjm",
+   "zellen": [
+    "o2fd9ptsv4",
+    "29pitka13xo",
+    "yw6etlqdl4",
+    "183twrwiir2",
+    "dgp0x8p16g"
+   ]
+  },
+  "cktz:1nzxeoy4gdy": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "pay8rlcetl",
+   "zellen": [
+    "sf6v2dbap3",
+    "eshpmfm3ov",
+    "1dwmkz0pswj",
+    "5jkoz36s48",
+    "dgp0x8p16g"
+   ]
+  },
+  "cktz:f1u9ejn7p3": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2bghlu6dvpk",
+   "zellen": [
+    "b6nsqdn3fq",
+    "329s2sq877",
+    "qmegfi22f",
+    "25rb5k8a9fs",
+    "dgp0x8p16g"
+   ]
+  },
+  "cktz:s64mqo2df8": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "192ynjihcej",
+   "zellen": [
+    "1brwk0rcs18",
+    "14gojuphj5q",
+    "27vmyfefmn3",
+    "5vazvz2ljl",
+    "dgp0x8p16g"
+   ]
+  },
+  "cktz:xgkl0fj72j": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "iyqb61x1q7",
+   "zellen": [
+    "1ykxo43wzzk",
+    "pt8o516vxh",
+    "ql24o85kh8",
+    "23m2kx7d0w9",
+    "dgp0x8p16g"
+   ]
+  },
+  "doppel:125eu3d6p5u": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "lfzhp8a1fv",
+   "zellen": [
+    "19w48nfyiha",
+    "101bic0wuge",
+    "1yadq0meag5",
+    "osxnfb232w",
+    "dgp0x8p16g"
+   ]
+  },
+  "doppel:9bgw4gwokk": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2fewea9qpgh",
+   "zellen": [
+    "hkr3887l5y",
+    "dw3jx8uafk",
+    "wuge120n3l",
+    "1kqgo8u4ef9",
+    "dgp0x8p16g"
+   ]
+  },
+  "doppel:djiunf8qr3": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "5yd0od67m6",
+   "zellen": [
+    "1nxq4m3avtu",
+    "izofce1l73",
+    "1g8a9eyrq32",
+    "cutxyuulmi",
+    "dgp0x8p16g"
+   ]
+  },
+  "doppel:nkgnjybgex": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "10n8hooxldr",
+   "zellen": [
+    "1whsuh8nq1r",
+    "y1y2s92all",
+    "1l8sf2x15g9",
+    "29kcqm95a8l",
+    "dgp0x8p16g"
+   ]
+  },
+  "doppel:qdp2gwqtj0": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "gqwcs4beb6",
+   "zellen": [
+    "26f1cxpeli6",
+    "1lwni0o2ifq",
+    "qiwfvi3off",
+    "1zi7huiztjo",
+    "dgp0x8p16g"
+   ]
+  },
+  "doppel:v30663htd": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1jn0xlq87al",
+   "zellen": [
+    "3pumeg74p",
+    "lcb1y0yl4h",
+    "wth9s05dmb",
+    "7wq7cng02v",
+    "dgp0x8p16g"
+   ]
+  }
+ },
+ "fehler-lupe/nomen-gross": {
+  "abstrakt:17yvdvpjsc7": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "33qnok6pph",
+   "zellen": [
+    "1cgnrluunac",
+    "1naarcxin1y",
+    "6cqd03tvwr",
+    "1ray3r3724q",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:1ay538t4875": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "120bp1r6qb1",
+   "zellen": [
+    "1w9p9vorbsf",
+    "bl9vd1g61i",
+    "1opd2kjd8qb",
+    "1aawq4sf71c",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:1ybiko4hiry": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "ehl5jgzudm",
+   "zellen": [
+    "1ird9jjn25d",
+    "1u959823cpz",
+    "18rf370uu7a",
+    "24x03s0u5pl",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:21dmpoq6qxi": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1wjuau8b54c",
+   "zellen": [
+    "ojmal22m4l",
+    "2fj1kpxn9rq",
+    "2dnrepdt6l7",
+    "21chsaxlbtf",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:2gg466r24kq": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "nqie0v3yt2",
+   "zellen": [
+    "1f5ato2eel",
+    "29ogx49nu3t",
+    "1u2aaaxkurv",
+    "rb5bx6dvdp",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:6v39kp8kom": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2ebvxygks19",
+   "zellen": [
+    "1ounp6oqj13",
+    "vxih3ht7hk",
+    "9m0p5uf00q",
+    "4szlhpiwdi",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:82yxn3vlej": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "22bcgv1e53x",
+   "zellen": [
+    "8nxlet0n6",
+    "145kgjqu3ac",
+    "1fnzty7440x",
+    "146b3ie3915",
+    "dgp0x8p16g"
+   ]
+  },
+  "abstrakt:tffiben6zz": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "c6nfkofpih",
+   "zellen": [
+    "93n8ava1my",
+    "lu1nlbgimk",
+    "1lqmln0rt3s",
+    "sphszb2amt",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:16y7d31lpdd": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "16167hy6dvz",
+   "zellen": [
+    "17n2hcxuvlv",
+    "jgebb2ak2k",
+    "gh64zlbe36",
+    "wiwhunioch",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:1gdmkhprfl5": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "126dxxmtox4",
+   "zellen": [
+    "1eu95plu8yq",
+    "24ax4kydbk2",
+    "2ei43fa3i77",
+    "1wd3cl219ww",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:1lr3shulcvi": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "bjloipteib",
+   "zellen": [
+    "1xos21i9im7",
+    "1675syvju7j",
+    "1877behat4q",
+    "1oofjgfr3q9",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:1msaghncmbq": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "wlofr04ttf",
+   "zellen": [
+    "1s7v05bc0fb",
+    "1f3ivtllr99",
+    "b89n2x472w",
+    "isjjsc9igk",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:1ncqpvwreyj": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "7f0rb1wdkw",
+   "zellen": [
+    "4zz5tvzqhe",
+    "p13epaliq2",
+    "1hb6v4rvxif",
+    "1xn40lihldv",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:1wukz2x03ek": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1g8k3dd6vn8",
+   "zellen": [
+    "1h02yvo5amk",
+    "2dnbjxjkruz",
+    "1twml47ubx9",
+    "h737i1znj0",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:29ongan3yyr": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1l7ird6kxkv",
+   "zellen": [
+    "14fmgy0cbzu",
+    "1suc4s1giei",
+    "219xsjbsxgy",
+    "164ptfu6v9p",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:6ig8qc61f2": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1cxe47gzjsq",
+   "zellen": [
+    "272nzwo4ikx",
+    "rl523q7cuk",
+    "8y52iydniw",
+    "26lulbkpssp",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:8e6fb38g1m": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1exz21vigqw",
+   "zellen": [
+    "5zu3stv5nr",
+    "vvp9o7s7d2",
+    "1omelv0lrcj",
+    "22clbqeya4w",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:lu1t1b1dlm": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "23s16osxe4m",
+   "zellen": [
+    "17o2ek2rjwr",
+    "2814drv2ihp",
+    "28pk4vrdrvo",
+    "8rufyt8qqs",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:pgwdg8s507": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1lidoewj8g6",
+   "zellen": [
+    "19p4ddligbs",
+    "nbrfmt75yt",
+    "2474r86os4e",
+    "ttr8ib6fxa",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:q5gpe12pgu": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "c97ojtdqd6",
+   "zellen": [
+    "1fkk7ctblu1",
+    "20sm5gv5nz",
+    "21f4c9o5q78",
+    "wh101xljzs",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:tookgr12tt": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "27t7hpadyc5",
+   "zellen": [
+    "hfgodjf0zg",
+    "15s9z8liqgo",
+    "28mb7n7bcga",
+    "17q5gb5c3n9",
+    "dgp0x8p16g"
+   ]
+  },
+  "gross:u7p6robnlk": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "19c1m4ad5n7",
+   "zellen": [
+    "1c3wkk0a6n8",
+    "fm7w7aph0m",
+    "1zu8tsekgq0",
+    "12vw62nfw5s",
+    "dgp0x8p16g"
+   ]
+  }
+ },
+ "fehler-lupe/sp-st-sch": {
+  "sch:15o73l11c4j": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "20ykuu6kgje",
+   "zellen": [
+    "1o33h6u53m4",
+    "ixi3fhxffg",
+    "wth9s05dmb",
+    "1j8gie5rpd8",
+    "dmjvvp6dc"
+   ]
+  },
+  "sch:1vubycabiig": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "ejmkn7nt51",
+   "zellen": [
+    "28jewjg1zcf",
+    "1l7uwb2gwky",
+    "372rtfqgjl",
+    "16xhwk5s2zl",
+    "1c1kn18vthg"
+   ]
+  },
+  "sch:2cqo2tg8gkf": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "hnyf1lp1xc",
+   "zellen": [
+    "249k15vmr9u",
+    "1rne7d6mldb",
+    "220x6is3o3w",
+    "1giiu2w590d",
+    "2bc0b53sobq"
+   ]
+  },
+  "sch:2csz2jkcq4h": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "27p362tewgg",
+   "zellen": [
+    "1vg066fxoob",
+    "15ird9dcf1x",
+    "1wh8byd4iln",
+    "un36iio2ti",
+    "2f2lx3djaii"
+   ]
+  },
+  "sch:6zntii2i78": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "eafoci221",
+   "zellen": [
+    "y51kggljxc",
+    "1rwgc5rt8yx",
+    "17am0wj08go",
+    "194au0ptiv1",
+    "27wk0p7gp0j"
+   ]
+  },
+  "sch:ap4e6akokd": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1eddr2wvdl4",
+   "zellen": [
+    "27p87q7caoz",
+    "e9fj54tvuc",
+    "1jjke7ohhuo",
+    "2bga7rnddm3",
+    "19qy2fzj1ts"
+   ]
+  },
+  "sch:dg057pek6n": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1w1aetld6sj",
+   "zellen": [
+    "5nmolsei8w",
+    "gjmaidl1eh",
+    "5ag5bgqg25",
+    "1puoyl5agcf",
+    "3a5bxubrac"
+   ]
+  },
+  "sch:idhjlekrgn": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1vki0ipya1v",
+   "zellen": [
+    "60qzstg51w",
+    "g0yko7ktwo",
+    "1ozh4mx30r7",
+    "e5z065k1hh",
+    "291hp1kyhme"
+   ]
+  },
+  "spst:167hisoydf3": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "wbccquwfhs",
+   "zellen": [
+    "1j94re62e1b",
+    "1z3hs4vtkju",
+    "5bqziqo09u",
+    "v9n4oy4sqk",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:1wtugas6c6o": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "5it2k379qb",
+   "zellen": [
+    "kqsochck9a",
+    "1ofver295r2",
+    "1p3s00c7m8",
+    "bcfez79ynw",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:2dwxlo3y5f5": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1ea4dlz7j5i",
+   "zellen": [
+    "2d9iurqilcn",
+    "2rkmyl840j",
+    "22x8y3lqphi",
+    "om0l6w376m",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:2g6l1wozn61": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1i1e24ob3hq",
+   "zellen": [
+    "i31hl4n828",
+    "1j3ejm5bf8t",
+    "2fd76ntzl3d",
+    "13dwgxi9vcl",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:42yx5e5qba": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2ex3ukx6mou",
+   "zellen": [
+    "vkl6nfbkus",
+    "1uaoes7khw1",
+    "ero5c9kbt6",
+    "263h3hjrnsk",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:dc4dnm2kwc": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "h0yftmd8ne",
+   "zellen": [
+    "19bi505bd0b",
+    "lsezgp36ks",
+    "1h98sysef5q",
+    "xx4xqkkvv3",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:f2vvi0b028": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "12s18ehuwek",
+   "zellen": [
+    "1xn6shutyoo",
+    "n097qhyo4t",
+    "ero5c9kbt6",
+    "263h3hjrnsk",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:ojacn84a28": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "m3jv1vf0hp",
+   "zellen": [
+    "1a8eaytho4z",
+    "23eel6q6r3u",
+    "9bxqg48nf6",
+    "q0kfnwz13l",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:s1h6mg0u16": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "1d593ehgyp3",
+   "zellen": [
+    "1yrp37e7vc",
+    "lbaijqelq7",
+    "1jhgrq9pjfs",
+    "20v90jbezql",
+    "dgp0x8p16g"
+   ]
+  },
+  "spst:u61mhjknfa": {
+   "am": "2026-11-14",
+   "von": "Patrik",
+   "zeile": "2dt05hx3ef1",
+   "zellen": [
+    "1nt1tnhg1dv",
+    "wj0n8l3cdo",
+    "6o2vyhjtdt",
+    "145lshb70xm",
     "dgp0x8p16g"
    ]
   }

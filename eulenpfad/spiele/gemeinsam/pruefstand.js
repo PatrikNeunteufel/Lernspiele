@@ -743,7 +743,8 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "fehler-lupe/ae-aeu": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "27iiawdxlu8",
       "von": "Patrik"
     },
     "fehler-lupe/dehnungs-h": {
@@ -752,23 +753,28 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "fehler-lupe/ie-i": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "2ey7hk2p4bm",
       "von": "Patrik"
     },
     "fehler-lupe/komma": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "2d8qhhw8xlo",
       "von": "Patrik"
     },
     "fehler-lupe/kurzer-vokal": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "1zfgv3eua8s",
       "von": "Patrik"
     },
     "fehler-lupe/nomen-gross": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "1l9octfb8w6",
       "von": "Patrik"
     },
     "fehler-lupe/sp-st-sch": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "2d6nt6t45ae",
       "von": "Patrik"
     },
     "fehler-lupe/verben-als-nomen": {
@@ -1490,6 +1496,10 @@ const PRUEFSTAND = {
       "am": "2026-11-06",
       "von": "Patrik"
     },
+    "plan-leser": {
+      "am": "2026-11-14",
+      "von": "Patrik"
+    },
     "platzhalter-geschichten": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -1592,6 +1602,10 @@ const PRUEFSTAND = {
     },
     "stufenzahl-schieber": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "sudoku-duell": {
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "tageslauf-sonne": {
