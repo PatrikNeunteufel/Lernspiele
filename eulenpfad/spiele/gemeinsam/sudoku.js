@@ -101,7 +101,7 @@ const SUDOKU = (() => {
    * Raster aus Grösse und Gebieten. → { n, gebiete, einheiten: [{ art, felder }], vonFeld: [[Einheit …]], voll }
    * art: "zeile", "spalte", "kasten" oder "gebiet" (für die Sätze der Eule).
    */
-  function raster(n, gebiete, gebietArt = "kasten", vergleiche = []) {
+  function raster(n, gebiete, gebietArt = "kasten", vergleiche = [], kaefige = []) {
     if (gebiete.length !== n * n) throw new Error("Gebiete passen nicht zum Raster");
     const einheiten = [];
     for (let r = 0; r < n; r++) einheiten.push({ art: "zeile", felder: Array.from({ length: n }, (_, c) => r * n + c) });
@@ -118,7 +118,80 @@ const SUDOKU = (() => {
     // Vergleichs-Sudoku: [klein, gross] je Zeichen zwischen zwei Nachbarfeldern (Wert klein < Wert gross)
     const kleiner = Array.from({ length: n * n }, () => []), groesser = Array.from({ length: n * n }, () => []);
     for (const [a, b] of vergleiche) { kleiner[a].push(b); groesser[b].push(a); }
-    return { n, gebiete, einheiten, vonFeld, voll: bits(n), vergleiche, kleiner, groesser };
+    // Käfig-Sudoku: je Käfig alle Zahlenfolgen (Kombis), die das Ergebnis geben, ohne doppelte Zahl im Käfig
+    const kf = kaefige.map(k => ({ ...k, kombis: kaefigKombis(n, k.felder.length, k.op, k.ziel) }));
+    const kaefigVon = Array(n * n).fill(-1), kaefigPos = Array(n * n).fill(-1);
+    kf.forEach((k, c) => k.felder.forEach((f, p) => { kaefigVon[f] = c; kaefigPos[f] = p; }));
+    return { n, gebiete, einheiten, vonFeld, voll: bits(n), vergleiche, kleiner, groesser, kaefige: kf, kaefigVon, kaefigPos };
+  }
+
+  // ----- Käfige (Käfig-Sudoku, SU1 a: „Zellgruppen mit ihrer Summe, in den oberen Stufen auch mit −, ×, :“) -----
+  /** Ergebnis einer Zahlenfolge mit der Rechenart; − und : nur für zwei Felder, grössere Zahl zuerst. */
+  const RECHNE = {
+    "+": t => t.reduce((s, x) => s + x, 0),
+    "×": t => t.reduce((s, x) => s * x, 1),
+    "−": t => (t.length === 2 ? Math.abs(t[0] - t[1]) : NaN),
+    ":": t => (t.length === 2 && Math.max(...t) % Math.min(...t) === 0 ? Math.max(...t) / Math.min(...t) : NaN),
+  };
+  /** Alle Folgen von k verschiedenen Zahlen 1 … n, die mit op das Ergebnis ziel geben. */
+  function kaefigKombis(n, k, op, ziel) {
+    const aus = [], t = [];
+    (function weiter() {
+      if (t.length === k) { if (RECHNE[op](t) === ziel) aus.push(t.slice()); return; }
+      for (let v = 1; v <= n; v++) if (!t.includes(v)) { t.push(v); weiter(); t.pop(); }
+    })();
+    return aus;
+  }
+  /** Beschriftung eines Käfigs: „12+“, „2−“, „20×“, „3:“; ein einzelnes Feld nur die Zahl. */
+  const kaefigText = k => (k.felder.length === 1 ? String(k.ziel) : `${k.ziel}${k.op}`);
+  /** Was die Kombis des Käfigs von i mit den schon gefüllten Feldern des Käfigs an der Stelle von i erlauben. */
+  function kaefigMaske(r, werte, i) {
+    const k = r.kaefige[r.kaefigVon[i]], p = r.kaefigPos[i];
+    let m = 0;
+    for (const t of k.kombis) if (k.felder.every((f, q) => !werte[f] || werte[f] === t[q])) m |= 1 << (t[p] - 1);
+    return m;
+  }
+  /**
+   * Käfige zu einer Lösung: Felder in zufälliger Folge, je Käfig 2 bis 4 Nachbarn ohne gleiche Zahl (groessen: Liste,
+   * aus der gezogen wird); ein übrig gebliebenes einzelnes Feld kommt zu einem Nachbarkäfig. ops: "+" oder "alle"
+   * (zwei Felder auch −, ×, :, drei und mehr auch × bis maxProdukt). → [{ felder, op, ziel }]
+   */
+  function kaefigeAus(n, loesung, zufall, { ops = "+", groessen = [2, 2, 3, 3, 4], maxProdukt = 200 } = {}) {
+    const N = n * n, kaefig = Array(N).fill(-1), liste = [];
+    const folge = Array.from({ length: N }, (_, i) => i);
+    for (let i = N - 1; i > 0; i--) { const j = Math.floor(zufall() * (i + 1)); [folge[i], folge[j]] = [folge[j], folge[i]]; }
+    for (const start of folge) {
+      if (kaefig[start] >= 0) continue;
+      const groesse = groessen[Math.floor(zufall() * groessen.length)];
+      const felder = [start];
+      kaefig[start] = liste.length;
+      while (felder.length < groesse) {
+        const rand = [...new Set(felder.flatMap(f => nachbarnVon(n, f)))].filter(k => kaefig[k] < 0 && !felder.some(f => loesung[f] === loesung[k]));
+        if (!rand.length) break;
+        const k = rand[Math.floor(zufall() * rand.length)];
+        kaefig[k] = liste.length;
+        felder.push(k);
+      }
+      liste.push(felder);
+    }
+    liste.forEach((felder, c) => {
+      if (felder.length !== 1) return;
+      const f = felder[0];
+      const ziel = nachbarnVon(n, f).map(k => kaefig[k]).find(d => d !== c && liste[d].length > 0 && liste[d].length < 5 && !liste[d].some(x => loesung[x] === loesung[f]));
+      if (ziel === undefined) return;
+      liste[ziel].push(f); kaefig[f] = ziel; liste[c] = [];
+    });
+    return liste.filter(f => f.length).map(felder => {
+      felder.sort((a, b) => a - b);
+      const t = felder.map(f => loesung[f]);
+      let op = "+";
+      if (ops === "alle") {
+        const moeglich = t.length === 2 ? ["+", "−", "×", ...(Number.isFinite(RECHNE[":"](t)) ? [":"] : [])]
+          : ["+", ...(RECHNE["×"](t) <= maxProdukt ? ["×"] : [])];
+        op = moeglich[Math.floor(zufall() * moeglich.length)];
+      }
+      return { felder, op, ziel: felder.length === 1 ? t[0] : RECHNE[op](t) };
+    });
   }
 
   /**
@@ -143,10 +216,15 @@ const SUDOKU = (() => {
     for (const j of r.groesser[i]) if (werte[j]) m &= ~((1 << werte[j]) - 1);
     return m;
   }
-  /** Kandidaten eines Felds aus den Einheiten; mit werte auch aus den Zeichen zu gefüllten Nachbarn (Vergleichs-Sudoku). */
+  /**
+   * Kandidaten eines Felds aus den Einheiten; mit werte auch aus den Zeichen zu gefüllten Nachbarn (Vergleichs-Sudoku)
+   * und aus den Kombis seines Käfigs mit den schon gefüllten Feldern darin (Käfig-Sudoku).
+   */
   const kandidaten = (r, masken, i, werte = null) => {
-    const m = r.voll & ~r.vonFeld[i].reduce((x, u) => x | masken[u], 0);
-    return werte && r.vergleiche.length ? m & vergleichMaske(r, werte, i) : m;
+    let m = r.voll & ~r.vonFeld[i].reduce((x, u) => x | masken[u], 0);
+    if (werte && r.vergleiche.length) m &= vergleichMaske(r, werte, i);
+    if (werte && r.kaefige.length && r.kaefigVon[i] >= 0) m &= kaefigMaske(r, werte, i);
+    return m;
   };
 
   /**
@@ -161,6 +239,11 @@ const SUDOKU = (() => {
       for (const [z, f] of Object.entries(je)) if (f.length > 1) aus.push({ einheit: u, zahl: Number(z), felder: f });
     });
     for (const [a, b] of r.vergleiche) if (werte[a] && werte[b] && werte[a] >= werte[b]) aus.push({ vergleich: [a, b], felder: [a, b] });
+    // Käfig: eine Zahl doppelt, oder voll und das Ergebnis stimmt nicht
+    r.kaefige.forEach((k, c) => {
+      const t = k.felder.map(f => werte[f]).filter(Boolean);
+      if (new Set(t).size < t.length || (t.length === k.felder.length && RECHNE[k.op](t) !== k.ziel)) aus.push({ kaefig: c, felder: k.felder });
+    });
     return aus;
   }
 
@@ -228,7 +311,7 @@ const SUDOKU = (() => {
    * höchstens 3 passt“ — so lange, bis sich nichts mehr ändert). Die Zeichen engen die Kandidaten ein; gefunden wird
    * zuerst „einer“ (ein Feld), dann „versteckt“ (eine Einheit).
    */
-  function schritt(r, werte, techniken, masken = einheitsMasken(r, werte)) {
+  function schritt(r, werte, techniken, masken = einheitsMasken(r, werte), alle = false) {
     const mitVergleich = r.vergleiche.length > 0 && techniken.has("vergleich");
     let kand = i => kandidaten(r, masken, i, mitVergleich ? werte : null);
     if (mitVergleich && techniken.has("kette")) {
@@ -245,12 +328,33 @@ const SUDOKU = (() => {
       }
       kand = i => c[i];
     }
+    // Käfig-Sudoku, Schritt „kaefig“: je Käfig nur Kombis, die zu den Kandidaten aller seiner Felder passen („8 in zwei
+    // Feldern: 1 + 7, 2 + 6, 3 + 5 — die 1 steht schon in der Zeile“), so lange, bis sich nichts mehr ändert
+    if (r.kaefige.length && techniken.has("kaefig")) {
+      const vorher = kand;
+      const c = werte.map((v, i) => (v ? 0 : vorher(i)));
+      const maske = i => (werte[i] ? 1 << (werte[i] - 1) : c[i]);
+      for (let neu = true; neu;) {
+        neu = false;
+        for (const k of r.kaefige) {
+          const erlaubt = k.felder.map(() => 0);
+          for (const t of k.kombis) if (k.felder.every((f, q) => maske(f) & (1 << (t[q] - 1)))) t.forEach((v, q) => { erlaubt[q] |= 1 << (v - 1); });
+          k.felder.forEach((f, q) => { if (!werte[f]) { const x = c[f] & erlaubt[q]; if (x !== c[f]) { c[f] = x; neu = true; } } });
+        }
+      }
+      kand = i => c[i];
+    }
     if (techniken.has("einer")) {
+      const gefunden = [];
       for (let i = 0; i < werte.length; i++) {
         if (werte[i]) continue;
         const m = kand(i);
-        if (m && !(m & (m - 1))) return { feld: i, zahl: einzigeZahl(m), art: "einer", einheit: null };
+        if (m && !(m & (m - 1))) {
+          if (!alle) return { feld: i, zahl: einzigeZahl(m), art: "einer", einheit: null };
+          gefunden.push({ feld: i, zahl: einzigeZahl(m) });
+        }
       }
+      if (gefunden.length) return { ...gefunden[0], art: "einer", einheit: null, alle: gefunden };
     }
     if (techniken.has("versteckt")) {
       for (let u = 0; u < r.einheiten.length; u++) {
@@ -279,12 +383,16 @@ const SUDOKU = (() => {
     const arten = { einer: 0, versteckt: 0 };
     let offen = werte.filter(v => !v).length;
     while (offen) {
-      const s = schritt(r, werte, techniken, masken);
+      // je Durchgang alle Felder mit nur einer Zahl auf einmal (LERN_Session40, Käfig-Sudoku: ein Durchgang kostet die
+      // ganze Käfig-Rechnung): Ob das Rätsel lösbar ist, ändert das nicht — jedes solche Feld ist zwingend
+      const s = schritt(r, werte, techniken, masken, true);
       if (!s) return { geloest: false, arten };
-      werte[s.feld] = s.zahl;
-      for (const u of r.vonFeld[s.feld]) masken[u] |= 1 << (s.zahl - 1);
-      arten[s.art]++;
-      offen--;
+      for (const { feld, zahl } of s.alle || [s]) {
+        werte[feld] = zahl;
+        for (const u of r.vonFeld[feld]) masken[u] |= 1 << (zahl - 1);
+        arten[s.art]++;
+        offen--;
+      }
     }
     return { geloest: true, arten };
   }
@@ -416,6 +524,15 @@ const SUDOKU = (() => {
       if (s === 0 || r.gebiete[i - 1] !== g) kl.push("sd-links");
       if (z === n - 1) kl.push("sd-unten");
       if (s === n - 1) kl.push("sd-rechts");
+      // Käfig: gestrichelter Rand innen, wo das Nachbarfeld zu einem anderen Käfig gehört (sudoku.css)
+      const c = r.kaefige.length ? r.kaefigVon[i] : -1;
+      if (c >= 0) {
+        kl.push("sd-kf");
+        if (z === 0 || r.kaefigVon[i - n] !== c) kl.push("kf-o");
+        if (z === n - 1 || r.kaefigVon[i + n] !== c) kl.push("kf-u");
+        if (s === 0 || r.kaefigVon[i - 1] !== c) kl.push("kf-l");
+        if (s === n - 1 || r.kaefigVon[i + 1] !== c) kl.push("kf-r");
+      }
       const f = el("button", { type: "button", class: kl.join(" "), "data-feld": String(i) });
       if (opt.vorgabe[i]) { f.disabled = true; f.textContent = zeichen(opt.vorgabe[i]); }
       else f.addEventListener("click", () => waehle(i));
@@ -458,6 +575,14 @@ const SUDOKU = (() => {
       sp.style.top = `${((waag ? z + 0.5 : z + 1) / n) * 100}%`;
       brett.append(sp);
     }
+    // Ergebnis des Käfigs oben links in seinem ersten Feld („12+“, „3:“), über dem Feld, damit Notizen es nicht löschen
+    for (const k of r.kaefige) {
+      const f0 = k.felder[0], z = Math.floor(f0 / n), s = f0 % n;
+      const sp = el("span", { class: "sd-kaefig-ziel", text: kaefigText(k), "aria-hidden": "true" });
+      sp.style.left = `${(s / n) * 100}%`;
+      sp.style.top = `${(z / n) * 100}%`;
+      brett.append(sp);
+    }
     ctx.flaeche.append(el("div", { class: "frage sd-auftrag", text: opt.auftrag }),
       el("div", { class: "sd-spiel" }, brett, el("div", { class: "sd-steuerung" }, zahlen, werkzeuge)));
     LS.kurztasten(zahlen, zahlKnoepfe);
@@ -498,6 +623,24 @@ const SUDOKU = (() => {
           return;
         }
       }
+      // Widerspruch im Käfig (Käfig-Sudoku, SU3 a: „oder bricht sie … eine Summe“): was das Kind selbst sehen kann —
+      // die Zahl steht schon im Käfig, die Summe ist schon zu gross, oder der volle Käfig gibt nicht sein Ergebnis
+      if (r.kaefige.length && r.kaefigVon[i] >= 0) {
+        const k = r.kaefige[r.kaefigVon[i]], text = `„${kaefigText(k)}“`;
+        const andere = k.felder.filter(f => f !== i && werte[f]);
+        const t = [...andere.map(f => werte[f]), v];
+        const voll = t.length === k.felder.length;
+        let satz = null;
+        if (andere.some(f => werte[f] === v)) satz = `${gross(nennung(v))} steht schon in diesem Käfig.`;
+        else if (k.op === "+" && (voll ? RECHNE["+"](t) !== k.ziel : RECHNE["+"](t) >= k.ziel))
+          satz = voll ? `Die Zahlen im Käfig ${text} geben zusammen nicht ${k.ziel}.` : `Im Käfig ${text} ist die Summe damit schon zu gross.`;
+        else if (voll && RECHNE[k.op](t) !== k.ziel) satz = `Die Zahlen im Käfig ${text} geben nicht ${k.ziel}.`;
+        if (satz) {
+          wackle(felder[i]); andere.forEach(f => wackle(felder[f]));
+          ctx.falsch(satz);
+          return;
+        }
+      }
       werte[i] = v;
       notizen[i].clear();
       falschMarke.delete(i);
@@ -526,7 +669,7 @@ const SUDOKU = (() => {
     /** Tipp 3: ein Feld zeigen, in das nach den richtigen Zahlen nur eine Zahl passt (nie die Zahl selbst). */
     function zeigeSchritt() {
       const sicher = werte.map((v, k) => (v === opt.loesung[k] ? v : 0));
-      const s = schritt(r, sicher, new Set(["einer", "versteckt", "vergleich", "kette"]));
+      const s = schritt(r, sicher, new Set(["einer", "versteckt", "vergleich", "kette", "kaefig"]));
       const feld = s ? s.feld : sicher.findIndex(v => !v);
       if (feld < 0) return;
       gewaehlt = feld;
@@ -556,7 +699,7 @@ const SUDOKU = (() => {
     }
   }
 
-  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, vergleicheAus, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
+  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, vergleicheAus, kaefigeAus, RECHNE, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
 })();
 
 if (typeof module !== "undefined") module.exports = SUDOKU;

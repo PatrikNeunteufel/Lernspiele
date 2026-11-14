@@ -33,6 +33,14 @@ Katalog seit LERN_Session2, an sg.lehrplan.ch geprüft).
 |---|---|---|
 | MA.1.A.1 (Zahlen vergleichen mit < und >), MA.1.B.1 (`.f`, `.h`: aus Zeichen schliessen) | Vergleichs-Sudoku | Zeichen an jeder Kante im Kasten; s1 4 × 4, 10 leer · s2 4 × 4, 12 leer · s3 6 × 6, 26 leer · s4 6 × 6, 30 leer, Zeichen zwischen zwei leeren Feldern nötig · s5 6 × 6 ohne vorgegebene Zahl · s6 9 × 9 mit neun Zahlen, Zeichen zwischen leeren Feldern nötig |
 
+**Käfig-Sudoku, Basisklasse 5** (SU1 a: „Zellgruppen mit ihrer Summe, in den oberen Stufen auch mit −, ×, :“): s1 =
+4. Klasse, s3 = Klassenziel 5. Klasse, s5 = 6. Klasse. Dazu MA.1.A.3 (Kopfrechnen, im Katalog seit LERN_Session1, an
+sg.lehrplan.ch geprüft).
+
+| Lernziel | Spiel | Stufen im Spiel (s1 → s6) |
+|---|---|---|
+| MA.1.A.3 (Zahlen zerlegen und im Kopf rechnen: welche Zahlen geben 12?), MA.1.B.1 (`.f`, `.h`: aus Käfigen schliessen) | Käfig-Sudoku | s1 4 × 4, Plus, 12 leer · s2 4 × 4, Plus, ohne Zahlen · s3 6 × 6, Plus, 28 leer · s4 6 × 6, Plus, 32 leer · s5 6 × 6, + − × :, 32 leer · s6 6 × 6, + − × :, ohne Zahlen |
+
 **Bilder-Sudoku, Basisklasse 1** (SU1 a: „Basis Kindergarten/1. Klasse“; Spiele für den Kindergarten haben Basisklasse
 1, Stufe 1 ist der Kindergarten): s3 = Klassenziel 1. Klasse, s5 = 2. Klasse.
 
@@ -41,6 +49,12 @@ Katalog seit LERN_Session2, an sg.lehrplan.ch geprüft).
 | MA.1.B.1 (1. Zyklus; Beziehungen erforschen ohne Zahlen: in welches Feld passt nur noch ein Tier) | Bilder-Sudoku | immer 4 × 4 mit 🐶 🐱 🐰 🐸; leere Felder s1 3 · s2 5 · s3 7 · s4 9 · s5 11 · s6 12 |
 
 ## Annahmen (mit dem Lehrmittel abzugleichen)
+
+- **Käfig-Sudoku ohne 9 × 9:** Die Königsstufe ist ein 6 × 6 mit allen vier Rechenarten und ohne vorgegebene Zahl. Ein
+  9 × 9 kostete im Generator 33 bis 131 ms je Rätsel (die Prüfung mit 3000 Rätseln je Stufe liefe aus) und wäre eine
+  Runde von weit über einer Viertelstunde. So entschieden: kein 9 × 9 (Entscheid KK1 a, Patrik 2026-11-14).
+- **Käfig-Sudoku, Schreibweise der Käfige:** „12+“, „2−“, „20×“, „3:“ — Ergebnis vor dem Zeichen, wie in Käfig-Rätseln
+  üblich; ob das Lehrmittel eine andere Schreibweise kennt, ist offen.
 
 - **Bilder-Sudoku zu MA.1.B.1 im 1. Zyklus:** Den Wortlaut der Kompetenzstufen des 1. Zyklus (`.a` bis `.c`) habe ich
   nicht gelesen; gelesen sind nur `.f` und `.h` (2. Zyklus). Vor der Freigabe den Wortlaut von MA.1.B.1 im 1. Zyklus

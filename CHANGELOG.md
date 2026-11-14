@@ -2372,3 +2372,9 @@
   (`skripte`) reiht feier.js auf Spielseiten nach spiel.js ein — dieselbe Folge wie vorher auf allen 172 Seiten (geprüft
   an HEAD). Zahlenmauer gedrosselt bedienbar nach 67 bis 145 ms statt 89 bis 534 ms. Im Browser geprüft: feier.js ab
   172 ms nach dem Aufbau (49 ms), Schlussbild mit Animation, ohne feier.js Konfetti, Vorschau der Schweiz-Karte mit Karte.
+- **Käfig-Sudoku (kaefig-sudoku)**, Basisklasse 5, neu und ungeprüft (LERN-56, SU1 a): Käfige mit Ergebnis, Stufe 1–4
+  nur Plus, Stufe 5–6 auch −, ×, :; 4 × 4 (12 leer, ohne Zahlen) und 6 × 6 (28, 32 leer, Königsstufe ohne Zahlen); kein
+  9 × 9 (33 bis 131 ms je Rätsel, Runde weit über eine Viertelstunde; Entscheid KK1 a). Lernziele MA.1.A.3 und MA.1.B.1
+  (Annahme). Endlos, nicht im Mix, Abschluss-Animation mit Käfigrändern. Baustein: `kaefigeAus`, Kombis je Käfig,
+  Schritt „kaefig“, Widersprüche im Käfig, Ränder und Ergebnis im Raster; `mitTechnikLoesen` setzt je Durchgang alle
+  Felder mit nur einer Zahl (gleiches Ergebnis, schneller).

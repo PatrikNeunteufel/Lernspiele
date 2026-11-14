@@ -1861,6 +1861,25 @@ const SPIELE = [
         leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35] },
       s6: { n: 9, kh: 3, kb: 3, loesung: "836195724174832569529746381947263815318457296652981473793518642261374958485629137",
         leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 69, 70, 71, 72, 73, 74, 75, 76, 79] } } } },
+  // Käfig-Sudoku (LERN-56, SU1 a): Käfige mit ihrem Ergebnis, oben auch − × :, Basisklasse 5
+  { id: "kaefig-sudoku", art: ["antippen"], klasse: 5, neu: "LERN_Session40", bild: "🔲", name: "Käfig-Sudoku", thema: "logik", farbe: "var(--deko-2)",
+    // nicht im Zufallsmix (Entscheid ZM1 b, LERN_Session40): ein ganzes Rätsel ist keine Kurzaufgabe
+    mix: false,
+    pfad: "spiele/kaefig-sudoku/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 120, s2: 180, s3: 360, s4: 420, s5: 480, s6: 900 },
+    beschreibung: "Sudoku mit Käfigen: Die Zahlen im Käfig geben sein Ergebnis — zerlegen und im Kopf rechnen",
+    lernziele: [{ lz: "MA.1.A.3", stufen: ALLE_STUFEN }, { lz: "MA.1.B.1", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (feier.js, BAUEN · sudoku): das Rätsel der Stufe mit seinen Käfigen füllt sich Feld um Feld
+    feier: { muster: "bauen", bilder: "sudoku", ziele: {
+      s1: { n: 4, kh: 2, kb: 2, loesung: "1234341241232341", kaefige: "geeegbbadfcadfca", leer: [0, 1, 2, 3, 5, 7, 9, 10, 11, 12, 13, 14] },
+      s2: { n: 4, kh: 2, kb: 2, loesung: "1324243142133142", kaefige: "abbcabfcdffeddee", leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] },
+      s3: { n: 6, kh: 2, kb: 3, loesung: "432516615243126435354621541362263154", kaefige: "keddjjkeggijafmgiiafmcchallchhnnbbbh",
+        leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 15, 16, 17, 18, 20, 21, 22, 24, 25, 28, 30, 31, 32, 33, 34] },
+      s4: { n: 6, kh: 2, kb: 3, loesung: "124635536421641253352146463512215364", kaefige: "lnnoiklffoikdffommddaahhccejggbbejgg",
+        leer: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35] },
+      s5: { n: 6, kh: 2, kb: 3, loesung: "315642426153563214142536654321231465", kaefige: "ggahbbgaahbbeeifffkkilmmkjjlccnnnddd",
+        leer: [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 24, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35] },
+      s6: { n: 6, kh: 2, kb: 3, loesung: "234516651342316254425631542163163425", kaefige: "ccllnncmmeeeaabbdhakggdhkkfgdjoofiij",
+        leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35] } } } },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */

@@ -1581,6 +1581,16 @@ und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku
   für die schweren Stufen. Ein Zeichen, das eine Zahl bricht, ist ein Widerspruch wie eine doppelte Zahl (SU3 a: „Die 2
   muss grösser sein als die 3 daneben.“). Im Spiel stehen die Zeichen auf der Kante, senkrecht dasselbe < und >, um 90°
   gedreht; die Spitze zeigt zur kleineren Zahl. Die Abschluss-Animation zeigt sie mit `feier.vergleich`.
+- **Käfige** (Käfig-Sudoku): `SUDOKU.kaefigeAus(n, loesung, zufall, { ops, groessen })` teilt das Raster zu einer Lösung
+  in Käfige aus 2 bis 4 Nachbarfeldern ohne gleiche Zahl, je mit Rechenart und Ergebnis (`ops` „+“ oder „alle“: zwei
+  Felder auch −, ×, :, grosse Zahl zuerst; mehr Felder auch ×). `raster(…, kaefige)` rechnet je Käfig alle passenden
+  Zahlenfolgen (Kombis) einmal aus; daraus kommen die Kandidaten im Löser durch Probieren (mit den gefüllten Feldern) und
+  im menschlichen Löser der Schritt „kaefig“ (nur Kombis, die zu allen Feldern des Käfigs passen, bis sich nichts mehr
+  ändert). Widerspruch nach SU3 a, was das Kind sehen kann: die Zahl steht schon im Käfig, die Summe ist schon zu gross,
+  der volle Käfig gibt nicht sein Ergebnis. Im Spiel innen gestrichelte Ränder (`sd-kf`, `kf-o` …) und das Ergebnis oben
+  links („12+“, `sd-kaefig-ziel`); die Abschluss-Animation zeigt die Ränder mit `kaefige` (je Feld ein Buchstabe). Der
+  menschliche Löser setzt bei der Prüfung „lösbar?“ je Durchgang alle Felder mit nur einer Zahl (das Ergebnis bleibt, die
+  Käfig-Rechnung läuft so seltener; LERN_Session40).
 - **Prüfung** (`SUDOKU.maengel` für `pruefeAufgabe`): Lösung gültig, Vorgaben passen, genau eine Lösung — unabhängig vom
   Generator durch Probieren gezählt (`SUDOKU.zaehleLoesungen`) —, mit den Schritten der Stufe lösbar, richtige Zahl
   leerer Felder.

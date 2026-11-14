@@ -71,6 +71,37 @@
 }
 .sd-zeichen.sd-senk { transform: translate(-50%, -50%) rotate(90deg); }
 
+/* Käfig-Sudoku: gestrichelter Rand innen, wo der Käfig endet; das Ergebnis oben links im ersten Feld (sudoku.js setzt
+   left/top in % des Rasters) */
+.sd-feld.sd-kf { position: relative; }
+.sd-feld.sd-kf::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  border: 0 dashed var(--text-leise);
+}
+.sd-feld.kf-o::after { border-top-width: 2px; }
+.sd-feld.kf-u::after { border-bottom-width: 2px; }
+.sd-feld.kf-l::after { border-left-width: 2px; }
+.sd-feld.kf-r::after { border-right-width: 2px; }
+.sd-feld.sd-kf:not(.kf-o)::after { top: -1px; }
+.sd-feld.sd-kf:not(.kf-u)::after { bottom: -1px; }
+.sd-feld.sd-kf:not(.kf-l)::after { left: -1px; }
+.sd-feld.sd-kf:not(.kf-r)::after { right: -1px; }
+.sd-kaefig-ziel {
+  position: absolute;
+  transform: translate(5px, 4px);
+  pointer-events: none;
+  padding: 0 2px;
+  border-radius: 4px;
+  background: var(--k-feld);
+  color: var(--text);
+  font-size: max(11px, calc(var(--sd-zelle) * .2));
+  font-weight: 800;
+  line-height: 1.1;
+}
+
 /* Notizen: kleine Zahlen im Feld, 2 × 2 beim 4 × 4, sonst 3 Spalten */
 .sd-notizen {
   display: grid;

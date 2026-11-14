@@ -4174,6 +4174,16 @@ var LS_FEIER = (function () {
     leer.forEach((i, k) => svg.appendChild(erscheine(s("g", { "data-stueck": "zahl", "data-wert": w[i] },
       s("rect", { x: x0 + (i % n) * c + 1, y: y0 + Math.floor(i / n) * c + 1, width: c - 2, height: c - 2, rx: 2, fill: "#e3f6ea" }),
       text(...mitte(i), zeig(w[i]), { gross, farbe: "#2b6cd1" })), 0.2 + k * je, ruhig, 0.12)));
+    // Käfig-Sudoku (z.kaefige: je Feld der Buchstabe seines Käfigs): innen gestrichelt, wo der Käfig endet, wie im Spiel
+    const kf = z.kaefige ? [...String(z.kaefige)] : null;
+    if (kf && kf.length === n * n) for (let i = 0; i < n * n; i++) {
+      const zz = Math.floor(i / n), sp = i % n, x = x0 + sp * c, y = y0 + zz * c, e = 2.2;
+      const strich = (x1, y1, x2, y2) => svg.appendChild(s("line", { x1, y1, x2, y2, stroke: "#8a8fa8", "stroke-width": 0.9, "stroke-dasharray": "2 1.6" }));
+      if (zz === 0 || kf[i - n] !== kf[i]) strich(x + e, y + e, x + c - e, y + e);
+      if (zz === n - 1 || kf[i + n] !== kf[i]) strich(x + e, y + c - e, x + c - e, y + c - e);
+      if (sp === 0 || kf[i - 1] !== kf[i]) strich(x + e, y + e, x + e, y + c - e);
+      if (sp === n - 1 || kf[i + 1] !== kf[i]) strich(x + c - e, y + e, x + c - e, y + c - e);
+    }
     // Vergleichs-Sudoku (feier.vergleich): die Zeichen auf den Kanten im Kasten wie im Spiel, Spitze zur kleineren Zahl
     if (feier.vergleich) for (let i = 0; i < n * n; i++) {
       const zz = Math.floor(i / n), sp = i % n, x = x0 + sp * c, y = y0 + zz * c, gz = Math.max(9, c * 0.42);

@@ -17,12 +17,12 @@ beliebigen Gebieten, Löser, Generator, Bedienung mit ✏️-Notizen; Fehler nac
 | Bilder-Sudoku | KG/1 | dasselbe mit Tieren statt Zahlen, 4 × 4 | erledigt 2026-11-13 (LERN_Session40), neu und ungeprüft |
 | Gebiets-Sudoku | 4 | unregelmässige Gebiete statt Kästen (Zusatz Patrik); 4 × 4, 5 × 5, 6 × 6, 9 × 9 | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
 | Vergleichs-Sudoku | 3 | < und > zwischen Nachbarfeldern statt vieler Vorgaben | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
-| Käfig-Sudoku | 5 | Summen in Zellgruppen, oben auch −, ×, : | offen |
+| Käfig-Sudoku | 5 | Summen in Zellgruppen, oben auch −, ×, :; 4 × 4 und 6 × 6 | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
 | Sudoku-Duell | 5 | abwechselnd mit der Eule regelkonform setzen (Thema Strategie) | offen |
 
 Was der Baustein für die übrigen noch braucht (Bilder kann er seit dem Bilder-Sudoku: `zeichen`, `name`, `nennung`, eigene
-`tipps`; Gebiete seit dem Gebiets-Sudoku; Zeichen < und > seit dem Vergleichs-Sudoku): Summen im Löser und im menschlichen
-Löser (Käfig), ein Zug der Eule (Duell).
+`tipps`; Gebiete seit dem Gebiets-Sudoku; Zeichen < und > seit dem Vergleichs-Sudoku; Käfige seit dem Käfig-Sudoku): ein
+Zug der Eule (Duell).
 
 **Gebiets-Sudoku 7 × 7 (offen):** Bei 5 und 7 gibt es keine Kästen; die Gebiete entstehen dort aus den Zeilen, und ein Tausch
 gelingt fast nur an den Zeilenenden. Beim 7 × 7 blieb in 96 bis 99 von 100 ersten Versuchen ein Gebiet ein Rechteck, ein

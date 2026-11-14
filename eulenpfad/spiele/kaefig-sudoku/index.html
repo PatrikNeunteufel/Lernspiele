@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Käfig-Sudoku</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/sudoku.css">
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🔲 Käfig-Sudoku</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../../version.js"></script>
+<script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/sudoku.js"></script>
+<script>
+"use strict";
+// Sudoku-Familie (LERN-56, SU1 a, LERN_Session13): das Käfig-Sudoku, Basisklasse 5 — Felder in Käfigen mit ihrem
+// Ergebnis, „in den oberen Stufen auch mit −, ×, :“. Übt Zerlegen und Kopfrechnen (MA.1.A.3) und das Schliessen
+// (MA.1.B.1); Lernziele als Annahme (docs/eulenpfad/lernziele/lehrplan_sg_session40.md).
+// Regel: Jede Zahl einmal in jeder Zeile, Spalte und jedem Kasten; die Zahlen eines Käfigs geben sein Ergebnis, keine
+// Zahl steht in einem Käfig zweimal; − und : nur in Käfigen mit zwei Feldern, grosse Zahl zuerst.
+
+// Je Stufe: Grösse, Kasten, Rechenarten (+ oder alle), leere Felder. Gemessen LERN_Session40, je 200 Rätsel ohne Mangel,
+// höchstens 11 ms. Kein 9 × 9 (Entscheid KK1 a): ein Rätsel kostete 33 bis 131 ms (die Prüfung mit 3000 Rätseln liefe aus) und wäre
+// eine Runde von weit über einer Viertelstunde.
+const STUFE = {
+  s1: { n: 4, k: [2, 2], ops: "+", leer: 12, groessen: [2, 2, 3] },        // 4. Klasse
+  s2: { n: 4, k: [2, 2], ops: "+", leer: 16, groessen: [2, 2, 3] },        // keine Zahl vorgegeben
+  s3: { n: 6, k: [2, 3], ops: "+", leer: 28, groessen: [2, 2, 3, 3] },     // Klassenziel
+  s4: { n: 6, k: [2, 3], ops: "+", leer: 32, groessen: [2, 2, 3, 3] },
+  s5: { n: 6, k: [2, 3], ops: "alle", leer: 32, groessen: [2, 2, 3, 3] },  // 6. Klasse: + − × :
+  s6: { n: 6, k: [2, 3], ops: "alle", leer: 36, groessen: [2, 2, 3, 3] },  // Königsstufe: keine Zahl vorgegeben
+};
+const TECHNIKEN = new Set(["einer", "versteckt", "kaefig"]);
+const KAESTEN = {};
+const startRaster = p => (KAESTEN[p.n] = KAESTEN[p.n] || SUDOKU.raster(p.n, SUDOKU.kaesten(p.n, ...p.k)));
+const rasterMit = (p, kaefige) => SUDOKU.raster(p.n, startRaster(p).gebiete, "kasten", [], kaefige);
+
+/** { kaefige, loesung, vorgabe }: Lösung, Käfige dazu, dann Felder geleert, solange es lösbar bleibt. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let v = 0; v < 100; v++) {
+    const loesung = SUDOKU.fuelle(startRaster(p), LS.mische);
+    const kaefige = SUDOKU.kaefigeAus(p.n, loesung, () => KERN.zufall.quelle.zufall(), { ops: p.ops, groessen: p.groessen });
+    const a = SUDOKU.erzeuge(rasterMit(p, kaefige), { leer: p.leer, techniken: TECHNIKEN, mische: LS.mische, versuche: 2, loesung });
+    if (a) return { kaefige, ...a };
+  }
+  throw new Error(`Käfig-Sudoku ${stufe}: kein Rätsel gefunden`);
+}
+
+/** Mängel: Käfige decken alle Felder genau einmal, Rechenarten der Stufe, Ergebnis stimmt; Rätsel genau eine Lösung. */
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  const m = [];
+  const felder = a.kaefige.flatMap(k => k.felder);
+  if (felder.length !== p.n * p.n || new Set(felder).size !== felder.length) m.push("Käfige decken das Raster nicht genau");
+  for (const k of a.kaefige) {
+    if (p.ops === "+" && k.op !== "+") m.push(`Rechenart ${k.op} in Stufe ${stufe}`);
+    if ((k.op === "−" || k.op === ":") && k.felder.length !== 2) m.push(`${k.op} mit ${k.felder.length} Feldern`);
+    if (SUDOKU.RECHNE[k.op](k.felder.map(f => a.loesung[f])) !== k.ziel && k.felder.length > 1) m.push(`Käfig ${k.ziel}${k.op} stimmt nicht`);
+  }
+  return [...m, ...SUDOKU.maengel(rasterMit(p, a.kaefige), a, { leer: p.leer, techniken: TECHNIKEN })];
+}
+
+LS.spiel({
+  id: "kaefig-sudoku",
+  einleitung: "Fülle das Sudoku! Jede Zahl einmal in jeder Zeile, Spalte und jedem Kasten — und die Zahlen in jedem Käfig geben sein Ergebnis.",
+  hilfe: stufe => "Die Zahl oben links in einem Käfig ist sein Ergebnis: 12+ heisst, alle Zahlen im Käfig zusammen geben 12. Im Käfig steht keine Zahl zweimal."
+    + (STUFE[stufe]?.ops === "alle" ? " 2− ist der Unterschied zweier Zahlen, 20× das Mal, 3: das Geteilt (die grössere durch die kleinere)." : "")
+    + " Tipp auf ein leeres Feld, dann auf eine Zahl unten. Mit ✏️ schreibst du Notizen, ⌫ leert das Feld, „✓ Fertig“ prüft alles.",
+  anzahl: { s1: 3, s2: 3, s3: 2, s4: 2, s5: 2, s6: 1 },
+  stufen: {
+    s1: "4 × 4 mit Plus-Käfigen und ein paar Zahlen.",
+    s2: "4 × 4 nur mit Plus-Käfigen, ohne Zahlen.",
+    s3: "6 × 6 mit Plus-Käfigen.",
+    s4: "6 × 6 mit Plus-Käfigen und wenigen Zahlen.",
+    s5: "6 × 6 mit allen Rechenarten: + − × :",
+    s6: "Endgegner: 6 × 6 mit allen Rechenarten, ohne Zahlen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const { kaefige, loesung, vorgabe } = aufgabeErzeugen(ctx.stufe);
+    SUDOKU.spiel(ctx, {
+      raster: rasterMit(p, kaefige), vorgabe, loesung,
+      tipps: [
+        "Nicht sicher? Schreib die möglichen Zahlen klein ins Feld (✏️).",
+        "Such einen kleinen Käfig mit wenigen Möglichkeiten: Welche Zahlen geben sein Ergebnis, ohne doppelte Zahl? Schau dann, welche davon in Zeile, Spalte und Kasten noch fehlen.",
+        "Schau dir das Feld an, das jetzt leuchtet: Welche Zahl passt in seinen Käfig und fehlt dort noch?",
+      ],
+      auftrag: `Jede Zahl von 1 bis ${p.n} einmal in jeder Zeile, Spalte und jedem Kasten. Die Zahlen im Käfig geben sein Ergebnis.`,
+    });
+    if (ctx.nr === 0) ctx.sag("Schau die Käfige an: Die kleine Zahl oben links ist ihr Ergebnis.");
+  },
+});
+</script>
+</body>
+</html>
