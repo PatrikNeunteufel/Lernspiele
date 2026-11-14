@@ -433,7 +433,14 @@ Stelle der Karte öffnet das Startbild des Spiels. Lernziel-Kürzel blenden beim
     (`svg.hand-rahmen`, `STIL.pfad`): eine gefüllte Fläche zwischen zwei leicht krummen Linien, auf der Kopfseite 7–11 px
     dick (Spielkarte oben, kompakt und Weiterspielen links), sonst 2–4 px; Farbe `--f`, sonst eine helle Linie. Die Form
     hängt an der Kennung (Zufall mit Startwert) und wird neu gerechnet, wenn sich die Grösse ändert (ResizeObserver);
-    neue Elemente bindet ein MutationObserver ein.
+    neue Elemente bindet ein MutationObserver ein. Gezeichnet wird erst, wenn das Element ins Bild kommt (Entscheid
+    LZ1 a, LERN_Session40; IntersectionObserver mit 300 px Vorlauf, dann der ResizeObserver): Jeder Rahmen misst seine
+    Grösse und erzwingt so ein Layout; für alle 76 Karten auf einmal reagierte der Tab Spiele auf einem Tablet (CPU
+    vierfach gedrosselt) erst nach 2 bis 4 s, jetzt nach 1,2 bis 2,4 s. Dazu layoutet der Browser Themenblöcke ausserhalb
+    des Bildes erst beim Rollen (`content-visibility: auto` mit `overflow-clip-margin` in `start/start.css`). Ohne
+    IntersectionObserver (Ersatz-DOM der Tests) wie vorher sofort. Folge für Werkzeuge: Eine Aufnahme über das Fenster
+    hinaus (`tools/bilder_aufnehmen.js --voll`) zeigt Karten unten ohne Rahmen, wie schon ohne Kartenbild;
+    `tools/anleitung_bilder.js` vergrössert das Fenster vorher und ist nicht betroffen.
   - Raster: Spielkarten in den Kacheln bis 4 px verschoben, 0–12 px tiefer, 97,5–102 % gross (`--rx`, `--ry`, `--rm`,
     `--rs`), je Spiel gleich; nach etwa jeder zwölften Karte eine Lücke (`.raster-luecke`, `STIL.luecke`), ab 640 px
     Breite. Gemessen LERN_Session32: keine Karte überdeckt eine andere, kleinster Abstand 7,4 px (1024 px) und 6,4 px
@@ -1210,11 +1217,20 @@ steht **im Katalog**, im Eintrag als `feier: { muster, … }` (Entscheid GS1 a, 
 Startseite das Kartenbild zeichnen kann; docs/eulenpfad/konzept_gestaltung.md). `LS.spiel` übernimmt sie von dort
 (`def.feier`); eine Angabe in `LS.spiel({ …, feier })` meldet die Konsole als Fehler. Braucht die Animation Daten des
 Spiels, nennt sie diese beim Namen (Entscheid SK1 a): `feier.karte: "schweiz"`, Ziele wie `{ flaechen: "ostschweiz" }`,
-dazu `daten: ["karte.js", "orte.js"]` (Dateien im Spielordner, die die Startseite nachlädt). Die Datendatei meldet Karte
-und Auswahl an (`LS_FEIER.kartenDaten(name, { karte, auswahl: { name: karte => … } })`, in `schweiz-karte/orte.js` mit
-OSTSCHWEIZ und STADT_MIN); unbekannte Namen geben kein Bild. Das Spiel lädt
-`../gemeinsam/feier.js` nach `spiel.js` und nennt im Katalog `einstellungen: ["feier"]`. Das Schlussbild zeigt sie (`LS_FEIER.zeige`) zwischen „Geschafft“ und den Sternen, wenn die
+dazu `daten: ["karte.js", "orte.js"]` (Dateien im Spielordner, die die Startseite nachlädt). Die Datendatei stellt Karte
+und Auswahl bereit (`globalThis.FEIER_KARTEN_DATEN[name] = { karte, auswahl: { name: karte => … } }`, in
+`schweiz-karte/orte.js` mit OSTSCHWEIZ und STADT_MIN; `LS_FEIER.kartenDaten(name, …)` geht weiter); unbekannte Namen
+geben kein Bild. Das Spiel nennt im Katalog `einstellungen: ["feier"]`. Das Schlussbild zeigt sie (`LS_FEIER.zeige`) zwischen „Geschafft“ und den Sternen, wenn die
 Einstellung „Abschluss-Animation“ (`EINSTELLUNGEN.feier`, global und je Spiel) an ist; dann entfällt das Konfetti.
+
+**Laden** (Entscheid LZ1 a, LERN_Session40): Die Spielseiten binden `feier.js` (727 KB, gezippt 202 KB) nicht mehr ein;
+`spiel.js` lädt die Datei im Leerlauf nach dem Aufbau nach (`ladeFeier`, `requestIdleCallback`, spätestens nach 4 s; im
+Zufallsmix nicht). Gemessen mit vierfach gedrosselter CPU: Die Zahlenmauer ist nach 67 bis 145 ms bedienbar statt nach
+89 bis 534 ms. Ist die Datei beim Schlussbild noch nicht da, steht ein Platz (`.feier-platz`, so hoch wie das Bild), bis
+sie geladen ist; lädt sie gar nicht, gibt es Konfetti wie früher. Die Vorschau (`?feier=`) wartet auf sie. Die Startseite
+bindet `feier.js` weiter ein: Die Kartenbilder der sichtbaren Karten brauchen es sofort. In den Testwerkzeugen reiht
+`skripte()` (`tools/listen_fingerabdruck.js`) die Datei auf Spielseiten gleich nach `spiel.js` ein, wo sie bis
+LERN_Session40 stand; das Ersatz-DOM lädt keine Skripte nach.
 Spiele ohne `feier` behalten das bisherige Schlussbild mit Konfetti.
 
 - **Stufe ändert das Ziel, Sterne schmücken aus:** 2 Sterne ein Fähnchen oder funkelnde Sterne (`data-schmuck="2"`),
@@ -1558,6 +1574,13 @@ und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku
   bei einem Teil). `gebieteMaengel` prüft: n Gebiete zu n Feldern, zusammenhängend, keins ein Rechteck. `erzeuge` nimmt
   die Lösung mit `loesung`. Im Spiel sind die Gebiete leicht gefärbt (`sd-ton0` … `sd-ton3` aus `--deko-*`, Nachbarn
   verschieden); die Abschluss-Animation nimmt `gebiete` als Ziffernfolge.
+- **Zeichen < und >** (Vergleichs-Sudoku): `SUDOKU.vergleicheAus(n, gebiete, loesung)` setzt an jede Kante innerhalb
+  eines Kastens ein Zeichen, als `[klein, gross]`; `raster(n, gebiete, art, vergleiche)` nimmt sie. Löser durch Probieren
+  und Füllen beachten sie bei gefüllten Nachbarn; der menschliche Löser hat dazu die Schritte „vergleich“ (Zeichen zu einem
+  gefüllten Nachbarn) und „kette“ (Zeichen zwischen zwei leeren Feldern, bis sich nichts mehr ändert); `braucht: "kette"`
+  für die schweren Stufen. Ein Zeichen, das eine Zahl bricht, ist ein Widerspruch wie eine doppelte Zahl (SU3 a: „Die 2
+  muss grösser sein als die 3 daneben.“). Im Spiel stehen die Zeichen auf der Kante, senkrecht dasselbe < und >, um 90°
+  gedreht; die Spitze zeigt zur kleineren Zahl. Die Abschluss-Animation zeigt sie mit `feier.vergleich`.
 - **Prüfung** (`SUDOKU.maengel` für `pruefeAufgabe`): Lösung gültig, Vorgaben passen, genau eine Lösung — unabhängig vom
   Generator durch Probieren gezählt (`SUDOKU.zaehleLoesungen`) —, mit den Schritten der Stufe lösbar, richtige Zahl
   leerer Felder.

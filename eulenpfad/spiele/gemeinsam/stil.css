@@ -886,6 +886,9 @@ button.link, a.link {
 
 .feier { margin: 4px auto 10px; max-width: 360px; cursor: pointer; }
 .feier svg { display: block; width: 100%; height: auto; }
+/* Platz der Abschluss-Animation, solange feier.js noch lädt (LZ1 a, LERN_Session40): so hoch wie das Bild (320 × 150), damit
+   die Schlusskarte nicht springt */
+.feier-platz { margin: 4px auto 10px; width: 100%; max-width: 360px; aspect-ratio: 320 / 150; }
 
 /* ---------- Konfetti ---------- */
 

@@ -2353,3 +2353,22 @@
     im Mix, Abschluss-Animation mit den Gebieten. Baustein: `gebieteZufall` (Gebiete zu einer gegebenen Lösung, Tausch nur
     gleicher Zahlen), `gebieteMaengel`, `startGebiete`, `erzeuge` mit `loesung`, `fuelle` mit Schrittgrenze. Kein 7 × 7:
     dort blieb fast immer ein Gebiet ein Rechteck, die Prüfung liefe aus (logikraetsel.md).
+  - Neues Spiel **Vergleichs-Sudoku (vergleichs-sudoku)**, Basisklasse 3, neu und ungeprüft: < und > an jeder Kante im
+    Kasten statt vieler Vorgaben; 4 × 4 (10 und 12 leer), 6 × 6 (26, 30 leer, 36 ohne eine Zahl), 9 × 9 mit neun Zahlen.
+    Lernziele MA.1.A.1 (vergleichen) und MA.1.B.1 (Annahme). Endlos, nicht im Mix, Abschluss-Animation mit den Zeichen.
+    Baustein: Zeichen im Raster (`vergleicheAus`), in beiden Lösern, als Widerspruch beim Eintragen, Schritte
+    „vergleich“ und „kette“; die anderen drei Sudoku-Spiele unverändert (gleiche Klickzahlen).
+- **Schneller laden, Entscheid LZ1 a (Frage Patrik: „kann das Laden der Seite optimiert werden? lazyload?“):** gemessen in
+  Chrome ohne Fenster mit vierfach gedrosselter CPU (wie ein Tablet). Die Dateien laden in 20 bis 40 ms, die Zeit steckt
+  danach im Layout und Zeichnen der Startseite, vor allem in den gezeichneten Rahmen aller Karten. Neu zeichnet
+  `spiel.js` (STIL) einen Rahmen erst, wenn das Element ins Bild kommt, und `start.css` gibt den Themenblöcken
+  `content-visibility: auto`. Tab Spiele bedienbar nach 1,2 bis 2,4 s statt 1,8 bis 4,3 s (Stil „glatt“ 1,0 bis 1,4 s);
+  nach dem Rollen haben alle Karten im Bild ihren Rahmen, am Blockrand ist nichts abgeschnitten (hell, dunkel, 1024 und
+  375 px).
+- **feier.js erst bei Bedarf (LZ1 a, Punkt 3, nach erneuter Vorlage a):** die 173 Spielseiten binden feier.js nicht mehr
+  ein; `spiel.js` lädt es im Leerlauf nach dem Aufbau (`ladeFeier`), das Schlussbild wartet mit einem Platz
+  (`.feier-platz`), ohne Datei Konfetti; die Vorschau `?feier=` wartet; `schweiz-karte/orte.js` stellt die Kartendaten in
+  `globalThis.FEIER_KARTEN_DATEN` bereit (nur mit karte.js davor), feier.js liest sie dort. `tools/listen_fingerabdruck.js`
+  (`skripte`) reiht feier.js auf Spielseiten nach spiel.js ein — dieselbe Folge wie vorher auf allen 172 Seiten (geprüft
+  an HEAD). Zahlenmauer gedrosselt bedienbar nach 67 bis 145 ms statt 89 bis 534 ms. Im Browser geprüft: feier.js ab
+  172 ms nach dem Aufbau (49 ms), Schlussbild mit Animation, ohne feier.js Konfetti, Vorschau der Schweiz-Karte mit Karte.

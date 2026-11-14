@@ -4174,6 +4174,17 @@ var LS_FEIER = (function () {
     leer.forEach((i, k) => svg.appendChild(erscheine(s("g", { "data-stueck": "zahl", "data-wert": w[i] },
       s("rect", { x: x0 + (i % n) * c + 1, y: y0 + Math.floor(i / n) * c + 1, width: c - 2, height: c - 2, rx: 2, fill: "#e3f6ea" }),
       text(...mitte(i), zeig(w[i]), { gross, farbe: "#2b6cd1" })), 0.2 + k * je, ruhig, 0.12)));
+    // Vergleichs-Sudoku (feier.vergleich): die Zeichen auf den Kanten im Kasten wie im Spiel, Spitze zur kleineren Zahl
+    if (feier.vergleich) for (let i = 0; i < n * n; i++) {
+      const zz = Math.floor(i / n), sp = i % n, x = x0 + sp * c, y = y0 + zz * c, gz = Math.max(9, c * 0.42);
+      if (sp + 1 < n && kasten(i) === kasten(i + 1)) svg.appendChild(text(x + c, y + c / 2 + gz * 0.36, w[i] < w[i + 1] ? "<" : ">", { gross: gz, farbe: "#d9480f" }));
+      if (zz + 1 < n && kasten(i) === kasten(i + n)) {
+        // senkrecht dasselbe < und >, um 90° gedreht wie im Spiel
+        const t = text(x + c / 2, y + c + gz * 0.36, w[i] < w[i + n] ? "<" : ">", { gross: gz, farbe: "#d9480f" });
+        t.setAttribute("transform", `rotate(90 ${x + c / 2} ${y + c})`);
+        svg.appendChild(t);
+      }
+    }
     if (sterne >= 2) svg.appendChild(glanz(x0 + n * c + 16, y0 + 10, ruhig));
     if (sterne >= 3) svg.appendChild(funken(Math.max(x0 - 24, 24), 30, ruhig));
     return svg;
@@ -9580,7 +9591,8 @@ var LS_FEIER = (function () {
   /** feier.karte und die Ziele einer Stufe auflösen: Namen → Pfade und Punkte; unbekannte Namen → kein Bild. */
   function karteAufloesen(feier, ziel) {
     if (typeof feier.karte !== "string") return { karte: feier.karte, ziel };
-    const d = KARTEN_DATEN[feier.karte];
+    // auch aus globalThis.FEIER_KARTEN_DATEN: dort legt orte.js sie ab, wenn es vor feier.js läuft (LZ1 a, LERN_Session40)
+    const d = KARTEN_DATEN[feier.karte] || globalThis.FEIER_KARTEN_DATEN?.[feier.karte];
     if (!d || !ziel) return { karte: null, ziel: null };
     const nimm = w => (typeof w !== "string" ? w : d.auswahl?.[w] ? d.auswahl[w](d.karte) : null);
     const aus = { ...ziel, flaechen: nimm(ziel.flaechen), punkte: nimm(ziel.punkte) };

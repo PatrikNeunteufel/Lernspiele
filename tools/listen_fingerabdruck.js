@@ -16,11 +16,19 @@ const DOM = fs.readFileSync(path.join(__dirname, "pruef_dom.js"), "utf8");
 function skripte(seitenPfad, html) {
   const liste = [];
   const re = /<script(?:\s+src="([^"]+)")?[^>]*>([\s\S]*?)<\/script>/g;
+  // Spielseiten laden feier.js erst im Leerlauf nach (Entscheid LZ1 a, LERN_Session40, LS.ladeFeier in spiel.js), lange
+  // vor dem Schlussbild. Das Ersatz-DOM lädt keine Skripte nach; darum steht feier.js hier gleich nach spiel.js, wie es
+  // früher in der Seite stand — so prüfen Spieltest, Feier-Prüfung und Prüfansicht das Schlussbild wie bisher.
+  const spielseite = /[\\/]spiele[\\/](?!gemeinsam[\\/])[^\\/]+[\\/]index\.html$/.test(seitenPfad) && !/feier\.js"/.test(html);
   let m;
   while ((m = re.exec(html))) {
     if (m[1]) {
       const datei = path.join(path.dirname(seitenPfad), m[1]);
       liste.push({ name: path.relative(WURZEL, datei), code: fs.readFileSync(datei, "utf8") });
+      if (spielseite && /[\\/]gemeinsam[\\/]spiel\.js$/.test(datei)) {
+        const feier = path.join(path.dirname(datei), "feier.js");
+        liste.push({ name: path.relative(WURZEL, feier), code: fs.readFileSync(feier, "utf8") });
+      }
     } else {
       liste.push({ name: path.relative(WURZEL, seitenPfad) + " (inline)", code: m[2] });
     }

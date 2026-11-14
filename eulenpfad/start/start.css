@@ -344,6 +344,11 @@ input.suche { flex: 1 1 220px; max-width: 360px; min-height: 40px; font: inherit
 .stil-hand .thema-block::after { background: color-mix(in srgb, var(--f) 55%, var(--k-karte)); }
 .stil-hand .fach-block:not([style*="--hand-maske"])::after, .stil-hand .thema-block:not([style*="--hand-maske"])::after { content: none; }
 .stil-hand .thema-block { border-radius: 14px 20px 12px 22px / 20px 12px 22px 14px; }
+/* Blöcke ausserhalb des Bildes layoutet und zeichnet der Browser erst beim Rollen (Entscheid LZ1 a, LERN_Session40):
+   Themenblöcke mit 76 Karten brauchten auf einem Tablet (CPU vierfach gedrosselt) bis 4 s, bis der Tab Spiele reagierte.
+   contain-intrinsic-size „auto“ merkt sich die echte Höhe, sobald ein Block einmal gezeichnet war. content-visibility
+   schneidet am Rand ab (Paint-Containment); overflow-clip-margin lässt Rahmen, verschobene Karten und Lücken hinausragen. */
+.thema-block { content-visibility: auto; contain-intrinsic-size: auto 520px; overflow-clip-margin: 24px; }
 .stil-hand .thema-block:nth-child(2n) { border-radius: 22px 12px 20px 14px / 12px 22px 14px 20px; }
 /* Erfolge: Wochenziel und Abzeichen (Entscheid L1 a, LERN_Session10) */
 .abzeichen-hinweis { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 14px; border-radius: var(--rund);

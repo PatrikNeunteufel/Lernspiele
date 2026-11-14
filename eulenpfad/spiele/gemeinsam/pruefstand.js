@@ -1291,6 +1291,10 @@ const PRUEFSTAND = {
       "am": "2026-11-05",
       "von": "Patrik"
     },
+    "gebiets-sudoku": {
+      "am": "2026-11-14",
+      "von": "Patrik"
+    },
     "gegenteil-wippe": {
       "am": "2026-11-04",
       "von": "Patrik"

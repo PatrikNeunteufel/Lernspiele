@@ -1842,6 +1842,25 @@ const SPIELE = [
       s6: { n: 9, gebiete: "000111222011111122000002222333455555633455455663444444663777788663778888663777888",
         loesung: "643192785278564319519873642384625971192748563765319824427956138936481257851237496",
         leer: [2, 4, 5, 6, 7, 10, 11, 12, 13, 15, 16, 17, 18, 20, 21, 23, 24, 26, 29, 30, 31, 33, 35, 36, 37, 39, 40, 42, 43, 45, 46, 47, 48, 49, 50, 56, 58, 59, 60, 61, 63, 64, 65, 66, 67, 69, 70, 72, 73, 74, 75, 77] } } } },
+  // Vergleichs-Sudoku (LERN-56, SU1 a): < und > zwischen Nachbarfeldern statt vieler Vorgaben, Basisklasse 3
+  { id: "vergleichs-sudoku", art: ["antippen"], klasse: 3, neu: "LERN_Session40", bild: "🆚", name: "Vergleichs-Sudoku", thema: "logik", farbe: "var(--deko-1)",
+    // nicht im Zufallsmix (Entscheid ZM1 b, LERN_Session40): ein ganzes Rätsel ist keine Kurzaufgabe
+    mix: false,
+    pfad: "spiele/vergleichs-sudoku/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], zeiten: { s1: 90, s2: 120, s3: 300, s4: 360, s5: 480, s6: 1200 },
+    beschreibung: "Sudoku mit < und > zwischen den Feldern — Zahlen vergleichen und logisch schliessen",
+    lernziele: [{ lz: "MA.1.A.1", stufen: ALLE_STUFEN }, { lz: "MA.1.B.1", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (feier.js, BAUEN · sudoku): das Rätsel der Stufe mit seinen Zeichen füllt sich Feld um Feld
+    feier: { muster: "bauen", bilder: "sudoku", vergleich: true, ziele: {
+      s1: { n: 4, kh: 2, kb: 2, loesung: "3214412324311342", leer: [1, 3, 4, 6, 7, 9, 10, 11, 12, 15] },
+      s2: { n: 4, kh: 2, kb: 2, loesung: "3214143223414123", leer: [2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 14, 15] },
+      s3: { n: 6, kh: 2, kb: 3, loesung: "162345534216456123321564243651615432",
+        leer: [1, 2, 4, 5, 8, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 22, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34] },
+      s4: { n: 6, kh: 2, kb: 3, loesung: "415362623145342516156423561234234651",
+        leer: [0, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 32, 33, 34, 35] },
+      s5: { n: 6, kh: 2, kb: 3, loesung: "643125512463264351135246451632326514",
+        leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35] },
+      s6: { n: 9, kh: 3, kb: 3, loesung: "836195724174832569529746381947263815318457296652981473793518642261374958485629137",
+        leer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 29, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 69, 70, 71, 72, 73, 74, 75, 76, 79] } } } },
 ];
 
 /** Lernziele (Lernzielblatt 4.2 und Lehrplan SG) — für Profil-Fokus und Statistik je Lernziel. */

@@ -25,6 +25,14 @@ SU1 a).
 |---|---|---|
 | MA.1.B.1 (`.f`, `.h` wie beim Zahlen-Sudoku; dazu die Form der Gebiete lesen) | Gebiets-Sudoku | s1 4 × 4, 8 leer · s2 5 × 5, 13 leer · s3 6 × 6, 18 leer · s4 6 × 6, 22 leer, „versteckt“ nötig · s5 9 × 9, 45 leer · s6 9 × 9, 52 leer, „versteckt“ nötig |
 
+**Vergleichs-Sudoku, Basisklasse 3** (SU1 a: < und > zwischen Nachbarfeldern statt vieler Vorgaben): s1 = 2. Klasse,
+s3 = Klassenziel 3. Klasse, s5 = 4. Klasse. Dazu MA.1.A.1 („Anzahlen und Zahlen vergleichen: grösser, kleiner, <, >“, im
+Katalog seit LERN_Session2, an sg.lehrplan.ch geprüft).
+
+| Lernziel | Spiel | Stufen im Spiel (s1 → s6) |
+|---|---|---|
+| MA.1.A.1 (Zahlen vergleichen mit < und >), MA.1.B.1 (`.f`, `.h`: aus Zeichen schliessen) | Vergleichs-Sudoku | Zeichen an jeder Kante im Kasten; s1 4 × 4, 10 leer · s2 4 × 4, 12 leer · s3 6 × 6, 26 leer · s4 6 × 6, 30 leer, Zeichen zwischen zwei leeren Feldern nötig · s5 6 × 6 ohne vorgegebene Zahl · s6 9 × 9 mit neun Zahlen, Zeichen zwischen leeren Feldern nötig |
+
 **Bilder-Sudoku, Basisklasse 1** (SU1 a: „Basis Kindergarten/1. Klasse“; Spiele für den Kindergarten haben Basisklasse
 1, Stufe 1 ist der Kindergarten): s3 = Klassenziel 1. Klasse, s5 = 2. Klasse.
 

@@ -101,7 +101,7 @@ const SUDOKU = (() => {
    * Raster aus Grösse und Gebieten. → { n, gebiete, einheiten: [{ art, felder }], vonFeld: [[Einheit …]], voll }
    * art: "zeile", "spalte", "kasten" oder "gebiet" (für die Sätze der Eule).
    */
-  function raster(n, gebiete, gebietArt = "kasten") {
+  function raster(n, gebiete, gebietArt = "kasten", vergleiche = []) {
     if (gebiete.length !== n * n) throw new Error("Gebiete passen nicht zum Raster");
     const einheiten = [];
     for (let r = 0; r < n; r++) einheiten.push({ art: "zeile", felder: Array.from({ length: n }, (_, c) => r * n + c) });
@@ -115,14 +115,44 @@ const SUDOKU = (() => {
     }
     const vonFeld = Array.from({ length: n * n }, () => []);
     einheiten.forEach((e, u) => e.felder.forEach(i => vonFeld[i].push(u)));
-    return { n, gebiete, einheiten, vonFeld, voll: bits(n) };
+    // Vergleichs-Sudoku: [klein, gross] je Zeichen zwischen zwei Nachbarfeldern (Wert klein < Wert gross)
+    const kleiner = Array.from({ length: n * n }, () => []), groesser = Array.from({ length: n * n }, () => []);
+    for (const [a, b] of vergleiche) { kleiner[a].push(b); groesser[b].push(a); }
+    return { n, gebiete, einheiten, vonFeld, voll: bits(n), vergleiche, kleiner, groesser };
+  }
+
+  /**
+   * Zeichen zwischen allen Nachbarn im selben Gebiet, aus der Lösung: [klein, gross] (wie im üblichen Vergleichs-Sudoku
+   * steht an jeder Kante innerhalb eines Kastens ein Zeichen).
+   */
+  function vergleicheAus(n, gebiete, loesung) {
+    const aus = [];
+    for (let i = 0; i < n * n; i++) for (const k of [i + 1, i + n]) {
+      if ((k === i + 1 && (i % n) === n - 1) || k >= n * n || gebiete[k] !== gebiete[i]) continue;
+      aus.push(loesung[i] < loesung[k] ? [i, k] : [k, i]);
+    }
+    return aus;
   }
 
   /** Masken je Einheit: welche Zahlen dort schon stehen. */
   const einheitsMasken = (r, werte) => r.einheiten.map(e => e.felder.reduce((m, i) => (werte[i] ? m | (1 << (werte[i] - 1)) : m), 0));
-  const kandidaten = (r, masken, i) => r.voll & ~r.vonFeld[i].reduce((m, u) => m | masken[u], 0);
+  /** Was die Zeichen zu schon gefüllten Nachbarn erlauben: kleiner als jeder grössere, grösser als jeder kleinere. */
+  function vergleichMaske(r, werte, i) {
+    let m = r.voll;
+    for (const j of r.kleiner[i]) if (werte[j]) m &= (1 << (werte[j] - 1)) - 1;
+    for (const j of r.groesser[i]) if (werte[j]) m &= ~((1 << werte[j]) - 1);
+    return m;
+  }
+  /** Kandidaten eines Felds aus den Einheiten; mit werte auch aus den Zeichen zu gefüllten Nachbarn (Vergleichs-Sudoku). */
+  const kandidaten = (r, masken, i, werte = null) => {
+    const m = r.voll & ~r.vonFeld[i].reduce((x, u) => x | masken[u], 0);
+    return werte && r.vergleiche.length ? m & vergleichMaske(r, werte, i) : m;
+  };
 
-  /** Widersprüche der Werte: je Einheit doppelte Zahlen → [{ einheit, zahl, felder }]. */
+  /**
+   * Widersprüche der Werte: je Einheit doppelte Zahlen → [{ einheit, zahl, felder }]; dazu verletzte Zeichen zwischen
+   * zwei gefüllten Feldern → [{ vergleich: [klein, gross], felder }].
+   */
   function widersprueche(r, werte) {
     const aus = [];
     r.einheiten.forEach((e, u) => {
@@ -130,6 +160,7 @@ const SUDOKU = (() => {
       for (const i of e.felder) if (werte[i]) (je[werte[i]] = je[werte[i]] || []).push(i);
       for (const [z, f] of Object.entries(je)) if (f.length > 1) aus.push({ einheit: u, zahl: Number(z), felder: f });
     });
+    for (const [a, b] of r.vergleiche) if (werte[a] && werte[b] && werte[a] >= werte[b]) aus.push({ vergleich: [a, b], felder: [a, b] });
     return aus;
   }
 
@@ -148,7 +179,7 @@ const SUDOKU = (() => {
       let best = -1, bestMaske = 0, bestZahl = 99;
       for (let i = 0; i < werte.length; i++) {
         if (werte[i]) continue;
-        const m = kandidaten(r, masken, i), k = zaehleBits(m);
+        const m = kandidaten(r, masken, i, werte), k = zaehleBits(m);
         if (k < bestZahl) { best = i; bestMaske = m; bestZahl = k; if (k <= 1) break; }
       }
       if (best < 0) { anzahl++; if (ziel && anzahl === 1) ziel.push(...werte); return; }
@@ -173,7 +204,7 @@ const SUDOKU = (() => {
       let best = -1, bestMaske = 0, bestZahl = 99;
       for (let i = 0; i < werte.length; i++) {
         if (werte[i]) continue;
-        const m = kandidaten(r, masken, i), k = zaehleBits(m);
+        const m = kandidaten(r, masken, i, werte), k = zaehleBits(m);
         if (k < bestZahl) { best = i; bestMaske = m; bestZahl = k; if (k <= 1) break; }
       }
       if (best < 0) return true;
@@ -192,13 +223,32 @@ const SUDOKU = (() => {
 
   /**
    * Nächster Schritt des menschlichen Lösers: { feld, zahl, art: "einer" | "versteckt", einheit } oder null.
-   * techniken: Set aus "einer", "versteckt". Zuerst „einer“ (ein Feld), dann „versteckt“ (eine Einheit).
+   * techniken: Set aus "einer", "versteckt", dazu im Vergleichs-Sudoku „vergleich“ (ein Zeichen zu einem gefüllten
+   * Nachbarn: „grösser als die 2“) und „kette“ (ein Zeichen zwischen zwei leeren Feldern: „kleiner als ein Feld, in das
+   * höchstens 3 passt“ — so lange, bis sich nichts mehr ändert). Die Zeichen engen die Kandidaten ein; gefunden wird
+   * zuerst „einer“ (ein Feld), dann „versteckt“ (eine Einheit).
    */
   function schritt(r, werte, techniken, masken = einheitsMasken(r, werte)) {
+    const mitVergleich = r.vergleiche.length > 0 && techniken.has("vergleich");
+    let kand = i => kandidaten(r, masken, i, mitVergleich ? werte : null);
+    if (mitVergleich && techniken.has("kette")) {
+      const c = werte.map((v, i) => (v ? 0 : kandidaten(r, masken, i, werte)));
+      const maske = i => (werte[i] ? 1 << (werte[i] - 1) : c[i]);
+      for (let neu = true; neu;) {
+        neu = false;
+        for (const [a, b] of r.vergleiche) {
+          const ma = maske(a), mb = maske(b);
+          if (!ma || !mb) continue; // Widerspruch: das zeigt der Löser nicht hier
+          if (!werte[a]) { const x = c[a] & ((1 << (31 - Math.clz32(mb))) - 1); if (x !== c[a]) { c[a] = x; neu = true; } }      // a < höchstes b
+          if (!werte[b]) { const x = c[b] & ~(((ma & -ma) << 1) - 1); if (x !== c[b]) { c[b] = x; neu = true; } }               // b > tiefstes a
+        }
+      }
+      kand = i => c[i];
+    }
     if (techniken.has("einer")) {
       for (let i = 0; i < werte.length; i++) {
         if (werte[i]) continue;
-        const m = kandidaten(r, masken, i);
+        const m = kand(i);
         if (m && !(m & (m - 1))) return { feld: i, zahl: einzigeZahl(m), art: "einer", einheit: null };
       }
     }
@@ -208,13 +258,13 @@ const SUDOKU = (() => {
         const felder = r.einheiten[u].felder;
         for (const i of felder) {
           if (werte[i]) continue;
-          const m = kandidaten(r, masken, i);
+          const m = kand(i);
           mehrmals |= einmal & m; einmal |= m;
         }
         const nur = einmal & ~mehrmals & ~masken[u];
         if (nur) {
           const bit = nur & -nur;
-          const feld = felder.find(i => !werte[i] && (kandidaten(r, masken, i) & bit));
+          const feld = felder.find(i => !werte[i] && (kand(i) & bit));
           return { feld, zahl: einzigeZahl(bit), art: "versteckt", einheit: u };
         }
       }
@@ -397,6 +447,17 @@ const SUDOKU = (() => {
     zahlen.style.setProperty("--sd-n", String(n));
     zahlen.style.setProperty("--sd-tasten", n <= 4 ? "2" : "3"); // Tastenblock breit: 2 × 2 oder 3 Spalten
 
+    // Zeichen zwischen Nachbarn (Vergleichs-Sudoku): auf der Kante, die Spitze zeigt zur kleineren Zahl
+    for (const [a, b] of r.vergleiche) {
+      const [x, y] = [Math.min(a, b), Math.max(a, b)], waag = y === x + 1;
+      // senkrecht dasselbe < und >, um 90° gedreht (sudoku.css): Spitze nach oben, wenn das obere Feld kleiner ist
+      const marke = a === x ? "<" : ">";
+      const z = Math.floor(x / n), s = x % n;
+      const sp = el("span", { class: `sd-zeichen ${waag ? "sd-waag" : "sd-senk"}`, text: marke, "aria-hidden": "true" });
+      sp.style.left = `${((waag ? s + 1 : s + 0.5) / n) * 100}%`;
+      sp.style.top = `${((waag ? z + 0.5 : z + 1) / n) * 100}%`;
+      brett.append(sp);
+    }
     ctx.flaeche.append(el("div", { class: "frage sd-auftrag", text: opt.auftrag }),
       el("div", { class: "sd-spiel" }, brett, el("div", { class: "sd-steuerung" }, zahlen, werkzeuge)));
     LS.kurztasten(zahlen, zahlKnoepfe);
@@ -424,6 +485,16 @@ const SUDOKU = (() => {
         if (dort !== undefined) {
           wackle(felder[i]); wackle(felder[dort]);
           ctx.falsch(`${gross(nennung(v))} steht schon ${EINHEIT_SATZ[r.einheiten[u].art]}.`);
+          return;
+        }
+      }
+      // Widerspruch zu einem Zeichen (Vergleichs-Sudoku, SU3 a): der gefüllte Nachbar ist nicht grösser bzw. kleiner
+      const wo = j => (Math.floor(j / n) === Math.floor(i / n) ? "daneben" : j < i ? "darüber" : "darunter");
+      for (const [nachbarn, soll, passt] of [[r.kleiner[i], "kleiner", w => v < w], [r.groesser[i], "grösser", w => v > w]]) {
+        const j = nachbarn.find(k => werte[k] && !passt(werte[k]));
+        if (j !== undefined) {
+          wackle(felder[i]); wackle(felder[j]);
+          ctx.falsch(`${gross(nennung(v))} muss ${soll} sein als ${nennung(werte[j])} ${wo(j)}.`);
           return;
         }
       }
@@ -455,7 +526,7 @@ const SUDOKU = (() => {
     /** Tipp 3: ein Feld zeigen, in das nach den richtigen Zahlen nur eine Zahl passt (nie die Zahl selbst). */
     function zeigeSchritt() {
       const sicher = werte.map((v, k) => (v === opt.loesung[k] ? v : 0));
-      const s = schritt(r, sicher, new Set(["einer", "versteckt"]));
+      const s = schritt(r, sicher, new Set(["einer", "versteckt", "vergleich", "kette"]));
       const feld = s ? s.feld : sicher.findIndex(v => !v);
       if (feld < 0) return;
       gewaehlt = feld;
@@ -485,7 +556,7 @@ const SUDOKU = (() => {
     }
   }
 
-  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
+  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, vergleicheAus, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
 })();
 
 if (typeof module !== "undefined") module.exports = SUDOKU;

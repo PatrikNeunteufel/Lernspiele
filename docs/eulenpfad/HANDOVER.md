@@ -1,5 +1,26 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-14 01:37 — LERN_Session40_2026-11-13_push-master
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+
+- **Angehalten — beim Weitermachen neu starten:** Spieltest der Sudoku-Spiele (Hintergrund, abgebrochen kurz vor dem
+  Ende). Fertig und ohne Fehler: alle 24 Stufen von Vergleichs-, Gebiets-, Bilder- und Zahlen-Sudoku (je 3000 Rätsel
+  fachlich), Endlos für Zahlen-, Bilder- und Gebiets-Sudoku; nur Hinweis „Einzahl?“ in vergleichs-sudoku s2 („Die 2
+  muss kleiner sein als die 1 daneben.“, Satz stimmt). Es fehlen Endlos und Mix des Vergleichs-Sudokus: neu starten mit
+  `node tools/pruefe_spiele.js vergleichs-sudoku` (rund 10 min). Sonst lief nichts; der Server auf 8765 war nicht von
+  dieser Sitzung.
+- **Stand im Arbeitsbaum (nichts committet seit `baf347f` Bilder-Sudoku):** Gebiets-Sudoku (gebiets-sudoku) und
+  Vergleichs-Sudoku (vergleichs-sudoku) fertig; Entscheid LZ1 a (schneller laden): Rahmen des Stils „hand“ erst im
+  Bild (spiel.js), Themenblöcke mit content-visibility (start.css), feier.js auf 173 Spielseiten entfernt und im
+  Leerlauf nachgeladen (LS.ladeFeier, .feier-platz, orte.js über globalThis.FEIER_KARTEN_DATEN, skripte() in
+  tools/listen_fingerabdruck.js). Geprüft: Skripte „Keine Fehler.“, Feier „173 Spiele, 6228 Bilder, keine Fehler.“,
+  Eulenpfad schweiz-karte kompass zahlenmauer „Keine Fehler.“, Bildhöhe der neuen Sudokus „Alle Aufgaben passen ins
+  Bild.“, im Browser Schlussbild, Konfetti ohne feier.js, Vorschau. Doku (rahmen.md 24, 26), CHANGELOG nachgeführt.
+  `eulenpfad/spiele/gemeinsam/pruefstand.js` ist Patriks Änderung aus dem Prüfen, nicht Teil dieses Commits.
+- **Weiter mit:** (1) `node tools/pruefe_spiele.js vergleichs-sudoku`; (2) bei „Keine Fehler.“ Patrik die
+  Commit-Message geben (Entwurf im Gespräch, Testzahlen dann nachführen); (3) Käfig-Sudoku und Sudoku-Duell (LERN-56);
+  (4) Push auf master (Pages) mit vollem Eulenpfad-Lauf nur auf Patriks Entscheid.
+
 ## Stand
 **2026-11-13, nach LERN_Session39** ([Report](report/LERN_Session39_2026-11-13.md)):
 - **Kern:** unverändert 1.45.1.
@@ -592,7 +613,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |
 | LERN-55 | Ganze Aufgabe im Bild auf der sichtbaren Fläche (GR1 a); GR1 b (1000 × 500 ohne Vollbild) zurückgestellt | in Arbeit seit 2026-11-04 (LERN_Session13); BH1–BH3 umgesetzt, GR1 a offen | bildhoehe_offen.md; rahmen.md 20 |
-| LERN-56 | Sudoku-Familie: Bilder-, Zahlen-, Vergleichs-, Käfig-, Gebiets-Sudoku, Sudoku-Duell; Thema Logikrätsel (SU1–SU3 a) | in Arbeit seit 2026-11-13 (LERN_Session40); Baustein, Zahlen-, Bilder- und Gebiets-Sudoku gebaut, drei Spiele offen | spielideen/logikraetsel.md; rahmen.md 26; Report LERN_Session13, Plan 2 |
+| LERN-56 | Sudoku-Familie: Bilder-, Zahlen-, Vergleichs-, Käfig-, Gebiets-Sudoku, Sudoku-Duell; Thema Logikrätsel (SU1–SU3 a) | in Arbeit seit 2026-11-13 (LERN_Session40); Baustein, Zahlen-, Bilder-, Gebiets- und Vergleichs-Sudoku gebaut, Käfig-Sudoku und Duell offen | spielideen/logikraetsel.md; rahmen.md 26; Report LERN_Session13, Plan 2 |
 | LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
 | LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |
 | LERN-59 | Notizen für Zwischenergebnisse (NZ1 a) | erledigt 2026-11-04 (LERN_Session13, 32 Spiele) | konzept_notizen.md; rahmen.md 4.3 |

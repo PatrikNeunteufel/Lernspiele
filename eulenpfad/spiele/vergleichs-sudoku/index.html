@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vergleichs-Sudoku</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/sudoku.css">
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🆚 Vergleichs-Sudoku</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../../version.js"></script>
+<script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/sudoku.js"></script>
+<script>
+"use strict";
+// Sudoku-Familie (LERN-56, SU1 a, LERN_Session13): das Vergleichs-Sudoku, Basisklasse 3 — < und > zwischen
+// Nachbarfeldern statt vieler Vorgaben; übt das Vergleichen von Zahlen (MA.1.A.1) und das Schliessen (MA.1.B.1). Lernziele
+// als Annahme (docs/eulenpfad/lernziele/lehrplan_sg_session40.md).
+// Regel: Jede Zahl steht in jeder Zeile, jeder Spalte und jedem Kasten genau einmal; jedes Zeichen stimmt.
+
+// Je Stufe: Grösse, Kasten, leere Felder, Schritte. vergleich: Zeichen zu einem gefüllten Nachbarn („grösser als die 2“);
+// kette: Zeichen zwischen zwei leeren Feldern („kleiner als ein Feld, in das höchstens 3 passt“). Ein Zeichen steht an
+// jeder Kante innerhalb eines Kastens. Gemessen LERN_Session40, je 100 Rätsel ohne Mangel, unter 10 ms je Rätsel.
+const MIT = ["einer", "versteckt", "vergleich"], KETTE = [...MIT, "kette"];
+const STUFE = {
+  s1: { n: 4, k: [2, 2], leer: 10, techniken: MIT },                      // 2. Klasse
+  s2: { n: 4, k: [2, 2], leer: 12, techniken: MIT },
+  s3: { n: 6, k: [2, 3], leer: 26, techniken: MIT },                      // Klassenziel
+  s4: { n: 6, k: [2, 3], leer: 30, techniken: KETTE, braucht: "kette" },
+  s5: { n: 6, k: [2, 3], leer: 36, techniken: KETTE },                    // 4. Klasse: keine Zahl vorgegeben
+  s6: { n: 9, k: [3, 3], leer: 72, techniken: KETTE, braucht: "kette" },  // Königsstufe: neun Zahlen vorgegeben
+};
+const KAESTEN = {};
+const startRaster = p => (KAESTEN[p.n] = KAESTEN[p.n] || SUDOKU.raster(p.n, SUDOKU.kaesten(p.n, ...p.k)));
+const rasterMit = (p, vergleiche) => SUDOKU.raster(p.n, startRaster(p).gebiete, "kasten", vergleiche);
+const regel = p => ({ leer: p.leer, techniken: new Set(p.techniken), braucht: p.braucht || null });
+
+/** { vergleiche, loesung, vorgabe }: Lösung, die Zeichen daraus, dann Felder geleert, solange es lösbar bleibt. */
+function aufgabeErzeugen(stufe) {
+  const p = STUFE[stufe];
+  for (let v = 0; v < 50; v++) {
+    const loesung = SUDOKU.fuelle(startRaster(p), LS.mische);
+    const vergleiche = SUDOKU.vergleicheAus(p.n, startRaster(p).gebiete, loesung);
+    const a = SUDOKU.erzeuge(rasterMit(p, vergleiche), { ...regel(p), mische: LS.mische, versuche: 3, loesung });
+    if (a) return { vergleiche, ...a };
+  }
+  throw new Error(`Vergleichs-Sudoku ${stufe}: kein Rätsel gefunden`);
+}
+
+/** Mängel: jedes Zeichen passt zur Lösung (Widersprüche), genau eine Lösung, mit den Schritten der Stufe lösbar. */
+function pruefeAufgabe(a, stufe) {
+  const p = STUFE[stufe];
+  const m = SUDOKU.maengel(rasterMit(p, a.vergleiche), a, regel(p));
+  const erwartet = SUDOKU.vergleicheAus(p.n, startRaster(p).gebiete, a.loesung).length;
+  if (a.vergleiche.length !== erwartet) m.push(`${a.vergleiche.length} statt ${erwartet} Zeichen`);
+  return m;
+}
+
+LS.spiel({
+  id: "vergleichs-sudoku",
+  einleitung: "Fülle das Sudoku! Jede Zahl steht in jeder Zeile, Spalte und jedem Kasten einmal — und die Zeichen < und > zwischen den Feldern müssen stimmen.",
+  hilfe: "Die Spitze von < und > zeigt immer zur kleineren Zahl. Tipp auf ein leeres Feld, dann auf eine Zahl unten. Mit ✏️ schreibst du kleine Zahlen als Notiz ins Feld. ⌫ leert das Feld. Sind alle Felder voll, drückst du „✓ Fertig“.",
+  anzahl: { s1: 3, s2: 3, s3: 2, s4: 2, s5: 1, s6: 1 },
+  stufen: {
+    s1: "4 × 4 mit Zeichen — viele Zahlen helfen mit.",
+    s2: "4 × 4 mit wenigen Zahlen.",
+    s3: "6 × 6 mit Zeichen.",
+    s4: "6 × 6 — vergleiche auch zwei leere Felder miteinander.",
+    s5: "6 × 6 ganz ohne Zahlen, nur mit Zeichen.",
+    s6: "Endgegner: 9 × 9 mit nur neun Zahlen.",
+  },
+
+  aufgabe(ctx) {
+    const p = STUFE[ctx.stufe];
+    const { vergleiche, loesung, vorgabe } = aufgabeErzeugen(ctx.stufe);
+    SUDOKU.spiel(ctx, {
+      raster: rasterMit(p, vergleiche), vorgabe, loesung,
+      tipps: [
+        "Nicht sicher? Schreib die möglichen Zahlen klein ins Feld (✏️).",
+        "Die Spitze zeigt zur kleineren Zahl. Ein Feld, das kleiner als ein Nachbar ist, kann nicht die grösste Zahl sein. Such ein Feld, in das so nur noch eine Zahl passt.",
+        "Schau dir das Feld an, das jetzt leuchtet: Welche Zahl passt zu seinen Zeichen und fehlt dort noch?",
+      ],
+      auftrag: `Jede Zahl von 1 bis ${p.n} einmal in jeder Zeile, Spalte und jedem Kasten. Die Spitze zeigt zur kleineren Zahl.`,
+    });
+    if (ctx.nr === 0) ctx.sag("Schau die Zeichen an: Die Spitze zeigt immer zur kleineren Zahl.");
+  },
+});
+</script>
+</body>
+</html>

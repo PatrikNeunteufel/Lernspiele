@@ -821,6 +821,24 @@ const LS = (() => {
     s.src = src; s.onload = ok; s.onerror = fehler;
     document.head.append(s);
   });
+  // Abschluss-Animationen (feier.js, 727 KB) lädt eine Spielseite erst im Leerlauf nach dem Aufbau (Entscheid LZ1 a,
+  // LERN_Session40): Beim ersten Öffnen kostete sie auf einem Tablet (CPU vierfach gedrosselt) 0,45 s, bevor die Seite
+  // bedienbar war; gebraucht wird sie erst im Schlussbild. Der Pfad folgt dem von spiel.js (Spielseite und Startseite).
+  const FEIER_SRC = (() => {
+    const s = typeof document !== "undefined" ? document.currentScript?.src : "";
+    return s && /spiel\.js(\?.*)?$/.test(s) ? s.replace(/spiel\.js(\?.*)?$/, "feier.js") : "../gemeinsam/feier.js";
+  })();
+  let feierLaden = null;
+  /** feier.js einmal laden; → Promise mit LS_FEIER, oder null, wenn es nicht lädt (dann wieder Konfetti wie früher). */
+  const ladeFeier = () => (typeof LS_FEIER !== "undefined" ? Promise.resolve(LS_FEIER) : (feierLaden = feierLaden || new Promise(ok => {
+    const s = document.createElement("script");
+    s.src = FEIER_SRC;
+    s.onload = () => ok(typeof LS_FEIER !== "undefined" ? LS_FEIER : null);
+    s.onerror = () => { feierLaden = null; ok(null); };
+    document.head.append(s);
+  })));
+  /** f im Leerlauf des Browsers (spätestens nach 4 s), sonst nach 1,5 s. */
+  const imLeerlauf = f => (typeof requestIdleCallback === "function" ? requestIdleCallback(f, { timeout: 4000 }) : setTimeout(f, 1500));
   /**
    * Prüfansicht einer Liste öffnen (nur auf der Seite des Spiels, das sie besitzt). Lädt listenpruefung.js und
    * pruefung.js des Spiels nach; false, wenn das Spiel noch keine Prüfansicht hat.
@@ -3477,9 +3495,16 @@ const LS = (() => {
         ton("fertig");
         tonFuerRunde = false; // nach der Runde ist das Hören wieder still (AN3-T a)
         // Abschluss-Animation des Spiels (feier.js, Entscheide AN1–AN3 a), sonst wie bisher Konfetti
-        const feier = def.feier && typeof LS_FEIER !== "undefined" && einstellung("feier", def.id) === "an" && !ruhe("feier", def.id)
-          ? LS_FEIER.zeige(def.feier, { stufe: stufe.id, sterne, klang: ton }) : null; // klang: nur mit Ton an (Regel 8)
-        if (!feier) konfetti();
+        const feierGewollt = !!def.feier && einstellung("feier", def.id) === "an" && !ruhe("feier", def.id);
+        const zeigeFeier = F => F.zeige(def.feier, { stufe: stufe.id, sterne, klang: ton }); // klang: nur mit Ton an (Regel 8)
+        const feier = feierGewollt && typeof LS_FEIER !== "undefined" ? zeigeFeier(LS_FEIER) : null;
+        // feier.js noch nicht da (lädt im Leerlauf, LZ1 a): ein Platz, das Bild kommt, sobald die Datei geladen ist
+        const feierPlatz = feierGewollt && typeof LS_FEIER === "undefined" ? el("div", { class: "feier-platz", "aria-hidden": "true" }) : null;
+        if (!feier && !feierPlatz) konfetti();
+        if (feierPlatz) ladeFeier().then(F => {
+          const bild = F && feierPlatz.isConnected ? zeigeFeier(F) : null;
+          if (bild) feierPlatz.replaceWith(bild); else { feierPlatz.remove(); konfetti(); }
+        });
         pruefung.haken?.("schluss", { stufe: stufe.id, stufen: Object.keys(def.stufen || {}), sterne, feierDef: def.feier || null, feier });
         buehne.innerHTML = "";
         const karte = el("div", { class: "karte schluss mitte", "data-stil-bereich": "schluss" });
@@ -3488,7 +3513,7 @@ const LS = (() => {
         const eule = euleZeile();
         karte.append(
           el("div", { class: "auftrag", text: `Geschafft, ${name}!` }),
-          ...(feier ? [feier] : []),
+          ...(feier ? [feier] : feierPlatz ? [feierPlatz] : []),
           st,
           eule.element,
           el("div", { class: "knopfzeile" },
@@ -3575,7 +3600,10 @@ const LS = (() => {
     // Einstellung „Abschluss-Animation“ und die Ruhezeit gelten hier nicht (es ist eine Vorschau), der Ton schon.
     // aus der Skala, nicht aus den angebotenen Stufen: die hängen an freigegebenen Inhaltslisten, die Animation nicht
     const vorschau = SKALA.find(st => st.id === adresse.get("feier"));
-    if (vorschau && def.feier && typeof LS_FEIER !== "undefined") return feierVorschau(vorschau);
+    // Vorschau des Schlussbilds wartet auf feier.js; lädt es nicht, startet das Spiel wie sonst
+    if (vorschau && def.feier) return void ladeFeier().then(f => (f ? feierVorschau(vorschau) : stufenwahl()));
+    // fürs Schlussbild, ohne den Aufbau aufzuhalten (LZ1 a); im Zufallsmix gibt es kein Schlussbild des Spiels
+    if (def.feier && adresse.get("mix") !== "1") imLeerlauf(ladeFeier);
     // &mix=1 im iframe des Zufallsmix (Entscheid M1 a): ohne Kopfzeile, mit &timer=1 und &endlos=1 vom Mix.
     // Kann das Spiel die verlangte Stufe nicht stellen (nicht frei, keine Stimme), sagt es das dem Mix.
     if (adresse.get("mix") === "1" && parent !== window) {
@@ -3667,7 +3695,7 @@ const LS = (() => {
 
   const RAHMEN_KLASSEN = {
     reserviert: ["buehne", "kopf", "zurueck", "ton", "karte", "mitte", "schluss", "auftrag", "knopf", "knopfzeile", "hell", "gruen", "klein", "vorlesen", "los-huelle", "los-ueber", "los-zahl", "los-knopf",
-      "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "leise", "link",
+      "eule", "eule-zeile", "blase", "fortschritt", "sterne", "sterne-klein", "aus", "konfetti", "flug", "feier-platz", "leise", "link",
       "spieler-zeile", "speicher-voll",
       "stufen", "stufe", "fuer", "stufe-huelle", "stufe-kopf", "stufe-symbol", "stufe-nr", "stufe-name", "sterne-gross", "stufe-info", "stufe-text", "blase-klein", "stil-hand", "hand-rahmen", "raster-luecke", "timer-zeile", "timer-schalter", "nur-symbol", "timer-wort", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "schalter-zeile", "schalter-teil", "schalter-hinweis", "rangliste", "ranglisten", "ich",
@@ -3920,12 +3948,22 @@ const STIL = (() => {
   const lueckenBeobachter = typeof ResizeObserver === "function"
     ? new ResizeObserver(e => e.forEach(x => { const l = zuLuecke.get(x.target) || x.target; if (l.matches?.(".raster-luecke")) nachbarn(l); })) : null;
 
-  /** Ein Element einbinden: Rahmen beobachten, Raster setzen. */
+  /**
+   * Rahmen erst, wenn das Element ins Bild kommt (Entscheid LZ1 a, LERN_Session40): Jeder Rahmen misst seine Grösse und
+   * zwingt den Browser dabei zum Layout; für 76 Karten, von denen sechs im Bild sind, kostete das auf einem Tablet
+   * (CPU vierfach gedrosselt) 2 bis 4 s, bis der Tab Spiele reagierte. 300 px Vorlauf, damit der Rahmen beim Rollen schon
+   * steht; danach wie bisher der ResizeObserver (neu zeichnen bei jeder Grössenänderung).
+   */
+  const sicht = typeof IntersectionObserver === "function" && beobachter ? new IntersectionObserver(eintraege => {
+    for (const e of eintraege) if (e.isIntersecting) { sicht.unobserve(e.target); beobachter.observe(e.target); }
+  }, { rootMargin: "300px 0px" }) : null;
+
+  /** Ein Element einbinden: Raster setzen, Rahmen beobachten (sobald es im Bild ist). */
   function binde(k) {
     if (k.dataset.stil) return;
     k.dataset.stil = "1";
     if (k.matches(".spielkarte, .stufe")) raster(k);
-    if (beobachter) beobachter.observe(k); else zeichne(k);
+    if (sicht) sicht.observe(k); else if (beobachter) beobachter.observe(k); else zeichne(k);
   }
   const rahmenWahl = RAHMEN.map(([sel]) => sel).join(", ");
   /** Alle passenden Elemente in wurzel (und wurzel selbst) einbinden. */

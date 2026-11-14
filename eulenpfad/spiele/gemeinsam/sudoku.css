@@ -55,6 +55,22 @@
 .sd-brett.sd-notizmodus .sd-feld:not(.sd-vorgabe) { cursor: cell; }
 .sd-brett.sd-geloest .sd-feld { background: var(--gut-hell); }
 
+/* Vergleichs-Sudoku: Zeichen auf der Kante zwischen zwei Feldern (sudoku.js setzt left/top in % des Rasters) */
+.sd-brett { position: relative; }
+.sd-zeichen {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  padding: 0 2px;
+  border-radius: 6px;
+  background: var(--karte);
+  color: var(--hinweis);
+  font-size: max(13px, calc(var(--sd-zelle) * .34));
+  font-weight: 900;
+  line-height: 1.05;
+}
+.sd-zeichen.sd-senk { transform: translate(-50%, -50%) rotate(90deg); }
+
 /* Notizen: kleine Zahlen im Feld, 2 × 2 beim 4 × 4, sonst 3 Spalten */
 .sd-notizen {
   display: grid;
