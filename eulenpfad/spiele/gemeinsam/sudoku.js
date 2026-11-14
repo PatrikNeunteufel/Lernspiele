@@ -1,6 +1,7 @@
 /* Sudoku-Familie (LERN-56; Entscheide SU1 a–SU3 a, LERN_Session13; gebaut ab LERN_Session40). Gemeinsamer Baustein für
    Bilder-, Zahlen-, Gebiets-, Vergleichs- und Käfig-Sudoku und das Sudoku-Duell: Raster mit beliebigen Gebieten, Löser,
-   Generator und die Bedienung im Spiel. Beschreibung in docs/eulenpfad/rahmen.md, Abschnitt 26.
+   Generator, die Bedienung im Spiel und die Regel-Maschine des Duells (Züge, Suche nach Gewinnzügen). Beschreibung in
+   docs/eulenpfad/rahmen.md, Abschnitt 26.
 
    Raster: n × n Felder, Zahlen 1 … n, Feld i = Zeile · n + Spalte. Jede Zahl steht in jeder Einheit (Zeile, Spalte,
    Gebiet) genau einmal. Gebiete sind beim gewöhnlichen Sudoku Kästen (2 × 2, 2 × 3, 3 × 3), beim Gebiets-Sudoku
@@ -468,6 +469,77 @@ const SUDOKU = (() => {
     return ton;
   }
 
+  // ----- Sudoku-Duell (DU1 a, DU2 a, LERN_Session41) -----
+  // Regel: Abwechselnd setzt jede Seite eine Zahl in ein leeres Feld, die in Zeile, Spalte und Kasten noch nicht steht.
+  // Wer keine Zahl mehr setzen kann, verliert; umgekehrt (Königsstufe): wer die letzte Zahl setzt, verliert. Es gibt
+  // keine Lösung, die Zahlen müssen nur zueinander passen — ein Feld, in das keine Zahl mehr passt, bleibt leer
+  // („gesperrt“). Nur so gibt es eine Strategie: Müsste jede Zahl zur Lösung passen, würde das Raster immer voll und
+  // die Zahl der Züge stünde vor dem ersten fest (Vorlage DU1, LERN_Session41).
+
+  /** Erlaubte Züge [Feld, Zahl] in der Stellung. */
+  function duellZuege(r, werte, masken = einheitsMasken(r, werte)) {
+    const z = [];
+    for (let i = 0; i < werte.length; i++) {
+      if (werte[i]) continue;
+      for (let m = kandidaten(r, masken, i); m; m &= m - 1) z.push([i, einzigeZahl(m & -m)]);
+    }
+    return z;
+  }
+  /** Leere Felder, in die keine Zahl mehr passt. */
+  function gesperrt(r, werte) {
+    const masken = einheitsMasken(r, werte);
+    return werte.map((v, i) => (!v && !kandidaten(r, masken, i) ? i : -1)).filter(i => i >= 0);
+  }
+  /**
+   * Gewinnt, wer in der Stellung dran ist (bei bestem Spiel beider)? Vollständige Suche mit Speicher (Map, je Regel
+   * eine eigene oder dieselbe für viele Fragen zur selben Regel). Kein Zug mehr: verloren, umgekehrt gewonnen.
+   */
+  function duellGewinnt(r, werte, umgekehrt = false, speicher = new Map()) {
+    const w = werte.slice(), masken = einheitsMasken(r, w);
+    return (function gewinnt() {
+      const k = String.fromCharCode(...w);
+      const h = speicher.get(k);
+      if (h !== undefined) return h;
+      let erg = null, zug = false;
+      suche: for (let i = 0; i < w.length; i++) {
+        if (w[i]) continue;
+        for (let m = kandidaten(r, masken, i); m; m &= m - 1) {
+          zug = true;
+          const v = einzigeZahl(m & -m), bit = 1 << (v - 1);
+          w[i] = v; for (const u of r.vonFeld[i]) masken[u] |= bit;
+          const gegner = gewinnt();
+          w[i] = 0; for (const u of r.vonFeld[i]) masken[u] &= ~bit;
+          if (!gegner) { erg = true; break suche; }
+        }
+      }
+      if (erg === null) erg = zug ? false : umgekehrt;
+      speicher.set(k, erg);
+      return erg;
+    })();
+  }
+  /** Züge, nach denen die Gegenseite verliert. */
+  function duellGewinnzuege(r, werte, umgekehrt = false, speicher = new Map()) {
+    return duellZuege(r, werte).filter(([i, v]) => {
+      const w = werte.slice(); w[i] = v;
+      return !duellGewinnt(r, w, umgekehrt, speicher);
+    });
+  }
+  /**
+   * Stellung aus einer Partie mit zufälligen erlaubten Zügen ab dem leeren Raster, nach gesetzt Zügen; waehle(liste)
+   * zieht. → Werte oder null, wenn die Partie vorher endet.
+   */
+  function duellStellung(r, gesetzt, waehle) {
+    const w = Array(r.n * r.n).fill(0), masken = einheitsMasken(r, w);
+    for (let t = 0; t < gesetzt; t++) {
+      const z = duellZuege(r, w, masken);
+      if (!z.length) return null;
+      const [i, v] = waehle(z);
+      w[i] = v;
+      for (const u of r.vonFeld[i]) masken[u] |= 1 << (v - 1);
+    }
+    return w;
+  }
+
   // ----- Bedienung im Spiel -----
 
   const EINHEIT_SATZ = { zeile: "in dieser Zeile", spalte: "in dieser Spalte", kasten: "in diesem Kasten", gebiet: "in diesem Gebiet" };
@@ -699,7 +771,8 @@ const SUDOKU = (() => {
     }
   }
 
-  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, vergleicheAus, kaefigeAus, RECHNE, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel };
+  return { kaesten, startGebiete, gebieteZufall, gebieteMaengel, vergleicheAus, kaefigeAus, RECHNE, raster, widersprueche, zaehleLoesungen, fuelle, schritt, mitTechnikLoesen, erzeuge, maengel, spiel,
+    duellZuege, gesperrt, duellGewinnt, duellGewinnzuege, duellStellung };
 })();
 
 if (typeof module !== "undefined") module.exports = SUDOKU;

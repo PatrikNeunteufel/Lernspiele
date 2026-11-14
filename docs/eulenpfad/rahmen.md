@@ -1613,5 +1613,17 @@ und nach `stil.css` `../gemeinsam/sudoku.css`. Vorlage ist `spiele/zahlen-sudoku
   Feld antippen und die Zahl, das erste Feld ist schon gewählt. Endlos in allen Stufen (EN1 a: mehr als 100 verschiedene
   Rätsel je Stufe). Nicht im Zufallsmix (`mix: false`, ZM1 b, Abschnitt 9); das Sudoku-Duell mit seinen kurzen Zügen
   gehört hinein.
+- **Duell** (Sudoku-Duell, DU1 a, DU2 a, LERN_Session41; Thema Strategie): abwechselnd eine Zahl in ein leeres Feld, die
+  in Zeile, Spalte und Kasten noch nicht steht; wer keine mehr setzen kann, verliert (umgekehrt: wer die letzte setzt).
+  Es gibt keine Lösung, ein Feld ohne passende Zahl bleibt leer („gesperrt“). Regel-Maschine im Baustein:
+  `SUDOKU.duellZuege(r, werte)` (erlaubte Züge `[Feld, Zahl]`), `SUDOKU.gesperrt(r, werte)`, `SUDOKU.duellGewinnt(r, werte,
+  umgekehrt, speicher)` (gewinnt, wer dran ist? vollständige Suche mit Bitmasken und Speicher), `SUDOKU.duellGewinnzuege`
+  und `SUDOKU.duellStellung(r, gesetzt, waehle)` (Stellung aus einer Zufallspartie). Die Seite hat eine eigene Bedienung
+  nach dem Stein-Duell (`spiele/stein-duell`, Regelseite nach Abschnitt 16): Feld, dann Zahl ist der Zug; ein unerlaubter Zug ist ein Hinweis,
+  kein Fehler; ein schlechter Zug zeigt die Gewinnantwort der Eule im Raster (`sd-eule`), bis zum nächsten Antippen; der
+  zweite Tipp markiert gesperrte Felder mit ✖ (`sd-gesperrt`). `pruefeAufgabe` rechnet die Gewinnzüge mit einer eigenen
+  Suche ohne den Baustein nach. Weitere Zeilen über dem Raster meldet eine Seite mit `--sd-extra` an `.sd-brett`
+  (`sudoku.css`), damit das Raster ins Bild passt. Abschluss-Animation: Bild `duell` (BAUEN, `feier.js`) — Stellung, Züge
+  beider Seiten, ✖ auf den gesperrten Feldern.
 - **Abschluss-Animation:** Bild `sudoku` im Muster BAUEN (Abschnitt 24): das Rätsel der Stufe aus dem Katalog füllt sich
   Feld um Feld; `feier.js` prüft, dass jede Zahl je Zeile, Spalte und Kasten einmal steht.

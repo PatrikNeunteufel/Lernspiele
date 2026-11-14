@@ -1,6 +1,6 @@
 # Logikrätsel im Eulenpfad (Thema „🧠 Logikrätsel“, SU2 a)
 
-Stand: 13.11.2026 (LERN_Session40). Zusatz Patrik zu SU2 a (LERN_Session13): „Logikspiele gibt es sicher auch noch ein
+Stand: 14.11.2026 (LERN_Session41), Sudoku-Familie vollständig. Zusatz Patrik zu SU2 a (LERN_Session13): „Logikspiele gibt es sicher auch noch ein
 paar andere.“ Hier die Familie aus SU1 a und weitere Ideen. Lehrplan wie in
 [lehrplan_sg_session40.md](../lernziele/lehrplan_sg_session40.md): MA.1.B.1.f (Beziehungen erforschen), .h (heuristische
 Strategien, Annahmen treffen); Wortlaut in [strategie_raetsel.md](strategie_raetsel.md), Abschnitt 1. Ein Rätsel, das
@@ -18,11 +18,20 @@ beliebigen Gebieten, Löser, Generator, Bedienung mit ✏️-Notizen; Fehler nac
 | Gebiets-Sudoku | 4 | unregelmässige Gebiete statt Kästen (Zusatz Patrik); 4 × 4, 5 × 5, 6 × 6, 9 × 9 | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
 | Vergleichs-Sudoku | 3 | < und > zwischen Nachbarfeldern statt vieler Vorgaben | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
 | Käfig-Sudoku | 5 | Summen in Zellgruppen, oben auch −, ×, :; 4 × 4 und 6 × 6 | erledigt 2026-11-14 (LERN_Session40), neu und ungeprüft |
-| Sudoku-Duell | 5 | abwechselnd mit der Eule regelkonform setzen (Thema Strategie) | offen |
+| Sudoku-Duell | 5 | abwechselnd mit der Eule eine Zahl setzen, die zu den anderen passt; wer keine mehr setzen kann, verliert (Thema Strategie, DU1 a, DU2 a) | erledigt 2026-11-14 (LERN_Session41), neu und ungeprüft |
 
-Was der Baustein für die übrigen noch braucht (Bilder kann er seit dem Bilder-Sudoku: `zeichen`, `name`, `nennung`, eigene
-`tipps`; Gebiete seit dem Gebiets-Sudoku; Zeichen < und > seit dem Vergleichs-Sudoku; Käfige seit dem Käfig-Sudoku): ein
-Zug der Eule (Duell).
+Der Baustein kann damit alles, was die Familie braucht: Bilder seit dem Bilder-Sudoku (`zeichen`, `name`, `nennung`, eigene
+`tipps`), Gebiete seit dem Gebiets-Sudoku, Zeichen < und > seit dem Vergleichs-Sudoku, Käfige seit dem Käfig-Sudoku und die
+Regel-Maschine des Duells (`duellZuege`, `duellGewinnt`, `duellGewinnzuege`, `gesperrt`, `duellStellung`) seit dem
+Sudoku-Duell.
+
+**Sudoku-Duell, Regel (DU1 a, LERN_Session41):** Die Zahlen müssen nur zueinander passen, nicht zu einer Lösung. Müsste
+jede Zahl zur Lösung passen (oder das Rätsel lösbar bleiben), würde das Raster immer voll, die Zahl der Züge stünde vor dem
+ersten fest — dann gäbe es keine Strategie. Gemessen: Auf dem leeren 4 × 4 verliert, wer anfängt (vollständige Suche
+2,9 s); die Spiegelstrategie (gleiche Zahl ins gegenüberliegende Feld) brach in 20 000 Partien nie eine Regel. Schon nach
+einem Zug gewinnt aber jede Antwort, nach drei Zügen fast jede: Strategie zählt erst am Ende, darum ist jede Aufgabe ein
+Endspiel (S1 a: eine Stellung, ein Zug). Königsstufe (DU2 a): halb lange Endspiele auf dem 6 × 6, halb „wer die letzte
+Zahl setzt, verliert“.
 
 **Gebiets-Sudoku 7 × 7 (offen):** Bei 5 und 7 gibt es keine Kästen; die Gebiete entstehen dort aus den Zeilen, und ein Tausch
 gelingt fast nur an den Zeilenenden. Beim 7 × 7 blieb in 96 bis 99 von 100 ersten Versuchen ein Gebiet ein Rechteck, ein

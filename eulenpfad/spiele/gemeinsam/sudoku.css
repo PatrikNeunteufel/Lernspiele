@@ -8,9 +8,10 @@
 .sd-spiel { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 28px; }
 .sd-steuerung { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: 200px; }
 
-/* Feldgrösse nach Breite und Bildhöhe (H1 a: mit Untergrenze), höchstens 68 px */
+/* Feldgrösse nach Breite und Bildhöhe (H1 a: mit Untergrenze), höchstens 68 px. --sd-extra: Höhe weiterer Zeilen über
+   dem Raster, die eine Seite selbst setzt (Sudoku-Duell: die Regelzeile), Standard 0 */
 .sd-brett {
-  --sd-zelle: clamp(30px, min(calc((100vw - 360px) / var(--sd-n)), calc((100vh - 350px) / var(--sd-n))), 68px);
+  --sd-zelle: clamp(30px, min(calc((100vw - 360px) / var(--sd-n)), calc((100vh - 350px - var(--sd-extra, 0px)) / var(--sd-n))), 68px);
   display: grid;
   grid-template-columns: repeat(var(--sd-n), var(--sd-zelle));
   width: max-content;
@@ -19,7 +20,7 @@
   .sd-auftrag { font-size: 13px; margin-bottom: 4px; }
   .sd-spiel { flex-direction: column; gap: 8px; }
   .sd-steuerung { width: min(100%, 520px); gap: 6px; }
-  .sd-brett { --sd-zelle: clamp(30px, min(calc((100vw - 56px) / var(--sd-n)), calc((100vh - 500px) / var(--sd-n))), 68px); }
+  .sd-brett { --sd-zelle: clamp(30px, min(calc((100vw - 56px) / var(--sd-n)), calc((100vh - 500px - var(--sd-extra, 0px)) / var(--sd-n))), 68px); }
 }
 .sd-feld {
   width: var(--sd-zelle);
@@ -54,6 +55,9 @@
 .sd-feld.falsch { animation: wackeln .4s; }
 .sd-brett.sd-notizmodus .sd-feld:not(.sd-vorgabe) { cursor: cell; }
 .sd-brett.sd-geloest .sd-feld { background: var(--gut-hell); }
+/* Sudoku-Duell (DU1 a): Zahl der Eule in ihrer Farbe, gesperrtes Feld (keine Zahl passt mehr) mit ✖ nach dem Tipp */
+.sd-feld.sd-eule { color: var(--deko-1-schrift); background: color-mix(in srgb, var(--deko-1) 14%, var(--k-feld)); }
+.sd-feld.sd-gesperrt { color: var(--text-leise); font-size: calc(var(--sd-zelle) * .36); }
 
 /* Vergleichs-Sudoku: Zeichen auf der Kante zwischen zwei Feldern (sudoku.js setzt left/top in % des Rasters) */
 .sd-brett { position: relative; }

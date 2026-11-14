@@ -9,6 +9,11 @@ Entscheide S1 a, ST1 a, ST2 a, ST3 a (Patrik, 03.11.2026); Vorlage und Wortlaut 
 | Stein-Duell (`stein-duell`) | 5 | MI.2.2 (Stufe .b: „eine Spielstrategie entwickeln“) | s1 eine Reihe, k = 2–4 · s2 7–12 Steine · s3 bis 20, k = 3 · s4 „Wer fängt an?“ · s5 zwei Reihen · s6 drei Reihen oder „wer den letzten nimmt, verliert“ |
 | Steine fangen (`steine-fangen`) | 5 | MI.2.2 (.b) | s1 Freiheiten zählen · s2 Fang in 1 · s3 Gruppen fangen, Gefahr erkennen · s4 retten · s5 Fang in 2 · s6 Fang in 2 mit falscher Fährte |
 | König in der Falle (`koenig-falle`) | 5 | MI.2.2 (.b) | s1 Turm · s2 Dame · s3 zwei Türme, Dame mit Deckung · s4 Läufer, Springer · s5 eigene Figuren verstellen · s6 Matt in 2 |
+| Sudoku-Duell (`sudoku-duell`, LERN_Session41) | 5 | MI.2.2 (.b) | s1 4 × 4 fast voll, Gewinn mit einem Zug · s2 4 × 4, zwei Züge voraus · s3 4 × 4, 7–9 Zahlen gesetzt · s4 6 × 6 fast voll · s5 6 × 6, 22–24 gesetzt · s6 6 × 6 lange Endspiele oder „wer die letzte Zahl setzt, verliert“ |
+
+Das Sudoku-Duell kam mit der Sudoku-Familie dazu (SU1 a, SU2 a: gegen einen Gegner gehört es zur Strategie); Regel DU1 a
+(„wer keine Zahl mehr setzen kann, verliert“, die Zahlen müssen nur zueinander passen) und Königsstufe DU2 a, LERN_Session41.
+Den Lehrplan habe ich dafür nicht neu gelesen; Wortlaut wie oben vom 03.11.2026.
 
 Thema neu: **Strategie** (Fach Medien und Informatik). Jedes Spiel hat eine Regelseite (`regeln.html`, rahmen.md 16).
 

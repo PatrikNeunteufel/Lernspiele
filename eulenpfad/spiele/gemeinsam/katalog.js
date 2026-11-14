@@ -1789,6 +1789,22 @@ const SPIELE = [
     lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }],
     // Abschluss-Animation (feier.js, Block D, docs/konzept_abschluss_animationen.md 7)
     feier: { muster: "reise", bilder: "schach", ziele: { s1: { weiss: { b6: "K", h1: "T" }, schwarz: { b8: "K" }, zuege: [["h1", "h8"]] }, s2: { weiss: { b6: "K", h1: "D" }, schwarz: { a8: "K" }, zuege: [["h1", "h8"]] }, s3: { weiss: { e1: "K", a7: "T", h1: "T" }, schwarz: { e8: "K" }, zuege: [["h1", "h8"]] }, s4: { weiss: { g6: "K", e7: "S", c7: "L" }, schwarz: { h8: "K" }, zuege: [["c7", "e5"]] }, s5: { weiss: { a1: "K", g5: "S" }, schwarz: { h8: "K", g8: "T", g7: "B", h7: "B" }, zuege: [["g5", "f7"]] }, s6: { weiss: { g1: "K", c4: "D", h6: "S" }, schwarz: { h8: "K", d8: "T", g7: "B", h7: "B" }, zuege: [["c4", "g8"], ["d8", "g8"], ["h6", "f7"]] } } } },
+  // Sudoku-Familie (LERN-56, SU1 a): das Duell gehört zur Strategie (SU2 a). Regel DU1 a, Königsstufe DU2 a
+  // (LERN_Session41); im Zufallsmix, denn ein Zug ist eine kurze Aufgabe (rahmen.md 26).
+  { id: "sudoku-duell", art: ["brett"], klasse: 5, neu: "LERN_Session41", bild: "🆚", name: "Sudoku-Duell", thema: "strategie", farbe: "var(--deko-4)",
+    pfad: "spiele/sudoku-duell/index.html", stufen: ALLE_STUFEN, einstellungen: ["feier"], endlos: ["s1", "s2", "s3", "s4", "s5", "s6"], regeln: true, zeiten: { s1: 20, s2: 30, s3: 40, s4: 40, s5: 60, s6: 75 },
+    beschreibung: "Abwechselnd mit der Eule eine Zahl setzen — wer keine Zahl mehr setzen kann, verliert",
+    lernziele: [{ lz: "MI.2.2", stufen: ALLE_STUFEN }],
+    // Abschluss-Animation (feier.js, BAUEN · duell): Stellung der Stufe, du und die Eule setzen bei bestem Spiel, bis die
+    // Eule nicht mehr kann; die gesperrten Felder zeigen ✖ (Linien mit der Suche des Bausteins gerechnet, LERN_Session41)
+    feier: { muster: "bauen", bilder: "duell", ziele: {
+      s1: { n: 4, kh: 2, kb: 2, stellung: "0042140301342001", zuege: [[1, 3]] },
+      s2: { n: 4, kh: 2, kb: 2, stellung: "0012024323040400", zuege: [[12, 1], [0, 3], [14, 2]] },
+      s3: { n: 4, kh: 2, kb: 2, stellung: "3400204001304200", zuege: [[3, 1], [2, 2], [7, 3], [11, 2], [14, 1]] },
+      s4: { n: 6, kh: 2, kb: 3, stellung: "143000260315452001010436631524025103", zuege: [[3, 6], [5, 2], [34, 6]] },
+      s5: { n: 6, kh: 2, kb: 3, stellung: "020540510236305124100300453601601052", zuege: [[20, 6], [8, 4], [19, 4], [23, 5], [33, 4]] },
+      s6: { n: 6, kh: 2, kb: 3, stellung: "615423040100060215532006200041104030", zuege: [[25, 5], [6, 3], [26, 6], [10, 5], [12, 4], [33, 5], [35, 2]] },
+    } } },
   // Sudoku-Familie (LERN-56, SU1 a–SU3 a; Baustein spiele/gemeinsam/sudoku.js): erstes Spiel, Basisklasse 4 (SU1 a)
   { id: "zahlen-sudoku", art: ["antippen"], klasse: 4, neu: "LERN_Session40", bild: "#️⃣", name: "Zahlen-Sudoku", thema: "logik", farbe: "var(--deko-5)",
     // nicht im Zufallsmix (Entscheid ZM1 b, LERN_Session40): ein ganzes Rätsel ist keine Kurzaufgabe

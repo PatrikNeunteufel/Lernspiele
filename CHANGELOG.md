@@ -2379,4 +2379,20 @@
   Schritt „kaefig“, Widersprüche im Käfig, Ränder und Ergebnis im Raster; `mitTechnikLoesen` setzt je Durchgang alle
   Felder mit nur einer Zahl (gleiches Ergebnis, schneller).
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session40_2026-11-13.md`, Handover nachgeführt (Haltepunkt der Nacht
-  aufgelöst; Sudoku-Familie bis auf das Duell, LZ1 a, Prüfung Punkt 10; nächster Schritt Sudoku-Duell und Push).
+  aufgelöst; Sudoku-Familie bis auf das Duell, LZ1 a, Prüfung Punkt 10; nächster Schritt Sudoku-Duell und Push).
+
+## 2026-11-14 — LERN_Session41
+- **Sudoku-Duell (sudoku-duell)**, Basisklasse 5, Thema Strategie, neu und ungeprüft — letztes Spiel der Sudoku-Familie
+  (LERN-56 erledigt). Entscheid **DU1 a**: abwechselnd eine Zahl in ein leeres Feld, die in Zeile, Spalte und Kasten noch
+  nicht steht; wer keine Zahl mehr setzen kann, verliert (müsste jede Zahl zur Lösung passen, stünde der Sieger vor dem
+  ersten Zug fest). Entscheid **DU2 a**: Königsstufe halb lange Endspiele auf dem 6 × 6, halb „wer die letzte Zahl setzt,
+  verliert“. Jede Aufgabe ist eine Endspiel-Stellung (S1 a): s1–s3 4 × 4 (Gewinn mit einem Zug, zwei Züge voraus, mehr
+  leere Felder), s4–s6 6 × 6. Ein unerlaubter Zug ist ein Hinweis, ein schlechter zeigt die Gewinnantwort der Eule im
+  Raster; der zweite Tipp markiert gesperrte Felder mit ✖. Endlos in allen Stufen, im Zufallsmix, Regelseite,
+  Abschluss-Animation `duell` (Züge beider Seiten, dann ✖). Lernziel MI.2.2.
+- **Baustein `sudoku.js`:** Regel-Maschine des Duells — `duellZuege`, `gesperrt`, `duellGewinnt` (vollständige Suche mit
+  Bitmasken und Speicher), `duellGewinnzuege`, `duellStellung`; die übrigen Funktionen unverändert. `pruefeAufgabe` im
+  Spiel rechnet die Gewinnzüge mit einer eigenen Suche nach (in 600 Probe-Aufgaben gleich, s6 im Mittel 4 ms).
+- **sudoku.css:** `--sd-extra` für weitere Zeilen über dem Raster (Standard 0, die anderen Sudokus unverändert); Farben
+  `sd-eule` und `sd-gesperrt`. **feier.js:** Raster der Sudoku-Bilder in `sudokuRaster` ausgelagert, neues Bild `duell`.
+- Doku: rahmen.md 26 (Duell), logikraetsel.md (Regel und Messungen), lehrplan_sg_session11.md (Strategie-Tabelle).

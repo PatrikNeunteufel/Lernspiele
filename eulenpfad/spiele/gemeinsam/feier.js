@@ -4134,6 +4134,67 @@ var LS_FEIER = (function () {
 
   // ----- Sudoku-Familie (BAUEN · sudoku, LERN-56, LERN_Session40) -----
   /**
+   * Grund und Raster eines Sudokus in svg: weisses Feld, dünnes Gitter, kräftige Linien um Rand, Kästen und Gebiete wie
+   * im Spiel. kasten(i) → Nummer des Gebiets von Feld i. → { x0, y0, c (Feldgrösse), gross (Schrift), mitte(i) → [x, y] }
+   */
+  function sudokuRaster(svg, n, kasten) {
+    svg.appendChild(tagGrund());
+    const c = Math.min(26, 132 / n), x0 = (BREITE - n * c) / 2, y0 = (HOEHE - n * c) / 2;
+    svg.appendChild(s("rect", { x: x0, y: y0, width: n * c, height: n * c, fill: "#ffffff" }));
+    svg.appendChild(gitter(x0, y0, n, n, c));
+    const kante = (x1, y1, x2, y2) => svg.appendChild(s("line", { x1, y1, x2, y2, stroke: "#2d3047", "stroke-width": 1.6, "stroke-linecap": "square" }));
+    kante(x0, y0, x0 + n * c, y0); kante(x0, y0 + n * c, x0 + n * c, y0 + n * c); kante(x0, y0, x0, y0 + n * c); kante(x0 + n * c, y0, x0 + n * c, y0 + n * c);
+    for (let i = 0; i < n * n; i++) {
+      const zz = Math.floor(i / n), sp = i % n, x = x0 + sp * c, y = y0 + zz * c;
+      if (sp + 1 < n && kasten(i) !== kasten(i + 1)) kante(x + c, y, x + c, y + c);
+      if (zz + 1 < n && kasten(i) !== kasten(i + n)) kante(x, y + c, x + c, y + c);
+    }
+    const gross = Math.max(8, c * 0.62);
+    return { x0, y0, c, gross, mitte: i => [x0 + ((i % n) + 0.5) * c, y0 + (Math.floor(i / n) + 0.5) * c + gross * 0.36] };
+  }
+
+  /**
+   * Sudoku-Duell (DU1 a, LERN_Session41): die Stellung der Stufe wie im Spiel, dann setzen du (blau auf grün) und die
+   * Eule (lila) abwechselnd, bis die Eule keine Zahl mehr setzen kann (umgekehrt: bis sie die letzte gesetzt hat); zum
+   * Schluss zeigen die gesperrten Felder ✖. ziele je Stufe: { n, kh, kb, stellung: "…" Zeile um Zeile, 0 = leer,
+   * zuege: [[Feld, Zahl] …] (du zuerst), umgekehrt? }. Geprüft: keine Zahl doppelt in der Stellung, jeder Zug in ein
+   * leeres Feld und erlaubt, danach kein Zug mehr, der letzte Zug gehört dem Gewinner (dir, umgekehrt der Eule).
+   */
+  function sudokuDuell(feier, { stufe, sterne, ruhig }) {
+    const z = feier.ziele?.[stufe];
+    if (!z || ![4, 6].includes(z.n) || z.kh * z.kb !== z.n || z.n % z.kh || z.n % z.kb) return null;
+    const n = z.n, w = [...String(z.stellung)].map(Number), zuege = z.zuege || [];
+    if (w.length !== n * n || w.some(v => !(v >= 0 && v <= n)) || !zuege.length) return null;
+    const kasten = i => Math.floor(Math.floor(i / n) / z.kh) * (n / z.kb) + Math.floor((i % n) / z.kb);
+    const erlaubt = (x, i, v) => !x[i] && x.every((u, k) => !u || u !== v || k === i ||
+      (Math.floor(k / n) !== Math.floor(i / n) && k % n !== i % n && kasten(k) !== kasten(i)));
+    const anfang = w.map(() => 0);
+    for (let i = 0; i < n * n; i++) { if (w[i] && !erlaubt(anfang, i, w[i])) return null; anfang[i] = w[i]; }
+    const x = w.slice();
+    for (const [i, v] of zuege) { if (!(Number.isInteger(i) && i >= 0 && i < n * n && v >= 1 && v <= n) || !erlaubt(x, i, v)) return null; x[i] = v; }
+    const leerAmEnde = x.map((v, i) => (v ? -1 : i)).filter(i => i >= 0);
+    if (leerAmEnde.some(i => Array.from({ length: n }, (_, k) => k + 1).some(v => erlaubt(x, i, v)))) return null;
+    if ((zuege.length % 2 === 1) === !!z.umgekehrt) return null; // normal setzt du die letzte Zahl, umgekehrt die Eule
+    const svg = neuesBild("bauen", stufe, { "data-bilder": "duell", "data-anzahl": zuege.length });
+    const { x0, y0, c, gross, mitte } = sudokuRaster(svg, n, kasten);
+    w.forEach((v, i) => { if (v) svg.appendChild(text(...mitte(i), v, { gross })); });
+    const je = (DAUER * 0.75) / zuege.length;
+    zuege.forEach(([i, v], k) => {
+      const eule = k % 2 === 1;
+      svg.appendChild(erscheine(s("g", { "data-stueck": eule ? "eule" : "zahl", "data-wert": v },
+        s("rect", { x: x0 + (i % n) * c + 1, y: y0 + Math.floor(i / n) * c + 1, width: c - 2, height: c - 2, rx: 2, fill: eule ? "#efe4fb" : "#e3f6ea" }),
+        text(...mitte(i), v, { gross, farbe: eule ? "#8e5bd6" : "#2b6cd1" })), 0.2 + k * je, ruhig, 0.12));
+    });
+    const schluss = 0.2 + zuege.length * je;
+    // ✖ ist Schmuck des Schlussbilds, kein gesetztes Stück (data-anzahl zählt die Züge)
+    leerAmEnde.forEach(i => svg.appendChild(erscheine(s("g", { class: "gesperrt" },
+      text(...mitte(i), "✖", { gross: gross * 0.7, farbe: "#8a8fa8" })), schluss, ruhig, 0.12)));
+    if (sterne >= 2) svg.appendChild(glanz(x0 + n * c + 16, y0 + 10, ruhig));
+    if (sterne >= 3) svg.appendChild(funken(Math.max(x0 - 24, 24), 30, ruhig));
+    return svg;
+  }
+
+  /**
    * Das Rätsel der Stufe wie im Spiel: Die Vorgaben stehen, die leeren Felder füllen sich nacheinander mit ihrer Zahl.
    * ziele je Stufe: { n, kh, kb (Kasten Höhe × Breite), loesung: "…" Zeile um Zeile, leer: [Feld …] }; feier.zeichen:
    * je Zahl 1 … n das Bild (Bilder-Sudoku), sonst die Zahl. Geprüft: jede Zahl 1 … n genau einmal in jeder Zeile,
@@ -4155,19 +4216,7 @@ var LS_FEIER = (function () {
     if (feier.zeichen && (!Array.isArray(feier.zeichen) || feier.zeichen.length !== n)) return null;
     const zeig = v => (feier.zeichen ? feier.zeichen[v - 1] : v);
     const svg = neuesBild("bauen", stufe, { "data-bilder": "sudoku", "data-anzahl": leer.length });
-    svg.appendChild(tagGrund());
-    const c = Math.min(26, 132 / n), x0 = (BREITE - n * c) / 2, y0 = (HOEHE - n * c) / 2;
-    svg.appendChild(s("rect", { x: x0, y: y0, width: n * c, height: n * c, fill: "#ffffff" }));
-    svg.appendChild(gitter(x0, y0, n, n, c));
-    // Kästen und Gebiete mit kräftigen Linien wie im Spiel: der Rand und jede Kante zwischen zwei Gebieten
-    const kante = (x1, y1, x2, y2) => svg.appendChild(s("line", { x1, y1, x2, y2, stroke: "#2d3047", "stroke-width": 1.6, "stroke-linecap": "square" }));
-    kante(x0, y0, x0 + n * c, y0); kante(x0, y0 + n * c, x0 + n * c, y0 + n * c); kante(x0, y0, x0, y0 + n * c); kante(x0 + n * c, y0, x0 + n * c, y0 + n * c);
-    for (let i = 0; i < n * n; i++) {
-      const zz = Math.floor(i / n), sp = i % n, x = x0 + sp * c, y = y0 + zz * c;
-      if (sp + 1 < n && kasten(i) !== kasten(i + 1)) kante(x + c, y, x + c, y + c);
-      if (zz + 1 < n && kasten(i) !== kasten(i + n)) kante(x, y + c, x + c, y + c);
-    }
-    const gross = Math.max(8, c * 0.62), mitte = i => [x0 + ((i % n) + 0.5) * c, y0 + (Math.floor(i / n) + 0.5) * c + gross * 0.36];
+    const { x0, y0, c, gross, mitte } = sudokuRaster(svg, n, kasten);
     const offen = new Set(leer);
     w.forEach((v, i) => { if (!offen.has(i)) svg.appendChild(text(...mitte(i), zeig(v), { gross })); });
     const je = (DAUER * 0.85) / leer.length;
@@ -4200,7 +4249,7 @@ var LS_FEIER = (function () {
     return svg;
   }
 
-  Object.assign(BILDER.bauen, { spiegelraster, formen, pixel, pentomino, wuerfelbau, netz, rechtecke, geo, zaehler, quader, sudoku });
+  Object.assign(BILDER.bauen, { spiegelraster, formen, pixel, pentomino, wuerfelbau, netz, rechtecke, geo, zaehler, quader, sudoku, duell: sudokuDuell });
   Object.assign(BILDER.reise, { koordinaten, kipper });
   Object.assign(BILDER.sammeln, { merken });
 

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sudoku-Duell</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/sudoku.css">
+<style>
+  .regel-zeile { text-align: center; font-size: clamp(15px, 3.4vw, 19px); font-weight: 800; margin: 0 0 8px; color: var(--text-leise); }
+  .regel-zeile.umgekehrt { color: var(--text); background: var(--hinweis-hell); border: 3px solid var(--deko-2); border-radius: 14px; padding: 6px 10px; }
+  /* Die Regelzeile über dem Raster kostet Bildhöhe: so viel kleiner werden die Felder (sudoku.css, tools/bildhoehe.js) */
+  .sd-brett { --sd-extra: 60px; }
+  .eule-antwort { text-align: center; min-height: 26px; font-weight: 800; color: var(--deko-1-schrift); font-size: clamp(16px, 3.6vw, 19px); }
+</style>
+</head>
+<body>
+<header class="kopf">
+  <a class="zurueck" href="../../index.html" aria-label="Zur Übersicht">←</a>
+  <h1>🆚 Sudoku-Duell</h1>
+  <button class="ton" type="button" aria-label="Ton an oder aus"></button>
+</header>
+<main class="buehne"></main>
+
+<script src="../gemeinsam/avatare.js"></script>
+<script src="../../version.js"></script>
+<script src="../../kern/kern.js"></script>
+<script src="../gemeinsam/spiel.js"></script>
+<script src="../gemeinsam/abgleich.js"></script>
+<script src="../gemeinsam/katalog.js"></script>
+<script src="../gemeinsam/pruefstand.js"></script>
+<script src="../gemeinsam/entwicklung.js"></script>
+<script src="../gemeinsam/sudoku.js"></script>
+<script>
+"use strict";
+// Sudoku-Familie (LERN-56, SU1 a), Thema Strategie: Lehrplan SG MI.2.2.b (2. Zyklus) „durch Probieren Lösungswege für
+// einfache Problemstellungen suchen und auf Korrektheit prüfen (z.B. … eine Spielstrategie entwickeln)“; wie das
+// Stein-Duell (docs/eulenpfad/spielideen/strategie_raetsel.md). Basisklasse 5: Stufe 1 = 4. Klasse, 5 = 6. Klasse.
+// Regel (DU1 a, LERN_Session41): abwechselnd eine Zahl in ein leeres Feld, die in Zeile, Spalte und Kasten noch nicht
+// steht; wer keine Zahl mehr setzen kann, verliert. Königsstufe (DU2 a): halb lange Endspiele, halb umgekehrt — wer die
+// letzte Zahl setzt, verliert. Jede Aufgabe ist eine Stellung „Du bist dran“ (S1 a: eine Stellung, ein Zug); richtig
+// ist jeder Zug, nach dem die Eule verliert. Das sagt die Suche im Baustein (SUDOKU.duellGewinnzuege); pruefeAufgabe
+// rechnet es mit einer eigenen Suche nach.
+const { waehle, el } = LS;
+
+// Je Stufe: Raster n mit Kästen kh × kb, gesetzt: so viele Züge einer Zufallspartie bis zur Stellung, minZuege: so
+// viele erlaubte Züge mindestens (Auswahl), gewinn: [mindestens, höchstens] Gewinnzüge, sofort: true = der Gewinnzug
+// lässt der Eule keinen Zug (Stufe 1), false = keiner tut das (ab Stufe 2 denkt man voraus). Gemessen in LERN_Session41
+// (Vorlage DU1/DU2): je Aufgabe höchstens 53 ms zum Erzeugen, Prüfung im Mittel höchstens 4 ms.
+const STUFE = {
+  s1: [{ n: 4, kh: 2, kb: 2, gesetzt: [10, 11, 12], minZuege: 3, gewinn: [1, 1], sofort: true }],
+  s2: [{ n: 4, kh: 2, kb: 2, gesetzt: [9, 10, 11], minZuege: 4, gewinn: [1, 1], sofort: false }],
+  s3: [{ n: 4, kh: 2, kb: 2, gesetzt: [7, 8, 9], minZuege: 6, gewinn: [1, 2], sofort: false }],
+  s4: [{ n: 6, kh: 2, kb: 3, gesetzt: [26, 27, 28], minZuege: 4, gewinn: [1, 1], sofort: false }],
+  s5: [{ n: 6, kh: 2, kb: 3, gesetzt: [22, 23, 24], minZuege: 8, gewinn: [1, 2], sofort: false }],
+  s6: [{ n: 6, kh: 2, kb: 3, gesetzt: [20, 21, 22], minZuege: 14, gewinn: [1, 2], sofort: false },
+       { n: 6, kh: 2, kb: 3, gesetzt: [22, 23, 24], minZuege: 8, gewinn: [1, 2], umgekehrt: true }],
+};
+const RASTER = {};
+const rasterFuer = (n, kh, kb) => (RASTER[n] = RASTER[n] || SUDOKU.raster(n, SUDOKU.kaesten(n, kh, kb)));
+
+/** Ein Zug, nach dem die Eule keine Zahl mehr setzen kann? */
+const sofortZug = (r, w, z) => z.some(([i, v]) => { const x = w.slice(); x[i] = v; return !SUDOKU.duellZuege(r, x).length; });
+
+function aufgabeErzeugen(stufe) {
+  // In der Königsstufe zuerst die Regel ziehen, dann die Stellung (halb und halb)
+  const p = waehle(STUFE[stufe]);
+  const r = rasterFuer(p.n, p.kh, p.kb), umgekehrt = !!p.umgekehrt;
+  for (let versuch = 0; versuch < 5000; versuch++) {
+    const w = SUDOKU.duellStellung(r, waehle(p.gesetzt), waehle);
+    if (!w) continue;
+    const z = SUDOKU.duellZuege(r, w);
+    if (z.length < p.minZuege) continue;
+    const speicher = new Map();
+    if (!SUDOKU.duellGewinnt(r, w, umgekehrt, speicher)) continue;
+    const gut = SUDOKU.duellGewinnzuege(r, w, umgekehrt, speicher);
+    if (gut.length < p.gewinn[0] || gut.length > p.gewinn[1]) continue;
+    if (!umgekehrt && sofortZug(r, w, gut) !== p.sofort) continue;
+    return { n: p.n, kh: p.kh, kb: p.kb, werte: w, umgekehrt, gut };
+  }
+  throw new Error(`Sudoku-Duell ${stufe}: keine Stellung gefunden`);
+}
+
+/**
+ * Eigene Suche für die Prüfung, unabhängig vom Baustein: Zeilen-, Spalten- und Kastenmasken direkt aus n, kh, kb, alle
+ * Züge ohne SUDOKU. → { zuege(w), gewinnt(w), gewinnzuege(w) }
+ */
+function pruefSuche(n, kh, kb, umgekehrt) {
+  const N = n * n;
+  const Z = Array.from({ length: N }, (_, i) => Math.floor(i / n)), S = Array.from({ length: N }, (_, i) => i % n);
+  const K = Array.from({ length: N }, (_, i) => Math.floor(Z[i] / kh) * (n / kb) + Math.floor(S[i] / kb));
+  const speicher = new Map();
+  const masken = w => {
+    const m = { z: Array(n).fill(0), s: Array(n).fill(0), k: Array(n).fill(0), widerspruch: false };
+    w.forEach((v, i) => {
+      if (!v) return;
+      const b = 1 << v;
+      if ((m.z[Z[i]] | m.s[S[i]] | m.k[K[i]]) & b) m.widerspruch = true;
+      m.z[Z[i]] |= b; m.s[S[i]] |= b; m.k[K[i]] |= b;
+    });
+    return m;
+  };
+  const zuegeMit = (w, m) => {
+    const aus = [];
+    for (let i = 0; i < N; i++) {
+      if (w[i]) continue;
+      const belegt = m.z[Z[i]] | m.s[S[i]] | m.k[K[i]];
+      for (let v = 1; v <= n; v++) if (!(belegt & (1 << v))) aus.push([i, v]);
+    }
+    return aus;
+  };
+  const setze = (w, m, i, v, an) => {
+    const b = 1 << v;
+    w[i] = an ? v : 0;
+    if (an) { m.z[Z[i]] |= b; m.s[S[i]] |= b; m.k[K[i]] |= b; } else { m.z[Z[i]] &= ~b; m.s[S[i]] &= ~b; m.k[K[i]] &= ~b; }
+  };
+  function gewinnt(w, m) {
+    const k = w.join("");
+    if (speicher.has(k)) return speicher.get(k);
+    const z = zuegeMit(w, m);
+    let erg = z.length ? false : umgekehrt;
+    for (const [i, v] of z) {
+      setze(w, m, i, v, true);
+      const gegner = gewinnt(w, m);
+      setze(w, m, i, v, false);
+      if (!gegner) { erg = true; break; }
+    }
+    speicher.set(k, erg);
+    return erg;
+  }
+  return {
+    widerspruch: w => masken(w).widerspruch,
+    zuege: w => zuegeMit(w, masken(w)),
+    gewinnt: w => gewinnt(w.slice(), masken(w)),
+    gewinnzuege(w0) {
+      const w = w0.slice(), m = masken(w);
+      return zuegeMit(w, m).filter(([i, v]) => { setze(w, m, i, v, true); const g = gewinnt(w, m); setze(w, m, i, v, false); return !g; });
+    },
+  };
+}
+
+/** Mängel einer Aufgabe — für tools/pruefe_spiele.js. */
+function pruefeAufgabe(a, stufe) {
+  const m = [];
+  const p = STUFE[stufe].find(x => !!x.umgekehrt === !!a.umgekehrt);
+  if (!p) return ["Regel nicht in der Stufe"];
+  if (a.n !== p.n || a.kh !== p.kh || a.kb !== p.kb) m.push("Raster passt nicht zur Stufe");
+  if (a.werte.length !== a.n * a.n || a.werte.some(v => !Number.isInteger(v) || v < 0 || v > a.n)) return [...m, "Stellung mit ungültigem Wert"];
+  const P = pruefSuche(a.n, a.kh, a.kb, !!a.umgekehrt);
+  if (P.widerspruch(a.werte)) m.push("Stellung mit doppelter Zahl in einer Einheit");
+  const gesetzt = a.werte.filter(Boolean).length;
+  if (!p.gesetzt.includes(gesetzt)) m.push(`${gesetzt} Zahlen gesetzt, erwartet ${p.gesetzt.join(", ")}`);
+  const z = P.zuege(a.werte);
+  if (z.length < p.minZuege) m.push(`nur ${z.length} erlaubte Züge`);
+  if (!P.gewinnt(a.werte)) m.push("keine Gewinnstellung für das Kind");
+  const gut = P.gewinnzuege(a.werte);
+  if (gut.length < p.gewinn[0] || gut.length > p.gewinn[1]) m.push(`${gut.length} Gewinnzüge statt ${p.gewinn.join(" bis ")}`);
+  const text = l => l.map(x => x.join(":")).sort().join(" ");
+  if (text(gut) !== text(a.gut)) m.push("Baustein und Prüfsuche nennen verschiedene Gewinnzüge");
+  if (!a.umgekehrt) {
+    const sofort = gut.some(([i, v]) => { const x = a.werte.slice(); x[i] = v; return !P.zuege(x).length; });
+    if (sofort !== p.sofort) m.push(p.sofort ? "Gewinnzug lässt der Eule noch einen Zug" : "Gewinn schon mit einem Zug");
+  }
+  return m;
+}
+
+// ---------- Texte ----------
+const ort = (n, i) => `Zeile ${Math.floor(i / n) + 1}, Spalte ${(i % n) + 1}`;
+const zugText = (n, [i, v]) => `die ${v} in ${ort(n, i)}`;
+const EINHEIT = { zeile: "in dieser Zeile", spalte: "in dieser Spalte", kasten: "in diesem Kasten" };
+
+function loesungFuer(a) {
+  const teile = a.gut.map(z => `Setze ${zugText(a.n, z)}.`);
+  return teile.length > 1 ? `Es gibt ${teile.length} gute Züge. ${teile.join(" Oder: ")}` : teile[0];
+}
+
+/** Was die Eule nach einem schlechten Zug tun würde — sie zeigt, warum er nicht geht. → { text, zug } */
+function eulenAntwort(r, a, zug) {
+  const q = a.werte.slice();
+  q[zug[0]] = zug[1];
+  if (!SUDOKU.duellZuege(r, q).length) return { text: "Jetzt kann ich keine Zahl mehr setzen — und heute verliert, wer die letzte Zahl setzt. Such einen anderen Zug.", zug: null };
+  const ez = SUDOKU.duellGewinnzuege(r, q, a.umgekehrt)[0];
+  const q2 = q.slice();
+  q2[ez[0]] = ez[1];
+  const danach = SUDOKU.duellZuege(r, q2).length === 0 ? "und du kannst keine Zahl mehr setzen"
+    : a.umgekehrt ? "danach musst du am Schluss die letzte Zahl setzen" : "danach gewinne ich, was du auch setzt";
+  return { text: `Dann setze ich ${zugText(a.n, ez)} — ${danach}. Such einen anderen Zug.`, zug: ez };
+}
+
+/** Tipps vom Anstoss zum Konkreten — nie der Zug selbst. Der zweite markiert die gesperrten Felder (✖). */
+function tippsFuer(a, stufe, gesperrtZahl) {
+  const zaehlen = gesperrtZahl
+    ? "Felder mit ✖ sind gesperrt: Dort passt keine Zahl mehr. Eine Zahl kann weitere Felder sperren."
+    : "Noch ist kein Feld gesperrt. Aber eine Zahl kann ein Feld sperren: Dann passt dort keine Zahl mehr.";
+  if (a.umgekehrt) return [
+    "Diesmal willst du die letzte Zahl nicht setzen. Wer soll sie setzen?",
+    zaehlen,
+    "Denk vom Ende her: Lass der Eule am Schluss genau einen Zug — dann muss sie die letzte Zahl setzen.",
+  ];
+  if (stufe === "s1") return [
+    "In welche leeren Felder passt noch eine Zahl? Wer keine Zahl mehr setzen kann, verliert.",
+    zaehlen,
+    "Such einen Zug, nach dem in kein Feld mehr eine Zahl passt.",
+  ];
+  return [
+    "In welche leeren Felder passt noch eine Zahl? Wer keine Zahl mehr setzen kann, verliert.",
+    zaehlen,
+    "Spiel im Kopf weiter: Was setzt die Eule nach deinem Zug? Kannst du danach noch setzen — und sie nicht mehr?",
+  ];
+}
+
+// ---------- Darstellung ----------
+function duellAufgabe(ctx, a) {
+  const r = rasterFuer(a.n, a.kh, a.kb), n = a.n;
+  const werte = a.werte.slice();
+  const loesung = loesungFuer(a);
+  ctx.loesung(loesung);
+  ctx.schritte(2); // Feld antippen, dann die Zahl
+  const sperr = SUDOKU.gesperrt(r, a.werte);
+  ctx.tipp(tippsFuer(a, ctx.stufe, sperr.length), i => { if (i === 1) markiereGesperrt(); });
+
+  const f = ctx.flaeche;
+  // kurz, damit auch das 6 × 6 ganz im Bild steht (tools/bildhoehe.js); die Regel steht in der Einleitung und der Hilfe
+  f.append(el("div", { class: "auftrag", text: "Du bist dran! Setz eine erlaubte Zahl." }));
+  f.append(el("div", { class: `regel-zeile${a.umgekehrt ? " umgekehrt" : ""}`,
+    text: a.umgekehrt ? "⚠️ Achtung: Wer die letzte Zahl setzt, verliert!" : "🏆 Wer keine Zahl mehr setzen kann, verliert." }));
+  const brett = el("div", { class: "sd-brett", role: "grid", "aria-label": `Sudoku-Duell ${n} mal ${n}` });
+  brett.style.setProperty("--sd-n", String(n));
+  const felder = [];
+  for (let i = 0; i < n * n; i++) {
+    const z = Math.floor(i / n), s = i % n, g = r.gebiete[i];
+    const kl = ["sd-feld"];
+    if (werte[i]) kl.push("sd-vorgabe");
+    if (z === 0 || r.gebiete[i - n] !== g) kl.push("sd-oben");
+    if (s === 0 || r.gebiete[i - 1] !== g) kl.push("sd-links");
+    if (z === n - 1) kl.push("sd-unten");
+    if (s === n - 1) kl.push("sd-rechts");
+    const feld = el("button", { type: "button", class: kl.join(" "), "data-feld": String(i) });
+    if (werte[i]) { feld.disabled = true; feld.textContent = String(werte[i]); }
+    else feld.addEventListener("click", () => waehleFeld(i));
+    felder.push(feld);
+    brett.append(feld);
+  }
+  const zahlen = el("div", { class: "sd-zahlen" });
+  zahlen.style.setProperty("--sd-n", String(n));
+  zahlen.style.setProperty("--sd-tasten", n <= 4 ? "2" : "3");
+  const knoepfe = [];
+  for (let v = 1; v <= n; v++) {
+    const k = el("button", { type: "button", class: "knopf hell sd-zahl", text: String(v), "aria-label": String(v) });
+    k.addEventListener("click", () => setze(v));
+    knoepfe.push(k);
+    zahlen.append(k);
+  }
+  const antwort = el("div", { class: "eule-antwort", "aria-live": "polite" });
+  // Antwort der Eule bei den Zahlen: breit neben dem Raster, schmal darunter (spart eine Zeile Bildhöhe)
+  f.append(el("div", { class: "sd-spiel" }, brett, el("div", { class: "sd-steuerung" }, zahlen, antwort)));
+  LS.kurztasten(zahlen, knoepfe);
+
+  let gewaehlt = -1;
+  let zuruecksetzen = null; // nach einem schlechten Zug: Zug und Antwort der Eule, bis zum nächsten Antippen
+  const zeichne = () => {
+    const nachbarn = new Set(gewaehlt >= 0 ? r.vonFeld[gewaehlt].flatMap(u => r.einheiten[u].felder) : []);
+    felder.forEach((feld, i) => {
+      feld.classList.toggle("sd-gewaehlt", i === gewaehlt);
+      feld.classList.toggle("sd-nachbar", i !== gewaehlt && nachbarn.has(i));
+      if (!a.werte[i] && !feld.classList.contains("sd-gesperrt"))
+        feld.setAttribute("aria-label", `Feld ${ort(n, i)}, ${werte[i] ? werte[i] : "leer"}`);
+    });
+  };
+  function markiereGesperrt() {
+    for (const i of sperr) {
+      felder[i].classList.add("sd-gesperrt");
+      felder[i].textContent = "✖";
+      felder[i].setAttribute("aria-label", `Feld ${ort(n, i)}, gesperrt`);
+    }
+  }
+  const zeige = (i, v, klasse) => {
+    felder[i].textContent = String(v);
+    felder[i].classList.add(klasse);
+  };
+  // Ein erlaubter Zug geht nie in ein gesperrtes Feld: leeren heisst hier immer ganz leer
+  const leere = i => {
+    felder[i].classList.remove("sd-eigen", "sd-eule", "falsch");
+    felder[i].textContent = "";
+  };
+  const sperren = () => { felder.forEach(x => { x.disabled = true; }); knoepfe.forEach(k => { k.disabled = true; }); };
+  const aufraeumen = () => {
+    if (!zuruecksetzen) return;
+    zuruecksetzen.felder.forEach(leere);
+    zuruecksetzen = null;
+    antwort.textContent = "";
+  };
+
+  function waehleFeld(i) {
+    if (ctx.vorbei()) return;
+    aufraeumen();
+    gewaehlt = i;
+    zeichne();
+  }
+  function setze(v) {
+    if (ctx.vorbei()) return;
+    aufraeumen();
+    if (gewaehlt < 0) { ctx.sag("Tipp zuerst auf ein leeres Feld.", "hinweis"); return; }
+    const i = gewaehlt;
+    // Nicht erlaubt (die Zahl steht schon in einer Einheit): Hinweis, kein Fehler — wie ein unerlaubter Zug im Stein-Duell
+    for (const u of r.vonFeld[i]) {
+      const dort = r.einheiten[u].felder.find(k => k !== i && werte[k] === v);
+      if (dort !== undefined) {
+        [felder[i], felder[dort]].forEach(x => { x.classList.remove("falsch"); void x.offsetWidth; x.classList.add("falsch"); });
+        ctx.sag(`Die ${v} steht schon ${EINHEIT[r.einheiten[u].art]}. Das ist kein erlaubter Zug.`, "hinweis");
+        return;
+      }
+    }
+    const zug = [i, v];
+    if (a.gut.some(([gi, gv]) => gi === i && gv === v)) {
+      werte[i] = v;
+      zeige(i, v, "sd-eigen");
+      sperren();
+      const eulenZuege = SUDOKU.duellZuege(r, werte);
+      if (!eulenZuege.length) { antwort.textContent = "🦉 Ich kann keine Zahl mehr setzen … «Oh nein!»"; ctx.richtig("Die Eule kann keine Zahl mehr setzen — gewonnen! 🎉"); return; }
+      ctx.richtig(a.umgekehrt ? "Gut gesetzt! Am Schluss muss die Eule die letzte Zahl setzen."
+        : "Gut gesetzt! Die Eule steckt in der Falle: Was sie auch setzt, du gewinnst.");
+      // Die Eule antwortet kurz (irgendein erlaubter Zug); die Aufgabe ist schon gelöst.
+      const [ei, ev] = waehle(eulenZuege);
+      setTimeout(() => {
+        zeige(ei, ev, "sd-eule");
+        antwort.textContent = `🦉 Die Eule setzt die ${ev} … «Oh nein!»`;
+      }, 450);
+      return;
+    }
+    const e = eulenAntwort(r, a, zug);
+    zeige(i, v, "sd-eigen");
+    felder[i].classList.add("falsch");
+    if (e.zug) {
+      zeige(e.zug[0], e.zug[1], "sd-eule");
+      antwort.textContent = `🦉 Die Eule setzt die ${e.zug[1]}.`;
+    }
+    ctx.falsch(e.text, loesung);
+    if (ctx.vorbei()) { sperren(); return; }
+    // Zug und Antwort bleiben stehen, bis das Kind das nächste Feld oder die nächste Zahl antippt
+    zuruecksetzen = { felder: e.zug ? [i, e.zug[0]] : [i] };
+  }
+  zeichne();
+  if (ctx.nr === 0) ctx.sag("Tipp auf ein leeres Feld, dann auf eine Zahl. Findest du den Zug, nach dem ich verliere?");
+}
+
+LS.spiel({
+  id: "sudoku-duell",
+  einleitung: "Du und ich setzen abwechselnd eine Zahl. Sie darf in Zeile, Spalte und Kasten noch nicht stehen. Wer keine Zahl mehr setzen kann, verliert! Findest du den Zug, nach dem ich nicht mehr gewinnen kann?",
+  hilfe: "Tipp auf ein leeres Feld, dann auf eine Zahl. Ist dein Zug gut, kann die Eule nicht mehr gewinnen. Sonst zeigt sie dir, wie sie antworten würde — und du versuchst es nochmal.",
+  anzahl: 6,
+  stufen: {
+    s1: "4 × 4 fast voll: Nach welchem Zug kann die Eule nichts mehr setzen?",
+    s2: "4 × 4: Denk zwei Züge voraus.",
+    s3: "4 × 4 mit mehr leeren Feldern.",
+    s4: "6 × 6 fast voll.",
+    s5: "6 × 6 mit mehr leeren Feldern.",
+    s6: "Endgegner: lange Endspiele — oder wer die letzte Zahl setzt, verliert.",
+  },
+  aufgabe(ctx) {
+    const a = aufgabeErzeugen(ctx.stufe);
+    if (ctx.stufe === "s6") ctx.serie("regel", a.umgekehrt ? "umgekehrt" : "normal");
+    ctx.kennung(`${a.umgekehrt ? "umgekehrt" : "normal"}|${a.n}|${a.werte.join("")}`);
+    duellAufgabe(ctx, a);
+  },
+});
+</script>
+</body>
+</html>

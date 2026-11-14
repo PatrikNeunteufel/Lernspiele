@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sudoku-Duell — Regeln</title>
+<script src="../../kern/kern-kopf.js" data-speicher="lernspiele:"></script>
+<link rel="stylesheet" href="../../kern/kern.css">
+<link rel="stylesheet" href="../gemeinsam/stil.css">
+<link rel="stylesheet" href="../gemeinsam/regeln.css">
+<style>
+  .regeln svg.raster { max-width: 240px; }
+  .regeln svg .grund { fill: var(--k-feld); stroke: var(--text); stroke-width: 3; }
+  .regeln svg .duenn { stroke: var(--rand); stroke-width: 1.5; }
+  .regeln svg .dick { stroke: var(--text); stroke-width: 3; }
+  .regeln svg text { font: 800 24px var(--schrift); fill: var(--text); text-anchor: middle; }
+  .regeln svg .neu-grund { fill: var(--gut-hell); }
+  .regeln svg text.neu { fill: var(--knopf); }
+  .regeln svg text.sperre { fill: var(--text-leise); font-size: 18px; }
+</style>
+</head>
+<body>
+<main class="regeln">
+  <a class="zurueck-link" href="index.html">← Zurück zum Spiel</a>
+  <h1>🆚 Sudoku-Duell</h1>
+  <p class="unter">Ein Spiel für zwei: du gegen die Eule.</p>
+
+  <section>
+    <h2>Das Raster</h2>
+    <p>Ein Sudoku mit 4 × 4 oder 6 × 6 Feldern. Die dicken Linien teilen es in Kästen. Ein paar Zahlen stehen schon da.</p>
+  </section>
+
+  <section>
+    <h2>Ein Zug</h2>
+    <p>Ihr seid abwechselnd dran. Wer dran ist, schreibt <b>eine Zahl</b> in ein leeres Feld. Die Zahl darf in der Zeile, in der Spalte und im Kasten noch nicht stehen.</p>
+    <figure>
+      <svg class="raster" viewBox="0 0 180 180" role="img" aria-label="Ein Sudoku 4 mal 4; in Zeile 1, Spalte 2 wird eine 3 gesetzt">
+        <rect class="grund" x="10" y="10" width="160" height="160"/>
+        <rect class="neu-grund" x="51" y="11" width="38" height="38"/>
+        <line class="duenn" x1="50" y1="12" x2="50" y2="168"/><line class="duenn" x1="130" y1="12" x2="130" y2="168"/>
+        <line class="duenn" x1="12" y1="50" x2="168" y2="50"/><line class="duenn" x1="12" y1="130" x2="168" y2="130"/>
+        <line class="dick" x1="90" y1="10" x2="90" y2="170"/><line class="dick" x1="10" y1="90" x2="170" y2="90"/>
+        <text class="neu" x="70" y="38">3</text><text x="110" y="38">4</text><text x="150" y="38">2</text>
+        <text x="30" y="78">1</text><text x="70" y="78">4</text><text x="150" y="78">3</text>
+        <text x="70" y="118">1</text><text x="110" y="118">3</text><text x="150" y="118">4</text>
+        <text x="30" y="158">2</text><text x="150" y="158">1</text>
+      </svg>
+      <figcaption>Die 3 passt hier: Sie steht noch nicht in dieser Zeile, dieser Spalte und diesem Kasten.</figcaption>
+    </figure>
+    <p>Die Zahlen müssen kein fertiges Sudoku ergeben. Sie dürfen sich nur nicht in die Quere kommen.</p>
+  </section>
+
+  <section>
+    <h2>Gesperrte Felder</h2>
+    <p>Passt in ein leeres Feld keine Zahl mehr, ist es <b>gesperrt</b>. Dort kann niemand mehr etwas setzen.</p>
+    <figure>
+      <svg class="raster" viewBox="0 0 180 180" role="img" aria-label="Dasselbe Sudoku nach dem Zug; die fünf leeren Felder sind gesperrt">
+        <rect class="grund" x="10" y="10" width="160" height="160"/>
+        <line class="duenn" x1="50" y1="12" x2="50" y2="168"/><line class="duenn" x1="130" y1="12" x2="130" y2="168"/>
+        <line class="duenn" x1="12" y1="50" x2="168" y2="50"/><line class="duenn" x1="12" y1="130" x2="168" y2="130"/>
+        <line class="dick" x1="90" y1="10" x2="90" y2="170"/><line class="dick" x1="10" y1="90" x2="170" y2="90"/>
+        <text class="sperre" x="30" y="36">✖</text><text x="70" y="38">3</text><text x="110" y="38">4</text><text x="150" y="38">2</text>
+        <text x="30" y="78">1</text><text x="70" y="78">4</text><text class="sperre" x="110" y="76">✖</text><text x="150" y="78">3</text>
+        <text class="sperre" x="30" y="116">✖</text><text x="70" y="118">1</text><text x="110" y="118">3</text><text x="150" y="118">4</text>
+        <text x="30" y="158">2</text><text class="sperre" x="70" y="156">✖</text><text class="sperre" x="110" y="156">✖</text><text x="150" y="158">1</text>
+      </svg>
+      <figcaption>Nach der 3 passt in kein leeres Feld mehr eine Zahl. Die Eule ist dran — und kann nichts setzen.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Wer gewinnt?</h2>
+    <p>Wer <b>keine Zahl mehr setzen kann</b>, verliert.</p>
+    <p>Im Endgegner gibt es manchmal die umgekehrte Regel: <b>Wer die letzte Zahl setzt, verliert.</b> Dann steht über dem Raster ⚠️ Achtung.</p>
+    <p class="merke">Lies zuerst die Regel über dem Raster: Gewinnt oder verliert, wer die letzte Zahl setzt?</p>
+  </section>
+
+  <section>
+    <h2>So spielst du hier</h2>
+    <ol>
+      <li>Du bist dran. Tippe auf ein leeres Feld.</li>
+      <li>Tippe auf eine Zahl.</li>
+      <li>Ist dein Zug gut, kann die Eule nicht mehr gewinnen. Sonst zeigt sie dir, wie sie antworten würde — und du versuchst es nochmal.</li>
+    </ol>
+    <p class="merke">Zähle, wohin noch Zahlen passen, und spiel im Kopf weiter. So findest du die Züge, mit denen du gewinnst.</p>
+  </section>
+
+  <a class="knopf los" href="index.html">Zum Spiel</a>
+</main>
+</body>
+</html>
