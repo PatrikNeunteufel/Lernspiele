@@ -90,7 +90,6 @@ function zeichneSpiele(box, neu) {
   /** Einen Chip der Mehrfachwahl an- oder abwählen. */
   const schalte = (k, id) => () => { const s = new Set(filter[k]); if (s.has(id)) s.delete(id); else s.add(id); setze(k, [...s])(); };
   const speichere = daten => { LS.speichereProfil(name, daten); neu(); };
-  const spielSuche = SPIEL_SUCHE.text;
   const chip = (text, aktiv, onclick, tipp, klasse = "") =>
     el("button", { type: "button", class: "chip " + klasse, "aria-pressed": String(aktiv), onclick }, text, tipp ? el("span", { class: "tipp", text: tipp }) : null);
   /** „Alle“ der Mehrfachwahl: wählt alle an; sind schon alle an, wählt es alle ab. */
@@ -199,27 +198,6 @@ function zeichneSpiele(box, neu) {
     nurKlasse ? "🎒 Meine Klasse" : null, filter.fokus && fokus.length ? "⭐ Fokus" : null, nurZuPruefen ? "🔍 Zu prüfen" : null,
   ].filter(Boolean);
 
-  // ----- Spiele auswählen -----
-  // Ruhezeit (Zusatz Patrik zu AN3-K): Spiele mit Ton fehlen, wenn die Aufsicht sie dann ausblendet
-  const passt = s => LS.spielSichtbar(s.id) && !LS.ruheAusgeblendet(s.id)
-    && (filter.fach === "alle" || THEMEN.find(t => t.id === s.thema)?.fach === filter.fach)
-    && (!filter.thema.length || filter.thema.includes(s.thema))
-    && (!filter.stufe.length || s.stufen.some(st => filter.stufe.includes(st)))
-    && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)))
-    && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1)
-    && (!filter.klasse.length || filter.klasse.includes(s.klasse))
-    && (!nurZuPruefen || zuPruefen(s))
-    && (!treffer || treffer.has(s.id));
-  // Suche (Entscheid SU1 a): Treffer nach Relevanz, sonst Fokus-Spiele zuerst und Katalog-Reihenfolge.
-  // Ohne Suche, aber mit „?aehnlich=<id>“: die ähnlichen Spiele als Liste, ähnlichste zuerst (LERN_Session10).
-  const aehnlichZu = !spielSuche.trim() && UE.aehnlich.id() ? SPIELE.find(s => s.id === UE.aehnlich.id()) : null;
-  const treffer = spielSuche.trim() ? new Map((LS.suche(spielSuche, person) || []).map((t, i) => [t.id, { ...t, i }]))
-    : aehnlichZu ? new Map(LS.aehnlich(aehnlichZu.id, person).map((t, i) => [t.id, { ...t, i }])) : null;
-  const imFokus = s => s.lernziele.some(l => fokus.includes(l.lz));
-  const auswahl = SPIELE.filter(passt).sort(treffer
-    ? (a, b) => treffer.get(a.id).i - treffer.get(b.id).i
-    : (a, b) => Number(imFokus(b)) - Number(imFokus(a)));
-
   // ----- Sortierung (Wunsch Patrik, Entscheide SO1 a, SO2 a, LERN_Session11) -----
   // Vorgabe „nach Fach und Thema“ wie bisher; sonst eine Liste ohne Gruppen. Wählen darf die Aufsicht immer, ein Kind
   // nach Einstellung und Klasse (LS.sortierungFuer). Eine Suche ordnet weiter nach Relevanz.
@@ -230,11 +208,6 @@ function zeichneSpiele(box, neu) {
     name: nachName,
     klasse: (a, b) => a.klasse - b.klasse || nachName(a, b),
   };
-  const flach = !treffer && sort.art !== "thema";
-  if (flach) {
-    auswahl.sort(SORTIERER[sort.art]);
-    if (sort.ab) auswahl.reverse();
-  }
   const SORT_PFEIL = { thema: ["Katalog", "rückwärts"], passung: ["beste zuerst", "beste zuletzt"], name: ["A → Z", "Z → A"], klasse: ["tiefe zuerst", "hohe zuerst"] };
   const sortWahl = sort.waehlbar ? UE.sortWahl({
     arten: Object.entries(LS.EINSTELLUNGEN.sortierung.werte).map(([wert, text]) => ({ wert, text })), wahl: sort, pfeile: SORT_PFEIL,
@@ -244,16 +217,17 @@ function zeichneSpiele(box, neu) {
 
   // ----- Werkzeuge: Ansicht und alle auf/zu (nur mit Gruppen: nicht bei Suche, Ähnlichen oder flacher Liste) -----
   const gruppenIds = ["favoriten", ...FAECHER.map(f => "fach:" + f), ...THEMEN.map(t => "thema:" + t.id)];
-  const gegliedert = !treffer && !flach;
   // Über den Spielen nur Fach-Reiter, Suche und „Filter“ (FB1 a, LERN_Session32): Klasse, Nur, Thema, Stufe,
   // Sortierung, Ansicht und Alle auf/zu klappt der Knopf auf. Offen merkt das Profil (filterZu: false), vorgegeben zu.
   const filterOffen = p.filterZu === false;
-  const ansicht = el("div", { class: "filter-zeile filter-ansicht" },
+  /** Zeile „Ansicht“ im Filter; „Alle auf/zu“ nur mit Gruppen (zeichneAuswahl setzt sie je nach Suche neu). */
+  const ansichtZeile = gegliedert => el("div", { class: "filter-zeile filter-ansicht" },
     sortWahl,
     chip("▦ Kacheln", p.ansicht !== "kompakt", () => speichere({ ansicht: "kacheln" }), null, "klein"),
     chip("☰ Kompakt", p.ansicht === "kompakt", () => speichere({ ansicht: "kompakt" }), null, "klein"),
     gegliedert ? chip("Alle auf", false, () => speichere({ zu: [] }), null, "klein") : null,
     gegliedert ? chip("Alle zu", false, () => speichere({ zu: gruppenIds }), null, "klein") : null);
+  let ansicht = ansichtZeile(false);
   const filterFeld = el("div", { class: "filter-klapp filter-feld", id: "filter-feld", ...(filterOffen ? {} : { hidden: true }) },
     el("div", { class: "filter" }, ...zeilen, ansicht));
   const filterKnopf = el("button", { type: "button", class: "filter-knopf", "aria-expanded": String(filterOffen), "aria-controls": "filter-feld",
@@ -265,301 +239,343 @@ function zeichneSpiele(box, neu) {
     } },
     el("span", { class: "filter-symbol", "aria-hidden": "true", html: SCHIEBEREGLER }), el("span", { text: "Filter" }),
     aktiv.length ? el("span", { class: "filter-aktiv", text: aktiv.join(" · ") }) : null);
+  // Was von der Suche abhängt, steht in `auswahlBox` (display: contents, start.css): Die Suche zeichnet nur sie neu,
+  // das Feld bleibt (Hinweis Patrik, LERN_Session41: beim ersten Buchstaben vergingen Sekunden, solange jede Eingabe
+  // die ganze Startseite neu aufbaute; wie karteNeu für die Schalter, LERN_Session35).
+  const auswahlBox = el("div", { class: "spiele-auswahl" });
   box.append(fachReiter, el("div", { class: "werkzeuge" },
-    SPIEL_SUCHE.feld({ neu, beiEingabe: UE.aehnlich.schliessen, attr: suchAttr("🔍 Spiel suchen") }), filterKnopf), filterFeld);
+    SPIEL_SUCHE.feld({ neu: zeichneAuswahl, beiEingabe: UE.aehnlich.schliessen, attr: suchAttr("🔍 Spiel suchen") }), filterKnopf), filterFeld, auswahlBox);
+  zeichneAuswahl();
 
-  // ----- Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, ohne Thema (Wunsch Patrik, LERN_Session10) -----
-  // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
-  // Zufälliges Spiel: die Eule zieht ein Spiel aus der gefilterten Auswahl; je Stufe ein Knopf.
-  const gross = filter.stufe.length === 1;
-  /** Karte ohne Thema; freie Stellen lösen `beiTipp` aus (wie bei den Spielkarten das Startbild). */
-  function zufallsKarte({ bild, name: titel, ziel, farbe, knoepfe, beiTipp, titelText, schalter = null }) {
-    const k = el("div", { class: "spielkarte zufall" + (schalter?.an ? " endlos-an" : ""), title: titelText, "data-vorlesen": `${titel}. ${ziel}` });
-    k.style.setProperty("--f", farbe);
-    k.addEventListener("click", e => { if (!e.target.closest("a, button")) beiTipp(); });
-    if (schalter) k.append(el("div", { class: "karten-schalter-zeile" }, el("button", { type: "button", class: "karten-schalter" + (schalter.an ? " an" : ""),
-      "aria-pressed": String(schalter.an), "aria-label": schalter.text, title: schalter.text, onclick: schalter.onclick }, schalterSymbol("endlos", schalter.an))));
-    // ein Kind sieht nur den Titel (GS2 a); den Satz liest langes Drücken vor, die Aufsicht sieht ihn
-    k.append(el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: bild }), el("b", { class: "name", text: titel })),
-      aufsicht ? el("div", { class: "ziel", text: ziel }) : "", el("div", { class: "stufenknoepfe" }, ...knoepfe));
-    return k;
-  }
-  // Bedarf (Wunsch Patrik, LERN_Session10): der Zufall wählt, wo die Statistik Bedarf zeigt — AUSWERTUNG.bedarf,
-  // dieselbe Gewichtung wie im Zufallsmix.
-  const bedarf = (s, stufeId) => AUSWERTUNG.bedarf(s.id, stufeId, protokoll, fokus);
-  const ziehe = AUSWERTUNG.ziehe;
-  // ♾ auf der Karte (Wunsch Patrik, LERN_Session12): dann nur Spiele, die in dieser Stufe Endlos anbieten, endlos gestartet.
-  const zufallEndlos = p.endlosAn.includes("zufall");
-  // Zufall nimmt in der Ruhezeit keine Spiele, die Ton brauchen: niemand könnte dort den Ton für die Runde einschalten
-  const zufallAuswahl = auswahl.filter(s => !LS.tonSpielRuht(s.id));
-  const stufenZufall = st => zufallAuswahl.filter(s => s.stufen.includes(st.id) && (!zufallEndlos || (s.endlos || []).includes(st.id)));
-  const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}${zufallEndlos ? "&endlos=1" : ""}`; };
-  const zufallsKnoepfe = LS.SKALA.filter(st => (!filter.stufe.length || filter.stufe.includes(st.id)) && stufenZufall(st).length).map(st => {
-    const b = el("button", { type: "button", class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
-      "data-vorlesen": `Zufälliges Spiel, Stufe ${st.nr}, ${st.name}${zufallEndlos ? ", endlos" : ""}.`,
-      title: `${zufallEndlos ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name}: ein zufälliges Spiel aus deiner Auswahl`,
-      onclick: () => zufallsSpiel(st) }, el("span", { class: "stufen-text" }, zufallEndlos ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`), el("span", { class: "s" }));
-    b.style.setProperty("--sf", st.farbe);
-    return b;
-  });
-  // Weiterspielen (Entscheid ZG1 a, LERN_Session12): die letzten fünf Spiele, Antippen startet die zuletzt gespielte
-  // Stufe (nach einer Endlos-Runde wieder endlos). Runden im Zufallsmix zählen nicht — dort hat der Mix gewählt.
-  if (!spielSuche.trim()) {
-    const zuletzt = [
-      // Serien stehen seit LERN_Session19 auch im Protokoll (RA3 a); ältere nur als Rekord
-      ...protokoll.filter(e => !e.mix).map(e => ({ spiel: e.inhalt, stufe: e.stufe, zeit: e.zeit, endlos: !!e.endlos })),
-      ...LS.rekorde().filter(e => e.name === name && !e.mix).map(e => ({ spiel: e.inhalt, stufe: e.stufe, zeit: e.zeit, endlos: true })),
-    ].sort((a, b) => (a.zeit < b.zeit ? 1 : -1));
-    const gesehen = new Set();
-    const weiter = [];
-    for (const r of zuletzt) {
-      const s = SPIELE.find(x => x.id === r.spiel);
-      if (!s || gesehen.has(s.id) || !(aufsicht ? LS.spielSichtbar(s.id) : LS.fuerKinderSichtbar(s.id))) continue;
-      gesehen.add(s.id);
-      weiter.push({ s, ...r });
-      if (weiter.length === 5) break;
+  /** Alles, was von der Suche abhängt: Auswahl, Weiterspielen, Zufall, Treffer, Favoriten, Gruppen. */
+  function zeichneAuswahl() {
+    auswahlBox.replaceChildren();
+    const spielSuche = SPIEL_SUCHE.text;
+    // ----- Spiele auswählen -----
+    // Ruhezeit (Zusatz Patrik zu AN3-K): Spiele mit Ton fehlen, wenn die Aufsicht sie dann ausblendet
+    const passt = s => LS.spielSichtbar(s.id) && !LS.ruheAusgeblendet(s.id)
+      && (filter.fach === "alle" || THEMEN.find(t => t.id === s.thema)?.fach === filter.fach)
+      && (!filter.thema.length || filter.thema.includes(s.thema))
+      && (!filter.stufe.length || s.stufen.some(st => filter.stufe.includes(st)))
+      && (!filter.fokus || s.lernziele.some(l => fokus.includes(l.lz)))
+      && (!nurKlasse || Math.abs(s.klasse - klasse) <= 1)
+      && (!filter.klasse.length || filter.klasse.includes(s.klasse))
+      && (!nurZuPruefen || zuPruefen(s))
+      && (!treffer || treffer.has(s.id));
+    // Suche (Entscheid SU1 a): Treffer nach Relevanz, sonst Fokus-Spiele zuerst und Katalog-Reihenfolge.
+    // Ohne Suche, aber mit „?aehnlich=<id>“: die ähnlichen Spiele als Liste, ähnlichste zuerst (LERN_Session10).
+    const aehnlichZu = !spielSuche.trim() && UE.aehnlich.id() ? SPIELE.find(s => s.id === UE.aehnlich.id()) : null;
+    const treffer = spielSuche.trim() ? new Map((LS.suche(spielSuche, person) || []).map((t, i) => [t.id, { ...t, i }]))
+      : aehnlichZu ? new Map(LS.aehnlich(aehnlichZu.id, person).map((t, i) => [t.id, { ...t, i }])) : null;
+    const imFokus = s => s.lernziele.some(l => fokus.includes(l.lz));
+    const auswahl = SPIELE.filter(passt).sort(treffer
+      ? (a, b) => treffer.get(a.id).i - treffer.get(b.id).i
+      : (a, b) => Number(imFokus(b)) - Number(imFokus(a)));
+
+    const flach = !treffer && sort.art !== "thema";
+    if (flach) {
+      auswahl.sort(SORTIERER[sort.art]);
+      if (sort.ab) auswahl.reverse();
     }
-    if (weiter.length) box.append(el("div", { class: "weiter-zeile" }, el("b", { class: "weiter-titel", text: "▶️ Weiterspielen" }),
-      ...weiter.map(({ s, stufe, endlos }) => {
-        const st = LS.SKALA.find(x => x.id === stufe) || LS.SKALA[0];
-        const a = el("a", { class: "weiter-karte", href: `${s.pfad}?stufe=${st.id}${endlos ? "&endlos=1" : ""}`,
-          "data-vorlesen": `${s.name}, Stufe ${st.nr}${endlos ? ", endlos" : ""}. Weiterspielen.`, title: `${s.name} · Stufe ${st.nr}${endlos ? " · ♾ Endlos" : ""}` },
-          el("span", { class: "weiter-bild", text: s.bild }), el("span", { class: "weiter-name", text: s.name }),
-          el("span", { class: "weiter-stufe" }, endlos ? schalterSymbol("endlos", true) : st.icon, ` ${st.nr}`));
-        a.style.setProperty("--f", s.farbe);
-        return a;
-      })));
-  }
-  const zufallsKarten = [];
-  if (SPIELE.some(s => LS.spielSichtbar(s.id))) zufallsKarten.push(zufallsKarte({ bild: "🎲", name: "Zufallsmix", farbe: "var(--deko-2)",
-    ziel: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer.",
-    titelText: "Antippen: zur Mix-Seite", beiTipp: () => { location.href = "mix.html"; },
-    knoepfe: [el("a", { class: "stufenknopf gross", href: "mix.html", "data-vorlesen": "Zufallsmix einstellen und los." }, el("span", { class: "stufen-text", text: "🎲 Einstellen und los" }))] }));
-  // Die Karte bleibt auch mit ♾ ohne passendes Spiel stehen, damit der Schalter erreichbar ist.
-  if (zufallsKnoepfe.length || (zufallEndlos && zufallAuswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: aufsicht ? "Zufälliges Spiel" : "Überrasch mich", farbe: "var(--deko-6)",
-    ziel: zufallEndlos ? "Die Eule zieht ein Endlos-Spiel aus deiner Auswahl: so viele Aufgaben wie möglich ohne Fehler."
-      : "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
-    titelText: "Antippen: Startbild eines zufälligen Spiels",
-    knoepfe: zufallsKnoepfe.length ? zufallsKnoepfe : [el("span", { class: "leise-text", text: "Kein Endlos-Spiel in dieser Auswahl." })],
-    schalter: { an: zufallEndlos, text: zufallEndlos ? "Endlos aus" : "Endlos ein: ein zufälliges Spiel im Endlos-Modus",
-      onclick: () => speichere({ endlosAn: zufallEndlos ? p.endlosAn.filter(x => x !== "zufall") : [...p.endlosAn, "zufall"] }) },
-    beiTipp: () => {
-      const st = LS.SKALA.find(x => x.id === (gross ? filter.stufe[0] : empfohlen)) || LS.SKALA[2];
-      const s = ziehe(zufallEndlos ? stufenZufall(st) : zufallAuswahl, x => bedarf(x, st.id));
-      if (s) location.href = s.pfad;
-    } }));
-  if (zufallsKarten.length) box.append(el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...zufallsKarten));
-  const ruhend = SPIELE.filter(s => LS.spielSichtbar(s.id) && LS.ruheAusgeblendet(s.id)).length;
-  if (ruhend) box.append(el("p", { class: "leise-text", "data-hinweis": "ruhezeit",
-    text: `🤫 Ruhezeit: ${ruhend} ${ruhend === 1 ? "Spiel mit Ton ist" : "Spiele mit Ton sind"} ausgeblendet, bis sie vorbei ist.` }));
+    // Ansicht im Filter: „Alle auf/zu“ nur mit Gruppen, nicht bei Suche, Ähnlichen oder flacher Liste
+    const gegliedert = !treffer && !flach;
+    const neueAnsicht = ansichtZeile(gegliedert);
+    ansicht.replaceWith(neueAnsicht);
+    ansicht = neueAnsicht;
 
-  // Auf- und zuklappbare Gruppen; der Zustand landet im Profil. Gruppen gibt es nur ohne Suche (dann eine Liste).
-  const G = UE.gruppen({ zu: p.zu, merke: zu => LS.speichereProfil(name, { zu }) });
-  const gruppe = (id, titel, anzahl, ...inhalt) => G.gruppe({ id, kopf: titel, anzahl }, ...inhalt);
-
-  // Im Stil „hand“ ab und zu eine Lücke vor einer Karte (STIL.luecke, je Spiel gleich; nicht kompakt). Vor der Karte,
-  // damit sie in jede Spalte fallen kann, auch in die erste der ersten Zeile (Wunsch Patrik LERN_Session32). In der Lücke
-  // ein Motiv zum Fach (LU1 a, start/luecken.js); seine Wirkung auf die Nachbarn setzt STIL.nachbarn
-  const lueckenJeFach = new Map();
-  const luecke = s => {
-    const fach = THEMEN.find(t => t.id === s.thema)?.fach, nr = lueckenJeFach.get(fach) || 0;
-    lueckenJeFach.set(fach, nr + 1);
-    const m = LUECKEN.waehle(fach, nr);
-    return el("div", { class: `raster-luecke motiv-${m.id}`, "aria-hidden": "true", "data-wirkung": m.wirkung || "", html: m.svg });
-  };
-  const gitter = spiele => el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") },
-    ...spiele.flatMap(s => [!kompakt && STIL.luecke(s.id) ? luecke(s) : null, karte(s)]).filter(Boolean));
-
-  // Klassen-Rand (Entscheid G1 a, LERN_Session14): Ohne „🎒 Meine Klasse“ zeigt ein farbiger Rand mit Zeichen, wie die
-  // Basisklasse des Spiels zur Klasse des Kindes steht. Farben aus --deko-*, nicht aus den Stellenfarben; das Zeichen
-  // trägt die Bedeutung auch ohne Farbsehen. Welche Stufe genau passt, zeigt weiter 👍 auf dem Stufenknopf.
-  const KLASSEN_LAGE = {
-    tiefer: { zeichen: "✓", text: k => `Leichter als deine Klasse (Spiel für die ${LS.klasseText(k)}) — schaffst du!` },
-    gleich: { zeichen: "●", text: () => "Deine Klasse — da bist du gerade dran." },
-    hoeher: { zeichen: "▲", text: k => `Herausforderung: Spiel für die ${LS.klasseText(k)}.` },
-  };
-  const klassenRand = !aufsicht && klasse !== null && !nurKlasse;
-  const lageVon = s => (s.klasse < klasse ? "tiefer" : s.klasse === klasse ? "gleich" : "hoeher");
-  if (klassenRand && auswahl.length) box.append(el("div", { class: "klassen-legende", "aria-label": "Rand der Spielkarten" },
-    el("span", { text: "Rand:" }),
-    ...Object.entries({ tiefer: "leichter", gleich: "meine Klasse", hoeher: "Herausforderung" }).map(([lage, wort]) =>
-      el("span", { class: `klassen-legende-teil klasse-${lage}` }, el("span", { class: "klassen-marke", text: KLASSEN_LAGE[lage].zeichen }), ` ${wort}`))));
-
-  // Text der Karte (Entscheid GS2 a, LERN_Session32): Ein Kind sieht Kartenbild, Name und Stufenknöpfe; die Beschreibung
-  // zeigt ⓘ und liest langes Drücken vor. Lernziel-Kürzel und Sperrmarken sieht nur die Aufsicht; der Grund eines
-  // Suchtreffers bleibt, damit klar ist, warum das Spiel dasteht.
-  const kompakt = p.ansicht === "kompakt";
-  function karte(s) {
-    const favorit = p.favoriten.includes(s.id);
-    const frei = LS.fuerKinderSichtbar(s.id);
-    // Schalter je Spiel (Wunsch Patrik 2026-10-31): ⏱ Timer und ♾ Endlos leuchten wie der Favoriten-Stern;
-    // die Stufenknöpfe starten dann mit Timer bzw. im Endlos-Modus. Der Timer ist dieselbe Einstellung wie im Spiel.
-    const timerAn = s.stufen.some(st => LS.timerFuer(name, s.id, st).an);
-    const endlosAn = !!s.endlos?.length && p.endlosAn.includes(s.id);
-    // data-vorlesen: langes Drücken liest Name und Beschreibung vor (Kindergarten, 1. Klasse; LERN_Session8)
-    const lage = klassenRand ? lageVon(s) : null;
-    const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : "") + (lage ? ` klasse-${lage}` : ""), "data-spiel": s.id,
-      title: "Antippen: Startbild des Spiels",
-      "data-vorlesen": `${s.name}. ${s.beschreibung}${lage ? ` ${KLASSEN_LAGE[lage].text(s.klasse)}` : ""}` });
-    k.style.setProperty("--f", s.farbe);
-    // Freie Stellen der Karte öffnen das Startbild des Spiels (dort Stufen, Endlos und Timer mit Erklärung).
-    k.addEventListener("click", e => { if (!e.target.closest("a, button")) location.href = s.pfad; });
-    const ziel = lz => LERNZIELE.find(x => x.lz === lz)?.text || "";
-    // Lernziel-Kürzel: Antippen oder Zeigen blendet den Klartext ein (auch auf dem Tablet, wo es kein title gibt).
-    const marken = s.lernziele.map(l => el("button", { type: "button", class: "marke tipp" + (fokus.includes(l.lz) ? " fokus" : ""),
-      "data-tipp": `${l.lz}: ${ziel(l.lz)}`, "aria-label": `Lernziel ${l.lz}: ${ziel(l.lz)}`, text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));
-    if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: `🔒 für Kinder nicht sichtbar: ${LS.sperrGrund(s.id)}` }));
-    // Treffer über ein Feld, das nicht auf der Karte steht: sagen, wo (Entscheid SU1 a).
-    const grund = treffer?.get(s.id)?.grund;
-    if (grund) marken.push(el("span", { class: "marke such-grund", text: aehnlichZu ? `🔗 ${grund}` : `🔍 gefunden ${grund}` }));
-    const schalter = (an, art, text, onclick, attr = {}) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
-      "aria-label": text, title: text, onclick, ...attr }, schalterSymbol(art, an));
-    // Von der Aufsicht festgelegt (VR1 a): Symbol mit 🔒, Antippen ändert nichts.
-    const festSchalter = (an, art, text) => el("span", { class: "karten-schalter fest", role: "img", "aria-label": `${text} — ${LS.FEST_TEXT}`,
-      title: `${text} — ${LS.FEST_TEXT}` }, schalterSymbol(art, an), el("span", { class: "schloss", text: "🔒" }));
-    const reihenfolge = s.reihenfolge ? LS.reihenfolgeSchalter(s.id, LS.reihenfolgeFuer(name, s.id)) : null;
-    // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
-    const schalterZeile = el("div", { class: "karten-schalter-zeile" },
-        lage ? el("span", { class: "klassen-marke", role: "img", "aria-label": KLASSEN_LAGE[lage].text(s.klasse), title: KLASSEN_LAGE[lage].text(s.klasse),
-          text: KLASSEN_LAGE[lage].zeichen }) : null,
-        reihenfolge && (LS.istFest(name, "reihenfolge") ? festSchalter(reihenfolge.an, reihenfolge.symbol, reihenfolge.text)
-          : schalter(reihenfolge.an, reihenfolge.symbol, `${reihenfolge.text} — antippen wechselt`,
-            () => { LS.setzeWahl(name, "reihenfolge", s.id, reihenfolge.naechste); karteNeu(s.id); })),
-        LS.istFest(name, "timer") ? festSchalter(timerAn, "uhr", timerAn ? "Timer an" : "Timer aus")
-          : schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.waehleTimer(name, s.id, !timerAn); karteNeu(s.id); }),
-        s.endlos?.length ? schalter(endlosAn, "endlos", endlosAn ? "Endlos aus" : "Endlos ein: so viele wie möglich ohne Fehler",
-          () => { LS.speichereProfil(name, { endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] }); karteNeu(s.id); }) : null,
-        schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
-          () => { LS.speichereProfil(name, { favoriten: UE.umschalten(p.favoriten, s.id) }); karteNeu(s.id); favoritenNeu(); }, { "data-favorit": s.id }));
-    const beschreibung = el("div", { class: "ziel", text: s.beschreibung, ...(aufsicht ? {} : { hidden: true }) });
-    const info = aufsicht ? null : el("button", { type: "button", class: "karten-info", "aria-expanded": "false", "aria-label": `Worum geht es bei ${s.name}?`,
-      title: "Worum geht es?", text: "ⓘ", onclick: () => {
-        beschreibung.hidden = !beschreibung.hidden;
-        info.setAttribute("aria-expanded", String(!beschreibung.hidden));
-      } });
-    const sichtbareMarken = aufsicht ? marken : marken.filter(m => m.classList.contains("such-grund"));
-    // mit Kartenbild ohne das Emoji im Kopf: das Bild trägt die Erkennung, der Name hat Platz
-    const bild = kompakt ? null : kartenBild(s);
-    if (bild) k.classList.add("mit-bild");
-    k.append(...[
-      schalterZeile,
-      bild,
-      el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name }), info),
-      beschreibung,
-      sichtbareMarken.length ? el("div", { class: "marken" }, ...sichtbareMarken) : null].filter(Boolean));
-    const knoepfe = el("div", { class: "stufenknoepfe" });
-    const empf = LS.empfohleneStufe(name, s.id);
-    // Endlos an: nur die Endlos-Stufen, mit dem Rekord statt der Sterne. Stufenfilter: nur die gewählten.
-    const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (!filter.stufe.length || filter.stufe.includes(st.id)) && (!endlosAn || s.endlos.includes(st.id)));
-    for (const st of stufen) {
-      const timer = LS.timerFuer(name, s.id, st.id);
-      const rekord = endlosAn ? LS.besterRekord(name, s.id, st.id, timer.an) : 0;
-      const sterne = endlosAn ? "" : "★".repeat(LS.besteSterne(name, s.id, st.id));
-      const a = el("a", {
-        class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empf && !gross ? " empfohlen" : ""),
-        href: `${s.pfad}?stufe=${st.id}${endlosAn ? "&endlos=1" : ""}`,
-        "data-vorlesen": `${s.name}, Stufe ${st.nr}, ${st.name}. ${LS.stufeFuer(s.id, st.id)}${st.id === empf ? ", für dich empfohlen" : ""}.`,
-        title: `${endlosAn ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name} (${LS.stufeFuer(s.id, st.id)})${timer.an ? " · ⏱ mit Timer" : ""}`,
-      }, el("span", { class: "stufen-text" }, endlosAn ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`),
-         el("span", { class: "s", text: endlosAn ? (rekord ? `🏆${rekord}` : "") : sterne }));
-      a.style.setProperty("--sf", st.farbe);
-      knoepfe.append(a);
+    // ----- Zufallsmix und Zufälliges Spiel: Karten wie die Spiele, ohne Thema (Wunsch Patrik, LERN_Session10) -----
+    // Zufallsmix (Entscheid M1 a): Aufgaben aus mehreren Spielen, Einstellungen auf der Mix-Seite.
+    // Zufälliges Spiel: die Eule zieht ein Spiel aus der gefilterten Auswahl; je Stufe ein Knopf.
+    const gross = filter.stufe.length === 1;
+    /** Karte ohne Thema; freie Stellen lösen `beiTipp` aus (wie bei den Spielkarten das Startbild). */
+    function zufallsKarte({ bild, name: titel, ziel, farbe, knoepfe, beiTipp, titelText, schalter = null }) {
+      const k = el("div", { class: "spielkarte zufall" + (schalter?.an ? " endlos-an" : ""), title: titelText, "data-vorlesen": `${titel}. ${ziel}` });
+      k.style.setProperty("--f", farbe);
+      k.addEventListener("click", e => { if (!e.target.closest("a, button")) beiTipp(); });
+      if (schalter) k.append(el("div", { class: "karten-schalter-zeile" }, el("button", { type: "button", class: "karten-schalter" + (schalter.an ? " an" : ""),
+        "aria-pressed": String(schalter.an), "aria-label": schalter.text, title: schalter.text, onclick: schalter.onclick }, schalterSymbol("endlos", schalter.an))));
+      // ein Kind sieht nur den Titel (GS2 a); den Satz liest langes Drücken vor, die Aufsicht sieht ihn
+      k.append(el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: bild }), el("b", { class: "name", text: titel })),
+        aufsicht ? el("div", { class: "ziel", text: ziel }) : "", el("div", { class: "stufenknoepfe" }, ...knoepfe));
+      return k;
     }
-    k.append(knoepfe);
-    return k;
-  }
-
-  // Ein Schalter der Karte zeichnet nur diese Karte neu (Hinweis Patrik, LERN_Session35: der Neuaufbau aller Karten
-  // dauerte auf der Startseite rund 1 s, auf der Spielseite ging es sofort). Die Karte kann zweimal dastehen (Favoriten
-  // oben und am eigenen Platz); die Wirkung einer Lücke auf die Nachbarkarte (Stil „hand“) geht mit.
-  function karteNeu(id) {
-    p = LS.profil(name);
-    const s = SPIELE.find(x => x.id === id);
-    if (!s) return;
-    for (const alt of box.querySelectorAll(`.spielkarte[data-spiel="${id}"]`)) {
-      const frisch = karte(s);
-      for (const c of String(alt.getAttribute("class") || "").split(/\s+/)) if (/^(luecke-|w-)/.test(c)) frisch.classList.add(c);
-      alt.replaceWith(frisch);
-    }
-  }
-
-  // ----- Bei einer Suche: eine Liste, beste Treffer zuerst; sonst Favoriten, dann Fach → Thema -----
-  if (treffer && aehnlichZu) box.append(el("h2", { class: "treffer-titel" },
-    el("span", { text: `🔗 Ähnlich wie ${aehnlichZu.name}: ${auswahl.length} Spiel${auswahl.length === 1 ? "" : "e"} ` }),
-    chip("✕ Alle Spiele", false, () => { UE.aehnlich.schliessen(); neu(); }, null, "klein")));
-  if (treffer && auswahl.length) box.append(aehnlichZu ? gitter(auswahl) : el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), aehnlichZu ? "" : gitter(auswahl));
-  // Favoriten (Wunsch Patrik, LERN_Session35): oben zusätzlich, am eigenen Platz bleibt das Spiel; das Feld nur mit
-  // mindestens einem Favoriten, darin „Alle Favoriten entfernen“ (zweimal tippen). Der Platzhalter hält die Stelle,
-  // damit ein Stern nur das Feld und die Karte neu zeichnet.
-  const favoritenPlatz = el("span", { class: "favoriten-platz", hidden: true });
-  box.append(favoritenPlatz);
-  let favoritenFeld = null;
-  function favoritenGruppe() {
-    const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
-    if (!favoriten.length) return null;
-    const leeren = el("button", { type: "button", class: "knopf hell klein favoriten-leeren", text: "☆ Alle Favoriten entfernen" });
-    let gefragt = null;
-    leeren.addEventListener("click", () => {
-      if (!gefragt) { // erst nachfragen: ein Tipp aus Versehen löscht nichts
-        leeren.textContent = "Wirklich alle entfernen? Nochmal tippen";
-        gefragt = setTimeout(() => { gefragt = null; leeren.textContent = "☆ Alle Favoriten entfernen"; }, 4000);
-        return;
+    // Bedarf (Wunsch Patrik, LERN_Session10): der Zufall wählt, wo die Statistik Bedarf zeigt — AUSWERTUNG.bedarf,
+    // dieselbe Gewichtung wie im Zufallsmix.
+    const bedarf = (s, stufeId) => AUSWERTUNG.bedarf(s.id, stufeId, protokoll, fokus);
+    const ziehe = AUSWERTUNG.ziehe;
+    // ♾ auf der Karte (Wunsch Patrik, LERN_Session12): dann nur Spiele, die in dieser Stufe Endlos anbieten, endlos gestartet.
+    const zufallEndlos = p.endlosAn.includes("zufall");
+    // Zufall nimmt in der Ruhezeit keine Spiele, die Ton brauchen: niemand könnte dort den Ton für die Runde einschalten
+    const zufallAuswahl = auswahl.filter(s => !LS.tonSpielRuht(s.id));
+    const stufenZufall = st => zufallAuswahl.filter(s => s.stufen.includes(st.id) && (!zufallEndlos || (s.endlos || []).includes(st.id)));
+    const zufallsSpiel = st => { const s = ziehe(stufenZufall(st), x => bedarf(x, st.id)); location.href = `${s.pfad}?stufe=${st.id}${zufallEndlos ? "&endlos=1" : ""}`; };
+    const zufallsKnoepfe = LS.SKALA.filter(st => (!filter.stufe.length || filter.stufe.includes(st.id)) && stufenZufall(st).length).map(st => {
+      const b = el("button", { type: "button", class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empfohlen && !gross ? " empfohlen" : ""),
+        "data-vorlesen": `Zufälliges Spiel, Stufe ${st.nr}, ${st.name}${zufallEndlos ? ", endlos" : ""}.`,
+        title: `${zufallEndlos ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name}: ein zufälliges Spiel aus deiner Auswahl`,
+        onclick: () => zufallsSpiel(st) }, el("span", { class: "stufen-text" }, zufallEndlos ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`), el("span", { class: "s" }));
+      b.style.setProperty("--sf", st.farbe);
+      return b;
+    });
+    // Weiterspielen (Entscheid ZG1 a, LERN_Session12): die letzten fünf Spiele, Antippen startet die zuletzt gespielte
+    // Stufe (nach einer Endlos-Runde wieder endlos). Runden im Zufallsmix zählen nicht — dort hat der Mix gewählt.
+    if (!spielSuche.trim()) {
+      const zuletzt = [
+        // Serien stehen seit LERN_Session19 auch im Protokoll (RA3 a); ältere nur als Rekord
+        ...protokoll.filter(e => !e.mix).map(e => ({ spiel: e.inhalt, stufe: e.stufe, zeit: e.zeit, endlos: !!e.endlos })),
+        ...LS.rekorde().filter(e => e.name === name && !e.mix).map(e => ({ spiel: e.inhalt, stufe: e.stufe, zeit: e.zeit, endlos: true })),
+      ].sort((a, b) => (a.zeit < b.zeit ? 1 : -1));
+      const gesehen = new Set();
+      const weiter = [];
+      for (const r of zuletzt) {
+        const s = SPIELE.find(x => x.id === r.spiel);
+        if (!s || gesehen.has(s.id) || !(aufsicht ? LS.spielSichtbar(s.id) : LS.fuerKinderSichtbar(s.id))) continue;
+        gesehen.add(s.id);
+        weiter.push({ s, ...r });
+        if (weiter.length === 5) break;
       }
-      clearTimeout(gefragt);
-      const waren = p.favoriten;
-      LS.speichereProfil(name, { favoriten: [] });
-      waren.forEach(karteNeu);
-      favoritenNeu();
-    });
-    // gerahmt wie ein Fach (Hinweis Patrik, LERN_Session35), in Gold
-    const d = gruppe("favoriten", "⭐ Favoriten", favoriten.length, el("div", { class: "knopfzeile favoriten-leiste" }, leeren), gitter(favoriten));
-    d.classList.add("fach-block", "favoriten-block");
-    d.style.setProperty("--f", "var(--deko-4)");
-    return d;
-  }
-  function favoritenNeu() {
-    p = LS.profil(name);
-    const neuesFeld = favoritenGruppe();
-    favoritenFeld?.remove();
-    if (neuesFeld) favoritenPlatz.after(neuesFeld);
-    favoritenFeld = neuesFeld;
-    if (neuesFeld) LS.langDruecken(box);
-  }
-  favoritenFeld = favoritenGruppe();
-  if (favoritenFeld) box.append(favoritenFeld);
-  // Flache Sortierung: alle Spiele in einer Liste (Favoriten bleiben oben in ihrer Gruppe).
-  if (flach && auswahl.length) box.append(el("h2", { class: "treffer-titel", text: `${auswahl.length} Spiele · ${LS.EINSTELLUNGEN.sortierung.werte[sort.art]}` }), gitter(auswahl));
-  const faecherReihe = sort.ab ? [...FAECHER].reverse() : FAECHER;
-  for (const fach of treffer || flach ? [] : faecherReihe) {
-    const themen = (sort.ab ? [...THEMEN].reverse() : THEMEN).filter(t => t.fach === fach)
-      .map(t => ({ t, spiele: auswahl.filter(s => s.thema === t.id) }))
-      .filter(x => x.spiele.length);
-    if (!themen.length) continue;
-    const anzahl = themen.reduce((n, x) => n + x.spiele.length, 0);
-    // Fach und Thema als Blöcke mit Bild (Entscheid GR1 a, LERN_Session32): das Fach in der Farbe seines Reiters, das
-    // Thema mit Bild und kurzem Namen; den langen Titel zeigt ⓘ im Kopf, dazu beim Darüberfahren und langen Drücken
-    const themaBloecke = themen.map(({ t, spiele }) => {
-      const titel = el("div", { class: "thema-titel blase-klein", hidden: true, text: t.titel });
-      const info = el("button", { type: "button", class: "karten-info thema-info", "aria-expanded": "false", "aria-label": `Was gehört zu ${t.name}?`, title: t.titel, text: "ⓘ",
-        onclick: e => { e.preventDefault(); e.stopPropagation(); titel.hidden = !titel.hidden; info.setAttribute("aria-expanded", String(!titel.hidden)); } });
-      const d = G.gruppe({ id: "thema:" + t.id, kopf: [el("span", { class: "gruppe-bild", text: t.bild || "📚" }), el("span", { class: "gruppe-name", text: t.name }), info],
-        anzahl: spiele.length }, titel, gitter(spiele));
-      d.classList.add("thema-block");
-      d.querySelector("summary").title = t.titel;
-      d.querySelector("summary").dataset.vorlesen = `${t.name}: ${t.titel}`;
+      if (weiter.length) auswahlBox.append(el("div", { class: "weiter-zeile" }, el("b", { class: "weiter-titel", text: "▶️ Weiterspielen" }),
+        ...weiter.map(({ s, stufe, endlos }) => {
+          const st = LS.SKALA.find(x => x.id === stufe) || LS.SKALA[0];
+          const a = el("a", { class: "weiter-karte", href: `${s.pfad}?stufe=${st.id}${endlos ? "&endlos=1" : ""}`,
+            "data-vorlesen": `${s.name}, Stufe ${st.nr}${endlos ? ", endlos" : ""}. Weiterspielen.`, title: `${s.name} · Stufe ${st.nr}${endlos ? " · ♾ Endlos" : ""}` },
+            el("span", { class: "weiter-bild", text: s.bild }), el("span", { class: "weiter-name", text: s.name }),
+            el("span", { class: "weiter-stufe" }, endlos ? schalterSymbol("endlos", true) : st.icon, ` ${st.nr}`));
+          a.style.setProperty("--f", s.farbe);
+          return a;
+        })));
+    }
+    const zufallsKarten = [];
+    if (SPIELE.some(s => LS.spielSichtbar(s.id))) zufallsKarten.push(zufallsKarte({ bild: "🎲", name: "Zufallsmix", farbe: "var(--deko-2)",
+      ziel: "Aufgaben aus vielen Spielen gemischt — du stellst ein, wie schwer, wie lang und ob mit Timer.",
+      titelText: "Antippen: zur Mix-Seite", beiTipp: () => { location.href = "mix.html"; },
+      knoepfe: [el("a", { class: "stufenknopf gross", href: "mix.html", "data-vorlesen": "Zufallsmix einstellen und los." }, el("span", { class: "stufen-text", text: "🎲 Einstellen und los" }))] }));
+    // Die Karte bleibt auch mit ♾ ohne passendes Spiel stehen, damit der Schalter erreichbar ist.
+    if (zufallsKnoepfe.length || (zufallEndlos && zufallAuswahl.length)) zufallsKarten.push(zufallsKarte({ bild: "🎯", name: aufsicht ? "Zufälliges Spiel" : "Überrasch mich", farbe: "var(--deko-6)",
+      ziel: zufallEndlos ? "Die Eule zieht ein Endlos-Spiel aus deiner Auswahl: so viele Aufgaben wie möglich ohne Fehler."
+        : "Die Eule zieht ein Spiel aus deiner Auswahl — eher eines, das du noch üben solltest.",
+      titelText: "Antippen: Startbild eines zufälligen Spiels",
+      knoepfe: zufallsKnoepfe.length ? zufallsKnoepfe : [el("span", { class: "leise-text", text: "Kein Endlos-Spiel in dieser Auswahl." })],
+      schalter: { an: zufallEndlos, text: zufallEndlos ? "Endlos aus" : "Endlos ein: ein zufälliges Spiel im Endlos-Modus",
+        onclick: () => speichere({ endlosAn: zufallEndlos ? p.endlosAn.filter(x => x !== "zufall") : [...p.endlosAn, "zufall"] }) },
+      beiTipp: () => {
+        const st = LS.SKALA.find(x => x.id === (gross ? filter.stufe[0] : empfohlen)) || LS.SKALA[2];
+        const s = ziehe(zufallEndlos ? stufenZufall(st) : zufallAuswahl, x => bedarf(x, st.id));
+        if (s) location.href = s.pfad;
+      } }));
+    if (zufallsKarten.length) auswahlBox.append(el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") }, ...zufallsKarten));
+    const ruhend = SPIELE.filter(s => LS.spielSichtbar(s.id) && LS.ruheAusgeblendet(s.id)).length;
+    if (ruhend) auswahlBox.append(el("p", { class: "leise-text", "data-hinweis": "ruhezeit",
+      text: `🤫 Ruhezeit: ${ruhend} ${ruhend === 1 ? "Spiel mit Ton ist" : "Spiele mit Ton sind"} ausgeblendet, bis sie vorbei ist.` }));
+
+    // Auf- und zuklappbare Gruppen; der Zustand landet im Profil. Gruppen gibt es nur ohne Suche (dann eine Liste).
+    const G = UE.gruppen({ zu: p.zu, merke: zu => LS.speichereProfil(name, { zu }) });
+    const gruppe = (id, titel, anzahl, ...inhalt) => G.gruppe({ id, kopf: titel, anzahl }, ...inhalt);
+
+    // Im Stil „hand“ ab und zu eine Lücke vor einer Karte (STIL.luecke, je Spiel gleich; nicht kompakt). Vor der Karte,
+    // damit sie in jede Spalte fallen kann, auch in die erste der ersten Zeile (Wunsch Patrik LERN_Session32). In der Lücke
+    // ein Motiv zum Fach (LU1 a, start/luecken.js); seine Wirkung auf die Nachbarn setzt STIL.nachbarn
+    const lueckenJeFach = new Map();
+    const luecke = s => {
+      const fach = THEMEN.find(t => t.id === s.thema)?.fach, nr = lueckenJeFach.get(fach) || 0;
+      lueckenJeFach.set(fach, nr + 1);
+      const m = LUECKEN.waehle(fach, nr);
+      return el("div", { class: `raster-luecke motiv-${m.id}`, "aria-hidden": "true", "data-wirkung": m.wirkung || "", html: m.svg });
+    };
+    const gitter = spiele => el("div", { class: "spiele" + (p.ansicht === "kompakt" ? " kompakt" : "") },
+      ...spiele.flatMap(s => [!kompakt && STIL.luecke(s.id) ? luecke(s) : null, karte(s)]).filter(Boolean));
+
+    // Klassen-Rand (Entscheid G1 a, LERN_Session14): Ohne „🎒 Meine Klasse“ zeigt ein farbiger Rand mit Zeichen, wie die
+    // Basisklasse des Spiels zur Klasse des Kindes steht. Farben aus --deko-*, nicht aus den Stellenfarben; das Zeichen
+    // trägt die Bedeutung auch ohne Farbsehen. Welche Stufe genau passt, zeigt weiter 👍 auf dem Stufenknopf.
+    const KLASSEN_LAGE = {
+      tiefer: { zeichen: "✓", text: k => `Leichter als deine Klasse (Spiel für die ${LS.klasseText(k)}) — schaffst du!` },
+      gleich: { zeichen: "●", text: () => "Deine Klasse — da bist du gerade dran." },
+      hoeher: { zeichen: "▲", text: k => `Herausforderung: Spiel für die ${LS.klasseText(k)}.` },
+    };
+    const klassenRand = !aufsicht && klasse !== null && !nurKlasse;
+    const lageVon = s => (s.klasse < klasse ? "tiefer" : s.klasse === klasse ? "gleich" : "hoeher");
+    if (klassenRand && auswahl.length) auswahlBox.append(el("div", { class: "klassen-legende", "aria-label": "Rand der Spielkarten" },
+      el("span", { text: "Rand:" }),
+      ...Object.entries({ tiefer: "leichter", gleich: "meine Klasse", hoeher: "Herausforderung" }).map(([lage, wort]) =>
+        el("span", { class: `klassen-legende-teil klasse-${lage}` }, el("span", { class: "klassen-marke", text: KLASSEN_LAGE[lage].zeichen }), ` ${wort}`))));
+
+    // Text der Karte (Entscheid GS2 a, LERN_Session32): Ein Kind sieht Kartenbild, Name und Stufenknöpfe; die Beschreibung
+    // zeigt ⓘ und liest langes Drücken vor. Lernziel-Kürzel und Sperrmarken sieht nur die Aufsicht; der Grund eines
+    // Suchtreffers bleibt, damit klar ist, warum das Spiel dasteht.
+    const kompakt = p.ansicht === "kompakt";
+    function karte(s) {
+      const favorit = p.favoriten.includes(s.id);
+      const frei = LS.fuerKinderSichtbar(s.id);
+      // Schalter je Spiel (Wunsch Patrik 2026-10-31): ⏱ Timer und ♾ Endlos leuchten wie der Favoriten-Stern;
+      // die Stufenknöpfe starten dann mit Timer bzw. im Endlos-Modus. Der Timer ist dieselbe Einstellung wie im Spiel.
+      const timerAn = s.stufen.some(st => LS.timerFuer(name, s.id, st).an);
+      const endlosAn = !!s.endlos?.length && p.endlosAn.includes(s.id);
+      // data-vorlesen: langes Drücken liest Name und Beschreibung vor (Kindergarten, 1. Klasse; LERN_Session8)
+      const lage = klassenRand ? lageVon(s) : null;
+      const k = el("div", { class: "spielkarte" + (frei ? "" : " gesperrt") + (endlosAn ? " endlos-an" : "") + (lage ? ` klasse-${lage}` : ""), "data-spiel": s.id,
+        title: "Antippen: Startbild des Spiels",
+        "data-vorlesen": `${s.name}. ${s.beschreibung}${lage ? ` ${KLASSEN_LAGE[lage].text(s.klasse)}` : ""}` });
+      k.style.setProperty("--f", s.farbe);
+      // Freie Stellen der Karte öffnen das Startbild des Spiels (dort Stufen, Endlos und Timer mit Erklärung).
+      k.addEventListener("click", e => { if (!e.target.closest("a, button")) location.href = s.pfad; });
+      const ziel = lz => LERNZIELE.find(x => x.lz === lz)?.text || "";
+      // Lernziel-Kürzel: Antippen oder Zeigen blendet den Klartext ein (auch auf dem Tablet, wo es kein title gibt).
+      const marken = s.lernziele.map(l => el("button", { type: "button", class: "marke tipp" + (fokus.includes(l.lz) ? " fokus" : ""),
+        "data-tipp": `${l.lz}: ${ziel(l.lz)}`, "aria-label": `Lernziel ${l.lz}: ${ziel(l.lz)}`, text: (fokus.includes(l.lz) ? "⭐ " : "") + l.lz }));
+      if (aufsicht && !frei) marken.unshift(el("span", { class: "marke warnung", text: `🔒 für Kinder nicht sichtbar: ${LS.sperrGrund(s.id)}` }));
+      // Treffer über ein Feld, das nicht auf der Karte steht: sagen, wo (Entscheid SU1 a).
+      const grund = treffer?.get(s.id)?.grund;
+      if (grund) marken.push(el("span", { class: "marke such-grund", text: aehnlichZu ? `🔗 ${grund}` : `🔍 gefunden ${grund}` }));
+      const schalter = (an, art, text, onclick, attr = {}) => el("button", { type: "button", class: "karten-schalter" + (an ? " an" : ""), "aria-pressed": String(an),
+        "aria-label": text, title: text, onclick, ...attr }, schalterSymbol(art, an));
+      // Von der Aufsicht festgelegt (VR1 a): Symbol mit 🔒, Antippen ändert nichts.
+      const festSchalter = (an, art, text) => el("span", { class: "karten-schalter fest", role: "img", "aria-label": `${text} — ${LS.FEST_TEXT}`,
+        title: `${text} — ${LS.FEST_TEXT}` }, schalterSymbol(art, an), el("span", { class: "schloss", text: "🔒" }));
+      const reihenfolge = s.reihenfolge ? LS.reihenfolgeSchalter(s.id, LS.reihenfolgeFuer(name, s.id)) : null;
+      // Schalter in einer eigenen schmalen Leiste oben rechts; darunter hat der Name die volle Breite.
+      const schalterZeile = el("div", { class: "karten-schalter-zeile" },
+          lage ? el("span", { class: "klassen-marke", role: "img", "aria-label": KLASSEN_LAGE[lage].text(s.klasse), title: KLASSEN_LAGE[lage].text(s.klasse),
+            text: KLASSEN_LAGE[lage].zeichen }) : null,
+          reihenfolge && (LS.istFest(name, "reihenfolge") ? festSchalter(reihenfolge.an, reihenfolge.symbol, reihenfolge.text)
+            : schalter(reihenfolge.an, reihenfolge.symbol, `${reihenfolge.text} — antippen wechselt`,
+              () => { LS.setzeWahl(name, "reihenfolge", s.id, reihenfolge.naechste); karteNeu(s.id); })),
+          LS.istFest(name, "timer") ? festSchalter(timerAn, "uhr", timerAn ? "Timer an" : "Timer aus")
+            : schalter(timerAn, "uhr", timerAn ? "Timer aus" : "Timer ein: jede Aufgabe hat eine Zeit", () => { LS.waehleTimer(name, s.id, !timerAn); karteNeu(s.id); }),
+          s.endlos?.length ? schalter(endlosAn, "endlos", endlosAn ? "Endlos aus" : "Endlos ein: so viele wie möglich ohne Fehler",
+            () => { LS.speichereProfil(name, { endlosAn: endlosAn ? p.endlosAn.filter(x => x !== s.id) : [...p.endlosAn, s.id] }); karteNeu(s.id); }) : null,
+          schalter(favorit, "stern", favorit ? "Aus den Favoriten nehmen" : "Zu den Favoriten",
+            () => { LS.speichereProfil(name, { favoriten: UE.umschalten(p.favoriten, s.id) }); karteNeu(s.id); favoritenNeu(); }, { "data-favorit": s.id }));
+      const beschreibung = el("div", { class: "ziel", text: s.beschreibung, ...(aufsicht ? {} : { hidden: true }) });
+      const info = aufsicht ? null : el("button", { type: "button", class: "karten-info", "aria-expanded": "false", "aria-label": `Worum geht es bei ${s.name}?`,
+        title: "Worum geht es?", text: "ⓘ", onclick: () => {
+          beschreibung.hidden = !beschreibung.hidden;
+          info.setAttribute("aria-expanded", String(!beschreibung.hidden));
+        } });
+      const sichtbareMarken = aufsicht ? marken : marken.filter(m => m.classList.contains("such-grund"));
+      // mit Kartenbild ohne das Emoji im Kopf: das Bild trägt die Erkennung, der Name hat Platz
+      const bild = kompakt ? null : kartenBild(s);
+      if (bild) k.classList.add("mit-bild");
+      k.append(...[
+        schalterZeile,
+        bild,
+        el("div", { class: "kopfzeile" }, el("div", { class: "spiel-bild", text: s.bild }), el("b", { class: "name", text: s.name }), info),
+        beschreibung,
+        sichtbareMarken.length ? el("div", { class: "marken" }, ...sichtbareMarken) : null].filter(Boolean));
+      const knoepfe = el("div", { class: "stufenknoepfe" });
+      const empf = LS.empfohleneStufe(name, s.id);
+      // Endlos an: nur die Endlos-Stufen, mit dem Rekord statt der Sterne. Stufenfilter: nur die gewählten.
+      const stufen = LS.SKALA.filter(st => s.stufen.includes(st.id) && (!filter.stufe.length || filter.stufe.includes(st.id)) && (!endlosAn || s.endlos.includes(st.id)));
+      for (const st of stufen) {
+        const timer = LS.timerFuer(name, s.id, st.id);
+        const rekord = endlosAn ? LS.besterRekord(name, s.id, st.id, timer.an) : 0;
+        const sterne = endlosAn ? "" : "★".repeat(LS.besteSterne(name, s.id, st.id));
+        const a = el("a", {
+          class: "stufenknopf" + (gross ? " gross" : "") + (st.id === empf && !gross ? " empfohlen" : ""),
+          href: `${s.pfad}?stufe=${st.id}${endlosAn ? "&endlos=1" : ""}`,
+          "data-vorlesen": `${s.name}, Stufe ${st.nr}, ${st.name}. ${LS.stufeFuer(s.id, st.id)}${st.id === empf ? ", für dich empfohlen" : ""}.`,
+          title: `${endlosAn ? "♾ Endlos · " : ""}Stufe ${st.nr} · ${st.name} (${LS.stufeFuer(s.id, st.id)})${timer.an ? " · ⏱ mit Timer" : ""}`,
+        }, el("span", { class: "stufen-text" }, endlosAn ? schalterSymbol("endlos", true) : st.icon, gross ? ` Stufe ${st.nr} spielen` : `${st.nr}`),
+           el("span", { class: "s", text: endlosAn ? (rekord ? `🏆${rekord}` : "") : sterne }));
+        a.style.setProperty("--sf", st.farbe);
+        knoepfe.append(a);
+      }
+      k.append(knoepfe);
+      return k;
+    }
+
+    // Ein Schalter der Karte zeichnet nur diese Karte neu (Hinweis Patrik, LERN_Session35: der Neuaufbau aller Karten
+    // dauerte auf der Startseite rund 1 s, auf der Spielseite ging es sofort). Die Karte kann zweimal dastehen (Favoriten
+    // oben und am eigenen Platz); die Wirkung einer Lücke auf die Nachbarkarte (Stil „hand“) geht mit.
+    function karteNeu(id) {
+      p = LS.profil(name);
+      const s = SPIELE.find(x => x.id === id);
+      if (!s) return;
+      for (const alt of box.querySelectorAll(`.spielkarte[data-spiel="${id}"]`)) {
+        const frisch = karte(s);
+        for (const c of String(alt.getAttribute("class") || "").split(/\s+/)) if (/^(luecke-|w-)/.test(c)) frisch.classList.add(c);
+        alt.replaceWith(frisch);
+      }
+    }
+
+    // ----- Bei einer Suche: eine Liste, beste Treffer zuerst; sonst Favoriten, dann Fach → Thema -----
+    if (treffer && aehnlichZu) auswahlBox.append(el("h2", { class: "treffer-titel" },
+      el("span", { text: `🔗 Ähnlich wie ${aehnlichZu.name}: ${auswahl.length} Spiel${auswahl.length === 1 ? "" : "e"} ` }),
+      chip("✕ Alle Spiele", false, () => { UE.aehnlich.schliessen(); neu(); }, null, "klein")));
+    if (treffer && auswahl.length) auswahlBox.append(aehnlichZu ? gitter(auswahl) : el("h2", { class: "treffer-titel", text: `🔍 ${auswahl.length} Treffer, beste zuerst` }), aehnlichZu ? "" : gitter(auswahl));
+    // Favoriten (Wunsch Patrik, LERN_Session35): oben zusätzlich, am eigenen Platz bleibt das Spiel; das Feld nur mit
+    // mindestens einem Favoriten, darin „Alle Favoriten entfernen“ (zweimal tippen). Der Platzhalter hält die Stelle,
+    // damit ein Stern nur das Feld und die Karte neu zeichnet.
+    const favoritenPlatz = el("span", { class: "favoriten-platz", hidden: true });
+    auswahlBox.append(favoritenPlatz);
+    let favoritenFeld = null;
+    function favoritenGruppe() {
+      const favoriten = treffer ? [] : auswahl.filter(s => p.favoriten.includes(s.id));
+      if (!favoriten.length) return null;
+      const leeren = el("button", { type: "button", class: "knopf hell klein favoriten-leeren", text: "☆ Alle Favoriten entfernen" });
+      let gefragt = null;
+      leeren.addEventListener("click", () => {
+        if (!gefragt) { // erst nachfragen: ein Tipp aus Versehen löscht nichts
+          leeren.textContent = "Wirklich alle entfernen? Nochmal tippen";
+          gefragt = setTimeout(() => { gefragt = null; leeren.textContent = "☆ Alle Favoriten entfernen"; }, 4000);
+          return;
+        }
+        clearTimeout(gefragt);
+        const waren = p.favoriten;
+        LS.speichereProfil(name, { favoriten: [] });
+        waren.forEach(karteNeu);
+        favoritenNeu();
+      });
+      // gerahmt wie ein Fach (Hinweis Patrik, LERN_Session35), in Gold
+      const d = gruppe("favoriten", "⭐ Favoriten", favoriten.length, el("div", { class: "knopfzeile favoriten-leiste" }, leeren), gitter(favoriten));
+      d.classList.add("fach-block", "favoriten-block");
+      d.style.setProperty("--f", "var(--deko-4)");
       return d;
-    });
-    const fachBlock = G.gruppe({ id: "fach:" + fach, kopf: [el("span", { class: "gruppe-bild", text: FACH_BILD[fach] || "📚" }), el("span", { class: "gruppe-name", text: fach })], anzahl },
-      ...themaBloecke);
-    fachBlock.classList.add("fach-block");
-    fachBlock.style.setProperty("--f", fachFarbe(fach));
-    box.append(fachBlock);
-  }
-  // Langes Drücken auf eine Karte oder einen Stufenknopf liest vor (Kindergarten, 1. Klasse; LERN_Session8).
-  LS.langDruecken(box);
-  if (!auswahl.length) {
-    box.append(el("div", { class: "karte leer-hinweis",
-      text: SPIELE.some(s => LS.spielSichtbar(s.id)) ? "Für diese Auswahl gibt es noch kein Spiel. 🌱"
-        : "Noch ist kein Spiel freigegeben. Die Aufsicht kann Spiele in der Verwaltung freigeben. 🌱" }));
+    }
+    function favoritenNeu() {
+      p = LS.profil(name);
+      const neuesFeld = favoritenGruppe();
+      favoritenFeld?.remove();
+      if (neuesFeld) favoritenPlatz.after(neuesFeld);
+      favoritenFeld = neuesFeld;
+      if (neuesFeld) LS.langDruecken(auswahlBox);
+    }
+    favoritenFeld = favoritenGruppe();
+    if (favoritenFeld) auswahlBox.append(favoritenFeld);
+    // Flache Sortierung: alle Spiele in einer Liste (Favoriten bleiben oben in ihrer Gruppe).
+    if (flach && auswahl.length) auswahlBox.append(el("h2", { class: "treffer-titel", text: `${auswahl.length} Spiele · ${LS.EINSTELLUNGEN.sortierung.werte[sort.art]}` }), gitter(auswahl));
+    const faecherReihe = sort.ab ? [...FAECHER].reverse() : FAECHER;
+    for (const fach of treffer || flach ? [] : faecherReihe) {
+      const themen = (sort.ab ? [...THEMEN].reverse() : THEMEN).filter(t => t.fach === fach)
+        .map(t => ({ t, spiele: auswahl.filter(s => s.thema === t.id) }))
+        .filter(x => x.spiele.length);
+      if (!themen.length) continue;
+      const anzahl = themen.reduce((n, x) => n + x.spiele.length, 0);
+      // Fach und Thema als Blöcke mit Bild (Entscheid GR1 a, LERN_Session32): das Fach in der Farbe seines Reiters, das
+      // Thema mit Bild und kurzem Namen; den langen Titel zeigt ⓘ im Kopf, dazu beim Darüberfahren und langen Drücken
+      const themaBloecke = themen.map(({ t, spiele }) => {
+        const titel = el("div", { class: "thema-titel blase-klein", hidden: true, text: t.titel });
+        const info = el("button", { type: "button", class: "karten-info thema-info", "aria-expanded": "false", "aria-label": `Was gehört zu ${t.name}?`, title: t.titel, text: "ⓘ",
+          onclick: e => { e.preventDefault(); e.stopPropagation(); titel.hidden = !titel.hidden; info.setAttribute("aria-expanded", String(!titel.hidden)); } });
+        const d = G.gruppe({ id: "thema:" + t.id, kopf: [el("span", { class: "gruppe-bild", text: t.bild || "📚" }), el("span", { class: "gruppe-name", text: t.name }), info],
+          anzahl: spiele.length }, titel, gitter(spiele));
+        d.classList.add("thema-block");
+        d.querySelector("summary").title = t.titel;
+        d.querySelector("summary").dataset.vorlesen = `${t.name}: ${t.titel}`;
+        return d;
+      });
+      const fachBlock = G.gruppe({ id: "fach:" + fach, kopf: [el("span", { class: "gruppe-bild", text: FACH_BILD[fach] || "📚" }), el("span", { class: "gruppe-name", text: fach })], anzahl },
+        ...themaBloecke);
+      fachBlock.classList.add("fach-block");
+      fachBlock.style.setProperty("--f", fachFarbe(fach));
+      auswahlBox.append(fachBlock);
+    }
+    // Langes Drücken auf eine Karte oder einen Stufenknopf liest vor (Kindergarten, 1. Klasse; LERN_Session8).
+    LS.langDruecken(auswahlBox);
+    if (!auswahl.length) {
+      auswahlBox.append(el("div", { class: "karte leer-hinweis",
+        text: SPIELE.some(s => LS.spielSichtbar(s.id)) ? "Für diese Auswahl gibt es noch kein Spiel. 🌱"
+          : "Noch ist kein Spiel freigegeben. Die Aufsicht kann Spiele in der Verwaltung freigeben. 🌱" }));
+    }
   }
 }

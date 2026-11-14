@@ -1,4 +1,4 @@
-/* kern 1.45.0 · Prüfsumme sha256:07dd19ef4a5207650428d812b9c5727f59b5ae03eb6d1af7ac1743f409d14ad4 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
+/* kern 1.46.0 · Prüfsumme sha256:c320d54a147c4bddfb2723f50fcf86a297100227568aae1e5498e2281d836c23 · erzeugt von tools/kern_verteilen.py aus kern/ — nicht von Hand ändern, sondern kern/ ändern und neu verteilen. */
 /* ---- kern/zahl.js ---- */
 /* Kern — Zahlschreibung (Entscheide KB1 a, KB2 a; Plan docs/plan_angleich_reihe.md B).
    Die Schreibweise ist eine Einstellung der App, der Kern kennt keine App:
@@ -4330,7 +4330,8 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
    KERN.uebersicht.filterOffen(zu, schmal)       → offen? (ohne Wahl der Person auf dem Handy zu, sonst offen)
    KERN.uebersicht.schmal()                      → Handy-Breite (max-width: 560px)?
    KERN.uebersicht.suche()                       → { text, feld({ neu, attr, beiEingabe }) }
-     Suchtext, der das Neuzeichnen überlebt (nicht gespeichert), und ein Feld, das danach den Fokus zurückholt.
+     Suchtext, der das Neuzeichnen überlebt (nicht gespeichert), und ein Feld, das danach den Fokus zurückholt;
+     neu() läuft nach dem nächsten Bild, einmal für mehrere schnelle Eingaben (1.46.0).
    KERN.uebersicht.aehnlich                      → { id(search), schliessen() } für „?aehnlich=<id>“
    KERN.uebersicht.sortWahl({ arten, wahl, pfeile, setze, knopf, beschriftung, feld }) → label.sortier-wahl
    KERN.uebersicht.umschalten(liste, id)         → neue Liste mit id dazu (hinten) oder ohne id (Favoriten)
@@ -4401,15 +4402,29 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
   /**
    * Suche, deren Text das Neuzeichnen überlebt (nicht gespeichert). feld() baut das Eingabefeld; jede Eingabe setzt
-   * den Text, ruft beiEingabe (etwa: die Liste der Ähnlichen verlassen) und neu(); nach dem Neuzeichnen hat das neue
-   * Feld den Fokus mit der Schreibmarke am Ende.
+   * den Text und ruft beiEingabe (etwa: die Liste der Ähnlichen verlassen), neu() erst nach dem nächsten gezeichneten
+   * Bild: So steht der Buchstabe sofort im Feld, auch wenn neu() die ganze Seite neu aufbaut (Hinweis Patrik,
+   * LERN_Session41: beim ersten Buchstaben vergingen Sekunden). Kommen mehrere Eingaben, bevor neu() lief, läuft es
+   * einmal mit dem letzten Text. Baut neu() das Feld neu, hat das neue Feld danach den Fokus mit der Schreibmarke am
+   * Ende; zeichnet die App nur die Liste neu, bleibt das Feld, wie es ist.
    */
   function suche() {
-    let text = "", tippt = false;
+    let text = "", tippt = false, geplant = false;
     function feld({ neu, attr = {}, beiEingabe } = {}) {
       if (typeof neu !== "function") throw new Error("suche: neu fehlt");
       const f = KERN.el("input", Object.assign({ type: "search" }, attr, { value: text }));
-      f.addEventListener("input", () => { text = f.value; tippt = true; if (beiEingabe) beiEingabe(); neu(); });
+      f.addEventListener("input", () => {
+        text = f.value; tippt = true;
+        if (beiEingabe) beiEingabe();
+        if (geplant) return;
+        geplant = true;
+        // erst zeichnen lassen (requestAnimationFrame läuft vor dem Bild), dann neu
+        requestAnimationFrame(() => setTimeout(() => {
+          geplant = false;
+          neu();
+          if (f.isConnected) tippt = false; // Feld geblieben: kein neues Feld, das den Fokus braucht
+        }, 0));
+      });
       if (tippt) {
         tippt = false;
         requestAnimationFrame(() => { f.focus(); f.setSelectionRange(f.value.length, f.value.length); });
@@ -4818,4 +4833,4 @@ if (typeof module !== "undefined") module.exports = globalThis.KERN;
 if (typeof module !== "undefined") module.exports = globalThis.KERN;
 
 /* ---- erzeugt: Version des Kerns (kern/VERSION) ---- */
-globalThis.KERN.version = "1.45.0";
+globalThis.KERN.version = "1.46.0";

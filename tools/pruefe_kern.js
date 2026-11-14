@@ -588,14 +588,34 @@ console.log("uebersicht.js");
   const neu = () => ablauf.push("neu");
   const e1 = s.feld({ neu, attr: { class: "feld suche", placeholder: "suchen" }, beiEingabe: () => ablauf.push("bei") });
   gleich(e1.attribute.type + " " + e1.className + " " + e1.attribute.value, "search feld suche ", "suche: Feld mit Attributen der App");
+  // neu erst nach dem nächsten Bild (requestAnimationFrame, dann setTimeout), mehrere Eingaben ergeben ein neu
+  const zeitAlt = global.setTimeout, zeit = [];
+  global.setTimeout = f => zeit.push(f);
+  e1.value = "u"; e1.feuere("input");
   e1.value = "uhr"; e1.feuere("input");
-  gleich(s.text + " " + ablauf.join(), "uhr bei,neu", "suche: Eingabe setzt Text, dann beiEingabe und neu");
+  gleich(s.text + " " + ablauf.join() + " " + raf.length, "uhr bei,bei 1", "suche: Eingabe setzt Text und ruft beiEingabe, neu noch nicht");
+  raf.shift()();
+  gleich(ablauf.join() + " " + zeit.length, "bei,bei 1", "suche: neu nicht vor dem Bild");
+  zeit.shift()();
+  gleich(ablauf.join(), "bei,bei,neu", "suche: nach dem Bild einmal neu");
+  global.setTimeout = zeitAlt;
   const e2 = s.feld({ neu });
   gleich(e2.attribute.value + " " + raf.length, "uhr 1", "suche: neues Feld trägt den Text, Fokus vorgemerkt");
   e2.value = "uhr"; raf.shift()();
   gleich(global.__fokus === e2 && e2.auswahl.join(), "3,3", "suche: Fokus und Schreibmarke am Ende");
   s.feld({ neu });
   gleich(raf.length, 0, "suche: ohne Eingabe kein Fokus");
+  // App zeichnet nur die Liste neu: das Feld bleibt im Dokument, ein späteres Feld (Tabwechsel) holt keinen Fokus
+  {
+    const zeitAlt2 = global.setTimeout, zeit2 = [];
+    global.setTimeout = f => zeit2.push(f);
+    const e3 = s.feld({ neu: () => ablauf.push("liste") });
+    e3.isConnected = true;
+    e3.value = "uhrz"; e3.feuere("input"); raf.shift()(); zeit2.shift()();
+    global.setTimeout = zeitAlt2;
+    s.feld({ neu });
+    gleich(ablauf.at(-1) + " " + raf.length, "liste 0", "suche: Feld geblieben, kein Fokus für ein späteres Feld");
+  }
   s.text = "";
   gleich(s.text, "", "suche: Text zurücksetzen");
   wirft(() => s.feld({}), "suche ohne neu");

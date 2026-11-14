@@ -2379,7 +2379,7 @@
   Schritt „kaefig“, Widersprüche im Käfig, Ränder und Ergebnis im Raster; `mitTechnikLoesen` setzt je Durchgang alle
   Felder mit nur einer Zahl (gleiches Ergebnis, schneller).
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session40_2026-11-13.md`, Handover nachgeführt (Haltepunkt der Nacht
-  aufgelöst; Sudoku-Familie bis auf das Duell, LZ1 a, Prüfung Punkt 10; nächster Schritt Sudoku-Duell und Push).
+  aufgelöst; Sudoku-Familie bis auf das Duell, LZ1 a, Prüfung Punkt 10; nächster Schritt Sudoku-Duell und Push).
 
 ## 2026-11-14 — LERN_Session41
 - **Sudoku-Duell (sudoku-duell)**, Basisklasse 5, Thema Strategie, neu und ungeprüft — letztes Spiel der Sudoku-Familie
@@ -2396,3 +2396,13 @@
 - **sudoku.css:** `--sd-extra` für weitere Zeilen über dem Raster (Standard 0, die anderen Sudokus unverändert); Farben
   `sd-eule` und `sd-gesperrt`. **feier.js:** Raster der Sudoku-Bilder in `sudokuRaster` ausgelagert, neues Bild `duell`.
 - Doku: rahmen.md 26 (Duell), logikraetsel.md (Regel und Messungen), lehrplan_sg_session11.md (Strategie-Tabelle).
+- **Suche im Tab Spiele ohne Wartezeit (Hinweis Patrik: „bei der Eingabe vom ersten Buchstaben geht es schon sekunden,
+  bis eine reaktion erfolgt“):** Jede Eingabe baute die ganze Startseite neu auf, bevor der Buchstabe gezeichnet wurde.
+  Gemessen in Chrome ohne Fenster, CPU vierfach gedrosselt, 1024 px: erster Buchstabe 500–620 ms bis zum Bild, danach
+  um 100 ms, Löschen auf einen Buchstaben oder leer 400–600 ms. **Kern 1.46.0** (`uebersicht.js`, `suche().feld`):
+  `neu()` erst nach dem nächsten Bild und einmal für mehrere schnelle Eingaben — gilt auch für die Suche in der
+  Freigabe (Verwaltung) und im Lernsteig. **Tab Spiele** (`start/spiele.js`): Was von der Suche abhängt, zeichnet
+  `zeichneAuswahl()` in einen eigenen Behälter (`.spiele-auswahl`, `display: contents`); die Suche zeichnet nur ihn und
+  die Zeile „Ansicht“ im Filter neu, das Feld bleibt. Danach: Buchstabe nach 56–88 ms (erster) bzw. 16–40 ms; die Liste
+  folgt nach 175–300 ms (erster Buchstabe, leer) bzw. 55–150 ms. Test `tools/eulenpfad_seiten.js`: `__fuelle` setzt
+  erst den Fokus wie beim Tippen; geprüft wird, dass die Liste erst nach dem Bild kommt und dasselbe Feld den Fokus behält.

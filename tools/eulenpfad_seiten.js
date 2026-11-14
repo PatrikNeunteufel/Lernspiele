@@ -17,7 +17,8 @@ const HILFEN = `
 globalThis.__alle = (sel, text) => [...document.querySelectorAll(sel)].filter(e => !text || e.textContent.includes(text));
 globalThis.__finde = (sel, text) => { const e = __alle(sel, text)[0]; if (!e) throw new Error("nicht gefunden: " + sel + (text ? " „" + text + "“" : "")); return e; };
 globalThis.__klick = (sel, text) => __finde(sel, text).click();
-globalThis.__fuelle = (sel, wert) => { const e = __finde(sel); e.value = String(wert); e.dispatchEvent(new Event("input", { bubbles: true })); };
+// wie eine Person, die tippt: erst ins Feld, dann der Text
+globalThis.__fuelle = (sel, wert) => { const e = __finde(sel); e.focus(); e.value = String(wert); e.dispatchEvent(new Event("input", { bubbles: true })); };
 globalThis.__klappe = (sel, offen) => { const d = __finde(sel); d.open = offen; d.dispatchEvent(new Event("toggle")); };
 globalThis.__text = () => __textMitAbstand(document.body);
 `;
@@ -316,11 +317,15 @@ function pruefeTabSpiele(melde) {
     const ort = "Tab Spiele, Suche";
     const s = oeffne({ speicher: browser, vorher: `LS.setzeSpieler("Mia");` });
     ruhe(s);
-    s.fuelle("input.suche", "uhr"); ruhe(s);
+    // Die Suche zeichnet nur die Liste neu (LERN_Session41): dasselbe Feld bleibt stehen und behält den Fokus
+    s.lauf(`globalThis.__suchfeld = document.querySelector("input.suche")`);
+    s.fuelle("input.suche", "uhr");
+    pruefe(s.gibt(".treffer-titel", "Treffer") === 0, ort, "Liste schon in der Eingabe neu gezeichnet (erst nach dem Bild, Kern 1.46.0)");
+    ruhe(s);
     pruefe(s.gibt(".treffer-titel", "Treffer") === 1 && s.gibt(".spielkarte[data-spiel]") > 0, ort, "keine Trefferliste zu „uhr“");
     pruefe(s.gibt("details.gruppe") === 0, ort, "Gruppen während der Suche");
     pruefe(s.gibt("button", "Alle auf") === 0 && s.gibt("button", "Alle zu") === 0, ort, "„Alle auf“ / „Alle zu“ während der Suche");
-    pruefe(s.lauf(`document.activeElement === document.querySelector("input.suche") && document.activeElement.selectionStart === 3`), ort, "Suchfeld ohne Fokus nach dem Neuzeichnen");
+    pruefe(s.lauf(`document.querySelector("input.suche") === __suchfeld && document.activeElement === __suchfeld && __suchfeld.value === "uhr"`), ort, "Suchfeld ersetzt oder ohne Fokus nach dem Neuzeichnen");
     textPruefen(ort, s);
     // Nur Leerzeichen: Gruppen wie ohne Suche, Zuklappen wird gemerkt
     s.fuelle("input.suche", "   "); ruhe(s);

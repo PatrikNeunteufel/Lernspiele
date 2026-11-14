@@ -3,6 +3,13 @@
 Versionen nach KB1 a: kleine Nummer Fehlerbehebung, mittlere neue Funktion (alte bleiben), grosse Schnittstelle
 geändert (Apps müssen nachziehen).
 
+## 1.46.0 — 2026-11-14 (LERN_Session41)
+- `uebersicht.js`, `suche().feld`: `neu()` läuft nicht mehr in der Eingabe, sondern nach dem nächsten gezeichneten Bild
+  (`requestAnimationFrame`, dann `setTimeout`), und für mehrere Eingaben davor nur einmal. Der Buchstabe steht so sofort
+  im Feld (Hinweis Patrik: im Tab Spiele des Eulenpfads vergingen beim ersten Buchstaben Sekunden, weil `neu()` die
+  ganze Seite aufbaute, bevor das Feld gezeichnet wurde). Zeichnet die App nur die Liste neu, bleibt das Feld; ein
+  späteres Feld holt dann keinen Fokus. Schnittstelle unverändert.
+
 ## 1.45.1 — 2026-11-13 (LERN_Session38)
 - `listenpruefung.js`: „↺ alle aufheben“ klappt die Gruppe samt Untergruppen auf. Vorher blieb eine ganz geprüfte,
   zugeklappte Gruppe nach dem Aufheben zu, und ihre Einträge waren nicht zu sehen (Hinweis Patrik). Dazu in den Stilen
