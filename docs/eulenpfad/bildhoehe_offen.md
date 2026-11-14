@@ -1,8 +1,54 @@
-# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session13, 2026-11-04)
+# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session42, 2026-11-14)
 
 Entscheide BH1 a, BH2 a, BH2-T a, BH3 a sind umgesetzt (rahmen.md Abschnitt 20). Gemessen mit `tools/bildhoehe.js`
 (Zufallsaufgaben, Streuung um einige Dutzend Pixel). Zahlen: wie weit die **Aufgabe selbst** (ohne Tipp-Zeile) über den
 unteren Rand ragt, in px, höchster Wert über die gemessenen Stufen.
+
+## Messung LERN_Session42 (2026-11-14)
+
+Alle 175 Spiele, sechs Stufen, die vier Geräte von BH1 a (Handy 375×812, Tablet 768×1024, quer 1024×768, Laptop
+1366×768; nicht die sichtbare Fläche von GR1 a) — 4200 Seiten, mit dem Werkzeug nach LERN_Session41 (Handy und Tablet
+ohne Tastenmarken). Die 30 auffälligen Spiele zweimal nachgemessen. Das Werkzeug misst nur die **erste** Aufgabe jeder
+Stufe; welche das ist, entscheidet der Zufall. Darum unten getrennt: über den Rand in allen drei Läufen, und nur bei
+einer Aufgabenart (in einem oder zwei Läufen). Zahlen in px, höchster Wert der drei Läufe.
+
+**In allen drei Läufen über dem Rand:**
+
+| Spiel | Stufe | Gerät: px | Was |
+|---|---|---|---|
+| weather-report | s5 | Handy 123, quer 134, Laptop 134 | Stadtplan zum Weg (rund 420 px hoch); dazu die Meldung „Stimme hat nicht gesprochen“ im Messbrowser |
+| hoch-tief-ohr | s6 | quer 12, Laptop 12 | — |
+| braille-finger | s5 | quer 8, Laptop 8 | — |
+| fahrplan-rechner | s4 | Handy 8 | — |
+| koordinaten-schatz | s2 | Laptop 7 | (s3, s4 bis 8 in ein oder zwei Läufen) |
+| son-lauscher | s6 | Handy 5 | — |
+
+**Nur bei einer Aufgabenart** (in den anderen Läufen passt dieselbe Stufe):
+kulturen-koffer quer s5/s6 443, s4 298, Handy s5 238, Tablet s4/s6 134 · plan-leser Handy s6 333, s5 288, s1–s3 bis 53,
+Laptop s6 56 (s5/s6 Weg beschreiben: Ausnahme Punkt 4) · diagramm-wahl Handy s5 473, s6 119, s1 32 (s5 Tabelle:
+Ausnahme) · quader-volumen Handy s4 128, s6 30 (s4 zerlegen: Ausnahme) · sachaufgaben-kompass quer s4 108, Handy s4 91,
+Laptop s4 89, Handy s2 31 · netz-falter Handy s5 103, Laptop s6 70, quer s5 48 · diagramm-detektiv Tablet s5 101, Handy
+s6 79, s3–s5 49 · hello-dialog quer/Laptop s5 88, Handy s5 27 · fledermaus-forscher Laptop s5 87, Handy s4–s6 47 ·
+calendrier Handy s5 58 (Stimme fehlt im Messbrowser) · au-cafe Handy s4 56, s6 29 · rechen-maschine Tablet s6 51
+(dreimal dieselbe Aufgabe zuerst; eine andere passt mit 334 px Luft) · kompass Laptop s5 38 · zehntel-lupe Tablet s5/s6
+37 · wassertropfen-reise Handy s6 33, s2 23 · quelle-heure Handy s3 27, quer s4 15, Laptop s6 15 · bionik-paare Handy s6
+23 · hundertertafel quer/Laptop s5 21 · unter 15: znueni-teller, geschichten-ordner, finger-zaehler, zahlen-baukasten,
+schriftlich-werkstatt.
+
+**Seitlich:** prozent-bruecke Handy s6 17 px, quader-volumen Handy s3 4 px — je in einem Lauf, in beiden Nachmessungen
+nicht. **Einzelwerte ohne Wiederholung:** hundertertafel quer s4 1023 px, zahlen-baukasten quer s3 678 px (je ein Lauf;
+bei hundertertafel ragt in allen Stufen bei 1024×768 nur die Tipp-Zeile 54 px über den Rand, die Aufgabe nicht).
+
+**Grafik geschrumpft (H1 a):** 15 Handy-Seiten gemeldet (Runden-Rutsche, Dezimal-Rutsche, Zehntel-Lupe,
+Zahlenstrahl-Pfeil, Zeitstrahl-Sortierer, Rhythmus-Leser) — alle mit `width: 100%`, auf dem Handy also nach der
+**Breite** kleiner, nicht nach der Bildhöhe. Das Werkzeug vergleicht den Massstab nur mit 1024×768 und hält das für
+Schrumpfen (Fehlmeldung; Session 28 mass das Handy nicht).
+
+**Gegenüber Punkt 3 unten (LERN_Session13):** punkte-blitz, laerm-waechter, stromkreis-bauer passen jetzt;
+weather-report schlechter (Handy 79 → 123, quer und Laptop 74 → 134); netz-falter Laptop 12 → bis 70 (eine Aufgabenart);
+plan-leser Handy 240 → bis 333 (Weg beschreiben).
+
+Rohdaten (gitignored): `.temp/bildhoehe/alle_2026-11-14.json`, `nach_a.json`, `nach_b.json`.
 
 ## Entscheid GR1 (Patrik, 2026-11-04)
 

@@ -2466,3 +2466,9 @@
   für die Appenzell). Angesehen nach dem Tippen und nach dem Lösungsweg: Stufe 1 hell und dunkel, Stufe 2 und 3 hell, je
   1024 px, Stufe 2 und 3 auch 375 px. Tests: Eulenpfad schweiz-karte „Keine
   Fehler.“, Skripte „Keine Fehler.“.
+- **Bildhöhe neu gemessen (LERN-55):** `tools/bildhoehe.js` über alle 175 Spiele, sechs Stufen, Handy, Tablet, quer und
+  Laptop (4200 Seiten), die 30 auffälligen Spiele zweimal nach. In allen drei Läufen über dem Rand: weather-report s5
+  (bis 134 px, schlechter als in LERN_Session13), dazu sechs Spiele mit 5–12 px; sonst nur bei einer Aufgabenart
+  (kulturen-koffer bis 443 px, sachaufgaben-kompass, netz-falter, diagramm-detektiv, hello-dialog …). Die 15 Handy-Seiten
+  „Grafik geschrumpft“ sind Fehlmeldungen des Werkzeugs (Grafiken nach der Breite, nicht nach der Höhe). Liste in
+  `docs/eulenpfad/bildhoehe_offen.md`, Abschnitt „Messung LERN_Session42“.
