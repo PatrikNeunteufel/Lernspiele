@@ -15,7 +15,10 @@
   .plan-bild.schulzimmer .grund { /* Bildfarben: Szene auf der Bildkachel */  fill: #f6ead7; }
   .plan-bild.quartier .grund { /* Bildfarben: Szene auf der Bildkachel */  fill: #dcefcf; }
   .plan-bild .rahmen { fill: none; stroke: var(--deko-7); stroke-width: 4; }
+  /* Tippfelder liegen unter den Zeichen (LERN_Session41, Hinweis Patrik: die grüne Fläche verdeckte die Wandtafel);
+     Zeichen und Rahmen lassen das Tippen durch */
   .plan-bild .plan-feld { fill: transparent; cursor: pointer; }
+  .plan-bild g, .plan-bild .rahmen { pointer-events: none; }
   .plan-bild .plan-feld.daneben { fill: var(--hinweis-hell); }
   .plan-bild .plan-feld.treffer { fill: var(--gut-hell); stroke: var(--gut); stroke-width: 4; }
   .plan-bild .weg { fill: none; stroke: var(--text); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 10; }
@@ -502,7 +505,8 @@ LS.spiel({
       frage = "Was bedeutet dieses Zeichen?";
       loesung = `Das Zeichen bedeutet: ${name(a.ding)}.`;
     } else if (a.art === "tippen") {
-      frage = `Tippe auf dem Plan auf ${name(a.ding)}.`;
+      // „auf“ mit Akkusativ: der → den, die und das bleiben (nur Dinge in der Einzahl; LERN_Session41, vorher „auf der Weiher“)
+      frage = `Tippe auf dem Plan auf ${name(a.ding).replace(/^der /, "den ")}.`;
       loesung = `${gross(name(a.ding))} ist in der ${zeile(a.richtig) + 1}. Reihe von oben, im ${spalte(a.richtig) + 1}. Feld von links.`;
     } else if (a.art === "zaehlen") {
       frage = `Wie viele ${ding(p.liste, a.ding)[2]} hat es auf dem Plan?`;
@@ -539,6 +543,8 @@ LS.spiel({
     if (a.art === "tippen") {
       ctx.loesung(loesung);
       ctx.schritte(1); // ein Tipp auf das richtige Feld
+      // Tippfelder direkt über dem Grund, unter Zeichen und Rahmen: die Farbe nach dem Tippen verdeckt das Zeichen nicht
+      const unter = bild.querySelector(":scope > :not(.grund)");
       for (let z = 0; z < N * N; z++) {
         const r = document.createElementNS(SVG, "rect");
         for (const [k, v] of Object.entries({ class: "plan-feld", x: spalte(z) * F, y: zeile(z) * F, width: F, height: F })) r.setAttribute(k, v);
@@ -548,7 +554,7 @@ LS.spiel({
           r.classList.add("daneben");
           ctx.falsch(HINWEIS.tippen, loesung);
         });
-        bild.append(r);
+        bild.insertBefore(r, unter);
       }
     } else {
       const kurz = ["zaehlen", "strecke", "weglaenge", "abbiegen"].includes(a.art); // Zahlen und links/rechts: drei in einer Reihe

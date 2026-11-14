@@ -1051,6 +1051,10 @@ benachbarten Tasten. Code in `spiel.js`, Abschnitt „Kurztasten“; Spiele mit 
   Knopfs gleich bleiben). Sie erscheint am Computer mit Maus (`hover: hover` und `pointer: fine`) oder nach dem ersten
   echten Tastendruck (gemerkt je Gerät in `lernspiele:tasten`); auf Tablet und Handy ohne Tastatur nie. Steht der
   Buchstabe oder die Ziffer sichtbar auf dem Knopf, entfällt sie; nennt nur `data-taste` das Zeichen, bleibt sie.
+  Läge die Marke auf Text oder Bild des Knopfs, bekommt er die Klasse `marke-platz` (oben 27 px Abstand, `stil.css`;
+  Entscheid TM1 a, LERN_Session41): gemessen von `ktPlatz` ohne diesen Abstand, beim Beschriften, beim Erscheinen der
+  Marken und bei jeder Grössenänderung des Knopfs (ResizeObserver); 3 px Spiel, weil der Kasten eines Bildzeichens
+  höher ist als das Zeichen. Vorher lag die Marke über alle Stufen in 72 Spielen auf Inhalt (937 von 3656 Knöpfen).
 - **Gruppen:** Ruft ein Spiel `LS.kurztasten` erneut für dieselbe Box auf, ersetzt die neue Gruppe die alte. Schon
   gewählte Knöpfe (`gewaehlt`, `disabled`, `aria-disabled`) überspringt die Taste.
 - **Vorrang:** Die Zifferntastatur hat die Ziffern, Enter und ⌫. Die jüngste sichtbare Gruppe gewinnt; verdeckte

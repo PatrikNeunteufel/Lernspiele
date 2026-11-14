@@ -515,6 +515,9 @@ button { font-family: inherit; }
 .mit-tasten [data-marke]::after { content: attr(data-marke); position: absolute; top: 4px; right: 5px; min-width: 1.1em;
   padding: 2px 5px; border-radius: 6px; border: 1.5px solid var(--marke-rand); background: var(--marke); color: var(--marke-text); box-shadow: 0 2px 0 var(--marke-rand);
   font-size: 13px; font-weight: 800; line-height: 1.1; text-align: center; pointer-events: none; }
+/* Läge die Marke auf Text oder Bild, setzt spiel.js (ktPlatz, Entscheid TM1 a) marke-platz: oben Platz für die Marke
+   (4 px Abstand, 21 px Marke, 2 px Luft), nur an diesen Knöpfen */
+.mit-tasten [data-marke].marke-platz { padding-top: 27px; }
 .kopf .hilfe-knopf, .kopf .farben-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
   font-size: 24px; cursor: pointer; flex: none; }
 .hilfe-eigen { font-size: 17px; font-weight: 700; }

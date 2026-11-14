@@ -691,6 +691,11 @@ const PRUEFSTAND = {
       "hash": "smz5351as0",
       "von": "Patrik"
     },
+    "bionik-paare/paare": {
+      "am": "2026-11-14",
+      "hash": "wp4mi3puz1",
+      "von": "Patrik"
+    },
     "blutkreislauf-lotse/fragen": {
       "am": "2026-11-12",
       "von": "Patrik"
@@ -708,6 +713,26 @@ const PRUEFSTAND = {
       "am": "2026-11-07",
       "von": "Patrik"
     },
+    "echt-oder-erfunden/aussagen": {
+      "am": "2026-11-14",
+      "hash": "c1wynbmqdk",
+      "von": "Patrik"
+    },
+    "echt-oder-erfunden/geschichten": {
+      "am": "2026-11-14",
+      "hash": "1ghb6s3au4g",
+      "von": "Patrik"
+    },
+    "echt-oder-erfunden/staunen": {
+      "am": "2026-11-14",
+      "hash": "1a862rt6xs6",
+      "von": "Patrik"
+    },
+    "echt-oder-erfunden/textsorten": {
+      "am": "2026-11-14",
+      "hash": "1yyjo79ymrh",
+      "von": "Patrik"
+    },
     "energie-wandler/geraete": {
       "am": "2026-11-13",
       "hash": "iv39oo36u9",
@@ -722,7 +747,8 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "fehler-lupe/dehnungs-h": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "1pnisv4r5hk",
       "von": "Patrik"
     },
     "fehler-lupe/ie-i": {
@@ -746,7 +772,8 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "fehler-lupe/verben-als-nomen": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
+      "hash": "178ko99c31b",
       "von": "Patrik"
     },
     "fledermaus-forscher/anpassungen": {
@@ -796,6 +823,11 @@ const PRUEFSTAND = {
     },
     "hello-dialog/dialoge": {
       "am": "2026-11-11",
+      "von": "Patrik"
+    },
+    "kakao-weg/wege": {
+      "am": "2026-11-14",
+      "hash": "1qmkwu35vqm",
       "von": "Patrik"
     },
     "koenig-falle/stellungen": {
@@ -911,6 +943,16 @@ const PRUEFSTAND = {
       "am": "2026-11-12",
       "von": "Patrik"
     },
+    "plan-leser/quartier": {
+      "am": "2026-11-14",
+      "hash": "1mslxfblfqf",
+      "von": "Patrik"
+    },
+    "plan-leser/schulzimmer": {
+      "am": "2026-11-14",
+      "hash": "a0ofxucec4",
+      "von": "Patrik"
+    },
     "platzhalter-geschichten/geschichten": {
       "am": "2026-11-04",
       "von": "Patrik"
@@ -1001,6 +1043,26 @@ const PRUEFSTAND = {
     },
     "schaetz-waage/zeit": {
       "am": "2026-11-04",
+      "von": "Patrik"
+    },
+    "schweiz-karte/hauptorte": {
+      "am": "2026-11-14",
+      "hash": "o4hak81j1q",
+      "von": "Patrik"
+    },
+    "schweiz-karte/kantone": {
+      "am": "2026-11-14",
+      "hash": "23sy2ybja07",
+      "von": "Patrik"
+    },
+    "schweiz-karte/staedte": {
+      "am": "2026-11-14",
+      "hash": "1woimdh8a32",
+      "von": "Patrik"
+    },
+    "schweiz-karte/wahlkreise-sg": {
+      "am": "2026-11-14",
+      "hash": "agriikr02n",
       "von": "Patrik"
     },
     "schwimmt-sinkt/eigenschaften": {
@@ -1297,7 +1359,7 @@ const PRUEFSTAND = {
       "von": "Patrik"
     },
     "fehler-lupe": {
-      "am": "2026-11-11",
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "finger-zaehler": {
@@ -1346,6 +1408,14 @@ const PRUEFSTAND = {
     },
     "hundertertafel": {
       "am": "2026-11-12",
+      "von": "Patrik"
+    },
+    "kaefig-sudoku": {
+      "am": "2026-11-14",
+      "von": "Patrik"
+    },
+    "kakao-weg": {
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "koenig-falle": {
@@ -1480,6 +1550,10 @@ const PRUEFSTAND = {
       "am": "2026-11-01",
       "von": "Patrik"
     },
+    "schweiz-karte": {
+      "am": "2026-11-14",
+      "von": "Patrik"
+    },
     "sentence-builder": {
       "am": "2026-11-11",
       "von": "Patrik"
@@ -1528,6 +1602,10 @@ const PRUEFSTAND = {
       "am": "2026-11-06",
       "von": "Patrik"
     },
+    "teddy-versteck": {
+      "am": "2026-11-14",
+      "von": "Patrik"
+    },
     "teiler-detektiv": {
       "am": "2026-11-12",
       "von": "Patrik"
@@ -1550,6 +1628,10 @@ const PRUEFSTAND = {
     },
     "vergleichs-krokodil": {
       "am": "2026-11-06",
+      "von": "Patrik"
+    },
+    "vergleichs-sudoku": {
+      "am": "2026-11-14",
       "von": "Patrik"
     },
     "wassertropfen-reise": {

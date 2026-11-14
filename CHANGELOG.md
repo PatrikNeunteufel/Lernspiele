@@ -2420,3 +2420,18 @@
   wäre abgeschnitten worden (gerechnet über alle 187 Kürzel); sie hängt jetzt an der Zeile `.marken` statt am Kürzel und
   ist nie breiter als sie — über alle Kürzel mindestens 32 px (1024 px) bzw. 56 px (375 px) innerhalb der Karte. Im Stil
   „hand“ hell und dunkel, 1024 und 375 px, mit Rahmen und Erklärung angesehen.
+- **Entscheid TM1 a — Tastenmarke bekommt Platz, wo sie auf Inhalt läge:** `ktPlatz` in `spiel.js` misst nach dem
+  Beschriften, beim Erscheinen der Marken und bei jeder Grössenänderung (ResizeObserver), ob die Marke auf Text oder Bild
+  des Knopfs läge (gemessen ohne den Abstand, 3 px Spiel für Bildzeichen), und setzt dann `marke-platz` (`stil.css`:
+  oben 27 px). Anlass Plan-Leser Stufe 5 („S“ auf „geradeaus,“); gemessen über alle Spiele, sechs Stufen, 1024 und
+  1366 px (2100 Seiten, je dieselbe Aufgabe mit und ohne): Marke auf Inhalt 905 Knöpfe in 74 Spielen → 132 Berührungen
+  ohne verdeckten Buchstaben in 19 Spielen; neu unten über den Rand 21 Seiten in 9 Spielen, höchstens 46 px — die
+  Aufgabe selbst nur in Rhythmus-Leser und Stromkreis-Bauer, die schon vorher bis 93 px überliefen. Verworfen nach
+  Messung: Marke über dem Rand (186 Marken auf fremdem Inhalt), Abstand links und rechts (613 Knöpfe weiter verdeckt),
+  Abstand oben an jedem Knopf (74 statt 26 Seiten über den Rand). Stichprobe Eulenpfad: plan-leser gegenteil-wippe
+  stellen-detektiv au-cafe rhythmus-diktat „Keine Fehler.“; rahmen.md 19.
+- **Plan-Leser (plan-leser), Bemerkung 54 (Patrik):** Nach dem Tippen verdeckte die grüne (richtig) bzw. orange
+  (daneben) Fläche das Zeichen im Feld — die Tippfelder lagen über den Zeichen. Jetzt liegen sie direkt über dem Grund,
+  Zeichen und Rahmen lassen das Tippen durch (`pointer-events: none`); geprüft: in allen 36 Feldern trifft ein Tipp auf
+  das Zeichen das Feld, hell und dunkel angesehen. Dazu „Tippe auf dem Plan auf der Weiher“ → „auf den Weiher“
+  (Akkusativ für männliche Dinge).

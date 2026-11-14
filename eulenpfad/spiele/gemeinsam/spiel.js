@@ -2032,6 +2032,51 @@ const LS = (() => {
       else a.knopf.dataset.marke = a.code ? ktName(a.code) : a.shift ? "⇧" + a.key.toUpperCase() : a.key.toUpperCase();
       a.knopf.setAttribute("aria-keyshortcuts", a.code ? ktName(a.code) : (a.shift ? "Shift+" : "") + a.key.toUpperCase());
     }
+    ktPlatz(g.tasten.map(a => a.knopf));
+  }
+
+  /**
+   * Platz für die Marke (Entscheid TM1 a, LERN_Session41): Liegt sie auf Text oder Bild des Knopfs, bekommt er die
+   * Klasse marke-platz (stil.css: oben so viel Abstand, wie die Marke hoch ist). Gemessen ohne diesen Abstand, damit er
+   * sich nicht selbst aufhebt; neu bei jeder Grössenänderung des Knopfs und wenn die Marken erscheinen. Vorher lag die
+   * Marke in 72 Spielen auf Inhalt (937 von 3656 Knöpfen über alle Stufen); Abstand für alle hätte 74 statt 26 Seiten
+   * unten über den Rand geschoben.
+   */
+  const KT_MARKE_HOEHE = 21; // ::after in stil.css: Schrift 13 px × 1.1, Rand 2 × 2 px, Linie 2 × 1.5 px
+  let ktMass = null;
+  const ktMarkeBreite = text => {
+    ktMass = ktMass || document.createElement("canvas").getContext("2d");
+    ktMass.font = `800 13px ${getComputedStyle(document.body).fontFamily}`;
+    return Math.max(ktMass.measureText(text).width + 13, 1.1 * 13 + 13); // Text, Polster 2 × 5 px, Linie 2 × 1.5 px
+  };
+  const ktBeobachter = typeof ResizeObserver === "function"
+    ? new ResizeObserver(e => ktPlatz(e.map(x => x.target).filter(k => k.isConnected))) : null;
+  function ktPlatz(knoepfe) {
+    const mitMarke = knoepfe.filter(k => k.dataset.marke);
+    knoepfe.filter(k => !k.dataset.marke).forEach(k => k.classList.remove("marke-platz"));
+    if (!mitMarke.length) return;
+    mitMarke.forEach(k => ktBeobachter?.observe(k));
+    if (!document.documentElement.classList.contains("mit-tasten")) return;
+    // erst alle ohne Abstand, dann messen (ein Layout), dann setzen — gleich grosse Knöpfe melden sich nicht neu
+    const vorher = mitMarke.map(k => k.classList.contains("marke-platz"));
+    mitMarke.forEach(k => k.classList.remove("marke-platz"));
+    const brauchen = mitMarke.map(k => {
+      if (!k.offsetParent) return false;
+      const r = k.getBoundingClientRect();
+      const m = { left: r.right - 5 - ktMarkeBreite(k.dataset.marke), right: r.right - 5, top: r.top + 4, bottom: r.top + 4 + KT_MARKE_HOEHE };
+      const teile = [];
+      const tw = document.createTreeWalker(k, NodeFilter.SHOW_TEXT);
+      for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+        if (!n.data.trim()) continue;
+        const rg = document.createRange();
+        rg.selectNodeContents(n);
+        teile.push(...rg.getClientRects());
+      }
+      for (const b of k.querySelectorAll("img, svg, canvas")) teile.push(b.getBoundingClientRect());
+      // 3 px Spiel: Der Kasten eines Bildzeichens ist höher als das Zeichen
+      return teile.some(t => t.width && t.left < m.right && m.left < t.right && t.top + 3 < m.bottom && m.top < t.bottom - 3);
+    });
+    mitMarke.forEach((k, i) => { if (brauchen[i]) k.classList.add("marke-platz"); else if (vorher[i]) k.classList.remove("marke-platz"); });
   }
 
   /**
@@ -2081,7 +2126,9 @@ const LS = (() => {
 
   // Marken zeigen: am Computer mit Maus gleich, sonst ab dem ersten echten Tastendruck (gemerkt auf dem Gerät).
   function ktMarkenZeigen(merken) {
+    const neu = !document.documentElement.classList.contains("mit-tasten");
     document.documentElement.classList.add("mit-tasten");
+    if (neu) ktGruppen.forEach(g => ktPlatz(g.tasten.map(a => a.knopf)));
     if (merken) try { localStorage.setItem("lernspiele:tasten", "1"); } catch { /* ohne Speicher: nur diese Seite */ }
   }
   try {
@@ -3701,7 +3748,7 @@ const LS = (() => {
       "endlos", "endlos-wahl", "schalter-zeile", "schalter-teil", "schalter-hinweis", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
       "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
-      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
+      "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "marke-platz", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
       "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
     bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "bildkachel", "szenenbild", "pruef-bild", "pruef-text-bild", "pruef-farbe", "pruef-farbfeld", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
       "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
