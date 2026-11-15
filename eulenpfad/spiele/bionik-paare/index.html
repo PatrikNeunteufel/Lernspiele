@@ -45,6 +45,8 @@
     .bionik-feld { gap: 8px; }
     .bionik-karte { min-height: 76px; padding: 4px; gap: 0; }
     .bionik-karte .bild { font-size: 28px; }
+    /* Dreier mit neun Karten (s6): langer Auftrag kleiner gesetzt (LERN-55, vorher 23 px darunter) */
+    .frage:has(+ .bionik-feld > :nth-child(7)) { font-size: 17px; line-height: 1.25; margin-bottom: 6px; }
   }
 </style>
 </head>

@@ -375,7 +375,9 @@ LS.spiel({
       const loesung = `${z.bild} ${z.name}: ${z.tut}`;
       gh.append(karteText("", a.a.satz), el("div", { class: "frage", text: "Wer ist dafür zuständig?" }));
       LS.auswahl(ctx, {
-        optionen: a.optionen, richtig: a.a.ziel, breite: 160,
+        // Lange Namen („Gemeindeverwaltung“, 24 px gut 250 px breit) brauchen breitere Spalten, sonst ragen sie auf dem
+        // Tablet über den Knopf und die Seite (LERN-55, seitlich 7 px)
+        optionen: a.optionen, richtig: a.a.ziel, breite: a.optionen.some(id => S[id].name.length > 14) ? 280 : 160,
         inhalt: id => ({ bild: S[id].bild, text: S[id].name }),
         hinweis: id => `${S[id].name}: ${S[id].tut}. Ist das hier die richtige Stelle?`,
         loesung,

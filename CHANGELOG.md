@@ -2547,3 +2547,30 @@
   Ziehungen 3 px, an der Schwelle, unverändert). Angesehen im Browser je auf dem betroffenen Gerät.
   `docs/eulenpfad/bildhoehe_offen.md`.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad wassertropfen-reise „Keine Fehler.“ (nur dort Code geändert, sonst CSS).
+- **Bildhöhe neu gemessen (LERN-55):** alle 175 Spiele, sechs Stufen, vier Geräte, fünf Ziehungen je Seite (21 000
+  Messungen). Aufgabe selbst über dem Rand: 17 Spiele neu (meist nur bei einer Aufgabenart, die früher nicht gezogen
+  wurde), dazu die Ausnahmen von Punkt 4 und vier Fälle an der Schwelle; seitlich gemeinde-helfer Tablet 7 px.
+  `docs/eulenpfad/bildhoehe_offen.md` (Abschnitt Messung LERN_Session43).
+- **`tools/bildhoehe.js`:** prüft vor dem Messen, ob der Server antwortet (sonst Abbruch mit Hinweis), und wartet, bis die
+  Startseite bereit ist, statt fest 2,5 s (ein gestoppter Server beendete einen Lauf mit „LS is not defined“). rahmen.md 20.
+- **Ganze Aufgabe im Bild (LERN-55, BH3 a) — Punkte-Blitz (punkte-blitz), Lärm-Wächter (laerm-waechter), Lese-Detektiv
+  (lese-detektiv), Möglichkeiten-Finder (glace-kombinator), Gedicht-Baukasten (gedicht-baukasten), Plan-Leser
+  (plan-leser), Gefühle-Radar (gefuehle-radar), Schweiz-Karte (schweiz-karte), Rede-Zeichen (rede-zeichen),
+  Taschengeld-Planer (taschengeld-planer), Bruch-Werkstatt (bruch-werkstatt), Bionik-Paare (bionik-paare),
+  Mittelwert-Waage (mittelwert-waage), Geschichten-Ordner (geschichten-ordner), Tonleiter-Treppe (tonleiter-treppe),
+  Blutkreislauf-Lotse (blutkreislauf-lotse), Gemeinde-Helfer (gemeinde-helfer):** Punkte-Blitz Vergleich bis 20 auf dem
+  Handy nebeneinander (vorher 161 px); Lärm-Wächter 👂 in der Satzzeile, Ohr-Bild nach der Bildhöhe (102 px); Lese-Detektiv
+  breit Text links, Frage und Antworten rechts, Handy Text enger (78 px); Möglichkeiten-Finder Handy Gruppen, Sorten und
+  Anzeige enger (bis 71 px; Ausnahme s6 jetzt bis 97 statt 196 px); Gedicht-Baukasten breit je Strophe eine Spalte,
+  gestrichelt getrennt, Reihenfolge bleibt eindeutig (52 px); Plan-Leser Handy Plan nach `100vh − 620px`, Legende enger,
+  breit bei Weg beschreiben Beschreibungen in zwei Zeilen (46 bzw. 35 px); Gefühle-Radar Paare mit Bild neben dem Text
+  (36 px); Schweiz-Karte Karte kleiner bei zweizeiligen Namen (32 px); Rede-Zeichen enger (31 px); Taschengeld-Planer
+  Handy Waren als Zeilen, Anzeige 56 px (29 px); Bruch-Werkstatt Streifen nach der Bildhöhe (27 px); Bionik-Paare langer
+  Auftrag kleiner (23 px); Mittelwert-Waage Anzeige 56 px (13 px); Geschichten-Ordner, Tonleiter-Treppe (Breite in
+  `treppeSvg` nach Seitenverhältnis und Bildhöhe), Blutkreislauf-Lotse enger (4–9 px); Gemeinde-Helfer breitere Spalten
+  bei langen Namen (seitlich 7 px). Jede neue Grösse nach der Bildhöhe mit Untergrenze (H1 a). Nachgemessen (dieselben
+  17 Spiele, fünf Ziehungen, alle Stufen und Geräte): Aufgabe in keinem mehr über dem Rand ausser den Ausnahmen von
+  Punkt 4. Angesehen im Browser: Punkte-Blitz, Lärm-Wächter, Gefühle-Radar, Taschengeld-Planer, Möglichkeiten-Finder
+  Handy; Lese-Detektiv Laptop; Gedicht-Baukasten quer. `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad (die 17 Spiele) „Keine Fehler.“ — der erste Lauf im Möglichkeiten-Finder
+  fand Regeln, die mit der Rahmen-Klasse `.auftrag` beginnen; jetzt unter der Spielfläche eingeschachtelt.

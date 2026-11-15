@@ -35,6 +35,19 @@
   .tg-ware .tg-preis { font-weight: 900; }
   .tg-ware.gewaehlt { border-color: var(--deko-5); background: color-mix(in srgb, var(--deko-5) 12%, var(--k-feld)); }
   .tg-ware.gewaehlt::after { content: "✓ im Korb"; font-size: 14px; color: var(--deko-5-schrift); font-weight: 900; }
+  /* Handy: die fünf Waren als Zeilen (Bild, Name, Preis), damit Regal, Notizen und „Prüfen“ im Bild stehen
+     (LERN-55, s3 vorher 29 px darunter); in zwei Spalten fanden lange Namen („Füllerpatronen“) neben dem Bild keinen Platz */
+  @media (max-width: 560px) {
+    .tg-regal { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-bottom: 8px; }
+    .tg-ware { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 10px; align-items: center; justify-items: start;
+      min-height: 48px; padding: 4px 12px; text-align: left; line-height: 1.2; }
+    .tg-ware .tg-bild { font-size: 28px; }
+    .tg-ware.gewaehlt::after { grid-column: 2 / -1; font-size: 13px; }
+    /* Eintippen (s2 „Wie viel bleibt?“, drei Waren mit langen Namen; vorher 20 px darunter): Anzeige niedriger */
+    .tg-eingabe .anzeige { min-height: 56px; }
+    .tg-karte { margin-bottom: 8px; }
+    .tg-zeile { padding-block: 2px; line-height: 1.2; }
+  }
   .tg-status { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; }
   .tg-pruefen { display: block; margin: 0 auto; }
   .tg-pruefen:disabled { opacity: .45; }

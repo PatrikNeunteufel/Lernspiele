@@ -72,6 +72,8 @@
   @media (max-width: 560px) {
     div:has(> svg.kreislauf) > .wahl:has(> :nth-child(2)):not(:has(> :nth-child(3))) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     div:has(> svg.kreislauf) > .wahl .wahl-knopf { padding: 8px 6px; }
+    /* Frage über vier Zeilen (Lungenarterie, s3): etwas enger, das Schema bleibt so breit wie die Karte (LERN-55, vorher 4 px darunter) */
+    div:has(> svg.kreislauf) > .frage { margin-bottom: 4px; line-height: 1.2; }
   }
 </style>
 </head>

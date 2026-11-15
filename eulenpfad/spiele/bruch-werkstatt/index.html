@@ -22,7 +22,8 @@
   .modell .teil.voll { fill: var(--deko-2); }
   .modell.klickbar .teil { cursor: pointer; }
   .modell-kreis { width: min(240px, 60vw); }
-  .modell-streifen { width: min(560px, 92vw); }
+  /* nach der Bildhöhe (Seitenverhältnis 528 : 368), damit „Fertig“ im Bild bleibt (LERN-55, Laptop s5 vorher 27 px darunter) */
+  .modell-streifen { width: max(min(260px, 92vw), min(560px, 92vw, calc((100vh - 410px) * 1.43))); }
   .modell-paar { display: flex; flex-direction: column; gap: 14px; align-items: center; }
   .modell-paar .modell-streifen { width: min(460px, 76vw); }
 

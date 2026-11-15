@@ -21,6 +21,15 @@
   .gedicht-vers.richtig { border-color: var(--gut); background: var(--gut-hell); }
   .gedicht-ordnen .wahl-knopf, .gedicht-ordnen .ablage span { font-size: clamp(16px, 3.6vw, 19px); }
   .gedicht-ordnen .ablage { flex-direction: column; align-items: stretch; }
+  /* Breit: Strophen nebeneinander in einer Reihe, je Strophe eine Spalte — so bleibt die Reihenfolge eindeutig (die Aufgabe
+     fragt nach „der zweiten Strophe“), und das Gedicht steht ganz im Bild (LERN-55, s3 quer vorher 52 px darunter) */
+  @media (min-width: 900px) {
+    .gedicht:has(> .strophe + .strophe) { max-width: 980px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; align-items: start; }
+    .gedicht:has(> .strophe + .strophe + .strophe) { grid-template-columns: 1fr 1fr 1fr; column-gap: 16px; }
+    .gedicht:has(> .strophe + .strophe) > .titel { grid-column: 1 / -1; }
+    .gedicht:has(> .strophe + .strophe) > .strophe { margin-top: 0; }
+    .gedicht:has(> .strophe + .strophe) > .strophe + .strophe { border-left: 3px dashed var(--rand); padding-left: 14px; margin-left: -8px; }
+  }
 </style>
 </head>
 <body>

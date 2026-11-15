@@ -30,6 +30,12 @@
   .gruppe { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: flex-end; max-width: 100%; }
   .seite { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .seite b { font-size: 20px; }
+  /* Handy: beim Vergleich bis 20 (zwei Zehnerfelder je Seite) stehen links und rechts nebeneinander,
+     sonst untereinander und die Antworten unter dem Rand (LERN-55, bis 161 px) */
+  @media (max-width: 560px) {
+    .seite .zehnerfeld { grid-template-columns: repeat(5, 18px); gap: 4px; padding: 6px; }
+    .seite .zehnerfeld i { width: 18px; height: 18px; border-width: 2px; }
+  }
 </style>
 </head>
 <body>

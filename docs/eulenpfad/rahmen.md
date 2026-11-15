@@ -1100,7 +1100,9 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   „Aufgabe selbst über dem Rand“ nennt dazu, in wie vielen Ziehungen. `--json` hält je Ziehung den Anfang des
   Aufgabentexts fest (Feld `text`, 100 Zeichen, LERN_Session43) — daran zeigt sich, welche Aufgabenart überläuft. Chrome
   läuft mit `--autoplay-policy=no-user-gesture-required`: sonst meldet die Eule „Stimme hat nicht gesprochen“, eine
-  höhere Blase, die es auf einem Gerät nicht gibt (LERN_Session43). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
+  höhere Blase, die es auf einem Gerät nicht gibt (LERN_Session43). Vor dem Messen prüft es, ob der Server antwortet
+  (sonst Abbruch mit Hinweis), und wartet, bis die Startseite bereit ist, statt einer festen Zeit (LERN_Session43: ein
+  gestoppter Server liess einen Lauf mit „LS is not defined“ ohne Messung enden). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
   selbst über dem Rand (ohne Tipp-Zeile), mit der
   Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). Dazu die Grafiken der Aufgabe (svg, canvas, img mit
   Klasse, nicht in Knöpfen, Eule mit Blase, Legende, Kopf): Geschrumpft heisst eine, deren kürzere Seite unter 100 px

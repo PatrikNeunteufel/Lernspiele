@@ -43,6 +43,14 @@
     background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
   .rz-taste.weg { font-size: 26px; background: var(--hinweis-hell); }
   .rz-pruefen { display: flex; justify-content: center; }
+  /* Handy: Schema, Satz über drei Zeilen, Tasten und Prüfen ganz im Bild (LERN-55, s5 vorher 31 px darunter) */
+  @media (max-width: 560px) {
+    .rz-schema { margin-bottom: 8px; }
+    .frage { margin-bottom: 8px; }
+    .satz { row-gap: 8px; margin-bottom: 10px; }
+    .rz-tasten { gap: 8px; margin-bottom: 10px; }
+    .rz-taste { min-height: 50px; min-width: 52px; }
+  }
 </style>
 </head>
 <body>

@@ -30,6 +30,14 @@
   .gs-wahl .wahl-knopf .bild { font-size: clamp(40px, 9vw, 54px); }
   .gs-wahl.gs-paar .wahl-knopf .bild { font-size: clamp(30px, 7vw, 42px); letter-spacing: 4px; }
   .gs-wahl.gs-text .wahl-knopf { font-size: clamp(15px, 3.5vw, 19px); font-weight: 700; line-height: 1.35; }
+  /* Handy: Gefühlspaare mit Bild neben dem Text, damit die Geschichte und alle vier Antworten im Bild stehen
+     (LERN-55, s6 vorher 36 px darunter) */
+  @media (max-width: 560px) {
+    .gs-wahl.gs-paar .wahl-knopf { flex-direction: row; gap: 10px; min-height: 54px; padding-block: 6px; }
+    .gs-wahl.gs-paar .wahl-knopf .bild { font-size: 28px; letter-spacing: 2px; }
+    .gs:has(~ .gs-paar) .satz { padding: 10px 14px; line-height: 1.4; margin-bottom: 10px; }
+    .gs:has(~ .gs-paar) .gs-hoer { margin-bottom: 10px; }
+  }
 </style>
 </head>
 <body>

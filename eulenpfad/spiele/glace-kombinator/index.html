@@ -56,6 +56,27 @@
     .gl-bau { min-height: 84px; margin-bottom: 6px; }
     .gl-gruppe > b { margin-bottom: 2px; }
   }
+  /* Handy: Zählen ganz im Bild (LERN-55, Kleider-Sets mit drei Gruppen s3/s4 vorher bis 66 px, Glace aus fünf Sorten
+     20 px darunter) — Gruppen, Sorten, Anzeige und Abstände enger */
+  @media (max-width: 560px) {
+    div:has(> .gl-anzeige) > .auftrag { margin-bottom: 6px; }
+    div:has(> .gl-anzeige) > .frage { margin-bottom: 6px; }
+    .gl-liste.vorgabe { gap: 4px 10px; margin-bottom: 6px; }
+    .gl-liste.vorgabe .gl-kugel { width: 44px; height: 44px; font-size: 19px; }
+    .gl-anzeige { min-height: 54px; margin-block: 4px 8px; }
+    .gl-gruppen { gap: 2px 16px; margin-bottom: 6px; }
+    .gl-gruppen .gl-gruppe > b { font-size: 13px; }
+    .gl-gruppen .gl-liste > span { font-size: 13px; }
+    .gl-gruppen .gl-liste .gl-bild { font-size: 26px; }
+    .gl-gruppen .gl-liste { margin-bottom: 0; }
+    /* Finde alle Kleider-Sets mit zwei Gruppen zu drei Stücken (s2, vorher 71 px darunter): Stückknöpfe und Set niedriger */
+    .gl-sorten { gap: 6px; margin-bottom: 6px; }
+    .gl-sorte { padding: 3px 6px; gap: 0; font-size: 16px; }
+    .gl-sorte .gl-bild { font-size: 28px; }
+    .gl-bau { min-height: 70px; }
+    div:has(> .gl-bau) > .auftrag { margin-bottom: 6px; }
+    .gl-gefunden { margin-top: 2px; }
+  }
 </style>
 </head>
 <body>

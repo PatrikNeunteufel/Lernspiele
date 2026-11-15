@@ -14,6 +14,19 @@
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 25px); font-weight: 800; margin: 0 0 12px; }
   .wahl-knopf.bilder { font-size: clamp(30px, 7vw, 42px); }
   .wahl-knopf.satz { font-size: clamp(16px, 3.6vw, 20px); text-align: left; }
+  /* Lange Texte mit Satz-Antworten ganz im Bild (LERN-55, s6 vorher Handy bis 78, Laptop 20 px darunter):
+     breit Text links, Frage und Antworten rechts; Handy Text und Antworten enger */
+  @media (min-width: 900px) {
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 24px; align-items: start; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .sachtext { grid-row: 1 / 3; margin: 4px 0 0; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .frage { grid-column: 2; margin-top: 4px; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .wahl { grid-column: 2; }
+  }
+  @media (max-width: 560px) {
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .sachtext { font-size: 17px; line-height: 1.45; padding: 10px 14px; margin-bottom: 10px; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .frage { margin-bottom: 8px; font-size: 18px; line-height: 1.25; }
+    .wahl-knopf.satz { min-height: 52px; padding-block: 6px; line-height: 1.25; }
+  }
 </style>
 </head>
 <body>

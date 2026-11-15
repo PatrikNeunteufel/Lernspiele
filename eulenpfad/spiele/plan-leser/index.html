@@ -54,14 +54,15 @@
   .legende b, .legende .massstab { grid-column: 1 / -1; }
   @media (max-width: 560px) {
     .plan-zeile { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; margin-bottom: 8px; width: 100%; }
-    .plan-zeile.mit-wahl .plan-bild { width: max(min(200px, 100%), min(100%, calc(100vh - 580px))); }
+    /* 620 px: Frage über drei Zeilen, Legende mit neun Zeichen und Antworten in zwei Reihen (LERN-55, vorher bis 46 px darunter) */
+    .plan-zeile.mit-wahl .plan-bild { width: max(min(180px, 100%), min(100%, calc(100vh - 620px))); }
     .plan-zeile .wahl { gap: 8px; }
     .plan-zeile .wahl-knopf { min-height: 54px; padding: 6px 8px; }
     .legende { padding: 6px 10px; min-width: 0; width: 100%; grid-template-columns: repeat(2, minmax(0, auto)); justify-content: space-between; column-gap: 8px; }
     .legende b { margin-bottom: 2px; }
-    .legende-zeile { margin: 1px 0; line-height: 1.15; }
+    .legende-zeile { margin: 1px 0; line-height: 1.1; font-size: 15px; }
     .legende-zeile { gap: 6px; }
-    .legende-zeile svg { width: 24px; height: 24px; }
+    .legende-zeile svg { width: 22px; height: 22px; }
     .massstab { margin-top: 4px; }
     .zeichen-gross { width: 64px; height: 64px; }
   }
@@ -72,6 +73,10 @@
   @media (min-width: 900px) and (orientation: landscape) {
     .plan-zeile { gap: 18px; }
     .plan-seite { display: flex; flex-direction: column; gap: 10px; max-width: 520px; }
+    /* Weg beschreiben: breitere Seite, die Beschreibungen brauchen weniger Zeilen (LERN-55, Laptop s6 vorher 35 px darunter) */
+    .plan-seite:has(> .wege) { max-width: 600px; flex: 1 1 0; }
+    .plan-zeile:has(.wege) .plan-bild { width: max(240px, min(320px, calc(100vh - 300px))); }
+    .plan-seite .wahl.wege .wahl-knopf { font-size: 17px; }
     .plan-bild { width: max(240px, min(360px, calc(100vh - 300px))); }
   }
 </style>

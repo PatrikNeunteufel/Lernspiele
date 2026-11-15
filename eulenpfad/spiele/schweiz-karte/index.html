@@ -12,7 +12,7 @@
      --rest = was über und unter der Karte noch Platz braucht (Kopf, Auftrag, Quelle, Tipp; mit Namen zur Wahl mehr). */
   .karte-svg { /* Bildfarben: Karte auf der Bildkachel */ --rest: 330px; display: block; width: max(min(320px, 100%), min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6)))); height: auto;
     margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
-  .karte-svg.mit-wahl { --rest: 400px; }
+  .karte-svg.mit-wahl { --rest: 435px; } /* 435: Kantonsnamen in zwei Zeilen („Appenzell Innerrhoden“; LERN-55, vorher bis 32 px darunter) */
   @media (min-height: 821px) { .karte-svg { --rest: 420px; } .karte-svg.mit-wahl { --rest: 500px; } }
   .karte-svg .land { fill: none; stroke: var(--text); stroke-width: .9; }
   .karte-svg .gebiet { /* Bildfarben: Karte auf der Bildkachel */ fill: #fbf7ec; stroke: #8a8fa8; stroke-width: .45; stroke-linejoin: round; fill-rule: evenodd; }

@@ -4,6 +4,43 @@ Entscheide BH1 a, BH2 a, BH2-T a, BH3 a sind umgesetzt (rahmen.md Abschnitt 20).
 (Zufallsaufgaben, Streuung um einige Dutzend Pixel). Zahlen: wie weit die **Aufgabe selbst** (ohne Tipp-Zeile) über den
 unteren Rand ragt, in px, höchster Wert über die gemessenen Stufen.
 
+## Messung LERN_Session43 (2026-11-15)
+
+Alle 175 Spiele, sechs Stufen, die vier Geräte von BH1 a, **fünf Ziehungen je Seite** (21 000 Messungen, rund 2,5 h),
+mit dem Werkzeug nach den Behebungen dieser Sitzung (Messbrowser ohne Stimmen-Meldung). Aufgabe selbst über dem Rand:
+43 Einträge. Davon die begründeten Ausnahmen von Punkt 4 (plan-leser Weg beschreiben Handy bis 307, diagramm-wahl s5
+Tabelle 453, glace-kombinator s5/s6 bis 196, quader-volumen s4/s6 bis 172, hebel-wippe s6 27, kakao-weg s6 bis 27,
+malkreuz s6 43) und vier an der Schwelle (3 px). Seitlich: gemeinde-helfer s6 Tablet 7 px. Keine geschrumpfte Grafik.
+
+Neu über dem Rand — *erledigt 2026-11-15 (LERN_Session43)*, mit einer Nachmessung derselben 17 Spiele (fünf Ziehungen,
+alle Stufen und Geräte): die Aufgabe selbst ragt in keinem mehr über den Rand, ausser den Ausnahmen von Punkt 4
+(plan-leser Weg beschreiben Handy 259, glace-kombinator s6 Handy 53) und bionik-paare s2/s3 3 px (Schwelle, unverändert).
+- **punkte-blitz** (s4 Handy 161, Vergleich bis 20): Zehnerfelder auf der Seite kleiner, links und rechts nebeneinander.
+- **laerm-waechter** (s5 Handy und Laptop 102, „Welcher Teil des Ohrs macht das?“): 👂 in der Zeile des Satzes, Ohr-Bild
+  nach der Bildhöhe, auf dem Handy Antworten 52 px und Satz enger.
+- **lese-detektiv** (s6 Handy 78, Laptop 20): breit Text links, Frage und Antworten rechts; Handy Text 17 px, enger.
+- **glace-kombinator** (Kleider-Sets zählen s3/s4 Handy 66, Glace aus fünf Sorten 20; in der Nachmessung Kleider-Sets
+  finden s2 71): Gruppen, Sorten, Stückknöpfe, Anzeige und Abstände auf dem Handy enger. Ausnahme s6 (vier Gruppen) jetzt
+  bis 53–97 statt 196 px.
+- **gedicht-baukasten** (s3 quer 52, Gedicht mit zwei oder drei Strophen): breit je Strophe eine Spalte in einer Reihe,
+  gestrichelt getrennt — die Aufgabe fragt nach „der zweiten Strophe“, die Reihenfolge muss eindeutig bleiben.
+- **plan-leser** (s1–s4 Handy bis 46; s6 Laptop 35 Weg beschreiben): Handy Plan nach `100vh − 620px` (mindestens 180 px),
+  Legende 15 px; breit bei Weg beschreiben Plan kleiner, Seite breiter, Beschreibungen 17 px (zwei statt drei Zeilen).
+- **gefuehle-radar** (s6 Handy 36): Gefühlspaare mit Bild neben dem Text, Geschichte enger.
+- **schweiz-karte** (s6 Laptop 32, quer 13): Karte mit Antworten nach `100vh − 435px` (zweizeilige Kantonsnamen).
+- **rede-zeichen** (s5 Handy 31): Abstände und Zeichen-Tasten (50 px) enger.
+- **taschengeld-planer** (s3 Handy 29, s2 13): Handy die fünf Waren als Zeilen (Bild, Name, Preis; in zwei Spalten fand
+  „Füllerpatronen“ neben dem Bild keinen Platz), Anzeige 56 px.
+- **bruch-werkstatt** (s5 Laptop 27): Streifen nach der Bildhöhe.
+- **bionik-paare** (s6 Handy 23): langer Auftrag bei neun Karten 17 px.
+- **mittelwert-waage** (s3/s6 Handy 13): Anzeige 56 px, Säulennamen enger.
+- **geschichten-ordner** (s6 Handy 9), **tonleiter-treppe** (s1 quer/Laptop 6; Breite setzt `treppeSvg` je Treppe nach
+  Seitenverhältnis und Bildhöhe), **blutkreislauf-lotse** (s3 Handy 4): enger bzw. nach der Bildhöhe.
+- **gemeinde-helfer** (seitlich Tablet 7, „Gemeindeverwaltung“ in 24 px breiter als die Spalte): bei langen Namen
+  breitere Spalten.
+
+Rohdaten (gitignored): `.temp/bildhoehe/alle_2026-11-15.json`, `neu_nachher.json`, `glace_nachher.json`.
+
 ## Messung LERN_Session42 (2026-11-14)
 
 Alle 175 Spiele, sechs Stufen, die vier Geräte von BH1 a (Handy 375×812, Tablet 768×1024, quer 1024×768, Laptop
@@ -143,8 +180,8 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
 3. **Rest auf Bildschirmgrössen** (ohne Leisten, alle Stufen): plan-leser Handy 240, weather-report Handy 79 / quer und
    Laptop 74, punkte-blitz Handy 65, laerm-waechter quer 55, stromkreis-bauer quer 14, netz-falter Laptop 12.
 4. **Begründete Ausnahmen der Bau-Helfer** (BH3, prüfen, ob sie bleiben): plan-leser Weg beschreiben (s5/s6, Handy, bis
-   348 px), diagramm-wahl s5 Tabelle (Handy, Diagramme sonst unter 10 px Schrift), glace-kombinator Kleider-Sets
-   zählen (s5/s6, Handy), kakao-weg s6 Schritte ordnen, quader-volumen s4 zerlegen und s6 Aquarium, zahlen-baukasten s6
+   348 px, LERN_Session43 259), diagramm-wahl s5 Tabelle (Handy, Diagramme sonst unter 10 px Schrift), glace-kombinator
+   Kleider-Sets zählen (s6 mit vier Gruppen, Handy, LERN_Session43 bis 97), kakao-weg s6 Schritte ordnen, quader-volumen s4 zerlegen und s6 Aquarium, zahlen-baukasten s6
    (sechs ausgeschriebene Bausteine), hebel-wippe s6 (langer Auftrag), diagramm-detektiv Handy (Tabelle mit Diagramm),
    malkreuz s6 3×2-Rätsel.
 5. **Wünsche an den Rahmen** (aus BH3): Baustein „Element an die restliche Höhe anpassen“ für Grafiken (statt
@@ -154,6 +191,7 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    Zifferntastatur nicht ganz im Bild); mit Notizen auch s2 (39–77 px). Das Messwerkzeug sieht es nicht, weil es nur
    den ersten Schritt misst (Befund Notiz-Paket A). Zu entscheiden: Notizen auf dem Handy in s2 lassen; den
    Ergebnis-Schritt selbst verdichten.
-7. **Messwerkzeug:** *erledigt 2026-11-14 (LERN_Session42, BW1 a: `--ziehungen`, Vorgabe 5; Hörspiele weiter offen).*
+7. **Messwerkzeug:** *erledigt 2026-11-15 (LERN_Session42 BW1 a: `--ziehungen`, Vorgabe 5; LERN_Session43 Messbrowser ohne
+   Stimmen-Meldung).*
    Eine Option „alle Aufgabenarten“ oder mehrere Ziehungen je Stufe (Fälle wie energie-wandler bis
    397 px zeigte erst eine Stichprobe); Hörspiele messen ohne Stimme (Eule meldet den Sprechfehler, die Blase wird länger).

@@ -180,8 +180,13 @@ async function main() {
       }
     };
     await send("Runtime.enable");
+    // Startseite bereit, sobald LS und SPIELE da sind (bis 20 s); sonst klare Meldung statt „LS is not defined“
+    // (LERN_Session43: der Server war beendet, die Messung brach mit dieser Meldung ab)
+    try { await fetch(BASIS + "/eulenpfad/index.html"); }
+    catch { throw new Error(`Server unter ${BASIS} nicht erreichbar — zuerst starten (python tools/server.py 8765).`); }
     await send("Page.navigate", { url: BASIS + "/eulenpfad/index.html" });
-    await warte(2500);
+    for (let i = 0; i < 40 && !(await js("return typeof LS !== 'undefined' && typeof SPIELE !== 'undefined'")); i++) await warte(500);
+    await warte(500);
     // Messkind anlegen und alles freigeben (nur in diesem leeren Profil)
     const spiele = await js(`
       const n = LS.neuerSpieler("Messkind") || "Messkind"; LS.setzeSpieler(n);
