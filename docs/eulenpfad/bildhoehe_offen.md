@@ -1,4 +1,4 @@
-# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session42, 2026-11-14)
+# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session43, 2026-11-15)
 
 Entscheide BH1 a, BH2 a, BH2-T a, BH3 a sind umgesetzt (rahmen.md Abschnitt 20). Gemessen mit `tools/bildhoehe.js`
 (Zufallsaufgaben, Streuung um einige Dutzend Pixel). Zahlen: wie weit die **Aufgabe selbst** (ohne Tipp-Zeile) über den
@@ -33,6 +33,27 @@ kulturen-koffer: *erledigt 2026-11-14 (LERN_Session42)* — Ursache war keine H�
 Bildersammlung mit eigener Klasse (`LS.bild(b, "kk-bild")`) bekamen die Grössenregel nicht und wurden so breit wie die
 Karte (bis 700 px hoch; „Woher wissen wir das?“ und „Gab es das schon?“). Regel in `stil.css` an `.gezeichnet`; danach
 acht Ziehungen je Stufe und Gerät: nirgends mehr über dem Rand. Dieselbe Regel betraf die Erdzeit-Leiter (`ez-bild`).
+
+Fünf Spiele aus der Liste unten: *erledigt 2026-11-15 (LERN_Session43)* — nachgemessen mit acht Ziehungen je Stufe
+(s1–s6) und Gerät; die Aufgabe selbst ragt in keinem der fünf mehr über den Rand.
+- **fledermaus-forscher** (Jahr, fünf Karten): unter 820 px Bildhöhe Fledermaus neben dem Satz, auf dem Handy kleiner.
+- **hello-dialog** (s5 Lücke): breit und quer Dialog links, Antworten rechts (`.hd-blasen` mit `margin-inline: 0`,
+  sonst schrumpfen die Blasen im Raster); Handy Antwortzeilen 52 px.
+- **netz-falter** (Quadernetze bis neun Felder hoch): Netz nach der Bildhöhe, `max(260px, calc(100vh - 370px))`, mit
+  Ja/Nein oder Körpern darunter `max(220px, calc(100vh - 480px))`.
+- **sachaufgaben-kompass** (s4 Lagerkasse, s2 Rechenwege): mit Tabelle oder Diagramm breit und quer die Daten rechts
+  (`.kompass-raster`, 💡 über `data-tipp-ziel`); Handy Tabelle enger, „Prüfen“ neben dem Schritt, Rechenwege zweispaltig,
+  wenn der längste in eine halbe Zeile passt (gemessen, 16 px).
+- **diagramm-detektiv**: Tablet hoch Frage und Antworten unter Tabelle und Diagramm über die ganze Breite (vorher
+  251 px); Handy Diagramm mit Zifferntastatur nach der Bildhöhe (die Regel `min-width` unter 820 px hob die Breite auf),
+  Tabelle mit Diagramm enger. Neben einem Diagramm steht die Tabelle oder Strichliste auf dem Handy **quer** (Entscheid
+  DD1 a, 2026-11-15: eine Spalte je Kategorie, Bild und Name oben, Anzahl oder Striche darunter, `querTabelle`; vorher bei
+  fünf Kategorien bis 114 px über dem Rand). Doppelte Säulen mit Tastatur (s6, Mo–Fr): Diagramm etwas kleiner (240 px
+  auf 812 px Bildhöhe). Die Achsenzahlen sind auf dem Handy damit rund 8 px hoch (vorher knapp 9 px) — beim Ansehen der
+  Lesbarkeit im Blick behalten.
+
+`tools/bildhoehe.js` hält je Ziehung den Anfang des Aufgabentexts im JSON fest (Feld `text`). Rohdaten (gitignored):
+`.temp/bildhoehe/fuenf_vorher.json`, `fuenf_nachher.json`.
 
 **Nur bei einer Aufgabenart** (in den anderen Läufen passt dieselbe Stufe):
 kulturen-koffer quer s5/s6 443, s4 298, Handy s5 238, Tablet s4/s6 134 · plan-leser Handy s6 333, s5 288, s1–s3 bis 53,

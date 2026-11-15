@@ -13,6 +13,11 @@
   .regel { text-align: center; color: var(--text-leise); font-weight: 700; margin: -4px 0 10px; }
   .netz { display: flex; justify-content: center; margin: 0 auto 14px; }
   .netz svg { display: block; max-width: 100%; height: auto; }
+  /* Ganze Aufgabe im Bild (BH3 a): Quadernetze sind bis neun Felder hoch (bis 630 px) — Netz nach der Bildhöhe, beim
+     Antippen so, dass ein Feld des höchsten Netzes auf 768 px Bildhöhe noch rund 44 px misst; mit Ja/Nein oder Körpern
+     darunter kleiner (dort wird im Netz nichts angetippt). Untergrenze nach H1 a. */
+  .netz svg { width: auto; max-height: max(260px, calc(100vh - 370px)); }
+  .netz:has(+ .wahl) svg { max-height: max(220px, calc(100vh - 480px)); }
   .netz .tippbar { cursor: pointer; }
   .netz .tippbar:hover { fill: var(--aktiv); }
   .netz .daneben { fill: var(--hinweis-hell); }

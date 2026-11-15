@@ -37,6 +37,22 @@
   .hd-ordnen .ablage { flex-direction: column; align-items: stretch; counter-reset: hd-zug; }
   .hd-ordnen .ablage > span { font-size: clamp(15px, 3.5vw, 19px); font-weight: 700; text-align: left; line-height: 1.35; counter-increment: hd-zug; }
   .hd-ordnen .ablage > span::before { content: counter(hd-zug) ". "; color: var(--text-leise); }
+  /* Ganze Aufgabe im Bild (BH3 a), Handy: Antwortzeilen 52 px wie die Zeilen-Knöpfe — die Lücke (Stufe 5) mit vier
+     Blasen ragte sonst bis 27 px unter den Rand */
+  @media (max-width: 560px) {
+    .hd-wahl .wahl-knopf { min-height: 52px; padding: 6px 12px; }
+    .hd-hoer { margin-bottom: 10px; }
+  }
+  /* Ganze Aufgabe im Bild (BH3 a): breit und quer der Dialog links, die Antworten rechts daneben — untereinander
+     ragte die Lücke (Stufe 5) auf dem Laptop bis 88 px unter den Rand */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .hd:has(> .hd-blasen):has(> .hd-wahl) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 24px; align-items: start; }
+    .hd:has(> .hd-blasen):has(> .hd-wahl) > * { grid-column: 1; }
+    .hd:has(> .hd-blasen):has(> .hd-wahl) > .frage { grid-column: 1 / -1; }
+    /* margin-inline: auto liesse die Blasen im Raster auf ihre Mindestbreite schrumpfen („Here you / are.“) */
+    .hd:has(> .hd-blasen):has(> .hd-wahl) > .hd-blasen { margin-inline: 0; }
+    .hd:has(> .hd-blasen):has(> .hd-wahl) > .hd-wahl { grid-column: 2; grid-row: 2 / span 3; align-self: center; margin: 0; }
+  }
 </style>
 </head>
 <body>

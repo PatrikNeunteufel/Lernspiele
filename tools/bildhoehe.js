@@ -135,6 +135,13 @@ const MESSEN = (auftraege, css) => `
               if (!k) return 0;
               const teile = [...k.querySelectorAll(":scope > *")].filter(x => !x.classList.contains("tipp-zeile"));
               return Math.round(Math.max(0, ...teile.map(x => x.getBoundingClientRect().bottom)) - a.h);
+            })(),
+            // Anfang des Aufgabentexts, damit sich in --json zeigt, welche Aufgabenart über den Rand ragt
+            text: (() => {
+              const k = d.querySelector(".karte");
+              if (!k) return "";
+              return [...k.querySelectorAll(":scope > *")].filter(x => !x.classList.contains("tipp-zeile"))
+                .map(x => x.innerText).join(" ").replace(/\\s+/g, " ").trim().slice(0, 100);
             })() });
         } catch (e) { __bh.erg.push({ ...a, fehler: String(e) }); }
         f.remove(); __bh.fertig++; fertig();

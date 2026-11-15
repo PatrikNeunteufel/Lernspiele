@@ -54,8 +54,34 @@
   .nz-zeile > span { align-self: center; }
   .nz-zeile .zw-notiz { font-size: 16px; min-height: 32px; padding: 1px 3px; }
   @media (min-width: 561px) { .kompass-antwort:has(> .nz-zeile) .anzeige { min-width: 180px; } }
+  /* Ganze Aufgabe im Bild (BH3 a): breit und quer Tabelle oder Diagramm rechts neben Text, Frage und Antwort —
+     untereinander ragte die Lagerkasse (fünf Tage) auf Laptop und Tablet quer bis 103 px unter den Rand */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .kompass-raster { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 24px; align-items: start; }
+    .kompass-raster > * { grid-column: 1; }
+    .kompass-raster > .kompass-tabelle-rahmen, .kompass-raster > .kompass-diagramm { grid-column: 2; grid-row: 1 / span 4; align-self: center; margin: 0; }
+    .kompass-raster > .kompass-diagramm { width: min(420px, 38vw); }
+  }
   /* Handy: eine eigene Zeile über der Antwort, so niedrig wie möglich */
   @media (max-width: 560px) {
+    /* Ganze Aufgabe im Bild (BH3 a): Text enger, Rechenwege niedriger (52 px, wie Zeilen-Knöpfe anderer Spiele) —
+       sonst ragte der vierte Rechenweg in Stufe 2 bis 78 px unter den Rand */
+    .kompass-text { line-height: 1.5; padding: 8px 10px; margin-bottom: 8px; }
+    .kompass-weg .wahl-knopf, .kompass-zusammenhang .wahl-knopf { min-height: 52px; padding-block: 6px; }
+    /* Tabelle der Stufe 4 (bis fünf Zeilen mit Angabe-Knöpfen): Zellen enger, Knöpfe bleiben 40 px hoch */
+    .kompass-tabelle th, .kompass-tabelle td { padding-block: 1px; }
+    .kompass-tabelle td .angabe { margin-block: 0; }
+    .kompass-tabelle caption { padding-bottom: 2px; }
+    .kompass-schritt { margin: 6px 0 4px; }
+    /* mit Tabelle oder Diagramm: „Prüfen“ rechts neben dem Schritt statt darunter */
+    .kompass-raster:has(.kompass-pruefen) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; }
+    .kompass-raster:has(.kompass-pruefen) > * { grid-column: 1 / -1; }
+    .kompass-raster:has(.kompass-pruefen) > .kompass-schritt { grid-column: 1; align-self: center; text-align: left; font-size: 14px; line-height: 1.25; }
+    .kompass-raster:has(.kompass-pruefen) > .kompass-schritt + div { grid-column: 2; align-self: center; }
+    .kompass-raster .kompass-pruefen { margin: 0; }
+    .kompass-raster .kompass-pruefen .knopf { padding-inline: 14px; font-size: 19px; min-height: 52px; }
+    .kompass-weg.kurz { --wahl-breite: 130px; }
+    .kompass-weg.kurz .wahl-knopf { padding-inline: 4px; white-space: nowrap; font-size: 16px; }
     .kompass-antwort > .nz-zeile { flex-basis: 100%; font-size: 12px; }
     .nz-zeile .zw-notiz { min-height: 30px; }
   }
@@ -776,13 +802,17 @@ LS.spiel({
     const knoepfe = a.angaben.map(x => (tippen
       ? el("button", { type: "button", class: "angabe", text: zeigeText(x.text), "aria-pressed": "false" })
       : el("span", { class: "angabe", text: zeigeText(x.text) })));
-    f.append(el("div", { class: "kompass-text sachtext" }, ...a.saetze.flatMap((s, i) => [...(i ? [" "] : []), ...teileEl(a, s, knoepfe)])));
-    if (a.tabelle) f.append(tabelleEl(a, knoepfe));
-    if (a.diagramm) f.append(diagrammEl(a, knoepfe));
-    f.append(el("div", { class: "frage" }, ...teileEl(a, a.frage, knoepfe)));
+    const text = el("div", { class: "kompass-text sachtext" }, ...a.saetze.flatMap((s, i) => [...(i ? [" "] : []), ...teileEl(a, s, knoepfe)]));
+    const frage = el("div", { class: "frage" }, ...teileEl(a, a.frage, knoepfe));
     const schritt = el("div", { class: "kompass-schritt", "aria-live": "polite" });
     const bereich = el("div", {});
-    f.append(schritt, bereich);
+    const daten = a.tabelle ? tabelleEl(a, knoepfe) : a.diagramm ? diagrammEl(a, knoepfe) : null;
+    if (daten) {
+      // Mit Tabelle oder Diagramm (Stufe 4) in einer Hülle: breit und quer stehen die Daten rechts neben Text, Frage und
+      // Antwort (BH3 a), schmal bleibt die Reihenfolge Text, Daten, Frage. 💡 gehört weiter in die Frage.
+      frage.setAttribute("data-tipp-ziel", "");
+      f.append(el("div", { class: "kompass-raster" }, text, daten, frage, schritt, bereich));
+    } else f.append(text, frage, schritt, bereich);
 
     // Handgriffe: Angaben antippen und Prüfen, je ein Tipp für Weg und Zusammenhang, Ziffern, Einheit und OK.
     const st = a.einheit === "Fr." ? 2 : 0;
@@ -843,8 +873,8 @@ LS.spiel({
       for (const o of optionen) {
         const k = el("button", { type: "button", class: "wahl-knopf" });
         const i = inhalt(o);
-        if (typeof i === "string") k.textContent = i;
-        else { k.append(el("span", { text: i.text })); if (i.klein) k.append(el("small", { text: i.klein })); }
+        k.append(el("span", { text: typeof i === "string" ? i : i.text })); // span: seine Breite misst zweiSpaltig
+        if (i.klein) k.append(el("small", { text: i.klein }));
         k.addEventListener("click", () => {
           if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
           if (o === richtig) { fertig = true; k.classList.add("richtig"); LS.ton("tipp"); setTimeout(weiter, 400); return; }
@@ -855,10 +885,23 @@ LS.spiel({
         box.append(k);
       }
       bereich.append(box);
+      return box;
+    }
+
+    /**
+     * Rechenwege zu zweit in einer Zeile (Klasse „kurz“, wirkt nur auf dem Handy, BH3 a), wenn der längste in eine
+     * halbe Zeile passt — gemessen in der Schrift von „kurz“ (16 px statt 18 px), sonst blieben lange umgebrochen.
+     */
+    function zweiSpaltig(box) {
+      const halb = (box.clientWidth - 10) / 2 - 12; // Lücke 10 px, je Knopf Rand und Innenabstand
+      // Breite des Texts selbst: der span wird im Knopf sonst auf dessen Breite gestreckt
+      const breit = [...box.children].map(k => { const s = k.firstElementChild; s.style.width = "max-content";
+        const b = s.getBoundingClientRect().width; s.style.width = ""; return b * 16 / parseFloat(getComputedStyle(k).fontSize); });
+      if (breit.every(b => b <= halb)) box.classList.add("kurz");
     }
 
     function phaseWeg() {
-      wahl(mische(a.wege), a.term, termText, a.tipp, "kompass-weg");
+      zweiSpaltig(wahl(mische(a.wege), a.term, termText, a.tipp, "kompass-weg"));
     }
 
     function phaseZusammenhang() {

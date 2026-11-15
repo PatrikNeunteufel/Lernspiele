@@ -11,6 +11,17 @@
   .nacht { /* Gleich in beiden Modi: Nachthimmel mit weisser Schrift */  background: linear-gradient(180deg, #1e1b4b, #3b3486); border-radius: 20px; padding: 14px; color: #fff; margin-bottom: 14px; text-align: center; }
   .nacht .bild { font-size: clamp(54px, 12vw, 80px); line-height: 1.1; }
   .nacht .aussage { font-size: clamp(20px, 4.6vw, 30px); font-weight: 800; margin-top: 6px; }
+  /* Ganze Aufgabe im Bild (BH3 a): unter 820 px Bildhöhe steht die Fledermaus neben dem Satz statt darüber — sonst
+     ragen die fünf Karten des Jahrs auf Laptop und Handy unter den Rand */
+  @media (max-height: 820px) {
+    .nacht { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 14px; }
+    .nacht .bild { font-size: clamp(36px, 8vw, 48px); }
+    .nacht .aussage { margin-top: 0; }
+  }
+  @media (max-height: 820px) and (max-width: 560px) {
+    .nacht { gap: 8px; padding: 8px 10px; }
+    .nacht .bild { font-size: 30px; }
+  }
   .wahl-knopf.ja { background: var(--gut-hell); }
   .wahl-knopf.nein { background: var(--taste-loeschen); }
 </style>

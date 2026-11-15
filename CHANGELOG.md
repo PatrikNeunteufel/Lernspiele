@@ -2506,3 +2506,23 @@
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session42_2026-11-14.md`, Handover nachgeführt (SVG-Flächen geprüft,
   Bildhöhe neu gemessen, BW1 a, BW2 a, Weather-Report und Kulturen-Koffer im Bild; nächster Schritt volle Messung mit fünf
   Ziehungen oder die nächsten Spiele der Liste).
+
+## 2026-11-15 — LERN_Session43
+- **Ganze Aufgabe im Bild (LERN-55, BH3 a) — Fledermaus-Forscher (fledermaus-forscher), Hello-Dialog (hello-dialog),
+  Netz-Falter (netz-falter), Sachaufgaben-Kompass (sachaufgaben-kompass), Diagramm-Detektiv (diagramm-detektiv):**
+  Fledermaus unter 820 px Bildhöhe neben dem Satz (Jahr mit fünf Karten, vorher Laptop 85, Handy 47 px über dem Rand);
+  Hello-Dialog breit und quer Dialog links, Antworten rechts, Handy Antwortzeilen 52 px (Lücke, vorher Laptop 88 px);
+  Netz-Falter Netz nach der Bildhöhe mit Untergrenze (Quadernetze, vorher Laptop 183 px); Sachaufgaben-Kompass mit
+  Tabelle oder Diagramm breit und quer die Daten rechts (`.kompass-raster`, 💡 über `data-tipp-ziel`), auf dem Handy
+  Tabelle enger, „Prüfen“ neben dem Schritt, Rechenwege zweispaltig, wenn der längste in eine halbe Zeile passt
+  (`zweiSpaltig`, gemessen; vorher bis 103 px); Diagramm-Detektiv auf dem Tablet hoch Frage und Antworten über die ganze
+  Breite (vorher 251 px), auf dem Handy Diagramm mit Zifferntastatur nach der Bildhöhe, Tabelle mit Diagramm enger.
+  Neben einem Diagramm steht die Tabelle oder Strichliste im Diagramm-Detektiv auf dem Handy quer (Entscheid DD1 a: eine
+  Spalte je Kategorie, Bild und Name oben, Anzahl oder Striche darunter, `querTabelle`; vorher bei fünf Kategorien bis
+  114 px über dem Rand). Nachgemessen mit acht Ziehungen je Stufe und Gerät: in keinem der fünf Spiele ragt die Aufgabe
+  noch über den Rand. Angesehen im Browser: jedes Spiel auf den betroffenen Geräten. `docs/eulenpfad/bildhoehe_offen.md`.
+- **`tools/bildhoehe.js`:** `--json` hält je Ziehung den Anfang des Aufgabentexts fest (Feld `text`), damit sich zeigt,
+  welche Aufgabenart überläuft (rahmen.md 20).
+- Tests: Skripte „Keine Fehler.“, Eulenpfad sachaufgaben-kompass „Keine Fehler.“, diagramm-detektiv „Keine Fehler.“ (nur
+  in diesen beiden Code geändert; der erste Lauf im Sachaufgaben-Kompass fand `document.createRange`, das es im Test-DOM
+  nicht gibt — jetzt gemessen über den span im Knopf).

@@ -64,15 +64,39 @@
   }
   @media (max-width: 560px) {
     .dd-daten > .diagramm { width: min(100%, 300px); margin-bottom: 0; }
+    /* Mit Zifferntastatur (rund 330 px mit Frage und Anzeige darunter): Diagramm nach der Bildhöhe, sonst lag die
+       Tastatur als Leiste über der Anzeige (BH3 a); Untergrenze nach H1 a */
+    div:has(> .tastatur) > .dd-zeile .dd-daten > .diagramm { width: max(220px, min(100%, 300px, calc((100vh - 600px) * 1.13))); min-width: 0; }
+    .dd-antwort .frage { margin-bottom: 4px; }
     .titel { margin-bottom: 2px; }
+    /* Tabelle und Diagramm untereinander (Stufe 5 „Säule falsch gezeichnet“): beide enger, sonst ragten Frage und
+       Antworten bis 81 px unter den Rand (BH3 a) */
+    .zwei { gap: 8px; margin-bottom: 8px; }
+    .zwei .daten { font-size: 18px; }
+    .zwei .daten th, .zwei .daten td { padding: 2px 10px; }
+    .zwei .daten svg { height: 24px; }
+    /* Tabelle quer (DD1 a): eine Spalte je Kategorie */
+    .dd-antwort .wahl-knopf { min-height: 50px; }
+    .daten.quer { width: 100%; table-layout: fixed; }
+    .daten.quer caption { font-size: 14px; font-weight: 900; color: var(--text-leise); padding-bottom: 2px; }
+    .zwei .daten.quer th, .zwei .daten.quer td { padding: 2px; text-align: center; vertical-align: middle; }
+    .daten.quer th { color: var(--text); }
+    .daten.quer .q-bild { display: block; font-size: 22px; line-height: 1.15; }
+    .daten.quer .q-name { display: block; font-size: 11px; line-height: 1.15; overflow-wrap: anywhere; }
+    .daten.quer td.zahl { text-align: center; min-width: 0; }
+    .zwei .daten.quer .q-striche svg { display: inline-block; height: 22px; vertical-align: middle; }
+    .zwei .diagramm { width: min(100%, 250px); min-width: 0; }
+    .frage { font-size: 18px; }
   }
   @media (min-width: 900px) and (orientation: landscape) {
     /* Tabelle und Diagramm nebeneinander, die Frage rechts daneben */
     .zwei .diagramm { width: max(240px, min(400px, calc((100vh - 400px) * 1.2))); min-width: 0; }
   }
   @media (min-width: 700px) {
-    /* Ohne Zifferntastatur (Tablet hoch und quer): links Tabelle oder Strichliste, darunter Frage und Antworten, rechts das Diagramm */
-    .dd-zeile.dd-raster { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "links diag" "antw diag"; gap: 12px 20px; align-items: start; }
+    /* Ohne Zifferntastatur (Tablet hoch und quer): links Tabelle oder Strichliste, rechts das Diagramm, darunter Frage und
+       Antworten über die ganze Breite — in der linken Spalte allein wurden sie so schmal, dass die Antworten
+       untereinander standen und die Aufgabe auf dem Tablet hoch bis 251 px unter den Rand ragte (BH3 a) */
+    .dd-zeile.dd-raster { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "links diag" "antw antw"; gap: 12px 20px; align-items: start; }
     .dd-raster .dd-daten, .dd-raster .zwei { display: contents; }
     .dd-raster .zwei > .daten { grid-area: links; justify-self: center; }
     .dd-raster .zwei > .diagramm { grid-area: diag; align-self: center; width: max(240px, min(400px, calc((100vh - 400px) * 1.2))); }
@@ -388,6 +412,23 @@ function tabelle(a) {
 }
 
 /**
+ * Tabelle oder Strichliste quer (Entscheid DD1 a, LERN_Session43): eine Spalte je Kategorie, oben Bild und Name, darunter
+ * Anzahl oder Striche (je Bündel ein Bild, sie brechen in der Spalte um). Nur auf dem Handy neben einem Diagramm —
+ * hochkant ragte die Aufgabe dort bei fünf Kategorien bis 114 px unter den Rand.
+ */
+function querTabelle(a, strich) {
+  const t = el("table", { class: "daten quer" });
+  t.append(el("caption", { text: `${UMFRAGEN[a.u].titel} · ${strich ? "Striche" : "Anzahl"}` }));
+  t.append(el("tr", {}, ...a.kat.map((x, i) => { const k = kat(a, i);
+    return el("th", { scope: "col" }, el("span", { class: "q-bild", text: k.bild }), el("span", { class: "q-name", text: k.name })); })));
+  t.append(el("tr", {}, ...a.werte.map(w => (strich
+    ? el("td", { class: "q-striche" }, ...[...Array(Math.floor(w / 5)).fill(5), ...(w % 5 ? [w % 5] : [])].map(striche))
+    : el("td", { class: "zahl", text: zahlText(w) })))));
+  return t;
+}
+const HANDY = "(max-width: 560px)"; // wie der Handy-Block im Stil
+
+/**
  * Säulendiagramm als SVG. werte[i] === null lässt die Spalte leer; opt.leer = Index einer Spalte, in
  * der man die Höhe antippt (opt.onTipp(wert)); opt.werte2 und opt.gruppen zeichnen Doppelsäulen.
  */
@@ -487,7 +528,9 @@ LS.spiel({
     else if (a.darst === "doppel") daten.append(titel(a), diagramm(a, a.werte, { werte2: a.werte2, gruppen: a.gruppen }));
     else {
       // zwei Darstellungen nebeneinander: Tabelle oder Strichliste links, Diagramm rechts
-      const links = a.darst === "strich+saeule" ? strichliste(a) : tabelle(a);
+      // Auf dem Handy quer (DD1 a); entschieden beim Aufbau der Aufgabe
+      const strich = a.darst === "strich+saeule", quer = window.matchMedia?.(HANDY).matches;
+      const links = quer ? querTabelle(a, strich) : strich ? strichliste(a) : tabelle(a);
       const werte = a.art === "vergleich" ? a.gezeichnet : a.werte.map((w, i) => (i === a.i ? null : w));
       // Quer ohne Zifferntastatur: Frage unter der Tabelle, Diagramm rechts (BH3 a)
       if (a.optionen || ["ergaenzen", "uebertragen", "fehlendTotal"].includes(a.art)) zeile.classList.add("dd-raster");
