@@ -24,6 +24,9 @@
     .frage { margin-bottom: 6px; }
     .hoer-zeile { margin-bottom: 10px; }
     .notenwahl .noten-zeile { max-height: 100px; }
+    /* Notenblatt der Königsstufe nach der Bildhöhe: mit 260 px ragten die Antworten bei 1024 × 768 und auf dem Laptop
+       12 px unter den Rand (LERN_Session43); Untergrenze nach H1 a */
+    .notenblatt .noten-zeile { max-height: max(160px, calc(100vh - 530px)); }
   }
 </style>
 </head>

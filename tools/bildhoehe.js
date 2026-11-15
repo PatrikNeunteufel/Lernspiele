@@ -159,7 +159,10 @@ async function main() {
   if (!BROWSER) throw new Error("Weder Chrome noch Edge gefunden.");
   const profil = fs.mkdtempSync(path.join(os.tmpdir(), "eulenpfad-bildhoehe-"));
   const browser = spawn(BROWSER, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profil}`,
-    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "about:blank"], { stdio: "ignore" });
+    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars",
+    // Stimme ohne Antippen erlauben: sonst meldete die Eule „Stimme hat nicht gesprochen (not-allowed)“, eine Blase
+    // rund 64 px höher als die gewöhnliche — Überlauf, den es auf einem Gerät nicht gibt (LERN_Session43)
+    "--autoplay-policy=no-user-gesture-required", "about:blank"], { stdio: "ignore" });
   try {
     let version = null;
     for (let i = 0; i < 50 && !version; i++) {

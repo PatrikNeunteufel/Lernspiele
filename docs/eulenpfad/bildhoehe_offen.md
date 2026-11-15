@@ -55,6 +55,32 @@ Fünf Spiele aus der Liste unten: *erledigt 2026-11-15 (LERN_Session43)* — nac
 `tools/bildhoehe.js` hält je Ziehung den Anfang des Aufgabentexts im JSON fest (Feld `text`). Rohdaten (gitignored):
 `.temp/bildhoehe/fuenf_vorher.json`, `fuenf_nachher.json`.
 
+Übrige Spiele der Liste: *erledigt 2026-11-15 (LERN_Session43)* — neu gemessen (alle Stufen, fünf Ziehungen), behoben,
+nachgemessen; die Aufgabe selbst ragt in keinem mehr über den Rand. Bionik-Paare und Schriftlich-Werkstatt lagen in
+einzelnen Ziehungen auf 3 px (an der Schwelle; in Stichproben höchstens 2 px), unverändert.
+- **Messbrowser ohne Stimmen-Meldung:** `bildhoehe.js` startet Chrome mit `--autoplay-policy=no-user-gesture-required`.
+  Vorher meldete die Eule in jedem Spiel mit Fremdsprachen-Stimme „Stimme hat nicht gesprochen (not-allowed)“ — eine
+  Blase rund 64 px höher als die gewöhnliche. Au-Café (136 px), Calendrier (58), Quelle heure (27) und Son-Lauscher (5)
+  standen deswegen in der Liste; Calendrier und Son-Lauscher passen ohne Änderung.
+- **rechen-maschine** (s6 Weiche, Handy 100, Tablet 51 px): Eingang → Frage überall in einer Zeile (Pfeil in der Mitte),
+  Handy Frage über die Restbreite, Hinweis 15 px, Notizen mit zweizeiliger Beschriftung neben dem Feld, Anzeige 56 px.
+- **wassertropfen-reise** (Handy bis 85 px): 💡 in der Frage (`data-tipp-ziel`, vorher eigene Zeile über der Grafik),
+  Grafik auf dem Handy nach `calc(100vh − 610px)` (mit 500 px griff die Formel bei 812 px nicht), Antworten 50 px.
+- **zahlen-baukasten** (s6 Handy 53 px): Anzeige 56 px, Bausteine 40 px hoch — auch vier Reihen passen.
+- **zehntel-lupe** (s5/s6 Tablet hoch 37 px): drei Strahlen nach der Bildhöhe.
+- **quelle-heure** (Handy 23, Laptop 14 px): Uhr nach `calc(100vh − 510px)`, Satzknöpfe auf dem Handy 54 px.
+- **hundertertafel** (s5/s6 quer/Laptop 21 px): Zeile „Seite … bis …“ zählt in der Feldgrösse mit (`--oben`).
+- **fahrplan-rechner** (Handy 20 px): Fahrplanzeilen enger.
+- **au-cafe** (s4 Handy bis 73 px bei sechs Zeilen, quer 6 px): Handy und niedrige Bildschirme Satzknöpfe 54 px, Bild
+  neben dem Wort, Blasen und Abstände enger.
+- **hoch-tief-ohr** (s6 quer/Laptop 12 px): Notenblatt nach der Bildhöhe.
+- **kompass** (Laptop 12, Tablet 7, Handy 4 px): Weg beschreiben breit mit engeren Antworten, Plan auf Tablet und Handy
+  bei langen Antworten etwas kleiner.
+- **braille-finger** (s5 quer/Laptop 8 px), **koordinaten-schatz** (quer/Laptop 7–8 px), **znueni-teller** (s6 quer/Laptop
+  8, Handy 14 px), **finger-zaehler** (s1/s2 Handy 3–5 px): Grafik bzw. Bild nach der Bildhöhe oder etwas kleiner.
+
+Rohdaten (gitignored): `.temp/bildhoehe/rest_vorher.json`, `franz_vorher.json`, `rest_nachher.json`.
+
 **Nur bei einer Aufgabenart** (in den anderen Läufen passt dieselbe Stufe):
 kulturen-koffer quer s5/s6 443, s4 298, Handy s5 238, Tablet s4/s6 134 · plan-leser Handy s6 333, s5 288, s1–s3 bis 53,
 Laptop s6 56 (s5/s6 Weg beschreiben: Ausnahme Punkt 4) · diagramm-wahl Handy s5 473, s6 119, s1 32 (s5 Tabelle:

@@ -14,6 +14,11 @@
 
   .lupe { max-width: 760px; margin: 0 auto 8px; }
   .lupe-strahl { width: 100%; max-width: 760px; display: block; margin: 0 auto; touch-action: manipulation; overflow: visible; }
+  /* Tablet hoch (BH3 a, LERN_Session43): drei Strahlen übereinander (zusammen 700 × 368) und die Zifferntastatur darunter —
+     Strahlen nach der Bildhöhe, sonst ragte die Aufgabe bis 37 px unter den Rand; Untergrenze nach H1 a */
+  @media (min-width: 561px) and (orientation: portrait) {
+    .lupe .lupe-strahl { width: max(min(400px, 100%), min(100%, calc((100vh - 702px) * 700 / 368))); }
+  }
   .lupe-strahl .linie { stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
   .lupe-strahl .strich { stroke: var(--text); stroke-width: 2; }
   .lupe-strahl .strich.gross { stroke-width: 3.5; }

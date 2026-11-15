@@ -16,6 +16,14 @@
   @media (max-height: 820px) {
     .korb-karte { margin-bottom: 8px; display: flow-root; }
     .korb-knopf { padding: 8px 8px 6px; }
+    /* Bild auf der Karte kleiner: mit sechs Körben in zwei Reihen (Königsstufe) ragten sie bei 1024 × 768 und auf dem
+       Laptop 8 px unter den Rand (LERN_Session43) */
+    .korb-karte .bild { font-size: 64px; }
+  }
+  /* Handy: sechs Körbe in drei Reihen ragten 14 px unter den Rand (LERN_Session43) */
+  @media (max-width: 560px) {
+    .korb-reihe { gap: 8px; }
+    .korb-knopf .bild { font-size: 28px; }
   }
 </style>
 </head>

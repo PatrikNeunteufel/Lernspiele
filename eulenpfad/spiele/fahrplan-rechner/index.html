@@ -43,6 +43,8 @@
   @media (max-width: 560px) {
     .ergebnis-zeile.nz-umbruch { flex-wrap: wrap; row-gap: 4px; }
     .nz-umbruch > .nz-zeile { flex-basis: 100%; justify-content: center; }
+    /* Zeilen enger: lange Fahrpläne ragten mit der Tastatur bis 20 px unter den Rand (LERN_Session43) */
+    .fahrplan th, .fahrplan td { padding-block: 4px; }
   }
   .nz-legende { white-space: nowrap; }
   .nz-legende .zw-notiz { font-size: 15px; min-height: 28px; padding: 0 3px; }

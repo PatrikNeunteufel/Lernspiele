@@ -38,7 +38,10 @@
     .wt-rechts .wahl-knopf { min-height: 54px; }
   }
   @media (max-width: 560px) {
-    .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc((100vh - 500px) * 400 / 270))); }
+    /* (100vh − 610px): bei 812 px rund 300 px breit — mit 500 px griff die Formel dort nicht, und die Reise mit sechs
+       Stationen ragte bis 23 px unter den Rand (LERN_Session43) */
+    .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc((100vh - 610px) * 400 / 270))); }
+    .wt-rechts .wahl-knopf { min-height: 50px; }
     .wt-rechts .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
     .wt-rechts .wahl-knopf { flex-direction: row; gap: 6px; }
     .wt-rechts .wahl-knopf .bild { font-size: 30px; }
@@ -564,6 +567,9 @@ LS.spiel({
     if (grafik) {
       const rechts = el("div", { class: "wt-rechts" });
       for (const k of [...ctx.flaeche.children]) if (k !== grafik) rechts.append(k);
+      // 💡 in die Frage (rahmen.md 20): in der Hülle fände der Rahmen sie nicht und legte 💡 in eine eigene Zeile
+      // über der Grafik — auf dem Handy 52 px Leerraum, die Aufgabe ragte bis 85 px unter den Rand (LERN_Session43)
+      rechts.querySelector(".frage")?.setAttribute("data-tipp-ziel", "");
       ctx.flaeche.append(el("div", { class: "wt-zeile" }, grafik, rechts));
     }
   },

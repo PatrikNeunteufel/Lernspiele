@@ -18,7 +18,9 @@
   .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 295px))); margin: 0 auto 12px; }
   /* Ganze Aufgabe im Bild (BH3 a): Tafel und Koordinatensystem folgen auf niedrigen Bildschirmen der Bildhöhe;
      stehen Antworten darunter, bleibt mehr Platz frei. */
-  .tafel:has(~ .optionen) { width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 355px))); }
+  /* mit Antworten darunter 10 px mehr Abstand als bis LERN_Session42: so ragten sie bei 1024 × 768 und auf dem Laptop
+     7–8 px unter den Rand (LERN_Session43) */
+  .tafel:has(~ .optionen) { width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 365px))); }
   .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
   .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: var(--aktiv); font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: var(--text-leise); cursor: pointer; padding: 0; }
   .tafel .feld.schatz { background: var(--marker); color: var(--text); font-size: clamp(16px, 4vw, 24px); }
@@ -26,6 +28,7 @@
   .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
 
   .ksys { width: max(min(240px, 90vw), min(440px, 90vw, calc(100vh - 365px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
+  .ksys:has(~ .optionen) { width: max(min(240px, 90vw), min(440px, 90vw, calc(100vh - 375px))); }
   .ksys .gitter { stroke: var(--rand); stroke-width: 1; }
   .ksys .achse { stroke: var(--text); stroke-width: 2; }
   .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }

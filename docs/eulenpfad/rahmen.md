@@ -1098,7 +1098,9 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   und Desktop mit (Feld `maus` der Geräte; LERN_Session41). Jede Seite lädt es `--ziehungen`-mal (Vorgabe 5,
   Entscheid BW1 a, LERN_Session42), jedes Mal mit einer neuen ersten Aufgabe, und meldet den höchsten Wert; die Liste
   „Aufgabe selbst über dem Rand“ nennt dazu, in wie vielen Ziehungen. `--json` hält je Ziehung den Anfang des
-  Aufgabentexts fest (Feld `text`, 100 Zeichen, LERN_Session43) — daran zeigt sich, welche Aufgabenart überläuft. Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
+  Aufgabentexts fest (Feld `text`, 100 Zeichen, LERN_Session43) — daran zeigt sich, welche Aufgabenart überläuft. Chrome
+  läuft mit `--autoplay-policy=no-user-gesture-required`: sonst meldet die Eule „Stimme hat nicht gesprochen“, eine
+  höhere Blase, die es auf einem Gerät nicht gibt (LERN_Session43). Je Gerät: Seiten mit Überlauf unten, mit der Aufgabe
   selbst über dem Rand (ohne Tipp-Zeile), mit der
   Zifferntastatur nicht ganz im Bild, und seitlich (Code 1). Dazu die Grafiken der Aufgabe (svg, canvas, img mit
   Klasse, nicht in Knöpfen, Eule mit Blase, Legende, Kopf): Geschrumpft heisst eine, deren kürzere Seite unter 100 px

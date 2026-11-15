@@ -13,7 +13,12 @@
      (Bemerkungen 34, 35, LERN_Session28). Lieber etwas scrollen als nichts sehen. */
   .fz-haende { display: block; width: 100%; max-width: max(120px, min(340px, (100vh - 480px) * .94)); margin: 0 auto 12px; }
   .fz-haende.zwei { max-width: max(240px, min(560px, (100vh - 480px) * 1.88)); }
-  @media (max-width: 560px) { .fz-haende { max-width: max(120px, min(340px, (100vh - 495px) * .94)); } }
+  @media (max-width: 560px) {
+    .fz-haende { max-width: max(120px, min(340px, (100vh - 495px) * .94)); }
+    /* mit dem Würfel darüber oder Antworten darunter (Stufe 1 und 2) ragte die Aufgabe 3–5 px unter den Rand
+       (LERN_Session43) */
+    .fz-paar:has(> .fz-ziel) .fz-haende, .fz-feld:has(+ .fz-wahl) .fz-haende { max-width: max(120px, min(340px, (100vh - 510px) * .94)); }
+  }
   @media (min-width: 900px) and (orientation: landscape) {
     .fz-paar { display: flex; gap: 20px; align-items: center; }
     .fz-paar > * { flex: 1 1 0; min-width: 0; }

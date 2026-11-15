@@ -18,7 +18,9 @@
   .bf-zelle text { font-size: 18px; font-weight: 800; fill: var(--text-leise); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
   .bf-zelle text.auf-voll { fill: var(--k-karte); }
   .bf-gross { width: clamp(96px, 26vw, 130px); margin: 0 auto 12px; }
-  .bf-setzen { width: clamp(150px, 46vw, 210px); margin: 0 auto 10px; touch-action: manipulation; }
+  /* Breite auch nach der Bildhöhe (Zelle 2 : 3): mit Buchstabe und Knöpfen ragte Stufe 5 bei 1024 × 768 und auf dem
+     Laptop 8 px unter den Rand (LERN_Session43) */
+  .bf-setzen { width: clamp(150px, min(46vw, (100vh - 470px) * 2 / 3), 210px); margin: 0 auto 10px; touch-action: manipulation; }
   .bf-setzen circle { cursor: pointer; }
   .bf-setzen circle.voll { fill: var(--deko-5); stroke: var(--deko-5); }
   .bf-klein { width: clamp(40px, 11vw, 54px); }

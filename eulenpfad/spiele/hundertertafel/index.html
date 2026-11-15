@@ -11,7 +11,9 @@
   .frage { text-align: center; font-size: clamp(20px, 4.5vw, 28px); font-weight: 800; margin: 0 0 10px; }
   /* Tafel: 10 Spalten wie die 100er-Tafel; Ausschnitte und Puzzleteile nutzen dasselbe Raster */
   /* Feldgrösse nach Breite und Höhe (Ganze Aufgabe im Bild, rahmen.md 20): die volle Tafel hat 10 Zeilen */
-  .ht-tafel { --z: clamp(26px, min((100vw - 64px) / var(--spalten, 10) - 3px, (100vh - 300px) / var(--zeilen, 10) - 3px), 50px);
+  /* --oben: Platz über der Tafel; mit der Zeile „Seite … bis …“ (Stufe 5 und 6) 30 px mehr — ohne ragte die Tafel bei
+     1024 × 768 und auf dem Laptop 21 px unter den Rand (LERN_Session43) */
+  .ht-tafel { --oben: 300px; --z: clamp(26px, min((100vw - 64px) / var(--spalten, 10) - 3px, (100vh - var(--oben)) / var(--zeilen, 10) - 3px), 50px);
     display: grid; grid-template-columns: repeat(var(--spalten, 10), var(--z)); gap: 3px; justify-content: center; margin: 0 auto 10px; }
   .ht-feld { width: var(--z); height: var(--z); display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     border-radius: 8px; font-weight: 900; font-size: calc(var(--z) * .4); font-variant-numeric: tabular-nums; color: var(--text);
@@ -27,7 +29,11 @@
   button.ht-feld.richtig { background: var(--gut-grund); border-color: var(--gut); color: var(--auf-gut); }
   button.ht-feld.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); animation: wackeln .4s; }
   .ht-seite { text-align: center; font-weight: 800; color: var(--text-leise); margin: -4px 0 6px; }
-  @media (max-width: 560px) { .ht-tafel { --z: clamp(26px, min((100vw - 48px) / var(--spalten, 10) - 3px, (100vh - 280px) / var(--zeilen, 10) - 3px), 44px); } }
+  .ht-seite + .ht-tafel { --oben: 330px; }
+  @media (max-width: 560px) {
+    .ht-tafel { --oben: 280px; --z: clamp(26px, min((100vw - 48px) / var(--spalten, 10) - 3px, (100vh - var(--oben)) / var(--zeilen, 10) - 3px), 44px); }
+    .ht-seite + .ht-tafel { --oben: 310px; }
+  }
 </style>
 </head>
 <body>

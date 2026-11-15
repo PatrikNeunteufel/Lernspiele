@@ -2526,3 +2526,24 @@
 - Tests: Skripte „Keine Fehler.“, Eulenpfad sachaufgaben-kompass „Keine Fehler.“, diagramm-detektiv „Keine Fehler.“ (nur
   in diesen beiden Code geändert; der erste Lauf im Sachaufgaben-Kompass fand `document.createRange`, das es im Test-DOM
   nicht gibt — jetzt gemessen über den span im Knopf).
+- **`tools/bildhoehe.js` — Messbrowser ohne Stimmen-Meldung:** Chrome mit `--autoplay-policy=no-user-gesture-required`;
+  vorher zeigte die Eule in jedem Spiel mit Fremdsprachen-Stimme „Stimme hat nicht gesprochen (not-allowed)“, eine rund
+  64 px höhere Blase (Au-Café 136, Calendrier 58, Quelle heure 27, Son-Lauscher 5 px über dem Rand; in 480 Messungen
+  danach keine Meldung mehr). rahmen.md 20.
+- **Ganze Aufgabe im Bild (LERN-55, BH3 a) — Rechen-Maschine (rechen-maschine), Wassertropfen-Reise
+  (wassertropfen-reise), Zahlen-Baukasten (zahlen-baukasten), Zehntel-Lupe (zehntel-lupe), Quelle heure (quelle-heure),
+  Hundertertafel (hundertertafel), Fahrplan-Rechner (fahrplan-rechner), Au café (au-cafe), Hoch-Tief-Ohr
+  (hoch-tief-ohr), Kompass (kompass), Braille-Finger (braille-finger), Koordinaten-Schatz (koordinaten-schatz),
+  Znüni-Teller (znueni-teller), Finger-Zähler (finger-zaehler):** die übrigen Spiele der Liste. Rechen-Maschine s6 Weiche
+  Eingang → Frage überall in einer Zeile, Handy Notizen und Hinweis enger (vorher Handy 100, Tablet 51 px); Wassertropfen
+  💡 in der Frage über `data-tipp-ziel` statt eigener Zeile, Grafik-Formel auf dem Handy griff nicht (85 px);
+  Zahlen-Baukasten s6 Anzeige und Bausteine niedriger (53 px); Zehntel-Lupe Strahlen auf dem Tablet hoch nach der
+  Bildhöhe (37 px); Quelle heure Uhr kleiner, Satzknöpfe 54 px (23 px); Hundertertafel Zeile „Seite … bis …“ in der
+  Feldgrösse (21 px); Fahrplan Zeilen enger (20 px); Au café Satzknöpfe mit Bild neben dem Wort, Blasen enger (bis
+  73 px); Hoch-Tief-Ohr Notenblatt nach der Bildhöhe (12 px); Kompass Weg beschreiben breit enger, Plan bei langen
+  Antworten kleiner (12 px); Braille-Finger Punktzelle nach der Bildhöhe, Koordinaten-Schatz, Znüni-Teller, Finger-Zähler
+  Grafik etwas kleiner (3–14 px). Jede neue Grösse nach der Bildhöhe mit Untergrenze (H1 a). Nachgemessen mit fünf bis zehn
+  Ziehungen je Stufe und Gerät: Aufgabe in keinem mehr über dem Rand (Bionik-Paare, Schriftlich-Werkstatt in einzelnen
+  Ziehungen 3 px, an der Schwelle, unverändert). Angesehen im Browser je auf dem betroffenen Gerät.
+  `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad wassertropfen-reise „Keine Fehler.“ (nur dort Code geändert, sonst CSS).

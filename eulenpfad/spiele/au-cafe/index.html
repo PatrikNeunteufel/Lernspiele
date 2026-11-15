@@ -30,6 +30,18 @@
   .ablage.cafe-ablage { flex-direction: column; align-items: stretch; }
   .ablage.cafe-ablage > span { font-size: clamp(16px, 3.6vw, 20px); }
   .cafe-tv .wahl-knopf { font-size: clamp(18px, 4vw, 24px); }
+  /* Ganze Aufgabe im Bild (BH3 a), Handy und niedrige Bildschirme: Satzknöpfe 54 px und das Gespräch enger — fünf
+     Zeilen mit langen Sätzen ragten in Stufe 4 bis 20 px (Handy) und 6 px (1024 × 768, Laptop) unter den Rand
+     (LERN_Session43) */
+  @media (max-width: 560px), (max-height: 820px) {
+    .cafe-saetze .wahl-knopf { min-height: 54px; }
+    .cafe-gespraech { gap: 6px; margin-bottom: 10px; }
+    .cafe-hoer { margin-bottom: 10px; }
+    /* Bild neben dem Wort statt darüber, Blasen enger: ein Gespräch mit sechs Zeilen und Bildantworten ragte sonst
+       bis 73 px unter den Rand */
+    .cafe-saetze .wahl-knopf { flex-direction: row; gap: 8px; }
+    .cafe-blase { padding: 6px 10px; line-height: 1.25; }
+  }
 </style>
 </head>
 <body>

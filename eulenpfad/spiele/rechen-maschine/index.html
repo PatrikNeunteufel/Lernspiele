@@ -44,13 +44,25 @@
     .m-pfeil { font-size: 20px; }
     .m-pfeil-notiz .zw-notiz { width: calc(4ch + 12px); padding: 2px 3px; font-size: 15px; min-height: 30px; }
   }
-  /* Handy: Eingang und Frage der Weiche in einer Zeile (der Pfeil zeigt dann nach rechts), die Wege darunter. */
+  /* Eingang und Frage der Weiche in einer Zeile (der Pfeil zeigt dann nach rechts), die Wege darunter — zuerst nur auf
+     dem Handy, seit LERN_Session43 überall: untereinander ragte die Königsstufe auf dem Tablet hoch bis 51 px unter den
+     Rand. Der Pfeil steht in der Mitte, Eingang und Frage schliessen an ihn an. */
+  .weiche { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; justify-items: center; column-gap: 8px; }
+  .weiche > .m-pfeil { transform: rotate(-90deg); }
+  .weiche > .m-kasten { justify-self: end; }
+  .weiche > .w-frage { justify-self: start; }
+  .weiche > .w-wege, .weiche > .w-runden, .weiche > .w-notizen { grid-column: 1 / -1; }
   @media (max-width: 560px) {
-    .weiche { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; justify-items: center; column-gap: 6px; }
-    .weiche > .m-pfeil { transform: rotate(-90deg); }
-    .weiche > .w-frage { padding: 6px 10px; }
-    .weiche > .w-wege, .weiche > .w-runden { grid-column: 1 / -1; }
+    .weiche { grid-template-columns: auto auto minmax(0, 1fr); column-gap: 6px; }
+    .weiche > .w-frage { padding: 6px 10px; justify-self: stretch; font-size: 19px; }
     .weiche .m-kasten { padding: 6px 12px; }
+    /* Königsstufe mit Notizen (LERN_Session43): Frage über die ganze Restbreite, Hinweis kleiner, Anzeige niedriger —
+       die Zifferntastatur lag sonst als Leiste über der Anzeige, die Aufgabe ragte bis 100 px unter den Rand */
+    .weiche .w-runden { font-size: 15px; line-height: 1.3; }
+    .weiche ~ .rm-anzeige { min-height: 56px; }
+    .weiche .w-notizen label { flex-direction: row; gap: 4px; font-size: 13px; }
+    /* zweizeilig („nach / Runde 1“), sonst passen zwei Felder nicht in eine Zeile */
+    .weiche .w-notizen label > span { max-width: 4.6em; line-height: 1.1; text-align: right; }
   }
 </style>
 </head>

@@ -52,7 +52,8 @@
     .kompass-seite { flex: 1 1 200px; }
     .nur-sehen { align-items: center; }
     .nur-sehen .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 560px))); }
-    .nur-sehen:has(.lang) .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 595px))); }
+    /* (100vh − 605px): mit 595 px ragte die gedrehte Karte mit Hinweis 4 px unter den Rand (LERN_Session43) */
+    .nur-sehen:has(.lang) .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 605px))); }
     .nur-sehen .kompass-seite, .kompass-seite.lang { flex-basis: 100%; }
     .kompass-seite .wahl, .wahl.kompass-wahl { gap: 8px; }
     .kompass-seite:not(.lang) .wahl, .wahl.kompass-wahl { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
@@ -63,11 +64,17 @@
   }
   @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Plan nach der Bildhöhe */
     .plan { width: max(min(240px, 100%), min(420px, 100%, calc(100vh - 640px))); }
+    /* Weg beschreiben (vier lange Antworten darunter), auf gedrehter Karte mit Hinweis: 7 px über dem Rand (LERN_Session43) */
+    .karten-zeile:has(.lang) .plan { width: max(min(240px, 100%), min(420px, 100%, calc(100vh - 665px))); }
   }
   @media (min-width: 900px) and (orientation: landscape) {
     .karten-zeile { flex-wrap: nowrap; align-items: center; gap: 16px; }
     .karten-zeile .plan { width: max(240px, min(420px, calc(100vh - 290px))); flex: none; }
     .kompass-seite { flex: 0 1 400px; }
+    /* Weg beschreiben: lange Antworten neben dem Plan so eng wie auf dem Handy — sonst ragten sie auf dem Laptop
+       12 px unter den Rand (LERN_Session43) */
+    .kompass-seite.lang .wahl { gap: 6px; }
+    .kompass-seite.lang .wahl-knopf { font-size: 17px; line-height: 1.2; min-height: 48px; padding: 5px 10px; }
   }
 </style>
 </head>
