@@ -69,7 +69,7 @@
     .mini-tabelle .z { min-height: 36px; font-size: 24px; padding: 2px 0; }
     /* sechs Bausteine in drei Reihen (Königsstufe) ragten bis 53 px unter den Rand (LERN_Session43) */
     .bausteine + .anzeige { min-height: 56px; margin-block: 4px; }
-    .auftrag:has(+ .bausteine) { margin-bottom: 6px; }
+    div:has(> .bausteine) > .auftrag { margin-bottom: 6px; }
     .baustein { min-height: 40px; padding-block: 4px; }
     .mini-tabelle { margin-top: 4px; }
   }
