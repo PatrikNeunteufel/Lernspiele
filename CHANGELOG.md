@@ -2591,6 +2591,12 @@
   zwölf Ziehungen: Aufgabe sonst in keinem mehr über dem Rand. Entscheide Patrik: 1 a — Diagramm-Wahl s5 auf dem
   Handy mit Tabelle quer und den drei Diagrammen zum Blättern (Reiter A B C; 484 px → passt); 2 a — Möglichkeiten-Finder
   (glace-kombinator) Kleider-Sets auf dem Handy mit der Regel neben der Anzeige, Stücke enger (s6 53 px → passt, vorher
-  Anzeige halb unter der Tastatur). Offen: Quader-Volumen s6 (17 und 30 px). `docs/eulenpfad/bildhoehe_offen.md`.
+  Anzeige halb unter der Tastatur). `docs/eulenpfad/bildhoehe_offen.md`.
+- Quader-Volumen (quader-volumen) s6, damit Punkt 4 erledigt: Aquarium und zwei Quader zusammen nach der Bildhöhe, nie
+  unter 80 % ihrer Zeichnung (`nachHoehe`), Anzeige neben den Notizen 56 statt 76 px, Notizfelder 28 px, Frage enger
+  (Handy 19 und 30 px → höchstens 3 px in 1 von 15); Tablet hoch Körper höchstens 260 px und nebeneinander (Vergleichen
+  mit einem Körper in cm war 583 px hoch, Aufgabe bis 376 px darunter); Rand links in `koerperSvg` nach der Textbreite
+  („0.5 dm“ unter schmalen Körpern und „💧 2.5 dm“ ragten links aus dem Bild). Tests: Eulenpfad quader-volumen „Keine
+  Fehler.“, Skripte „Keine Fehler.“
 - Tests: Eulenpfad hebel-wippe malkreuz zahlen-baukasten kakao-weg quader-volumen diagramm-wahl plan-leser „Keine
   Fehler.“, Eulenpfad diagramm-wahl glace-kombinator „Keine Fehler.“, Skripte „Keine Fehler.“

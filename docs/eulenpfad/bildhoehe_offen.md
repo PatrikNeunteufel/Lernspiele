@@ -179,9 +179,8 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    Laptop 1366×650: rhythmus-leser 20, stromkreis-bauer 19, braille-finger 11, tier-sortierer 5.
 3. **Rest auf Bildschirmgrössen** (ohne Leisten, alle Stufen): plan-leser Handy 240, weather-report Handy 79 / quer und
    Laptop 74, punkte-blitz Handy 65, laerm-waechter quer 55, stromkreis-bauer quer 14, netz-falter Laptop 12.
-4. **Begründete Ausnahmen der Bau-Helfer** (BH3) — *in Arbeit seit 2026-11-15 (LERN_Session44), neun behoben, offen
-   quader-volumen s6.* Einzelheiten im Abschnitt „Ausnahmen geprüft
-   LERN_Session44“ unten.
+4. **Begründete Ausnahmen der Bau-Helfer** (BH3) — *erledigt 2026-11-15 (LERN_Session44, Abschnitt „Ausnahmen
+   geprüft LERN_Session44“ unten).*
 5. **Wünsche an den Rahmen** (aus BH3): Baustein „Element an die restliche Höhe anpassen“ für Grafiken (statt
    `100vh − …px` je Spiel); Tastatur-Anordnung (2)/(3) auch für eigene Tastaturen (Geheimschrift-Knacker); Baustein
    „Bild links, Rest rechts“ für breit und quer; allgemeine Grösse für `.knopf.klein`.
@@ -219,7 +218,13 @@ Aufgabe selbst über dem Rand auf dem Handy, vorher → nachher.
   die Regel „Ein Set: …“ links neben der Anzeige unter den Gruppen (`.gl-antwort`), Anzeige 48 px; Stücke mit 6 px
   Abstand, damit vier in eine Zeile passen. Vorher lag die Anzeige halb unter der Tastatur.
 
-Offen:
-- **quader-volumen** s6: Aquarium jetzt nach der Bildhöhe, nie unter 80 % (`--vb-h`), steht dabei an der Grenze und ragt
-  noch 17 px über den Rand; eine zweite Aufgabenart 30 px (4 von 12 Ziehungen). Kleiner ginge nur unter die 80 %.
-- Nebenbei gesehen: plan-leser „Was ist zwischen …“ s3/s6 Handy bis 19 bzw. 55 px in einzelnen Ziehungen.
+- **quader-volumen** s6 Aquarium 19 und zwei Quader zusammen 30 → höchstens 3 px (1 von 15, Schwelle), dann in 15
+  Ziehungen passt: beide Körper nach der Bildhöhe, nie unter 80 % ihrer Zeichnung (`nachHoehe`, `--vb-h`); Anzeige
+  neben den Notizen 56 statt 76 px, Notizfelder 28 px, Frage enger. Tablet hoch neu gefunden: Vergleichen s6 mit einem
+  Körper in cm (40 cm · 50 cm · 40 cm) ohne Höhengrenze 583 px hoch, Aufgabe bis 376 px darunter — jetzt höchstens
+  260 px, beide Körper nebeneinander. Dazu Beschriftungen links aus dem Bild („0.5 dm“ unter schmalen Körpern,
+  „💧 2.5 dm“): Rand links nach der Textbreite (`koerperSvg`), in 29 Zeichnungen aller Stufen keine mehr ausserhalb.
+
+Nebenbei gesehen, nicht behoben:
+- quader-volumen s5 Handy seitlich 1 px (schon vor LERN_Session44).
+- plan-leser „Was ist zwischen …“ s3/s6 Handy bis 19 bzw. 55 px in einzelnen Ziehungen.
