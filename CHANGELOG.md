@@ -2574,3 +2574,5 @@
   Handy; Lese-Detektiv Laptop; Gedicht-Baukasten quer. `docs/eulenpfad/bildhoehe_offen.md`.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad (die 17 Spiele) „Keine Fehler.“ — der erste Lauf im Möglichkeiten-Finder
   fand Regeln, die mit der Rahmen-Klasse `.auftrag` beginnen; jetzt unter der Spielfläche eingeschachtelt.
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session43_2026-11-15.md`, Handover nachgeführt (Bildhöhe bis auf die
+  Ausnahmen erledigt, Stimme im Messbrowser erledigt; weiter mit Push, Ausnahmen von Punkt 4 oder GR1 a).
