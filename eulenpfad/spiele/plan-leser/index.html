@@ -54,8 +54,10 @@
   .legende b, .legende .massstab { grid-column: 1 / -1; }
   @media (max-width: 560px) {
     .plan-zeile { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; margin-bottom: 8px; width: 100%; }
-    /* 620 px: Frage über drei Zeilen, Legende mit neun Zeichen und Antworten in zwei Reihen (LERN-55, vorher bis 46 px darunter) */
-    .plan-zeile.mit-wahl .plan-bild { width: max(min(180px, 100%), min(100%, calc(100vh - 620px))); }
+    /* Plan unter der Frage (über 860 px Bildhöhe, darunter steht die Legende neben dem Plan): 680 px für Frage über drei
+       Zeilen, Legende mit neun Zeichen und Antworten in zwei Reihen — mit 620 px ragte „Was ist zwischen …?“ 55 px unter
+       den Rand (LERN-55, LERN_Session44); ab 860 px ist der Plan so mindestens 180 px breit */
+    .plan-zeile.mit-wahl .plan-bild { width: max(min(180px, 100%), min(100%, calc(100vh - 680px))); }
     .plan-zeile .wahl { gap: 8px; }
     .plan-zeile .wahl-knopf { min-height: 54px; padding: 6px 8px; }
     .legende { padding: 6px 10px; min-width: 0; width: 100%; grid-template-columns: repeat(2, minmax(0, auto)); justify-content: space-between; column-gap: 8px; }
@@ -65,17 +67,30 @@
     .legende-zeile svg { width: 22px; height: 22px; }
     .massstab { margin-top: 4px; }
     .zeichen-gross { width: 64px; height: 64px; }
-    /* Weg beschreiben (s5/s6): Legende in einer Spalte neben dem Plan statt darunter (links und rechts vom Plan blieben
-       je 90 px leer), Beschreibungen 16 px — alle drei bleiben zum Vergleichen zugleich im Bild; vorher ragte die
-       Aufgabe bis 259 px unter den Rand (LERN-55, LERN_Session44) */
+    /* Aufgaben mit Antworten: Legende in einer Spalte neben dem Plan statt darunter (links und rechts vom Plan blieben
+       je 90 px leer), einzeilig mit 14 px (15 px brach „das Bücherregal“ in der schmalen Spalte um). Weg beschreiben
+       (s5/s6) dazu mit Beschreibungen 16 px — alle drei bleiben zum Vergleichen zugleich im Bild. Vorher ragte die
+       Aufgabe bis 259 px (Weg beschreiben) bzw. 55 px („Was ist zwischen …?“) unter den Rand (LERN-55, LERN_Session44) */
     .plan-zeile:has(.wege) { grid-template-columns: auto minmax(0, 1fr); justify-items: stretch; align-items: start; }
     .plan-zeile.mit-wahl:has(.wege) .plan-bild { width: 172px; }
-    .plan-zeile:has(.wege) .legende { grid-template-columns: minmax(0, 1fr); padding: 4px 8px; }
+    .plan-zeile:has(.wege) .legende { grid-template-columns: minmax(0, 1fr); padding: 4px 6px; }
     .plan-zeile:has(.wege) .legende-zeile span { hyphens: auto; overflow-wrap: anywhere; min-width: 0; }
+    .plan-zeile:has(.wege) .legende-zeile { font-size: 14px; gap: 4px; }
+    .plan-zeile:has(.wege) .legende-zeile svg { width: 18px; height: 18px; }
     .plan-seite .wahl.wege .wahl-knopf { font-size: 16px; font-weight: 700; text-align: left; justify-content: flex-start; padding: 4px 10px; min-height: 0; }
     .plan-seite .wahl.wege { gap: 6px; }
     .plan-zeile:has(.wege) { margin-bottom: 4px; }
     div:has(> .plan-zeile .wege) > .frage { font-size: 18px; }
+  }
+  /* Die übrigen Aufgaben mit Antworten genauso, aber nur bis 860 px Bildhöhe — darüber bekommt der Plan unter der Frage
+     mehr Platz (100vh − 620px) als die 172 px neben der Legende */
+  @media (max-width: 560px) and (max-height: 860px) {
+    .plan-zeile.mit-wahl { grid-template-columns: auto minmax(0, 1fr); justify-items: stretch; align-items: start; }
+    .plan-zeile.mit-wahl .plan-bild { width: 172px; }
+    .plan-zeile.mit-wahl .legende { grid-template-columns: minmax(0, 1fr); padding: 4px 6px; }
+    .plan-zeile.mit-wahl .legende-zeile span { hyphens: auto; overflow-wrap: anywhere; min-width: 0; }
+    .plan-zeile.mit-wahl .legende-zeile { font-size: 14px; gap: 4px; }
+    .plan-zeile.mit-wahl .legende-zeile svg { width: 18px; height: 18px; }
   }
   @media (max-height: 820px) {
     .frage { margin-bottom: 6px; }

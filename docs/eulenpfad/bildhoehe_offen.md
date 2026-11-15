@@ -224,7 +224,12 @@ Aufgabe selbst über dem Rand auf dem Handy, vorher → nachher.
   Körper in cm (40 cm · 50 cm · 40 cm) ohne Höhengrenze 583 px hoch, Aufgabe bis 376 px darunter — jetzt höchstens
   260 px, beide Körper nebeneinander. Dazu Beschriftungen links aus dem Bild („0.5 dm“ unter schmalen Körpern,
   „💧 2.5 dm“): Rand links nach der Textbreite (`koerperSvg`), in 29 Zeichnungen aller Stufen keine mehr ausserhalb.
+- **plan-leser** „Was ist zwischen …?“ s3/s6 Handy 19 bzw. 55 → passt (15 Ziehungen, dazu im Browser 375×870 und
+  375×932): bis 860 px Bildhöhe steht bei allen Aufgaben mit Antworten die Legende in einer Spalte neben dem Plan
+  (Plan 172 px, Legende 14 px einzeilig); darüber der Plan unter der Frage nach `100vh − 680px` statt 620 px (mit 620
+  ragte „zwischen“ bei jeder Höhe gleich weit über). Weg beschreiben nimmt die Legende daneben immer. Die Legende brach
+  mit 15 px in der schmalen Spalte um (Schrift der Spielseiten ist Segoe UI, nicht Nunito) — die Nachmessung
+  „höchstens 8 px“ beim Weg beschreiben war zu günstig; im Browser mit Handy-Emulation bis 57 px, jetzt passt es.
 
 Nebenbei gesehen, nicht behoben:
 - quader-volumen s5 Handy seitlich 1 px (schon vor LERN_Session44).
-- plan-leser „Was ist zwischen …“ s3/s6 Handy bis 19 bzw. 55 px in einzelnen Ziehungen.

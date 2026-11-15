@@ -2598,5 +2598,11 @@
   mit einem Körper in cm war 583 px hoch, Aufgabe bis 376 px darunter); Rand links in `koerperSvg` nach der Textbreite
   („0.5 dm“ unter schmalen Körpern und „💧 2.5 dm“ ragten links aus dem Bild). Tests: Eulenpfad quader-volumen „Keine
   Fehler.“, Skripte „Keine Fehler.“
+- Plan-Leser (plan-leser) „Was ist zwischen …?“ (Handy s3 19, s6 55 px): bis 860 px Bildhöhe bei allen Aufgaben mit
+  Antworten die Legende in einer Spalte neben dem Plan, 14 px einzeilig; darüber der Plan nach `100vh − 680px` statt
+  620 px. Weg beschreiben: Legende 14 px — sie brach mit 15 px in der schmalen Spalte um (271 statt 172 px hoch), im
+  Browser mit Handy-Emulation bis 57 px darunter, obwohl die Messung höchstens 8 px zeigte. Nachgemessen mit 15
+  Ziehungen, dazu im Browser 375×870 und 375×932: Aufgabe überall im Bild. Tests: Eulenpfad plan-leser „Keine
+  Fehler.“, Skripte „Keine Fehler.“
 - Tests: Eulenpfad hebel-wippe malkreuz zahlen-baukasten kakao-weg quader-volumen diagramm-wahl plan-leser „Keine
   Fehler.“, Eulenpfad diagramm-wahl glace-kombinator „Keine Fehler.“, Skripte „Keine Fehler.“
