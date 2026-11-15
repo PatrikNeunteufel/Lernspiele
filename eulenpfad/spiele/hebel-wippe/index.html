@@ -273,6 +273,20 @@ function wippe(nL, nR) {
   g.style.transformOrigin = `${px}px ${py}px`;
   svg.append(g);
   const x = (seite, platz) => (seite === "links" ? px - platz * u : px + platz * u);
+  // Das Bild beginnt oben erst beim höchsten Inhalt, mit Platz für die Neigung (±9°) — vorher stand über niedrigen
+  // Klötzen bis 70 px leere Fläche, und die Aufgabe ragte auf dem Handy unter den Rand (LERN-55, LERN_Session44). Nur
+  // nach oben erweitert, nie zurück, damit das Bild während der Aufgabe nicht springt; ein neuer Klotz hält Platz für
+  // den höchsten frei, weil sein Gewicht erst mit der Antwort kommt.
+  const NEIGUNG = Math.sin(9 * Math.PI / 180);
+  let oben = 236;
+  const reserviere = (xi, yi) => {
+    const t = yi - (Math.abs(xi - px) + u) * NEIGUNG - 4;
+    if (t >= oben) return;
+    oben = t;
+    svg.setAttribute("viewBox", `0 ${oben.toFixed(1)} 400 ${(236 - oben).toFixed(1)}`);
+  };
+  reserviere(px - (nL + 0.5) * u, py - 6);
+  reserviere(px + (nR + 0.5) * u, py - 6);
   g.append(svgEl("rect", { class: "balken", x: px - (nL + 0.5) * u, y: py - 6, width: (nL + nR + 1) * u, height: 12, rx: 4 }));
   for (let i = 1; i <= nL; i++) g.append(svgEl("text", { class: "platz-nr", x: x("links", i), y: py + 24 }, String(i)));
   for (let i = 1; i <= nR; i++) g.append(svgEl("text", { class: "platz-nr", x: x("rechts", i), y: py + 24 }, String(i)));
@@ -283,6 +297,7 @@ function wippe(nL, nR) {
       const k = svgEl("g", { class: `klotz ${klasse}` });
       k.append(svgEl("rect", { x: x(seite, platz) - b / 2, y: py - 6 - h, width: b, height: h, rx: klasse.includes("stein") ? 14 : 4 }),
         svgEl("text", { x: x(seite, platz), y: py - 6 - h / 2 + 5 }, String(kg)));
+      reserviere(x(seite, platz), py - 6 - (klasse.includes("neu") ? 66 : h));
       g.append(k);
       return k;
     },
@@ -290,6 +305,7 @@ function wippe(nL, nR) {
     kraft(platz, text) {
       const cx = x("rechts", platz), k = svgEl("g", { class: "kraft" });
       k.append(svgEl("path", { d: `M${cx - 9},${py - 64} h18 v26 h9 l-18,26 l-18,-26 h9 Z` }), svgEl("text", { x: cx, y: py - 72 }, text));
+      reserviere(cx, py - 86);
       g.append(k);
       return k;
     },
@@ -305,6 +321,7 @@ function wippe(nL, nR) {
         const k = svgEl("g", { class: "wippe-platz", role: "button", "aria-label": `Platz ${pl}` });
         k.append(svgEl("rect", { x: x(seite, pl) - u * 0.45, y: py - 92, width: u * 0.9, height: 84, rx: 6 }),
           svgEl("text", { x: x(seite, pl), y: py - 44 }, String(pl)));
+        reserviere(x(seite, pl), py - 92);
         k.addEventListener("click", () => beiWahl(pl, k));
         g.append(k);
         return k;

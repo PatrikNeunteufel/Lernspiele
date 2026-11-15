@@ -2576,3 +2576,21 @@
   fand Regeln, die mit der Rahmen-Klasse `.auftrag` beginnen; jetzt unter der Spielfläche eingeschachtelt.
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session43_2026-11-15.md`, Handover nachgeführt (Bildhöhe bis auf die
   Ausnahmen erledigt, Stimme im Messbrowser erledigt; weiter mit Push, Ausnahmen von Punkt 4 oder GR1 a).
+
+## 2026-11-15 — LERN_Session44
+- Voller Eulenpfad-Lauf auf `750c0a8` (3070 s): „2 Fehler.“, beide im Zahlen-Baukasten — eine Regel begann mit der
+  Rahmen-Klasse `.auftrag` (seit `a8f11f7`), jetzt `div:has(> .bausteine) > .auftrag`; einzeln „Keine Fehler.“.
+- Ganze Aufgabe im Bild, Ausnahmen von Punkt 4 geprüft (LERN-55, BH3 a), Werte Handy vorher: Hebel-Wippe
+  (hebel-wippe) Bild beginnt oben beim höchsten Inhalt mit Platz für die Neigung (s6 27 px); Malkreuz (malkreuz) Rätsel
+  ohne „Malkreuz-Rätsel:“ auf dem Handy (s6 43 px); Zahlen-Baukasten (zahlen-baukasten) ausgeschriebene Bausteine enger
+  (s6 11 px); Kakao-Weg (kakao-weg) Schritte ordnen mit schmaler leerer Ablage, Schritte 44 px, Tablet hoch enger (s6
+  59 px, Tablet 10 px); Quader-Volumen (quader-volumen) zwei Körper nebeneinander (s4 106 px), Aquarium nach der Bildhöhe, nie unter 80 %
+  seiner Zeichnung (s6 noch 17 px); Plan-Leser (plan-leser)
+  Weg beschreiben mit der Legende neben dem Plan, Beschreibungen 16 px (s5/s6 259 px, jetzt höchstens 8 px in 1 von 12
+  Ziehungen); Diagramm-Wahl (diagramm-wahl) fünf Bildantworten in drei Spalten (s1 32 px). Nachgemessen mit zehn bis
+  zwölf Ziehungen: Aufgabe sonst in keinem mehr über dem Rand. Entscheide Patrik: 1 a — Diagramm-Wahl s5 auf dem
+  Handy mit Tabelle quer und den drei Diagrammen zum Blättern (Reiter A B C; 484 px → passt); 2 a — Möglichkeiten-Finder
+  (glace-kombinator) Kleider-Sets auf dem Handy mit der Regel neben der Anzeige, Stücke enger (s6 53 px → passt, vorher
+  Anzeige halb unter der Tastatur). Offen: Quader-Volumen s6 (17 und 30 px). `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Eulenpfad hebel-wippe malkreuz zahlen-baukasten kakao-weg quader-volumen diagramm-wahl plan-leser „Keine
+  Fehler.“, Eulenpfad diagramm-wahl glace-kombinator „Keine Fehler.“, Skripte „Keine Fehler.“

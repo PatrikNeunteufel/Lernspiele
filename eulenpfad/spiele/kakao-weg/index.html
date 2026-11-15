@@ -61,6 +61,18 @@
     .kw-wer .korb-reihe { gap: 8px; }
     .kw-wer .korb-knopf { min-height: 72px; padding: 6px 6px; font-size: 17px; line-height: 1.15; }
     .kw-wer .korb-knopf .bild { font-size: 28px; }
+    /* Schritte ordnen (s6, acht Schritte): leere Ablage niedriger — die Aufgabe ragte auf dem Handy bis 59 px unter
+       den Rand (LERN-55, LERN_Session44) */
+    div.schritt-ablage { margin-bottom: 8px; }
+    div.schritt-ablage:empty { min-height: 22px; padding-block: 0; }
+    div:has(> .schritt-ablage) > .produkt .gross { font-size: 28px; vertical-align: -4px; }
+    .schritt-wahl { gap: 3px; }
+    .schritt-wahl .wahl-knopf { min-height: 44px; line-height: 1.15; gap: 6px; }
+    .schritt-wahl .wahl-knopf .bild { font-size: 20px; }
+  }
+  /* Tablet hoch: acht Schritte untereinander (Ein Schritt steht am falschen Platz) ragten 10 px über den Rand */
+  @media (min-width: 561px) and (orientation: portrait) {
+    .schritt-wahl { gap: 6px; }
   }
 </style>
 </head>

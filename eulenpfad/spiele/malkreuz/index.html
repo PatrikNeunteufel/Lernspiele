@@ -74,6 +74,12 @@
     /* Notiz schmaler, damit „alles zusammen =“ mit ihr in einer Zeile bleibt */
     .kreuz .zusammen { gap: 4px; padding-right: 4px; }
     .kreuz .zusammen .zw-notiz { width: calc(6ch + 10px); padding: 2px 3px; font-size: 15px; min-height: 32px; }
+    /* Rätsel (s6): Auftrag in einer Zeile ohne „Malkreuz-Rätsel:“ — die Aufgabe ragte bis 43 px unter den Rand
+       (LERN-55, LERN_Session44) */
+    .mk-vorsatz { display: none; }
+    div:has(> .kreuz) > .auftrag { margin-bottom: 4px; }
+    .rechnung { line-height: 1.1; }
+    .kreuz.breit > * { min-height: 42px; }
   }
 </style>
 </head>
@@ -312,7 +318,8 @@ LS.spiel({
     const rechnung = el("div", { class: "rechnung", text: raetsel ? "? × ? = ?" : `${zahlText(a)} × ${zahlText(b)} = ?` });
     const anzeige = el("div", { class: "anzeige leer mk-anzeige", "aria-label": "Zahl für das gewählte Feld" });
     ctx.flaeche.append(
-      el("div", { class: "auftrag", text: raetsel ? "Malkreuz-Rätsel: Finde alle fehlenden Zahlen!" : `Rechne im Malkreuz: ${zahlText(a)} × ${zahlText(b)}` }),
+      raetsel ? el("div", { class: "auftrag" }, el("span", { class: "mk-vorsatz", text: "Malkreuz-Rätsel: " }), "Finde alle fehlenden Zahlen!")
+        : el("div", { class: "auftrag", text: `Rechne im Malkreuz: ${zahlText(a)} × ${zahlText(b)}` }),
       rechnung, kreuz,
       el("div", { class: "mk-eingabe" }, el("div", { class: "hinweis-klein", text: "Tipp auf ein Feld mit ?, dann die Zahl eintippen." }), anzeige));
 

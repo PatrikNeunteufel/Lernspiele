@@ -179,11 +179,9 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    Laptop 1366×650: rhythmus-leser 20, stromkreis-bauer 19, braille-finger 11, tier-sortierer 5.
 3. **Rest auf Bildschirmgrössen** (ohne Leisten, alle Stufen): plan-leser Handy 240, weather-report Handy 79 / quer und
    Laptop 74, punkte-blitz Handy 65, laerm-waechter quer 55, stromkreis-bauer quer 14, netz-falter Laptop 12.
-4. **Begründete Ausnahmen der Bau-Helfer** (BH3, prüfen, ob sie bleiben): plan-leser Weg beschreiben (s5/s6, Handy, bis
-   348 px, LERN_Session43 259), diagramm-wahl s5 Tabelle (Handy, Diagramme sonst unter 10 px Schrift), glace-kombinator
-   Kleider-Sets zählen (s6 mit vier Gruppen, Handy, LERN_Session43 bis 97), kakao-weg s6 Schritte ordnen, quader-volumen s4 zerlegen und s6 Aquarium, zahlen-baukasten s6
-   (sechs ausgeschriebene Bausteine), hebel-wippe s6 (langer Auftrag), diagramm-detektiv Handy (Tabelle mit Diagramm),
-   malkreuz s6 3×2-Rätsel.
+4. **Begründete Ausnahmen der Bau-Helfer** (BH3) — *in Arbeit seit 2026-11-15 (LERN_Session44), neun behoben, offen
+   quader-volumen s6.* Einzelheiten im Abschnitt „Ausnahmen geprüft
+   LERN_Session44“ unten.
 5. **Wünsche an den Rahmen** (aus BH3): Baustein „Element an die restliche Höhe anpassen“ für Grafiken (statt
    `100vh − …px` je Spiel); Tastatur-Anordnung (2)/(3) auch für eigene Tastaturen (Geheimschrift-Knacker); Baustein
    „Bild links, Rest rechts“ für breit und quer; allgemeine Grösse für `.knopf.klein`.
@@ -195,3 +193,33 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    Stimmen-Meldung).*
    Eine Option „alle Aufgabenarten“ oder mehrere Ziehungen je Stufe (Fälle wie energie-wandler bis
    397 px zeigte erst eine Stichprobe); Hörspiele messen ohne Stimme (Eule meldet den Sprechfehler, die Blase wird länger).
+
+## Ausnahmen geprüft LERN_Session44 (2026-11-15)
+
+Gemessen mit fünf Ziehungen je Seite, alle Stufen und Geräte, nach den Umbauten mit zehn bis zwölf Ziehungen. Zahlen:
+Aufgabe selbst über dem Rand auf dem Handy, vorher → nachher.
+- **hebel-wippe** s6 27 → passt: Das Bild beginnt oben beim höchsten Inhalt samt Platz für die Neigung (`reserviere` in
+  `wippe()`); über niedrigen Klötzen standen bis 70 px leer. Ein neuer Klotz hält Platz für den höchsten frei.
+- **malkreuz** s6 43 → passt: Auftrag ohne „Malkreuz-Rätsel:“ auf dem Handy (eine Zeile), enger.
+- **zahlen-baukasten** s6 11 → passt: ausgeschriebene Bausteine enger, Anzeige 48 px.
+- **kakao-weg** s6 59 → passt (Schritte ordnen): leere Ablage als schmaler Balken, Produktkopf kleiner, Schritte 44 px
+  hoch; Tablet hoch Abstand 6 px (Ein Schritt am falschen Platz, 10 px).
+- **quader-volumen** s4 106 → passt: Zerlegen mit beiden Körpern nebeneinander, Name und Notiz brechen unter dem Körper
+  um (vorher untereinander, weil die Namenszeilen zu breit waren).
+- **plan-leser** Weg beschreiben s5/s6 259 → höchstens 8 (1 von 12): Legende in einer Spalte neben dem Plan (links und
+  rechts vom Plan blieben je 90 px leer), Beschreibungen 16 px linksbündig, Frage 18 px; alle drei Beschreibungen
+  bleiben zum Vergleichen zugleich im Bild.
+- **diagramm-wahl** s1 32 (neu) → passt: fünf Bildantworten in drei Spalten.
+- **diagramm-detektiv**: seit DD1 a (LERN_Session43) keine Ausnahme mehr.
+
+- **diagramm-wahl** s5 Tabelle → drei Diagramme 484 → passt (Entscheid 1 a, Patrik 2026-11-15): auf dem Handy
+  Tabelle quer (eine Spalte je Kategorie, wie DD1 a) und die Diagramme zum Blättern mit den Reitern A B C, Tippen auf
+  das gezeigte Diagramm wählt es; 💡 in der Frage (`data-tipp-ziel`). Tablet und breit unverändert.
+- **glace-kombinator** s6 Kleider-Sets mit vier Gruppen 53 → passt (Entscheid 2 a, Patrik 2026-11-15): auf dem Handy
+  die Regel „Ein Set: …“ links neben der Anzeige unter den Gruppen (`.gl-antwort`), Anzeige 48 px; Stücke mit 6 px
+  Abstand, damit vier in eine Zeile passen. Vorher lag die Anzeige halb unter der Tastatur.
+
+Offen:
+- **quader-volumen** s6: Aquarium jetzt nach der Bildhöhe, nie unter 80 % (`--vb-h`), steht dabei an der Grenze und ragt
+  noch 17 px über den Rand; eine zweite Aufgabenart 30 px (4 von 12 Ziehungen). Kleiner ginge nur unter die 80 %.
+- Nebenbei gesehen: plan-leser „Was ist zwischen …“ s3/s6 Handy bis 19 bzw. 55 px in einzelnen Ziehungen.

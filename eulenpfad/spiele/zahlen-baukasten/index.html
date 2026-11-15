@@ -72,6 +72,9 @@
     div:has(> .bausteine) > .auftrag { margin-bottom: 6px; }
     .baustein { min-height: 40px; padding-block: 4px; }
     .mini-tabelle { margin-top: 4px; }
+    /* ausgeschriebene Bausteine („14 Hunderttausender“) in drei Reihen: noch 11 px darüber (LERN_Session44) */
+    .bausteine:has(.lang) { gap: 4px; margin-bottom: 2px; }
+    .bausteine:has(.lang) + .anzeige { min-height: 48px; }
   }
 </style>
 </head>

@@ -68,6 +68,23 @@
   @media (max-width: 560px) {
     .dw-wahl-text:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .dw-wahl-text:has(> :nth-child(3)):not(:has(> :nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    /* Fünf oder sechs Bildantworten (s1 „Wie kommen die meisten …“) in drei Spalten statt drei Reihen — die Aufgabe
+       ragte 32 px unter den Rand (LERN-55, LERN_Session44) */
+    div:has(> .dw) > .wahl:has(> :nth-child(5)):has(> .wahl-knopf > .bild) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    /* Tabelle zu drei Diagrammen (s5, Entscheid 1 a, LERN_Session44): Tabelle quer, Diagramme zum Blättern */
+    .dw-tabelle.quer { width: 100%; table-layout: fixed; margin-bottom: 6px; }
+    .dw-tabelle.quer caption { font-size: 15px; font-weight: 900; color: var(--text-leise); padding-bottom: 2px; }
+    .dw-tabelle.quer th, .dw-tabelle.quer td { padding: 2px; text-align: center; vertical-align: middle; }
+    .dw-tabelle.quer th { background: var(--hinweis-hell); color: var(--text); }
+    .dw-tabelle.quer .q-bild { display: block; font-size: 22px; line-height: 1.15; }
+    .dw-tabelle.quer .q-name { display: block; font-size: 14px; line-height: 1.15; overflow-wrap: anywhere; }
+    .dw-tabelle.quer td.zahl { text-align: center; min-width: 0; }
+    .dw-reiter { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 0 6px; }
+    .dw-reiter-knopf { min-height: 44px; border: 3px solid var(--rand); border-radius: 12px; background: var(--k-feld); color: var(--text); font: inherit; font-size: 22px; font-weight: 900; cursor: pointer; }
+    .dw-reiter-knopf.an { border-color: var(--knopf); background: var(--aktiv); }
+    .dw-wahl-gross.dw-blaettern { grid-template-columns: minmax(0, 1fr); }
+    .dw-wahl-gross.dw-blaettern > :not(.dw-sichtbar) { display: none; }
+    .dw-wahl-gross.dw-blaettern svg { max-width: none; }
   }
   @media (max-height: 820px) {
     .dw > .dw-diagramm:not(.dw-kreis) { width: min(420px, 100%, 52vh); margin-bottom: 4px; }
@@ -706,6 +723,37 @@ const tabelle = (d, w = werte(d)) => {
   return t;
 };
 
+/**
+ * Handy (Entscheid 1 a, LERN_Session44, LERN-55): Tabelle quer — eine Spalte je Kategorie, Bild und Name oben, Wert
+ * darunter (wie DD1 a im Diagramm-Detektiv) — und die drei Diagramme zum Blättern mit den Reitern A B C; Tippen auf das
+ * gezeigte Diagramm wählt es. Untereinander ragte die Aufgabe bis 484 px unter den Rand, und die Tabelle war beim
+ * dritten Diagramm aus dem Bild.
+ */
+const HANDY = "(max-width: 560px)"; // wie der Handy-Block im Stil
+const querTabelle = (d, w = werte(d)) => {
+  const t = el("table", { class: "dw-tabelle quer" });
+  t.append(el("caption", { text: `${d.titel} · ${d.einheit}` }));
+  t.append(el("tr", {}, ...d.kategorien.map(k => el("th", { scope: "col" }, el("span", { class: "q-bild", text: k[0] }), el("span", { class: "q-name", text: k[1] })))));
+  t.append(el("tr", {}, ...w.map(x => el("td", { class: "zahl", text: zahlText(x) }))));
+  return t;
+};
+function blaettern(box) {
+  const knoepfe = [...box.children];
+  const reiter = el("div", { class: "dw-reiter", role: "tablist", "aria-label": "Diagramm zeigen" });
+  const zeige = i => {
+    knoepfe.forEach((k, j) => k.classList.toggle("dw-sichtbar", i === j));
+    [...reiter.children].forEach((r, j) => { r.classList.toggle("an", i === j); r.setAttribute("aria-selected", String(i === j)); });
+  };
+  knoepfe.forEach((k, i) => {
+    const r = el("button", { type: "button", class: "dw-reiter-knopf", role: "tab", text: "ABC"[i], "aria-label": `Diagramm ${"ABC"[i]} zeigen` });
+    r.addEventListener("click", () => zeige(i));
+    reiter.append(r);
+  });
+  box.classList.add("dw-blaettern");
+  box.before(reiter);
+  zeige(0);
+}
+
 /** Kleines Sinnbild einer Diagrammart für die Antwortknöpfe (ohne Text, der Name steht darunter). */
 function mini(typ) {
   const svg = svgNeu("0 0 120 84", "dw-diagramm dw-mini", NAME[typ]);
@@ -918,7 +966,10 @@ LS.spiel({
     if (a.art === "tabelle") {
       const d = D.saeulen[a.s];
       const w = werte(d);
-      f.append(tabelle(d), frageEl(a.frage));
+      const handy = !!window.matchMedia?.(HANDY).matches;
+      const frage = frageEl(a.frage);
+      if (handy) frage.setAttribute("data-tipp-ziel", ""); // 💡 in die Frage, sonst schiebt er die breite Tabelle nach unten
+      f.append(handy ? querTabelle(d) : tabelle(d), frage);
       const buchstabe = v => "ABC"[a.optionen.indexOf(v)];
       const nm = namen(d);
       const loesung = `Diagramm ${buchstabe("richtig")} stimmt. In ${buchstabe("hoehe")} ist die Säule ${nm[a.i]} falsch hoch, in ${buchstabe("vertauscht")} sind ${nm[a.tausch[0]]} und ${nm[a.tausch[1]]} vertauscht.`;
@@ -929,6 +980,7 @@ LS.spiel({
         hinweis: v => (v === "hoehe" ? "In diesem Diagramm hat eine Säule die falsche Höhe. Vergleiche jede Zahl der Tabelle mit ihrer Säule." : "In diesem Diagramm sind zwei Namen vertauscht. Vergleiche die Namen unter den Säulen mit der Tabelle."),
         loesung });
       box.classList.add("dw-wahl-gross");
+      if (handy) blaettern(box);
       if (ctx.nr === 0) ctx.sag("Nur eines der drei Diagramme passt zur Tabelle.");
       return;
     }

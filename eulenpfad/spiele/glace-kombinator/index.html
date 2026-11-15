@@ -69,6 +69,12 @@
     .gl-gruppen .gl-liste > span { font-size: 13px; }
     .gl-gruppen .gl-liste .gl-bild { font-size: 26px; }
     .gl-gruppen .gl-liste { margin-bottom: 0; }
+    /* Kleider-Sets: Regel links neben der Anzeige (2 a, LERN_Session44); vier Stücke einer Gruppe in einer Zeile
+       („Turnschuhe Wanderschuhe Stiefel Halbschuhe“ brauchten mit 10 px Abstand 314 von 312 px) */
+    .gl-gruppen .gl-liste { column-gap: 6px; }
+    .gl-antwort { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; margin: 2px 0 8px; }
+    .gl-antwort > .frage { margin: 0; font-size: 15px; text-align: left; line-height: 1.25; }
+    .gl-antwort > .gl-anzeige { margin: 0; min-height: 48px; }
     /* Finde alle Kleider-Sets mit zwei Gruppen zu drei Stücken (s2, vorher 71 px darunter): Stückknöpfe und Set niedriger */
     .gl-sorten { gap: 6px; margin-bottom: 6px; }
     .gl-sorte { padding: 3px 6px; gap: 0; font-size: 16px; }
@@ -491,8 +497,12 @@ function zaehlen(ctx, a) {
   ctx.loesung(loesung);
   ctx.schritte(LS.tippSchritte(f.N));
   const glaceArt = a.typ !== "kleider";
+  // Kleider-Sets auf dem Handy: die Regel links neben der Anzeige statt über den Gruppen — mit vier Gruppen lag die
+  // Anzeige sonst halb unter der Tastatur (Entscheid 2 a, LERN_Session44, LERN-55)
+  const regelNebenAnzeige = !glaceArt && !!window.matchMedia?.("(max-width: 560px)").matches;
+  const regel = el("div", { class: "frage", text: regelText(a) });
   ctx.flaeche.append(el("div", { class: "auftrag", text: glaceArt ? "Wie viele verschiedene Glace gibt es?" : "Wie viele verschiedene Kleider-Sets gibt es?" }),
-    el("div", { class: "frage", text: regelText(a) }));
+    ...(regelNebenAnzeige ? [] : [regel]));
   if (glaceArt) {
     ctx.flaeche.append(el("div", { class: "gl-liste vorgabe" }, ...a.sorten.map(s => el("span", {}, kugel(s), el("span", { text: s })))));
   } else {
@@ -500,7 +510,7 @@ function zaehlen(ctx, a) {
       el("div", { class: "gl-liste vorgabe" }, ...g.teile.map(t => el("span", {}, el("span", { class: "gl-bild", text: TEIL[t][1] }), el("span", { text: t }))))))));
   }
   const anzeige = el("div", { class: "anzeige leer gl-anzeige", "aria-label": "Anzahl" });
-  ctx.flaeche.append(anzeige);
+  ctx.flaeche.append(regelNebenAnzeige ? el("div", { class: "gl-antwort" }, regel, anzeige) : anzeige);
   const n = glaceArt ? a.sorten.length : 0;
   const tasten = LS.tastatur({
     anzeige, maxStellen: 4,

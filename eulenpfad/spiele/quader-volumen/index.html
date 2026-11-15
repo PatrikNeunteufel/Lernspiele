@@ -43,6 +43,14 @@
     .qv-ergebnis .anzeige, .qv-einheit, .qv-ergebnis.mit-notiz .qv-notizen { margin-bottom: 2px; }
     .qv-ergebnis.mit-notiz { gap: 6px; }
     .qv-wahl:has(> :nth-child(3)):not(:has(> :nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    /* Zwei Körper (Zerlegen, Vergleichen) nebeneinander statt untereinander: Name und Notiz brechen dafür unter dem
+       Körper um — untereinander ragte die Aufgabe bis 127 px unter den Rand (LERN-55, LERN_Session44) */
+    .qv-bild:has(> .qv-geb + .qv-geb) { flex-wrap: nowrap; gap: 4px 10px; }
+    .qv-bild:has(> .qv-geb + .qv-geb) > .qv-geb { min-width: 0; }
+    .qv-bild:has(> .qv-geb + .qv-geb) .qv-name { white-space: normal; text-align: center; line-height: 1.5; }
+    /* Aquarium (s6) mit vierzeiliger Frage und Notizen: nach der Bildhöhe, nie unter 80 % seiner Zeichnung (die Masse
+       bleiben mindestens 12 px) — ragte bis 19 px unter den Rand (LERN-55, LERN_Session44) */
+    .qv-bild svg.qv-aquarium { max-height: max(calc(var(--vb-h) * .8px), min(192px, calc(100vh - 640px))); }
   }
   /* Breit und quer: zwei Körper nebeneinander, nie höher als der Rahmen sie zeichnet (240 px). */
   @media (min-width: 900px) and (orientation: landscape) {
@@ -799,9 +807,13 @@ function zeigeAquarium(ctx, a, qv) {
   ctx.tipp(["Das Wasser bildet einen Quader: Länge · Breite · Höhe des Wassers.",
     "Nimm die Höhe, bis zu der das Wasser steht — nicht die Höhe des Aquariums. Und rechne alles in dm.",
     "Ein Würfel mit 1 dm Kante fasst genau 1 Liter: dm · dm · dm ergibt Liter."]);
+  const aquarium = koerperSvg({ l: a.l, b: a.b, h: a.hoehe, rahmen: true, bloecke: [{ x: 0, r: 0, z: 0, l: a.l, b: a.b, h: a.fuell, farbe: "var(--deko-5)", dicke: 1 }],
+    marken: [...marken3(tl, tb, mass(a.hoehe, "dm")), { kante: "links", text: `💧 ${mass(a.fuell, "dm")}`, hoehe: a.fuell }] });
+  const zeichnung = aquarium.querySelector("svg"); // koerperSvg gibt eine Hülle (span) um das svg
+  zeichnung.classList.add("qv-aquarium");
+  zeichnung.style.setProperty("--vb-h", zeichnung.getAttribute("viewBox").split(" ")[3]); // Untergrenze 80 % (Stil)
   qv.append(el("div", { class: "frage", text: `Das Aquarium ist ${tl} lang, ${tb} breit und ${mass(a.hoehe, "dm")} hoch. Das Wasser steht ${mass(a.fuell, "dm")} hoch. Wie viele Liter Wasser sind drin?` }),
-    bild(koerperSvg({ l: a.l, b: a.b, h: a.hoehe, rahmen: true, bloecke: [{ x: 0, r: 0, z: 0, l: a.l, b: a.b, h: a.fuell, farbe: "var(--deko-5)", dicke: 1 }],
-      marken: [...marken3(tl, tb, mass(a.hoehe, "dm")), { kante: "links", text: `💧 ${mass(a.fuell, "dm")}`, hoehe: a.fuell }] })));
+    bild(aquarium));
   const mitHoehe = rund(a.l * a.b * a.hoehe);
   const roh = rund(kanteIn(a.l, a.einheiten[0]) * kanteIn(a.b, a.einheiten[1]) * a.fuell);
   // Notizen (NZ1 a): Kanten in cm erst in dm, dann die Grundfläche des Wassers
