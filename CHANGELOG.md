@@ -2604,5 +2604,11 @@
   Browser mit Handy-Emulation bis 57 px darunter, obwohl die Messung höchstens 8 px zeigte. Nachgemessen mit 15
   Ziehungen, dazu im Browser 375×870 und 375×932: Aufgabe überall im Bild. Tests: Eulenpfad plan-leser „Keine
   Fehler.“, Skripte „Keine Fehler.“
+- `tools/bildhoehe.js`: neue Option `--text="<Muster>"` — misst nur Aufgaben, deren Text das Muster enthält, und lädt je
+  Ziehung neu, bis die Art kommt (höchstens 25-mal, Feld `versuche`). Anlass: Die Messung meldete beim Plan-Leser
+  „Weg beschreiben“ höchstens 8 px, im Browser waren es bis 57. Nachgestellt (Messaufbau des Werkzeugs, gleiche
+  Schriftbreiten in beiden Browsern, alter Stil über `--css`): Das Werkzeug misst richtig, die Art kam nur in 7 von 24
+  Ziehungen vor und dann günstig; gezielt mit `--text` und altem Stil bis 79 px, mit dem heutigen höchstens 2 px.
+  rahmen.md 20, bildhoehe_offen.md Punkt 7.
 - Tests: Eulenpfad hebel-wippe malkreuz zahlen-baukasten kakao-weg quader-volumen diagramm-wahl plan-leser „Keine
   Fehler.“, Eulenpfad diagramm-wahl glace-kombinator „Keine Fehler.“, Skripte „Keine Fehler.“

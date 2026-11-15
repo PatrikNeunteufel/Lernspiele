@@ -189,9 +189,7 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    den ersten Schritt misst (Befund Notiz-Paket A). Zu entscheiden: Notizen auf dem Handy in s2 lassen; den
    Ergebnis-Schritt selbst verdichten.
 7. **Messwerkzeug:** *erledigt 2026-11-15 (LERN_Session42 BW1 a: `--ziehungen`, Vorgabe 5; LERN_Session43 Messbrowser ohne
-   Stimmen-Meldung).*
-   Eine Option „alle Aufgabenarten“ oder mehrere Ziehungen je Stufe (Fälle wie energie-wandler bis
-   397 px zeigte erst eine Stichprobe); Hörspiele messen ohne Stimme (Eule meldet den Sprechfehler, die Blase wird länger).
+   Stimmen-Meldung; LERN_Session44 `--text` misst eine Aufgabenart gezielt, rahmen.md 20).*
 
 ## Ausnahmen geprüft LERN_Session44 (2026-11-15)
 
@@ -230,6 +228,8 @@ Aufgabe selbst über dem Rand auf dem Handy, vorher → nachher.
   ragte „zwischen“ bei jeder Höhe gleich weit über). Weg beschreiben nimmt die Legende daneben immer. Die Legende brach
   mit 15 px in der schmalen Spalte um (Schrift der Spielseiten ist Segoe UI, nicht Nunito) — die Nachmessung
   „höchstens 8 px“ beim Weg beschreiben war zu günstig; im Browser mit Handy-Emulation bis 57 px, jetzt passt es.
+  Ursache der zu günstigen Zahl: die Stichprobe (7 von 24 Ziehungen waren „Weg beschreiben“), nicht das Werkzeug —
+  im nachgebauten Messaufbau und mit `--text` misst es mit dem alten Stil dieselben 17–79 px wie der Browser.
 
 Nebenbei gesehen, nicht behoben:
 - quader-volumen s5 Handy seitlich 1 px (schon vor LERN_Session44).

@@ -1098,7 +1098,11 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   und Desktop mit (Feld `maus` der Geräte; LERN_Session41). Jede Seite lädt es `--ziehungen`-mal (Vorgabe 5,
   Entscheid BW1 a, LERN_Session42), jedes Mal mit einer neuen ersten Aufgabe, und meldet den höchsten Wert; die Liste
   „Aufgabe selbst über dem Rand“ nennt dazu, in wie vielen Ziehungen. `--json` hält je Ziehung den Anfang des
-  Aufgabentexts fest (Feld `text`, 100 Zeichen, LERN_Session43) — daran zeigt sich, welche Aufgabenart überläuft. Chrome
+  Aufgabentexts fest (Feld `text`, 100 Zeichen, LERN_Session43) — daran zeigt sich, welche Aufgabenart überläuft.
+  `--text="<Muster>"` misst nur Aufgaben, deren Text das Muster enthält: Je Ziehung lädt es neu, bis die Art kommt
+  (höchstens 25-mal, Feld `versuche`); Stufen ohne diese Art erscheinen unter „Nicht gemessen“. Eine Art, die nur in
+  einem Teil der Ziehungen vorkommt, gezielt damit nachmessen — LERN_Session44: „Weg beschreiben“ im Plan-Leser kam in
+  24 Ziehungen nur 7-mal und dann günstig (höchstens 8 px), gezielt gezogen ragte sie bis 79 px über den Rand. Chrome
   läuft mit `--autoplay-policy=no-user-gesture-required`: sonst meldet die Eule „Stimme hat nicht gesprochen“, eine
   höhere Blase, die es auf einem Gerät nicht gibt (LERN_Session43). Vor dem Messen prüft es, ob der Server antwortet
   (sonst Abbruch mit Hinweis), und wartet, bis die Startseite bereit ist, statt einer festen Zeit (LERN_Session43: ein

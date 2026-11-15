@@ -1,14 +1,16 @@
 // Misst, ob die ganze Aufgabe ohne Scrollen ins Bild passt (Entscheid BH1 a, LERN_Session13).
 // Aufruf: node tools/bildhoehe.js [Basis-URL, Vorgabe http://localhost:8765] [spiel-id …]
 //         [--stufen=s1,s3,s6] [--geraete=handy,tablet,quer,desktop] [--ziehungen=5] [--css=datei.css] [--json=datei.json]
-//         [--port=9334]
+//         [--port=9334] [--text="Welche Beschreibung passt"]
 // Der Server muss das Repo ausliefern (server_starten.bat oder python tools/server.py 8765).
 //
 // Chrome läuft ohne Fenster mit einem eigenen, leeren Profil (wie tools/anleitung_bilder.js): Ein Messkind wird
 // angelegt, alle Spiele und Listen sind für es freigegeben. Je Spiel × Stufe × Gerät lädt ein iframe in der
 // Startseite die Stufe; 1,5 s nach dem Laden zählt scrollHeight − Fensterhöhe der ersten Aufgabe. Die Aufgaben
 // sind zufällig: Jede Seite wird --ziehungen-mal geladen (Vorgabe 5, BW1 a), gemeldet wird je Seite der höchste Wert. --css setzt zusätzliches CSS in jede Seite
-// (zum Ausprobieren, ohne den Code zu ändern). Ende mit Code 1, wenn eine Seite seitlich überläuft.
+// (zum Ausprobieren, ohne den Code zu ändern). --text misst nur Aufgaben, deren Text das Muster enthält (eine
+// Aufgabenart gezielt; Spiele ohne diese Art melden „keine Aufgabe mit dem Text gezogen“). Ende mit Code 1, wenn eine
+// Seite seitlich überläuft.
 "use strict";
 const { spawn } = require("child_process");
 const fs = require("fs");
@@ -57,6 +59,11 @@ for (const a of process.argv.slice(2)) {
   else nurSpiele.push(a);
 }
 const CSS = opt.css ? fs.readFileSync(opt.css, "utf8") : "";
+// --text: nur Ziehungen, deren Aufgabe diesen Text enthält (eine Aufgabenart gezielt messen, LERN_Session44: „Weg
+// beschreiben“ kam in 24 Ziehungen des Plan-Lesers nur 7-mal und dann günstig — gemeldet „höchstens 8 px“, gezielt
+// gezogen waren es bis 68). Je Ziehung wird neu geladen, bis die Art kommt, höchstens MAX_VERSUCHE-mal.
+const TEXT = opt.text || "";
+const MAX_VERSUCHE = 25;
 const ZIEHUNGEN = Math.max(1, Number(opt.ziehungen) || 1);
 const PORT = Number(opt.port);
 const BROWSER = [
@@ -89,17 +96,23 @@ const MESSEN = (auftraege, css) => `
   const eins = a => new Promise(fertig => {
     const f = document.createElement("iframe");
     f.style.cssText = "width:" + a.w + "px;height:" + a.h + "px;border:0";
+    let versuche = 1;
     f.onload = () => {
       if (${JSON.stringify(css)}) { const s = f.contentDocument.createElement("style"); s.textContent = ${JSON.stringify(css)}; f.contentDocument.head.append(s); }
       setTimeout(() => {
         try {
           const d = f.contentDocument, se = d.scrollingElement, t = d.querySelector(".tastatur");
+          // --text: nur Aufgaben mit diesem Text zählen — sonst neu laden (höchstens ${MAX_VERSUCHE}-mal je Ziehung)
+          if (${JSON.stringify(TEXT)} && !(d.querySelector(".karte")?.innerText || "").includes(${JSON.stringify(TEXT)})) {
+            if (versuche < ${MAX_VERSUCHE}) { versuche++; f.src = a.pfad + "?stufe=" + a.stufe + "&ziehung=" + Math.random(); return; }
+            __bh.erg.push({ ...a, fehler: "keine Aufgabe mit dem Text gezogen" }); f.remove(); __bh.fertig++; fertig(); return;
+          }
           // Gerät ohne Maus: keine Tastenmarken, kein Platz dafür (siehe GERAETE, maus)
           if (!a.maus) {
             d.documentElement.classList.remove("mit-tasten");
             d.querySelectorAll(".marke-platz").forEach(k => k.classList.remove("marke-platz"));
           }
-          __bh.erg.push({ ...a, ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
+          __bh.erg.push({ ...a, versuche, ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?
             tastaturImBild: t ? t.getBoundingClientRect().bottom <= a.h + 1 : null,
@@ -200,7 +213,7 @@ async function main() {
       for (const stufe of stufen.filter(st => s.stufen.includes(st)))
         for (const g of geraete)
           for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: s.id, pfad: s.pfad, stufe, geraet: g, ziehung: z, ...GERAETE[g] });
-    console.log(`Miss ${auftraege.length / ZIEHUNGEN} Seiten je ${ZIEHUNGEN}-mal (${geraete.join(", ")}; Stufen ${stufen.join(" ")})${CSS ? " mit " + opt.css : ""} …`);
+    console.log(`Miss ${auftraege.length / ZIEHUNGEN} Seiten je ${ZIEHUNGEN}-mal (${geraete.join(", ")}; Stufen ${stufen.join(" ")})${CSS ? " mit " + opt.css : ""}${TEXT ? ` nur Aufgaben mit «${TEXT}»` : ""} …`);
     await js(MESSEN(auftraege, CSS));
     let stand = 0;
     while (stand < auftraege.length) {
