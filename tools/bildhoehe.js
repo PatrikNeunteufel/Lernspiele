@@ -1,7 +1,7 @@
 // Misst, ob die ganze Aufgabe ohne Scrollen ins Bild passt (Entscheid BH1 a, LERN_Session13).
 // Aufruf: node tools/bildhoehe.js [Basis-URL, Vorgabe http://localhost:8765] [spiel-id …]
 //         [--stufen=s1,s3,s6] [--geraete=handy,tablet,quer,desktop] [--ziehungen=5] [--css=datei.css] [--json=datei.json]
-//         [--port=9334] [--text="Welche Beschreibung passt"]
+//         [--port=9334] [--text="Welche Beschreibung passt"] [--arten=liste.json]
 // Der Server muss das Repo ausliefern (server_starten.bat oder python tools/server.py 8765).
 //
 // Chrome läuft ohne Fenster mit einem eigenen, leeren Profil (wie tools/anleitung_bilder.js): Ein Messkind wird
@@ -9,8 +9,9 @@
 // Startseite die Stufe; 1,5 s nach dem Laden zählt scrollHeight − Fensterhöhe der ersten Aufgabe. Die Aufgaben
 // sind zufällig: Jede Seite wird --ziehungen-mal geladen (Vorgabe 5, BW1 a), gemeldet wird je Seite der höchste Wert. --css setzt zusätzliches CSS in jede Seite
 // (zum Ausprobieren, ohne den Code zu ändern). --text misst nur Aufgaben, deren Text das Muster enthält (eine
-// Aufgabenart gezielt; Spiele ohne diese Art melden „keine Aufgabe mit dem Text gezogen“). Ende mit Code 1, wenn eine
-// Seite seitlich überläuft.
+// Aufgabenart gezielt; Spiele ohne diese Art melden „keine Aufgabe mit dem Text gezogen“). --arten misst viele Arten in
+// einem Lauf: eine JSON-Liste [{ id, stufe, text }], je Eintrag wie --text, Stufen und Spiele aus der Liste; gemeldet
+// wird je Art. Ende mit Code 1, wenn eine Seite seitlich überläuft.
 "use strict";
 const { spawn } = require("child_process");
 const fs = require("fs");
@@ -64,6 +65,9 @@ const CSS = opt.css ? fs.readFileSync(opt.css, "utf8") : "";
 // gezogen waren es bis 68). Je Ziehung wird neu geladen, bis die Art kommt, höchstens MAX_VERSUCHE-mal.
 const TEXT = opt.text || "";
 const MAX_VERSUCHE = 25;
+// --arten: viele Arten in einem Lauf (LERN_Session45: in der vollen Messung kamen rund 1000 Arten auf dem Handy höchstens
+// einmal; je Art ein eigener Lauf mit --text wäre ein Browserstart je Art). Je Eintrag { id, stufe, text }.
+const ARTEN = opt.arten ? JSON.parse(fs.readFileSync(opt.arten, "utf8")) : null;
 const ZIEHUNGEN = Math.max(1, Number(opt.ziehungen) || 1);
 const PORT = Number(opt.port);
 const BROWSER = [
@@ -102,17 +106,19 @@ const MESSEN = (auftraege, css) => `
       setTimeout(() => {
         try {
           const d = f.contentDocument, se = d.scrollingElement, t = d.querySelector(".tastatur");
-          // --text: nur Aufgaben mit diesem Text zählen — sonst neu laden (höchstens ${MAX_VERSUCHE}-mal je Ziehung)
-          if (${JSON.stringify(TEXT)} && !(d.querySelector(".karte")?.innerText || "").includes(${JSON.stringify(TEXT)})) {
+          // --text/--arten: nur Aufgaben mit diesem Text zählen — sonst neu laden (höchstens ${MAX_VERSUCHE}-mal je Ziehung)
+          // Leerraum zusammengezogen wie im Feld text (LERN_Session45: Titel und Text stehen auf zwei Zeilen — ein
+          // Muster „Der Igel Der Igel“ aus --json kam mit dem rohen innerText nie)
+          if (a.text && !(d.querySelector(".karte")?.innerText || "").replace(/\\s+/g, " ").includes(a.text)) {
             if (versuche < ${MAX_VERSUCHE}) { versuche++; f.src = a.pfad + "?stufe=" + a.stufe + "&ziehung=" + Math.random(); return; }
-            __bh.erg.push({ ...a, fehler: "keine Aufgabe mit dem Text gezogen" }); f.remove(); __bh.fertig++; fertig(); return;
+            __bh.erg.push({ ...a, art: a.text, fehler: "keine Aufgabe mit dem Text gezogen" }); f.remove(); __bh.fertig++; fertig(); return;
           }
           // Gerät ohne Maus: keine Tastenmarken, kein Platz dafür (siehe GERAETE, maus)
           if (!a.maus) {
             d.documentElement.classList.remove("mit-tasten");
             d.querySelectorAll(".marke-platz").forEach(k => k.classList.remove("marke-platz"));
           }
-          __bh.erg.push({ ...a, versuche, ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
+          __bh.erg.push({ ...a, art: a.text, versuche, ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?
             tastaturImBild: t ? t.getBoundingClientRect().bottom <= a.h + 1 : null,
@@ -156,7 +162,7 @@ const MESSEN = (auftraege, css) => `
               return [...k.querySelectorAll(":scope > *")].filter(x => !x.classList.contains("tipp-zeile"))
                 .map(x => x.innerText).join(" ").replace(/\\s+/g, " ").trim().slice(0, 100);
             })() });
-        } catch (e) { __bh.erg.push({ ...a, fehler: String(e) }); }
+        } catch (e) { __bh.erg.push({ ...a, art: a.text, fehler: String(e) }); }
         f.remove(); __bh.fertig++; fertig();
       }, 1500);
     };
@@ -209,11 +215,20 @@ async function main() {
     const geraete = opt.geraete.split(",").filter(g => GERAETE[g]);
     if (!geraete.includes(VERGLEICH)) geraete.push(VERGLEICH); // Vergleich für geschrumpfte Grafiken (H1 a)
     const auftraege = [];
-    for (const s of spiele.filter(s => !nurSpiele.length || nurSpiele.includes(s.id)))
-      for (const stufe of stufen.filter(st => s.stufen.includes(st)))
+    const pfad = new Map(spiele.map(s => [s.id, s.pfad]));
+    if (ARTEN) {
+      const fremd = ARTEN.filter(x => !pfad.has(x.id));
+      if (fremd.length) throw new Error(`Unbekannte Spiele in ${opt.arten}: ${[...new Set(fremd.map(x => x.id))].join(", ")}`);
+      for (const x of ARTEN.filter(x => !nurSpiele.length || nurSpiele.includes(x.id)))
         for (const g of geraete)
-          for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: s.id, pfad: s.pfad, stufe, geraet: g, ziehung: z, ...GERAETE[g] });
-    console.log(`Miss ${auftraege.length / ZIEHUNGEN} Seiten je ${ZIEHUNGEN}-mal (${geraete.join(", ")}; Stufen ${stufen.join(" ")})${CSS ? " mit " + opt.css : ""}${TEXT ? ` nur Aufgaben mit «${TEXT}»` : ""} …`);
+          for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: x.id, pfad: pfad.get(x.id), stufe: x.stufe, text: x.text, geraet: g, ziehung: z, ...GERAETE[g] });
+    } else
+      for (const s of spiele.filter(s => !nurSpiele.length || nurSpiele.includes(s.id)))
+        for (const stufe of stufen.filter(st => s.stufen.includes(st)))
+          for (const g of geraete)
+            for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: s.id, pfad: s.pfad, stufe, text: TEXT, geraet: g, ziehung: z, ...GERAETE[g] });
+    console.log(`Miss ${auftraege.length / ZIEHUNGEN} Seiten je ${ZIEHUNGEN}-mal (${geraete.join(", ")}; ` +
+      `${ARTEN ? `${ARTEN.length} Arten aus ${opt.arten}` : "Stufen " + stufen.join(" ")})${CSS ? " mit " + opt.css : ""}${TEXT && !ARTEN ? ` nur Aufgaben mit «${TEXT}»` : ""} …`);
     await js(MESSEN(auftraege, CSS));
     let stand = 0;
     while (stand < auftraege.length) {
@@ -242,7 +257,7 @@ async function main() {
 function zusammenfassen(erg) {
   const je = new Map();
   for (const e of erg) {
-    const k = `${e.id}/${e.stufe}/${e.geraet}`;
+    const k = `${e.id}/${e.stufe}/${e.geraet}/${ARTEN ? e.art : ""}`; // mit --arten je Art getrennt (text ist danach der gemessene Aufgabentext)
     if (!je.has(k)) je.set(k, []);
     je.get(k).push(e);
   }
@@ -281,7 +296,12 @@ function auswerten(erg, geraete, stufen) {
     }
   const zuKlein = e => geschrumpft(e, vergleich);
   const gesperrt = erg.filter(e => e.gesperrt || e.fehler);
-  if (gesperrt.length) console.log(`Nicht gemessen (gesperrt oder Fehler): ${[...new Set(gesperrt.map(e => e.id))].join(", ")}\n`);
+  if (gesperrt.length && ARTEN) {
+    // je Art, die in keiner Ziehung eines Geräts kam: dort ist sie nicht gemessen
+    console.log(`Nicht gemessen (Art in ${MAX_VERSUCHE} Versuchen nicht gezogen, gesperrt oder Fehler):`);
+    for (const e of gesperrt) console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} «${e.art}» ${e.fehler || "gesperrt"}`);
+    console.log("");
+  } else if (gesperrt.length) console.log(`Nicht gemessen (gesperrt oder Fehler): ${[...new Set(gesperrt.map(e => e.id))].join(", ")}\n`);
   const zaehlbar = erg.filter(e => !e.gesperrt && !e.fehler);
   for (const g of geraete) {
     const alle = zaehlbar.filter(e => e.geraet === g);
@@ -309,7 +329,7 @@ function auswerten(erg, geraete, stufen) {
   if (aufgabeUeber.length) {
     console.log(`\nAufgabe selbst über dem Rand (ohne Tipp-Zeile; höchster Wert, in wie vielen von ${ZIEHUNGEN} Ziehungen):`);
     for (const e of aufgabeUeber)
-      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.aufgabe).padStart(4)} px  ${e.aufgabeUeber} von ${e.ziehungen}`);
+      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.aufgabe).padStart(4)} px  ${e.aufgabeUeber} von ${e.ziehungen}${ARTEN ? `  «${e.art}»` : ""}`);
   }
   const je = new Map();
   for (const e of zaehlbar.filter(e => e.ueber > 2 || e.seitlich > 2)) {
@@ -319,6 +339,7 @@ function auswerten(erg, geraete, stufen) {
     je.set(e.id, z);
   }
   if (!je.size) return console.log("\nAlle Aufgaben passen ins Bild.");
+  if (ARTEN) return console.log("\n(Mit --arten: Tabelle je Spiel weggelassen, die Werte je Art stehen oben und in --json.)");
   if (geraete.length > 4) return console.log("\n(Mehr als vier Geräte: Tabelle je Spiel weggelassen, die Zahlen stehen in --json.)");
   const zeilen = [...je.values()].sort((a, b) => Math.max(...geraete.flatMap(g => stufen.map(s => b[g + "/" + s] || 0)))
     - Math.max(...geraete.flatMap(g => stufen.map(s => a[g + "/" + s] || 0))));

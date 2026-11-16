@@ -2614,3 +2614,21 @@
   rahmen.md 20, bildhoehe_offen.md Punkt 7.
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session44_2026-11-15.md`, Handover nachgeführt (Ausnahmen von
   Punkt 4 erledigt, Entscheide 1 a und 2 a, `--text` im Messwerkzeug; weiter mit Push, seltenen Aufgabenarten oder GR1 a).
+
+## 2026-11-16 — LERN_Session45
+- Voller Eulenpfad-Lauf auf `0022648` vor dem Push (Entscheid Patrik): „Keine Fehler.“ (4060 s).
+- `tools/bildhoehe.js`: neue Option `--arten=<liste.json>` — misst eine Liste `[{ id, stufe, text }]` in einem Lauf, je
+  Eintrag wie `--text` (leerer Text = jede Aufgabe der Stufe), gemeldet je Art (Feld `art`), „Nicht gemessen“ nennt je
+  Gerät die Art, die in 25 Versuchen nicht kam. Das Muster wird gegen den Aufgabentext mit zusammengezogenem Leerraum
+  geprüft (vorher kamen Muster über zwei Zeilen wie „Der Igel Der Igel“ nie). rahmen.md 20.
+- Seltene Aufgabenarten nachgemessen (LERN-55, BH3 a): aus der vollen Messung vom 15.11. 452 Arten, die auf dem Handy
+  höchstens einmal kamen, gezielt, dazu 400 Seiten ohne trennbare Arten mit 10 Ziehungen, alle vier Geräte. Behoben:
+  Zeitstrahl-Sortierer (zeitstrahl-sortierer) s6 Ereignisse ordnen auf dem Handy mit Bild links, Jahrzahl und Ereignis
+  rechts (89–100 px); Calendrier (calendrier) s5/s6 Monate mit sechs Wochen, Monatsblatt zum Ansehen enger,
+  Wochentags-Knöpfe 50 px (33 px); Gedicht-Baukasten (gedicht-baukasten) s6 Vers in Strophen antippen, Vers-Knöpfe
+  enger (38 px); Auge-Entdecker (auge-entdecker) s3 quer Satz neben dem Bild 21 px (13 px); Kompass (kompass) s6 Frage
+  enger (4 px); Bruch-Rechteck (bruch-rechteck) s1 Tafel 76 % breit (3 px); Bionik-Paare (bionik-paare) s2 Vorbild →
+  Erfindung nebeneinander (3 px). Nachgemessen: Aufgabe überall im Bild. Sachaufgaben-Kompass s2 (11 px in 1 von 10)
+  nicht nachgestellt. `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Seltene Aufgabenarten LERN_Session45“.
+- Tests: Eulenpfad zeitstrahl-sortierer calendrier gedicht-baukasten auge-entdecker kompass bruch-rechteck
+  bionik-paare „Keine Fehler.“, Skripte „Keine Fehler.“

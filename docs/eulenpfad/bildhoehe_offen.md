@@ -1,4 +1,4 @@
-# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session43, 2026-11-15)
+# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session45, 2026-11-16)
 
 Entscheide BH1 a, BH2 a, BH2-T a, BH3 a sind umgesetzt (rahmen.md Abschnitt 20). Gemessen mit `tools/bildhoehe.js`
 (Zufallsaufgaben, Streuung um einige Dutzend Pixel). Zahlen: wie weit die **Aufgabe selbst** (ohne Tipp-Zeile) über den
@@ -189,7 +189,8 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    den ersten Schritt misst (Befund Notiz-Paket A). Zu entscheiden: Notizen auf dem Handy in s2 lassen; den
    Ergebnis-Schritt selbst verdichten.
 7. **Messwerkzeug:** *erledigt 2026-11-15 (LERN_Session42 BW1 a: `--ziehungen`, Vorgabe 5; LERN_Session43 Messbrowser ohne
-   Stimmen-Meldung; LERN_Session44 `--text` misst eine Aufgabenart gezielt, rahmen.md 20).*
+   Stimmen-Meldung; LERN_Session44 `--text` misst eine Aufgabenart gezielt; LERN_Session45 `--arten` misst eine Liste
+   von Arten in einem Lauf, rahmen.md 20).*
 
 ## Ausnahmen geprüft LERN_Session44 (2026-11-15)
 
@@ -233,3 +234,30 @@ Aufgabe selbst über dem Rand auf dem Handy, vorher → nachher.
 
 Nebenbei gesehen, nicht behoben:
 - quader-volumen s5 Handy seitlich 1 px (schon vor LERN_Session44).
+
+## Seltene Aufgabenarten LERN_Session45 (2026-11-16)
+
+Ausgezählt aus der vollen Messung vom 15.11. (`alle_2026-11-15.json`, 20 Ziehungen je Stufe über vier Geräte): Art =
+erster Satz nach dem gemeinsamen Anfang aller Ziehungen, Zahlen weggelassen, vier Wörter. Rund 1000 Arten kamen auf dem
+Handy höchstens einmal, 451 nie. Gemessen mit `tools/bildhoehe.js --arten` auf allen vier Geräten:
+- **A:** 452 Arten in 82 Spielen (Seiten mit 2–8 Arten) gezielt, je 2 Ziehungen; die 33, die in 25 Versuchen auf
+  einem Gerät nicht kamen, nach einer Korrektur des Werkzeugs (Leerraum im Muster) nochmals. Übrig nicht gemessen:
+  teddy-versteck s5 «Setz den Teddy unter» auf Handy und Tablet, sieben Arten nur auf einem Teil der übrigen Geräte.
+- **B:** 400 Seiten in 125 Spielen, deren Arten sich am Text nicht trennen lassen (mehr als acht Arten, oder Arten nur
+  durch Zahlen verschieden), je 10 Ziehungen.
+- Nicht erfasst: Arten, die am 15.11. in keiner der 20 Ziehungen einer Stufe kamen.
+
+Gefunden (Aufgabe selbst über dem Rand), vorher → nachher (mit `--text` bzw. 12 Ziehungen nachgemessen):
+- **zeitstrahl-sortierer** s6 Handy Ereignisse ordnen 89–100 → passt: Karten auf dem Handy mit Bild links, Jahrzahl
+  und Ereignis rechts (vier Karten untereinander mit Bild, Jahrzahl und zwei Zeilen Text).
+- **calendrier** s5/s6 Handy „c’est quel jour ?“ in Monaten mit sechs Wochen 33 → passt: Monatsblatt zum Ansehen
+  enger (Zellen 28 statt 34 px), Wochentags-Knöpfe 50 px.
+- **gedicht-baukasten** s6 Handy Vers in einem Gedicht mit Strophen antippen 38 → passt: Vers-Knöpfe 17 px, Zeilenhöhe
+  1,3, Gedicht mit 10 px Rand.
+- **auge-entdecker** s3 Tablet quer und Laptop „Was passiert mit der Pupille?“ mit langem Satz 13 → passt: Satz in der
+  halben Breite 21 px (mit 26 px drei Zeilen).
+- **kompass** s6 Handy gedrehte Karte mit drei Schritten 4 → passt: Frage 6 px Abstand.
+- **bruch-rechteck** s1 Handy „feiner geteilt“ mit Tastatur 3 → passt: Tafel 76 statt 82 % breit.
+- **bionik-paare** s2 Handy lange Erfindung 3 → passt (höchstens −77 px): Vorbild → Erfindung nebeneinander.
+- **sachaufgaben-kompass** s2 Handy 11 in 1 von 10 Ziehungen — nicht nachgestellt: in 26 weiteren Ziehungen, auch mit
+  derselben Geschichte, höchstens −37 px.

@@ -39,9 +39,12 @@
   button.cal-zelle.richtig { background: var(--gut-hell); box-shadow: 0 2px 0 var(--gut); }
 
   /* Ganze Aufgabe im Bild (BH3 a): Wochentage auf dem Handy zu dritt; quer 🔊 und Antworten neben dem Monatsblatt. */
+  /* Monate mit sechs Wochen: das Blatt nur zum Ansehen enger, Knöpfe 50 px (LERN_Session45: „c’est quel jour ?“ s5
+     ragte mit sechs Wochenzeilen 33 px über den Rand) */
   @media (max-width: 560px) {
     .cal-rechts .wahl { grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 8px; }
-    .cal-rechts .wahl-knopf { min-height: 54px; padding: 6px 4px; }
+    .cal-rechts .wahl-knopf { min-height: 50px; padding: 6px 4px; }
+    span.cal-zelle { padding: 4px 0; }
     .cal-monat { margin-bottom: 8px; }
     .cal-hoer { margin-bottom: 8px; }
   }

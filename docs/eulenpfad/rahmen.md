@@ -1102,7 +1102,11 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   `--text="<Muster>"` misst nur Aufgaben, deren Text das Muster enthält: Je Ziehung lädt es neu, bis die Art kommt
   (höchstens 25-mal, Feld `versuche`); Stufen ohne diese Art erscheinen unter „Nicht gemessen“. Eine Art, die nur in
   einem Teil der Ziehungen vorkommt, gezielt damit nachmessen — LERN_Session44: „Weg beschreiben“ im Plan-Leser kam in
-  24 Ziehungen nur 7-mal und dann günstig (höchstens 8 px), gezielt gezogen ragte sie bis 79 px über den Rand. Chrome
+  24 Ziehungen nur 7-mal und dann günstig (höchstens 8 px), gezielt gezogen ragte sie bis 79 px über den Rand.
+  `--arten=<liste.json>` misst viele Arten in einem Lauf: eine Liste `[{ id, stufe, text }]`, je Eintrag wie `--text`
+  (leerer `text` = jede Aufgabe dieser Stufe); Spiele und Stufen kommen aus der Liste, gemeldet wird je Art (Feld `art`),
+  „Nicht gemessen“ nennt je Gerät die Art, die in 25 Versuchen nicht kam (LERN_Session45: rund 1000 Arten kamen in der
+  vollen Messung auf dem Handy höchstens einmal). Chrome
   läuft mit `--autoplay-policy=no-user-gesture-required`: sonst meldet die Eule „Stimme hat nicht gesprochen“, eine
   höhere Blase, die es auf einem Gerät nicht gibt (LERN_Session43). Vor dem Messen prüft es, ob der Server antwortet
   (sonst Abbruch mit Hinweis), und wartet, bis die Startseite bereit ist, statt einer festen Zeit (LERN_Session43: ein

@@ -48,6 +48,13 @@
     /* Dreier mit neun Karten (s6): langer Auftrag kleiner gesetzt (LERN-55, vorher 23 px darunter) */
     .frage:has(+ .bionik-feld > :nth-child(7)) { font-size: 17px; line-height: 1.25; margin-bottom: 6px; }
   }
+  /* Handy: Vorbild → Erfindung nebeneinander statt untereinander (LERN_Session45: untereinander 206 px hoch, mit langer
+     Erfindung bis 3 px über dem Rand) */
+  @media (max-width: 560px) {
+    .bionik-zeile { flex-wrap: nowrap; gap: 6px; }
+    .bionik-teil { flex: 1 1 0; min-width: 0; max-width: 170px; padding: 6px 8px; overflow-wrap: anywhere; }
+    .bionik-pfeil { flex: none; }
+  }
 </style>
 </head>
 <body>

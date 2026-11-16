@@ -13,6 +13,14 @@
   .zs-strahl text { font-family: inherit; font-weight: 800; fill: var(--text); }
   .zs-strahl .zs-marke { fill: var(--deko-2); }
   .zs-bild { text-align: center; font-size: clamp(52px, 12vw, 72px); line-height: 1.1; margin: 0 0 8px; }
+  /* Ereignisse ordnen auf dem Handy: Bild links, Jahrzahl und Ereignis rechts (LERN-55, LERN_Session45: vier Karten
+     untereinander mit Bild, Jahrzahl und zwei Zeilen Text ragten bis 100 px über den Rand) */
+  @media (max-width: 560px) {
+    .zs-ereignisse .wahl-knopf { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 10px; align-items: center;
+      justify-items: start; text-align: left; min-height: 56px; padding: 6px 10px; }
+    .zs-ereignisse .wahl-knopf .bild { grid-row: span 2; justify-self: center; font-size: 32px; }
+    .zs-ereignisse .wahl-knopf small { font-size: 15px; line-height: 1.25; }
+  }
 </style>
 </head>
 <body>
@@ -346,12 +354,13 @@ LS.spiel({
       const mitJahr = a.typ === "ereignisse";
       const loesung = a.reihe.map(t => (mitJahr ? `${ereignis(t)[1]}` : t)).join(" → ");
       f.append(el("div", { class: "frage", text: titel }));
-      LS.reihenfolge(ctx, {
+      const { box } = LS.reihenfolge(ctx, {
         reihe: a.reihe, breite: mitJahr ? 220 : 130, pfeile: true,
         inhalt: t => (mitJahr ? { bild: teilBild(a.typ, t), text: ereignis(t)[1], klein: t } : bildText(a.typ, t)),
         ablage: t => (mitJahr ? ereignis(t)[1] : `${teilBild(a.typ, t)} ${t}`),
         hinweis, loesung, lob: `Richtig! ${loesung}`,
       });
+      if (mitJahr) box.classList.add("zs-ereignisse");
     } else if (a.art === "genStrahl") {
       const p = a.personen.find(x => x.name === a.ziel);
       f.append(el("div", { class: "frage", text: `Der Zeitstrahl zeigt, wann jemand geboren ist. In welchem Jahr ist ${a.ziel} geboren?` }),

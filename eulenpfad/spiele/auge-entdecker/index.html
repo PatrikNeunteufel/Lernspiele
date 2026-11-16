@@ -46,6 +46,9 @@
     div:has(> .ae > .ae-bild) > :not(.ae) { grid-column: 2; width: 100%; min-width: 0; box-sizing: border-box; }
     .ae > .ae-bild { margin-bottom: 0; }
     .ae-satz + .ae-bild { max-height: max(220px, calc(100vh - 420px)); }
+    /* Satz in der halben Breite kleiner: mit 26 px drei Zeilen, die Aufgabe ragte 13 px über den Rand (LERN_Session45,
+       „Jemand leuchtet mit einer Taschenlampe …“ auf dem Tablet quer) */
+    div:has(> .ae > .ae-bild) .ae-satz { font-size: 21px; padding: 8px 14px; }
   }
   /* Handy, Weg des Lichts: Stationen zu dritt in einer Reihe, das Bild etwas niedriger. */
   @media (max-width: 560px) and (max-height: 820px) {

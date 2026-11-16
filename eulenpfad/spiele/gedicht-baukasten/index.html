@@ -23,6 +23,12 @@
   .gedicht-ordnen .ablage { flex-direction: column; align-items: stretch; }
   /* Breit: Strophen nebeneinander in einer Reihe, je Strophe eine Spalte — so bleibt die Reihenfolge eindeutig (die Aufgabe
      fragt nach „der zweiten Strophe“), und das Gedicht steht ganz im Bild (LERN-55, s3 quer vorher 52 px darunter) */
+  /* Handy: Vers-Knöpfe enger, das Gedicht mit schmalerem Rand (LERN_Session45: zwei Strophen zum Antippen ragten s6
+     38 px über den Rand, viele Verse brachen um) */
+  @media (max-width: 560px) {
+    .gedicht:has(.gedicht-vers) { padding: 10px; }
+    .gedicht-vers { font-size: 17px; line-height: 1.3; padding: 5px 8px; margin: 3px 0; }
+  }
   @media (min-width: 900px) {
     .gedicht:has(> .strophe + .strophe) { max-width: 980px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; align-items: start; }
     .gedicht:has(> .strophe + .strophe + .strophe) { grid-template-columns: 1fr 1fr 1fr; column-gap: 16px; }
