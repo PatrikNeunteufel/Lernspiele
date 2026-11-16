@@ -2664,3 +2664,7 @@
   20 → 13, Tablet hoch 5 → 0, Laptop 2 → 0. `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Restliche Höhe
   LERN_Session45“, rahmen.md 20.
 - Tests: Eulenpfad über die 35 umgestellten Spiele „Keine Fehler.“, Skripte „Keine Fehler.“
+- Übrig gebliebene Warteschleifen der Agenten (`until … sleep`, bis 1 h alt) beendet; Hook-Kandidat im Report.
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session45_2026-11-16.md`, Handover nachgeführt (Haltepunkt
+  aufgelöst; gepusht bis `74d99fc` ohne vollen Lauf nach GR1 a und Baustein; weiter mit vollem Lauf, Vollbild prüfen,
+  Rest je Spiel).
