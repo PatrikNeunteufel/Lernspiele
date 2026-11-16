@@ -1,6 +1,6 @@
 // Misst, ob die ganze Aufgabe ohne Scrollen ins Bild passt (Entscheid BH1 a, LERN_Session13).
 // Aufruf: node tools/bildhoehe.js [Basis-URL, Vorgabe http://localhost:8765] [spiel-id …]
-//         [--stufen=s1,s3,s6] [--geraete=handy,tablet,quer,desktop] [--ziehungen=5] [--css=datei.css] [--json=datei.json]
+//         [--stufen=s1,s3,s6] [--geraete=handy-sicht,tablet-sicht,quer-sicht,laptop-sicht] [--ziehungen=5] [--css=datei.css] [--json=datei.json]
 //         [--port=9334] [--text="Welche Beschreibung passt"] [--arten=liste.json]
 // Der Server muss das Repo ausliefern (server_starten.bat oder python tools/server.py 8765).
 //
@@ -50,7 +50,9 @@ const ZUSAMMENGEFALLEN = 40;
 const VERGLEICH = "quer";
 // --ziehungen: so oft wird jede Seite geladen, jedes Mal mit einer neuen ersten Aufgabe (Entscheid BW1 a, LERN_Session42:
 // mit einer Ziehung hing das Ergebnis an der zufälligen Aufgabenart — 443 px in einem Lauf, im nächsten passte es)
-const opt = { stufen: "s1,s3,s6", geraete: "handy,tablet,quer,desktop", ziehungen: "5", css: null, json: null, port: "9334" }; // --port: eigener Chrome je Lauf, wenn mehrere zugleich messen
+// Vorgabe seit GR1 a (LERN_Session45): die sichtbare Fläche im Browser; die Bildschirmgrössen (handy, tablet, quer,
+// desktop) mit --geraete
+const opt = { stufen: "s1,s3,s6", geraete: "handy-sicht,tablet-sicht,quer-sicht,laptop-sicht", ziehungen: "5", css: null, json: null, port: "9334" }; // --port: eigener Chrome je Lauf, wenn mehrere zugleich messen
 const nurSpiele = [];
 let BASIS = "http://localhost:8765";
 for (const a of process.argv.slice(2)) {

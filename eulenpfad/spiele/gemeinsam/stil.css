@@ -520,6 +520,11 @@ button { font-family: inherit; }
 .mit-tasten [data-marke].marke-platz { padding-top: 27px; }
 .kopf .hilfe-knopf, .kopf .farben-knopf { border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
   font-size: 24px; cursor: pointer; flex: none; }
+/* ⛶ Vollbild (GR1 a, LERN_Session45): nur auf Geräten mit Maus unter 650 px Bildhöhe und im Vollbild selbst */
+.kopf .vollbild-knopf { display: none; border: none; background: var(--karte); box-shadow: var(--schatten); border-radius: 50%; width: 52px; height: 52px;
+  font-size: 24px; color: var(--text); cursor: pointer; flex: none; align-items: center; justify-content: center; }
+@media (max-height: 649px) and (hover: hover) and (pointer: fine) { .kopf .vollbild-knopf { display: inline-flex; } }
+.im-vollbild .kopf .vollbild-knopf { display: inline-flex; }
 .hilfe-eigen { font-size: 17px; font-weight: 700; }
 .hilfe-liste { padding-left: 20px; margin: 8px 0 12px; }
 .hilfe-liste li { margin-bottom: 6px; }
@@ -1072,6 +1077,29 @@ button.link, a.link {
 @media not ((min-width: 900px) and (orientation: landscape)) {
   .karte > div > .tastatur { position: sticky; bottom: 0; z-index: 3; background: var(--karte, var(--k-feld)); padding-top: 8px; padding-bottom: 8px;
     box-shadow: 0 -10px 12px -8px rgba(40, 45, 80, .18); }
+}
+/* (4) Sichtbare Fläche (Entscheid GR1 a, LERN_Session45): unter 700 px Höhe — Handy und Laptop mit Browserleisten,
+   Tablet quer — Kopfzeile, Eule, Knöpfe und Abstände enger. Gemessen auf 375×660, 1024×690, 1366×650: Spiele mit der
+   Aufgabe über dem Rand 118 → 68, 36 → 0, 72 → 12. */
+@media (max-height: 700px) {
+  .kopf { padding: 6px 10px; gap: 8px; }
+  .kopf a.zurueck, .kopf .ton, .kopf .hilfe-knopf, .kopf .farben-knopf, .kopf .vollbild-knopf { width: 40px; height: 40px; font-size: 20px; }
+  .kopf h1 { font-size: 20px; }
+  .fortschritt { margin: 0 0 8px; gap: 6px; }
+  .fortschritt span { width: 14px; height: 14px; }
+  .buehne { padding-bottom: 12px; }
+  .karte { padding: 10px; }
+  .eule { width: 40px; height: 44px; }
+  .eule-zeile { min-height: 44px; margin-bottom: 6px; gap: 6px; }
+  .blase { font-size: 15px; padding: 6px 10px; min-height: 40px; }
+  .eule-zeile .vorlesen { width: 40px; height: 40px; font-size: 20px; }
+  .melde-zeile { min-height: 34px; margin: -2px 0 4px; }
+  .melde-zeile .melden, .melde-zeile .nb-knopf { height: 32px; min-height: 32px; }
+  .tipp-zeile.schwebt .tipp-knopf { width: 44px; height: 44px; }
+  .auftrag { margin: 2px 0 10px; }
+  .knopf { min-height: 46px; padding: 8px 20px; font-size: 20px; }
+  .wahl-knopf { min-height: 46px; }
+  .tastatur button { min-height: 46px; font-size: 22px; }
 }
 
 /* Im Zufallsmix (iframe von mix.html, Entscheid M1 a): Kopfzeile und Fortschritt zeigt der Mix selbst. */

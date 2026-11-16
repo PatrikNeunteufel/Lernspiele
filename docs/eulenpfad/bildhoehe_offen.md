@@ -169,7 +169,8 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
 ## Offen
 
 1. **GR1 a umsetzen:** Verdichtung unter 700 px in `stil.css`, Vollbild-Knopf, Messgeräte der sichtbaren Fläche als
-   Vorgabe in `tools/bildhoehe.js`; danach eine Runde je Spiel für den Rest (Handy-Liste unten).
+   Vorgabe in `tools/bildhoehe.js` — *erledigt 2026-11-16 (LERN_Session45, Abschnitt „Sichtbare Fläche LERN_Session45“
+   unten)*; offen die Runde je Spiel für den Rest (Listen dort).
 2. **Rest auf der sichtbaren Handy-Fläche** (mit Verdichtung gemessen): gefuehle-radar 92, calendrier 91 (Stimme fehlt im
    Messbrowser), gerecht-teiler 76, diagramm-detektiv 71, geheimschrift-knacker 70, kakao-weg 67, malkreuz 65,
    kiosk-kasse 60, glace-kombinator 58, hebel-wippe 55, quader-volumen 50, bionik-paare 48, roboter-pfad 44,
@@ -261,3 +262,46 @@ Gefunden (Aufgabe selbst über dem Rand), vorher → nachher (mit `--text` bzw. 
 - **bionik-paare** s2 Handy lange Erfindung 3 → passt (höchstens −77 px): Vorbild → Erfindung nebeneinander.
 - **sachaufgaben-kompass** s2 Handy 11 in 1 von 10 Ziehungen — nicht nachgestellt: in 26 weiteren Ziehungen, auch mit
   derselben Geschichte, höchstens −37 px.
+
+## Sichtbare Fläche LERN_Session45 (2026-11-16, GR1 a)
+
+Umgesetzt: (4) in `stil.css` unter 700 px Höhe (Kopfzeile mit 40-px-Knöpfen, Eule 40 px, Blase 15 px, Knöpfe und
+Tasten 46 px, Abstände), ⛶ Vollbild in der Kopfzeile auf Geräten mit Maus unter 650 px, `tools/bildhoehe.js` misst als
+Vorgabe die sichtbare Fläche. Die Probe `niedrig_probe.css` aus LERN_Session13 war nicht mehr da; neu nach ihrer
+Beschreibung. Gemessen vor dem Einbau mit `--css` auf demselben Code, Stufen s1 s3 s6, drei Ziehungen
+(`sicht_vorher_2026-11-16.json`, `sicht_probe_2026-11-16.json`). Spiele mit der Aufgabe selbst über dem Rand:
+
+| sichtbare Fläche | vorher | mit Verdichtung |
+|---|---|---|
+| Handy 375×660 | 118 | 68 |
+| Tablet hoch 768×950 | 14 | 12 (über 700 px, unverändert — Streuung) |
+| Tablet quer 1024×690 | 36 | 0 |
+| Laptop 1366×650 | 72 | 12 |
+
+Streuung mit drei Ziehungen: dieselbe Seite bis 62 px verschieden (Schriftlich-Werkstatt s6 Tablet hoch −31 / 31,
+dort wirkt die Verdichtung nicht); sechs Spiele erscheinen darum mit Verdichtung neu in der Liste.
+
+Rest (höchster Wert in px):
+- **Handy 375×660:** gedicht-baukasten 153, geheimschrift-knacker 100, kakao-weg 98, zahlenmauer 90, zufalls-skala 87,
+  gerecht-teiler 84, roboter-pfad 78, gemeinde-helfer 74, preis-tabelle 73, calendrier 73, kompass 72,
+  zahlenraetsel-tresor 69, tier-sortierer 69, erdzeit-leiter 68, kiosk-kasse 67, malkreuz 66, rechen-maschine 66,
+  fahrplan-rechner 66, wassertropfen-reise 65, energie-wandler 64, diagramm-detektiv 63, zahlenhaus 62, flaechen-pixel 62,
+  mittelwert-waage 58, flaechenmass-treppe 57, platzhalter-geschichten 57, reim-paare 55, sachaufgaben-kompass 55,
+  rhythmus-diktat 54, gefuehle-radar 54, znueni-teller 53, zahlen-waage 49, plan-leser 48, glace-kombinator 47,
+  kulturen-koffer 47, pflanzen-bestimmer 45, bionik-paare 44, himmels-forscher 42, schwimmt-sinkt 42, stromkreis-bauer 42,
+  blutkreislauf-lotse 41, geschichten-ordner 38, stufenzahl-schieber 37, wortarten-probe 37, quader-volumen 37,
+  diagramm-wahl 37, hundertertafel 33, punkte-blitz 33, taschengeld-planer 33, velo-tabelle 32, frueher-heute 32,
+  speicher-leiter 32, wuerfel-zaehler 32, zahlen-baukasten 27, fledermaus-forscher 27, zeitstrahl-sortierer 27,
+  parallelwort-bruecke 26, spiegel-raster 25, bruch-rechteck 24, laerm-waechter 22, gattungs-kenner 19,
+  schriftlich-werkstatt 18, koordinaten-schatz 17, zehner-ergaenzer 15, son-lauscher 14, hebel-wippe 11, hello-dialog 8,
+  ziffernkarten 6.
+- **Tablet hoch 768×950:** fahrplan-rechner 71, geheimschrift-knacker 65, kakao-weg 56, zahlenmauer 47, preis-tabelle 47,
+  malkreuz 45, schriftlich-werkstatt 31, quader-volumen 28, steine-fangen 23, zahlen-baukasten 9, bruch-rechteck 5,
+  flaechenmass-treppe 3.
+- **Laptop 1366×650:** begriffs-geodreieck 40, geschichten-ordner 37, tier-sortierer 36, rhythmus-diktat 34,
+  hello-dialog 34, kakao-weg 32, reim-paare 26, znueni-teller 26, tageslauf-sonne 24, gattungs-kenner 23,
+  schriftlich-werkstatt 14, uhr-werkstatt 9.
+- Tablet quer 1024×690: keins.
+
+Das Umschalten ins Vollbild ist im Browser der App nicht prüfbar (die Anfrage kommt nie zurück); Knopf, Platz und
+Sichtbarkeit nach Höhe und Maus geprüft.

@@ -1071,7 +1071,13 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
 - **Rahmen** (`stil.css`, nach dem Handy-Block): (1) Unter 820 px Höhe verdichtet er wie unter 560 px Breite (Eule,
   Tasten 52 px, Ränder). (2) Breit und quer (ab 900 px, Querformat) steht die Zifferntastatur rechts neben der Aufgabe
   — nur, wenn sie direkt in der Spielfläche steht (`.karte > div > .tastatur`). (3) Sonst bleibt sie als Leiste unten im
-  Bild (`position: sticky`), und die Aufgabe scrollt darüber.
+  Bild (`position: sticky`), und die Aufgabe scrollt darüber. (4) Unter 700 px Höhe (Entscheid GR1 a, LERN_Session45)
+  verdichtet er weiter: Kopfzeile mit 40-px-Knöpfen, Eule 40 px, Blase 15 px, Knöpfe und Tasten 46 px, engere Abstände
+  — Ziel ist die sichtbare Fläche im Browser (Handy 375×660, Tablet 768×950 und 1024×690, Laptop 1366×650).
+- **⛶ Vollbild** (GR1 a): `spiel.js` setzt den Knopf `vollbild-knopf` hinter den Titel; `stil.css` zeigt ihn nur auf
+  Geräten mit Maus unter 650 px Höhe und im Vollbild selbst (`im-vollbild` am html). Nicht in einem Rahmen (Zufallsmix,
+  Prüfansicht) und nicht, wo der Browser kein Vollbild kennt. Alles auch bei 1000×500 ohne Vollbild (GR1 b) ist
+  zurückgestellt.
 - **Sprechblase und Tipp** (Entscheide BH2 a, BH2-T a; ersetzen den Ort aus T1 a): In der Runde zeigt die Blase
   höchstens zwei Zeilen (`span.blase-text`); ist der Text länger, steht „…“ und ▾, Antippen klappt auf und zu. Ein
   Hinweis nach einem Fehler steht immer ganz, 🗣️ liest immer alles. 💡 steht beim Antwortbereich ohne eigene Zeile:
@@ -1093,7 +1099,8 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   bleiben antippbar, Zahlen lesbar (Uhr und Kompassrose 160 px, Bretter und Pläne 200–300 px). Ausnahme nur mit
   dem Kommentar „ohne Untergrenze: <Grund>“ im Regelblock (feste Fenster). `tools/pruefe_skripte.js` weist jede
   Stelle ohne Untergrenze ab.
-- **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Server nötig; Chrome ohne Fenster, Messkind mit allem
+- **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Vorgabe seit GR1 a die sichtbare Fläche: `handy-sicht`,
+  `tablet-sicht`, `quer-sicht`, `laptop-sicht`; die Bildschirmgrössen mit `--geraete=handy,tablet,quer,desktop`. Server nötig; Chrome ohne Fenster, Messkind mit allem
   freigegeben). Handy und Tablet misst es ohne Tastenmarken und ohne deren Platz (`marke-platz`, Abschnitt 19), Laptop
   und Desktop mit (Feld `maus` der Geräte; LERN_Session41). Jede Seite lädt es `--ziehungen`-mal (Vorgabe 5,
   Entscheid BW1 a, LERN_Session42), jedes Mal mit einer neuen ersten Aufgabe, und meldet den höchsten Wert; die Liste

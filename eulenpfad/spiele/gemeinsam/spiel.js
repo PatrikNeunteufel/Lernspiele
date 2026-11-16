@@ -2555,6 +2555,23 @@ const LS = (() => {
       if (k) document.querySelector(".kopf .hilfe-knopf")?.before(k);
     };
     farbenOben();
+    // ⛶ Vollbild (Entscheid GR1 a, LERN_Session45): auf Geräten mit Maus unter 650 px Bildhöhe in der Kopfzeile
+    // (stil.css zeigt ihn nur dort und im Vollbild); nicht in einem Rahmen (Zufallsmix, Prüfansicht), nicht ohne
+    // Vollbild im Browser. Die Browserleisten nehmen einem Laptop sonst rund 120 px.
+    if (document.fullscreenEnabled && window.top === window.self) {
+      const vb = el("button", { type: "button", class: "vollbild-knopf", text: "⛶",
+        onclick: () => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => {}) });
+      const stand = () => {
+        const an = !!document.fullscreenElement;
+        vb.setAttribute("aria-pressed", String(an));
+        vb.setAttribute("aria-label", an ? "Vollbild beenden" : "Vollbild");
+        vb.title = an ? "Vollbild beenden" : "Vollbild";
+        document.documentElement.classList.toggle("im-vollbild", an);
+      };
+      document.addEventListener("fullscreenchange", stand);
+      stand();
+      document.querySelector(".kopf h1")?.after(vb);
+    }
     // Kam beim Abgleich etwas von einem anderen Gerät dazu: die Stufenwahl mit Sternen und Ranglisten neu zeichnen.
     addEventListener("lernspiele:abgeglichen", () => { if (buehne.querySelector(".stufen")) stufenwahl(); });
 
@@ -3747,7 +3764,7 @@ const LS = (() => {
       "stufen", "stufe", "fuer", "stufe-huelle", "stufe-kopf", "stufe-symbol", "stufe-nr", "stufe-name", "sterne-gross", "stufe-info", "stufe-text", "blase-klein", "stil-hand", "hand-rahmen", "raster-luecke", "timer-zeile", "timer-schalter", "nur-symbol", "timer-wort", "option-zeile", "option-schalter", "aufsicht-fest", "avatar", "avatar-ersatz", "avatar-bild", "entwickler-leiste", "entwickler-feld", "zeitleiste", "zeitbalken", "testhilfe",
       "endlos", "endlos-wahl", "schalter-zeile", "schalter-teil", "schalter-hinweis", "rangliste", "ranglisten", "ich",
       "melden", "melde-zeile", "melde-hintergrund", "melde-fenster", "melde-wahl", "melde-zusatz", "melde-meldung",
-      "hilfe-knopf", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
+      "hilfe-knopf", "vollbild-knopf", "im-vollbild", "hilfe-eigen", "hilfe-liste", "tipp-zeile", "tipp-knopf", "pause-verdeckt", "antworten-warten", "regeln-link",
       "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "marke-platz", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
       "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
     bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "bildkachel", "szenenbild", "pruef-bild", "pruef-text-bild", "pruef-farbe", "pruef-farbfeld", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",

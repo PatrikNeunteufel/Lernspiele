@@ -2632,3 +2632,14 @@
   nicht nachgestellt. `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Seltene Aufgabenarten LERN_Session45“.
 - Tests: Eulenpfad zeitstrahl-sortierer calendrier gedicht-baukasten auge-entdecker kompass bruch-rechteck
   bionik-paare „Keine Fehler.“, Skripte „Keine Fehler.“
+- **GR1 a umgesetzt (LERN-55):** `stil.css` verdichtet unter 700 px Höhe weiter (Kopfzeile mit 40-px-Knöpfen, Eule
+  40 px, Blase 15 px, Knöpfe und Tasten 46 px, engere Abstände); ⛶ Vollbild in der Kopfzeile (`spiel.js`, Klasse
+  `vollbild-knopf`, `im-vollbild` am html), nur auf Geräten mit Maus unter 650 px Höhe und im Vollbild, nicht in einem
+  Rahmen; `tools/bildhoehe.js` misst als Vorgabe die sichtbare Fläche (handy-sicht, tablet-sicht, quer-sicht,
+  laptop-sicht). Gemessen vorher und mit der Verdichtung (über `--css` auf demselben Code, drei Ziehungen): Spiele mit
+  der Aufgabe über dem Rand Handy 375×660 118 → 68, Tablet quer 1024×690 36 → 0, Laptop 1366×650 72 → 12, Tablet hoch
+  14 → 12. Rest je Spiel in `docs/eulenpfad/bildhoehe_offen.md` (Abschnitt „Sichtbare Fläche LERN_Session45“), rahmen.md
+  20. Das Umschalten ins Vollbild war im Browser der App nicht prüfbar.
+- Tests (Stichprobe nach „Testläufe während eines Umbaus“): Eulenpfad kompass kiosk-kasse zahlenmauer plan-leser
+  zeitstrahl-sortierer zahlen-sudoku hello-dialog schriftlich-werkstatt „Keine Fehler.“, Feier „175 Spiele, 6300 Bilder,
+  keine Fehler.“, Skripte „Keine Fehler.“
