@@ -30,7 +30,11 @@
   .wt-grafik .wt-schild { /* Bildfarben: Szene auf der Bildkachel */  font: 800 13px var(--schrift); fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; pointer-events: none; }
   .wt-beschreibung { max-width: 640px; margin: 0 auto 12px; padding: 10px 16px; border-radius: 16px; background: color-mix(in srgb, var(--deko-6) 9%, var(--k-karte)); border: 3px dashed color-mix(in srgb, var(--deko-6) 40%, var(--k-karte)); font-size: clamp(16px, 3.8vw, 20px); font-weight: 700; text-align: center; }
   .wahl-knopf { font-size: clamp(17px, 4vw, 22px); font-weight: 800; }
-  /* Ganze Aufgabe im Bild (BH3 a): Grafik nach der Bildhöhe; quer stehen Frage und Antworten rechts daneben. */
+  /* Ganze Aufgabe im Bild (BH3 a): Grafik nach der Bildhöhe; quer stehen Frage und Antworten rechts daneben.
+     Die Grafik ist so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, eine Höhe; --wt-verh = Breite je
+     Höhe der viewBox), statt nach geschätzten Abzügen 100vh − 230 … 700px (LERN_Session45). */
+  .wt-grafik { --wt-verh: calc(400 / 270); }
+  .wt-grafik[viewBox="0 0 300 230"] { --wt-verh: calc(300 / 230); }
   @media (max-width: 560px), (max-height: 820px) {
     .frage { margin-bottom: 8px; }
     .wt-grafik { margin-bottom: 8px; }
@@ -38,21 +42,19 @@
     .wt-rechts .wahl-knopf { min-height: 54px; }
   }
   @media (max-width: 560px) {
-    /* (100vh − 610px): bei 812 px rund 300 px breit — mit 500 px griff die Formel dort nicht, und die Reise mit sechs
-       Stationen ragte bis 23 px unter den Rand (LERN_Session43) */
-    .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc((100vh - 610px) * 400 / 270))); }
+    .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc(var(--rest-h, 202px) * var(--wt-verh)))); }
     .wt-rechts .wahl-knopf { min-height: 50px; }
     .wt-rechts .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
     .wt-rechts .wahl-knopf { flex-direction: row; gap: 6px; }
     .wt-rechts .wahl-knopf .bild { font-size: 30px; }
   }
   @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Grafik nach der Bildhöhe */
-    .wt-zeile .wt-grafik { width: max(min(300px, 100%), min(100%, 560px, calc((100vh - 700px) * 400 / 270))); }
+    .wt-zeile .wt-grafik { width: max(min(300px, 100%), min(100%, 560px, calc(var(--rest-h, 250px) * var(--wt-verh)))); }
   }
   @media (min-width: 900px) and (orientation: landscape) {
     .wt-zeile { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: center; }
-    .wt-zeile .wt-grafik { margin: 0 auto; width: max(280px, min(100%, calc((100vh - 230px) * 400 / 270))); }
-    .wt-zeile .wt-grafik[viewBox="0 0 300 230"] { width: max(280px, min(100%, 420px, calc((100vh - 230px) * 300 / 230))); }
+    /* Bodenprofil (300 × 230) höchstens 420 px breit: style="max-width:420px" an der Grafik */
+    .wt-zeile .wt-grafik { margin: 0 auto; width: max(280px, min(100%, calc(var(--rest-h, 325px) * var(--wt-verh)))); }
   }
 </style>
 </head>
@@ -571,6 +573,7 @@ LS.spiel({
       // über der Grafik — auf dem Handy 52 px Leerraum, die Aufgabe ragte bis 85 px unter den Rand (LERN_Session43)
       rechts.querySelector(".frage")?.setAttribute("data-tipp-ziel", "");
       ctx.flaeche.append(el("div", { class: "wt-zeile" }, grafik, rechts));
+      LS.restHoehe(grafik); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
     }
   },
 });

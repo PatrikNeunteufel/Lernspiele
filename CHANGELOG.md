@@ -2643,3 +2643,24 @@
 - Tests (Stichprobe nach „Testläufe während eines Umbaus“): Eulenpfad kompass kiosk-kasse zahlenmauer plan-leser
   zeitstrahl-sortierer zahlen-sudoku hello-dialog schriftlich-werkstatt „Keine Fehler.“, Feier „175 Spiele, 6300 Bilder,
   keine Fehler.“, Skripte „Keine Fehler.“
+- **Baustein „restliche Höhe“ (LERN-55, Wunsch an den Rahmen aus BH3):** `LS.restHoehe(el)` in `spiel.js` setzt am
+  Element `--rest-h` = seine Höhe plus den Platz unter seiner Karte (in einer Reihe nur seine Spalte, mehrere Elemente
+  einer Karte teilen sich den Platz), neu gemessen bei jeder Grössenänderung der Bühne oder des Fensters; ersetzt die
+  geschätzten Abzüge `100vh − …px`. `tools/pruefe_skripte.js` Punkt 5 verlangt auch für `var(--rest-h)` eine Untergrenze
+  (zwei neue Gegenproben). Umgestellt (35 Spiele, keine Regel `100vh − …px` mehr in den Spielseiten): Auge-Entdecker
+  (auge-entdecker), Blutkreislauf-Lotse (blutkreislauf-lotse), Braille-Finger (braille-finger), Bruch-Rechteck
+  (bruch-rechteck), Bruch-Werkstatt (bruch-werkstatt), Diagramm-Detektiv (diagramm-detektiv), Diagramm-Wahl
+  (diagramm-wahl), Erdzeit-Leiter (erdzeit-leiter), Finger-Zähler (finger-zaehler), Flächen-Pixel (flaechen-pixel),
+  Geheimschrift-Knacker (geheimschrift-knacker), Hebel-Wippe (hebel-wippe), Hoch-Tief-Ohr (hoch-tief-ohr),
+  Hundertertafel (hundertertafel), König in der Falle (koenig-falle), Kompass (kompass), Koordinaten-Schatz
+  (koordinaten-schatz; Tafel auf dem Laptop 378 statt 280 px breit, Spalten `minmax(0, 1fr)`), Lärm-Wächter
+  (laerm-waechter), Mittelwert-Waage (mittelwert-waage), Netz-Falter (netz-falter), Pentomino-Puzzle (pentomino-puzzle),
+  Plan-Leser (plan-leser), Quader-Volumen (quader-volumen), Quelle heure (quelle-heure), Roboter-Pfad (roboter-pfad),
+  Schriftlich-Werkstatt (schriftlich-werkstatt), Schweiz-Karte (schweiz-karte), Spiegel-Raster (spiegel-raster),
+  Steine fangen (steine-fangen), Stromkreis-Bauer (stromkreis-bauer), Tonleiter-Treppe (tonleiter-treppe),
+  Uhr-Werkstatt (uhr-werkstatt), Wassertropfen-Reise (wassertropfen-reise), Wetter und Jahreszeiten
+  (wetter-jahreszeiten), Zehntel-Lupe (zehntel-lupe). Schlussmessung aller Spiele auf der sichtbaren Fläche: Spiele mit
+  der Aufgabe über dem Rand Handy 68 → 60, Tablet hoch 12 → 9, Laptop 12 → 8, Tablet quer 0; die umgestellten Handy
+  20 → 13, Tablet hoch 5 → 0, Laptop 2 → 0. `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Restliche Höhe
+  LERN_Session45“, rahmen.md 20.
+- Tests: Eulenpfad über die 35 umgestellten Spiele „Keine Fehler.“, Skripte „Keine Fehler.“

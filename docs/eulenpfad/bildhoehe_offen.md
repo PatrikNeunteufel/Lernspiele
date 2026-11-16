@@ -183,7 +183,7 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
 4. **Begründete Ausnahmen der Bau-Helfer** (BH3) — *erledigt 2026-11-15 (LERN_Session44, Abschnitt „Ausnahmen
    geprüft LERN_Session44“ unten).*
 5. **Wünsche an den Rahmen** (aus BH3): Baustein „Element an die restliche Höhe anpassen“ für Grafiken (statt
-   `100vh − …px` je Spiel); Tastatur-Anordnung (2)/(3) auch für eigene Tastaturen (Geheimschrift-Knacker); Baustein
+   `100vh − …px` je Spiel) — *erledigt 2026-11-16 (LERN_Session45, `LS.restHoehe`, Abschnitt „Restliche Höhe“ unten)*; Tastatur-Anordnung (2)/(3) auch für eigene Tastaturen (Geheimschrift-Knacker); Baustein
    „Bild links, Rest rechts“ für breit und quer; allgemeine Grösse für `.knopf.klein`.
 6. **Sachaufgaben-Kompass, Ergebnis-Schritt auf dem Handy:** läuft schon ohne Notizen über (s3–s6 55–270 px, die
    Zifferntastatur nicht ganz im Bild); mit Notizen auch s2 (39–77 px). Das Messwerkzeug sieht es nicht, weil es nur
@@ -305,3 +305,54 @@ Rest (höchster Wert in px):
 
 Das Umschalten ins Vollbild ist im Browser der App nicht prüfbar (die Anfrage kommt nie zurück); Knopf, Platz und
 Sichtbarkeit nach Höhe und Maus geprüft.
+
+## Restliche Höhe LERN_Session45 (2026-11-16)
+
+Auszählung vorher (Handy 375×660, ungünstigste Ziehung je Spiel): von 68 Spielen über dem Rand hatten 16 eine Grafik
+ab 100 px, nur bei 8 hätte das Verkleinern der Grafik allein gereicht; dafür trugen 32 Spiele 63 geschätzte Abzüge
+`100vh − …px`, nach GR1 a alle zu gross. Entscheid Patrik: Baustein zuerst. `LS.restHoehe(el)` (rahmen.md 20) setzt
+`--rest-h`; umgestellt (Agenten je Gruppe, nachgeprüft): auge-entdecker, blutkreislauf-lotse, braille-finger,
+bruch-rechteck, bruch-werkstatt, diagramm-detektiv, diagramm-wahl, erdzeit-leiter, finger-zaehler, flaechen-pixel,
+geheimschrift-knacker, hebel-wippe, hoch-tief-ohr, hundertertafel, koenig-falle, kompass, koordinaten-schatz,
+laerm-waechter, mittelwert-waage, netz-falter, pentomino-puzzle, plan-leser, quader-volumen, quelle-heure, roboter-pfad,
+schriftlich-werkstatt, schweiz-karte, spiegel-raster, steine-fangen, stromkreis-bauer, tonleiter-treppe, uhr-werkstatt,
+wassertropfen-reise, wetter-jahreszeiten, zehntel-lupe. Keine `100vh − …px` mehr in den Spielseiten. Nebenbei:
+Koordinaten-Schatz Tafel auf dem Laptop 378 statt 280 px breit (Spalten `1fr` mit Mindestinhalt), behoben.
+
+Schlussmessung (alle Spiele, Stufen s1 s3 s6, drei Ziehungen, ein Lauf allein; `sicht_rest_2026-11-16.json`) gegen
+die Messung mit Verdichtung vor dem Baustein — Spiele mit der Aufgabe über dem Rand:
+
+| sichtbare Fläche | vor dem Baustein | nachher | davon umgestellte Spiele |
+|---|---|---|---|
+| Handy 375×660 | 68 | 60 | 20 → 13 |
+| Tablet hoch 768×950 | 12 | 9 | 5 → 0 |
+| Tablet quer 1024×690 | 0 | 0 | 0 → 0 |
+| Laptop 1366×650 | 12 | 8 | 2 → 0 |
+
+Auf dem Handy höher nach dem Umbau: uhr-werkstatt, kompass, zehntel-lupe, quader-volumen — gezielt nachgemessen (mit
+`--arten`, alter Stil über `--css`): andere Aufgabenarten gezogen; wo die Aufgabe überläuft, steht die Grafik schon an
+der Untergrenze (Uhr 180 px, Plan 200 px, Lupe 100 % Breite, Körper 0,8 der Zeichnung). Die Seite selbst ragt jetzt öfter
+bis 19 px über (Tablet quer 7 → 34 Seiten): `--rest-h` rechnet bis zur Karte, der untere Rand der Bühne (12 px) bleibt
+darunter — die Aufgabe ist im Bild.
+
+Messwerkzeug: Bei vier Läufen gleichzeitig auf denselben Server kamen einzelne Ziehungen mit 150–1400 px und einmal die
+Startseite statt des Spiels; allein gemessen keine.
+
+Rest (höchster Wert in px):
+- **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,
+  zufalls-skala 91, zahlenmauer 90, fahrplan-rechner 75, uhr-werkstatt 74, quader-volumen 74, preis-tabelle 73,
+  tier-sortierer 72, rechen-maschine 70, zahlenraetsel-tresor 69, malkreuz 66, sachaufgaben-kompass 65,
+  diagramm-detektiv 63, mittelwert-waage 62, zahlenhaus 62, flaechen-pixel 62, flaechenmass-treppe 57, reim-paare 55,
+  lese-detektiv 54, rhythmus-diktat 54, gemeinde-helfer 54, zahlen-waage 49, gerecht-teiler 48, pflanzen-bestimmer 45,
+  znueni-teller 44, bionik-paare 44, himmels-forscher 42, schwimmt-sinkt 42, erdzeit-leiter 40, gattungs-kenner 40,
+  zehntel-lupe 38, stufenzahl-schieber 37, wortarten-probe 37, glace-kombinator 36, gefuehle-radar 35,
+  geschichten-ordner 34, roboter-pfad 33, velo-tabelle 32, speicher-leiter 32, platzhalter-geschichten 32,
+  wuerfel-zaehler 32, frueher-heute 31, satz-reparatur 29, zahlen-baukasten 27, fledermaus-forscher 27,
+  kulturen-koffer 26, gegenteil-wippe 19, schriftlich-werkstatt 18, komma-messband 15, diagramm-wahl 15, son-lauscher 14,
+  wassertropfen-reise 12, taschengeld-planer 11, calendrier 9, zeitstrahl-sortierer 8, ziffernkarten 6.
+- **Tablet hoch 768×950:** zahlen-baukasten 65, kakao-weg 56, zahlenmauer 47, preis-tabelle 47, malkreuz 45,
+  fahrplan-rechner 41, rechen-maschine 26, zahlenhaus 12, flaechenmass-treppe 3.
+- **Laptop 1366×650:** geschichten-ordner 37, tier-sortierer 36, rhythmus-diktat 34, reim-paare 26, znueni-teller 26,
+  tageslauf-sonne 24, begriffs-geodreieck 20, fahrplan-rechner 18.
+- Tablet quer 1024×690: keins.
+Bei den umgestellten Spielen in der Handy-Liste liegt der Rest an Untergrenzen (H1 a) oder in Aufgaben ohne Grafik.

@@ -24,8 +24,12 @@
   .frage b { color: var(--knopf); }
   .frage-bild { text-align: center; font-size: clamp(40px, 9vw, 56px); line-height: 1.1; }
 
-  .kreislauf { display: block; width: 100%; max-width: 420px; margin: 0 auto 6px; touch-action: manipulation; user-select: none; }
-  .kreislauf.koerperbild { max-width: 300px; }
+  /* Schema so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe = Höhe des Schemas, mal Seitenverhältnis
+     der viewBox 420 × 460 bzw. 300 × 420), mindestens 260 bzw. 200 px breit. Vorher nur breit und quer, geschätzt
+     100vh − 220px; auf dem Handy 375×660 ragte die Aufgabe bis 63 px unter den Rand (LERN_Session45) */
+  .kreislauf { display: block; width: max(min(260px, 100%), min(100%, calc(var(--rest-h, 460px) * 420 / 460))); max-width: 420px;
+    margin: 0 auto 6px; touch-action: manipulation; user-select: none; }
+  .kreislauf.koerperbild { width: max(min(200px, 100%), min(100%, calc(var(--rest-h, 420px) * 300 / 420))); max-width: 300px; }
   .kreislauf.antippen .station { cursor: pointer; }
   .kreislauf text { font-family: var(--schrift); font-weight: 800; fill: var(--text); text-anchor: middle; dominant-baseline: middle; }
   .kreislauf .klein { font-size: 11px; }
@@ -64,8 +68,8 @@
       column-gap: 24px; align-content: start; }
     div:has(> svg.kreislauf) > * { grid-column: 2; min-width: 0; }
     div:has(> svg.kreislauf) > .wahl { margin-inline: 0; }
-    div:has(> svg.kreislauf) > svg.kreislauf { grid-column: 1; grid-row: 1 / 8; width: max(260px, min(420px, (100vh - 220px) * 420 / 460)); margin: 0; }
-    div:has(> svg.kreislauf) > svg.kreislauf.koerperbild { width: max(200px, min(300px, (100vh - 220px) * 300 / 420)); }
+    div:has(> svg.kreislauf) > svg.kreislauf { grid-column: 1; grid-row: 1 / 8; width: max(260px, min(420px, calc(var(--rest-h, 460px) * 420 / 460))); margin: 0; }
+    div:has(> svg.kreislauf) > svg.kreislauf.koerperbild { width: max(200px, min(300px, calc(var(--rest-h, 420px) * 300 / 420))); }
     div:has(> svg.kreislauf) > .frage { margin-top: 12px; }
   }
   /* Handy: zwei Antworten nebeneinander statt untereinander. */
@@ -307,6 +311,7 @@ function pfeilEl([x, y, richtung]) {
 function bild(opt) {
   const svg = svgEl("svg", { class: `kreislauf${opt.art === "koerper" ? " koerperbild" : ""}${opt.antippen ? " antippen" : ""}`,
     viewBox: opt.art === "koerper" ? "0 0 300 420" : "0 0 420 460", role: "img", "aria-label": "Schema des Blutkreislaufs" });
+  LS.restHoehe(svg); // Breite nach der restlichen Höhe (--rest-h, LERN_Session45)
   const stationen = new Map();
   const unten = svgEl("g"), mitte = svgEl("g"), oben = svgEl("g");
   svg.append(unten, mitte, oben);

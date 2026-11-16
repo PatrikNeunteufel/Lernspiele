@@ -1981,6 +1981,72 @@ const LS = (() => {
   }
   addEventListener("resize", () => lesetexte.forEach(lesetextHoehe));
 
+  // ---------- Restliche Höhe (GR1 a, Wunsch an den Rahmen aus BH3, LERN_Session45) ----------
+  // Eine Grafik oder ein Spielfeld soll so gross sein, wie die Aufgabe Platz übrig lässt. Statt je Spiel zu schätzen,
+  // wie hoch Kopfzeile, Eule und Abstände sind (`100vh − 600px`: 63 Schätzungen in 32 Spielen, nach GR1 a alle zu
+  // gross), misst der Rahmen: Er setzt am Element `--rest-h` = seine heutige Höhe plus den Platz, der unter seiner
+  // Karte frei ist (negativ, wenn die Karte über den Rand ragt). Das Spiel rechnet seine Grösse daraus, immer mit
+  // Untergrenze (H1 a):
+  //   width: max(200px, min(420px, 100%, calc(var(--rest-h, 420px) * 320 / 345)))
+  // Gemessen bis zur Unterkante der Karte, nicht der Bühne: Ziel ist die ganze Aufgabe im Bild (BH1 a); mit dem unteren
+  // Rand der Bühne wurde das Thermometer in Wetter und Jahreszeiten 37 px kleiner als nötig (LERN_Session45).
+  // Steht das Element in einer Reihe neben anderem (Bild links, Antworten rechts), zählt nur seine Spalte: Ist der
+  // Nachbar höher, darf es bis zu dessen Unterkante wachsen, und schrumpfen hülfe nichts. Den Platz teilen sich die
+  // Elemente derselben Karte. Die Formel zieht die eigene Wirkung ab und beruhigt sich nach wenigen Durchgängen; neu
+  // gemessen wird, wenn sich die Bühne oder das Fenster in der Grösse ändert (nicht <html>: das ist so hoch wie das
+  // Fenster und meldet wachsenden Inhalt nicht, Befund LERN_Session45).
+  const restElemente = new Set();
+  const REST_DURCHGAENGE = 8;
+  /** Platz in px, um den e wachsen kann (negativ: schrumpfen muss), bis seine Karte genau ins Bild passt. */
+  function restFrei(e, unten) {
+    let frei = innerHeight - (unten.getBoundingClientRect().bottom + scrollY);
+    for (let p = e; p.parentElement && p !== unten; p = p.parentElement) {
+      const r = p.getBoundingClientRect();
+      let unten = r.bottom;
+      for (const s of p.parentElement.children) {
+        if (s === p || /^(absolute|fixed)$/.test(getComputedStyle(s).position)) continue;
+        const q = s.getBoundingClientRect();
+        if (q.height && q.top < r.bottom && q.bottom > r.top && (q.left >= r.right - 1 || q.right <= r.left + 1)) unten = Math.max(unten, q.bottom);
+      }
+      frei += unten - r.bottom; // Spielraum neben einem höheren Nachbarn
+    }
+    return frei;
+  }
+  let restLaeuft = false;
+  function restMessen() {
+    const buehne = document.querySelector(".buehne");
+    if (restLaeuft || !buehne) return;
+    restLaeuft = true;
+    try {
+      for (let i = 0; i < REST_DURCHGAENGE; i++) {
+        const sichtbar = [...restElemente].filter(e => (e.isConnected ? e.getClientRects().length : (restElemente.delete(e), 0)));
+        const karte = e => e.closest(".karte") || buehne;
+        let geaendert = false;
+        for (const e of sichtbar) {
+          const k = karte(e), anzahl = sichtbar.filter(x => karte(x) === k).length;
+          const neu = Math.max(0, Math.floor(e.getBoundingClientRect().height + restFrei(e, k) / anzahl));
+          const alt = parseFloat(e.style.getPropertyValue("--rest-h"));
+          if (!(Math.abs(neu - alt) < 2)) { e.style.setProperty("--rest-h", neu + "px"); geaendert = true; }
+        }
+        if (!geaendert) break;
+      }
+    } finally { restLaeuft = false; }
+  }
+  let restBeobachter = null;
+  /** Gibt e die Variable --rest-h (siehe oben); das Spiel ruft es, sobald e in der Spielfläche steht. Gibt e zurück. */
+  function restHoehe(e) {
+    restElemente.add(e);
+    if (!restBeobachter && typeof ResizeObserver !== "undefined") {
+      restBeobachter = new ResizeObserver(() => restMessen());
+      const buehne = document.querySelector(".buehne");
+      if (buehne) restBeobachter.observe(buehne);
+      addEventListener("resize", restMessen);
+      document.fonts?.ready.then(restMessen);
+    }
+    setTimeout(restMessen, 0); // nicht requestAnimationFrame: läuft in einem verborgenen Fenster nicht (LERN_Session13)
+    return e;
+  }
+
   // ---------- Kurztasten für Antwortknöpfe (Entscheid TK1 a mit Zusatz Patrik, LERN_Session13) ----------
   // Wer mit einer echten Tastatur spielt, wählt Antworten auch mit Tasten. Zwei Arten von Tasten:
   //  • nach dem Ort (KeyboardEvent.code), ausgelegt für die Schweizer Tastatur (QWERTZ): Gleiche Zeichen liegen in
@@ -3778,7 +3844,7 @@ const LS = (() => {
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
     STELLEN, SKALA, schriftFarbe, flaeche, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, farbenKnopf, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
-    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, restHoehe, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     person, umbenennen, gehoert, PERSONEN,

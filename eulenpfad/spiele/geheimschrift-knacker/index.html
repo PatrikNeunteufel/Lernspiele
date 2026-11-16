@@ -14,9 +14,11 @@
     font-weight: 900; letter-spacing: .18em; margin: 2px 0 10px; color: var(--deko-1-schrift); }
   .wortkarte .gk-pfeil { color: var(--text-leise); letter-spacing: 0; margin: 0 .3em; }
 
-  /* Scheibe nach der Bildhöhe (BH3 a): hoch so gross, wie neben Wort, Feldern und Tasten Platz bleibt */
+  /* Scheibe nach der Bildhöhe (BH3 a): so gross, wie neben Wort, Feldern und Tasten Platz bleibt — quadratisch, Breite =
+     --rest-h von LS.restHoehe (vorher geschätzt 100vh − 620px, breit und quer 520px bzw. neben den Feldern 420px;
+     LERN_Session45) */
   .gk-scheibe-box { margin: 0 auto 6px; width: fit-content; max-width: 100%; }
-  .gk-scheibe { display: block; width: clamp(190px, 100vh - 620px, 300px); max-width: 100%; height: auto; margin: 0 auto; }
+  .gk-scheibe { display: block; width: clamp(190px, var(--rest-h, 260px), 300px); max-width: 100%; height: auto; margin: 0 auto; }
   .gk-scheibe .ring-aussen { fill: var(--karte); stroke: var(--rand); stroke-width: 2; }
   .gk-scheibe .ring-innen { fill: var(--k-feld); stroke: var(--deko-1); stroke-width: 2; }
   .gk-scheibe text { font-family: ui-monospace, Consolas, monospace; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
@@ -61,8 +63,7 @@
     .gk-feld .gk-slots { grid-area: slots; }
     .gk-feld .gk-tasten { grid-area: tasten; width: 100%; }
     .gk-feld:not(:has(.gk-scheibe)) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "wort" "slots" "tasten"; }
-    .gk-scheibe { width: clamp(190px, 100vh - 520px, 300px); }
-    .gk-feld .gk-scheibe { width: clamp(220px, 100vh - 420px, 300px); }
+    .gk-feld .gk-scheibe { width: clamp(220px, var(--rest-h, 300px), 300px); }
   }
   .gk-tasten button:disabled { opacity: .45; }
   .wahl-knopf.gk-buchstabe { font-family: ui-monospace, Consolas, monospace; font-size: clamp(30px, 7vw, 44px); font-weight: 900; }
@@ -225,6 +226,7 @@ function scheibe(k, { innen = true, drehbar = false } = {}) {
   const box = el("div", { class: "gk-scheibe-box" });
   const svg = svgEl("svg", { viewBox: "0 0 300 300", class: "gk-scheibe", role: "img",
     "aria-label": innen ? "Schlüsselscheibe: aussen Klartext, innen Geheimschrift" : "Alphabet im Kreis" });
+  LS.restHoehe(svg); // Grösse nach der restlichen Höhe (LERN_Session45)
   svg.append(svgEl("circle", { cx: 150, cy: 150, r: 146, class: "ring-aussen" }));
   if (innen) svg.append(svgEl("circle", { cx: 150, cy: 150, r: 112, class: "ring-innen" }));
   const geheim = [];

@@ -1,5 +1,23 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-16 16:45 — LERN_Session45_2026-11-16_push-seltene-arten (aufgenommen 2026-11-16 18:01)
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+- **Angehalten — beim Weitermachen neu starten:** nichts (keine Hintergrundläufe, keine Agenten; der Server
+  `lernspiele` auf 8765 war schon beendet — für Messungen mit `preview_start` `lernspiele` neu starten).
+- **Stand:** alles committet bis `e1b8f90` (Patrik): voller Eulenpfad-Lauf auf `0022648` „Keine Fehler.“; seltene
+  Aufgabenarten nachgemessen, sieben Spiele behoben, `bildhoehe.js --arten` (`a6706c8`); GR1 a im Rahmen umgesetzt —
+  Verdichtung unter 700 px, ⛶ Vollbild, Messwerkzeug auf der sichtbaren Fläche, Handy 118 → 68, Tablet quer 36 → 0,
+  Laptop 72 → 12 Spiele über dem Rand (`e1b8f90`). Seit dem vollen Lauf geändert: `stil.css`, `spiel.js`, neun Spiele;
+  geprüft nur als Stichprobe (acht Spiele, Feier, Skripte). Nicht gepusht ist nichts bekannt — Patrik pusht.
+- **Weiter mit:** (1) Antwort auf die offene Frage (unten); (2) Rest je Spiel aus `bildhoehe_offen.md`, Abschnitt
+  „Sichtbare Fläche LERN_Session45“; (3) voller Eulenpfad-Lauf vor dem nächsten Push, auf Patriks Entscheid
+  (`stil.css` und `spiel.js` geändert); (4) Abschluss mit Report LERN_Session45.
+- **Offene Entscheidung Patrik:** Rest nach GR1 a — a (Empfehlung) zuerst ein Rahmen-Baustein „Grafik an die restliche
+  Höhe anpassen“ (Punkt 5 der Liste, mit Untergrenze nach H1 a), vorher kurz auszählen, wie viele der 68 Spiele wegen
+  einer Grafik überlaufen; b gleich je Spiel anpassen, grösste Werte zuerst.
+- **Von Patrik zu prüfen:** ⛶ Vollbild im eigenen Browser bei kleinem Fenster (im Browser der App kam die Anfrage nie
+  zurück).
+
 ## Stand
 **2026-11-15, nach LERN_Session44** ([Report](report/LERN_Session44_2026-11-15.md)):
 - **Kern:** unverändert 1.46.0.

@@ -15,6 +15,11 @@
   /* Diagramme als SVG, skaliert auf die Breite (375 px ohne Querscrollen) */
   .dw-diagramm { display: block; width: min(420px, 100%); margin: 0 auto 8px; touch-action: manipulation; }
   .dw-diagramm.dw-kreis { width: min(240px, 70%); }
+  /* Diagramme so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, --dw-verh = Breite je Höhe der viewBox;
+     LERN_Session45). Vorher unter 820 px Bildhöhe min(420px, 100%, 52vh): auf dem Handy 375 × 660 ragten Säulen lesen
+     (s1) und „Kann man nicht sagen“ (s6) bis 37 px unter den Rand. */
+  .dw > .dw-diagramm:not(.dw-kreis) { width: max(min(240px, 100%), min(420px, 100%, calc(var(--rest-h, 290px) * var(--dw-verh)))); }
+  .dw > .dw-diagramm.dw-kreis { width: max(min(160px, 70%), min(240px, 70%, var(--rest-h, 240px))); }
   .dw-diagramm text { font-family: var(--schrift); font-weight: 800; fill: var(--text); }
   .dw-diagramm .zahl { font-size: 12px; fill: var(--text-leise); }
   .dw-diagramm .name { font-size: 12px; }
@@ -47,7 +52,7 @@
   .dw-farbe { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: -2px; margin-right: 4px; }
 
   .dw-zwei { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px 16px; margin-bottom: 8px; }
-  .dw-zwei .dw-diagramm { width: min(300px, 100%); margin: 0; }
+  .dw-zwei .dw-diagramm { width: max(min(200px, 100%), min(300px, 100%, calc(var(--rest-h, 217px) * var(--dw-verh)))); margin: 0; }
 
   .dw-tabelle { border-collapse: collapse; margin: 0 auto 10px; font-size: clamp(16px, 3.8vw, 20px); font-weight: 800; background: var(--karte); }
   .dw-tabelle th, .dw-tabelle td { border: 2px solid var(--rand); padding: 4px 10px; text-align: left; }
@@ -87,7 +92,7 @@
     .dw-wahl-gross.dw-blaettern svg { max-width: none; }
   }
   @media (max-height: 820px) {
-    .dw > .dw-diagramm:not(.dw-kreis) { width: min(420px, 100%, 52vh); margin-bottom: 4px; }
+    .dw > .dw-diagramm:not(.dw-kreis) { margin-bottom: 4px; }
     .dw .frage { margin-bottom: 6px; }
     .dw .frage .dw-zitat { margin-top: 2px; }
   }
@@ -624,6 +629,9 @@ function svgNeu(viewBox, klasse, label) {
   s.setAttribute("class", klasse);
   s.setAttribute("role", "img");
   s.setAttribute("aria-label", label);
+  // Breite je Höhe für die Grösse nach --rest-h (LERN_Session45)
+  const [, , b, h] = viewBox.split(" ").map(Number);
+  s.style.setProperty("--dw-verh", (b / h).toFixed(4));
   return s;
 }
 
@@ -823,7 +831,7 @@ LS.spiel({
     if (["wert", "meist", "wenigst", "extrem", "mittelwert"].includes(a.art)) {
       const d = D.saeulen[a.s];
       const w = werte(d);
-      f.append(titel(d.titel), saeulenSvg({ kategorien: d.kategorien.map((k, i) => kategorie(d, i)), achse: d.achse, einheit: d.einheit }), frageEl(a.frage));
+      f.append(titel(d.titel), LS.restHoehe(saeulenSvg({ kategorien: d.kategorien.map((k, i) => kategorie(d, i)), achse: d.achse, einheit: d.einheit })), frageEl(a.frage));
       const zahl = typeof a.loesung === "number";
       const loesung = a.art === "wert" ? `${namen(d)[a.i]}: ${mitEinheit(d, a.loesung)}.`
         : a.art === "mittelwert" ? `(${w.join(" + ")}) : ${w.length} = ${summe(w)} : ${w.length} = ${a.loesung}`
@@ -853,14 +861,14 @@ LS.spiel({
       const loesung = tippen ? `${groesse[0].toUpperCase() + groesse.slice(1)} ist ${teilName(a.i)}.` : `${teilName(a.i)} ist ${groesse}.`;
       ctx.loesung(loesung);
       let fertig = false;
-      const svg = kreisSvg({ teile: d.teile, nenner: d.nenner, onTipp: tippen ? (i, pfad) => {
+      const svg = LS.restHoehe(kreisSvg({ teile: d.teile, nenner: d.nenner, onTipp: tippen ? (i, pfad) => {
         if (fertig || ctx.vorbei() || pfad.classList.contains("falsch")) return;
         if (i === a.i) { fertig = true; pfad.classList.add("richtig"); ctx.richtig(); return; }
         pfad.classList.add("falsch");
         const z = d.teile.map(t => t[2]);
         ctx.falsch(`Dieser Teil ist ${z[i] > z[a.i] ? "zu gross. Such einen kleineren" : "zu klein. Such einen grösseren"} Teil.`, loesung);
         if (ctx.vorbei()) fertig = true;
-      } : null });
+      } : null }));
       f.append(titel(d.titel), svg, legende(d.teile), frageEl(a.frage));
       const grundTipp = prozent ? "Der ganze Kreis sind 100 %. Die Hälfte des Kreises sind 50 %, ein Viertel 25 %."
         : "Zwei gleich grosse Teile füllen den Kreis: Jeder ist die Hälfte. Vier: Jeder ist ein Viertel. Acht: Jeder ist ein Achtel. Drei: Jeder ist ein Drittel.";
@@ -898,7 +906,7 @@ LS.spiel({
     if (a.art === "linieExtrem" || a.art === "linieAnstieg") {
       const d = D.linien[a.l];
       const w = d.werte;
-      f.append(titel(d.titel), linieSvg({ x: d.x, werte: w, achse: d.achse, einheit: d.einheit }), frageEl(a.frage));
+      f.append(titel(d.titel), LS.restHoehe(linieSvg({ x: d.x, werte: w, achse: d.achse, einheit: d.einheit })), frageEl(a.frage));
       if (a.art === "linieExtrem") {
         const loesung = `${a.max ? "Am höchsten" : "Am tiefsten"}: ${a.loesung} mit ${zahlText(w[d.x.indexOf(a.loesung)])} ${d.einheit}.`;
         ctx.tipp([a.max ? "Such den höchsten Punkt der Linie." : "Such den tiefsten Punkt der Linie.", "Geh von diesem Punkt senkrecht nach unten: Welche Zeit steht dort?"]);
@@ -921,7 +929,7 @@ LS.spiel({
       if (a.quelle === "linien") {
         const d = D.linien[a.l];
         const w = d.werte;
-        f.append(titel(d.titel), linieSvg({ x: d.x, werte: w, achse: d.achse, einheit: d.einheit }));
+        f.append(titel(d.titel), LS.restHoehe(linieSvg({ x: d.x, werte: w, achse: d.achse, einheit: d.einheit })));
         loesung = a.typ === "offen" ? "Das steht nicht im Diagramm — man kann es nicht sagen."
           : a.typ === "hoechst" ? `${a.max ? "Am höchsten" : "Am tiefsten"} ist es ${d.xWo[w.indexOf(a.max ? Math.max(...w) : Math.min(...w))]} — ${ANTWORT[a.loesung].text.toLowerCase()}.`
           : `${xName(d.xWo[a.i])}: ${w[a.i]} ${d.einheit}, ${xName(d.xWo[a.j])}: ${w[a.j]} ${d.einheit} — ${ANTWORT[a.loesung].text.toLowerCase()}.`;
@@ -933,12 +941,12 @@ LS.spiel({
         if (a.typ === "gruppen") {
           const kat2 = d.kategorien.map((k, i) => ({ ...kategorie(d, i), wert: k[3] }));
           f.append(titel(d.titel), el("div", { class: "dw-zwei" },
-            saeulenSvg({ kategorien: kat, achse: a.achse1, einheit: d.einheit, gruppe: d.gruppen[0] }),
-            saeulenSvg({ kategorien: kat2, achse: a.achse2, einheit: d.einheit, gruppe: d.gruppen[1], farbe: "b" })));
+            LS.restHoehe(saeulenSvg({ kategorien: kat, achse: a.achse1, einheit: d.einheit, gruppe: d.gruppen[0] })),
+            LS.restHoehe(saeulenSvg({ kategorien: kat2, achse: a.achse2, einheit: d.einheit, gruppe: d.gruppen[1], farbe: "b" }))));
           loesung = `${nm[a.i]}: ${d.gruppen[0]} ${mitEinheit(d, w[a.i])}, ${d.gruppen[1]} ${mitEinheit(d, werte2(d)[a.i])} — ${ANTWORT[a.loesung].text.toLowerCase()}. Achtung, die beiden Achsen sind verschieden.`;
           zusatz = "Vorsicht: Die zwei Diagramme haben verschiedene Achsen.";
         } else {
-          f.append(titel(d.titel), saeulenSvg({ kategorien: kat, achse: d.achse, basis: a.basis || 0, einheit: d.einheit }));
+          f.append(titel(d.titel), LS.restHoehe(saeulenSvg({ kategorien: kat, achse: d.achse, basis: a.basis || 0, einheit: d.einheit })));
           loesung = a.typ === "offen" ? "Das steht nicht im Diagramm — man kann es nicht sagen."
             : a.typ === "meist" ? `Am meisten: ${nm[w.indexOf(Math.max(...w))]} — ${ANTWORT[a.loesung].text.toLowerCase()}.`
             : `${nm[a.i]}: ${mitEinheit(d, w[a.i])}, ${nm[a.j]}: ${mitEinheit(d, w[a.j])} — ${ANTWORT[a.loesung].text.toLowerCase()}.${a.basis ? " Achtung, die Achse beginnt nicht bei 0." : ""}`;
@@ -989,13 +997,13 @@ LS.spiel({
     if (a.art === "irre") {
       if (a.kind === "achse" || a.kind === "zahlen") {
         const d = D.saeulen[a.s];
-        f.append(titel(d.titel), saeulenSvg({ kategorien: d.kategorien.map((k, i) => kategorie(d, i)), achse: d.achse, basis: a.basis, zahlen: a.kind !== "zahlen", einheit: d.einheit }));
+        f.append(titel(d.titel), LS.restHoehe(saeulenSvg({ kategorien: d.kategorien.map((k, i) => kategorie(d, i)), achse: d.achse, basis: a.basis, zahlen: a.kind !== "zahlen", einheit: d.einheit })));
       } else if (a.kind === "prozent") {
         const d = D.kreis[a.k];
-        f.append(titel(d.titel), kreisSvg({ teile: d.teile, nenner: d.nenner, labels: a.labels.map(x => `${x} %`) }), legende(d.teile));
+        f.append(titel(d.titel), LS.restHoehe(kreisSvg({ teile: d.teile, nenner: d.nenner, labels: a.labels.map(x => `${x} %`) })), legende(d.teile));
       } else {
         const d = D.linien[a.l];
-        f.append(titel(d.titel), linieSvg({ x: d.xUngleich, werte: d.werte, achse: d.achse, einheit: d.einheit }));
+        f.append(titel(d.titel), LS.restHoehe(linieSvg({ x: d.xUngleich, werte: d.werte, achse: d.achse, einheit: d.einheit })));
       }
       f.append(frageEl(a.frage));
       const loesung = IRRE[a.kind] + (a.kind === "achse" ? " Die Unterschiede sehen grösser aus, als sie sind." : a.kind === "prozent" ? ` Zusammen sind es ${summe(a.labels)} %.` : a.kind === "zeit" ? " Alle Punkte sind gleich weit auseinander gezeichnet, obwohl die Zeit dazwischen verschieden lang ist." : " So lässt sich kein Wert ablesen.");

@@ -6,7 +6,7 @@
 //   3. kein Skript kommt von aussen (http, https, //) — die Reihe läuft ohne externe Abhängigkeiten (Entscheid LERN-1);
 //      ebenso kein <link href>, @import oder url() von aussen (Stile, Schriften; seit LERN_Session32);
 //   4. jede Seite, die <app>/kern/kern.js lädt, lädt davor <app>/version.js (Plan C12, NS3 a: Version der App);
-//   5. jede Grösse nach der Bildhöhe (`100vh - …`, auch dvh, svh, lvh) in .css-Dateien und <style>-Blöcken steht in
+//   5. jede Grösse nach der Bildhöhe (`100vh - …`, auch dvh, svh, lvh, und `var(--rest-h)` von LS.restHoehe) in .css-Dateien und <style>-Blöcken steht in
 //      einem max() oder clamp() mit Untergrenze (Entscheid H1 a, LERN_Session28: unter 480 px Bildhöhe wurde die Breite
 //      der Hände im Finger-Zähler null, Stufe 6 blitzte ein leeres Feld; acht weitere Spiele ebenso). Ausnahme nur mit
 //      dem Kommentar „ohne Untergrenze: <Grund>“ im selben Regelblock (feste Fenster, die nie grösser als das Bild sein
@@ -51,7 +51,8 @@ const dateien = (ordner, endung) => fs.readdirSync(ordner, { withFileTypes: true
   e.isDirectory() ? dateien(path.join(ordner, e.name), endung) : e.name.endsWith(endung) ? [path.join(ordner, e.name)] : []);
 
 // 5. Grösse nach der Bildhöhe: Zahl mit vh (dvh, svh, lvh), dann ein Minus
-const VH_MINUS = /\b\d+(?:\.\d+)?[dsl]?vh\s*-/g;
+// auch die restliche Höhe des Rahmens (LS.restHoehe, --rest-h, LERN_Session45): ebenfalls nach der Bildhöhe
+const VH_MINUS = /\b\d+(?:\.\d+)?[dsl]?vh\s*-|var\(\s*--rest-h\b/g;
 const AUSNAHME = "ohne Untergrenze:";
 
 /**
@@ -99,6 +100,8 @@ const GEGENPROBEN_CSS = [
   [`/* ${AUSNAHME} */ .a { max-height: calc(100vh - 24px); }`, 1, "Ausnahme vor dem Block"],
   ["/* .a { width: calc(100vh - 9px); } */ .b {}", 0, "nur im Kommentar"],
   ["@media (x) { .a { height: calc(100dvh - 50px); } }", 1, "dvh in @media"],
+  [".a { width: min(420px, calc(var(--rest-h, 420px) * 2)); }", 1, "restliche Höhe ohne Untergrenze"],
+  [".a { width: max(200px, min(420px, 100%, calc(var(--rest-h, 420px) * 320 / 345))); }", 0, "restliche Höhe mit Untergrenze"],
   ["@import url('https://fonts.example/css?family=X');", 1, "Schrift von aussen per @import"],
   ["@font-face { font-family: X; src: url(//cdn.example/x.woff2); }", 1, "Schriftdatei von aussen"],
   ["@font-face { font-family: X; src: url('schriften/x.woff2'); }", 0, "Schriftdatei im App-Ordner"],

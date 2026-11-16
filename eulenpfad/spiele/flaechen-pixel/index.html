@@ -14,8 +14,10 @@
   .raster .zelle { fill: var(--f, var(--deko-5)); stroke: var(--k-karte); stroke-width: 1.5; }
   .raster .rand { fill: none; stroke: var(--text); stroke-width: 3; stroke-linejoin: round; }
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
-  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy lässt das Raster über der Zifferntastatur Platz. */
-  @media (max-width: 560px) { .frage + .raster { max-height: calc(100vh - 600px); min-height: 200px; } }
+  /* Ganze Aufgabe im Bild (BH3 a): Auf dem Handy lässt das Raster über der Zifferntastatur Platz — so hoch, wie der
+     Rahmen misst (--rest-h von LS.restHoehe = Höhe des Rasters; vorher geschätzt 100vh − 600px, nach GR1 a falsch,
+     LERN_Session45), mindestens 200 px */
+  @media (max-width: 560px) { .frage + .raster { max-height: var(--rest-h, 212px); min-height: 200px; } }
 </style>
 </head>
 <body>
@@ -223,7 +225,7 @@ LS.spiel({
       return;
     }
     const frage = a.art === "flaeche" ? "Wie viele Häuschen hat die Figur?" : "Wie lang ist der Rand? Zähle die Häuschen-Seiten.";
-    ctx.flaeche.append(el("div", { class: "frage", text: frage }), rasterBild(a.zellen));
+    ctx.flaeche.append(el("div", { class: "frage", text: frage }), LS.restHoehe(rasterBild(a.zellen))); // Höhe nach --rest-h (LERN_Session45)
     // Königsstufe: Hilfe ohne die Masse des Rechtecks.
     const hinweis = STUFE[ctx.stufe].knapp
       ? (a.art === "flaeche" ? "Nicht ganz. Wie viele Reihen, wie viele in jeder Reihe?" : "Nicht ganz. Jede kleine Seite am Rand zählt — auch in den Ecken und Buchten.")

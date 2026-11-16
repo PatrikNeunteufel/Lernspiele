@@ -14,11 +14,11 @@
 
   .lupe { max-width: 760px; margin: 0 auto 8px; }
   .lupe-strahl { width: 100%; max-width: 760px; display: block; margin: 0 auto; touch-action: manipulation; overflow: visible; }
-  /* Tablet hoch (BH3 a, LERN_Session43): drei Strahlen übereinander (zusammen 700 × 368) und die Zifferntastatur darunter —
-     Strahlen nach der Bildhöhe, sonst ragte die Aufgabe bis 37 px unter den Rand; Untergrenze nach H1 a */
-  @media (min-width: 561px) and (orientation: portrait) {
-    .lupe .lupe-strahl { width: max(min(400px, 100%), min(100%, calc((100vh - 702px) * 700 / 368))); }
-  }
+  /* Strahlen nach der Bildhöhe (BH3 a, LERN_Session43: auf dem Tablet hoch ragten drei Strahlen mit der Zifferntastatur
+     bis 37 px unter den Rand). Seit LERN_Session45 misst der Rahmen: --rest-h (LS.restHoehe) ist die Höhe, die alle
+     Strahlen der Lupe zusammen haben dürfen, --lupe-verh ihre Breite je Höhe (lupeGroesse). Untergrenze nach H1 a:
+     400 px, schmaler wird die Schrift im Strahl zu klein. */
+  .lupe .lupe-strahl { width: max(min(400px, 100%), min(100%, calc(var(--rest-h, 368px) * var(--lupe-verh, 1.9)))); }
   .lupe-strahl .linie { stroke: var(--text); stroke-width: 4; stroke-linecap: round; }
   .lupe-strahl .strich { stroke: var(--text); stroke-width: 2; }
   .lupe-strahl .strich.gross { stroke-width: 3.5; }
@@ -298,6 +298,12 @@ function ebeneZeichnen(von, schritt, einheit, opt = {}) {
   return svg;
 }
 
+/** Breite je Höhe aller Strahlen der Lupe zusammen (--lupe-verh), für die Grösse nach --rest-h (LERN_Session45). */
+function lupeGroesse(lupe) {
+  const hoehe = [...lupe.children].reduce((s, svg) => s + Number(svg.getAttribute("viewBox").split(" ")[3]), 0);
+  lupe.style.setProperty("--lupe-verh", (B / hoehe).toFixed(4));
+}
+
 /** Weg durch die Lupe: je Ebene Anfang, Strichabstand und das Stück (zuletzt: der Strich) des Ziels. */
 function lupenWeg(a) {
   const weg = [];
@@ -341,7 +347,7 @@ function setzen(ctx, a, p) {
   ctx.flaeche.append(
     el("div", { class: "frage", text: a.ebenen ? "Tipp auf das Stück, in dem die Zahl liegt. Die Lupe zeigt es feiner." : "Tipp auf den Strich dieser Zahl:" }),
     el("div", { class: "ziel-zahl", text: Z }));
-  const lupe = el("div", { class: "lupe" });
+  const lupe = LS.restHoehe(el("div", { class: "lupe" }));
   ctx.flaeche.append(lupe);
   let ebene = 0;
 
@@ -359,6 +365,7 @@ function setzen(ctx, a, p) {
       teile.push(ebeneZeichnen(w.von, w.schritt, a.einheit, opt));
     }
     lupe.replaceChildren(...teile);
+    lupeGroesse(lupe);
   }
 
   function tippe(k, i) {
@@ -393,6 +400,8 @@ function ablesen(ctx, a, p) {
     if (k < a.ebenen) opt.markiert = w.i; else opt.zeiger = w.i;
     lupe.append(ebeneZeichnen(w.von, w.schritt, a.einheit, opt));
   });
+  LS.restHoehe(lupe);
+  lupeGroesse(lupe);
   ctx.flaeche.append(lupe);
   const strich = strichName(a.ebenen, a.einheit);
   const hinweis = p.knapp ? "Lies den Anfang des untersten Strahls ab und zähl die Striche."

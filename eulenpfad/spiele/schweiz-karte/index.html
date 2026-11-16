@@ -8,12 +8,11 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  /* Ganze Aufgabe im Bild (BH3 a): Die Breite folgt der Bildhöhe; --seiten = Breite/Höhe des Ausschnitts (aus dem Code),
-     --rest = was über und unter der Karte noch Platz braucht (Kopf, Auftrag, Quelle, Tipp; mit Namen zur Wahl mehr). */
-  .karte-svg { /* Bildfarben: Karte auf der Bildkachel */ --rest: 330px; display: block; width: max(min(320px, 100%), min(100%, 900px, calc((100vh - var(--rest)) * var(--seiten, 1.6)))); height: auto;
+  /* Ganze Aufgabe im Bild (BH3 a): Die Karte ist so hoch, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe),
+     Breite = Höhe × --seiten (Breite/Höhe des Ausschnitts, aus dem Code). Vorher geschätzt 100vh − 330px, mit Namen zur
+     Wahl 435px, über 820 px Bildhöhe 420px bzw. 500px (LERN_Session45). */
+  .karte-svg { /* Bildfarben: Karte auf der Bildkachel */ display: block; width: max(min(320px, 100%), min(100%, 900px, calc(var(--rest-h, 360px) * var(--seiten, 1.6)))); height: auto;
     margin: 6px auto 4px; background: #eaf5fb; border-radius: 16px; touch-action: manipulation; }
-  .karte-svg.mit-wahl { --rest: 435px; } /* 435: Kantonsnamen in zwei Zeilen („Appenzell Innerrhoden“; LERN-55, vorher bis 32 px darunter) */
-  @media (min-height: 821px) { .karte-svg { --rest: 420px; } .karte-svg.mit-wahl { --rest: 500px; } }
   .karte-svg .land { fill: none; stroke: var(--text); stroke-width: .9; }
   .karte-svg .gebiet { /* Bildfarben: Karte auf der Bildkachel */ fill: #fbf7ec; stroke: #8a8fa8; stroke-width: .45; stroke-linejoin: round; fill-rule: evenodd; }
   .karte-svg .gebiet.wahl { cursor: pointer; }
@@ -198,7 +197,7 @@ LS.spiel({
     // Flächen: Kantone bzw. Wahlkreise; klickbar, wenn ein Gebiet gesucht ist
     const auswahlGebiete = p.art === "gebiet" ? (p.ansicht === "sg" ? WAHLKREISE : KANTONE) : [];
     const { svg, pfade } = karteZeichnen(p.ansicht, () => (auswahlGebiete.length ? " wahl" : p.art === "punkt" ? " blass" : ""));
-    if (p.art === "erkennen") svg.classList.add("mit-wahl");
+    LS.restHoehe(svg); // Grösse nach der restlichen Höhe (LERN_Session45)
     const flaechen = new Map();
     let fertig = false;
     // Ein gefärbtes Gebiet kommt nach vorn, hinter das letzte Gebiet: sonst decken später gezeichnete Nachbarn seinen

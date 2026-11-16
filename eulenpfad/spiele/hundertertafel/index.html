@@ -11,9 +11,12 @@
   .frage { text-align: center; font-size: clamp(20px, 4.5vw, 28px); font-weight: 800; margin: 0 0 10px; }
   /* Tafel: 10 Spalten wie die 100er-Tafel; Ausschnitte und Puzzleteile nutzen dasselbe Raster */
   /* Feldgrösse nach Breite und Höhe (Ganze Aufgabe im Bild, rahmen.md 20): die volle Tafel hat 10 Zeilen */
-  /* --oben: Platz über der Tafel; mit der Zeile „Seite … bis …“ (Stufe 5 und 6) 30 px mehr — ohne ragte die Tafel bei
-     1024 × 768 und auf dem Laptop 21 px unter den Rand (LERN_Session43) */
-  .ht-tafel { --oben: 300px; --z: clamp(26px, min((100vw - 64px) / var(--spalten, 10) - 3px, (100vh - var(--oben)) / var(--zeilen, 10) - 3px), 50px);
+  /* Höhe: die Tafel so hoch, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe = Höhe der ganzen Tafel samt
+     3-px-Fugen, daraus die Zelle). Vorher geschätzt 100vh − 300px (mit der Zeile „Seite … bis …“ 330px, auf dem
+     Handy 280/310px, LERN_Session43); nach GR1 a stimmten die Abzüge nicht mehr (LERN_Session45). --seite: Platz
+     neben der Tafel, --z-max: grösste Zelle */
+  .ht-tafel { --seite: 64px; --z-max: 50px;
+    --z: clamp(26px, min((100vw - var(--seite)) / var(--spalten, 10) - 3px, (var(--rest-h, 400px) + 3px) / var(--zeilen, 10) - 3px), var(--z-max));
     display: grid; grid-template-columns: repeat(var(--spalten, 10), var(--z)); gap: 3px; justify-content: center; margin: 0 auto 10px; }
   .ht-feld { width: var(--z); height: var(--z); display: flex; align-items: center; justify-content: center; box-sizing: border-box;
     border-radius: 8px; font-weight: 900; font-size: calc(var(--z) * .4); font-variant-numeric: tabular-nums; color: var(--text);
@@ -29,10 +32,8 @@
   button.ht-feld.richtig { background: var(--gut-grund); border-color: var(--gut); color: var(--auf-gut); }
   button.ht-feld.falsch { background: var(--hinweis-hell); border-color: var(--hinweis); animation: wackeln .4s; }
   .ht-seite { text-align: center; font-weight: 800; color: var(--text-leise); margin: -4px 0 6px; }
-  .ht-seite + .ht-tafel { --oben: 330px; }
   @media (max-width: 560px) {
-    .ht-tafel { --oben: 280px; --z: clamp(26px, min((100vw - 48px) / var(--spalten, 10) - 3px, (100vh - var(--oben)) / var(--zeilen, 10) - 3px), 44px); }
-    .ht-seite + .ht-tafel { --oben: 310px; }
+    .ht-tafel { --seite: 48px; --z-max: 44px; }
   }
 </style>
 </head>
@@ -284,7 +285,7 @@ LS.spiel({
         });
         tafel.append(k);
       }
-      f.append(tafel);
+      f.append(LS.restHoehe(tafel)); // Zellgrösse nach der restlichen Höhe (--rest-h, LERN_Session45)
       if (ctx.nr === 0) ctx.sag(x.art === "reihe" ? "Die gelben Zahlen gehören zu einer Reihe. Wo geht sie weiter?" : "Finde den Platz der Zahl auf der Tafel.");
       return;
     }
@@ -296,7 +297,10 @@ LS.spiel({
     if (x.basis) f.append(el("div", { class: "ht-seite", text: `Seite ${zahlText(x.basis + START)} bis ${zahlText(x.basis + 99 + START)}` }));
     const tafel = el("div", { class: "ht-tafel", "aria-label": "Stück der Hundertertafel" });
     tafel.style.setProperty("--spalten", x.b);
-    tafel.style.setProperty("--zeilen", Math.max(x.h, 4)); // kleine Stücke nicht riesig, die Tastatur braucht Platz
+    // Zeilen des Stücks: den Platz für die Tastatur misst LS.restHoehe mit (vorher mindestens 4 gerechnet, damit die
+    // Tastatur Platz hatte — mit --rest-h wurde ein Stück aus zwei Zeilen dadurch 26 statt 40 px, LERN_Session45);
+    // riesig wird es nicht, die Zelle bleibt unter --z-max
+    tafel.style.setProperty("--zeilen", x.h);
     const im = (z, s) => x.felder.find(e => e.z === z && e.s === s);
     const gegeben = new Set(x.gegeben.map(g => `${g.z},${g.s}`));
     let gesuchtEl = null;
@@ -308,7 +312,7 @@ LS.spiel({
       if (istGesucht) gesuchtEl = k;
       tafel.append(k);
     }
-    f.append(tafel);
+    f.append(LS.restHoehe(tafel)); // Zellgrösse nach der restlichen Höhe (--rest-h, LERN_Session45)
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Zahl" });
     f.append(anzeige);
     const tasten = LS.tastatur({

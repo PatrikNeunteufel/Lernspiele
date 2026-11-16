@@ -9,10 +9,13 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   /* Stellenwerttabelle: gemeinsamer Baustein (notizblock.js, Stil .schriftlich in stil.css; NB4 a, LERN_Session14).
-     Handy (BH3 a): die Zelle auch nach der Bildhöhe, damit die Rechnung über der festen Tastatur Platz hat */
-  @media (max-width: 560px) {
-    .schriftlich { --zelle: clamp(26px, min((100vw - 84px) / var(--spalten) - 4px, (100vh - 540px) / 5.8), 58px); }
-  }
+     Die Zelle auch nach der Höhe, die der Rahmen der Tabelle lässt (--rest-h von LS.restHoehe = Höhe der ganzen
+     Tabelle), damit die Rechnung über der Tastatur Platz hat: Höhe = Zelle × --sw-zeilen (je Zeile eine Zelle) +
+     --sw-fest (Strich 4 px und die 4-px-Fugen), beides setzt das Skript. Vorher nur auf dem Handy und geschätzt
+     100vh − 540px durch 5,8; nach GR1 a falsch, dazu ragten auf dem Tablet hoch drei Summanden (s6) 31 px unter den
+     Rand (LERN_Session45) */
+  .schriftlich { --zelle: clamp(26px, min((100vw - 84px) / var(--spalten) - 4px,
+    (var(--rest-h, 400px) - var(--sw-fest, 24px)) / var(--sw-zeilen, 5)), 58px); }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 4px; }
 </style>
 </head>
@@ -224,6 +227,13 @@ LS.spiel({
     const ueberZellen = t.reihe(() => el("div", { class: "uebertrag" }));
     t.strich();
     const ergZellen = t.reihe(i => el("div", { class: `erg st st-${stelle(i).k}` }));
+    // Höhe der Tabelle für die Zellgrösse nach der restlichen Höhe (Stil .schriftlich, LERN_Session45): je Zeile eine
+    // Zelle — Kopf und Übertrag sind zwar niedriger, ihre Zeichenspalte aber ist eine volle Zelle hoch —, also Kopf,
+    // Zahlzeilen, Übertrag und Ergebnis; fest der Strich (4 px) und eine 4-px-Fuge zwischen je zwei Zeilen
+    const zahlZeilen = mal ? 1 : x.zahlen.length;
+    raster.style.setProperty("--sw-zeilen", 3 + zahlZeilen);
+    raster.style.setProperty("--sw-fest", `${4 + 4 * (zahlZeilen + 3)}px`);
+    LS.restHoehe(raster);
 
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: `Rechne schriftlich: ${rechnung}` }),

@@ -10,7 +10,9 @@
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.2vw, 28px); font-weight: 800; margin: 0 0 12px; }
   .frage b { color: var(--knopf); }
-  .raster-rahmen { position: relative; width: min(440px, 88vw, 49vh); margin: 0 auto 14px; }
+  /* Raster so gross, wie die Aufgabe Platz lässt: quadratisch, Breite = --rest-h von LS.restHoehe (vorher geschätzt 49vh
+     ohne Untergrenze, breit und quer 100vh − 250px; LERN_Session45) */
+  .raster-rahmen { position: relative; width: max(min(240px, 88vw), min(440px, 88vw, var(--rest-h, 360px))); margin: 0 auto 14px; }
   .raster { display: grid; gap: 2px; background: var(--rand); border: 2px solid var(--rand); border-radius: 8px; overflow: hidden; }
   .zelle { aspect-ratio: 1; border: none; padding: 0; background: var(--k-feld); cursor: pointer; }
   .zelle.fest { cursor: default; background: var(--feld-leise); }
@@ -29,7 +31,7 @@
     .sr-paar > .frage { grid-row: 2; }
     .sr-paar > .legende { grid-row: 3; }
     .sr-paar > .knopfzeile { grid-row: 4; }
-    .sr-paar > .raster-rahmen { grid-column: 1; grid-row: 1 / 6; width: max(260px, min(440px, 100vh - 250px)); margin: 6px 0; }
+    .sr-paar > .raster-rahmen { grid-column: 1; grid-row: 1 / 6; width: max(260px, min(440px, var(--rest-h, 440px))); margin: 6px 0; }
   }
 </style>
 </head>
@@ -243,7 +245,7 @@ LS.spiel({
     ctx.flaeche.append(paar);
     paar.append(el("div", { class: "frage", html: a.frage }),
       el("div", { class: "legende", html: `<span><i style="background:var(--deko-6)"></i>Vorlage</span><span><i style="background:var(--deko-3)"></i>deine Felder</span>` }));
-    const rahmen = el("div", { class: "raster-rahmen" });
+    const rahmen = LS.restHoehe(el("div", { class: "raster-rahmen" })); // Grösse nach der restlichen Höhe (LERN_Session45)
     const raster = el("div", { class: "raster" });
     raster.style.gridTemplateColumns = `repeat(${a.n}, 1fr)`;
     const zellen = {};

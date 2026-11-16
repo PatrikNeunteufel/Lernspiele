@@ -13,7 +13,10 @@
   .achtung { text-align: center; font-weight: 900; color: var(--deko-3-schrift); margin: 0 0 8px; font-size: 17px; }
 
   /* Kompassrose */
-  .rose { display: block; width: min(300px, 80vw); margin: 0 auto 12px; touch-action: manipulation; }
+  /* Rose und Plan so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, beide quadratisch: Breite = Höhe;
+     LERN_Session45). Vorher geschätzt (100vh − 290 … 665px): auf dem Handy 375 × 660 ragte der Plan zum Antippen, der
+     dort nicht nach der Bildhöhe ging, auf gedrehter Karte bis 77 px unter den Rand. */
+  .rose { display: block; width: max(min(160px, 80vw), min(300px, 80vw, var(--rest-h, 300px))); margin: 0 auto 12px; touch-action: manipulation; }
   .rose.klein { width: 96px; margin: 0; }
   .rose .ring { fill: var(--feld-leise); stroke: var(--rand); stroke-width: 3; }
   .rose .arm { fill: var(--deko-6); stroke: var(--k-karte); stroke-width: 2; cursor: pointer; }
@@ -26,7 +29,7 @@
 
   /* Plan: Raster mit Orten, Nordpfeil daneben */
   .karten-zeile { display: flex; justify-content: center; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-  .plan { /* Bildfarben: Szene auf der Bildkachel */ display: grid; gap: 3px; width: min(420px, 100%); background: #d9efc9; border: 4px solid #b6d9a0; border-radius: 16px; padding: 4px; }
+  .plan { /* Bildfarben: Szene auf der Bildkachel */ display: grid; gap: 3px; width: max(min(240px, 100%), min(420px, 100%, var(--rest-h, 420px))); background: #d9efc9; border: 4px solid #b6d9a0; border-radius: 16px; padding: 4px; }
   .plan .feld { aspect-ratio: 1; border: none; border-radius: 8px; background: color-mix(in srgb, var(--k-feld) 55%, transparent); font-family: inherit; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; color: var(--text); }
   .plan .feld:disabled { cursor: default; }
   .plan .feld .bild { font-size: clamp(20px, 5.4vw, 30px); line-height: 1.1; }
@@ -45,16 +48,14 @@
     .karten-zeile { margin-bottom: 6px; }
     .frage { margin-bottom: 8px; }
     .achtung { margin-bottom: 4px; }
-    .rose { width: max(160px, min(300px, 80vw, calc(100vh - 470px))); margin-bottom: 8px; }
+    .rose { margin-bottom: 8px; }
   }
   @media (max-width: 560px) { /* Nordpfeil oder kleine Rose links neben der Frage, unter dem Plan */
     .karten-zeile { justify-content: flex-start; align-items: flex-start; }
     .kompass-seite { flex: 1 1 200px; }
     .kompass-seite .frage { margin-bottom: 6px; } /* gedrehte Karte mit drei Schritten ragte 4 px über (LERN_Session45) */
     .nur-sehen { align-items: center; }
-    .nur-sehen .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 560px))); }
-    /* (100vh − 605px): mit 595 px ragte die gedrehte Karte mit Hinweis 4 px unter den Rand (LERN_Session43) */
-    .nur-sehen:has(.lang) .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), calc(100vh - 605px))); }
+    .nur-sehen .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), var(--rest-h, 240px))); }
     .nur-sehen .kompass-seite, .kompass-seite.lang { flex-basis: 100%; }
     .kompass-seite .wahl, .wahl.kompass-wahl { gap: 8px; }
     .kompass-seite:not(.lang) .wahl, .wahl.kompass-wahl { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
@@ -63,14 +64,9 @@
     .kompass-seite.lang .wahl-knopf { font-size: 17px; line-height: 1.2; min-height: 48px; padding: 5px 10px; }
     .kompass-seite .wahl-knopf { min-height: 54px; }
   }
-  @media (min-width: 561px) and (orientation: portrait) { /* Tablet hoch: Plan nach der Bildhöhe */
-    .plan { width: max(min(240px, 100%), min(420px, 100%, calc(100vh - 640px))); }
-    /* Weg beschreiben (vier lange Antworten darunter), auf gedrehter Karte mit Hinweis: 7 px über dem Rand (LERN_Session43) */
-    .karten-zeile:has(.lang) .plan { width: max(min(240px, 100%), min(420px, 100%, calc(100vh - 665px))); }
-  }
   @media (min-width: 900px) and (orientation: landscape) {
     .karten-zeile { flex-wrap: nowrap; align-items: center; gap: 16px; }
-    .karten-zeile .plan { width: max(240px, min(420px, calc(100vh - 290px))); flex: none; }
+    .karten-zeile .plan { width: max(240px, min(420px, var(--rest-h, 360px))); flex: none; }
     .kompass-seite { flex: 0 1 400px; }
     /* Weg beschreiben: lange Antworten neben dem Plan so eng wie auf dem Handy — sonst ragten sie auf dem Laptop
        12 px unter den Rand (LERN_Session43) */
@@ -379,7 +375,7 @@ function rose(dirs, opt = {}) {
   }
   extra.innerHTML = e;
   svg.append(extra);
-  return svg;
+  return opt.klein ? svg : LS.restHoehe(svg); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
 }
 
 /** Nordpfeil, um k Vierteldrehungen im Uhrzeigersinn gedreht (wie die Karte). */
@@ -419,7 +415,7 @@ function planZeichnen(a, onTipp) {
     box.felder[c + "," + r] = f;
     box.append(f);
   }
-  return box;
+  return LS.restHoehe(box); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
 }
 
 /**

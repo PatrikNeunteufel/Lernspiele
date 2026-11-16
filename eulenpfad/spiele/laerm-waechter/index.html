@@ -50,9 +50,10 @@
   /* „Welcher Teil des Ohrs macht das?“: Satz, Ohr-Bild und Antworten ganz im Bild (LERN-55, vorher bis 102 px darunter) —
      👂 in der Zeile des Satzes, Bild nach der Bildhöhe, auf dem Handy niedrigere Antworten */
   .lw-karte.lw-inline .lw-bild { display: inline; font-size: 1.4em; vertical-align: -0.15em; margin-right: 6px; }
-  .lw-karte.lw-inline + .lw-bildfeld { width: max(240px, min(100%, 480px, calc((100vh - 500px) * 4 / 3))); }
+  /* Bild so gross, wie die Aufgabe Platz lässt: --rest-h von LS.restHoehe = Höhe des Bilds, mal viewBox 400 × 300.
+     Vorher geschätzt 100vh − 500px, auf dem Handy 600px; nach GR1 a falsch, eine Regel für alle (LERN_Session45) */
+  .lw-karte.lw-inline + .lw-bildfeld { width: max(240px, min(100%, 480px, calc(var(--rest-h, 270px) * 4 / 3))); }
   @media (max-width: 560px) {
-    .lw-karte.lw-inline + .lw-bildfeld { width: max(240px, min(100%, calc((100vh - 600px) * 4 / 3))); }
     .lw:has(> .lw-inline) ~ .wahl .wahl-knopf { min-height: 52px; }
     .lw:has(> .lw-inline) > .frage { margin-bottom: 6px; }
     .lw-karte.lw-inline { padding: 8px 12px; line-height: 1.3; margin-bottom: 8px; }
@@ -627,7 +628,8 @@ function ohrAufgabe(ctx, a, lw) {
   ctx.tipp(["Lies den Satz genau: Ist das aussen, im Tunnel oder ganz am Ende?", `Das gesuchte Teil: ${t.lage}`, `So sieht es aus: ${t.aussehen}.`]);
   const karte = karteMit("👂", `… ${t.aufgabe}.`);
   karte.classList.add("lw-inline");
-  lw.append(el("div", { class: "frage", text: "Welcher Teil des Ohrs macht das?" }), karte, ohrBild().svg);
+  // Bild nach der restlichen Höhe (--rest-h, Stil .lw-karte.lw-inline + .lw-bildfeld, LERN_Session45)
+  lw.append(el("div", { class: "frage", text: "Welcher Teil des Ohrs macht das?" }), karte, LS.restHoehe(ohrBild().svg));
   LS.auswahl(ctx, {
     optionen: a.optionen, richtig: a.teil, breite: 170, loesung: `${gross(nom(a.teil))} ${t.aufgabe}.`,
     inhalt: id => nom(id),

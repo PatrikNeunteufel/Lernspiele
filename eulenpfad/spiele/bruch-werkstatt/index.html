@@ -22,8 +22,10 @@
   .modell .teil.voll { fill: var(--deko-2); }
   .modell.klickbar .teil { cursor: pointer; }
   .modell-kreis { width: min(240px, 60vw); }
-  /* nach der Bildhöhe (Seitenverhältnis 528 : 368), damit „Fertig“ im Bild bleibt (LERN-55, Laptop s5 vorher 27 px darunter) */
-  .modell-streifen { width: max(min(260px, 92vw), min(560px, 92vw, calc((100vh - 410px) * 1.43))); }
+  /* nach der Bildhöhe, damit „Fertig“ im Bild bleibt (LERN-55, Laptop s5 vorher 27 px darunter). Seit LERN_Session45
+     aus --rest-h (LS.restHoehe misst die Höhe, die die Aufgabe übrig lässt) mal --seite, dem Seitenverhältnis der
+     viewBox aus modellEl; vorher geschätzt 100vh − 410px mal 1,43 (das höchste Modell, 528 : 368) für jeden Streifen */
+  .modell-streifen { width: max(min(260px, 92vw), min(560px, 92vw, calc(var(--rest-h, 392px) * var(--seite, 1.43)))); }
   .modell-paar { display: flex; flex-direction: column; gap: 14px; align-items: center; }
   .modell-paar .modell-streifen { width: min(460px, 76vw); }
 
@@ -264,6 +266,7 @@ function modellEl(art, n, voll, klickbar = false) {
     const spalten = klickbar ? fingerSpalten(n) : n <= 12 ? n : 10, zeilen = n / spalten;
     const B = 520, H = klickbar ? zeilen * 90 : n <= 12 ? 90 : Math.min(260, zeilen * 40);
     svg.setAttribute("viewBox", `-4 -4 ${B + 8} ${H + 8}`);
+    svg.style.setProperty("--seite", ((B + 8) / (H + 8)).toFixed(4)); // Breite je Höhe für die Regel nach --rest-h
     for (let i = 0; i < n; i++) {
       const r = document.createElementNS(SVG, "rect");
       r.setAttribute("x", (i % spalten) * B / spalten); r.setAttribute("y", Math.floor(i / spalten) * H / zeilen);
@@ -273,6 +276,9 @@ function modellEl(art, n, voll, klickbar = false) {
   }
   return svg;
 }
+
+/** Einzelner Streifen: Grösse nach der restlichen Höhe (--rest-h, LERN_Session45); Kreis und Paar haben feste Grössen. */
+const streifenNachRest = svg => (svg.classList.contains("modell-streifen") ? LS.restHoehe(svg) : svg);
 
 // ---------- Hinweise (verraten die Lösung nicht) ----------
 
@@ -326,7 +332,7 @@ LS.spiel({
     ctx.tipp(tippsFuer(a)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     if (a.art === "ablesen") {
       ctx.serie("modell", a.modell);
-      f.append(el("div", { class: "frage", text: "Welcher Bruch ist gefärbt?" }), modellEl(a.modell, teile(a.bruch)[1], teile(a.bruch)[0]));
+      f.append(el("div", { class: "frage", text: "Welcher Bruch ist gefärbt?" }), streifenNachRest(modellEl(a.modell, teile(a.bruch)[1], teile(a.bruch)[0])));
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.bruch, inhalt: b => bruchEl(b), hinweis: HINWEIS_ABLESEN, loesung: a.bruch, lob: `Genau: ${a.bruch}` });
     } else if (a.art === "legen" || a.art === "erweitertLegen") {
       legen(ctx, a);
@@ -369,7 +375,7 @@ LS.spiel({
 /** Teile antippen, bis der Bruch gefärbt ist; „Fertig“ prüft die Anzahl. */
 function legen(ctx, a) {
   const f = ctx.flaeche;
-  const svg = modellEl(a.modell, a.teile, 0, true);
+  const svg = streifenNachRest(modellEl(a.modell, a.teile, 0, true));
   svg.classList.add("klickbar");
   const anzeige = el("div", { class: "zaehler-anzeige", text: "0 Teile gefärbt" });
   const loesungText = a.art === "erweitertLegen" ? `${a.bruch} = ${a.ziel}/${a.teile}: ${a.ziel} Teile färben` : `${a.ziel} von ${a.teile} Teilen färben`;

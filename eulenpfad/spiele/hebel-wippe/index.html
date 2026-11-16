@@ -46,18 +46,20 @@
     .hw-notizen ~ .wahl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .hw-notizen ~ .wahl .wahl-knopf { font-size: 16px; padding: 6px 4px; }
   }
-  /* Ganze Aufgabe im Bild (BH3 a): Die Wippe richtet sich nach der Bildhöhe (Seitenverhältnis 400 : 236 ≈ 1,7).
+  /* Ganze Aufgabe im Bild (BH3 a): Die Wippe richtet sich nach der Höhe, die die Aufgabe übrig lässt (--rest-h von
+     LS.restHoehe; Breite = Höhe mal --seite, dem Seitenverhältnis der viewBox, aus wippe(); vorher geschätzt
+     100vh − 530 … 770px mit festem 1,7, nach der Verdichtung unter 700 px Bildhöhe falsch, LERN_Session45).
      Breit und quer immer; hoch nur, wenn getippt wird (dann ist die Wippe nur zum Ansehen, ihre Plätze werden
      nicht angetippt und dürfen kleiner werden). */
   @media (min-width: 900px) and (orientation: landscape) {
-    .wippe { max-width: min(620px, max(400px, (100vh - 530px) * 1.7)); }
+    .wippe { max-width: min(620px, max(400px, calc(var(--rest-h, 365px) * var(--seite, 1.7)))); }
     .frage { margin-bottom: 2px; }
   }
   @media not ((min-width: 900px) and (orientation: landscape)) {
-    div:has(> .tastatur) > .wippe { max-width: min(620px, max(260px, (100vh - 770px) * 1.7)); }
+    div:has(> .tastatur) > .wippe { max-width: min(620px, 100%, max(260px, calc(var(--rest-h, 365px) * var(--seite, 1.7)))); }
   }
   @media (max-width: 560px) {
-    div:has(> .tastatur) > .wippe { max-width: min(100%, max(290px, (100vh - 640px) * 1.7)); margin-bottom: 0; }
+    div:has(> .tastatur) > .wippe { margin-bottom: 0; }
     div:has(> .tastatur) > .frage { margin-bottom: 2px; }
     div:has(> .tastatur) > .wippe-legende { margin-bottom: 2px; }
   }
@@ -284,7 +286,9 @@ function wippe(nL, nR) {
     if (t >= oben) return;
     oben = t;
     svg.setAttribute("viewBox", `0 ${oben.toFixed(1)} 400 ${(236 - oben).toFixed(1)}`);
+    svg.style.setProperty("--seite", (400 / (236 - oben)).toFixed(4)); // Breite je Höhe für die Regel nach --rest-h
   };
+  LS.restHoehe(svg); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
   reserviere(px - (nL + 0.5) * u, py - 6);
   reserviere(px + (nR + 0.5) * u, py - 6);
   g.append(svgEl("rect", { class: "balken", x: px - (nL + 0.5) * u, y: py - 6, width: (nL + nR + 1) * u, height: 12, rx: 4 }));

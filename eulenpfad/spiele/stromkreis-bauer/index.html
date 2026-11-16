@@ -14,7 +14,9 @@
   /* Ganze Aufgabe im Bild (BH3 a, LERN-55; LERN_Session41): Antworten neben dem Schaltbild, wo die Breite reicht, sonst
      darunter. „Warum brennt die Lampe nicht?“ ragte untereinander auf 1024 × 768 rund 90 px unter den Rand. */
   .strom-zeile { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 24px; }
-  .strom-zeile .schaltbild { flex: 0 1 440px; margin: 0; }
+  /* Schaltbild so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, viewBox 340 × 250; LERN_Session45):
+     auf dem Handy 375 × 660 ragte „Warum brennt die Lampe nicht?“ mit voller Breite 38 px unter den Rand */
+  .strom-zeile .schaltbild { flex: 0 1 auto; margin: 0; width: max(min(240px, 100%), min(440px, 100%, calc(var(--rest-h, 324px) * 340 / 250))); }
   /* min-width 0: das Antwortraster verlangt sonst bis über 450 px und schob die Antworten unter das Bild */
   .strom-seite { flex: 1 1 320px; max-width: 460px; min-width: 0; }
   .strom-seite .wahl { margin: 0; }
@@ -570,6 +572,7 @@ LS.spiel({
     const bild = schaltbild(s, g);
     const seite = el("div", { class: "strom-seite" });
     ctx.flaeche.append(el("div", { class: "strom-zeile" }, bild, seite));
+    LS.restHoehe(bild); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
     const hinweis = a.art === "brennt" && s.kurz ? HINWEIS.kurz : HINWEIS[a.art];
     const inhalt = a.art === "warum" ? k => GRUENDE[k] : a.art === "welche" ? k => k : k => ANTWORT[a.art][k];
     seite.append(LS.auswahl(ctx, {

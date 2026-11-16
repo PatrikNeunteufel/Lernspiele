@@ -1086,11 +1086,20 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   in der Spielfläche. Steht die Frage in einer eigenen Hülle, nennt das Spiel die Zeile mit dem Attribut
   `data-tipp-ziel`. Nie zwischen den Antworten.
 - **Je Spiel** (BH3 a): Was danach noch überläuft, passt das Spiel selbst an (Grafik nach der Bildhöhe, `min()` mit
-  `vh`, engere Abstände, Teile nebeneinander); Lesespiele nehmen `LS.lesetext`. Steht eine `.wahl` in einer Spalte eines
+  `vh`, engere Abstände, Teile nebeneinander); Lesespiele nehmen `LS.lesetext`. **Grafik nach der restlichen Höhe**
+  (LERN_Session45): `LS.restHoehe(el)` setzt am Element `--rest-h` = seine Höhe plus den Platz, der unter seiner Karte
+  frei ist (negativ, wenn sie über den Rand ragt); steht es in einer Reihe neben anderem, zählt nur seine Spalte, und
+  mehrere Elemente einer Karte teilen sich den Platz. Ersetzt ein Spiel das Element bei jedem Antippen, registriert es
+  besser den gleichbleibenden Halter (gleich hoch wie die Grafik) oder übernimmt `--rest-h` vom alten. Das Spiel
+  rechnet daraus mit Untergrenze, etwa `width: max(200px, min(420px, 100%, calc(var(--rest-h, 420px) * 320 / 345)))`
+  (Breite aus der Höhe über das Seitenverhältnis der viewBox). Ersetzt die geschätzten Abzüge `100vh − …px`, die bei
+  jeder Änderung des Rahmens neu falsch wurden. Neu gemessen wird, wenn sich die Bühne oder das Fenster in der Grösse
+  ändert (`ResizeObserver` auf `.buehne`, `resize`, Schriften geladen); in einem verborgenen Fenster laufen beide erst,
+  wenn es sichtbar wird. Umgestellt in LERN_Session45: 34 Spiele (Liste in `bildhoehe_offen.md`). Steht eine `.wahl` in einer Spalte eines
   Rasters, braucht sie `margin-inline: 0` — mit `margin: 0 auto` wird sie so breit wie ihr Mindestinhalt, und die
   Seite läuft seitlich über (Pflanzen-Bestimmer). Ein Spiel, das die Tastatur in einen
   eigenen Behälter setzt, bekommt (2) und (3) nicht und ordnet selbst.
-- **Untergrenze** (Entscheid H1 a, LERN_Session28): Jede Grösse nach der Bildhöhe hat eine Untergrenze —
+- **Untergrenze** (Entscheid H1 a, LERN_Session28): Jede Grösse nach der Bildhöhe (auch nach `var(--rest-h)`) hat eine Untergrenze —
   `max(Mindestmass, min(…, calc(100vh - …)))`, wo der Platz schmal sein kann `max(min(Mindestmass, 100%), …)`, oder
   `min-width`/`min-height` derselben Achse im selben Regelblock. Lieber scrollen als nichts sehen: Ohne sie wurde die
   Breite unter etwa 480 px Bildhöhe null — Handy quer und das Spielfenster des Zufallsmix (ab 460 px hoch) zeigten

@@ -8,10 +8,10 @@
 <link rel="stylesheet" href="../../kern/kern.css">
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
-  /* Ganze Aufgabe im Bild (BH3 a): Das Brett ist quadratisch, seine Breite folgt der Bildhöhe (Platz für Kopf,
-     Eule, Auftrag, Legende; mit Zahlen zur Wahl darunter mehr). */
-  .go-feld { max-width: max(min(300px, 100%), min(520px, calc(100vh - 345px))); margin: 4px auto 6px; }
-  .go-feld:has(~ .go-zahlen) { max-width: max(min(300px, 100%), min(520px, calc(100vh - 410px))); }
+  /* Ganze Aufgabe im Bild (BH3 a): Das Brett ist quadratisch, seine Breite = --rest-h von LS.restHoehe (so viel, wie
+     neben Kopf, Eule, Auftrag, Legende und Zahlen zur Wahl Platz bleibt; vorher geschätzt 100vh − 345px bzw. 410px,
+     LERN_Session45) */
+  .go-feld { max-width: max(min(300px, 100%), min(520px, var(--rest-h, 420px))); margin: 4px auto 6px; }
   .go-brett { display: block; width: 100%; height: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
   .go-brett .go-holz { /* Gleich in beiden Modi: Go-Brett */  fill: #e8c88c; }
   .go-brett .go-linie { /* Gleich in beiden Modi: Go-Brett */  stroke: #6b5235; stroke-width: 1.4; }
@@ -598,7 +598,7 @@ LS.spiel({
     const ansicht = brettAnsicht(n, a.art === "zaehlen" ? null : tippe);
     ansicht.zeige(start);
     if (a.art === "zaehlen") ansicht.marke([a.ziel], "go-ring");
-    ctx.flaeche.append(el("div", { class: "go-feld" }, ansicht.svg),
+    ctx.flaeche.append(LS.restHoehe(el("div", { class: "go-feld" }, ansicht.svg)), // Grösse nach der restlichen Höhe (LERN_Session45)
       el("div", { class: "go-legende", text: "⚫ du · ⚪ Eule" }));
 
     // Tipps; in s1 und s2 zeigt der letzte das Brett mit Nachbarpunkten bzw. Freiheiten.

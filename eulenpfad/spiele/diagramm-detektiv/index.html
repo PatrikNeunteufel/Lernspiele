@@ -15,8 +15,11 @@
   .zwei > * { flex: 0 1 auto; }
 
   /* Säulendiagramm (SVG, skaliert auf die Breite) */
-  .diagramm { display: block; width: min(440px, 100%); margin: 0 auto 12px; touch-action: manipulation; }
-  .zwei .diagramm { width: min(400px, 100%); margin: 0; }
+  /* Grösse aus --rest-h (LS.restHoehe misst die Höhe, die die Aufgabe übrig lässt; viewBox 360 : 300, Breite = Höhe
+     mal 1,2), mit Untergrenze (H1 a). Vorher geschätzt 100vh − 400 … 600px je Gerät, nach der Verdichtung unter 700 px
+     Bildhöhe falsch (LERN_Session45) */
+  .diagramm { display: block; width: max(min(320px, 100%), min(440px, 100%, calc(var(--rest-h, 367px) * 1.2))); margin: 0 auto 12px; touch-action: manipulation; }
+  .zwei .diagramm { width: max(min(240px, 100%), min(400px, 100%, calc(var(--rest-h, 334px) * 1.2))); margin: 0; }
   .diagramm .gitter { stroke: var(--rand); stroke-width: 1; }
   .diagramm .achse { stroke: var(--text); stroke-width: 2; }
   .diagramm text { font-family: var(--schrift); font-weight: 800; fill: var(--text); }
@@ -60,13 +63,11 @@
   .nz-zeile.nz-spalte { flex-direction: column; gap: 2px; margin: 0; font-size: 13px; line-height: 1.1; }
   @media (max-height: 820px) {
     .frage { margin-bottom: 8px; }
-    .diagramm { width: min(440px, 100%, calc((100vh - 430px) * 1.2)); min-width: min(320px, 100%); }
   }
   @media (max-width: 560px) {
-    .dd-daten > .diagramm { width: min(100%, 300px); margin-bottom: 0; }
-    /* Mit Zifferntastatur (rund 330 px mit Frage und Anzeige darunter): Diagramm nach der Bildhöhe, sonst lag die
-       Tastatur als Leiste über der Anzeige (BH3 a); Untergrenze nach H1 a */
-    div:has(> .tastatur) > .dd-zeile .dd-daten > .diagramm { width: max(220px, min(100%, 300px, calc((100vh - 600px) * 1.13))); min-width: 0; }
+    /* Handy: höchstens 320 px (so breit war es unter 820 px Bildhöhe), mit und ohne Zifferntastatur dieselbe Regel —
+       --rest-h zählt die Tastatur mit (vorher eigene Regel 100vh − 600px) */
+    .dd-daten > .diagramm { width: max(min(220px, 100%), min(100%, 320px, calc(var(--rest-h, 267px) * 1.2))); margin-bottom: 0; }
     .dd-antwort .frage { margin-bottom: 4px; }
     .titel { margin-bottom: 2px; }
     /* Tabelle und Diagramm untereinander (Stufe 5 „Säule falsch gezeichnet“): beide enger, sonst ragten Frage und
@@ -85,12 +86,8 @@
     .daten.quer .q-name { display: block; font-size: 11px; line-height: 1.15; overflow-wrap: anywhere; }
     .daten.quer td.zahl { text-align: center; min-width: 0; }
     .zwei .daten.quer .q-striche svg { display: inline-block; height: 22px; vertical-align: middle; }
-    .zwei .diagramm { width: min(100%, 250px); min-width: 0; }
+    .zwei .diagramm { width: max(min(200px, 100%), min(100%, 250px, calc(var(--rest-h, 209px) * 1.2))); }
     .frage { font-size: 18px; }
-  }
-  @media (min-width: 900px) and (orientation: landscape) {
-    /* Tabelle und Diagramm nebeneinander, die Frage rechts daneben */
-    .zwei .diagramm { width: max(240px, min(400px, calc((100vh - 400px) * 1.2))); min-width: 0; }
   }
   @media (min-width: 700px) {
     /* Ohne Zifferntastatur (Tablet hoch und quer): links Tabelle oder Strichliste, rechts das Diagramm, darunter Frage und
@@ -99,7 +96,7 @@
     .dd-zeile.dd-raster { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "links diag" "antw antw"; gap: 12px 20px; align-items: start; }
     .dd-raster .dd-daten, .dd-raster .zwei { display: contents; }
     .dd-raster .zwei > .daten { grid-area: links; justify-self: center; }
-    .dd-raster .zwei > .diagramm { grid-area: diag; align-self: center; width: max(240px, min(400px, calc((100vh - 400px) * 1.2))); }
+    .dd-raster .zwei > .diagramm { grid-area: diag; align-self: center; width: max(240px, min(400px, calc(var(--rest-h, 334px) * 1.2))); }
     .dd-raster .dd-antwort { grid-area: antw; max-width: none; }
   }
 </style>
@@ -467,6 +464,7 @@ function diagramm(a, werte, opt = {}) {
   svg.setAttribute("class", "diagramm");
   svg.setAttribute("aria-label", "Säulendiagramm");
   svg.innerHTML = s;
+  LS.restHoehe(svg); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
 
   if (opt.leer !== undefined) {
     // Eine Säule in der leeren Spalte: Tippen auf eine Höhe setzt ihre Spitze auf die nächste Gitterlinie.

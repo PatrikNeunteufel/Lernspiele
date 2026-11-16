@@ -10,7 +10,10 @@
 <style>
   .frage { text-align: center; font-size: clamp(22px, 4.6vw, 30px); font-weight: 800; margin: 0 0 10px; }
   .frage b { color: var(--knopf); }
-  .uhr-gross { display: block; width: min(260px, 62vw); margin: 0 auto 14px; }
+  /* Uhr so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, quadratisch: Breite = Höhe; LERN_Session45).
+     Vorher nur auf dem Handy nach 100vh − 630px; auf dem Tablet hoch 768 × 950 ragte „Wie spät ist es?“ mit der
+     Zifferntastatur 25 px unter den Rand. */
+  .uhr-gross { display: block; width: max(min(180px, 62vw), min(260px, 62vw, var(--rest-h, 260px))); margin: 0 auto 14px; }
   .uhr .rand { fill: var(--k-feld); stroke: var(--text); stroke-width: 4; }
   .uhr .strich { stroke: var(--text); stroke-width: 1.5; }
   .uhr .strich.gross { stroke-width: 3.5; }
@@ -23,7 +26,7 @@
   /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy immer zwei Antworten nebeneinander */
   @media (max-width: 560px) {
     .optionen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .uhr-gross { width: min(260px, 62vw, max(180px, 100vh - 630px)); margin-bottom: 10px; } /* Uhr nach der Bildhöhe */
+    .uhr-gross { margin-bottom: 10px; }
   }
   .option {
     border: none; border-radius: 16px; min-height: 64px; padding: 8px;
@@ -310,7 +313,7 @@ LS.spiel({
 
     if (art === "lesenWorte" || art === "lesenDigital") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie spät ist es?" }));
-      const gross = uhr(h, m, "uhr-gross"); ctx.flaeche.append(gross);
+      const gross = LS.restHoehe(uhr(h, m, "uhr-gross")); ctx.flaeche.append(gross); // Grösse nach --rest-h (LERN_Session45)
       const text = (hh, mm) => art === "lesenWorte" ? inWorten(hh, mm) : digital(hh, mm);
       // In Worten mit Bildzeichen für Viertel und halb (für Kinder, die noch kaum lesen).
       auswahl([{ h, m }, ...ablenker(h, m, ctx.stufe)], (k, o) => art === "lesenWorte" ? k.append(viertelBild(o.m), text(o.h, o.m)) : k.append(text(o.h, o.m)),
@@ -322,7 +325,7 @@ LS.spiel({
         `Gesucht war ${text}.`, "Der lange Zeiger zeigt die Minuten: bei der 3 sind es 15, bei der 6 sind es 30 Minuten.");
     } else if (art === "lesenTippen") {
       ctx.flaeche.append(el("div", { class: "frage", text: "Wie spät ist es? Tipp die Zeit ein (z. B. 7 4 5 für 7:45)." }));
-      ctx.flaeche.append(uhr(h, m, "uhr-gross"));
+      ctx.flaeche.append(LS.restHoehe(uhr(h, m, "uhr-gross")));
       const loesung = `Es ist ${digital(h, m)}.`;
       ctx.loesung(loesung);
       ctx.schritte(zeitSchritte(h, m));
@@ -365,7 +368,7 @@ LS.spiel({
         `${digital(t0.h, t0.m)} + ${a.dauer} min = ${digital(t1.h, t1.m)}`);
     } else if (art === "lesen24") {
       ctx.flaeche.append(el("div", { class: "frage", text: `Es ist ${a.tageszeit}. Wie spät ist es? Tipp die Zeit ein, z. B. 1 5 4 0 für 15:40.` }));
-      ctx.flaeche.append(uhr(h, m, "uhr-gross"));
+      ctx.flaeche.append(LS.restHoehe(uhr(h, m, "uhr-gross")));
       ctx.schritte(zeitSchritte(a.h24, m));
       eingabe(z => gleicheZeit(z, { h: a.h24, m }), z => {
         const t = zeitAusZiffern(z);

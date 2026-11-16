@@ -33,7 +33,9 @@
      gezeichnet, damit bis sechs in eine Reihe passen, Werkzeugknöpfe zu zweit in einer Reihe */
   @media (max-width: 560px) {
     .frage { margin-bottom: 8px; }
-    .brett { --z-hoch: max(44px, (100vh - 490px) / var(--zeilen, 6) - 3px); margin-bottom: 10px; }
+    /* Zelle aus der Höhe, die der Rahmen dem Brett lässt (--rest-h von LS.restHoehe = Höhe des Bretts samt 3-px-Fugen;
+       vorher geschätzt 100vh − 490px, nach GR1 a falsch, LERN_Session45) */
+    .brett { --z-hoch: max(44px, (var(--rest-h, 290px) + 3px) / var(--zeilen, 6) - 3px); margin-bottom: 10px; }
     .teile { gap: 5px; margin-bottom: 8px; }
     .teil { min-width: 50px; min-height: 50px; padding: 3px; }
     .teil svg { width: auto; height: auto; max-width: 44px; max-height: 44px; }
@@ -396,7 +398,7 @@ function auswahlAufgabe(ctx, a) {
     brett.style.setProperty("--zeilen", a.h);
     const loch = new Set(a.luecke.map(([x, y]) => fk(x, y)));
     for (let y = 0; y < a.h; y++) for (let x = 0; x < a.b; x++) brett.append(el("div", { class: "feld " + (loch.has(fk(x, y)) ? "luecke" : "voll") }));
-    ctx.flaeche.append(brett);
+    ctx.flaeche.append(LS.restHoehe(brett)); // Zelle nach der restlichen Höhe (--rest-h, Handy; LERN_Session45)
     ctx.kennung("luecke|" + schluessel(a.luecke) + "|" + a.luecke[0].join(","));
   } else {
     ctx.flaeche.append(el("div", { class: "vorlage-teil" }, teilSvg(a.vorlage, "var(--deko-6)", 26)));
@@ -501,7 +503,7 @@ function legen(ctx, a) {
   const spiegelKnopf = el("button", { type: "button", class: "knopf hell klein", text: "⇋ Spiegeln", onclick: () => veraendere(spiegle) });
   const neuKnopf = el("button", { type: "button", class: "knopf hell klein", text: "↺ Alles zurück", onclick: () => { if (fertig) return; [...gelegt.keys()].forEach(nimmWeg); gewaehlt = 0; zeichne(); } });
   const tippKnopf = el("button", { type: "button", class: "knopf hell klein", text: "🧩 Ein Teil legen", onclick: hilfe });
-  ctx.flaeche.append(brett, vorrat, el("div", { class: "werkzeug" }, drehKnopf, spiegelKnopf, neuKnopf, tippKnopf));
+  ctx.flaeche.append(LS.restHoehe(brett), vorrat, el("div", { class: "werkzeug" }, drehKnopf, spiegelKnopf, neuKnopf, tippKnopf));
 
   function zeichne() {
     for (const [k, z] of Object.entries(zellen)) {

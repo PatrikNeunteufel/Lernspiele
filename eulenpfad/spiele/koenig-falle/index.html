@@ -15,8 +15,9 @@
   .kf .vorgabe { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* Brett: 8 × 50 Einheiten, links und unten Platz für die Koordinaten. Auf 375 px gut 40 px je Feld. */
-  /* Ganze Aufgabe im Bild (BH3 a): auf niedrigen Bildschirmen so breit, wie die Höhe unter Kopf, Eule und Auftrag reicht. */
-  .kf-brett { width: max(min(280px, 100%), min(100%, 500px, calc(100vh - 340px))); height: auto; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+  /* Ganze Aufgabe im Bild (BH3 a): so breit, wie die Höhe unter Kopf, Eule und Auftrag reicht — quadratisch, Breite =
+     --rest-h von LS.restHoehe (vorher geschätzt 100vh − 340px, LERN_Session45) */
+  .kf-brett { width: max(min(280px, 100%), min(100%, 500px, var(--rest-h, 420px))); height: auto; display: block; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
   .kf-brett .kf-hell { /* Gleich in beiden Modi: Schachbrett */  fill: #f3e3c3; }
   .kf-brett .kf-dunkel { /* Gleich in beiden Modi: Schachbrett */  fill: #c49a6c; }
   .kf-brett .kf-feld.kf-tippbar { cursor: pointer; }
@@ -257,7 +258,9 @@ LS.spiel({
     kf.append(el("div", { class: "auftrag", text: zwei ? "Setz den schwarzen König in zwei Zügen matt!" : "Setz den schwarzen König mit einem Zug matt!" }),
       el("div", { class: "kf-seite", text: "Du spielst Weiss ♔ und bist dran." }));
     const vorgabe = el("div", { class: "vorgabe", text: stellungText(start) });
-    const halter = el("div", { style: "width:100%;display:flex;justify-content:center" });
+    // Grösse nach der restlichen Höhe (LERN_Session45): gemessen am Halter, so hat jedes neu gezeichnete Brett (zeichne)
+    // sofort sein --rest-h (erbt es) und springt nicht erst auf den Ersatzwert
+    const halter = LS.restHoehe(el("div", { style: "width:100%;display:flex;justify-content:center" }));
     kf.append(vorgabe, halter);
     ctx.flaeche.append(kf);
 

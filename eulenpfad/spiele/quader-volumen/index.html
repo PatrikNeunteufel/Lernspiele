@@ -49,8 +49,9 @@
     .qv-bild:has(> .qv-geb + .qv-geb) > .qv-geb { min-width: 0; }
     .qv-bild:has(> .qv-geb + .qv-geb) .qv-name { white-space: normal; text-align: center; line-height: 1.5; }
     /* Aquarium und zwei Quader zusammen (s6): nach der Bildhöhe, nie unter 80 % ihrer Zeichnung (die Masse bleiben
-       mindestens 12 px) — ragten bis 19 bzw. 30 px unter den Rand (LERN-55, LERN_Session44) */
-    .qv-bild svg.qv-nach-hoehe { max-height: max(calc(var(--vb-h) * .8px), min(192px, calc(100vh - 660px))); }
+       mindestens 12 px) — ragten bis 19 bzw. 30 px unter den Rand (LERN-55, LERN_Session44). Die Höhe misst der Rahmen
+       (--rest-h von LS.restHoehe = Höhe des Körpers; vorher geschätzt 100vh − 660px, nach GR1 a falsch, LERN_Session45) */
+    .qv-bild svg.qv-nach-hoehe { max-height: max(calc(var(--vb-h) * .8px), min(192px, var(--rest-h, 192px))); }
     .qv-bild + .qv-legende { margin-bottom: 4px; }
     .qv .frage { line-height: 1.2; }
     /* Anzeige mit Notizen daneben nicht höher als die zwei Notizzeilen (vorher 76 px), Notizfelder 28 px */
@@ -59,9 +60,10 @@
     .qv-ergebnis.mit-notiz .qv-notizen .zw-notiz { min-height: 28px; padding-block: 0; }
   }
   /* Tablet hoch: ohne Grenze wurde ein Körper in cm (Vergleichen s6, „40 cm · 50 cm · 40 cm“) 583 px hoch, der zweite
-     rutschte darunter, die Aufgabe ragte bis 376 px unter den Rand (LERN-55, LERN_Session44) */
+     rutschte darunter, die Aufgabe ragte bis 376 px unter den Rand (LERN-55, LERN_Session44). Höhe aus --rest-h wie oben
+     (vorher geschätzt 100vh − 700px, LERN_Session45) */
   @media (min-width: 561px) and (orientation: portrait) {
-    .qv-bild svg { max-height: max(200px, min(260px, calc(100vh - 700px))); }
+    .qv-bild svg { max-height: max(200px, min(260px, var(--rest-h, 260px))); }
     .qv-bild:has(> .qv-geb + .qv-geb) { flex-wrap: nowrap; }
     .qv-bild > .qv-geb { min-width: 0; }
   }
@@ -489,7 +491,9 @@ function koerperSvg(opt) {
     teile.push(`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anker}" font-size="15">${m.text}</text>`);
   }
   const w = breiteE * u + mL + mR, hh = hoeheE * u + mO + mU;
-  return el("span", { html: `<svg viewBox="0 0 ${w.toFixed(1)} ${hh.toFixed(1)}" width="${Math.round(w)}" height="${Math.round(hh)}" aria-hidden="true">${teile.join("")}</svg>` });
+  const huelle = el("span", { html: `<svg viewBox="0 0 ${w.toFixed(1)} ${hh.toFixed(1)}" width="${Math.round(w)}" height="${Math.round(hh)}" aria-hidden="true">${teile.join("")}</svg>` });
+  LS.restHoehe(huelle.firstElementChild); // Höhe nach der restlichen Höhe (--rest-h: Tablet hoch, .qv-nach-hoehe; LERN_Session45)
+  return huelle;
 }
 
 /** Voller Quader aus Einheitswürfeln (s1, s2). */

@@ -10,11 +10,12 @@
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
   .wj-bild { text-align: center; font-size: clamp(56px, 13vw, 80px); line-height: 1.1; margin: 0 0 8px; }
-  .wj-thermo { display: block; margin: 0 auto 12px; height: min(52vh, 380px); width: auto; max-width: 100%; }
+  /* Thermometer so hoch, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe; LERN_Session45). Vorher 52vh, auf dem
+     Handy 100vh − 460px mit 260 px Untergrenze. */
+  .wj-thermo { display: block; margin: 0 auto 12px; height: max(min(260px, 52vh), min(380px, var(--rest-h, 338px))); width: auto; max-width: 100%; }
   .wj-thermo text { font-family: inherit; font-weight: 800; fill: var(--text); }
   /* Ganze Aufgabe im Bild (BH3 a): Thermometer nach der Bildhöhe, auf dem Handy zwei Körbe nebeneinander. */
   @media (max-width: 560px) {
-    .wj-thermo { height: min(52vh, 380px, calc(100vh - 460px)); min-height: 260px; }
     .frage { margin-bottom: 8px; }
     .korb-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .korb-reihe .korb-knopf { min-height: 80px; }
@@ -289,12 +290,14 @@ function thermometer(t, wert) {
     if (gross) skala += `<text x="${x + 40}" y="${y(v) + 6}" font-size="17">${zahlText(v)}</text>`;
   }
   const null0 = t.von < 0 ? `<line x1="${x - 14}" y1="${y(0)}" x2="${x + 34}" y2="${y(0)}" stroke="#2d3047" stroke-width="1" stroke-dasharray="3 3"/>` : "";
-  return el("div", { html: `<svg class="wj-thermo szenenbild bildkachel" viewBox="0 0 140 380" role="img" aria-label="Thermometer">
+  const huelle = el("div", { html: `<svg class="wj-thermo szenenbild bildkachel" viewBox="0 0 140 380" role="img" aria-label="Thermometer">
     <text x="${x - 10}" y="14" font-size="16">°C</text>
     <rect x="${x - 9}" y="${oben - 10}" width="18" height="${unten - oben + 30}" rx="9" fill="#fff" stroke="#8a94a6" stroke-width="3"/>
     <circle cx="${x}" cy="${unten + 26}" r="18" fill="#e5322d" stroke="#8a94a6" stroke-width="3"/>
     <rect x="${x - 5}" y="${y(wert)}" width="10" height="${unten + 20 - y(wert)}" fill="#e5322d"/>
     ${null0}${skala}</svg>` });
+  LS.restHoehe(huelle.firstElementChild); // Höhe nach der restlichen Höhe (--rest-h, LERN_Session45)
+  return huelle;
 }
 
 function berichtEl(a) {

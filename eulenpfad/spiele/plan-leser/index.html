@@ -54,10 +54,11 @@
   .legende b, .legende .massstab { grid-column: 1 / -1; }
   @media (max-width: 560px) {
     .plan-zeile { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 8px; margin-bottom: 8px; width: 100%; }
-    /* Plan unter der Frage (über 860 px Bildhöhe, darunter steht die Legende neben dem Plan): 680 px für Frage über drei
-       Zeilen, Legende mit neun Zeichen und Antworten in zwei Reihen — mit 620 px ragte „Was ist zwischen …?“ 55 px unter
-       den Rand (LERN-55, LERN_Session44); ab 860 px ist der Plan so mindestens 180 px breit */
-    .plan-zeile.mit-wahl .plan-bild { width: max(min(180px, 100%), min(100%, calc(100vh - 680px))); }
+    /* Plan so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, quadratisch: Breite = Höhe; vorher
+       geschätzt 100vh − 680px, LERN_Session44), mindestens 180 px — über 860 px Bildhöhe unter der Frage, darunter
+       bei Aufgaben mit Antworten neben der Legende (unten); Plan zum Antippen auf dem Handy 375×660 vorher 48 px
+       zu hoch (LERN_Session45) */
+    .plan-bild { width: max(min(180px, 100%), min(100%, var(--rest-h, 360px))); }
     .plan-zeile .wahl { gap: 8px; }
     .plan-zeile .wahl-knopf { min-height: 54px; padding: 6px 8px; }
     .legende { padding: 6px 10px; min-width: 0; width: 100%; grid-template-columns: repeat(2, minmax(0, auto)); justify-content: space-between; column-gap: 8px; }
@@ -101,9 +102,9 @@
     .plan-seite { display: flex; flex-direction: column; gap: 10px; max-width: 520px; }
     /* Weg beschreiben: breitere Seite, die Beschreibungen brauchen weniger Zeilen (LERN-55, Laptop s6 vorher 35 px darunter) */
     .plan-seite:has(> .wege) { max-width: 600px; flex: 1 1 0; }
-    .plan-zeile:has(.wege) .plan-bild { width: max(240px, min(320px, calc(100vh - 300px))); }
+    .plan-zeile:has(.wege) .plan-bild { width: max(240px, min(320px, var(--rest-h, 320px))); }
     .plan-seite .wahl.wege .wahl-knopf { font-size: 17px; }
-    .plan-bild { width: max(240px, min(360px, calc(100vh - 300px))); }
+    .plan-bild { width: max(240px, min(360px, var(--rest-h, 360px))); }
   }
 </style>
 </head>
@@ -530,7 +531,7 @@ LS.spiel({
     const p = a.plan;
     const name = d => ding(p.liste, d)[0];
     const dativ = d => ding(p.liste, d)[1];
-    const bild = planBild(a);
+    const bild = LS.restHoehe(planBild(a)); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session45)
     let frage, loesung, inhalt = d => name(d);
     if (a.art === "zeichen") {
       frage = "Was bedeutet dieses Zeichen?";

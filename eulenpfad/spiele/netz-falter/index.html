@@ -13,11 +13,12 @@
   .regel { text-align: center; color: var(--text-leise); font-weight: 700; margin: -4px 0 10px; }
   .netz { display: flex; justify-content: center; margin: 0 auto 14px; }
   .netz svg { display: block; max-width: 100%; height: auto; }
-  /* Ganze Aufgabe im Bild (BH3 a): Quadernetze sind bis neun Felder hoch (bis 630 px) — Netz nach der Bildhöhe, beim
-     Antippen so, dass ein Feld des höchsten Netzes auf 768 px Bildhöhe noch rund 44 px misst; mit Ja/Nein oder Körpern
-     darunter kleiner (dort wird im Netz nichts angetippt). Untergrenze nach H1 a. */
-  .netz svg { width: auto; max-height: max(260px, calc(100vh - 370px)); }
-  .netz:has(+ .wahl) svg { max-height: max(220px, calc(100vh - 480px)); }
+  /* Ganze Aufgabe im Bild (BH3 a): Quadernetze sind bis neun Felder hoch (bis 630 px) — Netz höchstens so hoch, wie die
+     Aufgabe Platz lässt (--rest-h von LS.restHoehe; vorher geschätzt 100vh − 370px, mit Ja/Nein oder Körpern darunter
+     480px; LERN_Session45). Untergrenze nach H1 a: beim Antippen 260 px, mit Antworten darunter 220 px (dort wird im
+     Netz nichts angetippt). */
+  .netz svg { width: auto; max-height: max(260px, var(--rest-h, 400px)); }
+  .netz:has(+ .wahl) svg { max-height: max(220px, var(--rest-h, 400px)); }
   .netz .tippbar { cursor: pointer; }
   .netz .tippbar:hover { fill: var(--aktiv); }
   .netz .daneben { fill: var(--hinweis-hell); }
@@ -382,10 +383,16 @@ const TIPPS = {
   koerper: ["Zähl die Flächen: Wie viele Dreiecke, wie viele Vierecke?", "Sind alle Vierecke gleich gross?"],
 };
 
+/** Netz in der Aufgabe: Höhe nach der restlichen Höhe (--rest-h am svg, LERN_Session45). bild: Hülle aus netzSvg. */
+function netzFeld(bild) {
+  LS.restHoehe(bild.querySelector("svg"));
+  return el("div", { class: "netz" }, bild);
+}
+
 /** Antippen eines Feldes im Netz (Gegenüber, Ergänzen). */
 function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) {
   const { svg, flaechen } = netzSvg(netz, svgOpt);
-  ctx.flaeche.append(el("div", { class: "netz" }, svg));
+  ctx.flaeche.append(netzFeld(svg));
   ctx.loesung(loesung);
   ctx.schritte(1); // eine Fläche antippen
   let fertig = false;
@@ -439,7 +446,7 @@ LS.spiel({
       return;
     }
     if (["janein", "quaderJanein", "koerperJanein"].includes(a.art)) {
-      ctx.flaeche.append(el("div", { class: "netz" }, netzSvg(a.netz, { u: Math.min(einheit(a.netz), 56) }).svg));
+      ctx.flaeche.append(netzFeld(netzSvg(a.netz, { u: Math.min(einheit(a.netz), 56) }).svg));
       const koerperName = { quaderJanein: "Quader", koerperJanein: baue(a.k).name }[a.art] || "Würfel";
       const mitArtikel = { Würfel: "einen Würfel", Quader: "einen Quader", Dreiecksprisma: "ein Dreiecksprisma", Pyramide: "eine Pyramide" }[koerperName];
       LS.auswahl(ctx, {
@@ -452,7 +459,7 @@ LS.spiel({
       return;
     }
     if (a.art === "koerper") {
-      ctx.flaeche.append(el("div", { class: "netz" }, netzSvg(a.netz, { u: Math.min(einheit(a.netz), 56) }).svg));
+      ctx.flaeche.append(netzFeld(netzSvg(a.netz, { u: Math.min(einheit(a.netz), 56) }).svg));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 130,
         loesung: `Es entsteht ${{ Würfel: "ein Würfel", Quader: "ein Quader", Dreiecksprisma: "ein Dreiecksprisma", Pyramide: "eine Pyramide" }[a.richtig]}.`,
@@ -462,7 +469,7 @@ LS.spiel({
     }
     if (a.art === "wuerfelzahl") {
       ctx.flaeche.append(el("div", { class: "regel", text: "Beim Spielwürfel ergeben gegenüberliegende Seiten zusammen immer 7." }),
-        el("div", { class: "netz" }, netzSvg(a.netz, { augen: a.augen, frage: a.frage }).svg));
+        netzFeld(netzSvg(a.netz, { augen: a.augen, frage: a.frage }).svg));
       LS.auswahl(ctx, {
         optionen: a.optionen, richtig: a.richtig, breite: 70,
         loesung: `Auf das Fragezeichen gehören ${a.richtig} Augen.`,

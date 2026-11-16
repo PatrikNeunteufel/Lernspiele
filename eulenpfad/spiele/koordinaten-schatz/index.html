@@ -15,20 +15,20 @@
   .frage b { color: var(--knopf); white-space: nowrap; }
 
   /* Hundertertafel 0–99 mit Achsen E (Einer, Spalten) und Z (Zehner, Zeilen) */
-  .tafel { display: grid; grid-template-columns: 28px repeat(10, 1fr); gap: 2px; width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 295px))); margin: 0 auto 12px; }
-  /* Ganze Aufgabe im Bild (BH3 a): Tafel und Koordinatensystem folgen auf niedrigen Bildschirmen der Bildhöhe;
-     stehen Antworten darunter, bleibt mehr Platz frei. */
-  /* mit Antworten darunter 10 px mehr Abstand als bis LERN_Session42: so ragten sie bei 1024 × 768 und auf dem Laptop
-     7–8 px unter den Rand (LERN_Session43) */
-  .tafel:has(~ .optionen) { width: max(min(280px, 94vw), min(520px, 94vw, calc(100vh - 365px))); }
+  /* Ganze Aufgabe im Bild (BH3 a): Tafel und Koordinatensystem so gross, wie die Aufgabe Platz lässt (--rest-h von
+     LS.restHoehe; vorher geschätzt 100vh − 295px bzw. mit Antworten darunter 365px, nach der Verdichtung GR1 a zu
+     gross, LERN_Session45). Die Tafel ist rund 10 px breiter als hoch (Kopfspalte 28 px, Kopfzeile ≈ 18 px). Spalten
+     minmax(0, 1fr): mit 1fr hielten die Felder auf dem Laptop (Maus) 33 px und die Tafel wurde 378 statt 280 px breit
+     und 367 px hoch — die Antworten ragten 19 px unter den Rand (LERN_Session45). */
+  .tafel { display: grid; grid-template-columns: 28px repeat(10, minmax(0, 1fr)); gap: 2px; width: max(min(280px, 94vw), min(520px, 94vw, calc(var(--rest-h, 420px) + 10px))); margin: 0 auto 12px; }
   .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
   .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: var(--aktiv); font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: var(--text-leise); cursor: pointer; padding: 0; }
   .tafel .feld.schatz { background: var(--marker); color: var(--text); font-size: clamp(16px, 4vw, 24px); }
   .tafel .feld.daneben { background: var(--hinweis-hell); }
   .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
 
-  .ksys { width: max(min(240px, 90vw), min(440px, 90vw, calc(100vh - 365px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
-  .ksys:has(~ .optionen) { width: max(min(240px, 90vw), min(440px, 90vw, calc(100vh - 375px))); }
+  /* quadratisch: Breite = Höhe (--rest-h, LERN_Session45; vorher 100vh − 365px bzw. 375px mit Antworten) */
+  .ksys { width: max(min(240px, 90vw), min(440px, 90vw, var(--rest-h, 400px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
   .ksys .gitter { stroke: var(--rand); stroke-width: 1; }
   .ksys .achse { stroke: var(--text); stroke-width: 2; }
   .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }
@@ -111,7 +111,7 @@ const ez = z => `${z % 10} E ${Math.floor(z / 10)} Z`;
 const pt = (x, y) => `(${x}|${y})`;
 
 function tafel(onTipp) {
-  const box = el("div", { class: "tafel", "aria-label": "Hundertertafel" });
+  const box = LS.restHoehe(el("div", { class: "tafel", "aria-label": "Hundertertafel" })); // Grösse nach der restlichen Höhe (LERN_Session45)
   const felder = {};
   box.append(el("div"));
   for (let e = 0; e < 10; e++) box.append(el("div", { class: "kopf-e", text: `${e} E` }));
@@ -136,6 +136,7 @@ function koordinaten(onTipp) {
   const svg = document.createElementNS(SVG, "svg");
   svg.setAttribute("viewBox", `0 0 ${groesse} ${groesse}`);
   svg.setAttribute("class", "ksys");
+  LS.restHoehe(svg); // Grösse nach der restlichen Höhe (LERN_Session45)
   const X = x => o + x * s, Y = y => o + (N - y) * s; // y nach oben
   let inhalt = "";
   for (let i = 0; i <= N; i++) {

@@ -24,10 +24,11 @@
     .frage { margin-bottom: 6px; }
     .hoer-zeile { margin-bottom: 10px; }
     .notenwahl .noten-zeile { max-height: 100px; }
-    /* Notenblatt der Königsstufe nach der Bildhöhe: mit 260 px ragten die Antworten bei 1024 × 768 und auf dem Laptop
-       12 px unter den Rand (LERN_Session43); Untergrenze nach H1 a */
-    .notenblatt .noten-zeile { max-height: max(160px, calc(100vh - 530px)); }
   }
+  /* Notenblatt der Königsstufe nach der Bildhöhe: mit 260 px ragten die Antworten bei 1024 × 768 und auf dem Laptop
+     12 px unter den Rand (LERN_Session43); Untergrenze nach H1 a. Seit LERN_Session45 aus --rest-h (LS.restHoehe misst
+     die Höhe, die die Aufgabe übrig lässt) statt geschätzt 100vh − 530px, darum auf jeder Bildhöhe */
+  .notenblatt .noten-zeile { max-height: max(160px, var(--rest-h, 260px)); }
 </style>
 </head>
 <body>
@@ -205,7 +206,8 @@ LS.spiel({
       box.classList.add("notenwahl");
     } else {
       ctx.flaeche.prepend(el("div", { class: "frage", text: "Halbton oder Ganzton?" }));
-      ctx.flaeche.append(el("div", { class: "notenblatt" }, NOTEN.zeile({ noten: a.folge.map(p => ({ p })), schluessel: true, mindestBreite: 220 })));
+      // Notenzeile nach der restlichen Höhe (--rest-h, LERN_Session45)
+      ctx.flaeche.append(el("div", { class: "notenblatt" }, LS.restHoehe(NOTEN.zeile({ noten: a.folge.map(p => ({ p })), schluessel: true, mindestBreite: 220 }))));
       LS.auswahl(ctx, {
         optionen: ["Halbton", "Ganzton"], richtig: a.richtig, breite: 150,
         // Königsstufe: knappe Hilfe ohne die Regel; die Regel steht in der Auflösung.
