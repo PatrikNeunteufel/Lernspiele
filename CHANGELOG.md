@@ -2592,6 +2592,8 @@
   Handy mit Tabelle quer und den drei Diagrammen zum Blättern (Reiter A B C; 484 px → passt); 2 a — Möglichkeiten-Finder
   (glace-kombinator) Kleider-Sets auf dem Handy mit der Regel neben der Anzeige, Stücke enger (s6 53 px → passt, vorher
   Anzeige halb unter der Tastatur). `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Eulenpfad hebel-wippe malkreuz zahlen-baukasten kakao-weg quader-volumen diagramm-wahl plan-leser „Keine
+  Fehler.“, Eulenpfad diagramm-wahl glace-kombinator „Keine Fehler.“, Skripte „Keine Fehler.“
 - Quader-Volumen (quader-volumen) s6, damit Punkt 4 erledigt: Aquarium und zwei Quader zusammen nach der Bildhöhe, nie
   unter 80 % ihrer Zeichnung (`nachHoehe`), Anzeige neben den Notizen 56 statt 76 px, Notizfelder 28 px, Frage enger
   (Handy 19 und 30 px → höchstens 3 px in 1 von 15); Tablet hoch Körper höchstens 260 px und nebeneinander (Vergleichen
@@ -2610,5 +2612,5 @@
   Schriftbreiten in beiden Browsern, alter Stil über `--css`): Das Werkzeug misst richtig, die Art kam nur in 7 von 24
   Ziehungen vor und dann günstig; gezielt mit `--text` und altem Stil bis 79 px, mit dem heutigen höchstens 2 px.
   rahmen.md 20, bildhoehe_offen.md Punkt 7.
-- Tests: Eulenpfad hebel-wippe malkreuz zahlen-baukasten kakao-weg quader-volumen diagramm-wahl plan-leser „Keine
-  Fehler.“, Eulenpfad diagramm-wahl glace-kombinator „Keine Fehler.“, Skripte „Keine Fehler.“
+- **Abschluss:** Report `docs/eulenpfad/report/LERN_Session44_2026-11-15.md`, Handover nachgeführt (Ausnahmen von
+  Punkt 4 erledigt, Entscheide 1 a und 2 a, `--text` im Messwerkzeug; weiter mit Push, seltenen Aufgabenarten oder GR1 a).

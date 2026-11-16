@@ -1,6 +1,17 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-15, nach LERN_Session44** ([Report](report/LERN_Session44_2026-11-15.md)):
+- **Kern:** unverändert 1.46.0.
+- **Bildhöhe (LERN-55):** Ausnahmen von Punkt 4 alle behoben (Entscheide 1 a Diagramm-Wahl s5 zum Blättern, 2 a
+  Möglichkeiten-Finder Regel neben der Anzeige), dazu Plan-Leser „zwischen“ und Quader-Volumen Tablet hoch;
+  `tools/bildhoehe.js --text` misst eine Aufgabenart gezielt.
+- **Tests:** **voller Eulenpfad-Lauf auf `750c0a8`** („2 Fehler.“ im Zahlen-Baukasten, behoben); danach die neun
+  geänderten Spiele gezielt „Keine Fehler.“, Skripte „Keine Fehler.“. Commits bis `0022648` von Patrik, ein Teil nicht
+  gepusht; dieser Abschluss noch zu committen.
+- **Weiter mit:** (1) Push, voller Lauf vorher auf Patriks Entscheid; (2) seltene Aufgabenarten mit `--text`
+  nachmessen; (3) GR1 a; (4) Sudokus ansehen und freigeben (Patrik).
+
 **2026-11-15, nach LERN_Session43** ([Report](report/LERN_Session43_2026-11-15.md)):
 - **Kern:** unverändert 1.46.0.
 - **Bildhöhe (LERN-55):** volle Messung mit fünf Ziehungen über alle Spiele ([Liste](bildhoehe_offen.md), Abschnitt
