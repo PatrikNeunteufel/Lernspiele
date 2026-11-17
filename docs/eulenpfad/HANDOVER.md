@@ -1,6 +1,19 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
 ## Stand
+**2026-11-17, nach LERN_Session46** ([Report](report/LERN_Session46_2026-11-17.md)):
+- **Kern:** unverändert 1.46.0.
+- **Ganze Aufgabe im Bild (LERN-55) zu Ende geführt:** Rest je Spiel (62 Spiele), Kakao-Weg K1–K3, Rahmen R1–R6
+  (Anzeige, Tastaturabstand, „OK ✓“, Titel passt sich an, Baustein `bildLinks`, Melde-Zeile bleibt), letzte Reste,
+  Sachaufgaben-Kompass Ergebnis-Schritt (SK2 a), volle Bildschirmgrössen ohne seitlichen Überlauf. Spiele mit der
+  Aufgabe über dem Rand: Handy 61 → 4, Tablet hoch 9 → 1, Laptop 8 → 0; übrig nur Ausnahmen und Fälle unter 15 px
+  ([Liste](bildhoehe_offen.md), Abschnitt „Stand LERN_Session46“).
+- **Tests:** voller Eulenpfad-Lauf auf `8f58c33` „Keine Fehler.“; danach je geänderte Spiele „Keine Fehler.“, Skripte
+  „Keine Fehler.“. Gepusht bis `00263b5`, `41b8552` und dieser Abschluss noch zu pushen bzw. zu committen.
+- **Weiter mit:** (1) Push (Patrik); (2) ⛶ Vollbild prüfen, Sudokus freigeben, quere Abfahrtstafel im Fahrplan-Rechner
+  ansehen (Patrik); (3) Werkzeug für spätere Schritte in `bildhoehe.js`, Hook-Kandidat übrig gebliebene
+  Hintergrundprozesse; (4) Rest LERN-55 nach Bedarf.
+
 **2026-11-16, nach LERN_Session45** ([Report](report/LERN_Session45_2026-11-16.md)):
 - **Kern:** unverändert 1.46.0.
 - **Bildhöhe (LERN-55):** seltene Aufgabenarten nachgemessen (`bildhoehe.js --arten`), sieben Spiele behoben; GR1 a
