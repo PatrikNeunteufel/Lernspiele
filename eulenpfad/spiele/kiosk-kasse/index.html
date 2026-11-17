@@ -41,6 +41,15 @@
     .theke:has(> .nz-zeile) .artikel .bild { font-size: 32px; }
     .theke:has(> .nz-zeile) .preis { font-size: 15px; padding: 1px 6px; border-width: 2px; }
   }
+  /* Sichtbare Fläche (unter 700 px Höhe, GR1 a): Geld legen (s4) mit Münzen und Noten in drei Reihen ragte auf dem
+     Handy bis 36 px unter den Rand — leere Kasse niedriger, Artikel und Abstände enger (LERN-55, LERN_Session46) */
+  @media (max-height: 700px) {
+    .theke { margin-bottom: 6px; }
+    .artikel .bild { font-size: 40px; }
+    .frage { margin-bottom: 8px; line-height: 1.25; }
+    .kasse { min-height: 64px; padding: 6px; margin-bottom: 8px; }
+    .vorrat { gap: 8px; margin-bottom: 8px; }
+  }
 </style>
 </head>
 <body>

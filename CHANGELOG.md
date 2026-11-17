@@ -2727,3 +2727,9 @@
   (Bausteine, Abschnitt 20), `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Rahmen R1–R6 LERN_Session46“.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad über die 25 geänderten Spiele „Keine Fehler.“, Feier „175 Spiele, 6300
   Bilder, keine Fehler.“
+- Voller Eulenpfad-Lauf auf `8f58c33` (nach R1–R6): „Keine Fehler.“ (3269 s).
+- Reste auf der sichtbaren Fläche (LERN-55), unter 700 px Höhe enger: Jahreskreis (jahreskreis) s6 Monate zählen in drei
+  Spalten (51 px → im Bild), Hello-Dialog (hello-dialog) s5 Lücke und s6 Ordnen (49 bzw. 34 px auf dem Laptop → im Bild),
+  Kiosk-Kasse (kiosk-kasse) s4 leere Kasse 64 px (36 → im Bild), Au café (au-cafe) s4 Gespräch mit fünf Zeilen (35 → im
+  Bild); `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Eulenpfad hello-dialog kiosk-kasse jahreskreis au-cafe „Keine Fehler.“, Skripte „Keine Fehler.“

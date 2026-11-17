@@ -41,6 +41,16 @@
   .nz-zeile label { display: inline-flex; align-items: center; gap: 6px; }
   .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
   .reihe-gelegt span { background: var(--gut-hell); border-radius: 12px; padding: 8px 14px; font-weight: 900; font-size: 20px; }
+  /* Sichtbare Fläche (unter 700 px Höhe, GR1 a): Monate zählen (s5, s6) mit zwölf Monaten in sechs Reihen und
+     Notizzeile ragte auf dem Handy bis 51 px unter den Rand — Monate in drei Spalten, Knöpfe 46 px, Frage enger
+     (LERN-55, LERN_Session46) */
+  @media (max-height: 700px) {
+    .frage { font-size: clamp(19px, 4.4vw, 26px); margin-bottom: 10px; line-height: 1.25; }
+    .wahl { gap: 8px; }
+    .wahl.monate { grid-template-columns: repeat(auto-fit, minmax(min(100px, 100%), 1fr)); }
+    .antwort { min-height: 46px; padding: 4px 6px; font-size: clamp(16px, 3.4vw, 22px); }
+    .nz-zeile { margin-bottom: 8px; }
+  }
 </style>
 </head>
 <body>

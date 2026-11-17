@@ -43,6 +43,20 @@
     .hd-wahl .wahl-knopf { min-height: 52px; padding: 6px 12px; }
     .hd-hoer { margin-bottom: 10px; }
   }
+  /* Sichtbare Fläche (unter 700 px Höhe, GR1 a): Lücke (s5) mit vier Blasen und drei langen Antworten ragte auf dem Handy
+     bis 49 px, Ordnen (s6) auf dem Laptop 34 px unter den Rand — Blasen, Szene, „nochmal“ und Knöpfe enger
+     (LERN-55, LERN_Session46) */
+  @media (max-height: 700px) {
+    .hd .frage { margin-bottom: 6px; }
+    .hd-szene { margin-bottom: 4px; }
+    .hd-szene-bild { font-size: 34px; }
+    .hd-blasen { gap: 4px; margin-bottom: 8px; }
+    .hd-wer { font-size: 26px; }
+    .hd-text { padding: 5px 12px; font-size: 17px; line-height: 1.3; }
+    .hd-hoer { padding: 6px 20px; font-size: 18px; margin-bottom: 8px; }
+    .hd-wahl .wahl-knopf, .hd-zeilen .wahl-knopf { min-height: 46px; padding: 4px 12px; line-height: 1.25; }
+    .hd-wahl { gap: 6px; }
+  }
   /* Ganze Aufgabe im Bild (BH3 a): breit und quer der Dialog links, die Antworten rechts daneben — untereinander
      ragte die Lücke (Stufe 5) auf dem Laptop bis 88 px unter den Rand */
   @media (min-width: 900px) and (orientation: landscape) {

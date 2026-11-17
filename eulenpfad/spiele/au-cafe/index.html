@@ -42,6 +42,20 @@
     .cafe-saetze .wahl-knopf { flex-direction: row; gap: 8px; }
     .cafe-blase { padding: 6px 10px; line-height: 1.25; }
   }
+  /* Sichtbare Fläche (unter 700 px Höhe, GR1 a): Was sagst du? (s4) mit Bild, Situation und zwei langen Sätzen ragte
+     auf dem Handy bis 23 px, ein Gespräch mit fünf Zeilen und „Wie viel kostet es?“ bis 35 px unter den Rand — Bild und
+     Sprecher kleiner, Blasen und Abstände enger, Satzknöpfe 46 px (LERN-55, LERN_Session46) */
+  @media (max-height: 700px) {
+    .cafe-bild { font-size: 46px; margin-bottom: 2px; }
+    .cafe-situation { margin-bottom: 8px; line-height: 1.25; }
+    .frage { margin-bottom: 6px; line-height: 1.25; }
+    .cafe-saetze .wahl-knopf { min-height: 46px; }
+    .cafe-gespraech { gap: 4px; margin-bottom: 8px; }
+    .cafe-wer { font-size: 28px; }
+    .cafe-wer small { font-size: 10px; }
+    .cafe-blase { padding: 3px 10px; font-size: clamp(16px, 3.6vw, 20px); line-height: 1.2; }
+    .cafe-hoer { padding: 6px 20px; font-size: 18px; margin-bottom: 8px; }
+  }
 </style>
 </head>
 <body>

@@ -448,6 +448,13 @@ die Baustein-Spiele über alle Stufen gezielt — Spiele mit der Aufgabe über d
 Rest: Handy plan-leser s6 49 (Weg beschreiben, Ausnahme Punkt 4), hello-dialog s6 8, kiosk-kasse s6 7, flaechen-pixel
 s6 1; Tablet hoch malkreuz s6 1. Seitlich nirgends, keine geschrumpfte Grafik (auch `mix`, `handy-quer`).
 
+Voller Eulenpfad-Lauf auf `8f58c33` danach „Keine Fehler.“. Reste gezielt nachgemessen (14 Kandidaten, alle Stufen,
+fünf Ziehungen) und unter 700 px Höhe behoben: **jahreskreis** s6 Monate zählen 51 → im Bild (Monate in drei Spalten,
+Knöpfe 46 px), **hello-dialog** s5 Lücke 49 → im Bild, s6 Ordnen Laptop 34 → im Bild (Blasen, Szene, „nochmal“ und
+Knöpfe enger), **kiosk-kasse** s4 Geld legen 36 → im Bild (leere Kasse 64 px), **au-cafe** s4 bis 35 → im Bild
+(Gespräch mit fünf Zeilen; gezielt „francs“ s4–s6, zehn Ziehungen). Daten-Detektiv s4 8 px kam in sechs Ziehungen
+nicht mehr. Übrig an der Schwelle: flaechen-pixel s5/s6 1, roboter-pfad s5/s6 2, malkreuz s6 Tablet hoch 1 (Ausnahme).
+
 Rest (höchster Wert in px):
 - **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,
   zufalls-skala 91, zahlenmauer 90, fahrplan-rechner 75, uhr-werkstatt 74, quader-volumen 74, preis-tabelle 73,
