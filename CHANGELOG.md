@@ -2733,3 +2733,10 @@
   Kiosk-Kasse (kiosk-kasse) s4 leere Kasse 64 px (36 → im Bild), Au café (au-cafe) s4 Gespräch mit fünf Zeilen (35 → im
   Bild); `docs/eulenpfad/bildhoehe_offen.md`.
 - Tests: Eulenpfad hello-dialog kiosk-kasse jahreskreis au-cafe „Keine Fehler.“, Skripte „Keine Fehler.“
+- Sachaufgaben-Kompass (sachaufgaben-kompass), Entscheid SK2 a (LERN-55, bildhoehe_offen.md Offen 6, offen seit
+  LERN_Session13; vorgelegt als SK1): Im Ergebnis-Schritt stehen statt Sachtext und Daten nur die nötigen Angaben als
+  grüne Karten, „📄 Text zeigen“ holt Text und Daten zurück; auf dem Handy Angaben, Schritt, Einheiten und Notizen
+  enger. Vorher ragte der Schritt auf dem Handy in s2–s6 bis 255 px über den Rand (Zifferntastatur oft ganz), auf dem
+  Tablet hoch bis 228, auf dem Laptop bis 98 px; nachher überall im Bild ausser Handy s6 einmal 11 px (gemessen über eine
+  vorübergehende Kopie der Seite, die die Vorschritte richtig antippen lässt). `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Eulenpfad sachaufgaben-kompass „Keine Fehler.“, Skripte „Keine Fehler.“

@@ -37,6 +37,12 @@
   .kompass-namen { display: flex; justify-content: space-around; gap: 6px; padding: 4px 4px 0; font-weight: 800; }
   .kompass-namen span { flex: 1; text-align: center; min-width: 0; overflow-wrap: anywhere; }
   .kompass-schritt { text-align: center; font-weight: 800; color: var(--text-leise); margin: 10px 0 6px; }
+  /* Ergebnis-Schritt (SK2 a): nur die nötigen Angaben, grün wie im Text nach dem Prüfen, dazu „📄 Text zeigen“ */
+  .kompass-angaben { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 4px 6px; margin: 0 0 8px;
+    font-size: clamp(16px, 3.8vw, 21px); }
+  .kompass-angaben .angabe { margin: 0; background: var(--gut-hell); border-color: var(--gut); }
+  .kompass-text-zeigen { font: inherit; font-size: 15px; font-weight: 800; min-height: 44px; padding: 0 12px; border: 2px solid var(--rand);
+    border-radius: 999px; background: var(--k-feld); color: var(--text); cursor: pointer; }
   .kompass-pruefen { display: flex; justify-content: center; margin: 6px 0; }
   .kompass-antwort { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 6px 0; }
   .kompass-antwort .anzeige { margin: 0; }
@@ -88,7 +94,22 @@
     .nz-zeile .zw-notiz { min-height: 30px; }
     /* Erster Schritt ganz im Bild (LERN_Session46; vorher auf 375 × 660 bis 76 px darunter, s2 vier Rechenwege, s4
        Lagerkasse): Text 16 px und enger, Rechenwege und „Prüfen“ 46 px wie die Knöpfe des Rahmens unter 700 px, Tabelle
-       enger. Der Ergebnis-Schritt bleibt, wie er ist (offene Entscheidung, bildhoehe_offen.md Offen 6). */
+       enger. Im Ergebnis-Schritt stehen nur die nötigen Angaben (SK2 a, LERN_Session46), auf dem Handy enger: lange
+       Angaben (s2 ganze Sätze) 15 px, Schritt einzeilig 14 px — mit Notizen ragte s2 sonst bis 92 px unter den Rand. */
+    .kompass-angaben { font-size: 15px; gap: 3px 6px; margin-bottom: 4px; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center; }
+    .kompass-angaben .angabe { line-height: 1.3; padding: 1px 6px; grid-column: 1; justify-self: center; }
+    /* „📄 Text zeigen“ schmal rechts neben den Angaben statt auf einer eigenen Zeile */
+    .kompass-text-zeigen { grid-column: 2; grid-row: 1 / span var(--n, 1); width: 60px; padding: 4px; font-size: 12px; line-height: 1.15;
+      border-radius: 12px; white-space: normal; }
+    .kompass-einheit { min-height: 46px; }
+    /* „Notizen:“ und drei Felder (s6) in einer Zeile: mit 10 px Abstand brach das dritte um (+34 px) */
+    .kompass-antwort > .nz-zeile { column-gap: 6px; }
+    /* Ein einziges Notizfeld (s2): Teilrechnung links daneben statt darüber (s2 Lagerkosten ragte sonst 11 px darunter) */
+    .kompass-antwort > .nz-zeile:has(> label:only-of-type) label { flex-direction: row; align-items: center; gap: 6px; }
+    div:has(> .kompass-angaben) > .kompass-schritt { font-size: 14px; line-height: 1.25; margin: 0 0 2px; }
+    div:has(> .kompass-angaben) > .frage { margin-bottom: 4px; }
+    .kompass-antwort { gap: 6px; margin: 4px 0; }
     .kompass-text { line-height: 1.4; font-size: 16px; margin-bottom: 6px; }
     .kompass-text .angabe { margin-block: 1px; line-height: 1.4; }
     .frage { margin: 2px 0 6px; line-height: 1.3; }
@@ -938,6 +959,22 @@ LS.spiel({
     }
 
     function phaseErgebnis() {
+      // Entscheid SK2 a (LERN_Session46, vorgelegt als SK1): Im Ergebnis-Schritt stehen statt Sachtext und Daten nur die
+      // nötigen Angaben — die das Kind im ersten Schritt herausgesucht hat (s1, s2, s4 haben keine unnötigen, dort
+      // sind es alle). Mit dem ganzen Text ragte der Schritt auf dem Handy bis 255 px unter den Rand, die Tastatur oft
+      // ganz. „📄 Text zeigen“ holt Text und Daten zurück.
+      const ausgeblendet = [text, daten].filter(Boolean);
+      const textKnopf = el("button", { type: "button", class: "kompass-text-zeigen", text: "📄 Text zeigen", "aria-expanded": "false", onclick() {
+        const zeigen = !text.isConnected;
+        if (zeigen) ausgeblendet.forEach(x => angabenZeile.before(x)); else ausgeblendet.forEach(x => x.remove());
+        textKnopf.textContent = zeigen ? "📄 Text ausblenden" : "📄 Text zeigen";
+        textKnopf.setAttribute("aria-expanded", String(zeigen));
+      } });
+      const noetig = a.angaben.filter(x => x.noetig);
+      textKnopf.style.setProperty("--n", noetig.length); // auf dem Handy steht der Knopf rechts neben allen Angaben
+      const angabenZeile = el("div", { class: "kompass-angaben" }, ...noetig.map(x => el("span", { class: "angabe", text: zeigeText(x.text) })), textKnopf);
+      text.before(angabenZeile);
+      ausgeblendet.forEach(x => x.remove());
       let einheit = null, versuche = 0;
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Dein Ergebnis" });
       const einheiten = el("div", { class: "kompass-einheiten", role: "group", "aria-label": "Einheit" });

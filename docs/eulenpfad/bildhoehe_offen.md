@@ -189,7 +189,8 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
 6. **Sachaufgaben-Kompass, Ergebnis-Schritt auf dem Handy:** läuft schon ohne Notizen über (s3–s6 55–270 px, die
    Zifferntastatur nicht ganz im Bild); mit Notizen auch s2 (39–77 px). Das Messwerkzeug sieht es nicht, weil es nur
    den ersten Schritt misst (Befund Notiz-Paket A). Zu entscheiden: Notizen auf dem Handy in s2 lassen; den
-   Ergebnis-Schritt selbst verdichten.
+   Ergebnis-Schritt selbst verdichten. — *erledigt 2026-11-17 (LERN_Session46, Entscheid SK2 a, Abschnitt
+   „Sachaufgaben-Kompass, Ergebnis-Schritt“ unten).*
 7. **Messwerkzeug:** *erledigt 2026-11-15 (LERN_Session42 BW1 a: `--ziehungen`, Vorgabe 5; LERN_Session43 Messbrowser ohne
    Stimmen-Meldung; LERN_Session44 `--text` misst eine Aufgabenart gezielt; LERN_Session45 `--arten` misst eine Liste
    von Arten in einem Lauf, rahmen.md 20).*
@@ -454,6 +455,23 @@ Knöpfe 46 px), **hello-dialog** s5 Lücke 49 → im Bild, s6 Ordnen Laptop 34 �
 Knöpfe enger), **kiosk-kasse** s4 Geld legen 36 → im Bild (leere Kasse 64 px), **au-cafe** s4 bis 35 → im Bild
 (Gespräch mit fünf Zeilen; gezielt „francs“ s4–s6, zehn Ziehungen). Daten-Detektiv s4 8 px kam in sechs Ziehungen
 nicht mehr. Übrig an der Schwelle: flaechen-pixel s5/s6 1, roboter-pfad s5/s6 2, malkreuz s6 Tablet hoch 1 (Ausnahme).
+
+## Sachaufgaben-Kompass, Ergebnis-Schritt LERN_Session46 (2026-11-17)
+
+Gemessen mit einer vorübergehenden Kopie der Seite, die ihre Aufgabe offenlegt: ein Skript tippt die Vorschritte richtig
+an (Angaben, Rechenweg, Zusammenhang) und misst Schritt ③ (je Stufe drei bis vier Ziehungen, Handy, Tablet hoch,
+Laptop; zum Vergleich auf derselben Aufgabe die Varianten). Vorher ragte der Schritt auf dem Handy in s2–s6 über den
+Rand (s2 1–58, s3 71–177, s4 192–222, s5 53–95, s6 173–255 px; ohne Notizen immer noch bis 184), die Zifferntastatur oft
+ganz; Tablet hoch s4 bis 228, Laptop s2–s4 26–98. Verglichen: Text scrollt im eigenen Feld (Handy noch 22–41, s4
+unverändert bis 222, weil dort Tabelle oder Diagramm die Höhe machen) gegen nur die nötigen Angaben (Handy höchstens 39).
+
+**Entscheid SK2 a (Patrik, vorgelegt als SK1 — SK1 ist seit LERN_Session14 „Angaben mit Bedeutung“):** Im
+Ergebnis-Schritt stehen statt Sachtext und Daten nur die nötigen Angaben als grüne Karten (die das Kind im ersten
+Schritt herausgesucht hat; s1, s2, s4 haben keine unnötigen, dort alle), „📄 Text zeigen“ holt Text und Daten zurück.
+Notizen bleiben auf dem Handy ab Stufe 2. Auf dem Handy dazu: Angaben 15 px, Schritt einzeilig 14 px, „Text zeigen“
+schmal rechts neben den Angaben, Einheiten 46 px, drei Notizfelder in einer Zeile, ein einziges Notizfeld mit der
+Teilrechnung links daneben. Nachher (Schlussmessung): Handy, Tablet hoch und Laptop in allen Stufen im Bild, ausser
+Handy s6 einmal 11 px (eine von zehn Ziehungen); erster Schritt mit `bildhoehe.js` auf allen vier Flächen im Bild.
 
 Rest (höchster Wert in px):
 - **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,
