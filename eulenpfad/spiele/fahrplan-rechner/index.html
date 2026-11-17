@@ -49,7 +49,7 @@
     /* Zeilen enger: lange Fahrpläne ragten mit der Tastatur bis 20 px unter den Rand (LERN_Session43) */
     .fahrplan th, .fahrplan td { padding-block: 4px; }
     /* Züge zur Wahl (rückwärts planen): Bild neben der Zeit, die Knöpfe niedriger (LERN_Session46) */
-    .fp-rahmen ~ .wahl .wahl-knopf { flex-direction: row; gap: 8px; min-height: 54px; }
+    .fp-rahmen ~ .wahl.bild-links-eng { --bild-links-gr: 26px; } /* Baustein bildLinks "eng" (R5 a) */
     /* Lange Fahrpläne mit Zifferntastatur (LERN_Session46: bis 75 px über dem Rand): Beispiel neben der Anzeige, Anzeige
        56 px, Zeilen und Notizfelder enger */
     .frage { margin-bottom: 6px; }
@@ -57,7 +57,6 @@
     .fahrplan th, .fahrplan td { padding-block: 2px; }
     .fahrplan .zw-notiz, .nz-legende .zw-notiz { min-height: 24px; }
     .fp-legende { margin: -2px 0 4px; }
-    .ergebnis-zeile .anzeige { min-height: 50px; padding-block: 0; line-height: 1.2; }
     .ergebnis-zeile > .fr-beispiel { flex: 0 1 8.5em; margin: 0; text-align: left; font-size: 14px; line-height: 1.25; }
   }
   /* Tablet hoch: lange Fahrpläne mit Zifferntastatur ragten bis 39 px über den Rand (LERN_Session46) — Zeilen, Anzeige
@@ -656,7 +655,7 @@ LS.spiel({
     if (a.typ === "wahl") {
       if (notiz) ctx.flaeche.append(notiz);
       LS.auswahl(ctx, {
-        optionen: [0, 1, 2, 3], richtig: a.loesung, breite: 120,
+        optionen: [0, 1, 2, 3], richtig: a.loesung, breite: 120, bildLinks: "eng",
         inhalt: i => ({ bild: "🚆", text: `ab ${uhr(a.abfahrten[i])}` }),
         hinweis: i => (i > a.loesung
           ? `Mit diesem Zug bist du erst um ${uhr(a.abfahrten[i] + a.f + a.weg)} dort — zu spät. Denk an den Fussweg.`

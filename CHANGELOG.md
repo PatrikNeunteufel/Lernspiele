@@ -2709,3 +2709,21 @@
   bis 387 px (Handy), 166 px (Tablet hoch), 269 px (Laptop) über den Rand; jetzt bei keinem Schritt. Entscheid G1 a:
   Buchstabentasten des Geheimschrift-Knackers auf dem Handy bleiben 30 × 44 px. `docs/eulenpfad/bildhoehe_offen.md`.
 - Tests: Eulenpfad kakao-weg „Keine Fehler.“, Skripte „Keine Fehler.“
+- Rahmen, Entscheide R1 a–R6 a (LERN-55; vorher je Wunsch mit einer Probe gemessen, die dieselbe Aufgabe mit jeder
+  Variante neu misst): `stil.css` unter 700 px Höhe Anzeige 52 statt 76 px (R1) und 8 px Abstand über der Zifferntastatur
+  (R6); „OK ✓“ auf einer Zeile (R3); `spiel.js` `titelEinpassen` — Titel 20 → höchstens 16 px, bis er auf eine Zeile
+  passt (R4; vorher 33 von 175 Titeln zweizeilig, jetzt zwei); Baustein „Antwortknopf mit Bild links“
+  (`opt.bildLinks: true | "eng"` in `LS.auswahl`/`LS.reihenfolge`, `LS.bildLinks`, Klassen `bild-links`,
+  `bild-links-eng`, R5); Melde-Zeile bleibt gleich hoch (R2, WZ1 a). Einzelregeln entfernt bzw. auf den Baustein
+  umgestellt: Bionik-Paare (bionik-paare), Diagramm-Wahl (diagramm-wahl), Fahrplan-Rechner (fahrplan-rechner),
+  Flächen-Pixel (flaechen-pixel), Gattungs-Kenner (gattungs-kenner), Geheimschrift-Knacker (geheimschrift-knacker),
+  Gemeinde-Helfer (gemeinde-helfer), Möglichkeiten-Finder (glace-kombinator), Kakao-Weg (kakao-weg), Komma-Messband
+  (komma-messband), Mittelwert-Türme (mittelwert-waage), Preis-Tabelle (preis-tabelle), Quader-Volumen (quader-volumen),
+  Schriftlich-Werkstatt (schriftlich-werkstatt), Speicher-Leiter (speicher-leiter), Stufenzahl-Schieber
+  (stufenzahl-schieber), Taschengeld-Planer (taschengeld-planer), Uhr-Werkstatt (uhr-werkstatt), Velo-Tabelle
+  (velo-tabelle), Würfel-Zähler (wuerfel-zaehler), Zahlen-Baukasten (zahlen-baukasten), Zahlen-Waage (zahlen-waage),
+  Zahlenhaus (zahlenhaus), Zehntel-Lupe (zehntel-lupe), Zufalls-Skala (zufalls-skala). Nachmessung aller Spiele: Spiele
+  mit der Aufgabe über dem Rand gegen den 16.11. Handy 61 → 4, Tablet hoch 9 → 1, Laptop 8 → 0, Tablet quer 0. rahmen.md
+  (Bausteine, Abschnitt 20), `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Rahmen R1–R6 LERN_Session46“.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad über die 25 geänderten Spiele „Keine Fehler.“, Feier „175 Spiele, 6300
+  Bilder, keine Fehler.“

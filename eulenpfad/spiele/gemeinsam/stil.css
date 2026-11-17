@@ -411,6 +411,9 @@ button { font-family: inherit; }
 .tastatur button.loeschen { background: var(--taste-loeschen); box-shadow: 0 5px 0 var(--taste-loeschen-boden); }
 .tastatur button.ok { background: var(--gut-grund); color: var(--auf-gut); box-shadow: 0 5px 0 var(--gut-boden); grid-column: span 2; }
 .tastatur button.ok:disabled { opacity: .45; }
+/* „OK ✓“ auf einer Zeile (Entscheid R3 a, LERN_Session46): neben der Dezimaltaste ist OK nur eine Spalte breit, auf dem
+   Handy brach es um und machte die unterste Tastenreihe 62 statt 46 px hoch. */
+.tastatur button.ok { white-space: nowrap; }
 
 /* ---------- Anzeige einer eingetippten Zahl ---------- */
 
@@ -788,6 +791,23 @@ button.link, a.link {
 .wahl-knopf.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
 .wahl-knopf.richtig { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }
 .wahl-knopf.gewaehlt { opacity: .3; }
+/* Baustein „Antwortknopf mit Bild links“ (Entscheid R5 a, LERN_Session46): Bild links, Text und klein rechts —
+   LS.auswahl/LS.reihenfolge mit bildLinks: true (immer) oder "eng" (nur unter 560 px Breite oder 700 px Höhe); auf
+   kleiner Fläche zudem flacher Knopf. Vorher baute jedes Spiel das selbst (16 Regeln in acht Spielen). Bildgrösse je
+   Spiel über --bild-links-gr; Masse des Knopfs überschreibt ein Spiel mit .wahl.<eigene Klasse> .wahl-knopf. */
+.wahl.bild-links .wahl-knopf { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; align-items: center;
+  justify-items: start; text-align: left; }
+.wahl.bild-links .wahl-knopf > .bild { font-size: var(--bild-links-gr, 28px); }
+.wahl.bild-links .wahl-knopf:has(> small) > .bild { grid-row: 1 / span 2; }
+.wahl.bild-links .wahl-knopf > :not(.bild) { grid-column: 2; }
+@media (max-width: 560px), (max-height: 700px) {
+  .wahl.bild-links-eng .wahl-knopf { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; align-items: center;
+    justify-items: start; text-align: left; }
+  .wahl.bild-links-eng .wahl-knopf > .bild { font-size: var(--bild-links-gr, 28px); }
+  .wahl.bild-links-eng .wahl-knopf:has(> small) > .bild { grid-row: 1 / span 2; }
+  .wahl.bild-links-eng .wahl-knopf > :not(.bild) { grid-column: 2; }
+  .wahl:is(.bild-links, .bild-links-eng) .wahl-knopf { min-height: 46px; padding: 4px 10px; line-height: 1.2; }
+}
 
 .ablage {
   display: flex;
@@ -1100,6 +1120,11 @@ button.link, a.link {
   .knopf { min-height: 46px; padding: 8px 20px; font-size: 20px; }
   .wahl-knopf { min-height: 46px; }
   .tastatur button { min-height: 46px; font-size: 22px; }
+  /* Entscheide R1 a, R6 a (LERN_Session46): Anzeige 52 statt 76 px und Tastatur näher an der Aufgabe — vorher setzten
+     18 bzw. 14 Spiele das je selbst. Gemessen: Anzeige auf dem Handy −21 px (104 von 1050 Seiten), Tablet quer und
+     Laptop −30 px; Abstand −8 px (139 Seiten). Ein Spiel, das eine andere Anzeige braucht, setzt sie mit Begründung. */
+  .anzeige { min-height: 52px; font-size: 32px; padding-block: 2px; }
+  .tastatur { margin-top: 8px; }
 }
 
 /* Im Zufallsmix (iframe von mix.html, Entscheid M1 a): Kopfzeile und Fortschritt zeigt der Mix selbst. */

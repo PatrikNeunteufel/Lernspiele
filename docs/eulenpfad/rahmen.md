@@ -69,7 +69,7 @@ zum Beispiel grössere Wahlknöpfe. Die Liste steht in `LS.RAHMEN_KLASSEN.bauste
 
 | Baustein | Klassen |
 |---|---|
-| `LS.auswahl`, `LS.reihenfolge` | `wahl`, `wahl-knopf`, `bild`, `ablage`, `pfeil` |
+| `LS.auswahl`, `LS.reihenfolge` | `wahl`, `wahl-knopf`, `bild`, `ablage`, `pfeil`, `bild-links`, `bild-links-eng` |
 | `LS.bild` (Bildersammlung, Abschnitt 22) | `gezeichnet`, `pruef-bild`, `pruef-text-bild`; `pruef-farbe`, `pruef-farbfeld` (Farbcode `#rgb`/`#rrggbb` in einer Liste: Feld in der Farbe vor dem Code) |
 | `LS.koerbe` | `korb-karte`, `korb-reihe`, `korb-knopf` |
 | `LS.tastatur` | `tastatur`, `anzeige`, `ok`, `loeschen`, `zeichen` (Dezimalzeichen) |
@@ -198,8 +198,8 @@ auf. Die Optionen sind in `spiel.js` beschrieben.
 
 | Baustein | wofür |
 |---|---|
-| `LS.auswahl(ctx, opt)` | genau eine richtige Antwort unter mehreren Knöpfen |
-| `LS.reihenfolge(ctx, opt)` | Teile in der richtigen Reihenfolge antippen |
+| `LS.auswahl(ctx, opt)` | genau eine richtige Antwort unter mehreren Knöpfen. `opt.bildLinks` (Entscheid R5 a, LERN_Session46): Bild links, Text und `klein` rechts — `true` immer, `"eng"` nur unter 560 px Breite oder 700 px Höhe; auf kleiner Fläche ist der Knopf zudem flach (46 px). Bildgrösse je Spiel über `--bild-links-gr` (Vorgabe 28 px), andere Masse des Knopfs mit `.wahl.<eigene Klasse> .wahl-knopf`. Ein Spiel mit eigener Knopfkiste ruft `LS.bildLinks(box, wie)`. Vorher baute jedes Spiel das selbst (16 Regeln in acht Spielen) |
+| `LS.reihenfolge(ctx, opt)` | Teile in der richtigen Reihenfolge antippen; `opt.bildLinks` wie bei `LS.auswahl` |
 | `LS.koerbe(ctx, opt)` | Karte in den richtigen Korb (sie fliegt hinein). Farbe je Korb, nicht je Platz (KF1 a, LERN_Session38): ein Korb behält sie die ganze Runde, jede Runde verteilt sie neu, in einer Aufgabe nie zweimal dieselbe (bei mehr Körben als Farben weicht einer aus); `opt.farbe(wert, i)` wählt selbst. Prüfer „Korbfarbe“ im Testskript |
 | `LS.losGehts(ctx, element, weiter, { uhr })` | Für Aufgaben, die etwas nur kurz zeigen (einprägen, aufblitzen): element bleibt verdeckt. Bei der ersten Aufgabe einer Runde, nach einer Aufgabe mit Fehler und im Mix darüber „▶ Los!“, nach dem Tippen 3-2-1; sonst nur 1 s 👀 (`ctx.losKnopf`, LERN-38). Dann sichtbar, und `weiter(uhrLos)` startet die Zeigezeit. Mit und ohne Timer gleich: Die Uhr startet nach `weiter()`, mit `{ uhr: false }` erst, wenn das Spiel `uhrLos()` ruft (Merk-Blick: mit dem veränderten Bild). Mit `{ antwortenNachBlitz: true }` bleiben die Antworten (`.wahl`, `.tastatur`, `.korb-reihe`) verdeckt, bis das Spiel `weiter(uhrLos, vorbei)` → `vorbei()` ruft; erst dann startet die Uhr (höchstens 8 s, Bemerkung 7, LERN_Session11: Blitzlesen, Punkte-Blitz, Finger-Zähler). Benutzt von Merk-Blick, Punkte-Blitz, Blitzlesen, Finger-Zähler (Wunsch Patrik, LERN_Session8) |
 | `LS.tastatur(opt)` | Zifferntastatur mit Anzeigefeld; das Spiel prüft selbst in `onOk`. Mit `dezimal: true` eine Taste für das eingestellte Dezimalzeichen (auch `.` und `,` auf der Tastatur), `nachkomma` begrenzt die Ziffern danach (Standard 3); `onOk(wert, text)` bekommt die Zahl und den getippten Text mit „.“, wenn die Stellenzahl zählt („3.0“ beim Runden) (LERN_Session8, LERN-36) |
@@ -1073,7 +1073,14 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   — nur, wenn sie direkt in der Spielfläche steht (`.karte > div > .tastatur`). (3) Sonst bleibt sie als Leiste unten im
   Bild (`position: sticky`), und die Aufgabe scrollt darüber. (4) Unter 700 px Höhe (Entscheid GR1 a, LERN_Session45)
   verdichtet er weiter: Kopfzeile mit 40-px-Knöpfen, Eule 40 px, Blase 15 px, Knöpfe und Tasten 46 px, engere Abstände
-  — Ziel ist die sichtbare Fläche im Browser (Handy 375×660, Tablet 768×950 und 1024×690, Laptop 1366×650).
+  — Ziel ist die sichtbare Fläche im Browser (Handy 375×660, Tablet 768×950 und 1024×690, Laptop 1366×650). Dazu
+  (Entscheide R1 a, R6 a, LERN_Session46) die Anzeige 52 statt 76 px (Schrift 32 px) und 8 px Abstand über der
+  Zifferntastatur; vorher setzten 18 bzw. 14 Spiele das je selbst. Ein Spiel, das eine andere Anzeige braucht (kleiner
+  oder eigene Klasse), setzt sie mit Begründung. „OK ✓“ bleibt auf einer Zeile, auch neben der Dezimaltaste (R3 a).
+  **Titel** (R4 a): `spiel.js` macht die Schrift des Titels Pixel um Pixel kleiner, bis er auf eine Zeile passt, höchstens
+  bis 16 px (`titelEinpassen`, neu bei Grössenänderung); auf 375 px brachen vorher 33 von 175 Titeln um, bei 16 px noch
+  zwei (Zahlenmauer-Baumeister, Koordinaten-Schatzsuche). Nichts wird abgeschnitten. Die Zeile „🙋 Melden“ bleibt immer
+  gleich hoch, auch leer (WZ1 a; R2 a, LERN_Session46: sonst rutschte die Aufgabe, wenn der Balken „Weiter“ erscheint).
 - **⛶ Vollbild** (GR1 a): `spiel.js` setzt den Knopf `vollbild-knopf` hinter den Titel; `stil.css` zeigt ihn nur auf
   Geräten mit Maus unter 650 px Höhe und im Vollbild selbst (`im-vollbild` am html). Nicht in einem Rahmen (Zufallsmix,
   Prüfansicht) und nicht, wo der Browser kein Vollbild kennt. Alles auch bei 1000×500 ohne Vollbild (GR1 b) ist

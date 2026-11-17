@@ -57,10 +57,9 @@
       justify-items: start; align-content: center; text-align: left; min-height: 52px; padding: 4px 6px; font-size: 14px; }
     .bionik-feld:has(> :nth-child(7)) .bionik-karte .bild { grid-row: span 2; justify-self: center; font-size: 26px; }
     .bionik-feld:has(> :nth-child(7)) .bionik-karte small { font-size: 12px; }
-    /* Vorbild oder Erfindung wählen mit langer Erfindung (s2, 22 px darunter): Antworten mit Bild links, flacher */
-    .bionik-zeile ~ .wahl { gap: 8px; }
-    .bionik-zeile ~ .wahl .wahl-knopf { flex-direction: row; gap: 10px; min-height: 50px; padding-block: 4px; }
-    .bionik-zeile ~ .wahl .wahl-knopf .bild { font-size: 30px; }
+    /* Vorbild oder Erfindung wählen mit langer Erfindung (s2, 22 px darunter): Antworten mit Bild links (Baustein
+       bildLinks "eng", R5 a) */
+    .bionik-zeile ~ .wahl { gap: 8px; --bild-links-gr: 30px; }
     .bionik-zeile { margin-bottom: 8px; }
   }
   /* Handy: Vorbild → Erfindung nebeneinander statt untereinander (LERN_Session45: untereinander 206 px hoch, mit langer
@@ -297,13 +296,13 @@ LS.spiel({
       case "erfindung":
         f.append(el("div", { class: "bionik-zeile" }, teil(p.vbild, p.vorbild, "vorbild", "Vorbild"), pfeil(), teil("?", "", "erfindung offen", "Erfindung")),
           el("div", { class: "frage", text: `Vorbild: ${p.vorbild}. Welche Erfindung gehört dazu?` }));
-        Object.assign(opt, { inhalt: id => ({ bild: P[id].ebild, text: P[id].erfindung }), loesung: `${p.vorbild} → ${p.erfindung}. ${p.text}`,
+        Object.assign(opt, { inhalt: id => ({ bild: P[id].ebild, text: P[id].erfindung }), bildLinks: "eng", loesung: `${p.vorbild} → ${p.erfindung}. ${p.text}`,
           hinweis: id => `${P[id].erfindung} hat ein anderes Vorbild: ${P[id].vorbild}. Was kann dein Vorbild besonders?` });
         break;
       case "vorbild":
         f.append(el("div", { class: "bionik-zeile" }, teil("?", "", "vorbild offen", "Vorbild"), pfeil(), teil(p.ebild, p.erfindung, "erfindung", "Erfindung")),
           el("div", { class: "frage", text: `Welches Vorbild aus der Natur hatte diese Erfindung: ${p.erfindung}?` }));
-        Object.assign(opt, { inhalt: id => ({ bild: P[id].vbild, text: P[id].vorbild }), loesung: `${p.vorbild} → ${p.erfindung}. ${p.text}`,
+        Object.assign(opt, { inhalt: id => ({ bild: P[id].vbild, text: P[id].vorbild }), bildLinks: "eng", loesung: `${p.vorbild} → ${p.erfindung}. ${p.text}`,
           hinweis: id => `${P[id].vorbild} war das Vorbild für etwas anderes: ${P[id].erfindung}.` });
         break;
       case "eigenschaft":

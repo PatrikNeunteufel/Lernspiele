@@ -44,9 +44,8 @@
     div:has(> .gh-ablauf) .gh-karte { padding-block: 6px; }
     div:has(> .gh-ablauf) > .ablage { min-height: 44px; padding: 4px; margin-bottom: 8px; }
     .wahl.gh-ablauf { gap: 4px; }
-    /* Wer ist zuständig (s5): vier Stellen untereinander zu 79 px ragten 8 px unter den Rand — Bild links */
-    .gh ~ .wahl:not(.gh-ablauf):not(.gh-nummer):not(.gh-ebene) .wahl-knopf { flex-direction: row; min-height: 52px; gap: 8px; }
-    .gh ~ .wahl:not(.gh-ablauf):not(.gh-nummer):not(.gh-ebene) .wahl-knopf .bild { font-size: 28px; }
+    /* Wer ist zuständig (s5): vier Stellen untereinander zu 79 px ragten 8 px unter den Rand — Bild links (Baustein
+       bildLinks "eng", R5 a; auch beim Notruf mit Namen) */
   }
 </style>
 </head>
@@ -351,7 +350,7 @@ LS.spiel({
       if (a.text) gh.append(karteText("📞", a.text));
       gh.append(el("div", { class: "frage", text: a.frage }));
       const box = LS.auswahl(ctx, {
-        optionen: a.optionen, richtig: a.richtig, breite: a.namen ? 150 : 110,
+        optionen: a.optionen, richtig: a.richtig, breite: a.namen ? 150 : 110, bildLinks: a.namen && "eng",
         inhalt: o => (a.namen ? { bild: N[o].bild, text: N[o].name } : { text: o }),
         hinweis: o => {
           if (a.namen) return `Die ${N[o].name} hat eine andere Nummer. Überleg, wer bei Feuer, bei Verletzten und bei Gefahr kommt.`;
@@ -395,7 +394,7 @@ LS.spiel({
         // Lange Namen („Gemeindeverwaltung“, 24 px gut 250 px breit) brauchen breitere Spalten, sonst ragen sie auf dem
         // Tablet über den Knopf und die Seite (LERN-55, seitlich 7 px)
         optionen: a.optionen, richtig: a.a.ziel, breite: a.optionen.some(id => S[id].name.length > 14) ? 280 : 160,
-        inhalt: id => ({ bild: S[id].bild, text: S[id].name }),
+        inhalt: id => ({ bild: S[id].bild, text: S[id].name }), bildLinks: "eng",
         hinweis: id => `${S[id].name}: ${S[id].tut}. Ist das hier die richtige Stelle?`,
         loesung,
         lob: `Genau: ${z.name} — ${z.tut}.`,

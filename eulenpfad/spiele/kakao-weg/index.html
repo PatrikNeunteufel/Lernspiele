@@ -12,8 +12,9 @@
   .produkt { text-align: center; font-size: clamp(18px, 4vw, 24px); font-weight: 800; margin: 0 0 8px; color: var(--text-leise); }
   .produkt .gross { font-size: clamp(40px, 9vw, 56px); display: block; line-height: 1.1; }
   .schritt-wahl { --wahl-breite: 260px; }
-  .schritt-wahl .wahl-knopf { font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; line-height: 1.25; text-align: left; flex-direction: row; justify-content: flex-start; gap: 10px; }
-  .schritt-wahl .wahl-knopf .bild { font-size: 30px; flex: none; }
+  /* Schritte mit Bild links: Baustein bildLinks (R5 a); Masse des Spiels mit .wahl.schritt-wahl, damit sie gelten */
+  .schritt-wahl { --bild-links-gr: 30px; }
+  .wahl.schritt-wahl .wahl-knopf { font-size: clamp(15px, 3.4vw, 18px); font-weight: 700; line-height: 1.25; column-gap: 10px; }
   .schritt-ablage { flex-direction: column; align-items: stretch; }
   .schritt-ablage > span { font-size: clamp(14px, 3.3vw, 17px); font-weight: 700; }
   .schritt-ablage .pfeil { text-align: center; }
@@ -64,9 +65,8 @@
     .produkt .gross { display: inline; font-size: 36px; vertical-align: -6px; margin-right: 6px; }
     .kreislauf, .legende, .frage { margin-bottom: 6px; }
     .produkt { margin-bottom: 4px; }
-    .schritt-wahl { gap: 5px; }
-    .schritt-wahl .wahl-knopf { min-height: 46px; padding: 4px 8px; gap: 8px; line-height: 1.2; }
-    .schritt-wahl .wahl-knopf .bild { font-size: 24px; }
+    .schritt-wahl { gap: 5px; --bild-links-gr: 24px; }
+    .wahl.schritt-wahl .wahl-knopf { min-height: 46px; padding: 4px 8px; column-gap: 8px; line-height: 1.2; }
     .kw-wer .korb-karte { margin: 2px auto 10px; padding: 6px 18px; }
     .kw-wer .korb-karte .bild { font-size: 40px; }
     .kw-wer .korb-karte b { font-size: clamp(18px, 4vw, 24px); }
@@ -94,26 +94,22 @@
     div.schritt-ablage { margin-bottom: 8px; }
     div.schritt-ablage:empty { min-height: 22px; padding-block: 0; }
     div:has(> .schritt-ablage) > .produkt .gross { font-size: 28px; vertical-align: -4px; }
-    .schritt-wahl { gap: 3px; }
-    .schritt-wahl .wahl-knopf { min-height: 44px; line-height: 1.15; gap: 6px; }
-    .schritt-wahl .wahl-knopf .bild { font-size: 20px; }
+    .schritt-wahl { gap: 3px; --bild-links-gr: 20px; }
+    .wahl.schritt-wahl .wahl-knopf { min-height: 44px; line-height: 1.15; column-gap: 6px; }
     /* Ein Schritt am falschen Platz (s6, acht Schritte untereinander): Produktzeile flacher, Knöpfe mit weniger Rand,
        damit lange Sätze seltener in drei Zeilen brechen — ragte auf dem Handy und dem Laptop bis 26 px unter den Rand
        (LERN-55, LERN_Session46) */
     div:has(> .schritt-wahl) > .produkt { line-height: 1.2; }
     div:has(> .schritt-wahl) > .produkt .gross { font-size: 24px; line-height: 1; vertical-align: -3px; }
     div:has(> .schritt-wahl) > .frage { margin-bottom: 4px; }
-    .schritt-wahl .wahl-knopf { padding-inline: 6px; gap: 5px; }
-    .schritt-wahl .wahl-knopf .bild { font-size: 18px; }
-    /* Wie kommt es zu uns? (s2–s4): Bild links, Name und Beschreibung rechts — untereinander waren die drei Knöpfe
-       100–119 px hoch, die Aufgabe ragte bis 30 px unter den Rand (LERN_Session46) */
-    .wahl-knopf:has(> small) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; align-items: center;
-      justify-items: start; text-align: left; padding-block: 4px; line-height: 1.2; }
-    .wahl-knopf:has(> small) .bild { grid-row: 1 / span 2; font-size: 30px; }
-    /* Kreislauf (s5, s6): Antworten mit Bild links, leere Ablage niedriger (LERN_Session46) */
-    .kw-kreis .wahl { gap: 8px; }
-    .kw-kreis .wahl-knopf { flex-direction: row; min-height: 46px; padding: 4px 8px; gap: 6px; line-height: 1.15; }
-    .kw-kreis .wahl-knopf .bild { font-size: 24px; }
+    .wahl.schritt-wahl .wahl-knopf { padding-inline: 6px; column-gap: 5px; }
+    .schritt-wahl { --bild-links-gr: 18px; }
+    /* Wie kommt es zu uns? (s2–s4): Bild links, Name und Beschreibung rechts (Baustein bildLinks "eng", R5 a) —
+       untereinander waren die drei Knöpfe 100–119 px hoch, die Aufgabe ragte bis 30 px unter den Rand (LERN_Session46) */
+    .wahl.bild-links-eng:has(.wahl-knopf > small) { --bild-links-gr: 30px; }
+    /* Kreislauf (s5, s6): Antworten mit Bild links (Baustein bildLinks "eng"), leere Ablage niedriger (LERN_Session46) */
+    .kw-kreis .wahl { gap: 8px; --bild-links-gr: 24px; }
+    .kw-kreis .wahl.bild-links-eng .wahl-knopf { padding: 4px 8px; column-gap: 6px; line-height: 1.15; }
     .kw-kreis .ablage { min-height: 44px; padding: 4px; margin-bottom: 8px; }
   }
   /* Breit und niedrig (Laptop 1366 × 650): Produkt und Frage links, die acht Schritte rechts daneben (LERN_Session46) */
@@ -132,7 +128,7 @@
      (LERN-55, LERN_Session46) */
   @media (min-width: 561px) and (orientation: portrait) and (max-height: 1000px) {
     .produkt .gross { display: inline; font-size: 40px; vertical-align: -6px; margin-right: 8px; }
-    .schritt-wahl .wahl-knopf { min-height: 54px; padding-block: 4px; }
+    .wahl.schritt-wahl .wahl-knopf { min-height: 54px; padding-block: 4px; }
   }
 </style>
 </head>
@@ -454,7 +450,7 @@ LS.spiel({
       const loesung = wegText(p, a.schritte);
       f.append(produktKopf(p), el("div", { class: "frage", text: "Tippe die Schritte in der richtigen Reihenfolge an." }));
       const { ablage, box } = LS.reihenfolge(ctx, {
-        reihe: a.schritte, pfeile: true, loesung,
+        reihe: a.schritte, pfeile: true, loesung, bildLinks: true,
         inhalt: i => schrittInhalt(p.schritte[i]),
         ablage: i => `${p.schritte[i][2]} ${p.schritte[i][0]}`,
         hinweis: () => "Das kommt erst später. Was muss vorher passieren?",
@@ -479,7 +475,7 @@ LS.spiel({
         : el("li", {}, el("span", { class: "nr", text: `${i + 1}.` }), el("span", { text: s[2] }), el("span", { text: s[0] }))));
       f.append(produktKopf(p), el("div", { class: "frage", text: "Welcher Schritt fehlt?" }), liste);
       const box = LS.auswahl(ctx, {
-        optionen: a.optionen, richtig: a.optionen.find(o => o.produkt === a.produkt && o.i === a.luecke), loesung,
+        optionen: a.optionen, richtig: a.optionen.find(o => o.produkt === a.produkt && o.i === a.luecke), loesung, bildLinks: true,
         inhalt: o => schrittInhalt(produkt(o.produkt).schritte[o.i]),
         hinweis: "Lies den Schritt vor und nach der Lücke. Was muss dazwischen passieren — und gehört es zu diesem Produkt?",
       });
@@ -512,7 +508,7 @@ LS.spiel({
         el("div", { class: "frage", text: "Wie kommt es zu uns?" }),
         el("div", { class: "hinweiszeile", text: `So beginnt der Weg: ${p.schritte[0][0]}` }));
       LS.auswahl(ctx, {
-        optionen: ["schiff", "kurz", "flugzeug"], richtig: p.transport, breite: 200, inhalt: t => TRANSPORT[t], loesung,
+        optionen: ["schiff", "kurz", "flugzeug"], richtig: p.transport, breite: 200, inhalt: t => TRANSPORT[t], loesung, bildLinks: "eng",
         hinweis: t => (t === "flugzeug" ? "Das Flugzeug ist teuer und nimmt nur wenig Ladung mit. Schwere Waren reisen anders."
           : "Wo beginnt der Weg — in der Schweiz oder weit weg, hinter dem Meer?"),
       });
@@ -521,7 +517,7 @@ LS.spiel({
       const loesung = `Am falschen Platz: ${s[0]}`;
       f.append(produktKopf(p), el("div", { class: "frage", text: "Ein Schritt steht am falschen Platz. Welcher?" }));
       const box = LS.auswahl(ctx, {
-        optionen: a.reihe, richtig: a.falsch, loesung,
+        optionen: a.reihe, richtig: a.falsch, loesung, bildLinks: true,
         inhalt: i => schrittInhalt(p.schritte[i]),
         hinweis: "Dieser Schritt passt zu seinen Nachbarn. Lies den Weg der Reihe nach: Wo kommt etwas zu früh oder zu spät?",
       });
@@ -533,7 +529,7 @@ LS.spiel({
       const bild = [kreislaufSvg({ links: a.links, frage: a.fluss }), legende()];
       f.append(el("div", { class: "frage", text: "Was fliesst beim Pfeil mit dem Fragezeichen?" }), ...bild);
       const box = LS.auswahl(ctx, {
-        optionen: FLUESSE, richtig: a.fluss, breite: 140, inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }), loesung,
+        optionen: FLUESSE, richtig: a.fluss, breite: 140, inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }), loesung, bildLinks: "eng",
         hinweis: "Schau die Farbe an: Fliesst Geld? Und in welche Richtung zeigt der Pfeil?",
       });
       paar("kw-kreis", bild, [box]);
@@ -578,7 +574,7 @@ LS.spiel({
       const bild = [kreislaufSvg({ links: a.links, nummern: a.nummern }), legende()];
       f.append(el("div", { class: "frage", text: "Was fliesst bei Pfeil 1, 2, 3 und 4? Tippe der Reihe nach." }), ...bild);
       const { ablage, box } = LS.reihenfolge(ctx, {
-        reihe, loesung, breite: 140,
+        reihe, loesung, breite: 140, bildLinks: "eng",
         inhalt: x => ({ bild: FLUSS[x].bild, text: FLUSS[x].text }),
         ablage: x => FLUSS[x].text,
         hinweis: (x, erwartet) => `Schau Pfeil ${reihe.indexOf(erwartet) + 1} an: Welche Farbe hat er, und wohin zeigt er?`,

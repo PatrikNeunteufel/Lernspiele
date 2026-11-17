@@ -44,10 +44,10 @@
     .skala .wahl-knopf .bild { font-size: 28px; }
     /* Skalen-Knöpfe mit Bild links, Wort und „nie … immer“ rechts: untereinander waren die fünf Knöpfe 3 × 83 px hoch,
        die Aufgabe ragte bis 122 px unter den Rand (LERN-55, LERN_Session46) */
-    .wahl-knopf:has(> small) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 6px; align-items: center;
-      justify-items: start; text-align: left; min-height: 48px; padding: 3px 8px; line-height: 1.15; }
-    .wahl-knopf:has(> small) .bild { grid-row: 1 / span 2; font-size: 26px; }
-    .wahl-knopf:has(> small) small { line-height: 1.1; }
+    /* (Baustein bildLinks "eng", R5 a; hier etwas enger) */
+    .wahl.bild-links-eng { --bild-links-gr: 26px; }
+    .wahl.bild-links-eng .wahl-knopf { column-gap: 6px; padding: 3px 8px; line-height: 1.15; }
+    .wahl.bild-links-eng .wahl-knopf small { line-height: 1.1; }
     .frage { line-height: 1.3; }
     /* Ein Bild allein: so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe, --zs-verh = Breite je Höhe der
        viewBox), Untergrenze 120 px (Kugeln und Felder bleiben zählbar, H1 a) */
@@ -524,7 +524,7 @@ LS.spiel({
         el("div", { class: "frage" }, ...(a.s.ding === "summe" ? ["Du würfelst mit zwei Würfeln. ", ...ereignisTeile(a.s, a.e)] : ereignisTeile(a.s, a.e)),
           el("br"), "Wie wahrscheinlich ist das?"));
       const box = LS.auswahl(ctx, {
-        optionen: fuenf ? FUENF : DREI, richtig: a.loesung, loesung: loesungText, lob: `Genau: ${loesungText}`, breite: fuenf ? 110 : 140,
+        optionen: fuenf ? FUENF : DREI, richtig: a.loesung, loesung: loesungText, lob: `Genau: ${loesungText}`, breite: fuenf ? 110 : 140, bildLinks: "eng",
         inhalt: w => (fuenf ? { ...STUFEN_TEXT_FUENF[w], text: TRENNUNG[w] || STUFEN_TEXT_FUENF[w].text } : STUFEN_TEXT[w]),
         hinweis: a.art === "summeSkala" ? HINWEIS_SUMME : fuenf ? HINWEIS_FUENF : HINWEIS_DREI,
       });

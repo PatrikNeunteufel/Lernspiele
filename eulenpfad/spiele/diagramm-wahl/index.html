@@ -76,10 +76,9 @@
     /* Fünf oder sechs Bildantworten (s1 „Wie kommen die meisten …“) in drei Spalten statt drei Reihen — die Aufgabe
        ragte 32 px unter den Rand (LERN-55, LERN_Session44) */
     div:has(> .dw) > .wahl:has(> :nth-child(5)):has(> .wahl-knopf > .bild) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    /* Bis vier Bildantworten (s1 „Welche Gruppe hat am wenigsten …“) mit Bild links neben dem Namen: zwei Reihen zu
-       79 px liessen die Aufgabe 15 px unter den Rand ragen (LERN-55, LERN_Session46) */
-    div:has(> .dw) > .wahl:not(:has(> :nth-child(5))) > .wahl-knopf:has(> .bild) { flex-direction: row; min-height: 48px; gap: 8px; }
-    div:has(> .dw) > .wahl:not(:has(> :nth-child(5))) > .wahl-knopf:has(> .bild) > .bild { font-size: 26px; }
+    /* Bis vier Bildantworten (s1 „Welche Gruppe hat am wenigsten …“) mit Bild links neben dem Namen (Baustein bildLinks
+       "eng", R5 a): zwei Reihen zu 79 px liessen die Aufgabe 15 px unter den Rand ragen (LERN-55, LERN_Session46) */
+    div:has(> .dw) > .wahl.bild-links-eng { --bild-links-gr: 26px; }
     /* Tabelle zu drei Diagrammen (s5, Entscheid 1 a, LERN_Session44): Tabelle quer, Diagramme zum Blättern */
     .dw-tabelle.quer { width: 100%; table-layout: fixed; margin-bottom: 6px; }
     .dw-tabelle.quer caption { font-size: 15px; font-weight: 900; color: var(--text-leise); padding-bottom: 2px; }
@@ -864,7 +863,7 @@ LS.spiel({
         : [a.art === "meist" ? "Am meisten heisst: die höchste Säule." : "Am wenigsten heisst: die niedrigste Säule.", "Lies den Namen unter dieser Säule."]);
       LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: zahl ? 90 : 120,
         inhalt: zahl ? undefined : name => { const i = namen(d).indexOf(name); return { bild: d.kategorien[i][0] || undefined, text: name }; },
-        hinweis, loesung });
+        bildLinks: !zahl && a.optionen.length <= 4 && "eng", hinweis, loesung });
       if (ctx.nr === 0) ctx.sag("Lies genau: Titel, Achse und Beschriftung.");
       return;
     }
@@ -978,7 +977,7 @@ LS.spiel({
         "Vergleiche die abgelesenen Zahlen Wort für Wort mit der Aussage.",
       ]);
       const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.loesung, breite: 120,
-        inhalt: v => ANTWORT[v],
+        inhalt: v => ANTWORT[v], bildLinks: "eng",
         hinweis: v => (v === "offen" ? "Das Diagramm zeigt dazu Zahlen. Lies sie ab und vergleiche sie mit der Aussage."
           : a.typ === "offen" ? "Steht das wirklich im Diagramm? Schau auf Titel, Achse und Beschriftung."
           : zusatz ? `${zusatz} Lies die Zahlen an der Achse ab und vergleiche sie mit der Aussage.` : "Lies die Zahlen an der Achse ab und vergleiche sie genau mit der Aussage."),

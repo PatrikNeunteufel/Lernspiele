@@ -42,8 +42,9 @@
     .gk-merkmale li { padding: 2px 0; }
     /* Sieben Textsorten (s5, s6) mit Bild links neben dem Namen: in vier Reihen zu 61 px ragten die drei Merkmale (s6)
        bis 40 px unter den Rand (LERN-55, LERN_Session46) */
-    .gk .wahl-knopf:not(.gk-lang) { flex-direction: row; min-height: 44px; gap: 6px; }
-    .gk .wahl-knopf:not(.gk-lang) .bild { font-size: 24px; }
+    /* Bild links: Baustein bildLinks "eng" (R5 a), mit wenig Rand — „Kurzgeschichte“ passt sonst nicht in die Spalte */
+    .gk .wahl { --bild-links-gr: 24px; }
+    .gk .wahl.bild-links-eng .wahl-knopf { min-height: 44px; padding-inline: 6px; column-gap: 6px; }
     .gk .wahl:has(> :nth-child(5)) { gap: 6px; }
     .gk .frage:has(+ .gk-merkmale) { margin-bottom: 4px; }
     .gk-merkmale { margin-bottom: 6px; }
@@ -62,9 +63,8 @@
     .gk .korb-karte .bild { font-size: 56px; }
     /* Sieben Textsorten (s5, s6) mit Bild links in zwei Reihen zu vier: drei lange Merkmale (s6) ragten 23 px unter
        den Rand */
-    .gk .wahl:has(> :nth-child(5)) { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-    .gk .wahl:has(> :nth-child(5)) .wahl-knopf:not(.gk-lang) { flex-direction: row; min-height: 46px; gap: 6px; }
-    .gk .wahl:has(> :nth-child(5)) .wahl-knopf:not(.gk-lang) .bild { font-size: 26px; }
+    .gk .wahl:has(> :nth-child(5)) { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; --bild-links-gr: 26px; }
+    .gk .wahl.bild-links-eng .wahl-knopf { padding-inline: 6px; column-gap: 6px; }
   }
 </style>
 </head>
@@ -334,6 +334,7 @@ function zeilenTippen(ctx, zeilen, { richtig, ausser = null, hinweis, loesung, l
 
 /** Zwischenschritt mit Antwortknöpfen: wie LS.auswahl, aber nach der richtigen Wahl geht es mit 'dann' weiter. */
 function wahlSchritt(ctx, wahl, { optionen, inhalt, richtig, hinweis, loesung, dann }) {
+  LS.bildLinks(wahl, "eng");
   let fertig = false;
   for (const wert of optionen) {
     const k = el("button", { type: "button", class: "wahl-knopf" });
@@ -379,7 +380,7 @@ function zeichneMaerchenFrage(ctx, a) {
       if (!ja) return ctx.richtig("Richtig erkannt!");
       frage.textContent = `Wie ist ${a.figur[0]} in diesem Märchen?`;
       wahl.remove();
-      LS.auswahl(ctx, { optionen: mische(["gut", "boese"]), richtig: a.figur[1], inhalt: w => GUT_BOESE[w], loesung, breite: 150,
+      LS.auswahl(ctx, { optionen: mische(["gut", "boese"]), richtig: a.figur[1], inhalt: w => GUT_BOESE[w], loesung, breite: 150, bildLinks: "eng",
         hinweis: "Was tut diese Figur im Text? Hilft sie den anderen, oder schadet sie ihnen?", lob: "Durchschaut!" });
       lesetextNeu(ctx);
     },
@@ -393,7 +394,7 @@ function zeichneGattung(ctx, a) {
   const loesung = `${G[t.gattung].name} — ${mk.name}`;
   ctx.tipp(tippsFuer(mk));
   ctx.flaeche.append(el("div", { class: "frage", text: "Welche Textsorte ist das?" }), textEl(t).box);
-  LS.auswahl(ctx, { optionen: a.optionen, richtig: t.gattung, inhalt: gattungInhalt, hinweis: `Das passt nicht. ${mk.frage}`, loesung, breite: 150, lob: waehle(LOB) });
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: t.gattung, inhalt: gattungInhalt, hinweis: `Das passt nicht. ${mk.frage}`, loesung, breite: 150, bildLinks: "eng", lob: waehle(LOB) });
 }
 
 // Stufe 3 und 5: Gattung wählen, dann die Stelle antippen, die das Merkmal zeigt.
@@ -491,7 +492,7 @@ function zeichneRaten(ctx, a) {
       const mk = merkmalVon(a.gattung, id);
       return el("li", {}, el("b", { text: `${mk.name}: ` }), mk.kurz);
     })));
-  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.gattung, inhalt: gattungInhalt, loesung, breite: 150, lob: "Alle drei erkannt!",
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.gattung, inhalt: gattungInhalt, loesung, breite: 150, bildLinks: "eng", lob: "Alle drei erkannt!",
     hinweis: "Mindestens eines der drei Merkmale passt nicht zu dieser Textsorte. Welche hat alle drei?" });
 }
 

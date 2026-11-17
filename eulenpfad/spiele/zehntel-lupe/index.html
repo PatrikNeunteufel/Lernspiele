@@ -42,9 +42,7 @@
   /* Handy: Die Lupe steht schon an ihrer Untergrenze (volle Breite); mit drei Strahlen und der Zifferntastatur ragte die
      Aufgabe (s5, s6) bis 38 px unter den Rand — Anzeige niedriger, Tastatur näher (LERN-55, LERN_Session46) */
   @media (max-width: 560px) {
-    div:has(> .lupe) > .anzeige { min-height: 54px; font-size: 32px; padding-block: 2px; }
     div:has(> .lupe) > .lupe { margin-bottom: 4px; }
-    div:has(> .lupe) > .tastatur { margin-top: 6px; }
     /* OK neben der Dezimaltaste ist schmal: „OK ✓“ brach in zwei Zeilen, die unterste Reihe wurde 62 statt 46 px hoch */
     div:has(> .lupe) > .tastatur .ok { white-space: nowrap; padding-inline: 2px; font-size: 18px; }
   }

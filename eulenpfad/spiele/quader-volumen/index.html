@@ -55,7 +55,6 @@
     .qv-bild + .qv-legende { margin-bottom: 4px; }
     .qv .frage { line-height: 1.2; }
     /* Anzeige mit Notizen daneben nicht höher als die zwei Notizzeilen (vorher 76 px), Notizfelder 28 px */
-    .qv-ergebnis.mit-notiz .anzeige { min-height: 56px; }
     .qv-ergebnis.mit-notiz .qv-notizen { row-gap: 2px; }
     .qv-ergebnis.mit-notiz .qv-notizen .zw-notiz { min-height: 28px; padding-block: 0; }
   }
@@ -70,10 +69,6 @@
     .qv-ergebnis.mit-notiz .anzeige { min-height: 48px; min-width: 72px; }
     .qv-ergebnis.mit-notiz .qv-notizen { font-size: 14px; column-gap: 6px; }
     .qv-einheit { font-size: 24px; }
-    .qv ~ .tastatur { margin-top: 6px; }
-    /* Mit Dezimaltaste ist OK so schmal, dass „OK ✓“ umbrach und die unterste Reihe 62 statt 46 px hoch machte
-       (Aquarium s6 21 px darunter; Wunsch an den Rahmen, dort für alle Spiele) */
-    .qv ~ .tastatur button.ok { white-space: nowrap; font-size: 18px; padding-inline: 2px; }
   }
   /* Tablet hoch: ohne Grenze wurde ein Körper in cm (Vergleichen s6, „40 cm · 50 cm · 40 cm“) 583 px hoch, der zweite
      rutschte darunter, die Aufgabe ragte bis 376 px unter den Rand (LERN-55, LERN_Session44). Höhe aus --rest-h wie oben

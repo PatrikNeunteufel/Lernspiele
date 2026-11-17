@@ -389,7 +389,7 @@ Je Spiel (Handy, höchster Wert vorher → nachher in px; negativ = Platz frei; 
   gattungs-kenner 77 → −42 · zehntel-lupe 38 → −11 · platzhalter-geschichten 57 → −17 · wuerfel-zaehler 32 → −11 ·
   komma-messband 15 → −32 · diagramm-wahl Tablet 55 → −104 (Entscheid 1 a unverändert).
 
-Wünsche an den Rahmen (aus allen fünf Berichten, nicht umgesetzt): (R1) `.anzeige` unter 700 px Höhe niedriger — 17 Spiele
+Wünsche an den Rahmen (aus allen fünf Berichten; entschieden und umgesetzt, Abschnitt „Rahmen R1–R6“ unten): (R1) `.anzeige` unter 700 px Höhe niedriger — 17 Spiele
 setzen sie jetzt je selbst auf 46–56 px; (R2) leere `.melde-zeile` belegt auf dem Handy 34 px; (R3) „OK ✓“ bricht neben der
 Dezimaltaste um (unterste Tastenreihe 62 statt 46 px; in drei Spielen lokal umgangen); (R4) lange Titel brechen auf 375 px
 in der Kopfzeile um (+14 px); (R5) Baustein „Antwortknopf mit Bild links“ (in rund zehn Spielen einzeln gebaut); (R6)
@@ -409,6 +409,44 @@ Entscheide Patrik (2026-11-17), umgesetzt:
   Ablage verdichten (ab Schritt 5 wieder 70–117 px über dem Rand).
 - **G1 a — Geheimschrift-Knacker, Buchstabentasten auf dem Handy:** bleiben 30 × 44 px in drei Reihen zu zehn, wie die
   Buchstabentastatur eines Handys; die Vorgabe 44 px gilt bei Buchstabentastaturen für die Höhe.
+
+## Rahmen R1–R6 LERN_Session46 (2026-11-17)
+
+Vorher je Wunsch gemessen mit einer Probe, die jede geladene Aufgabe nacheinander mit jeder Variante neu misst (gleiche
+Aufgabe, kein Rauschen der Ziehungen; alle Spiele, s1 s3 s6, zwei Ziehungen, Handy, Tablet quer, Laptop;
+`.temp/bildhoehe/rahmen46/probe.json`). Entscheide Patrik (alle a), umgesetzt in `stil.css`, `spiel.js`, rahmen.md 20:
+- **R1 a — Anzeige** unter 700 px Höhe 52 statt 76 px (Schrift 32 px): wirkt auf dem Handy auf 104 von 1050 Seiten
+  (−21 px), auf Tablet quer und Laptop auf 138 (−30 px). Einzelregeln entfernt, wo sie nur Höhe und Schrift setzten (in
+  13 Spielen); geblieben sind kleinere (unter 50 px) und eigene Anzeigen (Daten-Detektiv, Zahlenmauer).
+- **R2 a — Melde-Zeile** bleibt immer gleich hoch (WZ1 a). Gemessen hätte das Wegfallen 36 px gebracht, aber nur Kindern
+  ohne „🙋 Melden“ (unter der 3. Klasse oder ohne Klasse), und die Aufgabe rutschte beim Balken „Weiter“.
+- **R3 a — „OK ✓“** auf einer Zeile (`white-space: nowrap`): neben der Dezimaltaste 67 px breit, nichts läuft über,
+  Tastenreihe 46 statt 62 px. Umgehung im Quader-Volumen entfernt.
+- **R4 a — Titel** passt seine Schrift an (`titelEinpassen` in `spiel.js`, 20 → höchstens 16 px): auf 375 px brachen 33
+  von 175 Titeln um, jetzt noch zwei (Zahlenmauer-Baumeister, Koordinaten-Schatzsuche); 14 px je betroffener Seite.
+- **R5 a — Baustein „Antwortknopf mit Bild links“** (`opt.bildLinks: true | "eng"` in `LS.auswahl`/`LS.reihenfolge`,
+  `LS.bildLinks(box, wie)`, Klassen `bild-links`, `bild-links-eng`; Anordnung immer, flacher Knopf nur auf kleiner
+  Fläche; Bildgrösse über `--bild-links-gr`). Umgestellt: Bionik-Paare, Diagramm-Wahl, Fahrplan-Rechner, Gattungs-Kenner,
+  Geheimschrift-Knacker, Gemeinde-Helfer, Kakao-Weg, Zufalls-Skala (16 Einzelregeln). Stolperstein: Eine alte Regel nach
+  Selektor erfasste mehr Auswahlen als die eine, für die sie geschrieben war (Gattungs-Kenner „drei Merkmale“ ragte
+  deshalb 20 px über den Rand, Diagramm-Wahl „Stimmt / Stimmt nicht“) — beim Umstellen jede Auswahl mit passendem Inhalt
+  suchen, nicht nur die im Kommentar genannte. Kakao-Weg „In welche Richtung“ ohne Baustein: das Bild „🏠 ➜ 🏭“ ist für
+  die linke Spalte zu breit (Tablet quer seitlich 7 px).
+- **R6 a — Abstand über der Zifferntastatur** unter 700 px Höhe 8 statt 16 px: wirkt auf 139 Seiten (−8 px);
+  Einzelregeln mit 6–8 px in 14 Spielen entfernt, Malkreuz (4 und 10 px) und Platzhalter-Geschichten (0) behalten ihre.
+
+Nachmessung aller Spiele (s1 s3 s6, drei Ziehungen, sechs Flächen; `rahmen46/nachher.json`), danach Gattungs-Kenner und
+die Baustein-Spiele über alle Stufen gezielt — Spiele mit der Aufgabe über dem Rand, gegen die Schlussmessung vom 16.11.:
+
+| sichtbare Fläche | 16.11. | 17.11. |
+|---|---|---|
+| Handy 375×660 | 61 | 4 |
+| Tablet hoch 768×950 | 9 | 1 |
+| Tablet quer 1024×690 | 0 | 0 |
+| Laptop 1366×650 | 8 | 0 |
+
+Rest: Handy plan-leser s6 49 (Weg beschreiben, Ausnahme Punkt 4), hello-dialog s6 8, kiosk-kasse s6 7, flaechen-pixel
+s6 1; Tablet hoch malkreuz s6 1. Seitlich nirgends, keine geschrumpfte Grafik (auch `mix`, `handy-quer`).
 
 Rest (höchster Wert in px):
 - **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,

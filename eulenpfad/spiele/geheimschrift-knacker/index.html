@@ -76,9 +76,9 @@
     .gk-tasten { grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: none; }
     .gk-tasten button.gk-ok { grid-column: span 3; }
     /* Schlüssel knacken (s5): die vier Schlüssel in einer Reihe, 🔑 neben der Zahl (vorher zwei Reihen, 57 px darunter) */
-    .wahl:has(.wahl-knopf .bild) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-    .wahl-knopf:has(.bild) { flex-direction: row; gap: 4px; padding: 6px 4px; }
-    .wahl-knopf:has(.bild) .bild { font-size: 24px; }
+    .wahl:has(.wahl-knopf .bild) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; --bild-links-gr: 24px; }
+    /* 🔑 neben der Zahl: Baustein bildLinks "eng" (R5 a); vier schmale Knöpfe in einer Reihe brauchen weniger Rand */
+    .wahl.bild-links-eng .wahl-knopf { column-gap: 4px; padding-inline: 4px; }
   }
   /* Breit und quer: Scheibe links, Wort, Felder und Tasten rechts */
   @media (min-width: 900px) and (orientation: landscape) {
@@ -402,7 +402,7 @@ LS.spiel({
         el("div", { class: "wortkarte", text: a.gegeben }),
         scheibe(0, { drehbar: true }));
       LS.auswahl(ctx, {
-        optionen: a.optionen, richtig: a.k, breite: 110,
+        optionen: a.optionen, richtig: a.k, breite: 110, bildLinks: "eng",
         inhalt: j => ({ bild: "🔑", text: String(j) }),
         hinweis: j => `Mit Schlüssel ${j} heisst es ${verschiebe(a.gegeben, -j)} — das ist kein Wort. Dreh die Scheibe und probier weiter.`,
         loesung: `Schlüssel ${a.k}: ${a.gegeben} → ${a.wort}`,

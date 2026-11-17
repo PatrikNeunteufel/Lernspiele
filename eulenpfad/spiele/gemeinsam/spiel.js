@@ -2047,6 +2047,24 @@ const LS = (() => {
     return e;
   }
 
+  // ---------- Titel auf einer Zeile (Entscheid R4 a, LERN_Session46) ----------
+  // Auf dem Handy (375 px, 211 px Platz) brachen 33 von 175 Titeln in zwei Zeilen um (+14 px über der Aufgabe). Die Schrift
+  // wird Pixel um Pixel kleiner, bis der Titel auf eine Zeile passt, höchstens bis TITEL_MIN; nichts wird abgeschnitten.
+  // Bei 16 px brechen noch zwei Titel um (Zahlenmauer-Baumeister, Koordinaten-Schatzsuche). Neu bei Grössenänderung und
+  // wenn die Schrift geladen ist.
+  const TITEL_MIN = 16;
+  function titelEinpassen(h1) {
+    if (!h1 || typeof getComputedStyle !== "function") return;
+    const passen = () => {
+      h1.style.fontSize = "";
+      let gr = parseFloat(getComputedStyle(h1).fontSize);
+      while (gr > TITEL_MIN && h1.getBoundingClientRect().height > gr * 1.6) h1.style.fontSize = --gr + "px";
+    };
+    passen();
+    addEventListener("resize", passen);
+    document.fonts?.ready.then(passen);
+  }
+
   // ---------- Kurztasten für Antwortknöpfe (Entscheid TK1 a mit Zusatz Patrik, LERN_Session13) ----------
   // Wer mit einer echten Tastatur spielt, wählt Antworten auch mit Tasten. Zwei Arten von Tasten:
   //  • nach dem Ort (KeyboardEvent.code), ausgelegt für die Schweizer Tastatur (QWERTZ): Gleiche Zeichen liegen in
@@ -2358,8 +2376,15 @@ const LS = (() => {
    * opt.lob, opt.erklaerung: Rückmeldung bei richtiger Antwort nach einem Fehlversuch (Bestätigung, Begründung); auf
    *   Anhieb zeigt der Rahmen nur ein Lob aus seiner Liste (LB1 a, WZ2 a) — siehe ctx.richtig
    * opt.breite: Mindestbreite der Knöpfe (px)
+   * opt.bildLinks: Bild links, Text (und klein) rechts, flacher Knopf — true immer, "eng" nur unter 560 px Breite oder
+   *   700 px Höhe (Entscheid R5 a, LERN_Session46; Klassen bild-links, bild-links-eng in stil.css)
    * opt.beiRichtig(knopf): zusätzlich bei richtiger Antwort, z. B. einen Ton vorspielen
    */
+  /** Baustein „Antwortknopf mit Bild links“ (R5 a): true → immer, "eng" → nur auf kleiner Fläche; gibt box zurück. */
+  function bildLinks(box, wie) {
+    if (wie) box.classList.add(wie === "eng" ? "bild-links-eng" : "bild-links");
+    return box;
+  }
   /** Lösung für die Testhilfe: opt.loesung, sonst der richtige Wert, wenn er ein einfacher Wert ist. */
   const loesungFuer = (opt, wert) => opt.loesung || (["string", "number"].includes(typeof wert) ? String(wert) : null);
 
@@ -2368,6 +2393,7 @@ const LS = (() => {
     ctx.schritte(1, true);
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
+    bildLinks(box, opt.bildLinks);
     let fertig = false;
     for (const wert of opt.optionen) {
       const k = el("button", { type: "button", class: "wahl-knopf" });
@@ -2398,7 +2424,7 @@ const LS = (() => {
    * opt.reihe: Werte in richtiger Reihenfolge (gezeigt werden sie gemischt)
    * opt.inhalt(wert), opt.hinweis(wert, erwartet), opt.loesung, opt.lob wie bei auswahl
    * opt.ablage(wert): Text des Teils in der Ablage, Vorgabe der Wert selbst
-   * opt.pfeile: zwischen den gelegten Teilen „→“ zeigen; opt.beiRichtig() wie bei auswahl
+   * opt.pfeile: zwischen den gelegten Teilen „→“ zeigen; opt.beiRichtig(), opt.bildLinks wie bei auswahl
    */
   function reihenfolge(ctx, opt) {
     ctx.loesung(opt.loesung || opt.reihe.map(w => (opt.ablage ? opt.ablage(w) : String(w))).join(" → "));
@@ -2406,6 +2432,7 @@ const LS = (() => {
     const ablage = el("div", { class: "ablage", "aria-live": "polite" });
     const box = el("div", { class: "wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
+    bildLinks(box, opt.bildLinks);
     let pos = 0;
     let fertig = false;
     for (const wert of mische(opt.reihe)) {
@@ -2638,6 +2665,7 @@ const LS = (() => {
       stand();
       document.querySelector(".kopf h1")?.after(vb);
     }
+    titelEinpassen(document.querySelector(".kopf h1"));
     // Kam beim Abgleich etwas von einem anderen Gerät dazu: die Stufenwahl mit Sternen und Ranglisten neu zeichnen.
     addEventListener("lernspiele:abgeglichen", () => { if (buehne.querySelector(".stufen")) stufenwahl(); });
 
@@ -3834,7 +3862,7 @@ const LS = (() => {
       "stimmen-zeile", "stimme-eintrag", "stimme-meldung", "pruef-zeile", "mit-tasten", "marke-platz", "blase-text", "lesetext", "zw-notiz", "weiter-leiste", "weiter-balken", "weiter-knopf",
       "notizblock", "nb-knopf", "nb-feld", "nb-kopf", "nb-inhalt", "nb-platz"],
     bausteine: ["wahl", "wahl-knopf", "bild", "gezeichnet", "bildkachel", "szenenbild", "pruef-bild", "pruef-text-bild", "pruef-farbe", "pruef-farbfeld", "ablage", "pfeil", "korb-karte", "korb-reihe", "korb-knopf",
-      "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
+      "bild-links", "bild-links-eng", "tastatur", "anzeige", "ok", "loeschen", "zeichen", "hoer-zeile", "hoer-knopf", "notenblatt", "noten-zeile"],
   };
 
   // Laden der grossen Schlüssel: ohne IndexedDB jetzt gleich (Umzug wie bis Kern 1.33 beim Laden der Seite), sonst
@@ -3844,7 +3872,7 @@ const LS = (() => {
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
     STELLEN, SKALA, schriftFarbe, flaeche, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, farbenKnopf, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
-    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, restHoehe, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, restHoehe, bildLinks, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     person, umbenennen, gehoert, PERSONEN,
