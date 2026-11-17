@@ -360,7 +360,7 @@ Gemeinsame Nachmessung danach, allein auf einem Server (alle sechs Stufen, drei 
 | Laptop 1366×650 | 8 | 0 |
 
 Seitlich nirgends, keine geschrumpfte Grafik (auch `mix`, `handy-quer`). Rest auf dem Handy, je in einer von drei Ziehungen:
-kakao-weg s6 56 (Schritte ordnen, Entscheid K1 offen), diagramm-detektiv s4 21 (Säule zeichnen), wassertropfen-reise s6 13,
+kakao-weg s6 56 (Schritte ordnen; behoben mit K1 a–K3 a, Abschnitt unten), diagramm-detektiv s4 21 (Säule zeichnen), wassertropfen-reise s6 13,
 pflanzen-bestimmer s6 10, erdzeit-leiter s5 7. Dazu aus den Berichten: quader-volumen s6 bis 23 und s4 11 (Körper an der
 Untergrenze 0,8 der Zeichnung, Ausnahme LERN_Session44), roboter-pfad s5 2 (Schwelle). Energie-Wandler: fehlender Pfeil
 zwischen Wandler und nächster Energie in `ketteEl` (älter) nebenbei behoben, s4/s6 Handy nachgemessen im Bild.
@@ -371,7 +371,7 @@ Je Spiel (Handy, höchster Wert vorher → nachher in px; negativ = Platz frei; 
   62 → 0 · znueni-teller 44 → −82, Laptop 26 → −110 · bionik-paare s6 62 → −76 · glace-kombinator s2 97 → −71, Kleider-Sets
   mit vier Gruppen 76 → −1 · gefuehle-radar 54 → −38 · kulturen-koffer 70 → −53, Laptop 18 → −127 · tageslauf-sonne Laptop
   24 → −11 (`LS.restHoehe`) · calendrier 73 → −38 · zeitstrahl-sortierer 46 → −9.
-- **Gruppe b:** geheimschrift-knacker s3 100 → −10 (Tasten 3 × 10, rund 30 px breit, Abnahme offen) · uhr-werkstatt s6
+- **Gruppe b:** geheimschrift-knacker s3 100 → −10 (Tasten 3 × 10, rund 30 px breit, Entscheid G1 a unten) · uhr-werkstatt s6
   74 → −48 · tier-sortierer 72 → −43, Laptop 36 → −26 · mittelwert-waage 42 → −11 · flaechenmass-treppe 57 → −14
   (`LS.restHoehe`) · pflanzen-bestimmer 47 → −23 (einmal 17) · himmels-forscher 42 → −44 · geschichten-ordner 30 → −13,
   Laptop 37 → −19 · roboter-pfad 78 → 2 · fledermaus-forscher 105 → −44 · begriffs-geodreieck Laptop 40 → −10
@@ -395,6 +395,20 @@ Dezimaltaste um (unterste Tastenreihe 62 statt 46 px; in drei Spielen lokal umga
 in der Kopfzeile um (+14 px); (R5) Baustein „Antwortknopf mit Bild links“ (in rund zehn Spielen einzeln gebaut); (R6)
 oberer Abstand der Tastatur auf dem Handy. Messwerkzeug: Zahlenrätsel-Tresor zieht als erste Aufgabe immer „Bündeln“;
 Ablagen, die beim Antippen wachsen (Energie-Wandler, Zeitstrahl-Sortierer, Kulturen-Koffer s6), sieht die Messung nicht.
+
+Entscheide Patrik (2026-11-17), umgesetzt:
+- **K1 a — Kakao-Weg s6, acht Schritte:** Die Liste der Schritte scrollt im eigenen Feld (`LS.lesetext`), Produkt, Frage
+  und Ablage bleiben stehen, Schrift und Knopfhöhe gleich; beim Ordnen nach jedem Antippen neu eingepasst. Gezielt mit
+  `--arten` („Tippe die Schritte“, „falschen Platz“, je 10 Ziehungen): auf allen vier Flächen im Bild.
+- **K2 a, K3 a — Kakao-Weg, wachsende Ablage beim Ordnen:** Erst beim Antippen zeigte sich, dass die Ablage je Schritt
+  70–100 px wuchs (nach sieben Schritten 641 px; Seite über dem Rand Handy 387, Tablet hoch 166, Laptop 269 px — die
+  Messung sieht nur den Anfang). Die Ablage scrollt jetzt im eigenen Feld (Handy höchstens 150, sonst 200 px) und springt
+  zum zuletzt gelegten Schritt; `flex-wrap: nowrap`, sonst brechen die Schritte in unsichtbare Spalten um. Je Schritt
+  gemessen (Schritt 1–7, je drei bis fünf Wege): Seite auf Handy, Tablet hoch und Laptop bei keinem Schritt über dem
+  Rand; Liste Handy 215–301, Tablet 257–394, Laptop 154–265 px. Verworfen: getippte Schritte aus der Liste nehmen und
+  Ablage verdichten (ab Schritt 5 wieder 70–117 px über dem Rand).
+- **G1 a — Geheimschrift-Knacker, Buchstabentasten auf dem Handy:** bleiben 30 × 44 px in drei Reihen zu zehn, wie die
+  Buchstabentastatur eines Handys; die Vorgabe 44 px gilt bei Buchstabentastaturen für die Höhe.
 
 Rest (höchster Wert in px):
 - **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,

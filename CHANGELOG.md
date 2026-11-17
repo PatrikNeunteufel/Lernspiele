@@ -2703,3 +2703,9 @@
   (`ketteEl`), behoben.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad über die 62 geänderten Spiele „Keine Fehler.“, Eulenpfad energie-wandler
   „Keine Fehler.“
+- Kakao-Weg (kakao-weg), Entscheide K1 a, K2 a, K3 a: In Stufe 6 scrollt die Liste der acht Schritte im eigenen Feld
+  (`LS.lesetext`, beim Ordnen nach jedem Antippen neu eingepasst); beim Ordnen scrollt auch die Ablage (Handy höchstens
+  150, sonst 200 px) und zeigt den zuletzt gelegten Schritt — sie wuchs je Schritt um 70–100 px, die Seite ragte am Ende
+  bis 387 px (Handy), 166 px (Tablet hoch), 269 px (Laptop) über den Rand; jetzt bei keinem Schritt. Entscheid G1 a:
+  Buchstabentasten des Geheimschrift-Knackers auf dem Handy bleiben 30 × 44 px. `docs/eulenpfad/bildhoehe_offen.md`.
+- Tests: Eulenpfad kakao-weg „Keine Fehler.“, Skripte „Keine Fehler.“

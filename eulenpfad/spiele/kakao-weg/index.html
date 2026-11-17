@@ -17,6 +17,14 @@
   .schritt-ablage { flex-direction: column; align-items: stretch; }
   .schritt-ablage > span { font-size: clamp(14px, 3.3vw, 17px); font-weight: 700; }
   .schritt-ablage .pfeil { text-align: center; }
+  /* Entscheide K2 a, K3 a (LERN_Session46): Beim Ordnen wuchs die Ablage je Schritt um 70–100 px, die Seite ragte am
+     Ende bis 387 px (Handy), 166 px (Tablet hoch), 269 px (Laptop) über den Rand — sie scrollt im eigenen Feld und
+     zeigt immer den zuletzt gelegten Schritt (Spiel-Code); Schatten oben, wenn frühere darüber liegen. Ohne
+     `nowrap` brächen die Schritte bei begrenzter Höhe in unsichtbare Spalten daneben um (Rahmen: `.ablage` wrap). */
+  div:has(> .schritt-ablage) > div.schritt-ablage { max-height: 200px; overflow-y: auto; overscroll-behavior: contain;
+    flex-wrap: nowrap; justify-content: flex-start; }
+  div.schritt-ablage > * { flex: none; }
+  div.schritt-ablage.scrollt-oben { box-shadow: inset 0 14px 12px -12px rgba(40, 45, 80, .35); }
   .weg-liste { list-style: none; padding: 0; margin: 0 auto 12px; max-width: 620px; display: grid; gap: 6px; }
   .weg-liste li { background: var(--k-feld); border: 2px solid var(--rand); border-radius: 12px; padding: 6px 10px; font-size: clamp(14px, 3.3vw, 17px); font-weight: 700; display: flex; gap: 8px; align-items: center; }
   .weg-liste li .nr { color: var(--text-leise); min-width: 1.4em; }
@@ -77,6 +85,8 @@
     div:has(> .schritt-ablage) > .frage { font-size: 17px; line-height: 1.25; }
     div:has(> .schritt-ablage) > div.schritt-ablage { margin-bottom: 4px; }
     div:has(> .schritt-ablage) > div.schritt-ablage:empty { min-height: 16px; }
+    /* K2 a: auf dem Handy höchstens rund zwei Schritte hoch */
+    div:has(> .schritt-ablage) > div.schritt-ablage { max-height: 150px; }
   }
   @media (max-height: 820px) {
     /* Schritte ordnen (s6, acht Schritte): leere Ablage niedriger — die Aufgabe ragte auf dem Handy bis 59 px unter
@@ -451,6 +461,16 @@ LS.spiel({
       });
       ablage.classList.add("schritt-ablage");
       box.classList.add("schritt-wahl");
+      // Entscheid K1 a (LERN_Session46): acht lange Schritte passen auf dem Handy nicht ganz ins Bild — die Liste
+      // scrollt im eigenen Feld, Produkt, Frage und Ablage bleiben stehen. Die Ablage wächst mit jedem Schritt, darum
+      // nach jedem Antippen neu einpassen (der Rahmen misst sonst nur bei Grössenänderung des Fensters).
+      // K2 a, K3 a: Auch die Ablage scrollt (CSS) und springt zum zuletzt gelegten Schritt.
+      LS.lesetext(box);
+      box.addEventListener("click", () => {
+        ablage.scrollTop = ablage.scrollHeight;
+        LS.lesetext(box);
+      });
+      ablage.addEventListener("scroll", () => ablage.classList.toggle("scrollt-oben", ablage.scrollTop > 2));
     } else if (a.art === "fehlt") {
       const loesung = `Es fehlt: ${p.schritte[a.luecke][0]}`;
       const liste = el("ol", { class: "weg-liste" });
@@ -507,6 +527,7 @@ LS.spiel({
       });
       box.classList.add("schritt-wahl");
       box.style.gridTemplateColumns = "1fr";
+      LS.lesetext(box); // Entscheid K1 a: acht Schritte untereinander scrollen auf dem Handy im eigenen Feld
     } else if (a.art === "pfeil") {
       const loesung = `Der Pfeil heisst «${FLUSS[a.fluss].text}».`;
       const bild = [kreislaufSvg({ links: a.links, frage: a.fluss }), legende()];
