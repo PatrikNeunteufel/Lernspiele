@@ -41,6 +41,23 @@
     .go-liste .wahl { gap: 8px; }
     .go-liste .wahl-knopf { padding: 6px 12px; line-height: 1.25; min-height: 48px; }
   }
+  /* Sichtbare Fläche (LERN-55): Sechs Sätze ordnen (s6) ragte auf dem Laptop 1366 × 650 bis 37 px, auf dem Handy
+     375 × 660 bis 34 px unter den Rand. Breit: Sätze in zwei Spalten (die Reihenfolge der Knöpfe ist ohnehin gemischt);
+     Handy: leere Ablage, Titel und Satzzeilen niedriger. */
+  @media (min-width: 900px) and (max-height: 820px) {
+    .go-liste > .wahl { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 900px; } /* nicht die Zeitwörter der Lücken */
+  }
+  @media (max-width: 560px) and (max-height: 760px) {
+    .go-titel { margin-bottom: 2px; }
+    .go .frage { margin-bottom: 6px; line-height: 1.25; }
+    .go-liste .ablage { min-height: 44px; margin-bottom: 8px; }
+    .go-liste > .wahl { gap: 6px; }
+    .go-liste > .wahl .wahl-knopf { padding: 5px 12px; min-height: 44px; } /* nur die Sätze, nicht die Zeitwörter der Lücken */
+    /* Lücken (s6, drei Karten): Satz mit engeren Zeilen, Zeitwörter 44 px hoch (vorher bis 19 px darunter) */
+    .go-luecke { padding: 4px 10px; margin-bottom: 4px; }
+    .go-luecke-satz { line-height: 1.3; margin-bottom: 4px; }
+    .go-luecke .wahl-knopf { min-height: 44px; }
+  }
 </style>
 </head>
 <body>

@@ -80,6 +80,31 @@
     div:has(> .kreuz) > .auftrag { margin-bottom: 4px; }
     .rechnung { line-height: 1.1; }
     .kreuz.breit > * { min-height: 42px; }
+    /* Auftrag und Rechnung nebeneinander, Kopfzeile des Kreuzes ohne Knopf flacher, Tastatur näher: die Aufgabe ragte
+       s3–s5 bis 28 px, s6 bis 66 px unter den Rand (LERN-55, LERN_Session46). Felder zum Antippen bleiben 44 px. */
+    div:has(> .kreuz) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; align-items: center; }
+    div:has(> .kreuz) > * { grid-column: 1 / -1; margin-inline: 0; } /* mit margin auto würden Kreuz und Tastatur im Raster schmal */
+    div:has(> .kreuz) > .auftrag { grid-column: 1; margin: 0 0 2px; font-size: 18px; line-height: 1.2; }
+    div:has(> .kreuz) > .rechnung { grid-column: 2; margin: 0 0 2px; font-size: 26px; white-space: nowrap; }
+    .kreuz .ecke, .kreuz .oben:not(button), .kreuz .kopf-summe { min-height: 32px; }
+    .kreuz { gap: 3px; margin-bottom: 4px; }
+    .mk-eingabe .hinweis-klein { font-size: 14px; line-height: 1.15; }
+    .mk-eingabe { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } /* Hinweis in zwei statt drei Zeilen */
+    .kreuz { gap: 2px; }
+    div:has(> .kreuz) > .tastatur { margin-top: 4px; }
+    .kreuz .oben, .kreuz .ecke, .kreuz .kopf-summe { margin-bottom: 2px; }
+    /* Rätsel (s6): „Finde alle fehlenden Zahlen!“ in einer Zeile neben „? × ? = ?“ */
+    div:has(> .kreuz) > .auftrag:has(> .mk-vorsatz) { font-size: 16px; }
+    div:has(> .kreuz) > .auftrag:has(> .mk-vorsatz) + .rechnung { font-size: 24px; }
+  }
+  /* Tablet hoch, sichtbare Fläche 768 × 950: Hinweis links neben der Anzeige wie auf dem Handy — das Rätsel (s6) ragte
+     45 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (min-width: 561px) and (orientation: portrait) and (max-height: 1000px) {
+    .mk-eingabe { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px; align-items: center; max-width: 620px; margin: 0 auto; }
+    .mk-eingabe .hinweis-klein { margin: 0; text-align: left; line-height: 1.25; }
+    div:has(> .kreuz) > .auftrag { margin-bottom: 8px; }
+    div:has(> .kreuz) > .tastatur { margin-top: 10px; }
+    .rechnung { font-size: 44px; line-height: 1.1; }
   }
 </style>
 </head>

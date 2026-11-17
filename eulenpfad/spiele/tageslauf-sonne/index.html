@@ -10,7 +10,9 @@
 <style>
   .tl-ding { text-align: center; font-size: clamp(64px, 16vw, 92px); line-height: 1.1; margin: 0 0 8px; }
   /* Sonnenbogen: SVG als Hintergrund, die Plätze sind Knöpfe darüber (Lage in Prozent der Fläche) */
-  .tl-himmel { position: relative; width: 100%; max-width: 460px; margin: 0 auto; aspect-ratio: 400 / 270; }
+  /* Breite aus der restlichen Höhe (--rest-h von LS.restHoehe, mal Seitenverhältnis 400 : 270), höchstens 460 px, nie
+     unter 280 px: auf dem Laptop 1366×650 ragte der Bogen 24 px unter den Rand (LERN_Session46) */
+  .tl-himmel { position: relative; width: max(min(280px, 100%), min(460px, 100%, calc(var(--rest-h, 311px) * 400 / 270))); margin: 0 auto; aspect-ratio: 400 / 270; }
   .tl-himmel svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   .tl-platz { /* Bildfarben: Szene auf der Bildkachel */ position: absolute; transform: translate(-50%, -50%); width: clamp(64px, 18vw, 84px); height: clamp(64px, 18vw, 84px);
     border-radius: 50%; border: 4px solid #fff; background: color-mix(in srgb, var(--k-feld) 55%, transparent); box-shadow: 0 4px 0 var(--rand);
@@ -258,7 +260,7 @@ LS.spiel({
         });
         himmel.append(k);
       }
-      f.append(himmel);
+      f.append(LS.restHoehe(himmel)); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session46)
       return;
     }
 

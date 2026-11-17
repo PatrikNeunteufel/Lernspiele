@@ -48,6 +48,21 @@
     /* Dreier mit neun Karten (s6): langer Auftrag kleiner gesetzt (LERN-55, vorher 23 px darunter) */
     .frage:has(+ .bionik-feld > :nth-child(7)) { font-size: 17px; line-height: 1.25; margin-bottom: 6px; }
   }
+  /* Handy mit Browserleisten (375×660, LERN_Session46): Dreier mit neun Karten (s6) ragten 62 px unter den Rand — Bild
+     links neben Name und Art, Karten flacher, Auftrag in zwei Zeilen */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .frage:has(+ .bionik-feld > :nth-child(7)) { font-size: 15px; line-height: 1.2; margin-bottom: 4px; }
+    .bionik-feld:has(> :nth-child(7)) { gap: 6px; }
+    .bionik-feld:has(> :nth-child(7)) .bionik-karte { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 6px;
+      justify-items: start; align-content: center; text-align: left; min-height: 52px; padding: 4px 6px; font-size: 14px; }
+    .bionik-feld:has(> :nth-child(7)) .bionik-karte .bild { grid-row: span 2; justify-self: center; font-size: 26px; }
+    .bionik-feld:has(> :nth-child(7)) .bionik-karte small { font-size: 12px; }
+    /* Vorbild oder Erfindung wählen mit langer Erfindung (s2, 22 px darunter): Antworten mit Bild links, flacher */
+    .bionik-zeile ~ .wahl { gap: 8px; }
+    .bionik-zeile ~ .wahl .wahl-knopf { flex-direction: row; gap: 10px; min-height: 50px; padding-block: 4px; }
+    .bionik-zeile ~ .wahl .wahl-knopf .bild { font-size: 30px; }
+    .bionik-zeile { margin-bottom: 8px; }
+  }
   /* Handy: Vorbild → Erfindung nebeneinander statt untereinander (LERN_Session45: untereinander 206 px hoch, mit langer
      Erfindung bis 3 px über dem Rand) */
   @media (max-width: 560px) {

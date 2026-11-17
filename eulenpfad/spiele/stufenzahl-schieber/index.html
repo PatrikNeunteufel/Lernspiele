@@ -41,6 +41,22 @@
   .ss-notizen .zw-notiz { font-size: 17px; min-height: 32px; padding: 2px 4px; }
   /* Mit Notizen nimmt die Pfeil-Zeile erst Platz ein, wenn sie nach dem Lösen etwas sagt */
   .ss-notizen ~ .ss-pfeil:empty { min-height: 0; margin: 0; }
+  /* Ganze Aufgabe im Bild (LERN-55): Handy Rechnung 24 px, Tafel und Anzeige niedriger, die leere Pfeil-Zeile ohne
+     Platz, engere Abstände — vorher ragte die Aufgabe auf 375 × 660 bis 37 px, die Kette mit Notizen (s6) bis 82 px
+     unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .frage { margin-bottom: 4px; }
+    .rechnung { font-size: 24px; line-height: 1.15; margin: 2px 0 6px; }
+    .ss-rahmen { margin-bottom: 6px; }
+    .ss-tafel th { padding: 2px 0; }
+    .ss-tafel td { height: 30px; font-size: 22px; }
+    .ss-pfeil:empty { min-height: 0; margin: 0; }
+    .ss-notizen { margin: -2px 0 6px; }
+    .ss-notizen .zw-notiz { min-height: 30px; }
+    .ss-eingabe { margin: 0 0 4px; }
+    .ss-eingabe .anzeige { min-height: 50px; font-size: 28px; padding-block: 2px; }
+    .ss-eingabe ~ .tastatur { margin-top: 6px; }
+  }
 </style>
 </head>
 <body>

@@ -22,6 +22,13 @@
   .paar-karte.gewaehlt { outline: 5px solid var(--deko-6); }
   .paar-karte.gefunden { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); cursor: default; }
   .paar-karte.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
+  /* Ganze Aufgabe im Bild (LERN-55): unter 700 px Bildhöhe Karten niedriger — zwölf Karten (Königsstufe, sechs Paare)
+     ragten auf dem Handy bis 55 px, auf dem Laptop 26 px unter den Rand (LERN_Session46) */
+  @media (max-height: 700px) {
+    .paare { gap: 8px; }
+    .paar-karte { min-height: 84px; padding: 4px; }
+    .paar-karte .bild { font-size: clamp(34px, 9vw, 38px); }
+  }
 </style>
 </head>
 <body>

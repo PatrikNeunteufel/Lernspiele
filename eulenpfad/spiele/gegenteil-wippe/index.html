@@ -31,6 +31,13 @@
   .wippen { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin: 0 auto 6px; }
   .wippen svg { width: clamp(130px, 40vw, 170px); height: auto; display: block; }
   .paket svg { width: 64px; height: 64px; display: block; }
+  /* Handy (LERN-55): vier Pakete in einer Reihe (Knöpfe 74 px) — mit drei Wippen und zwei Reihen Pakete ragte die
+     Königsstufe bis 19 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .gw-reihe:has(.paket) { gap: 8px; }
+    .gw-reihe:has(.paket) .gw-knopf { min-width: 74px; min-height: 74px; padding: 4px; }
+    .gw-reihe .paket svg { width: 56px; height: 56px; }
+  }
 </style>
 </head>
 <body>

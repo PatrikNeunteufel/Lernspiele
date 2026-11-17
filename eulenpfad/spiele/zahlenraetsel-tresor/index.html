@@ -82,13 +82,19 @@
   .tr-notizen { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; }
   .tr-notizen label { display: inline-flex; align-items: center; gap: 6px; font-size: .85em; }
   .tr-notizen .zw-notiz { font-size: 17px; min-height: 34px; width: calc(7ch + 14px); }
-  /* Handy: mit Notizen ein kleinerer Tresor und zwei Notizen je Zeile, damit die Tastatur im Bild bleibt */
+  /* Handy: das Rätsel über die ganze Breite, darunter ein kleiner Tresor links neben der Anzeige für den Code —
+     vorher stand der grosse Tresor über dem Rätsel (ohne Notizen) oder schmälerte es (mit Notizen), und die Aufgabe
+     ragte auf 375 × 660 bis 69 px unter den Rand (LERN_Session46). Zwei Notizen je Zeile. */
   @media (max-width: 560px) {
-    .tresor-zeile:has(.tr-notizen) { gap: 8px; margin-bottom: 8px; }
-    .tresor-zeile:has(.tr-notizen) .tresor { width: 64px; height: 64px; }
-    .tresor-zeile:has(.tr-notizen) .innen { font-size: 30px; }
-    .tresor-zeile:has(.tr-notizen) .rad { width: 34px; height: 34px; border-width: 4px; }
-    .tresor-zeile:has(.tr-notizen) .raetsel { padding: 10px 12px; }
+    div:has(> .tresor-zeile) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; }
+    div:has(> .tresor-zeile) > * { grid-column: 1 / -1; }
+    div:has(> .tresor-zeile) > .tastatur { width: 100%; box-sizing: border-box; }
+    div:has(> .tresor-zeile) > .anzeige { grid-column: 2; grid-row: 2; }
+    .tresor-zeile { display: contents; }
+    .tresor-zeile > .raetsel { grid-column: 1 / -1; grid-row: 1; min-width: 0; max-width: none; margin-bottom: 8px; padding: 10px 12px; }
+    .tresor-zeile > .tresor { grid-column: 1; grid-row: 2; width: 64px; height: 64px; }
+    .tresor-zeile .innen { font-size: 30px; }
+    .tresor-zeile .rad { width: 34px; height: 34px; border-width: 4px; }
     .tr-notizen { gap: 4px 10px; margin-top: 4px; }
     .tr-notizen label { gap: 4px; }
     .tr-notizen .zw-notiz { width: calc(6ch + 12px); font-size: 15px; min-height: 32px; padding: 2px 4px; }

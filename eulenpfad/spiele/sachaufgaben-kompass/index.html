@@ -73,17 +73,42 @@
     .kompass-tabelle td .angabe { margin-block: 0; }
     .kompass-tabelle caption { padding-bottom: 2px; }
     .kompass-schritt { margin: 6px 0 4px; }
-    /* mit Tabelle oder Diagramm: „Prüfen“ rechts neben dem Schritt statt darunter */
-    .kompass-raster:has(.kompass-pruefen) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; }
-    .kompass-raster:has(.kompass-pruefen) > * { grid-column: 1 / -1; }
-    .kompass-raster:has(.kompass-pruefen) > .kompass-schritt { grid-column: 1; align-self: center; text-align: left; font-size: 14px; line-height: 1.25; }
-    .kompass-raster:has(.kompass-pruefen) > .kompass-schritt + div { grid-column: 2; align-self: center; }
-    .kompass-raster .kompass-pruefen { margin: 0; }
-    .kompass-raster .kompass-pruefen .knopf { padding-inline: 14px; font-size: 19px; min-height: 52px; }
+    /* „Prüfen“ rechts neben dem Schritt statt darunter — mit Tabelle oder Diagramm (LERN_Session42) und seit
+       LERN_Session46 auch ohne (s6 ragte mit langem Text bis 37 px unter den Rand). :where hält die Gewichtung tief,
+       damit die schmale Tabelle unten die Spalten selbst setzt. */
+    :where(div:has(> .kompass-schritt + div > .kompass-pruefen)) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; }
+    :where(div:has(> .kompass-schritt + div > .kompass-pruefen)) > * { grid-column: 1 / -1; }
+    :where(div:has(> .kompass-schritt + div > .kompass-pruefen)) > .kompass-schritt { grid-column: 1; align-self: center; text-align: left; font-size: 14px; line-height: 1.25; }
+    :where(div:has(> .kompass-schritt + div > .kompass-pruefen)) > .kompass-schritt + div { grid-column: 2; align-self: center; }
+    .kompass-pruefen { margin: 0; }
+    .kompass-pruefen .knopf { padding-inline: 14px; font-size: 19px; min-height: 52px; }
     .kompass-weg.kurz { --wahl-breite: 130px; }
     .kompass-weg.kurz .wahl-knopf { padding-inline: 4px; white-space: nowrap; font-size: 16px; }
     .kompass-antwort > .nz-zeile { flex-basis: 100%; font-size: 12px; }
     .nz-zeile .zw-notiz { min-height: 30px; }
+    /* Erster Schritt ganz im Bild (LERN_Session46; vorher auf 375 × 660 bis 76 px darunter, s2 vier Rechenwege, s4
+       Lagerkasse): Text 16 px und enger, Rechenwege und „Prüfen“ 46 px wie die Knöpfe des Rahmens unter 700 px, Tabelle
+       enger. Der Ergebnis-Schritt bleibt, wie er ist (offene Entscheidung, bildhoehe_offen.md Offen 6). */
+    .kompass-text { line-height: 1.4; font-size: 16px; margin-bottom: 6px; }
+    .kompass-text .angabe { margin-block: 1px; line-height: 1.4; }
+    .frage { margin: 2px 0 6px; line-height: 1.3; }
+    .kompass-schritt { margin: 2px 0 4px; }
+    .kompass-weg, .kompass-zusammenhang { gap: 6px; }
+    .kompass-weg .wahl-knopf, .kompass-zusammenhang .wahl-knopf { min-height: 46px; padding-block: 4px; }
+    .kompass-tabelle-rahmen { margin-bottom: 6px; }
+    .kompass-tabelle caption { padding-bottom: 0; }
+    .kompass-tabelle th { padding-block: 1px; }
+    .kompass-tabelle td { padding-block: 0; }
+    .kompass-pruefen .knopf { min-height: 46px; }
+    /* Schmale Tabelle (zwei Spalten mit kurzen Namen, Lagerkasse): die Frage rechts daneben statt darunter, 💡 über
+       ihr statt im Text — in der schmalen Spalte stand sonst ein Wort je Zeile */
+    .kompass-raster:has(> .schmal) { display: grid; grid-template-columns: fit-content(210px) minmax(0, 1fr); column-gap: 10px; }
+    .kompass-raster:has(> .schmal) > * { grid-column: 1 / -1; }
+    .kompass-raster:has(> .schmal) > .schmal { grid-column: 1; grid-row: 2; }
+    .kompass-raster:has(> .schmal) > .frage { grid-column: 2; grid-row: 2; align-self: center; text-align: left; margin: 0 0 6px; }
+    .kompass-raster:has(> .schmal) > .frage > .tipp-zeile.schwebt:not([hidden]) { float: none; display: block; width: fit-content; margin: 0 0 6px auto; }
+    .kompass-raster:has(> .schmal):has(.kompass-pruefen) > .kompass-schritt { grid-column: 1; }
+    .kompass-raster:has(> .schmal):has(.kompass-pruefen) > .kompass-schritt + div { grid-column: 2; justify-self: end; }
   }
 </style>
 </head>
@@ -732,7 +757,9 @@ function tabelleEl(a, knoepfe) {
   const tab = el("table", { class: "kompass-tabelle" }, el("caption", { text: t.titel }),
     el("tr", {}, ...t.kopf.map(k => el("th", { text: k }))),
     ...t.zeilen.map(z => el("tr", {}, ...z.map((c, i) => (typeof c === "string" ? el("td", { class: i === 0 ? "name" : "", text: c }) : el("td", {}, knoepfe[c.a]))))));
-  return el("div", { class: "kompass-tabelle-rahmen" }, tab);
+  // Schmal: zwei Spalten mit kurzen Namen (Lagerkasse) — auf dem Handy steht die Frage daneben (LERN_Session46)
+  const schmal = t.kopf.length === 2 && t.zeilen.every(z => typeof z[0] === "string" && z[0].length <= 12);
+  return el("div", { class: "kompass-tabelle-rahmen" + (schmal ? " schmal" : "") }, tab);
 }
 
 function diagrammEl(a, knoepfe) {

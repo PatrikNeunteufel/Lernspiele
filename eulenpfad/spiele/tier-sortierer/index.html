@@ -14,6 +14,20 @@
     .korb-karte { margin-bottom: 10px; }
     .korb-knopf { padding: 8px 6px 6px; }
   }
+  /* Sichtbare Fläche im Browser (Handy 375 × 660, Laptop 1366 × 650; LERN-55): Bild und Name des Tiers nebeneinander
+     statt untereinander; auf dem Handy die Körbe niedriger (Korbbild 28 px). Vorher ragten die Körbe auf dem Handy bis
+     72 px, auf dem Laptop bis 36 px unter den Rand. */
+  @media (max-height: 760px) {
+    .korb-karte { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 22px; margin: 4px auto 12px; }
+    .korb-karte .bild { display: inline-block; }
+  }
+  @media (max-width: 560px) and (max-height: 760px) {
+    .frage { margin: 2px 0 8px; }
+    .korb-karte { margin-bottom: 10px; }
+    .korb-reihe { gap: 10px; }
+    .korb-knopf { min-height: 72px; padding: 6px 6px 4px; gap: 0; }
+    .korb-knopf .bild { font-size: 28px; line-height: 1.15; }
+  }
 </style>
 </head>
 <body>

@@ -1,4 +1,4 @@
-# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session45, 2026-11-16)
+# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session46, 2026-11-17)
 
 Entscheide BH1 a, BH2 a, BH2-T a, BH3 a sind umgesetzt (rahmen.md Abschnitt 20). Gemessen mit `tools/bildhoehe.js`
 (Zufallsaufgaben, Streuung um einige Dutzend Pixel). Zahlen: wie weit die **Aufgabe selbst** (ohne Tipp-Zeile) über den
@@ -170,7 +170,8 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
 
 1. **GR1 a umsetzen:** Verdichtung unter 700 px in `stil.css`, Vollbild-Knopf, Messgeräte der sichtbaren Fläche als
    Vorgabe in `tools/bildhoehe.js` — *erledigt 2026-11-16 (LERN_Session45, Abschnitt „Sichtbare Fläche LERN_Session45“
-   unten)*; offen die Runde je Spiel für den Rest (Listen dort).
+   unten)*; Runde je Spiel für den Rest *erledigt 2026-11-17 (LERN_Session46, Abschnitt „Rest je Spiel“ unten)*, offen
+   dort fünf kleine Reste, Entscheid K1 (Kakao-Weg) und die Wünsche an den Rahmen R1–R6.
 2. **Rest auf der sichtbaren Handy-Fläche** (mit Verdichtung gemessen): gefuehle-radar 92, calendrier 91 (Stimme fehlt im
    Messbrowser), gerecht-teiler 76, diagramm-detektiv 71, geheimschrift-knacker 70, kakao-weg 67, malkreuz 65,
    kiosk-kasse 60, glace-kombinator 58, hebel-wippe 55, quader-volumen 50, bionik-paare 48, roboter-pfad 44,
@@ -337,6 +338,63 @@ darunter — die Aufgabe ist im Bild.
 
 Messwerkzeug: Bei vier Läufen gleichzeitig auf denselben Server kamen einzelne Ziehungen mit 150–1400 px und einmal die
 Startseite statt des Spiels; allein gemessen keine.
+
+## Rest je Spiel LERN_Session46 (2026-11-17)
+
+Die 62 Spiele aus der Schlussmessung vom 16.11. (ohne muster-fortsetzer, 1 px), in fünf Gruppen von Agenten bearbeitet:
+je eigener Server und Messbrowser, alle sechs Stufen mit fünf Ziehungen vorher und nachher, seltene Arten gezielt mit
+`--arten`/`--text`; nur die Spielseiten selbst geändert (CSS, meist unter `@media (max-width: 560px)` mit Höhengrenze; JS
+nur `LS.restHoehe` oder `data-tipp-ziel` an wenigen Stellen), Inhalt, Wortlaut und Zahl der Teile unverändert. Berichte und
+Messdaten in `.temp/bildhoehe/rest46/` (`bericht_a.md` … `bericht_e.md`). Häufigste Mittel: Bild links neben dem Text statt
+darüber, Frage neben Tabelle oder Grafik, Anzeige auf dem Handy 46–56 px statt 76, 💡 in der Frage (`data-tipp-ziel`), wo
+er eine Zeile schmaler machte, engere Abstände.
+
+Gemeinsame Nachmessung danach, allein auf einem Server (alle sechs Stufen, drei Ziehungen,
+`rest46/gesamt_nachher.json`) — Spiele mit der Aufgabe über dem Rand, von diesen 62:
+
+| sichtbare Fläche | 16.11. | 17.11. |
+|---|---|---|
+| Handy 375×660 | 60 | 5 |
+| Tablet hoch 768×950 | 9 | 0 |
+| Tablet quer 1024×690 | 0 | 0 |
+| Laptop 1366×650 | 8 | 0 |
+
+Seitlich nirgends, keine geschrumpfte Grafik (auch `mix`, `handy-quer`). Rest auf dem Handy, je in einer von drei Ziehungen:
+kakao-weg s6 56 (Schritte ordnen, Entscheid K1 offen), diagramm-detektiv s4 21 (Säule zeichnen), wassertropfen-reise s6 13,
+pflanzen-bestimmer s6 10, erdzeit-leiter s5 7. Dazu aus den Berichten: quader-volumen s6 bis 23 und s4 11 (Körper an der
+Untergrenze 0,8 der Zeichnung, Ausnahme LERN_Session44), roboter-pfad s5 2 (Schwelle). Energie-Wandler: fehlender Pfeil
+zwischen Wandler und nächster Energie in `ketteEl` (älter) nebenbei behoben, s4/s6 Handy nachgemessen im Bild.
+
+Je Spiel (Handy, höchster Wert vorher → nachher in px; negativ = Platz frei; andere Geräte genannt):
+- **Gruppe a:** energie-wandler s6 74 → −76, lange Ketten 111 → −38, Laptop 4 → im Bild · quader-volumen s2 51 → −10,
+  s3/s5 37 → −15, s4 59 → 11, s6 74 → 23 · preis-tabelle s1 73 → −66, Tablet 47 → −1 · zahlenhaus 62 → −3 · flaechen-pixel
+  62 → 0 · znueni-teller 44 → −82, Laptop 26 → −110 · bionik-paare s6 62 → −76 · glace-kombinator s2 97 → −71, Kleider-Sets
+  mit vier Gruppen 76 → −1 · gefuehle-radar 54 → −38 · kulturen-koffer 70 → −53, Laptop 18 → −127 · tageslauf-sonne Laptop
+  24 → −11 (`LS.restHoehe`) · calendrier 73 → −38 · zeitstrahl-sortierer 46 → −9.
+- **Gruppe b:** geheimschrift-knacker s3 100 → −10 (Tasten 3 × 10, rund 30 px breit, Abnahme offen) · uhr-werkstatt s6
+  74 → −48 · tier-sortierer 72 → −43, Laptop 36 → −26 · mittelwert-waage 42 → −11 · flaechenmass-treppe 57 → −14
+  (`LS.restHoehe`) · pflanzen-bestimmer 47 → −23 (einmal 17) · himmels-forscher 42 → −44 · geschichten-ordner 30 → −13,
+  Laptop 37 → −19 · roboter-pfad 78 → 2 · fledermaus-forscher 105 → −44 · begriffs-geodreieck Laptop 40 → −10
+  (`LS.restHoehe`) · taschengeld-planer 55 → −3 · ziffernkarten 33 → −25.
+- **Gruppe c:** punkte-blitz s6 141 → im Bild · gerecht-teiler 84 → −14 · fahrplan-rechner 82 → −3, Tablet 41 → −10
+  (Abfahrtstafel jetzt auf allen Geräten quer) · rechen-maschine 70 → −7 · wortarten-probe 66 → −37 · wassertropfen-reise
+  65 → 0 · diagramm-detektiv 59 → −7 · reim-paare 55 → −31 · schwimmt-sinkt 42 → −72 · velo-tabelle 32 → −47 ·
+  gegenteil-wippe 19 → −113 · satz-reparatur 29 → −71.
+- **Gruppe d:** kompass s6 79 → −16 · zahlenmauer 90 → −32, Tablet 47 → −62 · zahlenraetsel-tresor 69 → −91 ·
+  sachaufgaben-kompass 76 → −66 (Ergebnis-Schritt nicht umgebaut, Offen 6) · lese-detektiv 54 → −21 · zahlen-waage
+  49 → −3 · erdzeit-leiter Ordnen 129 → −10 · stufenzahl-schieber 82 → −1 · speicher-leiter 32 → −20 · frueher-heute
+  34 → −54 · schriftlich-werkstatt 18 → −10 · son-lauscher 14 → −20.
+- **Gruppe e:** kakao-weg s6 Kreislauf 98 → −34 (Ordnen bis 72, K1) · zufalls-skala 91 → −16 (`LS.restHoehe`) · malkreuz
+  66 → 0 · zahlen-baukasten 71 → −59, Tablet 65 → −137 · rhythmus-diktat 54 → −4, Laptop 34 → −62 · gemeinde-helfer 74 → −1 ·
+  gattungs-kenner 77 → −42 · zehntel-lupe 38 → −11 · platzhalter-geschichten 57 → −17 · wuerfel-zaehler 32 → −11 ·
+  komma-messband 15 → −32 · diagramm-wahl Tablet 55 → −104 (Entscheid 1 a unverändert).
+
+Wünsche an den Rahmen (aus allen fünf Berichten, nicht umgesetzt): (R1) `.anzeige` unter 700 px Höhe niedriger — 17 Spiele
+setzen sie jetzt je selbst auf 46–56 px; (R2) leere `.melde-zeile` belegt auf dem Handy 34 px; (R3) „OK ✓“ bricht neben der
+Dezimaltaste um (unterste Tastenreihe 62 statt 46 px; in drei Spielen lokal umgangen); (R4) lange Titel brechen auf 375 px
+in der Kopfzeile um (+14 px); (R5) Baustein „Antwortknopf mit Bild links“ (in rund zehn Spielen einzeln gebaut); (R6)
+oberer Abstand der Tastatur auf dem Handy. Messwerkzeug: Zahlenrätsel-Tresor zieht als erste Aufgabe immer „Bündeln“;
+Ablagen, die beim Antippen wachsen (Energie-Wandler, Zeitstrahl-Sortierer, Kulturen-Koffer s6), sieht die Messung nicht.
 
 Rest (höchster Wert in px):
 - **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,

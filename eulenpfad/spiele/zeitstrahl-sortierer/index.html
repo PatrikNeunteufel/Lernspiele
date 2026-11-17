@@ -21,6 +21,14 @@
     .zs-ereignisse .wahl-knopf .bild { grid-row: span 2; justify-self: center; font-size: 32px; }
     .zs-ereignisse .wahl-knopf small { font-size: 15px; line-height: 1.25; }
   }
+  /* Handy mit Browserleisten (375×660, LERN_Session46): Ereignisse ordnen (s6) ragte bis 46 px unter den Rand — Frage,
+     leere Ablage und Karten enger */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .frage:has(+ .ablage) { font-size: 17px; line-height: 1.25; margin: 2px 0 6px; }
+    .ablage:has(+ .zs-ereignisse) { min-height: 48px; margin-bottom: 8px; padding: 4px; }
+    .zs-ereignisse { gap: 6px; }
+    .zs-ereignisse .wahl-knopf { min-height: 50px; padding-block: 4px; }
+  }
 </style>
 </head>
 <body>

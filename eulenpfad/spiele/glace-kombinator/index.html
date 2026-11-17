@@ -83,6 +83,31 @@
     div:has(> .gl-bau) > .auftrag { margin-bottom: 6px; }
     .gl-gefunden { margin-top: 2px; }
   }
+  /* Handy mit Browserleisten (375×660, LERN_Session46): Finden mit zwei Gruppen zu drei Stücken (s2) ragte 97 px unter
+     den Rand, weil je Gruppe nur zwei Knöpfe nebeneinander standen — jetzt drei; Zähler, Funde und Bau enger */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .gl-sorten { grid-template-columns: repeat(auto-fit, minmax(min(92px, 100%), 1fr)); }
+    .gl-sorte { padding: 3px 4px; font-size: 15px; }
+    .gl-zaehler { font-size: 18px; margin-bottom: 4px; }
+    .gl-gefunden { min-height: 34px; margin-bottom: 2px; }
+    .gl-bau { min-height: 60px; margin-bottom: 4px; }
+    div:has(> .gl-bau) > .frage { margin-bottom: 6px; }
+    /* Zählen (s5/s6 bis 56 px darunter): Auftrag, Regel, Sorten und Anzeige kleiner, Tastatur näher */
+    div:has(> .tastatur) > .auftrag { font-size: 17px; line-height: 1.2; }
+    div:has(> .tastatur) > .frage { font-size: 15px; line-height: 1.25; }
+    /* nur die Sorten (nicht die Kleider-Gruppen: dort braucht es 6 px Abstand, damit vier Stücke in eine Zeile passen) */
+    div:has(> .tastatur) > .gl-liste.vorgabe { gap: 2px 8px; }
+    div:has(> .tastatur) > .gl-liste.vorgabe > span { font-size: 13px; }
+    div:has(> .tastatur) > .gl-liste.vorgabe .gl-kugel { width: 38px; height: 38px; font-size: 17px; }
+    .gl-anzeige, .gl-antwort > .gl-anzeige { min-height: 46px; font-size: 30px; line-height: 1.1; }
+    /* Kleider-Sets zählen mit vier Gruppen (s6, vier Zeilen Gruppen, 76 px darunter): Gruppen flacher, Regel breiter */
+    .gl-gruppen .gl-gruppe > b { font-size: 12px; line-height: 1.15; }
+    .gl-gruppen .gl-liste > span { font-size: 12px; line-height: 1.1; }
+    .gl-gruppen .gl-liste .gl-bild { font-size: 22px; }
+    .gl-antwort { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+    div:has(> .gl-antwort) > .auftrag { font-size: 15px; margin-bottom: 6px; }
+    div:has(> .tastatur) > .tastatur { margin-top: 6px; }
+  }
 </style>
 </head>
 <body>

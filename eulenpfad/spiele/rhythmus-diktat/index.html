@@ -39,6 +39,23 @@
     .karte-knopf { min-height: 72px; padding: 2px 2px 4px; }
     .karte-knopf svg { height: 42px; }
     .diktat { min-height: 76px; margin-bottom: 8px; }
+    /* Zehn Karten (s5, s6) in drei Reihen ragten bis 54 px unter den Rand (LERN-55, LERN_Session46): Knöpfe 44 px hoch,
+       Diktatfeld und Karten flacher, Namen der Karten mit weniger Rand (brechen seltener in drei Zeilen) */
+    .frage { margin: 0 0 6px; line-height: 1.25; }
+    .rd-zeile { gap: 6px; margin-bottom: 6px; }
+    .rd-zeile .knopf { min-height: 44px; padding: 6px 12px; }
+    .diktat { min-height: 64px; padding: 4px 6px; margin-bottom: 6px; }
+    .karte-knopf { min-height: 64px; padding: 2px 1px 4px; }
+    .karte-knopf svg { height: 36px; }
+    .karte-knopf small { line-height: 1.1; }
+  }
+  /* Breit und niedrig (Laptop 1366 × 650): zehn Karten in zwei Reihen zu fünf über die ganze Breite statt in drei
+     Reihen in 640 px — ragten 34 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+    .karten-wahl:has(> :nth-child(9)) { max-width: none; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .frage { margin-bottom: 6px; }
+    .rd-zeile { margin-bottom: 8px; }
+    .diktat { margin-bottom: 8px; }
   }
 </style>
 </head>

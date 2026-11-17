@@ -9,6 +9,13 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  /* Ganze Aufgabe im Bild (LERN-55): auf dem Handy bei fünf Materialkörben (Königsstufe) Bild und Name im Korb
+     nebeneinander, die Körbe niedriger — drei Reihen zu 92 px ragten bis 42 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .korb-reihe:has(> :nth-child(5)) { gap: 10px; }
+    .korb-reihe:has(> :nth-child(5)) .korb-knopf { flex-direction: row; gap: 8px; min-height: 58px; padding: 6px 8px; }
+    .korb-karte:has(+ .korb-reihe > :nth-child(5)) { margin: 2px auto 10px; }
+  }
 </style>
 </head>
 <body>

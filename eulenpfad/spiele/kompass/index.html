@@ -54,14 +54,30 @@
     .karten-zeile { justify-content: flex-start; align-items: flex-start; }
     .kompass-seite { flex: 1 1 200px; }
     .kompass-seite .frage { margin-bottom: 6px; } /* gedrehte Karte mit drei Schritten ragte 4 px über (LERN_Session45) */
-    .nur-sehen { align-items: center; }
-    .nur-sehen .plan { width: max(min(200px, calc(100% - 74px)), min(calc(100% - 74px), var(--rest-h, 240px))); }
-    .nur-sehen .kompass-seite, .kompass-seite.lang { flex-basis: 100%; }
+    /* Plan nur zum Ansehen: Nordpfeil (oder kleine Rose) rechts neben dem Plan, auf gedrehter Karte der Hinweis darunter
+       statt in einer Zeile über dem Plan; Frage und Antworten unter beidem. Vorher ragte die Aufgabe auf 375 × 660 bis
+       79 px unter den Rand (LERN_Session46). Der Plan zum Antippen bleibt so breit wie möglich, sein Hinweis oben. */
+    div:has(> .nur-sehen) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: start; }
+    div:has(> .nur-sehen) > * { grid-column: 1 / -1; }
+    .karten-zeile.nur-sehen { display: contents; }
+    .nur-sehen > .plan { grid-column: 1; grid-row: 1 / span 2; width: max(min(200px, 100%), min(100%, var(--rest-h, 240px))); }
+    .nur-sehen > .nordpfeil, .nur-sehen > .rose.klein { grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-self: center; }
+    div:has(> .achtung) > .nur-sehen > .nordpfeil { grid-row: 1; align-self: end; }
+    div:has(> .nur-sehen) > .achtung { grid-column: 2; grid-row: 2; width: 92px; margin: 6px 0 0; font-size: 15px; line-height: 1.25; }
+    .nur-sehen > .kompass-seite { grid-column: 1 / -1; grid-row: 3; margin-top: 4px; }
+    .kompass-seite.lang .frage { font-size: 17px; line-height: 1.25; } /* Weg beschreiben: Frage in zwei Zeilen */
+    /* Plan zum Antippen: höchstens so breit, dass der Nordpfeil (48 px) oder die kleine Rose daneben Platz hat — wurde
+       der Plan breiter, rutschte der Pfeil neben die Frage, sie brach in mehr Zeilen um, und die gedrehte Karte ragte
+       bis 36 px unter den Rand (LERN_Session46) */
+    .karten-zeile:not(.nur-sehen) > .nordpfeil { width: 48px; }
+    .karten-zeile:not(.nur-sehen) > .plan { width: max(min(240px, 100%), min(420px, calc(100% - 58px), var(--rest-h, 420px))); }
+    .karten-zeile:not(.nur-sehen):has(> .rose.klein) > .plan { width: max(min(220px, 100%), min(420px, calc(100% - 106px), var(--rest-h, 420px))); }
+    .kompass-seite.lang { flex-basis: 100%; }
     .kompass-seite .wahl, .wahl.kompass-wahl { gap: 8px; }
     .kompass-seite:not(.lang) .wahl, .wahl.kompass-wahl { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
     .wahl.kompass-wahl .wahl-knopf { min-height: 54px; }
-    .kompass-seite.lang .wahl { gap: 6px; }
-    .kompass-seite.lang .wahl-knopf { font-size: 17px; line-height: 1.2; min-height: 48px; padding: 5px 10px; }
+    .kompass-seite.lang .wahl { gap: 4px; } /* Weg beschreiben mit langen Namen: bis 5 px über dem Rand (LERN_Session46) */
+    .kompass-seite.lang .wahl-knopf { font-size: 17px; line-height: 1.2; min-height: 46px; padding: 3px 10px; }
     .kompass-seite .wahl-knopf { min-height: 54px; }
   }
   @media (min-width: 900px) and (orientation: landscape) {
@@ -537,7 +553,7 @@ LS.spiel({
       const startFeld = f.querySelector(".plan").felder[A.c + "," + A.r];
       startFeld.classList.add("start");
       if (a.art === "richtung") {
-        seite.append(el("div", { class: "frage", html: `In welcher Richtung liegt ${bNom} ${bBild} von ${aDat} ${aBild} aus?` }));
+        seite.append(el("div", { class: "frage", "data-tipp-ziel": "", html: `In welcher Richtung liegt ${bNom} ${bBild} von ${aDat} ${aBild} aus?` }));
         seite.append(LS.auswahl(ctx, {
           optionen: a.optionen, richtig: a.loesung, breite: a.dirs.length > 4 ? 120 : 130,
           hinweis: gedreht ? kartenHinweis
@@ -545,7 +561,7 @@ LS.spiel({
           loesung: `${gross(bNom)} liegt von ${aDat} aus im ${a.loesung}.`,
         }));
       } else {
-        seite.append(el("div", { class: "frage", html: `Wie kommst du von ${aDat} ${aBild} zu ${bDat} ${bBild}?` }));
+        seite.append(el("div", { class: "frage", "data-tipp-ziel": "", html: `Wie kommst du von ${aDat} ${aBild} zu ${bDat} ${bBild}?` }));
         seite.append(LS.auswahl(ctx, {
           optionen: a.optionen, richtig: a.loesung, breite: 260,
           hinweis: gedreht ? kartenHinweis : "Zähle vom Start aus: Wie viele Felder nach rechts oder links? Wie viele nach oben oder unten? Osten ist rechts, Norden oben.",
@@ -577,7 +593,9 @@ LS.spiel({
     });
     plan.felder[A.c + "," + A.r].classList.add("start");
     f.append(el("div", { class: "karten-zeile" }, plan, neben, seite));
-    seite.append(el("div", { class: "frage", html: a.art === "weg"
+    // 💡 in der Frage (data-tipp-ziel): sonst stand er rechts oben in der Spielfläche und machte Plan und Hinweis
+    // darunter um seine Breite schmaler (LERN_Session46)
+    seite.append(el("div", { class: "frage", "data-tipp-ziel": "", html: a.art === "weg"
       ? `Starte bei ${aDat} ${aBild}. Geh <b>${schritteText(a.schritte)}</b>. Wo kommst du an?`
       : `Was liegt direkt <b>${R[a.richtung].adj}</b> neben ${aDat} ${aBild}?` }));
     if (ctx.nr === 0) ctx.sag("Tipp auf das Feld, wo du ankommst. Der blaue Rahmen zeigt den Start.");

@@ -120,6 +120,12 @@
     .vorgabe { padding: 6px 12px; }
     .fach-kopf { padding: 2px 0; }
   }
+  /* Handy mit Browserleisten (375 × 660, LERN-55): Vorgabe mit 18 px und engeren Zeilen, Ergebniszeile niedriger
+     (vorher s5/s6 mit vierzeiliger Vorgabe bis 33 px unter dem Rand) */
+  @media (max-width: 560px) and (max-height: 760px) {
+    .vorgabe { font-size: 18px; line-height: 1.25; margin-bottom: 8px; }
+    .ergebnis { font-size: 20px; min-height: 26px; margin-top: 4px; }
+  }
 </style>
 </head>
 <body>

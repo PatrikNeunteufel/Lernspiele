@@ -38,6 +38,19 @@
     .pg-wahl.wahl { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     .pg-wahl .wahl-knopf { min-height: 54px; }
   }
+  /* Ohne Schritte (s1–s3) bleibt die Schrittzeile leer und braucht keinen Platz (LERN_Session46) */
+  .pg-schritt:empty { display: none; }
+  /* Handy: Bilder zum Zählen etwas kleiner, 16 Bilder in zwei statt drei Reihen — s1 ragte mit einer langen Geschichte
+     bis 57 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (max-width: 560px) {
+    .pg-bilder { font-size: 24px; gap: 2px; }
+    .pg-bilder .plus { font-size: 22px; margin: 0 3px; }
+    /* Lange Geschichten (s6, Schritt 1 von 4) ragten bis 32 px unter den Rand: Zeilen und Abstände enger */
+    .pg-geschichte { line-height: 1.38; padding: 8px 12px; }
+    .pg-gleichung { margin: 2px 0 4px; }
+    .pg > .auftrag { margin-bottom: 6px; line-height: 1.25; }
+    .pg-schritt { font-size: 14px; line-height: 1.2; }
+  }
   @media (max-height: 820px), (max-width: 560px) {
     .pg-geschichte { padding: 10px 14px; margin-bottom: 8px; }
     .pg-bilder { margin-bottom: 6px; }

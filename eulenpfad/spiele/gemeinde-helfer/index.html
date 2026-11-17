@@ -31,6 +31,23 @@
     .wahl.gh-ablauf { gap: 6px; }
     .wahl.gh-ablauf .wahl-knopf { min-height: 48px; padding: 5px 10px; line-height: 1.25; }
   }
+  /* Handy: fünf Körbe zum Anliegen als Satz (s4) mit Bild links neben dem Namen — in drei Reihen zu 96 px ragte ein
+     langes Anliegen bis 18 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (max-width: 560px) {
+    .korb-karte.gh-satz { margin-bottom: 10px; }
+    .korb-karte.gh-satz ~ .korb-reihe { gap: 8px; }
+    .korb-karte.gh-satz ~ .korb-reihe .korb-knopf { flex-direction: row; min-height: 56px; gap: 6px; padding-block: 4px; line-height: 1.15; }
+    .korb-karte.gh-satz ~ .korb-reihe .korb-knopf .bild { font-size: 28px; }
+    /* Schritte ordnen (s6): Bild vor dem Anliegen statt darüber, leere Ablage niedriger — fünf Schritte ragten bis
+       74 px unter den Rand */
+    div:has(> .gh-ablauf) .gh-karte .gh-bild { display: inline; font-size: 30px; vertical-align: -4px; margin-right: 6px; }
+    div:has(> .gh-ablauf) .gh-karte { padding-block: 6px; }
+    div:has(> .gh-ablauf) > .ablage { min-height: 44px; padding: 4px; margin-bottom: 8px; }
+    .wahl.gh-ablauf { gap: 4px; }
+    /* Wer ist zuständig (s5): vier Stellen untereinander zu 79 px ragten 8 px unter den Rand — Bild links */
+    .gh ~ .wahl:not(.gh-ablauf):not(.gh-nummer):not(.gh-ebene) .wahl-knopf { flex-direction: row; min-height: 52px; gap: 8px; }
+    .gh ~ .wahl:not(.gh-ablauf):not(.gh-nummer):not(.gh-ebene) .wahl-knopf .bild { font-size: 28px; }
+  }
 </style>
 </head>
 <body>

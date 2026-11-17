@@ -40,9 +40,23 @@
     /* Leiter so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe = Höhe der Leiter, mal viewBox 320 × 345;
        vorher geschätzt 100vh − 490px, nach GR1 a falsch, LERN_Session45); Abschnitte bleiben über 44 px hoch */
     .ez-leiter { width: max(min(260px, 100%), min(100%, 400px, calc(var(--rest-h, 371px) * 320 / 345))); }
-    .wahl.ez-ordnen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .ez-ordnen .wahl-knopf { font-size: 16px; padding: 6px; }
-    .ez-ordnen .wahl-knopf .bild { font-size: 30px; }
+    /* Ordnen: eine Karte je Zeile, Bild links, Text und Zeit rechts — zu zweit nebeneinander brachen lange Ereignisse
+       in sechs, sieben Zeilen um, und die Aufgabe ragte auf 375 × 660 bis 129 px unter den Rand (LERN_Session46) */
+    .wahl.ez-ordnen { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .ez-ordnen .wahl-knopf { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 8px; align-items: center; justify-items: start;
+      text-align: left; font-size: 16px; line-height: 1.25; padding: 4px 10px; }
+    .ez-ordnen .wahl-knopf .bild { grid-row: span 2; font-size: 28px; }
+    /* Leiter: Frage 18 px (eine Zeile, 💡 steht bei der Erklärung), Karte und Erklärung enger — die Leiter steht an
+       ihrer Untergrenze, lange Ereignisse ragten bis 40 px darunter (LERN_Session46) */
+    .frage { font-size: 18px; margin-bottom: 4px; }
+    .ez-leiter-text .ez-ereignis { padding: 6px 10px; margin-bottom: 6px; font-size: 16px; line-height: 1.3; }
+    .ez-leiter-text .ez-ereignis .ez-bild { font-size: 26px; line-height: 1; }
+    .ez-leiter-text .ez-ereignis small { margin-top: 2px; font-size: 15px; }
+    .ez-erklaerung { font-size: 13px; line-height: 1.25; margin-bottom: 4px; }
+    .ez-leiter { margin-bottom: 0; }
+    /* Zeitalter: Bild links neben dem Ereignis (darüber ragten lange Ereignisse in s4 bis 22 px unter den Rand) */
+    .korb-karte { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 10px; text-align: left; }
+    .korb-karte .bild { font-size: 40px; }
     .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
     .korb-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .korb-reihe .korb-knopf { min-height: 80px; padding: 8px 6px; }
@@ -346,7 +360,8 @@ function zeigeLeiter(ctx, a) {
   // Ab 700 px Breite stehen Karte und Erklärung neben der Leiter (BH3 a).
   ctx.flaeche.append(el("div", { class: "frage", html: "Wo gehört das auf die <b>Erdzeit-Leiter</b>?" }),
     el("div", { class: "ez-leiter-zeile" }, el("div", { class: "ez-leiter-text" }, ereignisKarte(a.text, a.zahl),
-      el("div", { class: "ez-erklaerung", text: "Die Leiter ist gestaucht: Jede Sprosse liegt zehnmal so weit zurück wie die darunter." })), svg));
+      // 💡 bei der Erklärung (data-tipp-ziel): in der Frage brach sie auf dem Handy in zwei Zeilen um (LERN_Session46)
+      el("div", { class: "ez-erklaerung", "data-tipp-ziel": "", text: "Die Leiter ist gestaucht: Jede Sprosse liegt zehnmal so weit zurück wie die darunter." })), svg));
   const baender = [];
   for (let i = 0; i < 6; i++) {
     const unten = yVon(SPROSSEN[i]), oben = i === 5 ? yVon(ERDALTER) : yVon(SPROSSEN[i + 1]);

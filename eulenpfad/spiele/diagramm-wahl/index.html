@@ -76,6 +76,10 @@
     /* Fünf oder sechs Bildantworten (s1 „Wie kommen die meisten …“) in drei Spalten statt drei Reihen — die Aufgabe
        ragte 32 px unter den Rand (LERN-55, LERN_Session44) */
     div:has(> .dw) > .wahl:has(> :nth-child(5)):has(> .wahl-knopf > .bild) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    /* Bis vier Bildantworten (s1 „Welche Gruppe hat am wenigsten …“) mit Bild links neben dem Namen: zwei Reihen zu
+       79 px liessen die Aufgabe 15 px unter den Rand ragen (LERN-55, LERN_Session46) */
+    div:has(> .dw) > .wahl:not(:has(> :nth-child(5))) > .wahl-knopf:has(> .bild) { flex-direction: row; min-height: 48px; gap: 8px; }
+    div:has(> .dw) > .wahl:not(:has(> :nth-child(5))) > .wahl-knopf:has(> .bild) > .bild { font-size: 26px; }
     /* Tabelle zu drei Diagrammen (s5, Entscheid 1 a, LERN_Session44): Tabelle quer, Diagramme zum Blättern */
     .dw-tabelle.quer { width: 100%; table-layout: fixed; margin-bottom: 6px; }
     .dw-tabelle.quer caption { font-size: 15px; font-weight: 900; color: var(--text-leise); padding-bottom: 2px; }
@@ -105,6 +109,20 @@
   @media (min-width: 900px) and (orientation: landscape) {
     .dw-wahl-text:has(> :nth-child(4)) { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .dw-wahl-gross { max-width: none; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  /* Ab Tablet bis 1000 px Bildhöhe (Tablet hoch 768 × 950, quer 1024 × 690, Laptop 1366 × 650): Tabelle und Frage der
+     Stufe 5 nebeneinander statt untereinander — die drei Diagramme ragten bis 10 px unter den Rand (LERN-55,
+     LERN_Session46) */
+  @media (min-width: 561px) and (max-height: 1000px) {
+    .dw:has(> .dw-tabelle):not(:has(> .dw-diagramm)) { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 8px; }
+    .dw:has(> .dw-tabelle):not(:has(> .dw-diagramm)) > .dw-tabelle { margin: 0; }
+    .dw:has(> .dw-tabelle):not(:has(> .dw-diagramm)) > .frage { margin: 0; max-width: 420px; }
+  }
+  /* Ab Tablet bis 1000 px Bildhöhe: Tabelle zu den drei Diagrammen (s5) mit engeren Zeilen — mit sieben Zeilen ragten
+     die Diagramme auf dem Tablet hoch 55 px, auf dem Laptop 7 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (min-width: 561px) and (max-height: 1000px) {
+    .dw:not(:has(> .dw-diagramm)) > .dw-tabelle { font-size: 17px; line-height: 1.2; }
+    .dw:not(:has(> .dw-diagramm)) > .dw-tabelle th, .dw:not(:has(> .dw-diagramm)) > .dw-tabelle td { padding: 2px 8px; }
   }
 </style>
 </head>

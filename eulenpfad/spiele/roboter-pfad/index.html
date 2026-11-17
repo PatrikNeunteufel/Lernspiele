@@ -51,6 +51,21 @@
   @media not ((min-width: 900px) and (orientation: landscape)) {
     .rp-ansicht .rp-raster { max-width: min(400px, var(--rest-h, 400px)); min-width: 240px; margin-bottom: 8px; }
   }
+  /* Handy mit Browserleisten (375 × 660, LERN-55): Auftrag 18 px, Programm, Befehle und „Wenn“-Kasten enger; ein
+     Raster zum Antippen nach der restlichen Höhe, aber jedes Feld mindestens 44 px (--b Spalten, Randspalte 20 px,
+     Fuge 3 px). Vorher ragte „Bring den Roboter zum Stern“ (s5/s6) bis 78 px unter den Rand, das gezeigte Raster stand
+     schon an seiner Untergrenze 240 px. */
+  @media (max-width: 560px) and (max-height: 760px) {
+    .rp > .auftrag { font-size: 18px; margin: 0 0 4px; }
+    .rp-raster:has(button.rp-zelle) { max-width: max(calc(20px + var(--b, 6) * 47px), min(400px, var(--rest-h, 400px))); }
+    .rp-ansicht .rp-raster { margin-bottom: 4px; }
+    .rp-programm { min-height: 46px; margin-bottom: 4px; padding: 3px 4px; }
+    .rp-zeile { font-size: 15px; line-height: 1.2; margin-bottom: 4px; }
+    .rp-befehl { min-height: 46px; }
+    .rp-befehle { gap: 6px 8px; margin-bottom: 0; }
+    .rp-wenn { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 14px; font-size: 17px; line-height: 1.35; padding: 4px 10px; margin-bottom: 6px; }
+    .rp-wenn > div:first-child { flex-basis: 100%; text-align: center; }
+  }
   /* Breit und quer: Raster links, Auftrag, Programm und Befehle rechts */
   @media (min-width: 900px) and (orientation: landscape) {
     .rp { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 24px; align-items: start; align-content: start; }
@@ -371,7 +386,7 @@ function pruefeAufgabe(a, stufe) {
  * klick(x, y): Felder sind Knöpfe (Befolgen).
  */
 function raster(feld, zustand, klick) {
-  const r = el("div", { class: "rp-raster", style: `grid-template-columns: 20px repeat(${feld.b}, minmax(0, 1fr))` });
+  const r = el("div", { class: "rp-raster", style: `grid-template-columns: 20px repeat(${feld.b}, minmax(0, 1fr)); --b: ${feld.b}` });
   r.append(el("span"));
   for (let x = 0; x < feld.b; x++) r.append(el("span", { class: "rp-rand", text: SPALTEN[x] }));
   for (let y = 0; y < feld.h; y++) {

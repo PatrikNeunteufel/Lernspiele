@@ -54,6 +54,32 @@
     .gk-slots { margin: 2px 0 6px; }
     .gk-tasten { gap: 4px; }
   }
+  /* Handy mit Browserleisten (375 × 660, LERN-55): Scheibe über dem Wort, Wort und Felder in einer Zeile (bricht bei
+     langen Wörtern um), Tasten in drei Reihen wie die Buchstabentastatur des Handys (zehn Spalten, OK drei breit,
+     Tasten 44 px hoch), Schlüssel steht schon in der Mitte der Scheibe (🔑) — die Zeile darunter entfällt.
+     Vorher ragte die Aufgabe bis 100 px (s3) unter den Rand, die Scheibe stand schon an ihrer Untergrenze 190 px. */
+  @media (max-width: 560px) and (max-height: 760px) {
+    .frage { margin-bottom: 4px; }
+    .gk-anzeige { display: none; }
+    .gk-legende { font-size: 13px; line-height: 1.2; }
+    .gk-feld { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 10px; row-gap: 4px; }
+    .gk-feld > .gk-hilfe { order: -1; flex: 1 0 100%; }
+    .gk-feld > .gk-tasten { flex: 1 0 100%; }
+    .gk-feld .wortkarte { margin: 0; font-size: 28px; letter-spacing: .1em; }
+    .gk-feld .gk-slots { margin: 0 0 4px; gap: 4px; }
+    .gk-feld .gk-slots span { width: 30px; }
+    /* Sieben Buchstaben (GITARRE, ROBOTER …): enger, damit Wort und Felder noch in einer Zeile stehen */
+    .gk-feld:has(.gk-slots > :nth-child(7)) .wortkarte { font-size: 26px; letter-spacing: .06em; }
+    .gk-feld .gk-slots:has(> :nth-child(7)) { gap: 3px; }
+    .gk-feld .gk-slots:has(> :nth-child(7)) span { width: 26px; }
+    .gk-feld:has(.gk-slots > :nth-child(7)) { column-gap: 8px; }
+    .gk-tasten { grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: none; }
+    .gk-tasten button.gk-ok { grid-column: span 3; }
+    /* Schlüssel knacken (s5): die vier Schlüssel in einer Reihe, 🔑 neben der Zahl (vorher zwei Reihen, 57 px darunter) */
+    .wahl:has(.wahl-knopf .bild) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .wahl-knopf:has(.bild) { flex-direction: row; gap: 4px; padding: 6px 4px; }
+    .wahl-knopf:has(.bild) .bild { font-size: 24px; }
+  }
   /* Breit und quer: Scheibe links, Wort, Felder und Tasten rechts */
   @media (min-width: 900px) and (orientation: landscape) {
     .gk-feld { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "hilfe wort" "hilfe slots" "hilfe tasten";

@@ -32,6 +32,13 @@
   .sl-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; margin: -4px 0 10px; font-size: 16px; font-weight: 800; color: var(--text-leise); }
   .sl-notizen label { display: inline-flex; align-items: center; gap: 4px; }
   .sl-notizen .zw-notiz { font-size: 18px; min-height: 36px; }
+  /* Ganze Aufgabe im Bild (LERN-55): Handy Bild und Anzeige niedriger, Tastatur näher — die Sachaufgabe mit zwei
+     Notizen (s6) ragte auf 375 × 660 bis 32 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .sl-bild { font-size: 32px; line-height: 1.1; }
+    .ergebnis-zeile .anzeige { min-height: 50px; font-size: 28px; padding-block: 2px; }
+    .ergebnis-zeile ~ .tastatur { margin-top: 8px; }
+  }
 </style>
 </head>
 <body>

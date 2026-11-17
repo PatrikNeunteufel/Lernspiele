@@ -22,6 +22,20 @@
     .nacht { gap: 8px; padding: 8px 10px; }
     .nacht .bild { font-size: 30px; }
   }
+  /* Das Jahr einer Fledermaus (fünf Karten mit Sätzen ordnen) unter 820 px Bildhöhe: Karten mit 18 px Schrift und
+     engeren Zeilen (LERN-55: vorher auf dem Laptop 1366 × 650 bis 49 px, auf dem Handy 375 × 660 bis 105 px unter dem
+     Rand); auf dem Handy dazu Satz und leere Ablage niedriger. */
+  @media (max-height: 820px) {
+    div:has(> .ablage) > .nacht { margin-bottom: 8px; }
+    div:has(> .ablage) > .ablage { margin-bottom: 8px; }
+    div:has(> .ablage) > .wahl { gap: 8px; }
+    div:has(> .ablage) > .wahl .wahl-knopf { font-size: 18px; line-height: 1.25; padding: 6px 10px; }
+  }
+  @media (max-height: 820px) and (max-width: 560px) {
+    div:has(> .ablage) > .nacht .aussage { font-size: 18px; line-height: 1.25; }
+    div:has(> .ablage) > .ablage { min-height: 46px; }
+    div:has(> .ablage) > .wahl .wahl-knopf { font-size: 16px; min-height: 46px; padding: 5px 8px; }
+  }
   .wahl-knopf.ja { background: var(--gut-hell); }
   .wahl-knopf.nein { background: var(--taste-loeschen); }
 </style>

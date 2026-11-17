@@ -15,6 +15,14 @@
   .fh-ding .bild { font-size: clamp(40px, 9vw, 56px); line-height: 1.1; display: block; }
   .fh-ding.fh-luecke { border-style: dashed; color: var(--text-leise); min-width: 80px; }
   .fh-pfeil { font-size: 28px; color: var(--text-leise); font-weight: 900; }
+  /* Ganze Aufgabe im Bild (LERN-55): auf dem Handy Antworten mit Bild in einer Spalte, Bild links neben dem Namen —
+     mit dem Bild über dem Namen ragten vier Antworten auf 375 × 660 bis 34 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .wahl:has(> .wahl-knopf > .bild) { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .wahl > .wahl-knopf:has(> .bild) { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 10px; align-items: center; justify-items: start;
+      text-align: left; min-height: 52px; padding: 4px 12px; line-height: 1.2; }
+    .wahl > .wahl-knopf > .bild { font-size: 32px; margin: 0; }
+  }
 </style>
 </head>
 <body>

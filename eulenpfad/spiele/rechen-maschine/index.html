@@ -52,14 +52,34 @@
   .weiche > .m-kasten { justify-self: end; }
   .weiche > .w-frage { justify-self: start; }
   .weiche > .w-wege, .weiche > .w-runden, .weiche > .w-notizen { grid-column: 1 / -1; }
+  /* Mit Notizen stehen sie rechts neben den beiden Wegen, nicht in einer eigenen Zeile (LERN_Session46: Königsstufe auf
+     dem Tablet hoch bis 26 px, auf dem Handy bis 70 px über dem Rand): Wege unter Eingang und Pfeil, Notizen unter der Frage */
+  .weiche:has(> .w-notizen) > .w-wege { grid-row: 2; grid-column: 1 / 3; justify-self: end; }
+  .weiche > .w-notizen { grid-row: 2; grid-column: 3; justify-self: start; flex-direction: column; flex-wrap: nowrap; gap: 4px; }
+  .weiche:has(> .w-notizen) > .w-runden { grid-row: 3; }
   @media (max-width: 560px) {
+    /* Kette mit drei Kästen und Notizen (LERN_Session46): Kästen, Pfeile und Anzeige enger — die Kette brach in drei
+       Reihen um, die Anzeige lag unter der Zifferntastatur, die Aufgabe ragte bis 66 px über den Rand */
+    .maschine { gap: 4px; margin: 4px 0 8px; }
+    .m-kasten { font-size: 22px; padding: 3px 8px; min-width: 50px; border-width: 3px; border-radius: 14px; }
+    .m-kasten small { font-size: 11px; letter-spacing: 0; }
+    .m-pfeil { font-size: 22px; }
+    .m-pfeil-notiz .zw-notiz { font-size: 15px; min-height: 30px; padding: 1px 3px; }
+    .rm-anzeige { min-height: 50px; padding-block: 0; line-height: 1.2; }
     .weiche { grid-template-columns: auto auto minmax(0, 1fr); column-gap: 6px; }
     .weiche > .w-frage { padding: 6px 10px; justify-self: stretch; font-size: 19px; }
     .weiche .m-kasten { padding: 6px 12px; }
     /* Königsstufe mit Notizen (LERN_Session43): Frage über die ganze Restbreite, Hinweis kleiner, Anzeige niedriger —
        die Zifferntastatur lag sonst als Leiste über der Anzeige, die Aufgabe ragte bis 100 px unter den Rand */
     .weiche .w-runden { font-size: 15px; line-height: 1.3; }
-    .weiche ~ .rm-anzeige { min-height: 56px; }
+    .weiche ~ .rm-anzeige { min-height: 50px; }
+    /* Notizen neben den Wegen: die erste Spalte ist hier nur so breit wie der Eingang — beide über die ganze Breite,
+       Wege links, Notizen rechts */
+    .weiche:has(> .w-notizen) > .w-wege { grid-column: 1 / -1; justify-self: start; gap: 8px; }
+    .weiche > .w-notizen { grid-column: 1 / -1; justify-self: end; }
+    .weiche .w-weg b { font-size: 15px; }
+    .weiche > .w-frage { font-size: 17px; padding: 5px 8px; border-width: 3px; }
+    .weiche .w-runden { font-size: 14px; line-height: 1.2; }
     .weiche .w-notizen label { flex-direction: row; gap: 4px; font-size: 13px; }
     /* zweizeilig („nach / Runde 1“), sonst passen zwei Felder nicht in eine Zeile */
     .weiche .w-notizen label > span { max-width: 4.6em; line-height: 1.1; text-align: right; }

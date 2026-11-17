@@ -40,6 +40,31 @@
     .gk .wahl-knopf .bild { font-size: 28px; }
     .gk-merkmale { padding: 6px 12px; margin-bottom: 8px; line-height: 1.35; }
     .gk-merkmale li { padding: 2px 0; }
+    /* Sieben Textsorten (s5, s6) mit Bild links neben dem Namen: in vier Reihen zu 61 px ragten die drei Merkmale (s6)
+       bis 40 px unter den Rand (LERN-55, LERN_Session46) */
+    .gk .wahl-knopf:not(.gk-lang) { flex-direction: row; min-height: 44px; gap: 6px; }
+    .gk .wahl-knopf:not(.gk-lang) .bild { font-size: 24px; }
+    .gk .wahl:has(> :nth-child(5)) { gap: 6px; }
+    .gk .frage:has(+ .gk-merkmale) { margin-bottom: 4px; }
+    .gk-merkmale { margin-bottom: 6px; }
+    /* Merkmal-Karte (s4): fünf Körbe mit Bild links, Karte enger — in drei Reihen zu 96 px ragte die Aufgabe 77 px
+       unter den Rand */
+    .gk .korb-reihe { gap: 8px; }
+    .gk .korb-knopf { flex-direction: row; min-height: 52px; gap: 8px; padding-block: 4px; }
+    .gk .korb-knopf .bild { font-size: 28px; }
+    .gk .korb-karte { margin-bottom: 10px; padding-block: 6px; }
+    .gk .korb-karte .bild { font-size: 44px; }
+  }
+  /* Breit und niedrig (Laptop 1366 × 650): fünf Körbe in einer Reihe, Merkmal-Karte mit kleinerem Bild — die Körbe
+     standen 4 + 1 und ragten bis 34 px unter den Rand (s4, LERN-55, LERN_Session46) */
+  @media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+    .gk .korb-reihe:has(> :nth-child(5)) { max-width: none; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
+    .gk .korb-karte .bild { font-size: 56px; }
+    /* Sieben Textsorten (s5, s6) mit Bild links in zwei Reihen zu vier: drei lange Merkmale (s6) ragten 23 px unter
+       den Rand */
+    .gk .wahl:has(> :nth-child(5)) { max-width: none; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .gk .wahl:has(> :nth-child(5)) .wahl-knopf:not(.gk-lang) { flex-direction: row; min-height: 46px; gap: 6px; }
+    .gk .wahl:has(> :nth-child(5)) .wahl-knopf:not(.gk-lang) .bild { font-size: 26px; }
   }
 </style>
 </head>

@@ -24,6 +24,15 @@
   .nz-zeile { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 8px; margin: 0 0 8px;
     font-size: 15px; font-weight: 800; color: var(--text-leise); }
   .nz-zeile.nz-hinter { display: inline-flex; margin: 0 0 0 10px; vertical-align: middle; }
+  /* Ganze Aufgabe im Bild (LERN-55): auf dem Handy der Fahrer links neben der Frage (der Text fliesst herum), Tabelle
+     und Anzeige enger — die Anzeige lag unter der Zifferntastatur, die Aufgabe ragte 32 px über den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .fahrer { float: left; line-height: 1.1; margin: 0 6px 0 0; }
+    .fahrer + .frage { margin-bottom: 8px; }
+    .fahrer ~ .tabelle-rahmen { clear: both; }
+    .fahrer ~ .tabelle-rahmen .wertetabelle { margin-bottom: 6px; }
+    .fahrer ~ .anzeige { min-height: 56px; }
+  }
 </style>
 </head>
 <body>

@@ -10,7 +10,11 @@
 <style>
   .frage { text-align: center; font-size: clamp(19px, 4.2vw, 26px); font-weight: 800; margin: 0 0 8px; }
   .frage b { color: var(--knopf); }
-  .geo { display: block; width: 100%; max-width: 480px; margin: 0 auto; touch-action: manipulation; user-select: none; }
+  /* Figur nach der restlichen Höhe (LS.restHoehe; Breite aus der Höhe über die viewBox 300 × 240), höchstens 480 px,
+     mindestens 260 px, damit Linien und Punkte antippbar bleiben (LERN-55: vorher auf dem Laptop 1366 × 650 bis 40 px
+     unter dem Rand) */
+  .geo { display: block; width: max(min(260px, 100%), min(480px, 100%, calc(var(--rest-h, 384px) * 300 / 240))); margin: 0 auto;
+    touch-action: manipulation; user-select: none; }
   .geo .flaeche { fill: color-mix(in srgb, var(--deko-6) 10%, var(--k-feld)); stroke: none; }
   .geo .umriss { fill: color-mix(in srgb, var(--deko-6) 10%, var(--k-feld)); stroke: var(--text); stroke-width: 4; stroke-linejoin: round; }
   .geo .kreis { fill: color-mix(in srgb, var(--deko-6) 10%, var(--k-feld)); stroke: var(--text); stroke-width: 4; }
@@ -623,7 +627,7 @@ LS.spiel({
     // Antwort mit Knöpfen
     if (["lage", "benennen", "symbol", "diagEigenschaft"].includes(a.art)) {
       const { svg } = bildEl(a, () => {});
-      f.append(svg);
+      f.append(LS.restHoehe(svg)); // Grösse nach der restlichen Höhe (LERN-55)
       const optionen = a.art === "lage" ? ["parallel", "senkrecht", "weder"] : a.art === "benennen" ? ["seite", "diagonale", "radius", "durchmesser"]
         : a.art === "symbol" ? ["recht", "parallel"] : ["ja", "nein"];
       const name = o => (a.art === "lage" ? LAGE_ANTWORT[o] : a.art === "benennen" ? ROLLE_NAME[o] : a.art === "symbol" ? SYMBOL_NAME[o] : o);
@@ -656,7 +660,7 @@ LS.spiel({
       ctx.falsch(hinweis, loesungText);
       if (ctx.vorbei()) zeigeLoesung();
     });
-    f.append(svg);
+    f.append(LS.restHoehe(svg)); // Grösse nach der restlichen Höhe (LERN-55)
     if (mehrere) {
       const fertig = el("button", { type: "button", class: "knopf gruen", text: "Fertig ✓" });
       fertig.addEventListener("click", () => {

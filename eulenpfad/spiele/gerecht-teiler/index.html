@@ -43,6 +43,15 @@
     .teiler-knoepfe { margin-top: 8px; }
   }
   .teiler-knoepfe .zuege { margin: 0; align-self: center; }
+  /* Handy (LERN-55): vier Dinge in einer Reihe auf dem Teller (je 3 px über den durchsichtigen Rand des Nachbarn, die
+     Dinge bleiben 42 px gross), Schale und Knöpfe niedriger — mit drei Reihen ragte die Königsstufe (vier Teller und
+     Schale) bis 84 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .tisch:not(.gross):not(.mittel) .ding { margin: 0 -3px; }
+    .teller.schale { flex-basis: 240px; min-height: 68px; padding: 8px 16px 12px; } /* fünf Dinge in einer Reihe */
+    .teiler-knoepfe { margin-top: 6px; }
+    .teiler-knoepfe .knopf { min-height: 52px; font-size: 26px; }
+  }
 </style>
 </head>
 <body>

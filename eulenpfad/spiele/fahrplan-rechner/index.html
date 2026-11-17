@@ -21,12 +21,15 @@
   .fahrplan td.mittel { font-size: 1.2em; padding: 2px 6px; }
   .fahrplan tr.umsteigen td { background: color-mix(in srgb, var(--deko-2) 16%, var(--k-feld)); }
   .fahrplan caption { font-weight: 800; color: var(--deko-2-schrift); padding-bottom: 4px; }
+  .fahrplan.tafel th { text-align: left; }
   .fp-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 8px; }
   .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
   .ergebnis-zeile .anzeige { flex: 1; }
   .anzeige.fr-dauer.leer::after { content: "? h ? min"; }
   .ergebnis-zeile .einheit { font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: var(--knopf); min-width: 1.6em; }
   .fr-beispiel { text-align: center; font-size: 15px; color: var(--text-leise); font-weight: 700; margin: 4px 0 8px; }
+  .ergebnis-zeile:has(> .fr-beispiel) { flex-wrap: wrap; row-gap: 0; }
+  .ergebnis-zeile > .fr-beispiel { flex-basis: 100%; }
   .wahl-knopf { font-variant-numeric: tabular-nums; }
   /* Notizen (NZ1 a): Spalte im Fahrplan und eine Zeile unter der Aufgabe */
   .fahrplan .nz-spalte { background: var(--papier-hell); padding: 1px 4px; }
@@ -45,6 +48,25 @@
     .nz-umbruch > .nz-zeile { flex-basis: 100%; justify-content: center; }
     /* Zeilen enger: lange Fahrpläne ragten mit der Tastatur bis 20 px unter den Rand (LERN_Session43) */
     .fahrplan th, .fahrplan td { padding-block: 4px; }
+    /* Züge zur Wahl (rückwärts planen): Bild neben der Zeit, die Knöpfe niedriger (LERN_Session46) */
+    .fp-rahmen ~ .wahl .wahl-knopf { flex-direction: row; gap: 8px; min-height: 54px; }
+    /* Lange Fahrpläne mit Zifferntastatur (LERN_Session46: bis 75 px über dem Rand): Beispiel neben der Anzeige, Anzeige
+       56 px, Zeilen und Notizfelder enger */
+    .frage { margin-bottom: 6px; }
+    .fahrplan { margin: 2px auto 6px; }
+    .fahrplan th, .fahrplan td { padding-block: 2px; }
+    .fahrplan .zw-notiz, .nz-legende .zw-notiz { min-height: 24px; }
+    .fp-legende { margin: -2px 0 4px; }
+    .ergebnis-zeile .anzeige { min-height: 50px; padding-block: 0; line-height: 1.2; }
+    .ergebnis-zeile > .fr-beispiel { flex: 0 1 8.5em; margin: 0; text-align: left; font-size: 14px; line-height: 1.25; }
+  }
+  /* Tablet hoch: lange Fahrpläne mit Zifferntastatur ragten bis 39 px über den Rand (LERN_Session46) — Zeilen, Anzeige
+     und Abstände enger */
+  @media (min-width: 561px) and (orientation: portrait) {
+    .frage { margin-bottom: 6px; }
+    .fahrplan th, .fahrplan td { padding-block: 3px; }
+    .ergebnis-zeile .anzeige { min-height: 64px; padding-block: 0; line-height: 1.15; }
+    .ergebnis-zeile > .fr-beispiel { margin: 2px 0 4px; }
   }
   .nz-legende { white-space: nowrap; }
   .nz-legende .zw-notiz { font-size: 15px; min-height: 28px; padding: 0 3px; }
@@ -358,11 +380,14 @@ function fahrplanEl(a, teilzeit = false) {
   return a.linie ? [box] : [box, el("div", { class: "fp-legende", text: "Farbige Zeile: hier umsteigen" })];
 }
 
-/** Abfahrtstafel: ab (und an) je Zug. */
+/**
+ * Abfahrtstafel: die Züge nebeneinander, eine Zeile ab (und eine an) — wie ein Taktfahrplan. Untereinander (eine Zeile
+ * je Zug) ragte die Aufgabe auf Handy, Tablet hoch und Laptop bis 82 px unter den Rand (LERN-55, LERN_Session46).
+ */
 function tafelEl(a, mitAnkunft) {
-  const zeilen = [el("tr", {}, el("th", { text: `ab ${a.von}` }), ...(mitAnkunft ? [el("th", { text: `an ${a.nach}` })] : []))];
-  for (const t of a.abfahrten) zeilen.push(el("tr", {}, el("td", { text: uhr(t) }), ...(mitAnkunft ? [el("td", { text: uhr(t + a.f) })] : [])));
-  return el("div", { class: "fp-rahmen" }, el("table", { class: "fahrplan" }, el("caption", { text: `🚆 Zug nach ${a.nach}` }), ...zeilen));
+  const zeile = (kopf, zeiten) => el("tr", {}, el("th", { text: kopf }), ...zeiten.map(t => el("td", { text: uhr(t) })));
+  return el("div", { class: "fp-rahmen" }, el("table", { class: "fahrplan tafel" }, el("caption", { text: `🚆 Zug nach ${a.nach}` }),
+    zeile(`ab ${a.von}`, a.abfahrten), ...(mitAnkunft ? [zeile(`an ${a.nach}`, a.abfahrten.map(t => t + a.f))] : [])));
 }
 
 /** Text der Aufgabe (Frage) und die Antwort als Text (für den Lösungssatz). */
@@ -569,11 +594,12 @@ function eingabe(ctx, a, loesung, notiz = null) {
   // Bemerkung 11 (LERN_Session16): Bei einer Dauer zeigt die leere Anzeige „? h ? min“, damit klar ist, in welcher Form
   // die Antwort verlangt ist (zweifach benannt, MA.3.A.2.h) — nicht als Minuten allein
   const anzeige = el("div", { class: `anzeige leer${typ === "dauer" ? " fr-dauer" : ""}`, "aria-label": typ === "uhrzeit" ? "Uhrzeit" : typ === "dauer" ? "Zeitdauer in Stunden und Minuten" : "Zeitdauer" });
-  // Eine Dauer („2 h 47 min“) braucht die ganze Breite: auf dem Handy stehen die Notizen dann darüber
-  ctx.flaeche.append(el("div", { class: `ergebnis-zeile${notiz && typ === "dauer" ? " nz-umbruch" : ""}` }, ...(notiz ? [notiz] : []), anzeige, ...(einheit ? [el("span", { class: "einheit", text: einheit })] : [])));
   const tipp = tippBeispiel(a);
+  // Eine Dauer („2 h 47 min“) braucht die ganze Breite: auf dem Handy stehen die Notizen dann darüber.
+  // Das Beispiel steht in der Zeile der Anzeige: breit darunter, auf dem Handy daneben (LERN-55, LERN_Session46);
   // eigene Klasse: „tipp-zeile“ gehört dem Rahmen (💡 Tipp, LERN_Session9)
-  if (tipp) ctx.flaeche.append(el("div", { class: "fr-beispiel", text: tipp }));
+  ctx.flaeche.append(el("div", { class: `ergebnis-zeile${notiz && typ === "dauer" ? " nz-umbruch" : ""}` }, ...(notiz ? [notiz] : []), anzeige,
+    ...(einheit ? [el("span", { class: "einheit", text: einheit })] : []), ...(tipp ? [el("div", { class: "fr-beispiel", text: tipp })] : [])));
   ctx.schritte(typ === "dauer" ? LS.tippSchritte(ziffernDauer(a.loesung))
     : typ === "uhrzeit" ? LS.tippSchritte(ziffernUhr(a.loesung))
     : typ === "dezimal" ? LS.tippSchritte(a.loesung / 100) : LS.tippSchritte(a.loesung));

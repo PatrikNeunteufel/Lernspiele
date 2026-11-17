@@ -23,6 +23,14 @@
   .sonne { font-size: 40px; }
   .planet-knopf { display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .planet-knopf i { display: block; border-radius: 50%; }
+  /* Handy (LERN-55): Reihenfolgen mit sieben oder mehr Teilen — die Mondbilder in vier, die Planeten in drei Spalten
+     statt zwei (vorher ragten sie auf 375 × 660 bis 42 px unter den Rand) */
+  @media (max-width: 560px) {
+    .optionen:has(> :nth-child(7)) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .optionen:has(> .mond:nth-child(7)) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .optionen:has(> :nth-child(7)) .option { padding: 6px 4px; }
+    .optionen:has(> :nth-child(7)) .option:not(.mond) { font-size: 17px; }
+  }
 </style>
 </head>
 <body>

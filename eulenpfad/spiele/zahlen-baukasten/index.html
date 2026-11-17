@@ -57,8 +57,9 @@
   .mini-tabelle .z { background: var(--feld-leise); font-size: 26px; min-height: 42px; color: var(--f); }
 
   /* Ganze Aufgabe im Bild (BH3 a): auf dem Handy und auf niedrigen Bildschirmen kleinere Bausteine, damit
-     auch fünf oder sechs in zwei, drei Reihen über der Tastatur Platz haben */
-  @media (max-width: 560px), (max-height: 820px) {
+     auch fünf oder sechs in zwei, drei Reihen über der Tastatur Platz haben. Dazu Tablet hoch bis 1000 px (sichtbare
+     Fläche 768 × 950): sechs Bausteine ragten dort 65 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (max-width: 560px), (max-height: 820px), (orientation: portrait) and (max-height: 1000px) {
     .bausteine { gap: 6px 4px; margin-bottom: 6px; }
     .baustein { min-width: 0; min-height: 44px; padding: 6px 10px; font-size: clamp(22px, 6vw, 30px); border-radius: 14px; box-shadow: 0 4px 0 rgba(0, 0, 0, .18); }
     .baustein.lang { font-size: 16px; }
@@ -75,6 +76,17 @@
     /* ausgeschriebene Bausteine („14 Hunderttausender“) in drei Reihen: noch 11 px darüber (LERN_Session44) */
     .bausteine:has(.lang) { gap: 4px; margin-bottom: 2px; }
     .bausteine:has(.lang) + .anzeige { min-height: 48px; }
+  }
+  /* Handy: sechs ausgeschriebene Bausteine (s6) in drei Reihen ragten noch 27 px unter den Rand — Auftrag in einer
+     Zeile, Tastatur näher (LERN-55, LERN_Session46) */
+  @media (max-width: 560px) {
+    div:has(> .bausteine .lang) > .auftrag { font-size: 17px; }
+    div:has(> .bausteine .lang) > .tastatur { margin-top: 6px; }
+    /* vier Reihen ausgeschriebener Bausteine: noch 29 px — Anzeige und Stellentafel flacher */
+    div:has(> .bausteine .lang) > .anzeige { font-size: 30px; padding-block: 0; margin-block: 2px; }
+    div:has(> .bausteine .lang) > .mini-tabelle { margin-top: 2px; }
+    div:has(> .bausteine .lang) > .mini-tabelle .k { padding: 1px 0; font-size: 14px; }
+    div:has(> .bausteine .lang) > .mini-tabelle .z { min-height: 30px; font-size: 22px; padding: 0; }
   }
 </style>
 </head>

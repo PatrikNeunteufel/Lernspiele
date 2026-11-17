@@ -35,6 +35,13 @@
   @media (max-width: 560px) {
     .seite .zehnerfeld { grid-template-columns: repeat(5, 18px); gap: 4px; padding: 6px; }
     .seite .zehnerfeld i { width: 18px; height: 18px; border-width: 2px; }
+    /* Stufe 6 (bis 1000): Platten mit 6-px-Feldern, damit vier in eine Reihe passen; die Stange so lang wie die Seite
+       der Platte (wie im Material). Vorher drei Platten je Reihe, bei 9xx vier Reihen — die Antworten lagen bis 99 px
+       unter dem Rand (LERN-55, LERN_Session46) */
+    .platte { grid-template-columns: repeat(10, 6px); }
+    .platte i { width: 6px; height: 6px; }
+    .stange { grid-template-rows: repeat(10, 6px); }
+    .stange i { height: 6px; }
   }
 </style>
 </head>
@@ -213,7 +220,8 @@ LS.spiel({
     // Mit Pfeil, damit auch Kinder antworten können, die noch nicht lesen (LERN_Session8)
     const name = { links: { bild: "⬅️", text: "Links" }, rechts: { bild: "➡️", text: "Rechts" }, gleich: { bild: "🟰", text: "Gleich viele" } };
     LS.auswahl(ctx, {
-      optionen: a.optionen, richtig: a.richtig, breite: a.art === "vergleich" || a.art === "gerade" ? 130 : 90,
+      // Zahlen 76 px: vier Antworten in einer Reihe auch auf dem Handy (mit 90 px drei und eine zweite Reihe, LERN_Session46)
+      optionen: a.optionen, richtig: a.richtig, breite: a.art === "vergleich" || a.art === "gerade" ? 130 : 76,
       inhalt: o => (typeof o === "number" ? zahlText(o) : name[o] || o),
       hinweis,
       loesung: a.art === "vergleich" ? `Links ${a.a}, rechts ${a.b}.` : a.art === "gerade" ? `${a.n} ist ${a.richtig}.` : `Es sind ${zahlText(a.n)}.`,

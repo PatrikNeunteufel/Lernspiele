@@ -88,6 +88,33 @@
     .zwei .daten.quer .q-striche svg { display: inline-block; height: 22px; vertical-align: middle; }
     .zwei .diagramm { width: max(min(200px, 100%), min(100%, 250px, calc(var(--rest-h, 209px) * 1.2))); }
     .frage { font-size: 18px; }
+    /* Mit Zifferntastatur (LERN_Session46: bis 59 px über dem Rand, das Diagramm steht an der Untergrenze 220 px):
+       Tabelle allein mit engeren Zeilen, Anzeige 50 px, die Frage links neben der Anzeige */
+    .dd-zeile:has(~ .tastatur) { row-gap: 6px; }
+    .dd-zeile:has(~ .tastatur) .dd-antwort > .frage { font-size: 17px; line-height: 1.25; }
+    .dd-zeile:has(~ .tastatur) .daten:not(.quer) { font-size: 17px; }
+    .dd-zeile:has(~ .tastatur) .daten:not(.quer) :is(th, td) { padding-block: 1px; }
+    .dd-antwort .anzeige.dd-anzeige { min-height: 50px; padding-block: 0; line-height: 1.2; }
+    .dd-antwort:has(> .dd-anzeige) { display: grid; grid-template-columns: minmax(0, 1fr) 96px; align-items: center; column-gap: 8px; }
+    .dd-antwort:has(> .dd-anzeige) > .frage { margin: 0; text-align: left; font-size: 17px; line-height: 1.25; }
+    .dd-antwort > .dd-anzeige { margin-top: 0; }
+    /* Diagramm mit Notiz (Durchschnitt): ein Raster über Daten und Antwort — Notiz rechts neben dem Diagramm, Frage
+       links neben der Anzeige (die Hüllen dazwischen mit display: contents) */
+    .dd-zeile:has(> .dd-daten > .diagramm):has(.nz-antwort) { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 4px 8px; align-items: center; }
+    .dd-zeile:has(> .dd-daten > .diagramm):has(.nz-antwort) :is(.dd-daten, .dd-antwort, .nz-antwort) { display: contents; }
+    .dd-zeile:has(> .dd-daten > .diagramm):has(.nz-antwort) .titel { grid-row: 1; grid-column: 1 / -1; }
+    .dd-zeile:has(.nz-antwort) > .dd-daten > .diagramm { grid-row: 2; grid-column: 1; justify-self: center; }
+    .dd-zeile:has(> .dd-daten > .diagramm) .nz-antwort > .nz-zeile { grid-row: 2; grid-column: 2; align-self: end; }
+    .dd-zeile:has(> .dd-daten > .diagramm):has(.nz-antwort) .dd-antwort > .frage { grid-row: 3; grid-column: 1; margin: 0; text-align: left; font-size: 17px; line-height: 1.25; }
+    .dd-zeile:has(> .dd-daten > .diagramm) .nz-antwort > .anzeige { grid-row: 3; grid-column: 2; margin: 0; }
+    /* Tabelle quer, Diagramm und Antworten (Säule falsch gezeichnet, bis 56 px über dem Rand): die Frage rechts neben
+       dem Diagramm (es steht an der Untergrenze 200 px, daneben blieben 135 px leer), die Antworten darunter */
+    .dd-raster:has(.dd-antwort > .wahl) { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 6px 8px; align-items: center; }
+    .dd-raster:has(.dd-antwort > .wahl) :is(.dd-daten, .zwei, .dd-antwort) { display: contents; }
+    .dd-raster:has(.dd-antwort > .wahl) .daten.quer { grid-row: 1; grid-column: 1 / -1; }
+    .dd-raster:has(.dd-antwort > .wahl) .zwei > .diagramm { grid-row: 2; grid-column: 1; width: 200px; }
+    .dd-raster:has(.dd-antwort > .wahl) .dd-antwort > .frage { grid-row: 2; grid-column: 2; margin: 0; text-align: left; font-size: 16px; line-height: 1.2; }
+    .dd-raster:has(.dd-antwort > .wahl) .dd-antwort > .wahl { grid-row: 3; grid-column: 1 / -1; width: 100%; }
   }
   @media (min-width: 700px) {
     /* Ohne Zifferntastatur (Tablet hoch und quer): links Tabelle oder Strichliste, rechts das Diagramm, darunter Frage und
@@ -534,7 +561,9 @@ LS.spiel({
       if (a.optionen || ["ergaenzen", "uebertragen", "fehlendTotal"].includes(a.art)) zeile.classList.add("dd-raster");
       daten.append(el("div", { class: "zwei" }, links, diagramm(a, werte, a.art === "vergleich" ? {} : { leer: a.i, onTipp: v => tipp(v) })));
     }
-    antwort.append(el("div", { class: "frage", text: a.frage }));
+    // Auf dem Handy 💡 in die Frage (data-tipp-ziel): oben rechts in der Spielfläche machte er Daten und Antworten um
+    // seine Breite schmaler (LERN_Session46: Säule falsch gezeichnet bis 44 px über dem Rand)
+    antwort.append(el("div", { class: "frage", text: a.frage, ...(window.matchMedia?.(HANDY).matches ? { "data-tipp-ziel": "" } : {}) }));
     // Notizen (NZ1 a): ein Feld für die Summe — neben der Antwort (Tastatur) oder unter der Frage (Säule antippen);
     // nach Stufe ab s5 (mehrere Werte bis 100 zusammenzählen)
     const NOTIZ = { total: "Zwischensumme", durchschnitt: "Summe", fehlendTotal: "Säulen zusammen" }[a.art];

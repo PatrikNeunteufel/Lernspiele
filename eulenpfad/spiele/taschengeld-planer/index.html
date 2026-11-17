@@ -48,6 +48,24 @@
     .tg-karte { margin-bottom: 8px; }
     .tg-zeile { padding-block: 2px; line-height: 1.2; }
   }
+  /* Handy mit Browserleisten (375 × 660, LERN-55): Karte, Zeilen und Anzeige enger, damit die Anzeige über der
+     Zifferntastatur steht (vorher s2/s5 bis 55 px darunter); beim Angebote-Vergleich (s6) beide Angebote nebeneinander
+     und die drei Antworten in einer Reihe (vorher bis 47 px darunter). */
+  @media (max-width: 560px) and (max-height: 760px) {
+    .frage { margin-bottom: 4px; }
+    .tg-karte { padding: 6px 10px; margin-bottom: 6px; font-size: 16px; }
+    .tg-budget { margin-bottom: 2px; font-size: 18px; }
+    .tg-titel { margin: 2px 0 0; }
+    .tg-zeile { padding-block: 1px; }
+    .tg-zeile .tg-bild { font-size: 1.25em; }
+    div.tg-status { margin-bottom: 4px; line-height: 1.2; font-size: 15px; } /* div.: die Grundregel steht weiter unten */
+    .anzeige, .tg-eingabe .anzeige { min-height: 50px; }
+    .tg-angebote { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+    .tg-angebot { padding: 6px; font-size: 16px; }
+    .tg-angebote + .wahl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .tg-angebote + .wahl .wahl-knopf { font-size: 16px; padding: 6px 4px; }
+    .tg-angebote + .wahl .wahl-knopf .bild { font-size: 26px; }
+  }
   .tg-status { text-align: center; font-weight: 800; color: var(--text-leise); margin: 0 0 6px; }
   .tg-pruefen { display: block; margin: 0 auto; }
   .tg-pruefen:disabled { opacity: .45; }

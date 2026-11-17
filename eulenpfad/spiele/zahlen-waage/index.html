@@ -21,6 +21,17 @@
   .waage-notiz { position: absolute; left: 0; top: 136px; width: calc(50% - 40px); display: flex; align-items: center; justify-content: center;
     gap: 6px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
   .waage-notiz .zw-notiz { font-size: 17px; min-height: 34px; }
+  /* Ganze Aufgabe im Bild (LERN-55): Handy Waage 24 px niedriger (über dem Balken blieb auch bei voller Neigung Platz
+     frei) und Anzeige 50 px hoch — vorher ragte die Aufgabe auf 375 × 660 in allen Stufen 49 px unter den Rand
+     (LERN_Session46) */
+  @media (max-width: 560px) {
+    .waage { height: 166px; }
+    .balken { top: 66px; }
+    .fuss { top: 71px; }
+    .waage-notiz { top: 112px; }
+    .gleich { margin-bottom: 6px; }
+    .gleich ~ .anzeige { min-height: 50px; font-size: 28px; padding-block: 2px; }
+  }
 </style>
 </head>
 <body>

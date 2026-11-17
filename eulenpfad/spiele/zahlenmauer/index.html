@@ -37,6 +37,24 @@
     .mauer.fuenf .reihe { gap: 4px; }
     .mauer.fuenf .stein { height: 44px; }
   }
+  /* Hoch (Handy, Tablet): Hinweis links und Anzeige rechts neben der Spitze der Mauer statt darunter — neben den
+     beiden obersten Reihen ist Platz frei; untereinander ragte die Aufgabe auf 375 × 660 bis 90 px, auf 768 × 950
+     bis 47 px unter den Rand (LERN_Session46). --ecke = Platz neben der zweitobersten Reihe (zwei Steine). Quer ab
+     900 px steht die Tastatur rechts, dort bleibt alles untereinander. */
+  @media not ((min-width: 900px) and (orientation: landscape)) {
+    div:has(> .mauer) { --stein-b: clamp(64px, 17vw, 108px); display: grid; grid-template-columns: minmax(0, 1fr); }
+    div:has(> .mauer.fuenf) { --stein-b: clamp(52px, 15vw, 96px); }
+    div:has(> .mauer) > * { grid-column: 1; }
+    div:has(> .mauer) > .tastatur { width: 100%; box-sizing: border-box; }
+    div:has(> .mauer) > .mauer, div:has(> .mauer) > .hinweis-klein, div:has(> .mauer) > .anzeige { grid-row: 1; }
+    div:has(> .mauer) > .hinweis-klein, div:has(> .mauer) > .anzeige { --ecke: calc((100% - 2 * var(--stein-b) - 6px) / 2 - 8px); }
+    div:has(> .mauer) > .hinweis-klein { justify-self: start; align-self: start; width: var(--ecke); margin: 4px 0 0; text-align: left; line-height: 1.25; }
+    div:has(> .mauer) > .anzeige { justify-self: end; align-self: start; width: var(--ecke); margin-top: 4px; box-sizing: border-box; }
+  }
+  @media (max-width: 560px) {
+    div:has(> .mauer) > .hinweis-klein { font-size: 14px; line-height: 1.2; }
+    div:has(> .mauer) > .anzeige { min-height: 52px; font-size: 28px; padding: 2px 6px; border-width: 3px; }
+  }
 </style>
 </head>
 <body>

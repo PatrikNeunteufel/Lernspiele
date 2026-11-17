@@ -22,10 +22,14 @@
     div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .frage { grid-column: 2; margin-top: 4px; }
     div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .wahl { grid-column: 2; }
   }
+  /* LERN_Session46: auf 375 × 660 ragten lange Texte noch bis 54 px darunter — Text 16 px, Titel 18 px, Satz-Antworten
+     46 px wie die Knöpfe des Rahmens unter 700 px, engere Abstände */
   @media (max-width: 560px) {
-    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .sachtext { font-size: 17px; line-height: 1.45; padding: 10px 14px; margin-bottom: 10px; }
-    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .frage { margin-bottom: 8px; font-size: 18px; line-height: 1.25; }
-    .wahl-knopf.satz { min-height: 52px; padding-block: 6px; line-height: 1.25; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .sachtext { font-size: 16px; line-height: 1.4; padding: 8px 12px; margin-bottom: 6px; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .sachtext h2 { font-size: 18px; margin-bottom: 2px; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .frage { margin-bottom: 6px; font-size: 18px; line-height: 1.25; }
+    div:has(> .sachtext:not(.gross) ~ .wahl .satz) > .wahl { gap: 6px; }
+    .wahl-knopf.satz { min-height: 46px; padding-block: 4px; line-height: 1.25; }
   }
 </style>
 </head>

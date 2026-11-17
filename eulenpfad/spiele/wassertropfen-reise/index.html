@@ -43,8 +43,16 @@
   }
   @media (max-width: 560px) {
     .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc(var(--rest-h, 202px) * var(--wt-verh)))); }
-    .wt-rechts .wahl-knopf { min-height: 50px; }
-    .wt-rechts .ablage { min-height: 50px; margin-bottom: 8px; padding: 4px; }
+    /* Reise mit fünf oder sechs Stationen (LERN_Session46: bis 65 px über dem Rand, die Grafik steht an der Untergrenze):
+       Frage, Ablage und Stationen enger, Knöpfe 46 px */
+    .wt-zeile .wt-grafik { margin-bottom: 4px; }
+    .wt-rechts .frage { font-size: 17px; line-height: 1.2; margin-bottom: 4px; }
+    .wt-rechts .wahl { gap: 5px; }
+    .wt-rechts .wahl-knopf { min-height: 46px; }
+    .wt-rechts .ablage { min-height: 46px; margin-bottom: 5px; padding: 4px; }
+    /* Kläranlage der Reihe nach (Stufe 5, bis 12 px über dem Rand): Bild links neben der Frage */
+    .frage-bild:has(+ .frage + .ablage) { float: left; margin: 0 6px 0 0; font-size: 40px; }
+    .frage-bild + .frage + .ablage { clear: both; }
     .wt-rechts .wahl-knopf { flex-direction: row; gap: 6px; }
     .wt-rechts .wahl-knopf .bild { font-size: 30px; }
   }

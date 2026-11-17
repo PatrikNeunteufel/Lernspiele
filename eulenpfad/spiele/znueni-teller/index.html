@@ -25,6 +25,15 @@
     .korb-reihe { gap: 8px; }
     .korb-knopf .bild { font-size: 28px; }
   }
+  /* Sichtbare Fläche (LERN_Session46): alle sechs Gruppen (s6) ragten auf dem Handy 375×660 44–53 px, auf dem Laptop
+     1366×650 26 px unter den Rand — Handy drei Körbe je Reihe statt zwei, breit alle sechs in einer Reihe */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .korb-reihe:has(> :nth-child(5)) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .korb-reihe:has(> :nth-child(5)) .korb-knopf { font-size: 15px; padding: 6px 4px; min-height: 80px; overflow-wrap: anywhere; }
+  }
+  @media (min-width: 900px) and (max-height: 820px) {
+    .korb-reihe:has(> :nth-child(6)) { max-width: 960px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  }
 </style>
 </head>
 <body>

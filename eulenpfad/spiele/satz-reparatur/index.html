@@ -26,6 +26,13 @@
   .zeichen.fehler { border-color: var(--hinweis); }
   /* früher .tipp-zeile — die Klasse gehört seit LERN_Session9 dem Rahmen (💡 Tipp) */
   .sr-anleitung { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 8px; }
+  /* Ganze Aufgabe im Bild (LERN-55): auf dem Handy Wörter etwas kleiner und enger (Knöpfe 46 px hoch) — drei Sätze der
+     Königsstufe ragten bis 29 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .satz { gap: 6px; margin: 4px 0 10px; }
+    .wort { min-height: 46px; padding: 5px 9px; font-size: 21px; }
+    .zeichen { width: 42px; height: 46px; font-size: 30px; }
+  }
 </style>
 </head>
 <body>

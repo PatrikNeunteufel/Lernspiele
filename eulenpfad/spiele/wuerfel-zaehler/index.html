@@ -41,6 +41,20 @@
     .wz-bau:has(> .wz-geb:nth-child(2)) > .wz-geb { flex: 1 1 0; min-width: 0; }
     .wz-geb svg { max-width: 100%; }
     .wz-felder { --wz-feld: 46px; gap: 5px; }
+    /* Links, Gleich viele, Rechts in einer Reihe statt 2 + 1: zwei Gebäude mit Bauplan (s3) ragten bis 32 px unter den
+       Rand (LERN-55, LERN_Session46) */
+    .wz-wahl:has(> :nth-child(3)):not(:has(> :nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .wz-wahl .wahl-knopf { padding-inline: 4px; line-height: 1.15; }
+    .wz-wahl .wahl-knopf .bild { font-size: 30px; }
+  }
+  /* Kiste füllen (s5) mit Zifferntastatur: Anzeige niedriger, Tastatur näher — ragte auf dem Handy bis 31 px, auf dem
+     Laptop 9 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (max-width: 560px), (max-height: 700px) {
+    .wz .anzeige { min-height: 54px; font-size: 34px; padding-block: 2px; margin-bottom: 6px; }
+    .wz > .tastatur { margin-top: 6px; }
+    .wz-mass { margin-bottom: 6px; }
+    .wz .frage { margin-bottom: 6px; }
+    .wz-bau { margin-bottom: 6px; }
   }
 </style>
 </head>

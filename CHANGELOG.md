@@ -2668,3 +2668,38 @@
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session45_2026-11-16.md`, Handover nachgeführt (Haltepunkt
   aufgelöst; gepusht bis `74d99fc` ohne vollen Lauf nach GR1 a und Baustein; weiter mit vollem Lauf, Vollbild prüfen,
   Rest je Spiel).
+
+## 2026-11-17 — LERN_Session46
+- Voller Eulenpfad-Lauf auf `bde136d` (nach GR1 a und Baustein „restliche Höhe“): „Keine Fehler.“ (3587 s).
+- Ganze Aufgabe im Bild (LERN-55), Rest je Spiel: 62 Spiele in fünf Gruppen (Agenten, je eigener Server und
+  Messbrowser, alle Stufen mit fünf Ziehungen vorher und nachher), nur die Spielseiten geändert, Inhalt und Wortlaut
+  unverändert — Bild links statt darüber, Frage neben Tabelle oder Grafik, Anzeige auf dem Handy 46–56 px, 💡 in der
+  Frage (`data-tipp-ziel`), `LS.restHoehe` in Flächenmass-Treppe, Begriffs-Geodreieck, Tageslauf-Sonne, Zufalls-Skala,
+  Kakao-Weg, engere Abstände: Begriffs-Geodreieck (begriffs-geodreieck), Bionik-Paare (bionik-paare), Calendrier
+  (calendrier), Daten-Detektiv (diagramm-detektiv), Diagramm-Wahl (diagramm-wahl), Energie-Wandler (energie-wandler),
+  Erdzeit-Leiter (erdzeit-leiter), Fahrplan-Rechner (fahrplan-rechner), Flächen-Pixel (flaechen-pixel),
+  Flächenmass-Treppe (flaechenmass-treppe), Fledermaus-Forscher (fledermaus-forscher), Früher und heute
+  (frueher-heute), Gattungs-Kenner (gattungs-kenner), Gefühle-Radar (gefuehle-radar), Gegenteil-Wippe
+  (gegenteil-wippe), Geheimschrift-Knacker (geheimschrift-knacker), Gemeinde-Helfer (gemeinde-helfer), Gerecht-Teiler
+  (gerecht-teiler), Geschichten-Ordner (geschichten-ordner), Möglichkeiten-Finder (glace-kombinator), Himmels-Forscher
+  (himmels-forscher), Kakao-Weg (kakao-weg), Komma-Messband (komma-messband), Kompass-Spiel (kompass), Kulturen-Koffer
+  (kulturen-koffer), Lese-Detektiv (lese-detektiv), Malkreuz (malkreuz), Mittelwert-Türme (mittelwert-waage),
+  Pflanzen-Bestimmer (pflanzen-bestimmer), Platzhalter-Geschichten (platzhalter-geschichten), Preis-Tabelle
+  (preis-tabelle), Punkte-Blitz (punkte-blitz), Quader-Volumen (quader-volumen), Rechen-Maschine (rechen-maschine),
+  Reim-Paare (reim-paare), Rhythmus-Diktat (rhythmus-diktat), Roboter-Pfad (roboter-pfad), Sachaufgaben-Kompass
+  (sachaufgaben-kompass), Satz-Reparatur (satz-reparatur), Schriftlich-Werkstatt (schriftlich-werkstatt), Schwimmt
+  oder sinkt? (schwimmt-sinkt), Son-Lauscher (son-lauscher), Speicher-Leiter (speicher-leiter), Stufenzahl-Schieber
+  (stufenzahl-schieber), Tageslauf-Sonne (tageslauf-sonne), Taschengeld-Planer (taschengeld-planer), Tier-Sortierer
+  (tier-sortierer), Uhr-Werkstatt (uhr-werkstatt), Velo-Tabelle (velo-tabelle), Wassertropfen-Reise
+  (wassertropfen-reise), Wortarten-Probe (wortarten-probe), Würfel-Zähler (wuerfel-zaehler), Zahlen-Baukasten
+  (zahlen-baukasten), Zahlen-Waage (zahlen-waage), Zahlenhaus (zahlenhaus), Zahlenmauer-Baumeister (zahlenmauer),
+  Zahlenrätsel-Tresor (zahlenraetsel-tresor), Zehntel-Lupe (zehntel-lupe), Zeitstrahl-Sortierer
+  (zeitstrahl-sortierer), Ziffernkarten (ziffernkarten), Znüni-Teller (znueni-teller), Zufalls-Skala (zufalls-skala).
+  Gemeinsame Nachmessung allein auf einem Server (alle Stufen, drei Ziehungen): Spiele mit der Aufgabe über dem Rand
+  Handy 60 → 5, Tablet hoch 9 → 0, Laptop 8 → 0, Tablet quer 0; seitlich und geschrumpfte Grafik 0. Je Spiel
+  vorher/nachher, Reste, Entscheid K1 (Kakao-Weg) und Wünsche an den Rahmen R1–R6 in
+  `docs/eulenpfad/bildhoehe_offen.md` Abschnitt „Rest je Spiel LERN_Session46“.
+- Energie-Wandler (energie-wandler): Pfeil zwischen einem Wandler und der nächsten Energie fehlte in der Kette
+  (`ketteEl`), behoben.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad über die 62 geänderten Spiele „Keine Fehler.“, Eulenpfad energie-wandler
+  „Keine Fehler.“

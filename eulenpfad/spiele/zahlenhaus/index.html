@@ -23,9 +23,23 @@
   .haus-notiz { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -6px 0 8px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
   .haus-notiz .zw-notiz { font-size: 17px; min-height: 34px; }
   /* Mit Notiz auf niedrigen oder schmalen Bildschirmen: Stockwerke etwas flacher, damit die Tastatur im Bild bleibt */
-  @media (max-width: 560px), (max-height: 820px) {
+  /* (Tablet hoch 768×950 dazu: mit Notiz 12 px darunter, LERN_Session46) */
+  @media (max-width: 560px), (max-height: 820px), (orientation: portrait) {
     .haus:has(+ .haus-notiz) { margin-bottom: 10px; }
     .haus:has(+ .haus-notiz) .stock span { padding: 1px 0; }
+  }
+  /* Sichtbare Fläche (LERN-55, LERN_Session46): Handy 375×660 ragte die Aufgabe in allen Stufen 62 px unter den Rand —
+     Dach flacher, Stockwerke enger, Anzeige 52 statt 76 px, Tastatur näher */
+  @media (max-height: 700px) {
+    .haus { margin: 2px auto 6px; }
+    .dach { height: 54px; }
+    .dach b { top: 16px; font-size: 30px; }
+    .stock span { padding: 1px 0; }
+    .haus ~ .anzeige { min-height: 52px; font-size: 30px; line-height: 1.1; }
+    .haus ~ .tastatur { margin-top: 8px; }
+    /* Königsstufe mit Notiz (s6 vorher 59 px darunter) */
+    .haus:has(+ .haus-notiz) { margin-bottom: 4px; }
+    .haus-notiz { margin-bottom: 4px; }
   }
 </style>
 </head>

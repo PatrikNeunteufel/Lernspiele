@@ -17,6 +17,13 @@
   .schriftlich { --zelle: clamp(26px, min((100vw - 84px) / var(--spalten) - 4px,
     (var(--rest-h, 400px) - var(--sw-fest, 24px)) / var(--sw-zeilen, 5)), 58px); }
   .hinweis-klein { text-align: center; color: var(--text-leise); font-size: 15px; margin-bottom: 4px; }
+  /* Handy: Auftrag 18 px, Hinweis 14 px in einer Zeile, Tastatur näher — mit drei Summanden (s6) standen die Zellen
+     an ihrer Untergrenze (26 px) und die Aufgabe ragte auf 375 × 660 bis 18 px unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    div > .auftrag { font-size: 18px; margin-bottom: 6px; }
+    .hinweis-klein { font-size: 14px; line-height: 1.25; margin-bottom: 2px; }
+    .hinweis-klein ~ .tastatur { margin-top: 8px; }
+  }
 </style>
 </head>
 <body>

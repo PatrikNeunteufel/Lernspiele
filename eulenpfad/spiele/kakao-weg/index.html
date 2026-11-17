@@ -23,6 +23,10 @@
   .weg-liste li.weg-luecke { border: 3px dashed var(--deko-4); background: var(--hinweis-hell); justify-content: center; font-size: 24px; }
   .hinweiszeile { text-align: center; color: var(--text-leise); font-weight: 700; margin: 0 0 10px; font-size: clamp(14px, 3.3vw, 17px); }
   .kreislauf { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto 10px; }
+  /* Kreislauf so gross, wie die Aufgabe Platz lässt (--rest-h von LS.restHoehe; viewBox 360 × 230), Untergrenze 260 px
+     (Schrift in den Kästen 10 px, H1 a). Vorher immer volle Breite: auf dem Handy ragte „Pfeil 1, 2, 3 und 4“ (s6) bis
+     98 px unter den Rand (LERN-55, LERN_Session46) */
+  .kreislauf { width: max(min(260px, 100%), min(520px, 100%, calc(var(--rest-h, 230px) * 360 / 230))); }
   .kreislauf .kasten { fill: var(--k-feld); stroke: var(--rand); stroke-width: 3; }
   .kreislauf .kasten-bild { font-size: 34px; }
   .kreislauf .kasten-text { font-size: 14px; font-weight: 900; fill: var(--text); }
@@ -61,6 +65,20 @@
     .kw-wer .korb-reihe { gap: 8px; }
     .kw-wer .korb-knopf { min-height: 72px; padding: 6px 6px; font-size: 17px; line-height: 1.15; }
     .kw-wer .korb-knopf .bild { font-size: 28px; }
+  }
+  /* Wer macht das? (s3) auf dem Handy: Bild vor dem Namen, Beispiele darunter — sechs Körbe in drei Reihen ragten mit
+     einem langen Schritt bis 27 px unter den Rand (LERN-55, LERN_Session46) */
+  @media (max-width: 560px) {
+    .kw-wer .korb-knopf { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 4px; align-items: center;
+      justify-items: center; min-height: 0; padding: 4px 4px 6px; }
+    .kw-wer .korb-knopf .bild { font-size: 24px; }
+    .kw-wer .korb-knopf small { grid-column: 1 / -1; line-height: 1.2; }
+    /* Schritte ordnen (s6): Auftrag kleiner, leere Ablage schmaler — acht Schritte ragten bis 63 px unter den Rand */
+    div:has(> .schritt-ablage) > .frage { font-size: 17px; line-height: 1.25; }
+    div:has(> .schritt-ablage) > div.schritt-ablage { margin-bottom: 4px; }
+    div:has(> .schritt-ablage) > div.schritt-ablage:empty { min-height: 16px; }
+  }
+  @media (max-height: 820px) {
     /* Schritte ordnen (s6, acht Schritte): leere Ablage niedriger — die Aufgabe ragte auf dem Handy bis 59 px unter
        den Rand (LERN-55, LERN_Session44) */
     div.schritt-ablage { margin-bottom: 8px; }
@@ -69,10 +87,42 @@
     .schritt-wahl { gap: 3px; }
     .schritt-wahl .wahl-knopf { min-height: 44px; line-height: 1.15; gap: 6px; }
     .schritt-wahl .wahl-knopf .bild { font-size: 20px; }
+    /* Ein Schritt am falschen Platz (s6, acht Schritte untereinander): Produktzeile flacher, Knöpfe mit weniger Rand,
+       damit lange Sätze seltener in drei Zeilen brechen — ragte auf dem Handy und dem Laptop bis 26 px unter den Rand
+       (LERN-55, LERN_Session46) */
+    div:has(> .schritt-wahl) > .produkt { line-height: 1.2; }
+    div:has(> .schritt-wahl) > .produkt .gross { font-size: 24px; line-height: 1; vertical-align: -3px; }
+    div:has(> .schritt-wahl) > .frage { margin-bottom: 4px; }
+    .schritt-wahl .wahl-knopf { padding-inline: 6px; gap: 5px; }
+    .schritt-wahl .wahl-knopf .bild { font-size: 18px; }
+    /* Wie kommt es zu uns? (s2–s4): Bild links, Name und Beschreibung rechts — untereinander waren die drei Knöpfe
+       100–119 px hoch, die Aufgabe ragte bis 30 px unter den Rand (LERN_Session46) */
+    .wahl-knopf:has(> small) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; align-items: center;
+      justify-items: start; text-align: left; padding-block: 4px; line-height: 1.2; }
+    .wahl-knopf:has(> small) .bild { grid-row: 1 / span 2; font-size: 30px; }
+    /* Kreislauf (s5, s6): Antworten mit Bild links, leere Ablage niedriger (LERN_Session46) */
+    .kw-kreis .wahl { gap: 8px; }
+    .kw-kreis .wahl-knopf { flex-direction: row; min-height: 46px; padding: 4px 8px; gap: 6px; line-height: 1.15; }
+    .kw-kreis .wahl-knopf .bild { font-size: 24px; }
+    .kw-kreis .ablage { min-height: 44px; padding: 4px; margin-bottom: 8px; }
+  }
+  /* Breit und niedrig (Laptop 1366 × 650): Produkt und Frage links, die acht Schritte rechts daneben (LERN_Session46) */
+  @media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+    div:has(> .schritt-wahl[style*="grid-template-columns"]) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      column-gap: 20px; align-items: start; align-content: start; }
+    div:has(> .schritt-wahl[style*="grid-template-columns"]) > :not(.schritt-wahl) { grid-column: 1; }
+    div:has(> .schritt-wahl[style*="grid-template-columns"]) > .schritt-wahl { grid-column: 2; grid-row: 1 / span 3; margin: 0; }
   }
   /* Tablet hoch: acht Schritte untereinander (Ein Schritt steht am falschen Platz) ragten 10 px über den Rand */
   @media (min-width: 561px) and (orientation: portrait) {
     .schritt-wahl { gap: 6px; }
+  }
+  /* Tablet hoch, sichtbare Fläche 768 × 950: Produktbild neben dem Namen, Schritte 54 px — acht Schritte untereinander
+     (s6 Ein Schritt am falschen Platz) ragten 56 px, ein langer Satz bei „Wer macht das?“ 47 px unter den Rand
+     (LERN-55, LERN_Session46) */
+  @media (min-width: 561px) and (orientation: portrait) and (max-height: 1000px) {
+    .produkt .gross { display: inline; font-size: 40px; vertical-align: -6px; margin-right: 8px; }
+    .schritt-wahl .wahl-knopf { min-height: 54px; padding-block: 4px; }
   }
 </style>
 </head>
@@ -326,7 +376,7 @@ function kreislaufSvg(opt) {
         svgEl("text", { x: 180, y: y - 11, "text-anchor": "middle", class: "nummer-text" }, String(opt.nummern[i])));
     }
   });
-  return svg;
+  return LS.restHoehe(svg); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session46)
 }
 
 const legende = () => el("div", { class: "legende" },

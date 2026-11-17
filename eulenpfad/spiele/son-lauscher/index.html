@@ -24,6 +24,12 @@
   .sl-tasten { grid-template-columns: repeat(5, 1fr); }
   .sl-tasten button { font-size: clamp(24px, 6vw, 30px); }
   .sl-anzeige { max-width: 260px; margin: 0 auto; }
+  /* Handy: Anzeige 50 px, Tastatur näher — mit der Buchstabentastatur (s6) ragte die Aufgabe auf 375 × 660 14 px
+     unter den Rand (LERN_Session46) */
+  @media (max-width: 560px) {
+    .sl-anzeige { min-height: 50px; font-size: 28px; padding-block: 2px; }
+    .sl-anzeige ~ .sl-tasten { margin-top: 8px; }
+  }
 </style>
 </head>
 <body>
