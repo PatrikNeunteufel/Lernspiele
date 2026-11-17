@@ -20,7 +20,9 @@
      gross, LERN_Session45). Die Tafel ist rund 10 px breiter als hoch (Kopfspalte 28 px, Kopfzeile ≈ 18 px). Spalten
      minmax(0, 1fr): mit 1fr hielten die Felder auf dem Laptop (Maus) 33 px und die Tafel wurde 378 statt 280 px breit
      und 367 px hoch — die Antworten ragten 19 px unter den Rand (LERN_Session45). */
-  .tafel { display: grid; grid-template-columns: 28px repeat(10, minmax(0, 1fr)); gap: 2px; width: max(min(280px, 94vw), min(520px, 94vw, calc(var(--rest-h, 420px) + 10px))); margin: 0 auto 12px; }
+  .tafel { display: grid; grid-template-columns: 28px repeat(10, minmax(0, 1fr)); gap: 2px; width: max(min(280px, 100%), min(520px, 100%, calc(var(--rest-h, 420px) + 10px))); margin: 0 auto 12px; }
+  /* Breite nach dem Behälter (100 %), nicht nach dem Fenster: mit 94vw ragte die Tafel auf dem Handy mit voller Höhe
+     (375 × 812) 2 px über die Karte hinaus (LERN_Session46) */
   .tafel .kopf-e, .tafel .kopf-z { font-weight: 900; font-size: 13px; color: var(--text-leise); display: flex; align-items: center; justify-content: center; }
   .tafel .feld { aspect-ratio: 1; border: none; border-radius: 6px; background: var(--aktiv); font-family: inherit; font-weight: 800; font-size: clamp(11px, 2.6vw, 16px); color: var(--text-leise); cursor: pointer; padding: 0; }
   .tafel .feld.schatz { background: var(--marker); color: var(--text); font-size: clamp(16px, 4vw, 24px); }
@@ -28,7 +30,7 @@
   .tafel .feld.treffer { background: var(--gut-hell); color: var(--text); }
 
   /* quadratisch: Breite = Höhe (--rest-h, LERN_Session45; vorher 100vh − 365px bzw. 375px mit Antworten) */
-  .ksys { width: max(min(240px, 90vw), min(440px, 90vw, var(--rest-h, 400px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
+  .ksys { width: max(min(240px, 100%), min(440px, 100%, var(--rest-h, 400px))); display: block; margin: 0 auto 12px; touch-action: manipulation; }
   .ksys .gitter { stroke: var(--rand); stroke-width: 1; }
   .ksys .achse { stroke: var(--text); stroke-width: 2; }
   .ksys text { font-family: var(--schrift); font-size: 10px; font-weight: 800; fill: var(--text-leise); }

@@ -66,7 +66,12 @@
     .qv .frage { font-size: 16px; line-height: 1.25; margin-bottom: 2px; }
     .qv-bild { margin-bottom: 2px; }
     .qv-ergebnis .anzeige { min-height: 48px; font-size: 30px; line-height: 1.1; }
-    .qv-ergebnis.mit-notiz .anzeige { min-height: 48px; min-width: 72px; }
+    .qv-ergebnis.mit-notiz .anzeige { min-height: 48px; }
+  }
+  /* Schmal (unabhängig von der Höhe): Anzeige mit Notizen schmaler, Notizen und Einheit kleiner — „Grundfläche 9 · 10 = ✏️
+     cm² [?] cm³“ (s3) lief auf 375 px seitlich bis 4 px über, auch mit voller Höhe 375 × 812 (LERN_Session46) */
+  @media (max-width: 560px) {
+    .qv-ergebnis.mit-notiz .anzeige { min-width: 72px; }
     .qv-ergebnis.mit-notiz .qv-notizen { font-size: 14px; column-gap: 6px; }
     .qv-einheit { font-size: 24px; }
   }

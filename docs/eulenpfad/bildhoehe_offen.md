@@ -178,9 +178,11 @@ Gemessen (Spiele, deren Aufgabe selbst über den Rand ragt):
    punkte-blitz 41, tier-sortierer 39, znueni-teller 38, zahlenmauer 36, gattungs-kenner 30, zufalls-skala 30,
    reim-paare 21, au-cafe 20, braille-finger 20, schwimmt-sinkt 20, rhythmus-diktat 18, rechen-maschine 18,
    taschengeld-planer 16, gemeinde-helfer 14, zahlenhaus 12, flaechen-pixel 6, blutkreislauf-lotse 3.
-   Laptop 1366×650: rhythmus-leser 20, stromkreis-bauer 19, braille-finger 11, tier-sortierer 5.
+   Laptop 1366×650: rhythmus-leser 20, stromkreis-bauer 19, braille-finger 11, tier-sortierer 5. — *erledigt 2026-11-17
+   (LERN_Session46: Rest je Spiel, Rahmen R1–R6, Reste; heutiger Stand im Abschnitt „Stand LERN_Session46“ unten).*
 3. **Rest auf Bildschirmgrössen** (ohne Leisten, alle Stufen): plan-leser Handy 240, weather-report Handy 79 / quer und
-   Laptop 74, punkte-blitz Handy 65, laerm-waechter quer 55, stromkreis-bauer quer 14, netz-falter Laptop 12.
+   Laptop 74, punkte-blitz Handy 65, laerm-waechter quer 55, stromkreis-bauer quer 14, netz-falter Laptop 12. —
+   *erledigt 2026-11-17 (LERN_Session46, neu gemessen, Abschnitt „Stand LERN_Session46“ unten).*
 4. **Begründete Ausnahmen der Bau-Helfer** (BH3) — *erledigt 2026-11-15 (LERN_Session44, Abschnitt „Ausnahmen
    geprüft LERN_Session44“ unten).*
 5. **Wünsche an den Rahmen** (aus BH3): Baustein „Element an die restliche Höhe anpassen“ für Grafiken (statt
@@ -472,6 +474,20 @@ Notizen bleiben auf dem Handy ab Stufe 2. Auf dem Handy dazu: Angaben 15 px, Sch
 schmal rechts neben den Angaben, Einheiten 46 px, drei Notizfelder in einer Zeile, ein einziges Notizfeld mit der
 Teilrechnung links daneben. Nachher (Schlussmessung): Handy, Tablet hoch und Laptop in allen Stufen im Bild, ausser
 Handy s6 einmal 11 px (eine von zehn Ziehungen); erster Schritt mit `bildhoehe.js` auf allen vier Flächen im Bild.
+
+## Stand LERN_Session46 (2026-11-17)
+
+Auch die vollen Bildschirmgrössen (BH1 a, ohne Browserleisten) neu gemessen: alle Spiele, s1 s3 s6, drei Ziehungen
+(`rahmen46/voll_gross.json`). Aufgabe über dem Rand nur Mittelwert-Türme s6 Handy 375×812 11 px (eine Ziehung);
+seitlich liefen Koordinaten-Schatz s1 (2 px, Tafel und Koordinatensystem nach `94vw`/`90vw` statt nach dem Behälter)
+und Quader-Volumen s3 (4 px, Antwortzeile mit Notiz; behoben war es nur unter 700 px Höhe) über — beide behoben, über
+alle Stufen und acht Flächen nachgemessen ohne seitlichen Überlauf.
+
+Heute über dem Rand, alle Flächen zusammen: plan-leser s6 (Weg beschreiben) und quader-volumen s6 (Körper an der
+Untergrenze) als begründete Ausnahmen (Punkt 4); an der Schwelle oder in einer Ziehung von mehreren unter 15 px:
+flaechen-pixel, roboter-pfad, malkreuz (Tablet hoch, Ausnahme), mittelwert-waage, quader-volumen s5, preis-tabelle,
+sachaufgaben-kompass s6 (Ergebnis-Schritt). Seitlich nirgends, keine geschrumpfte Grafik. Was die Messung nicht sieht:
+spätere Schritte einer Aufgabe und Ablagen, die beim Antippen wachsen (Liste im Abschnitt „Rest je Spiel“).
 
 Rest (höchster Wert in px):
 - **Handy 375×660:** energie-wandler 139, geheimschrift-knacker 100, punkte-blitz 99, kompass 98, kakao-weg 98,

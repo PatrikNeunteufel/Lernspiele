@@ -2740,3 +2740,9 @@
   Tablet hoch bis 228, auf dem Laptop bis 98 px; nachher überall im Bild ausser Handy s6 einmal 11 px (gemessen über eine
   vorübergehende Kopie der Seite, die die Vorschritte richtig antippen lässt). `docs/eulenpfad/bildhoehe_offen.md`.
 - Tests: Eulenpfad sachaufgaben-kompass „Keine Fehler.“, Skripte „Keine Fehler.“
+- Volle Bildschirmgrössen (BH1 a) neu gemessen, alle Spiele: Seitlicher Überlauf behoben — Koordinaten-Schatz
+  (koordinaten-schatz) s1 Tafel und Koordinatensystem nach dem Behälter statt nach `94vw`/`90vw` (2 px auf 375 × 812),
+  Quader-Volumen (quader-volumen) s3 Antwortzeile mit Notiz auf jeder schmalen Fläche schmaler (4 px, vorher nur unter
+  700 px Höhe behoben). Offen-Liste 2 und 3 durch den heutigen Stand ersetzt (`docs/eulenpfad/bildhoehe_offen.md`,
+  Abschnitt „Stand LERN_Session46“).
+- Tests: Eulenpfad quader-volumen koordinaten-schatz „Keine Fehler.“, Skripte „Keine Fehler.“
