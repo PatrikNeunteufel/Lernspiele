@@ -1,5 +1,25 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
+## HALTEPUNKT 2026-11-18 16:50 — LERN_Session47_2026-11-18_bildhoehe-werkzeug (aufgenommen 2026-11-18 18:32)
+Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
+- **Angehalten — beim Weitermachen neu starten:** Server `python tools/server.py 8765` (für `tools/bildhoehe.js`),
+  beendet; neu starten, sobald gemessen wird. Sonst lief nichts.
+- **Stand:** alles committet bis `f0c7412` (ZU1 a: `LS.pruefung.zug`, `ctx.testZug`, `bildhoehe.js --schritte`;
+  GT1 a: gelegte Teile verschwinden in `LS.reihenfolge`; Au café 👂 statt ☕👂). Arbeitsbaum sauber. Tests zuletzt:
+  Skripte „Keine Fehler.“, Eulenpfad geschichten-ordner au-cafe hello-dialog silben-klatscher auge-entdecker
+  wassertropfen-reise „Keine Fehler.“. Kein voller Eulenpfad-Lauf seit der Baustein-Änderung (Patriks Entscheid, vor
+  dem nächsten Push fällig). Nicht gepusht.
+- **Weiter mit** (Patrik: erst nach der Pause):
+  1. Offene Überläufe aus der Nachmessung (32 Reihenfolge-Spiele, alle Stufen, `--schritte`; Zahlen im CHANGELOG
+     LERN_Session47): spätere Schritte Energie-Wandler s6 43 px (Stand 9), Lärm-Wächter s5 Laptop 16 px (Stand 2);
+     nach dem falschen Handgriff Lärm-Wächter s4–s6 bis 89 px, Auge-Entdecker s4 76 px, Bruch-Werkstatt s1–s4 15,
+     Erdzeit-Leiter s4 18, Lebenszyklus s3/s4 12, Wassertropfen-Reise s5 12, Kakao-Weg s3/s6 10; beim Laden
+     Hör-Geschichte s2 67 px (3 von 3), Prozent-Brücke s2 Laptop 5 px; früher gesehen Gedicht-Baukasten s6 bis 193 px
+     nach dem falschen Handgriff.
+  2. Danach Pakete je Spiel für den Zug: 121 Spiele ohne vollständigen Zug (26 nur `erwartet` an der Tastatur, 25
+     Tastatur und eigener Zug, 70 nur eigener Zug); offen auch, ob `pruefe_spiele.js` die Zug-Schnittstelle nutzt.
+  3. Beim Abschluss: Vollbild als erledigt (Patrik: nichts Störendes, steht im CHANGELOG), Report LERN_Session47.
+
 ## Stand
 **2026-11-17, nach LERN_Session46** ([Report](report/LERN_Session46_2026-11-17.md)):
 - **Kern:** unverändert 1.46.0.

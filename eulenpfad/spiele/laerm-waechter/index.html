@@ -52,11 +52,19 @@
   .lw-karte.lw-inline .lw-bild { display: inline; font-size: 1.4em; vertical-align: -0.15em; margin-right: 6px; }
   /* Bild so gross, wie die Aufgabe Platz lässt: --rest-h von LS.restHoehe = Höhe des Bilds, mal viewBox 400 × 300.
      Vorher geschätzt 100vh − 500px, auf dem Handy 600px; nach GR1 a falsch, eine Regel für alle (LERN_Session45) */
-  .lw-karte.lw-inline + .lw-bildfeld { width: max(240px, min(100%, 480px, calc(var(--rest-h, 270px) * 4 / 3))); }
+  /* Untergrenze 180 px breit (135 hoch; vorher 240): Platz für den Hinweis nach einem Fehler (LERN_Session47) */
+  .lw-karte.lw-inline + .lw-bildfeld, .lw-bildfeld.lw-benennen { width: max(180px, min(100%, 480px, calc(var(--rest-h, 270px) * 4 / 3))); }
   @media (max-width: 560px) {
     .lw:has(> .lw-inline) ~ .wahl .wahl-knopf { min-height: 52px; }
     .lw:has(> .lw-inline) > .frage { margin-bottom: 6px; }
     .lw-karte.lw-inline { padding: 8px 12px; line-height: 1.3; margin-bottom: 8px; }
+    /* „Was schützt deine Ohren?“ (s3): drei Körbe in einer Reihe, flacher; Karte enger — mit dem Hinweis nach einem
+       Fehler ragten zwei Reihen Körbe bis 61 px über den Rand (LERN-55, LERN_Session47) */
+    .lw ~ .korb-karte.lw-satz { padding: 8px 12px; margin-bottom: 8px; }
+    .lw ~ .korb-karte.lw-satz .bild { font-size: 40px; }
+    .lw ~ .korb-reihe:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .lw ~ .korb-reihe .korb-knopf { min-height: 0; padding: 8px 4px; font-size: 16px; }
+    .lw ~ .korb-reihe .korb-knopf .bild { font-size: 30px; }
   }
 </style>
 </head>
@@ -562,7 +570,9 @@ function wirkung(ctx, a, lw) {
     el("p", { class: "lw-massnahme" }, "Du machst: ", el("b", { text: LS.mitBildText(s.bild, s.name) })));
   const w = WIRKUNG[a.richtig];
   LS.auswahl(ctx, {
-    optionen: [2, 1, 0], richtig: a.richtig, breite: 170,
+    // Bild links auf kleiner Fläche (R5 a): drei Knöpfe übereinander mit Bild über dem Wort ragten mit dem Hinweis nach
+    // einem Fehler bis 68 px über den Rand (LERN-55, LERN_Session47)
+    optionen: [2, 1, 0], richtig: a.richtig, breite: 170, bildLinks: "eng",
     inhalt: v => WIRKUNG[v],
     hinweis: "Überleg: Kommt damit weniger Lärm bei den Ohren an — und reicht das für die ganze Zeit?",
     loesung: `${s.name}: ${w.text.toLowerCase()}.`,
@@ -613,9 +623,12 @@ function ohrBenennen(ctx, a, lw) {
   const t = TEIL[a.teil];
   b.teile.get(a.teil).classList.add("lw-markiert");
   ctx.tipp([`Schau, wo es leuchtet: ${t.lage}`, `Dieses Teil ${t.aufgabe}.`, `So sieht es aus: ${t.aussehen}.`]);
-  lw.append(el("div", { class: "frage", text: "Wie heisst der Teil, der leuchtet?" }), b.svg);
+  // Bild nach der restlichen Höhe und zwei Namen nebeneinander, wie in ohrAufgabe: mit dem Hinweis nach einem Fehler ragte
+  // die Aufgabe auf dem Handy bis 47 px, auf dem Laptop 18 px über den Rand (LERN-55, LERN_Session47)
+  b.svg.classList.add("lw-benennen");
+  lw.append(el("div", { class: "frage", text: "Wie heisst der Teil, der leuchtet?" }), LS.restHoehe(b.svg));
   LS.auswahl(ctx, {
-    optionen: a.optionen, richtig: a.teil, breite: 170, loesung: gross(nom(a.teil)),
+    optionen: a.optionen, richtig: a.teil, breite: 140, loesung: gross(nom(a.teil)),
     inhalt: id => nom(id),
     hinweis: id => `Nein, ${nom(id)} ist es nicht. Schau genau, wo es leuchtet: ${t.lage}`,
     lob: `Genau! ${gross(nom(a.teil))} ${t.aufgabe}.`,
@@ -630,8 +643,10 @@ function ohrAufgabe(ctx, a, lw) {
   karte.classList.add("lw-inline");
   // Bild nach der restlichen Höhe (--rest-h, Stil .lw-karte.lw-inline + .lw-bildfeld, LERN_Session45)
   lw.append(el("div", { class: "frage", text: "Welcher Teil des Ohrs macht das?" }), karte, LS.restHoehe(ohrBild().svg));
+  // breite 140: auf dem Handy zwei Namen nebeneinander — mit dem Hinweis nach einem Fehler (was das falsche Teil tut und wo
+  // das gesuchte liegt, bis fünf Zeilen) ragte die Aufgabe sonst bis 113 px über den Rand (LERN-55, LERN_Session47)
   LS.auswahl(ctx, {
-    optionen: a.optionen, richtig: a.teil, breite: 170, loesung: `${gross(nom(a.teil))} ${t.aufgabe}.`,
+    optionen: a.optionen, richtig: a.teil, breite: 140, loesung: `${gross(nom(a.teil))} ${t.aufgabe}.`,
     inhalt: id => nom(id),
     hinweis: id => `Nein, ${nom(id)} ${TEIL[id].aufgabe}. Überleg: ${t.lage}`,
     lob: `Genau! ${gross(nom(a.teil))} ${t.aufgabe}.`,

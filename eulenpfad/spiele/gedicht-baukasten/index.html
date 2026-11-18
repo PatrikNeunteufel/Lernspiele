@@ -28,6 +28,10 @@
   @media (max-width: 560px) {
     .gedicht:has(.gedicht-vers) { padding: 10px; }
     .gedicht-vers { font-size: 17px; line-height: 1.3; padding: 5px 8px; margin: 3px 0; }
+    /* Reimschema einer Strophe (s6): das ganze Gedicht mit zwei oder drei Strophen ragte bis 193 px über den Rand —
+       Schrift und Abstände enger, damit die Verse nicht umbrechen (LERN-55, LERN_Session47) */
+    .gedicht:has(> .strophe + .strophe) { font-size: 16px; line-height: 1.3; padding: 8px 12px; }
+    .gedicht:has(> .strophe + .strophe) .strophe + .strophe { margin-top: 8px; }
   }
   @media (min-width: 900px) {
     .gedicht:has(> .strophe + .strophe) { max-width: 980px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 22px; align-items: start; }

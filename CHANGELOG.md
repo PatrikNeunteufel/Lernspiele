@@ -2780,3 +2780,22 @@
   verriet sie (BI1 a). Jetzt nur 👂.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad geschichten-ordner au-cafe hello-dialog silben-klatscher auge-entdecker
   wassertropfen-reise „Keine Fehler.“
+- Offene Überläufe nach der Nachmessung (LERN-55, `--schritte`, alle Stufen): Nach einem Fehler wächst nur die Sprechblase
+  (Hinweis immer ganz, BH2 a; Melde-Zeile gleich hoch, R2 a) — das Spiel gibt Platz (BH3 a).
+  - Hör-Geschichte (hoer-geschichte) s2: Die Vorschau „Darauf achtest du“ geht weg, wenn die Fragen kommen; sie wiederholte
+    die gestellte Frage (Handy 88 px → im Bild).
+  - Gedicht-Baukasten (gedicht-baukasten) s6, Reimschema einer Strophe: Gedicht mit mehreren Strophen auf dem Handy in
+    16 px und engeren Abständen (193 px → im Bild, nach einem Fehler höchstens 15 px).
+  - Lärm-Wächter (laerm-waechter): „Wie gut hilft das?“ (s4) mit Bild links (`bildLinks: "eng"`, 68 px → im Bild); „Was
+    schützt deine Ohren?“ (s3) drei Körbe in einer Reihe, flacher (61 → im Bild); Ohr-Aufgaben (s5, s6) zwei Namen
+    nebeneinander (`breite` 140), „Wie heisst der Teil, der leuchtet?“ mit dem Bild nach der Bildhöhe, Untergrenze des
+    Ohr-Bilds 180 statt 240 px breit (113 → höchstens 18 px in einer von 6 Ziehungen).
+  - Auge-Entdecker (auge-entdecker): Die Regeln für Karte, Körbe und Ablage griffen nie (`.ae .korb-karte`, die Bausteine
+    hängen sie neben `.ae`), jetzt `.ae ~ …` — der Satz der Karte in s4 stand in 36 px (76 px → im Bild); Weg des Lichts
+    (s6) Bild-Untergrenze 120 statt 160 px (58 → im Bild). Hinweis „keine Aufgabe für die Bindehaut“ statt „nicht die
+    Aufgabe von die Bindehaut“.
+  - Nachgemessen ohne Grafik geschrumpft und ohne seitlichen Überlauf. Offen (unter 45 px, nach einem Fehler, oder nach dem
+    letzten Handgriff): Wassertropfen-Reise s4–s6 bis 38 px (Grafik schon an der Untergrenze, eine tiefere half nicht),
+    Energie-Wandler s6 43 px, Kakao-Weg s3 21, Bruch-Werkstatt s1–s4 15, Erdzeit-Leiter s5 14, Lebenszyklus s3/s4 12.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad hoer-geschichte gedicht-baukasten laerm-waechter auge-entdecker „Keine
+  Fehler.“

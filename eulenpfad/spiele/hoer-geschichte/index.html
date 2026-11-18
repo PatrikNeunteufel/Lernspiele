@@ -266,8 +266,10 @@ const SPIEL = {
     const erledigt = el("ul", { class: "hg-erledigt" });
     const fragenBox = el("div", { class: "hg-fragen" });
     hg.append(auftrag, buch);
-    if (p.vorher) {
-      const vorschau = el("ol", { class: "hg-vorschau" }, el("b", { text: "Darauf achtest du:" }));
+    // Hörerwartung (s2): die Fragen vor dem Hören. Danach kommen sie einzeln, die Vorschau geht weg — sie wiederholte
+    // die gestellte Frage, und auf dem Handy lagen die Antworten bis 88 px unter dem Rand (LERN-55, LERN_Session47)
+    const vorschau = p.vorher ? el("ol", { class: "hg-vorschau" }, el("b", { text: "Darauf achtest du:" })) : null;
+    if (vorschau) {
       for (const f of a.fragen) vorschau.append(el("li", { text: f.frage }));
       hg.append(vorschau);
     }
@@ -284,6 +286,7 @@ const SPIEL = {
       fragenDa = true;
       ohr.classList.remove("spricht");
       ohr.remove();
+      vorschau?.remove();
       auftrag.textContent = a.fragen.length > 1 ? "❓ Beantworte die Fragen." : "❓ Beantworte die Frage.";
       zeigeFrage();
     };
