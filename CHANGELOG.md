@@ -2818,3 +2818,33 @@
     18 px (je nach einem Handgriff).
 - Tests: Skripte „Keine Fehler.“, Eulenpfad wassertropfen-reise erdzeit-leiter gattungs-kenner energie-wandler
   bruch-werkstatt lebenszyklus kakao-weg figuren-spiegel korrektur-stift sachtext-spurensuche „Keine Fehler.“
+- Körbe über alle Spiele gemessen (29 Spiele mit `LS.koerbe`, alle Stufen, Handy 375 × 660 und 375 × 812, je 3 Ziehungen):
+  Eine Rahmen-Regel „drei Körbe auf dem Handy in einer Reihe“ half nur dem Gemeinde-Helfer s6 (39 px → im Bild), die
+  übrigen Unterschiede waren Ziehungen; in 106 px breiten Körben passten „Schwimmbad“, „Feuerwehr“, „Bibliothek“,
+  „Werkhof“ (Gemeinde-Helfer s2) nicht, die Seite lief seitlich über — verworfen. Eine Probe je Korb (Inhalt breiter als
+  der Korb, 605 Körbe) fand die eigene Regel im Lärm-Wächter (laerm-waechter) s3 („Lärmschutzwand“ 120 in 106 px): dort
+  jetzt zu zweit und flach (in 10 Ziehungen im Bild). Heute schon zu lang, unabhängig davon: Gemeinde-Helfer s2–s4
+  „Abfallentsorgung“ 182 und „Gemeindehaus“ 169 in 164 px, Instrumente s4–s6 „Blechblasinstrument“ 172 und
+  „Holzblasinstrument“ 168 in 162 px (Korbschrift auf dem Handy mindestens 18 px, kein Umbruch im Wort); offen.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad laerm-waechter „Keine Fehler.“
+- Schrift im Korb (Entscheid WE1 a): Passt ein Name nicht in seinen Korb, wird dessen Schrift Pixel um Pixel kleiner, bis
+  14 px (`spiel.js`, wie der Titel nach R4 a). Instrumente „Blechblasinstrument“, „Holzblasinstrument“ und Gemeinde-Helfer
+  „Gemeindehaus“ passen jetzt; „Abfallentsorgung“ ragte neben dem Bild auch in 14 px heraus — im Gemeinde-Helfer
+  (gemeinde-helfer) bricht der Name jetzt unter das Bild, wenn er nicht daneben passt (s2–s5 auf dem Handy nachgemessen,
+  im Bild). `tools/bildhoehe.js` meldet „Inhalt breiter als Knopf“ (Antwort- und Korbknöpfe, je Stand, Code 1); dabei
+  `split(/\\s+/)` im Seitencode berichtigt (im Template-String kam es als `/s+/` an). rahmen.md 4.3 und 20.
+  Die Meldung zeigt in den Körbe-Spielen auch Antwortknöpfe mit zu langem Inhalt (Datei-Typen, Gattungs-Kenner,
+  Gemeinde-Helfer s5, Tier-Sortierer, Früher-Heute, Zeit-Schätzer) — nicht Teil von WE1, Messung über alle Spiele folgt.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad gemeinde-helfer instrumente tier-sortierer lebenszyklus laerm-waechter
+  „Keine Fehler.“
+- Schrift je Box (Entscheid WE2 a): Auch Antwortknöpfe (`LS.auswahl`) und Teile (`LS.reihenfolge`) passen ihre Schrift an;
+  alle Knöpfe einer Box werden um dieselben Pixel kleiner (keine Antwort fällt durch kleinere Schrift auf), höchstens bis
+  14 px, ein Knopf mit kleinerer eigener Schrift bleibt dort stehen. Körbe ebenso (vorher je Korb). Für eigene
+  Knopfkisten `LS.schriftEinpassen(box, auswahl)`. Vorher über alle Spiele (alle Stufen, Handy, Laptop, Tablet quer, eine
+  Ziehung): 46 Knöpfe in 14 Spielen auf 29 Seiten mit Inhalt breiter als der Knopf (Au café „Schokoladenglace“ bis 37 px,
+  Datei-Typen 30, Früher-Heute „Dampflokomotive“ 21 …), danach 4 Seiten. Au café (au-cafe): Sache und Bestellung mit Bild
+  links (`bildLinks`), auf Handy und Tablet hoch Bild über dem Namen; Gattungs-Kenner (gattungs-kenner) ruft
+  `LS.schriftEinpassen` für seine eigenen Knöpfe; nachgemessen im Bild und ohne zu enge Knöpfe. Übrig: Datei-Typen s6 auf
+  dem Handy 2 px (kleine Zeile „zum Beispiel PowerPoint“, eine von 8 Ziehungen). rahmen.md 4.3.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad au-cafe gattungs-kenner datei-typen frueher-heute rechentrick-detektiv
+  gemeinde-helfer instrumente „Keine Fehler.“

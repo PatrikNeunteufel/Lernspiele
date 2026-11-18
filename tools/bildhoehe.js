@@ -131,7 +131,17 @@ const MESSEN = (auftraege, css) => `
             d.querySelectorAll(".marke-platz").forEach(k => k.classList.remove("marke-platz"));
           }
           // Ein Stand der Seite; mit --schritte nach jedem Zug neu (ZU1 a)
-          const messe = () => { const t = d.querySelector(".tastatur"); return { ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
+          // Knöpfe, deren Inhalt seitlich herausragt (WE1 a, LERN_Session47: lange Wörter in Körben; die Seite läuft
+          // dabei nicht über, darum sah es „seitlich“ nicht) — wie knopfZuEng in spiel.js
+          const zuEng = k => {
+            if (k.scrollWidth > k.clientWidth + 1) return true;
+            const r = k.getBoundingClientRect();
+            return [...k.querySelectorAll("*")].some(c => { const q = c.getBoundingClientRect(); return q.width > 0 && (q.right > r.right + 1 || q.left < r.left - 1); });
+          };
+          const messe = () => { const t = d.querySelector(".tastatur"); return {
+            eng: [...d.querySelectorAll(".karte .wahl-knopf, .karte .korb-knopf")].filter(k => k.getClientRects().length && zuEng(k))
+              .map(k => k.innerText.replace(/\\s+/g, " ").trim().slice(0, 40) + " (" + k.scrollWidth + " > " + k.clientWidth + ")"),
+            ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?
             tastaturImBild: t ? t.getBoundingClientRect().bottom <= a.h + 1 : null,
@@ -157,7 +167,7 @@ const MESSEN = (auftraege, css) => `
                   const platz = p.getBoundingClientRect().width - ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"]
                     .reduce((s, n) => s + (parseFloat(ps[n]) || 0), 0);
                   // Schlüssel aus allen Klassen: .rose.klein ist bewusst klein, .rose nicht (Kompass)
-                  return [Math.round(r.width), Math.round(r.height), x.tagName.toLowerCase() + "." + x.getAttribute("class").trim().split(/\s+/).sort().join("."),
+                  return [Math.round(r.width), Math.round(r.height), x.tagName.toLowerCase() + "." + x.getAttribute("class").trim().split(/\\s+/).sort().join("."),
                     mass === null ? null : Math.round(mass * 1000) / 1000, inhaltBreite >= platz - 2];
                 });
             })(),
@@ -198,6 +208,7 @@ const MESSEN = (auftraege, css) => `
           let schritt = 0;
           staende.forEach((s, i) => { if (s.aufgabe > staende[schritt].aufgabe) schritt = i; });
           __bh.erg.push({ ...a, art: a.text, versuche, ...staende[0], ueber: hoechst("ueber"), seitlich: hoechst("seitlich"),
+            eng: [...new Set(staende.flatMap(s => s.eng))],
             aufgabe: hoechst("aufgabe"), tastatur: mitT.length > 0, tastaturImBild: mitT.length ? mitT.every(s => s.tastaturImBild) : null,
             // Text des Stands mit der höchsten Aufgabe, Schritt 0 = beim Laden
             text: staende[schritt].text, ...(a.schritte ? { ...zug, schritt } : {}) });
@@ -307,6 +318,7 @@ function zusammenfassen(erg) {
     const imBild = gut.filter(e => e.tastaturImBild !== null).map(e => e.tastaturImBild);
     return {
       ...gut[0], ueber: max("ueber"), seitlich: max("seitlich"), aufgabe: max("aufgabe"),
+      eng: [...new Set(gut.flatMap(e => e.eng || []))],
       gesperrt: gut.some(e => e.gesperrt), tastatur: gut.some(e => e.tastatur),
       tastaturImBild: imBild.length ? imBild.every(Boolean) : null,
       grafiken: gut.flatMap(e => e.grafiken || []),
@@ -353,7 +365,14 @@ function auswerten(erg, geraete, stufen) {
       `${new Set(ueber.map(e => e.id)).size} Spiele, höchstens ${max} px; seitlich: ${alle.filter(e => e.seitlich > 2).length}; ` +
       `Zifferntastatur nicht ganz im Bild: ${alle.filter(e => e.tastaturImBild === false).length} von ${alle.filter(e => e.tastatur).length}; ` +
       `Aufgabe selbst (ohne Tipp-Zeile) über: ${alle.filter(e => e.aufgabe > 2).length} Seiten, ${new Set(alle.filter(e => e.aufgabe > 2).map(e => e.id)).size} Spiele; ` +
-      `Grafik geschrumpft: ${alle.filter(zuKlein).length} Seiten`);
+      `Grafik geschrumpft: ${alle.filter(zuKlein).length} Seiten; Inhalt breiter als Knopf: ${alle.filter(e => e.eng?.length).length} Seiten`);
+  }
+  // WE1 a: Inhalt breiter als sein Knopf (Antwort oder Korb) — je Seite die Knöpfe mit Inhalt > Breite; Code 1
+  const eng = zaehlbar.filter(e => e.eng?.length);
+  if (eng.length) {
+    console.log("\nInhalt breiter als Knopf (WE1 a; Körbe passen ihre Schrift bis 14 px an):");
+    for (const e of eng) console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${e.eng.join(" · ")}`);
+    process.exitCode = 1;
   }
   // H1 a: Grafiken, die nach der Bildhöhe zusammenschrumpfen — je Seite mit Grösse, Klasse und Vergleich; Code 1
   const klein = zaehlbar.filter(zuKlein);

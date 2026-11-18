@@ -36,7 +36,9 @@
   @media (max-width: 560px) {
     .korb-karte.gh-satz { margin-bottom: 10px; }
     .korb-karte.gh-satz ~ .korb-reihe { gap: 8px; }
-    .korb-karte.gh-satz ~ .korb-reihe .korb-knopf { flex-direction: row; min-height: 56px; gap: 6px; padding-block: 4px; line-height: 1.15; }
+    /* flex-wrap: passt ein langer Name nicht neben das Bild, steht er darunter — „Abfallentsorgung“ ragte sonst auch in
+       14 px aus dem Korb (WE1 a, LERN_Session47) */
+    .korb-karte.gh-satz ~ .korb-reihe .korb-knopf { flex-direction: row; flex-wrap: wrap; min-height: 56px; gap: 0 6px; padding-block: 4px; line-height: 1.15; }
     .korb-karte.gh-satz ~ .korb-reihe .korb-knopf .bild { font-size: 28px; }
     /* Schritte ordnen (s6): Bild vor dem Anliegen statt darüber, leere Ablage niedriger — fünf Schritte ragten bis
        74 px unter den Rand */

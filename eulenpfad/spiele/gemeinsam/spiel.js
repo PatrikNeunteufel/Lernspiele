@@ -2452,6 +2452,7 @@ const LS = (() => {
     });
     ctx.flaeche.append(box);
     kurztasten(box);
+    schriftEinpassen(box, ".wahl-knopf");
     return box;
   }
 
@@ -2506,6 +2507,7 @@ const LS = (() => {
     });
     ctx.flaeche.append(ablage, box);
     kurztasten(box);
+    schriftEinpassen(box, ".wahl-knopf");
     return { ablage, box };
   }
 
@@ -2618,7 +2620,40 @@ const LS = (() => {
     });
     ctx.flaeche.append(karte, box);
     kurztasten(box);
+    schriftEinpassen(box, ".korb-knopf");
     return { karte, box };
+  }
+
+  // ---------- Schrift in Knöpfen und Körben (Entscheide WE1 a, WE2 a, LERN_Session47) ----------
+  // Antworten und Körbe stehen in 18–24 px fett und brechen im Wort nicht um. In schmalen Spalten ragten lange Wörter
+  // heraus (Gemeinde-Helfer „Abfallentsorgung“ 182 px im Korb von 164, Au café „Schokoladenglace“ 210 px im Knopf von
+  // 173 auf dem Laptop; 14 Spiele mit Antwortknöpfen, 2 mit Körben). Wie beim Titel (R4 a) wird die Schrift kleiner, bis
+  // alles hineinpasst, höchstens bis SCHRIFT_MIN; nichts wird abgeschnitten. Je Box, nicht je Knopf (WE2 a): alle Knöpfe
+  // einer Box werden um dieselben Pixel kleiner, damit keine Antwort durch kleinere Schrift auffällt; was ein Spiel
+  // einzelnen Knöpfen an Grösse gibt, bleibt im Verhältnis. Neu nach dem Einhängen (das Spiel kann Box und Klassen danach
+  // noch ändern), bei Grössenänderung und wenn die Schrift geladen ist. Bild und kleine Zeile behalten ihre Grösse.
+  const SCHRIFT_MIN = 14;
+  /** Ragt der Inhalt seitlich aus dem Knopf? Auch für tools/bildhoehe.js (Meldung „Inhalt breiter als Knopf“). */
+  function knopfZuEng(k) {
+    if (k.scrollWidth > k.clientWidth + 1) return true;
+    const r = k.getBoundingClientRect();
+    return [...k.querySelectorAll("*")].some(c => { const q = c.getBoundingClientRect(); return q.width > 0 && (q.right > r.right + 1 || q.left < r.left - 1); });
+  }
+  function schriftEinpassen(box, wahl) {
+    if (typeof getComputedStyle !== "function") return;
+    const passen = () => {
+      if (!box.isConnected) { removeEventListener("resize", passen); return; }
+      const knoepfe = [...box.querySelectorAll(wahl)];
+      knoepfe.forEach(k => { k.style.fontSize = ""; });
+      const sichtbar = knoepfe.filter(k => k.getClientRects().length); // nicht im Bild: keine Masse
+      const basis = sichtbar.map(k => parseFloat(getComputedStyle(k).fontSize));
+      // Ein Knopf mit kleinerer eigener Schrift bleibt bei SCHRIFT_MIN stehen, die anderen werden weiter kleiner
+      for (let weniger = 1; sichtbar.some(knopfZuEng) && basis.some(g => g - weniger + 1 > SCHRIFT_MIN); weniger++)
+        sichtbar.forEach((k, i) => { k.style.fontSize = Math.min(basis[i], Math.max(SCHRIFT_MIN, basis[i] - weniger)) + "px"; });
+    };
+    setTimeout(passen, 0);
+    addEventListener("resize", passen);
+    document.fonts?.ready.then(passen);
   }
 
   // ---------- Rahmen eines Spiels ----------
@@ -3952,7 +3987,7 @@ const LS = (() => {
   return {
     bereit, nachBereit, beiBereit, SPEICHER, speicherVoll,
     STELLEN, SKALA, schriftFarbe, flaeche, zahlText, dezimalText, geldText, klasseDerStufe, EINSTELLUNGEN, EINSTELLUNG_BLOECKE, einstellung, aussehen, farbenAnwenden, farbenKnopf, einstellungSpiel, setzeEinstellung, einstellungenZuruecksetzen,
-    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, restHoehe, bildLinks, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
+    RUHE_ARTEN, WOCHENTAGE, ruhezeiten, setzeRuhezeiten, ruheZeitGueltig, ruhe, ruheJetzt, ruheStand, ruheTageText, brauchtTon, tonSpielRuht, ruheAusgeblendet, dativ, zufall, waehle, mische, zerlege, el, ton, konfetti, tastatur, tippSchritte, lesetext, restHoehe, bildLinks, schriftEinpassen, notizFeld, kurztasten, kurztastenAus: () => { ktAus = true; }, SERIE_MAX, spiel, lies, schreibe, sterneText, sterneFuer,
     LOB, MIX_PRAEFIX, istMix, mixName, speichereRekord, protokolliere, euleZeile, tonSchalter, rangliste,
     spielerListe, aktuellerSpieler, setzeSpieler, neuerSpieler, loescheSpieler, profil, speichereProfil, empfohleneStufe,
     person, umbenennen, gehoert, PERSONEN,

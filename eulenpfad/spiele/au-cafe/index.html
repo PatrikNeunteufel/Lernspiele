@@ -30,6 +30,12 @@
   .ablage.cafe-ablage { flex-direction: column; align-items: stretch; }
   .ablage.cafe-ablage > span { font-size: clamp(16px, 3.6vw, 20px); }
   .cafe-tv .wahl-knopf { font-size: clamp(18px, 4vw, 24px); }
+  /* Sache und Bestellung (bildLinks): Bild kleiner; auf Handy und Tablet hoch über dem Namen — „Schokoladenglace“ passt
+     neben einem Bild auch in 14 px nicht in einen Knopf unter 170 px (WE2 a, LERN_Session47) */
+  .cafe-saetze.bild-links { --bild-links-gr: 22px; }
+  @media (max-width: 900px) {
+    .cafe-saetze.bild-links .wahl-knopf { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-inline: 6px; }
+  }
   /* Ganze Aufgabe im Bild (BH3 a), Handy und niedrige Bildschirme: Satzknöpfe 54 px und das Gespräch enger — fünf
      Zeilen mit langen Sätzen ragten in Stufe 4 bis 20 px (Handy) und 6 px (1024 × 768, Laptop) unter den Rand
      (LERN_Session43) */
@@ -50,6 +56,7 @@
     .cafe-situation { margin-bottom: 8px; line-height: 1.25; }
     .frage { margin-bottom: 6px; line-height: 1.25; }
     .cafe-saetze .wahl-knopf { min-height: 46px; }
+    .cafe-saetze.bild-links .wahl-knopf { padding-block: 3px; gap: 0; line-height: 1.15; } /* Bild über dem Namen, flach */
     .cafe-gespraech { gap: 4px; margin-bottom: 8px; }
     .cafe-wer { font-size: 28px; }
     .cafe-wer small { font-size: 10px; }
@@ -478,6 +485,9 @@ const SPIEL = {
     const box = LS.auswahl(ctx, {
       optionen: a.optionen, richtig: a.richtig, inhalt: inhaltFuer(a), hinweis: a.hinweis, loesung: fr(a.loesung),
       breite: a.inhalt === "satz" || a.inhalt === "formel" ? 240 : a.inhalt === "preis" ? 120 : 150,
+      // Sache und Bestellung: Bild links, Name und Preis darunter (R5 a) — in einer Zeile mit dem Bild ragte
+      // „Schokoladenglace 14 Fr.“ bis 23 px aus dem Knopf (WE2 a, LERN_Session47)
+      bildLinks: a.inhalt === "sache" || a.inhalt === "beides" ? true : undefined,
       lob: waehle(["Oui !", "Super !", "Bravo !", "Très bien !"]),
       beiRichtig: () => { if (a.inhalt === "satz" || a.inhalt === "formel") sprich(a.inhalt === "formel" ? CAFE_FORMELN[a.richtig][0] : a.richtig); },
     });

@@ -58,13 +58,14 @@
     .lw:has(> .lw-inline) ~ .wahl .wahl-knopf { min-height: 52px; }
     .lw:has(> .lw-inline) > .frage { margin-bottom: 6px; }
     .lw-karte.lw-inline { padding: 8px 12px; line-height: 1.3; margin-bottom: 8px; }
-    /* „Was schützt deine Ohren?“ (s3): drei Körbe in einer Reihe, flacher; Karte enger — mit dem Hinweis nach einem
-       Fehler ragten zwei Reihen Körbe bis 61 px über den Rand (LERN-55, LERN_Session47) */
+    /* „Was schützt deine Ohren?“ (s3): Körbe flacher, Karte enger — mit dem Hinweis nach einem Fehler ragten zwei Reihen
+       Körbe bis 61 px über den Rand (LERN-55, LERN_Session47). Zu zweit, nicht zu dritt: in 106 px passte
+       „Lärmschutzwand“ nicht (120 px) */
     .lw ~ .korb-karte.lw-satz { padding: 8px 12px; margin-bottom: 8px; }
     .lw ~ .korb-karte.lw-satz .bild { font-size: 40px; }
-    .lw ~ .korb-reihe:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-    .lw ~ .korb-reihe .korb-knopf { min-height: 0; padding: 8px 4px; font-size: 16px; }
-    .lw ~ .korb-reihe .korb-knopf .bild { font-size: 30px; }
+    .lw ~ .korb-reihe { gap: 8px; }
+    .lw ~ .korb-reihe .korb-knopf { min-height: 0; padding: 6px 4px; font-size: 16px; gap: 2px; }
+    .lw ~ .korb-reihe .korb-knopf .bild { font-size: 28px; }
   }
 </style>
 </head>

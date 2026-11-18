@@ -351,6 +351,7 @@ function wahlSchritt(ctx, wahl, { optionen, inhalt, richtig, hinweis, loesung, d
     });
     wahl.append(k);
   }
+  LS.schriftEinpassen(wahl, ".wahl-knopf"); // lange Namen wie „Kurzgeschichte“ (WE2 a, LERN_Session47)
 }
 
 /** Tipps zu einem Text mit gefragtem Merkmal (ctx.tipp): Anstoss, Merkmalsfrage, Stelle — nie die Lösung. */
