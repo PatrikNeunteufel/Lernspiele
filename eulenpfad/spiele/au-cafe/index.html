@@ -453,7 +453,8 @@ const SPIEL = {
     if (a.art === "antwort" || a.art === "antwortHoeren") {
       f.append(el("div", { class: "cafe-gespraech" }, zeileEl(d.repliken[a.i], false, a.nurHoeren)));
     }
-    if (a.nurHoeren && a.art !== "antwortHoeren") f.append(el("div", { class: "cafe-bild", "aria-hidden": "true", text: "☕👂" }));
+    // Nur hören: ein Ohr, kein ☕ — das trägt die heisse Schokolade, und das Bild verriete sie (BI1 a, LERN_Session47)
+    if (a.nurHoeren && a.art !== "antwortHoeren") f.append(el("div", { class: "cafe-bild", "aria-hidden": "true", text: "👂" }));
     f.append(el("div", { class: "frage", html: a.frage }));
     if (a.sprich) {
       f.append(el("button", { type: "button", class: "cafe-hoer", text: "🔊 nochmal", "aria-label": "Nochmal anhören", onclick: () => sprich(a.sprich) }));

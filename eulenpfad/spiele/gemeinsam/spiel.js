@@ -2452,7 +2452,8 @@ const LS = (() => {
     ctx.loesung(opt.loesung || opt.reihe.map(w => (opt.ablage ? opt.ablage(w) : String(w))).join(" → "));
     ctx.schritte(opt.reihe.length, true);
     const ablage = el("div", { class: "ablage", "aria-live": "polite" });
-    const box = el("div", { class: "wahl" });
+    // reihe-wahl: ein gelegtes Teil verschwindet aus der Box, es steht nur noch in der Ablage (Entscheid GT1 a, stil.css)
+    const box = el("div", { class: "wahl reihe-wahl" });
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
     bildLinks(box, opt.bildLinks);
     let pos = 0;

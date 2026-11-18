@@ -2765,3 +2765,18 @@
   Geschichten-Ordner (geschichten-ordner) s6 154 px nach 5. rahmen.md 4.2, 4.3 und 20.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad anlaut-angel tier-sortierer kakao-weg zahlenmauer sachaufgaben-kompass
   glace-kombinator „Keine Fehler.“
+- Gelegte Teile verschwinden (Entscheid GT1 a): In `LS.reihenfolge` blieb ein gelegtes Teil blass in der Box stehen,
+  während die Ablage darüber mit jedem Teil wuchs — die beiden Funde oben und weitere in späteren Schritten. Jetzt
+  steht es nur noch in der Ablage (Klasse `reihe-wahl`, `stil.css`), in allen 32 Spielen mit dem Baustein. Gemessen
+  mit `--schritte` (Stufen s1, s3, s6, Handy und Laptop, je 3 Ziehungen), Aufgabe über dem Rand nach dem zweiten
+  Handgriff oder später: vorher Geschichten-Ordner 176 px, Auge-Entdecker 152, Au café 138, Wassertropfen-Reise 113,
+  Gemeinde-Helfer 72, Lebenszyklus 54, Hello-Dialog 46, Gedicht-Baukasten 17, Kakao-Weg 10, Energie-Wandler 7.
+  Nachgemessen über alle sechs Stufen und alle vier sichtbaren Flächen: übrig nur Energie-Wandler (energie-wandler)
+  s6 43 px nach dem letzten Handgriff und Lärm-Wächter (laerm-waechter) s5 auf dem Laptop 16 px nach dem ersten
+  richtigen; offen. Ebenfalls offen: Überläufe nach dem falschen Handgriff (Lärm-Wächter s4–s6 bis 89 px,
+  Auge-Entdecker s4 76 px, weitere bis 18 px) und Hör-Geschichte (hoer-geschichte) s2 beim Laden 67 px. rahmen.md
+  2.2 und 4.3.
+- Au café (au-cafe): Die Hör-Aufgaben in s5 und s6 zeigten ☕👂, das ☕ trägt aber auch die heisse Schokolade — das Bild
+  verriet sie (BI1 a). Jetzt nur 👂.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad geschichten-ordner au-cafe hello-dialog silben-klatscher auge-entdecker
+  wassertropfen-reise „Keine Fehler.“

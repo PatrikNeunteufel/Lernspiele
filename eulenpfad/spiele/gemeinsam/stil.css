@@ -791,6 +791,9 @@ button.link, a.link {
 .wahl-knopf.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
 .wahl-knopf.richtig { background: var(--gut-hell); box-shadow: 0 5px 0 var(--gut); }
 .wahl-knopf.gewaehlt { opacity: .3; }
+/* LS.reihenfolge (Entscheid GT1 a, LERN_Session47): Ein gelegtes Teil steht nur noch in der Ablage. Blieb es blass in
+   der Box, wuchs die Seite mit jedem Teil um eine Zeile der Ablage — im Geschichten-Ordner s6 bis 228 px unter den Rand */
+.reihe-wahl > .wahl-knopf.gewaehlt { display: none; }
 /* Baustein „Antwortknopf mit Bild links“ (Entscheid R5 a, LERN_Session46): Bild links, Text und klein rechts —
    LS.auswahl/LS.reihenfolge mit bildLinks: true (immer) oder "eng" (nur unter 560 px Breite oder 700 px Höhe); auf
    kleiner Fläche zudem flacher Knopf. Vorher baute jedes Spiel das selbst (16 Regeln in acht Spielen). Bildgrösse je
