@@ -42,7 +42,9 @@
     .wt-rechts .wahl-knopf { min-height: 54px; }
   }
   @media (max-width: 560px) {
-    .wt-zeile .wt-grafik { width: max(min(240px, 100%), min(100%, calc(var(--rest-h, 202px) * var(--wt-verh)))); }
+    /* Untergrenze 200 px breit (vorher 240): mit dem Hinweis nach einem Fehler ragte die Reise s4 18–38 px über den Rand
+       (LERN_Session47) */
+    .wt-zeile .wt-grafik { width: max(min(200px, 100%), min(100%, calc(var(--rest-h, 202px) * var(--wt-verh)))); }
     /* Reise mit fünf oder sechs Stationen (LERN_Session46: bis 65 px über dem Rand, die Grafik steht an der Untergrenze):
        Frage, Ablage und Stationen enger, Knöpfe 46 px */
     .wt-zeile .wt-grafik { margin-bottom: 4px; }
@@ -53,6 +55,15 @@
     /* Kläranlage der Reihe nach (Stufe 5, bis 12 px über dem Rand): Bild links neben der Frage */
     .frage-bild:has(+ .frage + .ablage) { float: left; margin: 0 6px 0 0; font-size: 40px; }
     .frage-bild + .frage + .ablage { clear: both; }
+    /* Alle sechs Stationen (s6): die volle Ablage war am Ende 236 px hoch, die Aufgabe ragte bis 65 px über den Rand
+       (LERN_Session47, gemessen nach jedem Handgriff) — Stationen kleiner und enger */
+    .frage-bild + .frage + .ablage { gap: 4px; padding: 4px; }
+    .frage-bild + .frage + .ablage > span { font-size: 15px; padding: 3px 8px; }
+    /* Stationen flacher: Bild kleiner, weniger Rand — mit dem Hinweis nach einem Fehler ragten s5 und s6 bis 26 px über
+       den Rand */
+    .frage-bild + .frage + .ablage + .wahl { gap: 6px; }
+    .frage-bild + .frage + .ablage + .wahl .wahl-knopf { padding: 6px 8px; gap: 2px; }
+    .frage-bild + .frage + .ablage + .wahl .wahl-knopf .bild { font-size: 26px; line-height: 1.1; }
     .wt-rechts .wahl-knopf { flex-direction: row; gap: 6px; }
     .wt-rechts .wahl-knopf .bild { font-size: 30px; }
   }
@@ -505,6 +516,8 @@ function zeigeKlaer(ctx, a) {
     el("div", { class: "frage", html: alle ? "Abwasser kommt in die Kläranlage. Tippe <b>alle Stationen</b> der Reihe nach, bis das Wasser wieder in die Natur fliesst."
       : `Abwasser fliesst durch die Kläranlage. Tippe diese ${a.reihe.length} Stationen <b>der Reihe nach</b>.` }));
   LS.reihenfolge(ctx, {
+    // Bild über dem Namen, nicht links: zu zweit neben dem Bild passten lange Namen wie „Belebungsbecken“ nicht (20 px
+    // seitlich über, getrennt mitten im Wort), eine Spalte wäre mit sechs Stationen 138 px zu hoch (LERN_Session47)
     reihe: a.reihe, pfeile: true, breite: 150,
     inhalt: t => { const k = KLAERANLAGE.find(x => x.text === t); return alle ? { bild: k.bild, text: k.text } : { bild: k.bild, text: k.text, klein: k.was }; },
     hinweis: "Zuerst kommt das Grobe aus dem Wasser, dann das Feine, ganz am Schluss der gelöste Schmutz.",

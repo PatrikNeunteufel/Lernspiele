@@ -418,7 +418,9 @@ function zeigeTag(ctx, a) {
   const e = ereignis(a.text);
   ctx.kennung(`tag|${a.text}`);
   ctx.flaeche.append(el("div", { class: "ez-erklaerung", text: TAG_SATZ }), el("div", { class: "frage", html: "<b>Um wie viel Uhr</b> geschieht das?" }), ereignisKarte(a.text, true));
-  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 170, inhalt: t => ({ text: t }),
+  // breite 140: die Uhrzeiten zu zweit auch auf dem Handy — einzeln untereinander ragte die Aufgabe mit dem Hinweis nach
+  // einem Fehler 14 px über den Rand (LERN-55, LERN_Session47)
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 140, inhalt: t => ({ text: t }),
     hinweis: `Die ganze Erdgeschichte sind ${dauerText(ERDALTER)}. Welcher Teil davon ist ${dauerText(jahreVon(e))}? So viel fehlt bis Mitternacht.`,
     loesung: LS.mitBildText(e.bild, a.richtig) });
 }
@@ -436,7 +438,9 @@ function zeigeAbstand(ctx, a) {
   const [x, y] = a.texte.map(ereignis);
   ctx.kennung(`abstand|${a.texte.join("|")}`);
   ctx.flaeche.append(el("div", { class: "frage", html: "Wie viel Zeit liegt <b>dazwischen</b>? Schätze!" }), ereignisKarte(x.text, true), ereignisKarte(y.text, true));
-  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 190, inhalt: d => ({ text: `etwa ${dauerText(d)}` }),
+  // breite 150: zwei Antworten nebeneinander auch auf dem Handy (je zwei Zeilen) — einzeln untereinander ragte s6 mit dem
+  // Hinweis nach einem Fehler 19 px über den Rand (LERN-55, LERN_Session47)
+  LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, breite: 150, inhalt: d => ({ text: `etwa ${dauerText(d)}` }),
     hinweis: "Rechne grob: die grössere Zeit minus die kleinere. Achte auf Millionen und Tausende!",
     loesung: `${dauerText(jahreVon(x))} − ${dauerText(jahreVon(y))} = ${dauerText(a.richtig)}` });
 }

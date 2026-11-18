@@ -1985,13 +1985,27 @@ const LS = (() => {
     feld.scrollTop = stelle;
   }
   /** Macht feld zum Lesetext; das Spiel ruft es, wenn die Aufgabe ganz steht. */
+  // Neu auch, wenn sich die Bühne ändert (wie restHoehe): wächst nach einem Fehler die Sprechblase (der Hinweis steht immer
+  // ganz, BH2 a), schob sie die Antworten bisher unter den Rand — Kakao-Weg s3 bis 21 px (LERN-55, LERN_Session47). Das
+  // eigene Nachmessen ändert die Bühne höchstens einmal; danach ist die Höhe dieselbe, und es kommt keine Meldung mehr.
+  let lesetextBeobachter = null;
+  let lesetextLaeuft = false;
+  const lesetexteMessen = () => {
+    if (lesetextLaeuft) return;
+    lesetextLaeuft = true;
+    try { lesetexte.forEach(lesetextHoehe); } finally { lesetextLaeuft = false; }
+  };
   function lesetext(feld) {
     feld.classList.add("lesetext");
     lesetexte.add(feld);
     lesetextHoehe(feld);
     setTimeout(() => lesetextHoehe(feld), 0);
+    if (!lesetextBeobachter && typeof ResizeObserver !== "undefined") {
+      const buehne = document.querySelector(".buehne");
+      if (buehne) (lesetextBeobachter = new ResizeObserver(lesetexteMessen)).observe(buehne);
+    }
   }
-  addEventListener("resize", () => lesetexte.forEach(lesetextHoehe));
+  addEventListener("resize", lesetexteMessen);
 
   // ---------- Restliche Höhe (GR1 a, Wunsch an den Rahmen aus BH3, LERN_Session45) ----------
   // Eine Grafik oder ein Spielfeld soll so gross sein, wie die Aufgabe Platz übrig lässt. Statt je Spiel zu schätzen,

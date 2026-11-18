@@ -22,6 +22,9 @@
   .modell .teil.voll { fill: var(--deko-2); }
   .modell.klickbar .teil { cursor: pointer; }
   .modell-kreis { width: min(240px, 60vw); }
+  /* Kreis zum Ablesen nach der Bildhöhe (quadratisch), höchstens wie bisher, mindestens 180 px: mit dem Hinweis nach einem
+     Fehler ragte s1–s4 auf dem Handy 15 px über den Rand (LERN-55, LERN_Session47). Zum Antippen bleibt er fest. */
+  .modell-kreis:not(.klickbar) { width: max(min(180px, 60vw), min(240px, 60vw, var(--rest-h, 240px))); }
   /* nach der Bildhöhe, damit „Fertig“ im Bild bleibt (LERN-55, Laptop s5 vorher 27 px darunter). Seit LERN_Session45
      aus --rest-h (LS.restHoehe misst die Höhe, die die Aufgabe übrig lässt) mal --seite, dem Seitenverhältnis der
      viewBox aus modellEl; vorher geschätzt 100vh − 410px mal 1,43 (das höchste Modell, 528 : 368) für jeden Streifen */
@@ -277,8 +280,10 @@ function modellEl(art, n, voll, klickbar = false) {
   return svg;
 }
 
-/** Einzelner Streifen: Grösse nach der restlichen Höhe (--rest-h, LERN_Session45); Kreis und Paar haben feste Grössen. */
-const streifenNachRest = svg => (svg.classList.contains("modell-streifen") ? LS.restHoehe(svg) : svg);
+/** Einzelner Streifen und Kreis zum Ablesen: Grösse nach der restlichen Höhe (--rest-h, LERN_Session45, Kreis seit
+    LERN_Session47); der Kreis zum Antippen und das Paar haben feste Grössen. */
+const streifenNachRest = svg => (svg.classList.contains("modell-streifen")
+  || (svg.classList.contains("modell-kreis") && !svg.classList.contains("klickbar")) ? LS.restHoehe(svg) : svg);
 
 // ---------- Hinweise (verraten die Lösung nicht) ----------
 

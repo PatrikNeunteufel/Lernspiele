@@ -40,6 +40,11 @@
   @media (max-width: 560px) and (max-height: 700px) {
     .frage:has(+ .ablage) { font-size: 17px; line-height: 1.25; margin-bottom: 6px; }
     .ablage:has(+ .ew-kurz) { min-height: 48px; margin-bottom: 8px; padding: 4px; }
+    /* Gelegte Teile kleiner: mit neun Teilen war die Ablage am Ende so hoch, dass die Aufgabe nach dem letzten Handgriff
+       67 px über den Rand ragte (LERN-55, LERN_Session47, gemessen nach jedem Handgriff) */
+    .ablage:has(+ .ew-kurz) { gap: 3px 4px; }
+    .ablage:has(+ .ew-kurz) > span { font-size: 14px; padding: 3px 6px; }
+    .ablage:has(+ .ew-kurz) > .pfeil { padding: 0; }
     .ablage + .ew-kurz { gap: 6px 8px; }
     .ablage + .ew-kurz .wahl-knopf { min-height: 46px; padding: 3px 6px; gap: 0; line-height: 1.15; }
     .ablage + .ew-kurz .wahl-knopf .bild { font-size: 22px; line-height: 1.05; }
@@ -50,6 +55,11 @@
     .kette:has(> :nth-child(8)) .glied .bild { font-size: 22px; }
     .anfang:has(+ .kette) { margin-bottom: 2px; }
     .kette:has(> :nth-child(8)) + .frage { font-size: 17px; line-height: 1.25; margin-bottom: 6px; }
+    /* „Ein Wandler passt nicht“ (s4–s6): Wandler flacher wie beim Ordnen — mit dem Hinweis nach einem Fehler (drei Zeilen)
+       ragte die Aufgabe bis 33 px über den Rand (LERN_Session47) */
+    .kette + .frage + .ew-kurz { gap: 6px 8px; }
+    .kette + .frage + .ew-kurz .wahl-knopf { min-height: 46px; padding: 3px 6px; gap: 0; line-height: 1.15; }
+    .kette + .frage + .ew-kurz .wahl-knopf .bild { font-size: 22px; line-height: 1.05; }
   }
   @media (max-height: 820px) and (min-width: 561px) { /* niedrig und breit: Bild links neben dem Namen */
     .ew-kurz .wahl-knopf { flex-direction: row; gap: 8px; min-height: 56px; }

@@ -9,6 +9,14 @@
 <link rel="stylesheet" href="../gemeinsam/stil.css">
 <style>
   .frage { text-align: center; font-size: clamp(20px, 4.4vw, 28px); font-weight: 800; margin: 4px 0 12px; }
+  /* „Wie kommen die Jungen zur Welt?“ auf dem Handy: Karte kleiner, die drei Körbe in einer Reihe — mit dem Hinweis nach
+     einem Fehler (drei Sätze) ragte die Aufgabe 12 px über den Rand (LERN-55, LERN_Session47) */
+  @media (max-width: 560px) {
+    .korb-karte .bild { font-size: 48px; }
+    .korb-karte b { font-size: 24px; }
+    .korb-reihe:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .korb-reihe .korb-knopf { padding: 8px 4px; }
+  }
 </style>
 </head>
 <body>

@@ -47,7 +47,9 @@
     .gk .wahl.bild-links-eng .wahl-knopf { min-height: 44px; padding-inline: 6px; column-gap: 6px; }
     .gk .wahl:has(> :nth-child(5)) { gap: 6px; }
     .gk .frage:has(+ .gk-merkmale) { margin-bottom: 4px; }
-    .gk-merkmale { margin-bottom: 6px; }
+    /* engere Zeilen: mit dem Hinweis nach einem Fehler ragte s6 noch 16 px über den Rand (LERN_Session47) */
+    .gk-merkmale { margin-bottom: 6px; line-height: 1.25; }
+    .gk-merkmale li { padding: 1px 0; }
     /* Merkmal-Karte (s4): fünf Körbe mit Bild links, Karte enger — in drei Reihen zu 96 px ragte die Aufgabe 77 px
        unter den Rand */
     .gk .korb-reihe { gap: 8px; }

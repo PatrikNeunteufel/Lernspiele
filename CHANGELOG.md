@@ -2799,3 +2799,22 @@
     Energie-Wandler s6 43 px, Kakao-Weg s3 21, Bruch-Werkstatt s1–s4 15, Erdzeit-Leiter s5 14, Lebenszyklus s3/s4 12.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad hoer-geschichte gedicht-baukasten laerm-waechter auge-entdecker „Keine
   Fehler.“
+- Kleine Überläufe (LERN-55, `--schritte`, alle Stufen und Flächen):
+  - Rahmen: `LS.lesetext` misst auch neu, wenn sich die Bühne ändert (wie `restHoehe`) — die wachsende Sprechblase nach
+    einem Fehler schob sonst die Antworten unter den Rand (Kakao-Weg s3 21 px). Wirkt in Figuren-Spiegel,
+    Gattungs-Kenner, Kakao-Weg, Korrektur-Stift, Sachtext-Spurensuche. rahmen.md 4.3.
+  - Bruch-Werkstatt (bruch-werkstatt): Kreis zum Ablesen nach der Bildhöhe (180–240 px), zum Antippen fest (15 px → im Bild).
+  - Erdzeit-Leiter (erdzeit-leiter): Uhrzeiten (`breite` 140) und Zeitspannen (150) zu zweit (14 und 19 px → im Bild).
+  - Lebenszyklus (lebenszyklus): „Wie kommen die Jungen zur Welt?“ auf dem Handy mit kleiner Karte, drei Körbe in einer
+    Reihe (12 px → im Bild).
+  - Wassertropfen-Reise (wassertropfen-reise): Reise-Grafik Untergrenze 200 statt 240 px (s4 38 → im Bild); Kläranlage
+    Stationen flacher (kleines Bild über dem Namen; Bild links probiert und verworfen: „Belebungsbecken“ lief seitlich
+    über und brach mitten im Wort, eine Spalte war mit sechs Stationen 138 px zu hoch), volle Ablage enger (s6 am Ende
+    65 px → höchstens 18 px nach dem ersten richtigen Handgriff).
+  - Energie-Wandler (energie-wandler): gelegte Teile der Kette kleiner (s6 am Ende 67 px → im Bild); „Ein Wandler passt
+    nicht“ mit flachen Wandlern (33 px → im Bild).
+  - Gattungs-Kenner (gattungs-kenner): Merkmale mit engeren Zeilen (s6 16 px → im Bild).
+  - Nachgemessen: keine Grafik geschrumpft, nichts seitlich; übrig Erdzeit-Leiter s5 6 px und Wassertropfen-Reise s6
+    18 px (je nach einem Handgriff).
+- Tests: Skripte „Keine Fehler.“, Eulenpfad wassertropfen-reise erdzeit-leiter gattungs-kenner energie-wandler
+  bruch-werkstatt lebenszyklus kakao-weg figuren-spiegel korrektur-stift sachtext-spurensuche „Keine Fehler.“
