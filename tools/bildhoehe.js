@@ -1,7 +1,7 @@
 // Misst, ob die ganze Aufgabe ohne Scrollen ins Bild passt (Entscheid BH1 a, LERN_Session13).
 // Aufruf: node tools/bildhoehe.js [Basis-URL, Vorgabe http://localhost:8765] [spiel-id …]
 //         [--stufen=s1,s3,s6] [--geraete=handy-sicht,tablet-sicht,quer-sicht,laptop-sicht] [--ziehungen=5] [--css=datei.css] [--json=datei.json]
-//         [--port=9334] [--text="Welche Beschreibung passt"] [--arten=liste.json]
+//         [--port=9334] [--text="Welche Beschreibung passt"] [--arten=liste.json] [--schritte]
 // Der Server muss das Repo ausliefern (server_starten.bat oder python tools/server.py 8765).
 //
 // Chrome läuft ohne Fenster mit einem eigenen, leeren Profil (wie tools/anleitung_bilder.js): Ein Messkind wird
@@ -11,7 +11,8 @@
 // (zum Ausprobieren, ohne den Code zu ändern). --text misst nur Aufgaben, deren Text das Muster enthält (eine
 // Aufgabenart gezielt; Spiele ohne diese Art melden „keine Aufgabe mit dem Text gezogen“). --arten misst viele Arten in
 // einem Lauf: eine JSON-Liste [{ id, stufe, text }], je Eintrag wie --text, Stufen und Spiele aus der Liste; gemeldet
-// wird je Art. Ende mit Code 1, wenn eine Seite seitlich überläuft.
+// wird je Art. --schritte spielt jede Aufgabe weiter und misst nach jedem Handgriff (ZU1 a, siehe SCHRITTE). Ende mit
+// Code 1, wenn eine Seite seitlich überläuft.
 "use strict";
 const { spawn } = require("child_process");
 const fs = require("fs");
@@ -58,6 +59,7 @@ let BASIS = "http://localhost:8765";
 for (const a of process.argv.slice(2)) {
   const m = a.match(/^--(\w+)=(.*)$/);
   if (m) opt[m[1]] = m[2];
+  else if (a === "--schritte") opt.schritte = true;
   else if (/^https?:/.test(a)) BASIS = a.replace(/\/$/, "");
   else nurSpiele.push(a);
 }
@@ -71,6 +73,14 @@ const MAX_VERSUCHE = 25;
 // einmal; je Art ein eigener Lauf mit --text wäre ein Browserstart je Art). Je Eintrag { id, stufe, text }.
 const ARTEN = opt.arten ? JSON.parse(fs.readFileSync(opt.arten, "utf8")) : null;
 const ZIEHUNGEN = Math.max(1, Number(opt.ziehungen) || 1);
+// --schritte (Entscheid ZU1 a, LERN_Session47): Die Messung beim Laden sah nur den Anfang einer Aufgabe — spätere Schritte
+// (Sachaufgaben-Kompass bis 255 px) und wachsende Ablagen (Kakao-Weg 641 px) fielen erst mit eigenen Skripten auf. Mit
+// --schritte spielt jede Ziehung ihre Aufgabe mit LS.pruefung.zug weiter: ein falscher Handgriff, dann richtige bis zum
+// Lösen, nach jedem ZUG_MS warten und messen; gemeldet wird der höchste Stand. Spiele, die keinen Zug melden, nennt die
+// Auswertung (sie brauchen ctx.testZug oder opt.erwartet an der Tastatur).
+const SCHRITTE = !!opt.schritte;
+const ZUG_MS = 700;   // Wackeln, Fliegen und Hinweis sind dann vorbei
+const MAX_ZUEGE = 60; // Schutz vor einem Zug, der nichts bewirkt
 const PORT = Number(opt.port);
 const BROWSER = [
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -105,9 +115,9 @@ const MESSEN = (auftraege, css) => `
     let versuche = 1;
     f.onload = () => {
       if (${JSON.stringify(css)}) { const s = f.contentDocument.createElement("style"); s.textContent = ${JSON.stringify(css)}; f.contentDocument.head.append(s); }
-      setTimeout(() => {
+      setTimeout(async () => {
         try {
-          const d = f.contentDocument, se = d.scrollingElement, t = d.querySelector(".tastatur");
+          const d = f.contentDocument, se = d.scrollingElement;
           // --text/--arten: nur Aufgaben mit diesem Text zählen — sonst neu laden (höchstens ${MAX_VERSUCHE}-mal je Ziehung)
           // Leerraum zusammengezogen wie im Feld text (LERN_Session45: Titel und Text stehen auf zwei Zeilen — ein
           // Muster „Der Igel Der Igel“ aus --json kam mit dem rohen innerText nie)
@@ -120,7 +130,8 @@ const MESSEN = (auftraege, css) => `
             d.documentElement.classList.remove("mit-tasten");
             d.querySelectorAll(".marke-platz").forEach(k => k.classList.remove("marke-platz"));
           }
-          __bh.erg.push({ ...a, art: a.text, versuche, ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
+          // Ein Stand der Seite; mit --schritte nach jedem Zug neu (ZU1 a)
+          const messe = () => { const t = d.querySelector(".tastatur"); return { ueber: se.scrollHeight - a.h, seitlich: se.scrollWidth - a.w,
             gesperrt: /noch nicht freigegeben|erst anmelden/i.test(d.body.innerText), tastatur: !!t,
             // Liegt die Zifferntastatur ganz im Bild (ohne zu scrollen)?
             tastaturImBild: t ? t.getBoundingClientRect().bottom <= a.h + 1 : null,
@@ -163,7 +174,33 @@ const MESSEN = (auftraege, css) => `
               if (!k) return "";
               return [...k.querySelectorAll(":scope > *")].filter(x => !x.classList.contains("tipp-zeile"))
                 .map(x => x.innerText).join(" ").replace(/\\s+/g, " ").trim().slice(0, 100);
-            })() });
+            })() }; };
+          const staende = [messe()];
+          // --schritte (ZU1 a): die Aufgabe mit den Zügen des Rahmens (LS.pruefung.zug) weiterspielen — zuerst ein falscher
+          // Handgriff (Hinweis nach einem Fehler), dann richtige bis zum Lösen — und nach jedem messen. Zu Ende ist die
+          // Aufgabe mit „richtig“, mit der aufgelösten Lösung oder wenn schon die nächste gestellt ist.
+          const zug = { zuege: 0, falschZug: false, geloest: false };
+          if (a.schritte) {
+            // LS ist ein const der Seite, keine Eigenschaft von window
+            const P = f.contentWindow.eval("typeof LS === 'undefined' ? null : LS.pruefung");
+            let ende = false;
+            if (P) P.haken = (art, x) => { if (art === "richtig" || art === "gestellt" || (art === "falsch" && x.aufgeloest)) ende = true; };
+            if (P && P.zug(false)) { zug.falschZug = true; await new Promise(r => setTimeout(r, ${ZUG_MS})); staende.push(messe()); }
+            while (P && !ende && zug.zuege < ${MAX_ZUEGE} && P.zug(true)) {
+              zug.zuege++;
+              await new Promise(r => setTimeout(r, ${ZUG_MS}));
+              staende.push(messe());
+            }
+            zug.geloest = ende;
+          }
+          const hoechst = k => Math.max(...staende.map(s => s[k]));
+          const mitT = staende.filter(s => s.tastatur);
+          let schritt = 0;
+          staende.forEach((s, i) => { if (s.aufgabe > staende[schritt].aufgabe) schritt = i; });
+          __bh.erg.push({ ...a, art: a.text, versuche, ...staende[0], ueber: hoechst("ueber"), seitlich: hoechst("seitlich"),
+            aufgabe: hoechst("aufgabe"), tastatur: mitT.length > 0, tastaturImBild: mitT.length ? mitT.every(s => s.tastaturImBild) : null,
+            // Text des Stands mit der höchsten Aufgabe, Schritt 0 = beim Laden
+            text: staende[schritt].text, ...(a.schritte ? { ...zug, schritt } : {}) });
         } catch (e) { __bh.erg.push({ ...a, art: a.text, fehler: String(e) }); }
         f.remove(); __bh.fertig++; fertig();
       }, 1500);
@@ -223,12 +260,12 @@ async function main() {
       if (fremd.length) throw new Error(`Unbekannte Spiele in ${opt.arten}: ${[...new Set(fremd.map(x => x.id))].join(", ")}`);
       for (const x of ARTEN.filter(x => !nurSpiele.length || nurSpiele.includes(x.id)))
         for (const g of geraete)
-          for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: x.id, pfad: pfad.get(x.id), stufe: x.stufe, text: x.text, geraet: g, ziehung: z, ...GERAETE[g] });
+          for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: x.id, pfad: pfad.get(x.id), stufe: x.stufe, text: x.text, geraet: g, ziehung: z, schritte: SCHRITTE, ...GERAETE[g] });
     } else
       for (const s of spiele.filter(s => !nurSpiele.length || nurSpiele.includes(s.id)))
         for (const stufe of stufen.filter(st => s.stufen.includes(st)))
           for (const g of geraete)
-            for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: s.id, pfad: s.pfad, stufe, text: TEXT, geraet: g, ziehung: z, ...GERAETE[g] });
+            for (let z = 0; z < ZIEHUNGEN; z++) auftraege.push({ id: s.id, pfad: s.pfad, stufe, text: TEXT, geraet: g, ziehung: z, schritte: SCHRITTE, ...GERAETE[g] });
     console.log(`Miss ${auftraege.length / ZIEHUNGEN} Seiten je ${ZIEHUNGEN}-mal (${geraete.join(", ")}; ` +
       `${ARTEN ? `${ARTEN.length} Arten aus ${opt.arten}` : "Stufen " + stufen.join(" ")})${CSS ? " mit " + opt.css : ""}${TEXT && !ARTEN ? ` nur Aufgaben mit «${TEXT}»` : ""} …`);
     await js(MESSEN(auftraege, CSS));
@@ -274,6 +311,9 @@ function zusammenfassen(erg) {
       tastaturImBild: imBild.length ? imBild.every(Boolean) : null,
       grafiken: gut.flatMap(e => e.grafiken || []),
       ziehungen: gut.length, aufgabeUeber: gut.filter(e => e.aufgabe > 2).length,
+      // --schritte: kein Zug in keiner Ziehung, wie oft zu Ende gespielt, Schritt der höchsten Aufgabe
+      ...(SCHRITTE ? { ohneZug: gut.every(e => !e.zuege && !e.falschZug), geloest: gut.filter(e => e.geloest).length,
+        schritt: gut.reduce((b, e) => (e.aufgabe > b.aufgabe ? e : b)).schritt } : {}),
     };
   });
 }
@@ -326,12 +366,22 @@ function auswerten(erg, geraete, stufen) {
     }
     process.exitCode = 1;
   }
+  // --schritte (ZU1 a): Seiten ohne Zug sind nur beim Laden gemessen; nicht zu Ende gespielt heisst, ein späterer Schritt
+  // meldet keinen Zug (dort fehlt ctx.testZug oder opt.erwartet)
+  if (SCHRITTE) {
+    const ohne = [...new Set(zaehlbar.filter(e => e.ohneZug).map(e => e.id))];
+    const halb = zaehlbar.filter(e => !e.ohneZug && e.geloest < e.ziehungen);
+    console.log(`\nMit --schritte: ${ohne.length} Spiele ohne Zug (nur beim Laden gemessen)${ohne.length ? ": " + ohne.join(", ") : ""}`);
+    console.log(`Nicht in jeder Ziehung zu Ende gespielt: ${halb.length} Seiten${halb.length ? ", " + [...new Set(halb.map(e => e.id + " " + e.stufe))].join(", ") : ""}`);
+  }
   // BH1 a zählt die Aufgabe selbst (ohne Tipp-Zeile): je Seite der höchste Wert und in wie vielen Ziehungen (BW1 a)
   const aufgabeUeber = zaehlbar.filter(e => e.aufgabe > 2).sort((a, b) => b.aufgabe - a.aufgabe);
   if (aufgabeUeber.length) {
-    console.log(`\nAufgabe selbst über dem Rand (ohne Tipp-Zeile; höchster Wert, in wie vielen von ${ZIEHUNGEN} Ziehungen):`);
+    console.log(`\nAufgabe selbst über dem Rand (ohne Tipp-Zeile; höchster Wert, in wie vielen von ${ZIEHUNGEN} Ziehungen` +
+      `${SCHRITTE ? "; Stand: 0 = beim Laden, 1 = nach dem falschen Handgriff, danach je richtiger einer" : ""}):`);
     for (const e of aufgabeUeber)
-      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.aufgabe).padStart(4)} px  ${e.aufgabeUeber} von ${e.ziehungen}${ARTEN ? `  «${e.art}»` : ""}`);
+      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.aufgabe).padStart(4)} px  ${e.aufgabeUeber} von ${e.ziehungen}` +
+        `${SCHRITTE ? `  Stand ${e.schritt}` : ""}${ARTEN ? `  «${e.art}»` : ""}`);
   }
   const je = new Map();
   for (const e of zaehlbar.filter(e => e.ueber > 2 || e.seitlich > 2)) {

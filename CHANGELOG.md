@@ -2749,3 +2749,19 @@
 - **Abschluss:** Report `docs/eulenpfad/report/LERN_Session46_2026-11-17.md`, Handover nachgeführt (LERN-55 zu Ende
   geführt: Handy 61 → 4, Tablet hoch 9 → 1, Laptop 8 → 0 Spiele mit der Aufgabe über dem Rand; voller Lauf auf `8f58c33`
   „Keine Fehler.“; weiter mit Push, Vollbild prüfen, Sudokus, Werkzeug für spätere Schritte).
+
+## 2026-11-18 — LERN_Session47
+- ⛶ Vollbild von Patrik im eigenen Browser geprüft: nichts Störendes (offen seit LERN_Session45).
+- Spätere Schritte einer Aufgabe messen (Entscheid ZU1 a, LERN-55): Zählung vorab über alle Spiele (Ersatz-DOM,
+  Zufallsklicks, nur im Scratchpad) — 85 Spiele ändern die Aufgabe vor dem Lösen sichtbar, 46 offen, weil Zufallsklicks
+  sie selten lösen (Sachaufgaben-Kompass 0 von 102, Sudokus 0 von 30), 44 ohne.
+- Rahmen (`spiel.js`): `LS.pruefung.zug(richtig)` macht den nächsten richtigen oder falschen Handgriff der laufenden
+  Aufgabe; `ctx.testZug(fn)` für eigene Knöpfe; Auswahl, Reihenfolge und Körbe melden ihre Züge selbst, die Tastatur mit
+  der neuen Option `opt.erwartet`. Die Liste leert der Rahmen vor jedem Zeichnen; kein Kind kann sie auslösen.
+- `tools/bildhoehe.js --schritte`: spielt jede Ziehung weiter (ein falscher, dann richtige Handgriffe bis zum Lösen) und
+  misst nach jedem; meldet den höchsten Stand mit `Stand`, dazu Spiele ohne Zug und nicht zu Ende gespielte Seiten.
+  Erste Messung aller Spiele (Handy, s1/s3/s6, eine Ziehung): 54 Spiele ganz gespielt, 44 in einem Teil der Stufen,
+  76 ohne Zug, 1 mit einem späteren Schritt ohne Zug; neu gefunden Au café (au-cafe) s6 202 px nach 6 Handgriffen und
+  Geschichten-Ordner (geschichten-ordner) s6 154 px nach 5. rahmen.md 4.2, 4.3 und 20.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad anlaut-angel tier-sortierer kakao-weg zahlenmauer sachaufgaben-kompass
+  glace-kombinator „Keine Fehler.“

@@ -1928,6 +1928,18 @@ const LS = (() => {
     t.addEventListener("pointerdown", e => { if (e.target.closest("button") && notizImFokus()) e.preventDefault(); });
     t.addEventListener("mousedown", e => { if (e.target.closest("button") && notizImFokus()) e.preventDefault(); });
 
+    // ZU1 a: Mit opt.erwartet (Zahl, Text wie „3.0“ oder Funktion, die eins davon gibt) tippt der Zug den Wert samt OK
+    // ein, falsch einen um 1 grösseren; ohne erwartet kennt die Tastatur keinen Zug.
+    zugMelden(richtig => {
+      if (opt.erwartet === undefined || api.gesperrt || !zugImBild(t)) return false;
+      const w = typeof opt.erwartet === "function" ? opt.erwartet() : opt.erwartet;
+      if (w === null || w === undefined || w === "") return false;
+      const s = richtig ? String(w) : String(Number(w) + 1);
+      api.leeren();
+      for (const z of s) if (z === "." || z === ",") api.zeichen(); else if (/[0-9]/.test(z)) api.tippe(z);
+      api.ok();
+      return true;
+    });
     aktiveTastatur = api;
     zeige();
     return api;
@@ -2395,6 +2407,7 @@ const LS = (() => {
     if (opt.breite) box.style.setProperty("--wahl-breite", opt.breite + "px");
     bildLinks(box, opt.bildLinks);
     let fertig = false;
+    const knoepfe = []; // [wert, Knopf] für den Zug (ZU1 a)
     for (const wert of opt.optionen) {
       const k = el("button", { type: "button", class: "wahl-knopf" });
       wahlInhalt(k, opt.inhalt ? opt.inhalt(wert) : String(wert));
@@ -2413,7 +2426,16 @@ const LS = (() => {
         if (ctx.vorbei()) fertig = true;
       });
       box.append(k);
+      knoepfe.push([wert, k]);
     }
+    // ZU1 a: richtig = der Knopf mit opt.richtig, falsch = ein anderer, noch nicht gewählter
+    zugMelden(richtig => {
+      if (fertig || !zugImBild(box)) return false;
+      const k = knoepfe.find(([w, x]) => (richtig ? w === opt.richtig : w !== opt.richtig && !x.classList.contains("gewaehlt")))?.[1];
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     ctx.flaeche.append(box);
     kurztasten(box);
     return box;
@@ -2435,6 +2457,7 @@ const LS = (() => {
     bildLinks(box, opt.bildLinks);
     let pos = 0;
     let fertig = false;
+    const knoepfe = []; // [wert, Knopf] für den Zug (ZU1 a)
     for (const wert of mische(opt.reihe)) {
       const k = el("button", { type: "button", class: "wahl-knopf" });
       wahlInhalt(k, opt.inhalt ? opt.inhalt(wert) : String(wert));
@@ -2456,7 +2479,16 @@ const LS = (() => {
         if (ctx.vorbei()) fertig = true;
       });
       box.append(k);
+      knoepfe.push([wert, k]);
     }
+    // ZU1 a: richtig = ein noch freies Teil mit dem Wert, der an der Reihe ist; falsch = ein freies mit einem anderen
+    zugMelden(richtig => {
+      if (fertig || !zugImBild(box)) return false;
+      const k = knoepfe.find(([w, x]) => !x.classList.contains("gewaehlt") && (w === opt.reihe[pos]) === richtig)?.[1];
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     ctx.flaeche.append(ablage, box);
     kurztasten(box);
     return { ablage, box };
@@ -2539,6 +2571,7 @@ const LS = (() => {
       opt.karte.bild ? bild(opt.karte.bild) : null, el("b", { text: opt.karte.text }));
     const box = el("div", { class: "korb-reihe" });
     let fertig = false;
+    const knoepfe = []; // [wert, Korb] für den Zug (ZU1 a)
     opt.koerbe.forEach((wert, i) => {
       const k = el("button", { type: "button", class: "korb-knopf" });
       wahlInhalt(k, opt.korbInhalt ? opt.korbInhalt(wert) : String(wert));
@@ -2558,6 +2591,15 @@ const LS = (() => {
         if (ctx.vorbei()) fertig = true;
       });
       box.append(k);
+      knoepfe.push([wert, k]);
+    });
+    // ZU1 a: richtig = der Korb opt.richtig, falsch = ein anderer
+    zugMelden(richtig => {
+      if (fertig || !zugImBild(box)) return false;
+      const k = knoepfe.find(([w]) => (w === opt.richtig) === richtig)?.[1];
+      if (!k) return false;
+      k.click();
+      return true;
     });
     ctx.flaeche.append(karte, box);
     kurztasten(box);
@@ -3373,6 +3415,12 @@ const LS = (() => {
           /** Lösung der Aufgabe gleich beim Zeichnen nennen (Text wie loesungText); zeigt sie nur die Testhilfe. */
           loesung(text) { loesungVorab = text || null; },
           /**
+           * Nächster Handgriff für Werkzeuge (ZU1 a): fn(richtig) macht einen richtigen (true) oder falschen (false)
+           * Handgriff mit den eigenen Knöpfen des Spiels und gibt true, wenn es etwas getan hat. Die Bausteine melden
+           * ihre selbst; ein Spiel ruft es dort, wo es eigene Knöpfe oder Felder zeichnet, auch in einem späteren Schritt.
+           */
+          testZug(fn) { zugMelden(fn); },
+          /**
            * Woran diese Aufgabe zu erkennen ist, wenn man es nicht sieht (Hör-Aufgaben: die Melodie).
            * Ohne Angabe nimmt der Rahmen Text und Bilder der Fläche; dient der Regel gegen Wiederholungen.
            */
@@ -3541,6 +3589,7 @@ const LS = (() => {
         wahl.neueSuche();
         for (let versuch = 0; ; versuch++) {
           gesagtBeimZeichnen = false;
+          zuege = []; // ZU1 a: Züge einer neu gezogenen Aufgabe gehören nur zu ihr
           def.aufgabe(ctx);
           const k = kennung(flaeche, loesungVorab, eigeneKennung);
           const messen = !!pruefung.zaehle?.(k); // nur das Testskript: weiter ziehen, nichts stellen
@@ -3796,7 +3845,23 @@ const LS = (() => {
    * Solange sie true gibt, zieht der Rahmen neu, ohne eine Aufgabe zu stellen — mit derselben Kennung wie gegen
    * Wiederholungen.
    */
-  const pruefung = { haken: null, zaehle: null };
+  const pruefung = { haken: null, zaehle: null, zug: richtig => naechsterZug(richtig) };
+
+  /**
+   * Züge der laufenden Aufgabe (Entscheid ZU1 a, LERN_Session47): Jeder Baustein und jedes Spiel mit eigenen Knöpfen
+   * meldet eine Funktion zug(richtig), die einen Handgriff macht — richtig (true) oder einen falschen (false) — und
+   * true gibt, wenn sie etwas getan hat; false, wenn sie nichts mehr zu tun weiss (fertig, nicht mehr im Bild, kein
+   * falscher Zug möglich). Der Rahmen leert die Liste vor jedem Zeichnen einer Aufgabe. pruefung.zug(richtig) fragt
+   * die zuletzt gemeldete zuerst: Ein späterer Schritt entsteht nach dem früheren. Nur für Werkzeuge
+   * (tools/bildhoehe.js --schritte); kein Kind kann sie auslösen.
+   */
+  let zuege = [];
+  const zugMelden = fn => { zuege.push(fn); };
+  function naechsterZug(richtig = true) {
+    for (let i = zuege.length - 1; i >= 0; i--) if (zuege[i](richtig)) return true;
+    return false;
+  }
+  const zugImBild = e => !!e && document.body.contains(e);
 
   /**
    * CSS-Klassen des Rahmens (Vertrag in docs/rahmen.md; einzige Liste, das Testskript liest sie hier).
