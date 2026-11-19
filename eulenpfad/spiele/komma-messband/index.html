@@ -415,6 +415,7 @@ LS.spiel({
     const wert = antwortWert(a);
     ctx.schritte(LS.tippSchritte(wert));
     const tasten = LS.tastatur({
+      erwartet: () => tausendstel(a.q, a.fam, a.ziel) / 1000,
       anzeige, maxStellen: 7, dezimal: true, nachkomma: a.fam === "geld" ? 2 : 3,
       onOk(w) {
         const kt = Math.round(w * 1000);

@@ -538,13 +538,15 @@ const farbfeld = f => { const s = el("span", { class: "qv-farbe", "aria-hidden":
 /**
  * Anzeige (mit Einheit daneben) und Zifferntastatur. pruefe(wert) liefert true (gelöst: Tastatur sperren,
  * ctx.richtig mit lob), "weiter" (Zwischenschritt richtig: Anzeige leeren) oder den Hinweis für ctx.falsch.
+ * erwartet: richtige Eingabe des laufenden Schritts für den Zug der Werkzeuge (ZU1 a; Zahl oder Funktion).
  */
-function tippfeld(ctx, qv, { einheit = "", dezimal = false, maxStellen = 5, loesung, lob, pruefe, notiz = null }) {
+function tippfeld(ctx, qv, { einheit = "", dezimal = false, maxStellen = 5, loesung, lob, pruefe, erwartet, notiz = null }) {
   const anzeige = el("div", { class: "anzeige leer", "aria-label": einheit ? `Antwort in ${einheit}` : "Antwort" });
   const zeile = el("div", { class: "qv-ergebnis" + (notiz ? " mit-notiz" : "") }, notiz, anzeige);
   if (einheit) zeile.append(el("span", { class: "qv-einheit", text: einheit }));
   qv.append(zeile);
   const tasten = LS.tastatur({
+    erwartet,
     anzeige, maxStellen, dezimal, nachkomma: 3,
     onOk(w) {
       if (ctx.vorbei()) return;
@@ -601,7 +603,7 @@ function zeigeZaehlen(ctx, a, qv) {
   qv.append(schritt, frage, bild(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)")));
   let stufe = 1;
   tippfeld(ctx, qv, {
-    einheit: "Würfel", maxStellen: 3, loesung, lob: `Genau, ${a.V} Würfel!`,
+    einheit: "Würfel", maxStellen: 3, loesung, erwartet: () => (stufe === 1 ? schicht : stufe === 2 ? a.h : a.V), lob: `Genau, ${a.V} Würfel!`,
     pruefe(w) {
       if (stufe === 1) {
         if (w !== schicht) return "Zähl die Würfel in der obersten Schicht: so viele in einer Reihe, mal so viele Reihen.";
@@ -632,7 +634,7 @@ function zeigeFehlen(ctx, a, qv) {
   // Notizen (NZ1 a): erst der ganze Quader — nach Stufe ab dem Klassenziel s3, hier also nur mit „immer“
   const notiz = notizZeile(ctx, stufeNr(ctx) >= 3, [["ganzer Quader:", "Würfel", "Würfel im ganzen Quader"]], { breite: 3 });
   tippfeld(ctx, qv, {
-    notiz, einheit: "Würfel", maxStellen: 3, loesung, lob: "Genau, dann ist der Quader voll!",
+    notiz, einheit: "Würfel", maxStellen: 3, loesung, erwartet: a.fehlt, lob: "Genau, dann ist der Quader voll!",
     pruefe(w) {
       if (w === a.fehlt) return true;
       if (w === a.V) return "Das ist der ganze Quader. Ein Teil ist schon drin — zieh ihn ab.";
@@ -652,7 +654,7 @@ function zeigeRechnen(ctx, a, qv) {
   qv.append(el("div", { class: "frage", text: `Wie viele Würfel hat der Quader? Er ist ${a.l} Würfel lang, ${a.b} Würfel breit und ${a.h} Würfel hoch.` }),
     bild(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h))));
   const notiz = notizZeile(ctx, stufeNr(ctx) >= 3, [[`eine Schicht ${a.l} · ${a.b} =`, "Würfel", "Würfel in einer Schicht"]], { breite: 3 });
-  tippfeld(ctx, qv, { notiz, einheit: "Würfel", maxStellen: 3, loesung, lob: "Richtig gerechnet!", pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
+  tippfeld(ctx, qv, { notiz, einheit: "Würfel", maxStellen: 3, loesung, erwartet: a.V, lob: "Richtig gerechnet!", pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
 }
 
 /** Hinweis für ein falsches Produkt Länge · Breite · Höhe (true, wenn richtig). */
@@ -675,7 +677,7 @@ function zeigeCm3(ctx, a, qv) {
   qv.append(el("div", { class: "frage", text: `Wie gross ist das Volumen? Der Quader ist ${mass(a.l, e)} lang, ${mass(a.b, e)} breit und ${mass(a.h, e)} hoch.` }),
     bild(glatterQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(mass(a.l, e), mass(a.b, e), mass(a.h, e)))));
   const notiz = notizZeile(ctx, stufeNr(ctx) >= 3, [[`Grundfläche ${a.l} · ${a.b} =`, `${e}²`, GRUNDFLAECHE]], { breite: 3 });
-  tippfeld(ctx, qv, { notiz, einheit: e3, maxStellen: 4, loesung, lob: `Genau, ${a.V} ${e3}!`, pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
+  tippfeld(ctx, qv, { notiz, einheit: e3, maxStellen: 4, loesung, erwartet: a.V, lob: `Genau, ${a.V} ${e3}!`, pruefe: w => hinweisProdukt(w, a.l, a.b, a.h, a.V) });
 }
 
 /** s3: Welche Einheit passt zum Gegenstand? Körbe cm³, dm³, m³. */
@@ -709,7 +711,7 @@ function zeigeUmrechnen(ctx, a, qv) {
   qv.append(el("div", { class: "frage", text: "Wandle um." }),
     el("div", { class: "rechnung", html: `${mass(a.wert, a.von)} = <span class="qv-gesucht">? ${a.zu}</span>` }));
   tippfeld(ctx, qv, {
-    einheit: a.zu, maxStellen: 5, loesung, lob: "Richtig umgewandelt!",
+    einheit: a.zu, maxStellen: 5, loesung, erwartet: a.antwort, lob: "Richtig umgewandelt!",
     pruefe(w) {
       if (w === a.antwort) return true;
       if (a.faktor === 1) return "Liter und dm³ sind gleich gross: Ein Liter ist ein Würfel mit 1 dm Kante.";
@@ -736,7 +738,7 @@ function zeigeZerlegen(ctx, a, qv) {
     bild(mitName(wuerfelQuader(a.l, a.b, a.h, "var(--deko-6)", marken3(a.l, a.b, a.h)), "gross", ...wuerfel("grossen")),
       mitName(koerperSvg({ l: q, b: r, h: s, plan: new Array(q * r).fill(s), farbe: "var(--deko-3)", u: 22, marken: marken3(q, r, s) }), "klein", ...wuerfel("kleinen"))));
   tippfeld(ctx, qv, {
-    einheit: "", maxStellen: 3, loesung, lob: "Genau, so oft passt er hinein!",
+    einheit: "", maxStellen: 3, loesung, erwartet: a.antwort, lob: "Genau, so oft passt er hinein!",
     pruefe(w) {
       if (w === a.antwort) return true;
       if (w === a.V) return "Das ist die Zahl der Würfel im grossen Quader. Gefragt ist, wie oft der kleine hineinpasst.";
@@ -780,7 +782,7 @@ function zeigeDezimal(ctx, a, qv) {
   const notiz = notizZeile(ctx, true, [[["in dm:", "", "Länge in dm", 3], ["·", "", "Breite in dm", 3], ["·", "", "Höhe in dm", 3]],
     ["Grundfläche:", "dm²", GRUNDFLAECHE]], { breite: 4, dezimal: true });
   tippfeld(ctx, qv, {
-    notiz, einheit: "dm³", dezimal: true, maxStellen: 4, loesung, lob: `Richtig: ${a.V} dm³ — das sind ${zahl(a.V)} Liter!`,
+    notiz, einheit: "dm³", dezimal: true, maxStellen: 4, loesung, erwartet: a.V, lob: `Richtig: ${a.V} dm³ — das sind ${zahl(a.V)} Liter!`,
     pruefe(w) {
       if (gleich(w, a.V)) return true;
       if (gleich(w, roh) && roh !== a.V) return "Du hast Zahlen mit verschiedenen Einheiten malgenommen. Wandle zuerst alle Kanten in dm um.";
@@ -808,7 +810,7 @@ function zeigeKante(ctx, a, qv) {
     bild(glatterQuader(a.kanten[0], a.kanten[1], a.kanten[2], "var(--deko-6)", marken)));
   const notiz = notizZeile(ctx, true, [[`Schicht ${andere[0]} · ${andere[1]} =`, `${e}²`, "Schicht aus den zwei bekannten Kanten"]], { breite: 4 });
   tippfeld(ctx, qv, {
-    notiz, einheit: e, maxStellen: 4, loesung, lob: "Richtig, die Kante stimmt!",
+    notiz, einheit: e, maxStellen: 4, loesung, erwartet: () => x, lob: "Richtig, die Kante stimmt!",
     pruefe(w) {
       if (w === x) return true;
       if (w === flaeche) return "Das ist die Schicht aus den zwei bekannten Kanten. Teile jetzt das Volumen durch diese Zahl.";
@@ -839,7 +841,7 @@ function zeigeZusammen(ctx, a, qv) {
   const notiz = notizZeile(ctx, true, [[`${a.lage === "oben" ? "unten" : "links"}:`, "cm³", "Volumen des ersten Quaders"],
     [`${a.lage === "oben" ? "oben" : "rechts"}:`, "cm³", "Volumen des zweiten Quaders"]], { breite: 4 });
   tippfeld(ctx, qv, {
-    notiz, einheit: "cm³", maxStellen: 4, loesung, lob: "Richtig, beide Quader zusammen!",
+    notiz, einheit: "cm³", maxStellen: 4, loesung, erwartet: a.V, lob: "Richtig, beide Quader zusammen!",
     pruefe(w) {
       if (w === a.V) return true;
       if (w === a.V1) return "Das ist nur der grosse Quader. Der kleine gehört auch zum Körper — zähl ihn dazu.";
@@ -870,7 +872,7 @@ function zeigeAquarium(ctx, a, qv) {
   const notiz = notizZeile(ctx, true, [...(inDm.length ? [inDm.map(([label], i) => [i ? "·" : inDm.length > 1 ? "in dm:" : `${inDm[0][1]} in dm:`, "", label, 3])] : []),
     ["Grundfläche:", "dm²", GRUNDFLAECHE]], { breite: 4, dezimal: true });
   tippfeld(ctx, qv, {
-    notiz, einheit: "l", dezimal: true, maxStellen: 4, loesung, lob: "Richtig, so viel Wasser ist drin!",
+    notiz, einheit: "l", dezimal: true, maxStellen: 4, loesung, erwartet: a.liter, lob: "Richtig, so viel Wasser ist drin!",
     pruefe(w) {
       if (gleich(w, a.liter)) return true;
       if (gleich(w, mitHoehe)) return "Du hast mit der Höhe des Aquariums gerechnet. Das Wasser steht aber nicht so hoch.";

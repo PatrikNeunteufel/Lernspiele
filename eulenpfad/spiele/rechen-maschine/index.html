@@ -401,6 +401,7 @@ function zahlAntwort(ctx, soll, loesung, hinweis) {
   const anzeige = el("div", { class: "anzeige leer rm-anzeige", "aria-label": "Deine Zahl" });
   ctx.flaeche.append(anzeige);
   const tasten = LS.tastatur({
+    erwartet: () => soll,
     anzeige, maxStellen: 5,
     onOk(w) {
       if (ctx.vorbei()) return;

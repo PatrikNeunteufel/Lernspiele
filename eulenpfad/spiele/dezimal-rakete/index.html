@@ -311,6 +311,7 @@ LS.spiel({
 
     const falle = rechtsbuendigFalsch(x);
     const tasten = LS.tastatur({
+      erwartet: () => gesucht / 1000,
       anzeige, maxStellen: 3, dezimal: true, nachkomma: x.geld ? 2 : 3,
       onOk(w) {
         const t = Math.round(w * 1000);

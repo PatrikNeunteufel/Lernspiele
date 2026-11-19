@@ -211,6 +211,7 @@ function eintippen(ctx, richtig, hinweis, loesungText) {
   ctx.schritte(LS.tippSchritte(richtig));
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:6px", "aria-label": "Deine Antwort" });
   const tasten = LS.tastatur({
+    erwartet: () => richtig,
     anzeige, maxStellen: 4,
     onOk(w) {
       if (w === richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}`); return; }

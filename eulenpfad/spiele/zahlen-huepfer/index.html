@@ -254,6 +254,7 @@ LS.spiel({
     }
 
     const tasten = LS.tastatur({
+      erwartet: () => zahlen[sprung],
       anzeige,
       maxStellen: 7,
       onOk(w) {

@@ -262,6 +262,7 @@ LS.spiel({
       const feld = ergZellen[i];
       feld.classList.add("aktiv", "leer");
       const tasten = LS.tastatur({
+        erwartet: x.r[i],
         anzeige: feld, maxStellen: 1,
         onOk(w) {
           if (w === x.r[i]) { LS.ton("tipp"); setzen(tasten, true); return; }
@@ -316,6 +317,7 @@ LS.spiel({
         spalte();
       };
       const tasten = LS.tastatur({
+        erwartet: c,
         anzeige: z, maxStellen: 1,
         onOk(w) {
           if (w === c) { LS.ton("tipp"); weiter(true); return; }

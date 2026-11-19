@@ -560,6 +560,7 @@ LS.spiel({
       else { ctx.serie("ding", a.s.ding); f.append(einzelSituation(a.s), el("div", { class: "frage" }, ...ereignisTeile(a.s, a.e))); }
       f.append(el("div", { class: "zahl-zeile auftrag" }, el("span", { text: "Chance:" }), anzeige, el("span", { text: `von ${a.n}` })));
       const tasten = LS.tastatur({
+        erwartet: () => a.k,
         anzeige, maxStellen: 2,
         onOk(w) {
           if (ctx.vorbei()) return;

@@ -138,6 +138,7 @@ LS.spiel({
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Ergebnis" });
     ctx.flaeche.append(anzeige);
     const tasten = LS.tastatur({
+      erwartet: () => a.richtig,
       anzeige,
       maxStellen: 4,
       onAenderung(w) { luecke.textContent = w === null ? "?" : zahlText(w); },

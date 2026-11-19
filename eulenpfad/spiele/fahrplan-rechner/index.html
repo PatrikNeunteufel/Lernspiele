@@ -603,6 +603,7 @@ function eingabe(ctx, a, loesung, notiz = null) {
     : typ === "uhrzeit" ? LS.tippSchritte(ziffernUhr(a.loesung))
     : typ === "dezimal" ? LS.tippSchritte(a.loesung / 100) : LS.tippSchritte(a.loesung));
   const tasten = LS.tastatur({
+    erwartet: () => (typ === "dezimal" ? a.loesung / 100 : typ === "dauer" ? ziffernDauer(a.loesung) : typ === "uhrzeit" ? ziffernUhr(a.loesung) : a.loesung),
     anzeige, maxStellen: typ === "dezimal" ? 2 : typ === "minuten" ? 3 : 4, dezimal: typ === "dezimal", nachkomma: 2,
     onAenderung(z) {
       if (z === null || typ === "minuten" || typ === "dezimal") return;

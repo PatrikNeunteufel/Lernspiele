@@ -2850,3 +2850,22 @@
   gemeinde-helfer instrumente „Keine Fehler.“
 - Voller Eulenpfad-Lauf auf `f935860` „Keine Fehler.“ (3906 s).
 - Abschluss: Report `docs/eulenpfad/report/LERN_Session47_2026-11-18.md`, Handover nachgeführt (Haltepunkt aufgelöst).
+
+## 2026-11-19 — LERN_Session48
+- Zug-Pakete (ZU1 a, LERN-55), Paket 1: Die 26 Spiele, die nur die Zifferntastatur nutzen, nennen `opt.erwartet`, damit
+  `tools/bildhoehe.js --schritte` ihre Aufgaben zu Ende spielt: Dezimal-Rakete (dezimal-rakete), Doppel-Spiegel
+  (doppel-spiegel), Einmaleins-Blitz (einmaleins-blitz), Fahrplan-Rechner (fahrplan-rechner; Uhrzeit, Dauer und
+  Dezimalstunden wie die Prüfung), Flächen-Pixel (flaechen-pixel), Flächenmass-Treppe (flaechenmass-treppe),
+  Komma-Messband (komma-messband), Masse-Umwandler (masse-umwandler), Muster-Fortsetzer (muster-fortsetzer),
+  Quader-Volumen (quader-volumen; `tippfeld` reicht `erwartet` durch, beim Zählen je Schritt Schicht, Schichten,
+  zusammen), Rechen-Maschine (rechen-maschine), Rechen-Rakete (rechen-rakete), Rechengeschichten (rechengeschichten),
+  Rechentrick-Detektiv (rechentrick-detektiv), Rest-Rätsel (rest-raetsel; Ergebnis und Rest), Schriftlich-Werkstatt
+  (schriftlich-werkstatt; je Spalte und Übertrag), Speicher-Leiter (speicher-leiter), Stufenzahl-Schieber
+  (stufenzahl-schieber), Velo-Tabelle (velo-tabelle), Zahlen-Hüpfer (zahlen-huepfer; je Seerose), Zahlen-Waage
+  (zahlen-waage), Zahlenhaus (zahlenhaus), Zahlenrätsel-Tresor (zahlenraetsel-tresor), Zehner-Ergänzer
+  (zehner-ergaenzer), Zeit-Schätzer (zeit-schaetzer), Zufalls-Skala (zufalls-skala).
+- Messung mit `--schritte` (die 26 Spiele, s1–s6, Handy, zwei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende
+  gespielt. Neu sichtbar, meist nach dem falschen Handgriff (Stand 1): Speicher-Leiter s6 103 px, Rechentrick-Detektiv
+  quer 88 px (Stand 2), Fahrplan-Rechner s2 78 px, Quader-Volumen s6 58 px, Flächen-Pixel s6 41 px, Komma-Messband s6
+  41 px und kleinere — für den Rest LERN-55 vorgemerkt.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad die 26 Spiele „Keine Fehler.“

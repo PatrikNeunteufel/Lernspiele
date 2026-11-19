@@ -206,6 +206,7 @@ LS.spiel({
     ctx.flaeche.append(anzeige);
     let fehlversuche = 0;
     const tasten = LS.tastatur({
+      erwartet: () => a.ergebnis,
       anzeige,
       maxStellen: 4,
       onOk(w) {

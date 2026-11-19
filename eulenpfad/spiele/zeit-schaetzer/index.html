@@ -474,6 +474,7 @@ function eingabe(ctx, zs, { soll, einheit, label, loesung, hinweis, maxStellen =
   const anzeige = el("div", { class: "anzeige leer", "aria-label": label });
   zs.append(el("div", { class: "zs-ergebnis" }, anzeige, el("span", { class: "zs-einheit", text: einheit })));
   const tasten = LS.tastatur({
+    erwartet: () => soll,
     anzeige, maxStellen,
     onOk(w) {
       if (w === soll) {

@@ -451,6 +451,7 @@ LS.spiel({
           ...Array.from({ length: teilrechnungen }, (_, i) => LS.notizFeld({ breite: 7, label: `Teilrechnung ${i + 1}` }))));
       schritt2.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => x.wert,
         anzeige, maxStellen: 7,
         onOk(w) {
           if (w === x.wert) {

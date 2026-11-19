@@ -208,6 +208,7 @@ LS.spiel({
     ctx.flaeche.append(el("div", { class: "start-zeile" }, bahn, inhalt));
 
     const tasten = LS.tastatur({
+      erwartet: () => x.ergebnis,
       anzeige,
       maxStellen: 7,
       onOk(w) {

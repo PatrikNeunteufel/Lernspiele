@@ -133,6 +133,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Gesuchte Zahl" });
       ctx.flaeche.append(anzeige, umkehrZeile);
       const tasten = LS.tastatur({
+        erwartet: () => x.a,
         anzeige, maxStellen: 5,
         onOk(w) {
           if (w === x.a) { tasten.gesperrt = true; anzeige.classList.add("richtig"); umkehrZeile.textContent = umkehr; ctx.richtig(); return; }
@@ -171,6 +172,7 @@ LS.spiel({
     const schritt = (feld, soll, hinweis, weiter) => {
       halter.innerHTML = "";
       const tasten = LS.tastatur({
+        erwartet: () => soll,
         anzeige: feld, maxStellen: 3,
         onAenderung: w => { if (w === null) feld.textContent = "?"; },
         onOk(w) {

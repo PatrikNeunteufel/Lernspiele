@@ -420,6 +420,7 @@ LS.spiel({
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
     f.append(el("div", { class: "ss-eingabe" }, anzeige));
     const tasten = LS.tastatur({
+      erwartet: () => gesucht / 1000,
       anzeige, maxStellen: p.hi + 1, dezimal: p.lo < 0, nachkomma: -p.lo,
       onAenderung: w => { if (p.live && !ctx.vorbei()) zeile.zeigeMilli(w === null ? null : Math.round(w * 1000)); },
       onOk(w) {
@@ -478,6 +479,7 @@ function sach(ctx, a) {
   ctx.flaeche.append(el("div", { class: "frage", text: "Rechne im Kopf." }), el("div", { class: "sachtext", text }),
     el("div", { class: "ss-eingabe" }, anzeige, el("span", { class: "ss-einheit", text: "Fr." })));
   const tasten = LS.tastatur({
+    erwartet: () => antwort / 100,
     anzeige, maxStellen: 5, dezimal: true, nachkomma: 2,
     onOk(w) {
       if (Math.round(w * 100) === antwort) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesung}`); return; }

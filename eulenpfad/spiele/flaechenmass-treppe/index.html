@@ -397,6 +397,7 @@ LS.spiel({
     const anzeige = el("div", { class: "anzeige leer", "aria-label": `Ergebnis in ${a.ziel}` });
     f.append(el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: a.ziel })));
     const tasten = LS.tastatur({
+      erwartet: () => a.L / 1000,
       anzeige, maxStellen: 9, dezimal: !!p.dezimal, nachkomma: 2,
       onOk(w) {
         if (Math.round(w * 1000) === a.L) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }

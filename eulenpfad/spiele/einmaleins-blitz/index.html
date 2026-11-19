@@ -217,6 +217,7 @@ LS.spiel({
 
     // Die Lücke ist die Anzeige der Tastatur — die Zahl erscheint direkt in der Rechnung.
     const tasten = LS.tastatur({
+      erwartet: () => a.loesung,
       anzeige: luecke,
       maxStellen: 6,
       onAenderung: w => { if (w === null) luecke.textContent = "?"; },
