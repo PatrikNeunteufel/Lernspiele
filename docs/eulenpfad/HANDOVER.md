@@ -15,9 +15,10 @@
 - **Tests:**
   - voller Eulenpfad-Lauf auf `ec5ba6f` „Keine Fehler.“ (3941 s);
   - danach die 52 geänderten Spiele und die Skripte „Keine Fehler.“;
-  - nicht gepusht ab `55d9318`, dieser Abschluss noch zu committen.
+  - voller Eulenpfad-Lauf auf `f6aea34` „Keine Fehler.“ (3361 s);
+  - nicht gepusht ab `55d9318`.
 - **Weiter mit:**
-  1. Push (Patrik), vorher voller Lauf auf Patriks Entscheid.
+  1. Push (Patrik).
   2. Wünsche an den Rahmen, je ein Entscheid ([Liste](bildhoehe_offen.md), Stand LERN_Session48), zuerst „Hinweis
      nach einem Fehler kürzen“.
   3. Kleine Stufen mit Serien (Himmels-Forscher s1, Lebensraum s5).

@@ -6,7 +6,8 @@ Zug (ZU1 a) in drei Paketen. Dann spielt `pruefe_spiele.js` jede Stufe einmal ge
 `bildhoehe.js --schritte` alle Spiele bis zum Lösen gemessen. Zuletzt behoben vier Agenten die Überläufe in späteren
 Schritten, in 52 Spielen.
 
-Patrik hat sieben Commits gemacht, von `55d9318` bis `47ba274`; keiner ist gepusht. Es gab eine Pause mit Haltepunkt
+Patrik hat acht Commits gemacht, von `55d9318` bis `f6aea34` (Abschluss); keiner ist gepusht. Danach lief auf
+Patriks Entscheid der volle Eulenpfad-Lauf. Es gab eine Pause mit Haltepunkt
 (16:32, aufgenommen 19:37). Entwickler-Bemerkungen: keine offenen.
 
 ## Entscheide (Patrik, 19.11.2026)
@@ -88,10 +89,11 @@ Patrik hat sieben Commits gemacht, von `55d9318` bis `47ba274`; keiner ist gepus
   - je Paket s1–s6 auf Handy-, Tablet-, Quer- und Laptop-Sicht, drei Ziehungen: ohne Aufgabe über dem Rand;
   - Nachmessung aller 52 auf Handy und quer: zwei Reste, danach behoben;
   - Kulturen-Koffer zuletzt auf fünf Flächen mit sechs Ziehungen: 0.
-- **Vor dem Push:** Ein voller Eulenpfad-Lauf auf dem letzten Stand fehlt noch. Ob er läuft, entscheidet Patrik.
+- **Vor dem Push** (auf Patriks Entscheid): voller Eulenpfad-Lauf auf `f6aea34` „Keine Fehler.“ (3361 s), „Geführt
+  (ZP1 a): 1050 Stufen ganz durchgespielt; 0 Spiele mit einer Aufgabe ohne Zug“, 128 Hinweise wie auf `ec5ba6f`.
 
 ## Offene Punkte / Plan für die nächste Session
-1. Push ab `55d9318` (Patrik). Vorher der volle Eulenpfad-Lauf, wenn Patrik ihn will (rund 65 min).
+1. Push ab `55d9318` (Patrik); der volle Eulenpfad-Lauf davor ist gelaufen.
 2. **Wünsche an den Rahmen** aus den Behebungen, je ein Entscheid (`bildhoehe_offen.md`, Stand LERN_Session48):
    - Hinweis nach einem Fehler kürzen; er ist die häufigste Ursache.
    - Schrittwechsel in der Blase.

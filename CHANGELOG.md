@@ -3027,3 +3027,5 @@
   schmalen Spalten).
 - Tests: Bild Hör-Geschichte (hoer-geschichte) s3 auf 375 px bis zur zweiten Frage gespielt, ohne Ton; Skripte „Keine
   Fehler.“.
+- Voller Eulenpfad-Lauf auf `f6aea34` vor dem Push „Keine Fehler.“ (3361 s, „Geführt (ZP1 a): 1050 Stufen ganz
+  durchgespielt; 0 Spiele mit einer Aufgabe ohne Zug“).
