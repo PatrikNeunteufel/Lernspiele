@@ -2949,3 +2949,16 @@
 - Tests: Skripte „Keine Fehler.“; Eulenpfad je Teil die eigenen Spiele „Keine Fehler.“; über alle Spiele gekürzt (eine
   Runde, 10 Generator-Aufgaben, ohne Kind, Endlos und Tab): „Geführt (ZP1 a): 1050 Stufen ganz durchgespielt; 0 Spiele
   mit einer Aufgabe ohne Zug“, „Keine Fehler.“; pentomino-puzzle nach dem Umbau „Keine Fehler.“
+- Ein Zug, der wartet (Entscheid ZW1 a): `fn(richtig)` darf `"warte"` geben, wenn gerade nichts zu tun ist (Stimme liest
+  vor, Bild wird gezeigt, die Eule antwortet); `LS.pruefung.zug` gibt es durch und fragt dann keinen früheren Zug. Die
+  Werkzeuge warten ohne Messung und ohne Zählen, höchstens 30 s je Aufgabe, und fragen einen wartenden falschen
+  Handgriff später nochmals (inzwischen den richtigen, der etwa „▶ Los!“ antippt). `LS.losGehts` meldet seinen Zug
+  selbst: richtig „▶ Los!“, dann „warte“ bis zum Zeigen (auch beim kurzen 👀). Vorher gaben sechs Spiele beim Warten
+  `true` ohne Handgriff; jetzt „warte“: Hör-Geschichte (hoer-geschichte) und Hör-Reporter (hoer-reporter; der falsche
+  Handgriff fiel dort aus, wenn die Aufgabe beim Zuhören begann), Merk-Blick (merk-blick; ohne eigenen Los-Zug), König
+  in der Falle (koenig-falle), Steine fangen (steine-fangen), Stimmt immer? (stimmt-immer). rahmen.md 4.2.
+- Tests: Skripte „Keine Fehler.“; Eulenpfad hoer-geschichte hoer-reporter merk-blick koenig-falle steine-fangen
+  stimmt-immer blitzlesen finger-zaehler punkte-blitz „Keine Fehler.“; Messung mit `--schritte` dieser neun (s1–s6,
+  Handy, drei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende gespielt, auf jeder Seite ein falscher Handgriff;
+  über alle Spiele gekürzt (eine Runde, 10 Generator-Aufgaben, ohne Kind, Endlos und Tab) „Geführt (ZP1 a): 1050 Stufen
+  ganz durchgespielt; 0 Spiele mit einer Aufgabe ohne Zug“, „Keine Fehler.“

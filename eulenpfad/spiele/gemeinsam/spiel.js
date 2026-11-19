@@ -2307,12 +2307,20 @@ const LS = (() => {
       ton("tipp");
       setTimeout(() => zaehle(n - 1), 800);
     };
+    let los = null;
+    // ZW1 a: Zug für Werkzeuge — richtig „▶ Los!“ antippen; bis das Element sichtbar ist und die Antworten da sind, „warte“
+    // (auch für den falschen Handgriff: den gibt es erst danach); dann übernehmen die Züge des Spiels
+    zugMelden(richtig => {
+      if (!noch()) return false;
+      if (richtig && los && document.body.contains(los)) { los.click(); return true; }
+      return huelle.classList.contains("wartet") || !antwortenDa ? "warte" : false;
+    });
     if (!ctx.losKnopf) {
       zahl.textContent = "👀";
       setTimeout(zeigen, AUFPASSEN_MS);
       return;
     }
-    const los = el("button", { type: "button", class: "knopf gruen los-knopf", text: "▶ Los!", "aria-label": "Los, ich bin bereit",
+    los = el("button", { type: "button", class: "knopf gruen los-knopf", text: "▶ Los!", "aria-label": "Los, ich bin bereit",
       onclick: () => { los.remove(); zaehle(zaehlen); } });
     ueber.prepend(los);
   }
@@ -3904,15 +3912,21 @@ const LS = (() => {
   /**
    * Züge der laufenden Aufgabe (Entscheid ZU1 a, LERN_Session47): Jeder Baustein und jedes Spiel mit eigenen Knöpfen
    * meldet eine Funktion zug(richtig), die einen Handgriff macht — richtig (true) oder einen falschen (false) — und
-   * true gibt, wenn sie etwas getan hat; false, wenn sie nichts mehr zu tun weiss (fertig, nicht mehr im Bild, kein
-   * falscher Zug möglich). Der Rahmen leert die Liste vor jedem Zeichnen einer Aufgabe. pruefung.zug(richtig) fragt
-   * die zuletzt gemeldete zuerst: Ein späterer Schritt entsteht nach dem früheren. Nur für Werkzeuge
-   * (tools/bildhoehe.js --schritte); kein Kind kann sie auslösen.
+   * true gibt, wenn sie etwas getan hat; "warte", wenn gerade nichts zu tun ist, aber gleich wieder (Stimme liest vor,
+   * Bild wird gezeigt, die Eule antwortet; Entscheid ZW1 a, LERN_Session48); false, wenn sie nichts mehr zu tun weiss
+   * (fertig, nicht mehr im Bild, kein falscher Zug möglich). Der Rahmen leert die Liste vor jedem Zeichnen einer Aufgabe.
+   * pruefung.zug(richtig) fragt die zuletzt gemeldete zuerst: Ein späterer Schritt entsteht nach dem früheren; sagt sie
+   * "warte", fragt er keine frühere. Nur für Werkzeuge (tools/bildhoehe.js --schritte, tools/pruefe_spiele.js geführt);
+   * kein Kind kann sie auslösen.
    */
   let zuege = [];
   const zugMelden = fn => { zuege.push(fn); };
   function naechsterZug(richtig = true) {
-    for (let i = zuege.length - 1; i >= 0; i--) if (zuege[i](richtig)) return true;
+    for (let i = zuege.length - 1; i >= 0; i--) {
+      const r = zuege[i](richtig);
+      if (r === "warte") return "warte";
+      if (r) return true;
+    }
     return false;
   }
   const zugImBild = e => !!e && document.body.contains(e);

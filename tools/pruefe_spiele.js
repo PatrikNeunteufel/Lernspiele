@@ -138,10 +138,10 @@ const TREIBER = `
   // Geführt (ZP1 a): welche Aufgabe gerade steht, welche gelöst ist, für welche der falsche Handgriff schon kam
   // Die erste Aufgabe (Nummer 0) steht schon, bevor der Treiber den Haken setzt
   // (ihre Handgriffe kennt er darum nicht: Grenze der Züge dort grosszügig)
-  let gestelltNr = 0, richtigNr = -1, falschFuer = -1, zuegeJe = 0, flaecheJetzt = null, zugGrenze = 300;
+  let gestelltNr = 0, richtigNr = -1, falschFuer = -1, zuegeJe = 0, wartenJe = 0, flaecheJetzt = null, zugGrenze = 300;
   LS.pruefung.haken = (art, a) => {
     // Grenze der Züge je Aufgabe: dreimal die Handgriffe, die das Spiel nennt (ctx.schritte), mindestens 80
-    if (art === "gestellt") { gestelltNr = a.nr; zuegeJe = 0; flaecheJetzt = a.flaeche; zugGrenze = Math.max(80, 3 * (a.schritte || 0)); }
+    if (art === "gestellt") { gestelltNr = a.nr; zuegeJe = 0; wartenJe = 0; flaecheJetzt = a.flaeche; zugGrenze = Math.max(80, 3 * (a.schritte || 0)); }
     if (art === "richtig" || (art === "falsch" && a.aufgeloest)) richtigNr = a.nr; // gelöst oder Lösung gezeigt
     if (art === "gestellt" && a.flaeche) bildAufgabe.set(a.nr, aufgabeBilder(a.flaeche));
     if (art === "gestellt") {
@@ -287,9 +287,21 @@ const TREIBER = `
     if (gefuehrt) {
       // ZP1 a: je Aufgabe zuerst ein falscher Handgriff, dann richtige; der Klick des Zugs ist nicht bekannt (geklickt leer)
       geklickt = null;
+      // ZW1 a: „warte“ ist kein Handgriff. Wartet der falsche Zug, später nochmals fragen und inzwischen den richtigen
+      // versuchen (nur der tippt etwa „▶ Los!“); höchstens 30 s Wartezeit je Aufgabe.
       let getan = false;
-      if (falschFuer !== gestelltNr && richtigNr !== gestelltNr) { falschFuer = gestelltNr; getan = LS.pruefung.zug(false); }
+      if (falschFuer !== gestelltNr && richtigNr !== gestelltNr) {
+        const f = LS.pruefung.zug(false);
+        if (f !== "warte") falschFuer = gestelltNr;
+        getan = f === true;
+      }
       if (!getan && richtigNr !== gestelltNr) getan = LS.pruefung.zug(true);
+      if (getan === "warte") {
+        wartenJe += 500;
+        if (wartenJe > 30000) { melde("Zug", "Aufgabe " + (gestelltNr + 1) + " wartet länger als 30 s — ein Zug sagt immer «warte»?", "zug-warte"); break; }
+        __uhr.weiter(500);
+        continue;
+      }
       if (getan) {
         klicks++;
         if (++zuegeJe > zugGrenze) { melde("Zug", "Aufgabe " + (gestelltNr + 1) + " nach " + zugGrenze + " Zügen nicht gelöst — ein Zug bewirkt nichts?", "zug-endlos"); break; }

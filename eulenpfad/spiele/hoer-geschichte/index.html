@@ -377,16 +377,15 @@ const SPIEL = {
       if (!LS.sprich(a.text, "de")) lesenStatt();
     });
 
-    // ZU1 a: vor den Fragen „Gelesen“ antippen oder, solange die Stimme erzählt, zuhören (nichts tippen; kein falscher
-    // Handgriff); danach je Frage richtig die passende Antwort, falsch eine andere, noch nicht gewählte (die
-    // Reihenfolge-Frage meldet LS.reihenfolge selbst)
+    // ZU1 a: vor den Fragen richtig „Gelesen“ antippen; solange die Stimme erzählt, zuhören („warte“, ZW1 a — auch der
+    // falsche Handgriff wartet auf die Fragen); danach je Frage richtig die passende Antwort, falsch eine andere, noch
+    // nicht gewählte (die Reihenfolge-Frage meldet LS.reihenfolge selbst)
     ctx.testZug(gut => {
       if (ctx.vorbei() || !document.body.contains(hg)) return false;
       if (!fragenDa) {
-        if (!gut) return false;
         const gelesen = hg.querySelector(".hg-los .knopf");
-        if (gelesen) { gelesen.click(); return true; }
-        return modus === "hoeren";
+        if (gelesen && gut) { gelesen.click(); return true; }
+        return gelesen || modus === "hoeren" ? "warte" : false;
       }
       const f = a.fragen[nrFrage];
       const wahl = f.art === "reihenfolge" ? null : fragenBox.querySelector(".wahl");

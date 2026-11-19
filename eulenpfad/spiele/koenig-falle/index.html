@@ -356,8 +356,8 @@ LS.spiel({
 
     // ZU1 a: ein Handgriff für Werkzeuge. Richtig: die Figur des Lösungszugs antippen, dann ihr Zielfeld (s6 im zweiten
     // Zug der erste Mattzug). Falsch: ein ganzer erlaubter Zug, der nicht matt setzt (s6 im ersten Zug: keinen Matt
-    // erzwingt) — Figur und Feld in einem Griff. Während die Eule antwortet oder das Brett zurückspringt, wartet der Zug
-    // (gibt true, ohne zu tippen). SVG-Felder haben kein click(), darum ein Klick-Ereignis wie vom Finger.
+    // erzwingt) — Figur und Feld in einem Griff. Während die Eule antwortet oder das Brett zurückspringt, „warte“ (ZW1 a).
+    // SVG-Felder haben kein click(), darum ein Klick-Ereignis wie vom Finger.
     const feldTippen = i => {
       const r = halter.querySelectorAll("rect.kf-feld")[i];
       if (!r) return false;
@@ -366,7 +366,7 @@ LS.spiel({
     };
     ctx.testZug(richtig => {
       if (ctx.vorbei() || !document.body.contains(halter)) return false;
-      if (!aktiv) return true;
+      if (!aktiv) return "warte";
       if (richtig) {
         const z = zwei && phase === 2 ? S.mattZuege(basis)[0] : ersterZug;
         if (!z) return false;

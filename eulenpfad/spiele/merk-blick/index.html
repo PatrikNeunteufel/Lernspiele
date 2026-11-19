@@ -294,18 +294,12 @@ LS.spiel({
     fuelle(a.vorher, false);
     f.append(auftrag, raster);
     const da = () => f.contains(raster); // Die Aufgabe kann neu gezogen worden sein (Wiederholungsregel).
-    // ZU1 a: Zug für Werkzeuge. Zuerst „▶ Los!“ antippen (nur richtig; einen falschen Handgriff gibt es da nicht), dann
-    // warten (true ohne Tippen), bis das veränderte Bild da ist; danach antwortet antwortZug(richtig).
+    // ZU1 a: Zug für Werkzeuge. „▶ Los!“ und 3-2-1 meldet LS.losGehts selbst (ZW1 a); danach „warte“, bis das veränderte
+    // Bild da ist (Zeigezeit, zudecken); dann antwortet antwortZug(richtig).
     let antwortZug = null;
     ctx.testZug(richtig => {
       if (ctx.vorbei() || !da()) return false;
-      const los = f.querySelector(".los-knopf");
-      if (los) {
-        if (!richtig) return false;
-        los.click();
-        return true;
-      }
-      return antwortZug ? antwortZug(richtig) : richtig;
+      return antwortZug ? antwortZug(richtig) : "warte";
     });
     // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1 — dann zeigen, zudecken, verändert aufdecken (Wunsch Patrik).
     // Die Uhr startet erst mit dem veränderten Bild: vorher kann das Kind nichts tun (F1 a, LERN_Session9).

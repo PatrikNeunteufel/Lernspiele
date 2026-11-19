@@ -200,10 +200,21 @@ const MESSEN = (auftraege, css) => `
             const P = f.contentWindow.eval("typeof LS === 'undefined' ? null : LS.pruefung");
             let ende = false;
             if (P) P.haken = (art, x) => { if (art === "richtig" || art === "gestellt" || (art === "falsch" && x.aufgeloest)) ende = true; };
-            if (P && P.zug(false)) { zug.falschZug = true; await new Promise(r => setTimeout(r, ${ZUG_MS})); staende.push(messe()); }
-            while (P && !ende && zug.zuege < ${MAX_ZUEGE} && P.zug(true)) {
-              zug.zuege++;
-              await new Promise(r => setTimeout(r, ${ZUG_MS}));
+            // ZW1 a: „warte“ ist kein Handgriff — ohne Messung kurz warten (höchstens 30 s je Ziehung); wartet der falsche
+            // Zug, ihn später nochmals fragen und inzwischen den richtigen versuchen (nur der tippt etwa „▶ Los!“)
+            let falschOffen = true, gewartet = 0;
+            while (P && !ende && zug.zuege < ${MAX_ZUEGE}) {
+              let r = false, warFalsch = false;
+              if (falschOffen) {
+                const f = P.zug(false);
+                if (f !== "warte") falschOffen = false;
+                if (f === true) { zug.falschZug = true; r = warFalsch = true; }
+              }
+              if (!r) r = P.zug(true);
+              if (r === "warte") { if ((gewartet += 250) > 30000) break; await new Promise(w => setTimeout(w, 250)); continue; }
+              if (!r) break;
+              if (!warFalsch) zug.zuege++;
+              await new Promise(w => setTimeout(w, ${ZUG_MS}));
               staende.push(messe());
             }
             zug.geloest = ende;

@@ -310,15 +310,15 @@ const SPIEL = {
       if (!LS.sprich(a.text, "de")) lesenStatt();
     });
 
-    // ZU1 a: vor den Fragen „Gelesen“ antippen oder, solange die Stimme vorliest, zuhören (nichts tippen; kein falscher
-    // Handgriff); danach je Frage richtig die passende Antwort, falsch eine andere, noch nicht gewählte
+    // ZU1 a: vor den Fragen richtig „Gelesen“ antippen; solange die Stimme vorliest, zuhören („warte“, ZW1 a — auch der
+    // falsche Handgriff wartet auf die Fragen); danach je Frage richtig die passende Antwort, falsch eine andere, noch
+    // nicht gewählte
     ctx.testZug(gut => {
       if (ctx.vorbei() || !document.body.contains(hr)) return false;
       if (!fragenDa) {
-        if (!gut) return false;
         const gelesen = hr.querySelector(".hr-los .knopf");
-        if (gelesen) { gelesen.click(); return true; }
-        return modus === "hoeren";
+        if (gelesen && gut) { gelesen.click(); return true; }
+        return gelesen || modus === "hoeren" ? "warte" : false;
       }
       const f = a.fragen[nrFrage];
       const wahl = fragenBox.querySelector(".wahl");

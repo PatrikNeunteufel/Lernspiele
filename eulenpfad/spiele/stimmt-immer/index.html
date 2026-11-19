@@ -631,10 +631,10 @@ LS.spiel({
       bereich.append(box);
       LS.kurztasten(box);
       // ZU1 a: richtig den richtigen Knopf, falsch den ersten anderen, noch nicht gewählten; nach dem richtigen
-      // Knopf wartet der Zug, bis der nächste Schritt (Beispiele) gezeichnet ist
+      // Knopf „warte“ (ZW1 a), bis der nächste Schritt (Beispiele) gezeichnet ist
       ctx.testZug(r => {
         if (ctx.vorbei() || !document.body.contains(box)) return false;
-        if (fertig) return true;
+        if (fertig) return "warte";
         const i = optionen.findIndex((o, j) => (o === richtig) === r && !box.children[j].classList.contains("gewaehlt"));
         if (i < 0) return false;
         box.children[i].click();
