@@ -74,7 +74,9 @@ async function main() {
   if (!BROWSER) throw new Error("Weder Chrome noch Edge gefunden.");
   const profil = fs.mkdtempSync(path.join(os.tmpdir(), "lernspiele-bilder-"));
   const browser = spawn(BROWSER, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profil}`,
-    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", STUMM_ARG, "about:blank"], { stdio: "ignore" });
+    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", STUMM_ARG,
+    // Stimme ohne Antippen erlauben wie in bildhoehe.js: sonst kamen die Hörspiele nie zu den Fragen (LERN_Session48)
+    "--autoplay-policy=no-user-gesture-required", "about:blank"], { stdio: "ignore" });
   const ziel = path.resolve(WURZEL, opt.ziel);
   fs.mkdirSync(ziel, { recursive: true });
   const dateien = [];

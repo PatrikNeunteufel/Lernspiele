@@ -1,8 +1,37 @@
-# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session46, 2026-11-17)
+# Ganze Aufgabe im Bild — offene Punkte (Stand LERN_Session48, 2026-11-19)
 
 Entscheide BH1 a, BH2 a, BH2-T a, BH3 a sind umgesetzt (rahmen.md Abschnitt 20). Gemessen mit `tools/bildhoehe.js`
 (Zufallsaufgaben, Streuung um einige Dutzend Pixel). Zahlen: wie weit die **Aufgabe selbst** (ohne Tipp-Zeile) über den
 unteren Rand ragt, in px, höchster Wert über die gemessenen Stufen.
+
+## Stand LERN_Session48 (2026-11-19)
+
+Gemessen mit `--schritte` (ZU1 a, jede Ziehung bis zum Lösen gespielt; alle 175 Spiele mit Zug). Der Stand nach dem
+lösenden Handgriff zählt nicht (ÜL1 a). Vor den Behebungen, alle Spiele, Handy und Tablet quer, zwei Ziehungen: 113 Seiten
+in 53 Spielen über dem Rand (5 beim Laden, 48 nach dem falschen Handgriff, 60 in späteren Schritten), ohne den Stand nach
+dem Lösen 98 Seiten in 50 Spielen. Behoben in 52 Spielen (Liste im CHANGELOG, LERN_Session48); danach je Paket auf vier
+sichtbaren Flächen mit drei Ziehungen keine Aufgabe über dem Rand, nichts seitlich. Nicht neu gemessen: die übrigen
+123 Spiele seit der Messung vom Morgen (dort ohne Überlauf).
+
+Wünsche an den Rahmen aus den Behebungen (offen, je ein Entscheid):
+- **Hinweis nach einem Fehler kürzen:** viele Überläufe kamen allein von Hinweisen mit fünf bis zehn Zeilen (Kompass bis
+  212 px). Vorschlag: höchstens drei bis vier Zeilen ganz, der Rest aufklappbar (BH2 a erweitern).
+- **Schrittwechsel in der Blase:** eine Aufgabe mit mehreren Schritten behält den Fehlerhinweis des vorigen Schritts;
+  heute sagt jedes Spiel selbst etwas (EU1 a: Würfel-Zähler, Probe-Stempel, Sachaufgaben-Kompass, Rechentrick-Detektiv).
+  Vorschlag eines Agenten: `ctx.schritt()` leert oder kürzt die Blase.
+- **Tastatur rechts daneben für eigene Behälter:** Regel (2) in `stil.css` greift nur bei `.karte > div > .tastatur`;
+  Würfel-Zähler und Rechentrick-Detektiv bauen sie nach. Vorschlag: Klasse `.mit-tastatur` am Behälter (gehört zu
+  Punkt 5 unten, Tastatur-Anordnung für eigene Tastaturen).
+- **Erledigtes als eine Zeile, Antippen zeigt sie ganz:** Figuren-Spiegel, Hör-Geschichte und Hör-Reporter bauen es je
+  selbst.
+- **`--wahl-breite` nur auf dem Handy:** `LS.auswahl` setzt die Breite am Element; Wörter-Brücke und Kulturen-Koffer
+  brauchen dafür `!important`.
+- **`LS.restHoehe` nach einem Fehler:** in Diagramm-Wahl s6 blieb das Diagramm einmal gross, obwohl die Aufgabe 14 px
+  überlief (in einem zweiten Lauf richtig nachgemessen) — vermutlich gemessen, bevor die Blase fertig gewachsen war.
+  Nicht nachgestellt.
+- **Messung „geschrumpft“:** misst eine Grafik in einer Rasterspalte gegen das Elternelement, nicht gegen die Spalte
+  (Befund Hebel-Wippe).
+- **💡 in einer schmalen Spalte** (Kompass, 120 px): zerreisst den Text der Frage.
 
 ## Messung LERN_Session43 (2026-11-15)
 

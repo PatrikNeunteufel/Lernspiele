@@ -1,57 +1,29 @@
 # Handover — Eulenpfad (Ordner Lernspiele)
 
-## HALTEPUNKT 19.11.2026 16:32 — LERN_Session48_2026-11-19_zug-pakete (aufgenommen 19.11.2026 19:37)
-Pause, kein Abschluss — weiter in derselben Session mit `/session-pause weiter`.
-
-- **Angehalten — beim Weitermachen neu starten:** nichts läuft mehr. Die vier Agenten für die Überlauf-Pakete A–D
-  (LERN-55, BH3 a) sind fertig, B auf Bitte angehalten. Die vier Server (`.claude/launch.json`: lernspiele,
-  lernspiele-2/3/4) sind beendet. Wieder starten nur zum Messen (preview_start).
-- **Stand:** Committet bis `c307ca5` (ÜL1 a), nicht gepusht ab `ef81cdc`. Im Arbeitsbaum ungeprüft zusammen: 52 Spiele
-  (nur `eulenpfad/spiele/<id>/index.html`, Kommentar „BH3 a“), Überläufe nach dem falschen Handgriff und in späteren
-  Schritten behoben. Je Paket gemessen mit `bildhoehe.js --schritte` (s1–s6, handy/tablet/quer/laptop-sicht, drei
-  Ziehungen): Aufgabe über dem Rand 0, seitlich 0, 0 Spiele ohne Zug, 0 nicht zu Ende gespielt. `pruefe_spiele.js`
-  je Paket „Keine Fehler.“. Skripte „Keine Fehler.“ (16:31).
-  - A (13, Deutsch): verben-faecher, wortarten-probe, rede-zeichen, morphem-schere, regel-luecke,
-    parallelwort-bruecke, figuren-spiegel, fehler-lupe (s6 auch nach dem Lösen im Bild), platzhalter-geschichten,
-    hoer-geschichte, hoer-reporter, kulturen-koffer, laerm-waechter.
-  - B (13, Rechnen): fahrplan-rechner, stein-duell, speicher-leiter, kompass, masse-umwandler, hebel-wippe,
-    quelle-heure, taschengeld-planer, flaechen-pixel, geheimschrift-knacker, kiosk-kasse, zehner-ergaenzer,
-    zehntel-lupe. **Offen:** quelle-heure, letzte Änderung (`div.qh-modus`, Zeiger-Knöpfe nebeneinander, s4 „Uhr
-    stellen“ zuletzt 14 px) ist ungemessen.
-  - C (12): braille-finger, wuerfel-zaehler, stimmt-immer, rechenprobe, himmels-forscher, wuerfelbau-blick,
-    sachaufgaben-kompass, rechentrick-detektiv, glace-kombinator, roboter-pfad, runden-rutsche, pentomino-puzzle.
-  - D (14): quader-volumen, diagramm-detektiv, rechen-maschine, finger-zaehler, rhythmus-leser, mittelwert-waage,
-    diagramm-wahl, preis-tabelle, muster-fortsetzer, kakao-weg, sortier-kiste, instrumente, erdzeit-leiter,
-    zahlen-waage (s6 seitlich 20 → 0 px).
-- **Weiter mit:**
-  1. quelle-heure: `bildhoehe.js` (alle Stufen, vier Sichten, `--schritte`), dann `pruefe_spiele.js quelle-heure`.
-  2. Änderungen über Anordnen hinaus ansehen (Liste unten), Entscheid EU1 vorlegen.
-  3. Gemeinsame Nachmessung der 52 Spiele (`--schritte`, Handy und quer, zwei Ziehungen), Vergleich mit der Messung
-     vom Morgen (113 Seiten in 53 Spielen); dann `pruefe_spiele.js` über die 52.
-  4. CHANGELOG-Eintrag (je Paket Ursache und Zahlen aus den Agentenberichten im Gespräch), Commit-Message.
-  5. Danach: Wünsche an den Rahmen sammeln, Session-Abschluss; Push (Patrik), vorher voller Lauf nur auf Patriks
-     Entscheid.
-- **Zum Ansehen (vor dem Commit):** rede-zeichen blendet auf schmalen/niedrigen Bildern den zweiten Teil der Frage
-  aus (steht in Blase und Hilfe); hoer-reporter ohne Vorschau „Darauf achtest du:“, sobald die Fragen kommen;
-  wortarten-probe: eine Probe, die nicht klappt, verliert ihren Knopf; morphem-schere und verben-faecher blenden
-  Erledigtes aus; fehler-lupe Wortknöpfe 42 px auf dem Handy. Gesenkte Untergrenzen: quader-volumen s6 60 %,
-  diagramm-detektiv 200–230 px, mittelwert-waage Fuge 1 px, roboter-pfad Felder 41 px und Raster 216 px,
-  braille-finger Zelle 100 px, wuerfel-zaehler 76 px, geheimschrift-knacker Scheibe 160 px, zehntel-lupe Strahlen
-  280 px.
-- **Offene Entscheidung Patrik (EU1):** neue Eulentexte beim Schrittwechsel in wuerfel-zaehler („Genau! Wie viele
-  Würfel mehr?“), rechenprobe („Genau! Jetzt rechne die Probe.“), sachaufgaben-kompass („Genau, weiter!“). Ohne sie
-  bliebe der Fehlerhinweis des vorigen Schritts bis fünf Zeilen über dem nächsten stehen.
-- **Wünsche an den Rahmen (aus den Berichten):** zweites Nachmessen von `LS.restHoehe` kurz nach `ctx.falsch`;
-  Hinweis nach Fehler höchstens drei bis vier Zeilen, Rest aufklappbar (eigener Entscheid, Kompass bis zehn Zeilen);
-  Blase beim Schrittwechsel selbst leeren; Klasse „Tastatur rechts“ für eigene Behälter; Muster „Erledigtes als eine
-  Zeile“; `--wahl-breite` nur auf dem Handy; `bilder_aufnehmen.js` mit Autoplay; Messung „geschrumpft“ misst die
-  Rasterspalte nicht.
-- **Hinweise der geführten Runde für den Abschluss:** quader-volumen Einzahl?, mittelwert-waage s5 „Hinweis verrät
-  «5»“ (Fehlalarm), himmels-forscher s1 und lebensraum s5 Serie, „wasFrisst“ Serie.
-- Rohdaten der Agenten im Scratchpad (`ue_A` … `ue_D`) überstehen einen Neustart vielleicht nicht; nötig sind sie
-  nicht, die Nachmessung (Schritt 3) ersetzt sie.
-
 ## Stand
+**2026-11-19, nach LERN_Session48** ([Report](report/LERN_Session48_2026-11-19.md)):
+- **Kern:** unverändert 1.46.0.
+- **Zug für alle 175 Spiele (ZU1 a):**
+  - `pruefe_spiele.js` spielt jede Stufe geführt durch (ZP1 a, `ZUG_PFLICHT`).
+  - Tastatur mit `erwartetFalsch` (ZF1 a).
+  - Züge dürfen `"warte"` geben (ZW1 a).
+- **Spätere Schritte im Bild (LERN-55):**
+  - `bildhoehe.js --schritte` spielt jede Ziehung bis zum Lösen; der Stand danach zählt nicht (ÜL1 a).
+  - Überläufe in 52 Spielen behoben, von 98 Seiten auf 0 auf vier sichtbaren Flächen.
+  - Neue Eulensätze beim Schrittwechsel (EU1 a).
+  - Die Messwerkzeuge laufen ohne Ton (`tools/stumm.js`).
+- **Tests:**
+  - voller Eulenpfad-Lauf auf `ec5ba6f` „Keine Fehler.“ (3941 s);
+  - danach die 52 geänderten Spiele und die Skripte „Keine Fehler.“;
+  - nicht gepusht ab `55d9318`, dieser Abschluss noch zu committen.
+- **Weiter mit:**
+  1. Push (Patrik), vorher voller Lauf auf Patriks Entscheid.
+  2. Wünsche an den Rahmen, je ein Entscheid ([Liste](bildhoehe_offen.md), Stand LERN_Session48), zuerst „Hinweis
+     nach einem Fehler kürzen“.
+  3. Kleine Stufen mit Serien (Himmels-Forscher s1, Lebensraum s5).
+  4. Die übrigen 123 Spiele mit `--schritte` auf allen vier Sichten messen.
+  5. Sudokus freigeben (Patrik).
+
 **2026-11-18, nach LERN_Session47** ([Report](report/LERN_Session47_2026-11-18.md)):
 - **Kern:** unverändert 1.46.0.
 - **Spätere Schritte im Bild (LERN-55):** Messung spielt die Aufgabe weiter (ZU1 a, `LS.pruefung.zug`,
@@ -754,7 +726,7 @@ hart neu laden (Strg+F5). Ohne Server per Doppelklick (README). Ungeprüft: Fire
 | LERN-52 | Zweisprachiges Vorlesen (VL1 a), Pilot Au café | offen | Report LERN_Session11, Plan 4 |
 | LERN-53 | PIN der Aufsicht ohne zweite Aufsicht wiederherstellen (Entscheid PIN1) | erledigt 2026-11-04 (LERN_Session13, PIN1 a, PIN1-R a) | rahmen.md 6 |
 | LERN-54 | Profil für Kinder: Avatar, Wahl gegen Vorgabe, Statistik, Endlos nach Messung (AV1–AV6, ST1, ST2, ZG1, RF1, VR1–VR3, EN1, EN2) | erledigt 2026-11-04 (LERN_Session12) bis auf VR2, VR3 und Ziele der Klasse (mit LERN-48) | docs/eulenpfad/konzept_profil_kind.md; rahmen.md 7, 18 |
-| LERN-55 | Ganze Aufgabe im Bild auf der sichtbaren Fläche (GR1 a); GR1 b (1000 × 500 ohne Vollbild) zurückgestellt | in Arbeit seit 2026-11-04 (LERN_Session13); BH1–BH3 umgesetzt, alle Spiele bis auf die Ausnahmen im Bild (LERN_Session43), GR1 a offen | bildhoehe_offen.md; rahmen.md 20 |
+| LERN-55 | Ganze Aufgabe im Bild auf der sichtbaren Fläche (GR1 a); GR1 b (1000 × 500 ohne Vollbild) zurückgestellt | in Arbeit seit 2026-11-04 (LERN_Session13); auch spätere Schritte im Bild (LERN_Session48), Wünsche an den Rahmen offen | bildhoehe_offen.md; rahmen.md 20 |
 | LERN-56 | Sudoku-Familie: Bilder-, Zahlen-, Vergleichs-, Käfig-, Gebiets-Sudoku, Sudoku-Duell; Thema Logikrätsel (SU1–SU3 a) | erledigt 2026-11-14 (LERN_Session41, Sudoku-Duell; Spiele neu und ungeprüft) | spielideen/logikraetsel.md; rahmen.md 26; Report LERN_Session13, Plan 2 |
 | LERN-57 | Neunerprobe im Probe-Stempel (PS2 a) mit Rückfrage Patrik: Erklärung, Regeln für 3/6/9, Gruppe für Neugierige | offen (vorzulegen) | Report LERN_Session13, Plan 3 |
 | LERN-58 | Weitere Erfolge: Abzeichen je Thema und für besondere Spiele (Zusatz Patrik zu NZ1) | offen | Report LERN_Session13, Plan 4 |

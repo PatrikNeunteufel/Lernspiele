@@ -3019,3 +3019,11 @@
   quer, zwei Ziehungen; vorher 98 Seiten in 50 Spielen): 2 Seiten (Kulturen-Koffer s5 10 px, Sachaufgaben-Kompass s2 3
   px), beide danach behoben (Kulturen-Koffer fünf Sichten, sechs Ziehungen: 0); `pruefe_spiele.js` aller 52 „Keine
   Fehler.“ (je Paket und nach den letzten Änderungen); Skripte „Keine Fehler.“.
+- `tools/bilder_aufnehmen.js` erlaubt die Stimme ohne Antippen (`--autoplay-policy=no-user-gesture-required` wie
+  `bildhoehe.js`): Hörspiele kamen dort nie zu den Fragen (Wunsch aus den Überlauf-Paketen).
+  `docs/eulenpfad/bildhoehe_offen.md`: Stand LERN_Session48 und die Wünsche an den Rahmen aus den Behebungen (Hinweis
+  nach einem Fehler kürzen, Schrittwechsel in der Blase, Tastatur rechts für eigene Behälter, Erledigtes als eine Zeile,
+  `--wahl-breite` nur auf dem Handy, `LS.restHoehe` nach einem Fehler, Messung „geschrumpft“ in Rasterspalten, 💡 in
+  schmalen Spalten).
+- Tests: Bild Hör-Geschichte (hoer-geschichte) s3 auf 375 px bis zur zweiten Frage gespielt, ohne Ton; Skripte „Keine
+  Fehler.“.
