@@ -1134,7 +1134,10 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   (Abschnitt 4.2). „Spiele ohne Zug“ sind nur beim Laden gemessen; „nicht zu Ende gespielt“ heisst, ein späterer Schritt
   meldet keinen Zug (höchstens 200 Züge je Ziehung). Gemessen wird erst, wenn die Aufgabe steht (Text mit Buchstaben auf
   der Karte, bis 10 s nach dem Laden); sonst „Aufgabe nach 11,5 s nicht gezeichnet“ (LERN_Session48: unter Last war ein
-  9 × 9-Sudoku nach 1,5 s noch leer und galt als nicht zu Ende gespielt). Vorher sah die Messung nur den Anfang einer Aufgabe (LERN_Session46: Sachaufgaben-Kompass Schritt ③
+  9 × 9-Sudoku nach 1,5 s noch leer und galt als nicht zu Ende gespielt). Der Stand nach dem lösenden Handgriff (Lob,
+  „Weiter ➜“) zählt nicht für „über dem Rand“ (Entscheid ÜL1 a, LERN_Session48: das Kind braucht dort nichts mehr); die
+  Messung nennt ihn getrennt unter „Nach dem Lösen über dem Rand“, zum Nachsehen und ohne Code 1. Steht dort etwas, das
+  das Kind lesen soll (Fehler-Lupe: der reparierte Text), gehört es trotzdem ins Bild. Vorher sah die Messung nur den Anfang einer Aufgabe (LERN_Session46: Sachaufgaben-Kompass Schritt ③
   bis 255 px, Kakao-Weg-Ablage 641 px fielen erst mit eigenen Skripten auf); Zufallsklicks reichen nicht, sie lösen einen
   Schritt mit getippter Zahl fast nie (Zählung LERN_Session47: Kompass 0 von 102 Aufgaben, Sudokus 0 von 30).
 - **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Vorgabe seit GR1 a die sichtbare Fläche: `handy-sicht`,

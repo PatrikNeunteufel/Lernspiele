@@ -219,15 +219,20 @@ const MESSEN = (auftraege, css) => `
             }
             zug.geloest = ende;
           }
-          const hoechst = k => Math.max(...staende.map(s => s[k]));
+          // ÜL1 a (LERN_Session48): Der Stand nach dem lösenden Handgriff (Lob, „Weiter ➜“) zählt nicht für „über dem
+          // Rand“ — das Kind braucht dort nichts mehr. Er steht getrennt in nachLoesen; seitlich und enge Knöpfe zählen weiter.
+          const nachDemLoesen = a.schritte && zug.geloest && staende.length > 1 ? staende[staende.length - 1] : null;
+          const zaehlen = nachDemLoesen ? staende.slice(0, -1) : staende;
+          const hoechst = (k, liste = zaehlen) => Math.max(...liste.map(s => s[k]));
           const mitT = staende.filter(s => s.tastatur);
           let schritt = 0;
-          staende.forEach((s, i) => { if (s.aufgabe > staende[schritt].aufgabe) schritt = i; });
-          __bh.erg.push({ ...a, art: a.text, versuche, ...staende[0], ueber: hoechst("ueber"), seitlich: hoechst("seitlich"),
+          zaehlen.forEach((s, i) => { if (s.aufgabe > zaehlen[schritt].aufgabe) schritt = i; });
+          __bh.erg.push({ ...a, art: a.text, versuche, ...staende[0], ueber: hoechst("ueber"), seitlich: hoechst("seitlich", staende),
             eng: [...new Set(staende.flatMap(s => s.eng))],
             aufgabe: hoechst("aufgabe"), tastatur: mitT.length > 0, tastaturImBild: mitT.length ? mitT.every(s => s.tastaturImBild) : null,
             // Text des Stands mit der höchsten Aufgabe, Schritt 0 = beim Laden
-            text: staende[schritt].text, ...(a.schritte ? { ...zug, schritt } : {}) });
+            text: zaehlen[schritt].text, ...(a.schritte ? { ...zug, schritt } : {}),
+            ...(nachDemLoesen ? { nachLoesen: nachDemLoesen.aufgabe, nachLoesenText: nachDemLoesen.text } : {}) });
         } catch (e) { __bh.erg.push({ ...a, art: a.text, fehler: String(e) }); }
         f.remove(); __bh.fertig++; fertig();
       }, 1500);
@@ -341,7 +346,8 @@ function zusammenfassen(erg) {
       ziehungen: gut.length, aufgabeUeber: gut.filter(e => e.aufgabe > 2).length,
       // --schritte: kein Zug in keiner Ziehung, wie oft zu Ende gespielt, Schritt der höchsten Aufgabe
       ...(SCHRITTE ? { ohneZug: gut.every(e => !e.zuege && !e.falschZug), geloest: gut.filter(e => e.geloest).length,
-        schritt: gut.reduce((b, e) => (e.aufgabe > b.aufgabe ? e : b)).schritt } : {}),
+        schritt: gut.reduce((b, e) => (e.aufgabe > b.aufgabe ? e : b)).schritt,
+        nachLoesen: max("nachLoesen"), nachLoesenUeber: gut.filter(e => (e.nachLoesen ?? 0) > 2).length } : {}),
     };
   });
 }
@@ -417,6 +423,13 @@ function auswerten(erg, geraete, stufen) {
     for (const e of aufgabeUeber)
       console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.aufgabe).padStart(4)} px  ${e.aufgabeUeber} von ${e.ziehungen}` +
         `${SCHRITTE ? `  Stand ${e.schritt}` : ""}${ARTEN ? `  «${e.art}»` : ""}`);
+  }
+  // ÜL1 a: nach dem Lösen über dem Rand — zum Nachsehen (steht dort etwas, das das Kind lesen soll?), ohne Code 1
+  const nachLoesen = SCHRITTE ? zaehlbar.filter(e => e.nachLoesen > 2 && e.nachLoesen > e.aufgabe).sort((a, b) => b.nachLoesen - a.nachLoesen) : [];
+  if (nachLoesen.length) {
+    console.log(`\nNach dem Lösen über dem Rand (ÜL1 a: zählt nicht, zum Nachsehen; höchster Wert, in wie vielen von ${ZIEHUNGEN} Ziehungen):`);
+    for (const e of nachLoesen)
+      console.log(`  ${e.id.padEnd(24)} ${e.stufe} ${e.geraet.padEnd(12)} ${String(e.nachLoesen).padStart(4)} px  ${e.nachLoesenUeber} von ${e.ziehungen}`);
   }
   const je = new Map();
   for (const e of zaehlbar.filter(e => e.ueber > 2 || e.seitlich > 2)) {

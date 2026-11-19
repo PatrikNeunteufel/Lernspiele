@@ -2962,3 +2962,16 @@
   Handy, drei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende gespielt, auf jeder Seite ein falscher Handgriff;
   über alle Spiele gekürzt (eine Runde, 10 Generator-Aufgaben, ohne Kind, Endlos und Tab) „Geführt (ZP1 a): 1050 Stufen
   ganz durchgespielt; 0 Spiele mit einer Aufgabe ohne Zug“, „Keine Fehler.“
+- Voller Eulenpfad-Lauf auf `ec5ba6f` „Keine Fehler.“ (3941 s, „Geführt (ZP1 a): 1050 Stufen ganz durchgespielt; 0
+  Spiele mit einer Aufgabe ohne Zug“).
+- Messung über alle Spiele mit `--schritte` (s1–s6, Handy und Tablet quer, zwei Ziehungen): alle zu Ende gespielt;
+  Aufgabe über dem Rand auf 113 Seiten in 53 Spielen (5 beim Laden, 48 nach dem falschen Handgriff, 60 in späteren
+  Schritten), seitlich Zahlen-Waage (zahlen-waage) s6 20 px und Verben-Fächer s4/s6 2 px — Liste für den Rest LERN-55.
+- Stand nach dem Lösen (Entscheid ÜL1 a): `tools/bildhoehe.js --schritte` zählt den Stand nach dem lösenden Handgriff
+  nicht mehr für „über dem Rand“ und nennt ihn getrennt („Nach dem Lösen über dem Rand“, ohne Code 1); seitlich und enge
+  Knöpfe zählen dort weiter. Betraf 25 Ziehungen (Weather-Report, Möglichkeiten-Finder, Hör-Geschichte, Stimmt immer?,
+  Zielzahl-Jagd …); Fehler-Lupe (fehler-lupe) s6 zeigt dort den reparierten Text und bleibt bei den Behebungen.
+  rahmen.md 20.
+- Tests: Messung mit `--schritte` weather-report glace-kombinator hoer-geschichte zielzahl-jagd fehler-lupe stimmt-immer
+  (s3–s6, Handy, zwei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende gespielt, getrennte Liste nach dem Lösen mit
+  acht Seiten.
