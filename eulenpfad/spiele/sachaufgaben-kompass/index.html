@@ -912,6 +912,22 @@ LS.spiel({
         if (ctx.vorbei()) knoepfe.forEach(k => { k.disabled = true; });
       } });
       bereich.append(el("div", { class: "kompass-pruefen" }, pruefen));
+      // ZU1 a: richtig = eine Angabe an- oder abwählen, bis genau die nötigen gewählt sind, dann „Prüfen“;
+      // falsch = „Prüfen“ bei falscher Wahl, sonst eine unnötige Angabe dazu (ohne unnötige kein falscher Handgriff)
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || !document.body.contains(pruefen) || knoepfe.some(k => k.disabled)) return false;
+        const gewaehlt = knoepfe.map(k => k.classList.contains("gewaehlt"));
+        const anders = knoepfe.findIndex((k, i) => gewaehlt[i] !== a.angaben[i].noetig);
+        if (richtig) {
+          if (anders >= 0) knoepfe[anders].click(); else pruefen.click();
+          return true;
+        }
+        if (anders >= 0 && gewaehlt.some(Boolean)) { pruefen.click(); return true; }
+        const unnoetig = knoepfe.find((k, i) => !a.angaben[i].noetig && !gewaehlt[i]);
+        if (!unnoetig) return false;
+        unnoetig.click();
+        return true;
+      });
     }
 
     /** Auswahl in einem Zwischenschritt: richtig führt weiter, falsch zählt als Fehlversuch. */
@@ -933,6 +949,14 @@ LS.spiel({
         box.append(k);
       }
       bereich.append(box);
+      // ZU1 a: richtig = die passende Option antippen, falsch = eine andere, noch nicht gewählte
+      ctx.testZug(soll => {
+        if (fertig || ctx.vorbei() || !document.body.contains(box)) return false;
+        const k = [...box.children].find((b, j) => (optionen[j] === richtig) === soll && !b.classList.contains("gewaehlt"));
+        if (!k) return false;
+        k.click();
+        return true;
+      });
       return box;
     }
 
@@ -989,6 +1013,7 @@ LS.spiel({
       }
       const ganz = String(Math.floor(a.ergebnis / 10 ** st)).length;
       const tasten = LS.tastatur({
+        erwartet: () => a.ergebnis / 10 ** st, // ZU1 a: wie onOk vergleicht (Franken mit Rappen)
         anzeige, maxStellen: Math.max(3, ganz + 1), dezimal: st > 0, nachkomma: st,
         onOk(w) {
           if (!einheit) { ctx.sag("Wähle noch die Einheit.", "hinweis"); return; }
@@ -1008,6 +1033,15 @@ LS.spiel({
       });
       // Notizen vor der Antwort in derselben Zeile; wo der Platz nicht reicht, brechen sie darüber um
       bereich.append(el("div", { class: "kompass-antwort" }, ...(notizen ? [notizZeile()] : []), anzeige, einheiten), tasten.element);
+      // ZU1 a: nach der Tastatur gemeldet, also zuerst gefragt — richtig = die passende Einheit wählen, solange sie
+      // fehlt (danach tippt die Tastatur); falsch = eine unpassende Einheit, solange keine gewählt ist
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || tasten.gesperrt || !document.body.contains(einheiten)) return false;
+        const knopf = [...einheiten.children].find(b => (b.textContent === a.einheit) === richtig);
+        if (!knopf || (richtig ? einheit === a.einheit : einheit !== null)) return false;
+        knopf.click();
+        return true;
+      });
     }
 
     weiter();

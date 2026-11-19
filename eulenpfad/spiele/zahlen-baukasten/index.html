@@ -228,6 +228,7 @@ LS.spiel({
     }
 
     const tasten = LS.tastatur({
+      erwartet: () => loesung, // ZU1 a
       anzeige,
       maxStellen: 7,
       onAenderung: miniZeigen,

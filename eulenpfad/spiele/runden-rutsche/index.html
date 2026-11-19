@@ -208,10 +208,19 @@ LS.spiel({
         ziele.append(knopf);
       }
       ctx.flaeche.append(ziele);
+      // ZU1 a: richtig = die gerundete Zahl antippen, falsch = die andere Richtung
+      ctx.testZug(richtig => {
+        if (fertig || !document.body.contains(ziele)) return false;
+        const i = [a.unten, a.oben].findIndex(w => (w === a.loesung) === richtig);
+        if (i < 0) return false;
+        ziele.children[i].click();
+        return true;
+      });
     } else {
       const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Gerundete Zahl" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: a.loesung, // ZU1 a
         anzeige, maxStellen: 7,
         onOk(w) {
           if (w === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); svg.rutschen(w); ctx.richtig(`Richtig: ${loesungText}`); return; }

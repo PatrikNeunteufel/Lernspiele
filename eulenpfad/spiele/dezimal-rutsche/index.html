@@ -258,6 +258,7 @@ function eintippen(ctx, richtig, stellen, hinweis, loesungText, lob, beiRichtig)
   ctx.schritte(LS.tippSchritte(richtig / 1000, stellen ?? nachkommaVon(richtig)));
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Deine Zahl" });
   const tasten = LS.tastatur({
+    erwartet: () => (richtig / 1000).toFixed(stellen ?? nachkommaVon(richtig)), // ZU1 a: mit allen verlangten Stellen
     anzeige, maxStellen: 3, dezimal: true, nachkomma: 3,
     onOk(w, text) {
       const getippt = (text.split(".")[1] || "").length;
@@ -317,6 +318,14 @@ function runden(ctx, a, p) {
       ziele.append(knopf);
     }
     ctx.flaeche.append(ziele);
+    // ZU1 a: richtig die Seite der Lösung antippen, falsch die andere
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(ziele)) return false;
+      const knoepfe = ziele.querySelectorAll(".ziel");
+      const i = ([a.unten, a.oben].indexOf(a.loesung) === 0) === richtig ? 0 : 1;
+      knoepfe[i].click();
+      return true;
+    });
   }
 }
 

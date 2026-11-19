@@ -512,6 +512,29 @@ function legen(ctx, a) {
   }
   zeichneBau();
   zeichneGefunden();
+
+  // ZU1 a: richtig das nächste Stück einer noch nicht gefundenen Kombination antippen, die zum Bau passt; falsch das
+  // nächste Stück einer schon gefundenen (ergibt eine doppelte). Vor dem ersten Fund gibt es keinen falschen Zug.
+  const ordnung = a.typ === "turm" || a.reihenfolge;
+  const naechstes = k => {
+    if (!glaceArt) { const i = k.findIndex((t, j) => aktuell[j] !== t); return i < 0 ? null : [i, k[i]]; }
+    if (ordnung) return aktuell.every((t, j) => k[j] === t) ? [0, k[aktuell.length]] : null;
+    const rest = k.slice();
+    for (const t of aktuell) { const j = rest.indexOf(t); if (j < 0) return null; rest.splice(j, 1); }
+    return rest.length ? [0, rest[0]] : null;
+  };
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || gefunden.size === N || !document.body.contains(wahl)) return false;
+    const passend = alle.filter(k => gefunden.has(schluessel(a, k)) !== richtig).map(naechstes).filter(Boolean);
+    if (richtig && !passend.length) passend.push(...alle.map(naechstes).filter(Boolean)); // Bau führt nur noch zu Gefundenem
+    if (!passend.length) return false;
+    const [gruppe, name] = passend[0];
+    const box = glaceArt ? wahl : wahl.querySelectorAll(".gl-gruppe")[gruppe];
+    const knopf = [...box.querySelectorAll(".gl-sorte")].find(b => b.dataset.name === name);
+    if (!knopf) return false;
+    knopf.click();
+    return true;
+  });
   if (ctx.nr === 0) ctx.sag(glaceArt ? "Tipp die Sorten an — jede neue Glace kommt unten dazu." : "Tipp aus jeder Gruppe ein Stück an.");
 }
 
@@ -537,6 +560,7 @@ function zaehlen(ctx, a) {
   ctx.flaeche.append(regelNebenAnzeige ? el("div", { class: "gl-antwort" }, regel, anzeige) : anzeige);
   const n = glaceArt ? a.sorten.length : 0;
   const tasten = LS.tastatur({
+    erwartet: () => f.N, // ZU1 a
     anzeige, maxStellen: 4,
     onOk(w) {
       if (ctx.vorbei()) return;

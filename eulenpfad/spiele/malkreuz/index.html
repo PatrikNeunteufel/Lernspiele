@@ -384,6 +384,7 @@ LS.spiel({
     }
 
     const tasten = LS.tastatur({
+      erwartet: () => (aktiv ? werte[aktiv] : null), // ZU1 a: der Wert des gewählten Felds (das Malkreuz wählt es selbst)
       anzeige, maxStellen: 6,
       onOk(eingabe) {
         if (!aktiv) { ctx.sag("Tipp zuerst auf ein Feld mit ?.", "hinweis"); return; }

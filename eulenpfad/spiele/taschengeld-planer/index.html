@@ -383,6 +383,7 @@ function eintippen(ctx, richtig, hinweis, loesung, einheit, notiz = null) {
   ctx.schritte(LS.tippSchritte(dezimal ? richtig / 100 : richtig));
   const anzeige = el("div", { class: "anzeige leer", "aria-label": `Deine Antwort in ${einheit}` });
   const tasten = LS.tastatur({
+    erwartet: () => (dezimal ? richtig / 100 : richtig), // ZU1 a
     anzeige, maxStellen: 3, dezimal, nachkomma: 2,
     onOk(w) {
       const ok = dezimal ? Math.round(w * 100) === richtig : w === richtig;
@@ -520,6 +521,26 @@ LS.spiel({
       f.append(regal, status);
       if (notizenAn(ctx)) f.append(el("div", { class: "tg-notizen" }, el("span", { text: "✏️ zusammen:" }), geldNotiz("Preis der gewählten Sachen zusammen"), el("span", { text: "Fr." })));
       f.append(pruefen);
+      // ZU1 a: ein Handgriff für Werkzeuge über die Knöpfe — richtig: was nicht zum Beispiel gehört, herausnehmen, dann
+      // das Fehlende hineinlegen, zuletzt prüfen; falsch: eine Auswahl über dem Budget legen und prüfen.
+      const knopf = name => regal.children[a.regal.indexOf(name)];
+      const zuTeuer = kombinationen(a.regal, a.k).find(c => c.reduce((x, n) => x + ware(n).rp, 0) > a.budget);
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || !document.body.contains(pruefen)) return false;
+        if (!richtig) {
+          if (!zuTeuer) return false;
+          for (const n of [...gewaehlt]) if (!zuTeuer.includes(n)) knopf(n).click();
+          for (const n of zuTeuer) if (!gewaehlt.has(n)) knopf(n).click();
+          pruefen.click();
+          return true;
+        }
+        const weg = [...gewaehlt].find(n => !beispiel.includes(n));
+        if (weg) { knopf(weg).click(); return true; }
+        const dazu = beispiel.find(n => !gewaehlt.has(n));
+        if (dazu) { knopf(dazu).click(); return true; }
+        pruefen.click();
+        return true;
+      });
       return;
     }
 

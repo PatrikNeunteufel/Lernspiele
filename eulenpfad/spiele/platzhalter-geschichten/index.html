@@ -585,6 +585,14 @@ function lueckenLoesen(ctx, a, pg) {
       wahl.append(k);
     }
     bereich.append(wahl);
+    // ZU1 a: richtig = die passende Option antippen, falsch = eine noch nicht gewählte unpassende
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(wahl) || wahl.querySelector(".richtig")) return false;
+      const k = [...wahl.children].find((b, j) => istRichtig(optionen[j]) === richtig && !b.disabled && !b.classList.contains("gewaehlt"));
+      if (!k) return false;
+      k.click();
+      return true;
+    });
   };
 
   const teilLoesen = i => {
@@ -614,6 +622,7 @@ function lueckenLoesen(ctx, a, pg) {
       beginne("tippen", "Rechne aus und tipp die Zahl ein.");
       tipp(tippsTippen(t, !!a.bild));
       const tasten = LS.tastatur({
+        erwartet: t.loesung, // ZU1 a: je Teil eine eigene Tastatur
         anzeige: box,
         maxStellen: 5,
         onOk(w) {

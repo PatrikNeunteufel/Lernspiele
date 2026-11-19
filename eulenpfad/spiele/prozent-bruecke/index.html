@@ -610,6 +610,7 @@ function eintippen(ctx, o) {
   const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
   ctx.flaeche.append(el("div", { class: "pb-eingabe" }, anzeige, el("span", { class: "pb-einheit", text: o.einheit })));
   const tasten = LS.tastatur({
+    erwartet: o.wert, // ZU1 a: o.wert ist das, was o.stimmt annimmt (Geld in Franken)
     anzeige, maxStellen: 4, dezimal: !!o.geld, nachkomma: 2,
     onOk(w) {
       if (o.stimmt(w)) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${o.loesung}`); return; }
@@ -639,6 +640,7 @@ function bruecke(ctx, a) {
   const ufer = el("div", { class: "pb-ufer" });
   ufer.style.setProperty("--sp", String(K));
   const gewaehlt = Array(K).fill(null);
+  const karten = []; // ZU1 a: { k, j, r } für den Testzug
   let fertig = 0;
   for (let j = 0; j < K; j++) {
     const spalte = el("div", { class: "pb-spalte" }, el("div", { class: "pb-kopf", text: a.spalten[j] }));
@@ -671,10 +673,29 @@ function bruecke(ctx, a) {
         if (fertig === R) ctx.richtig("Die Brücke steht! 🌉");
       });
       spalte.append(k);
+      karten.push({ k, j, r });
     }
     ufer.append(spalte);
   }
   f.append(ufer);
+  // ZU1 a: richtig = in einer freien Spalte die Karte der angefangenen (sonst der ersten offenen) Zeile antippen;
+  // falsch = neben einer gewählten Karte eine aus einer anderen Zeile (ohne Wahl kein falscher Handgriff)
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || fertig === R || !document.body.contains(ufer)) return false;
+    const offen = karten.filter(x => !x.k.classList.contains("fertig"));
+    const gewJ = gewaehlt.findIndex(Boolean);
+    let ziel;
+    if (richtig) {
+      const r = gewJ >= 0 ? Number(gewaehlt[gewJ].dataset.zeile) : offen[0]?.r;
+      ziel = offen.find(x => x.r === r && !gewaehlt[x.j]);
+    } else if (gewJ >= 0) {
+      const r = Number(gewaehlt[gewJ].dataset.zeile);
+      ziel = offen.find(x => x.r !== r && !gewaehlt[x.j]);
+    }
+    if (!ziel) return false;
+    ziel.k.click();
+    return true;
+  });
 }
 </script>
 </body>

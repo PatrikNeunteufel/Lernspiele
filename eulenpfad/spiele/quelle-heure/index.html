@@ -364,6 +364,7 @@ LS.spielMitStimme({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit", style: "max-width:320px;margin:0 auto" });
       f.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: a.h * 100 + a.m, // ZU1 a: 1 5 3 0 für 15:30 (Stunden 13–23)
         anzeige, maxStellen: 4,
         onAenderung: z => { if (z !== null) { const s = String(z); anzeige.textContent = s.length >= 3 ? `${s.slice(0, -2)}:${s.slice(-2)}` : s; } },
         onOk(z) {
@@ -418,6 +419,31 @@ LS.spielMitStimme({
       if (ctx.vorbei()) fertig = true;
     });
     f.append(el("div", { class: "qh-ok" }, ok));
+    // ZU1 a: richtig = kurzen Zeiger stellen, langen Zeiger wählen und stellen, OK (Zeigerwahl je ein Handgriff);
+    // falsch = OK, solange die Uhr nicht stimmt, sonst den gewählten Zeiger auf eine falsche Zahl.
+    // Die Zahlen sind SVG-Gruppen ohne click(): Klick wie vom Finger als MouseEvent.
+    const tippeZahl = z => zifferblatt.querySelector(`.ziel[data-zahl="${z}"]`).dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(ok)) return false;
+      const stimmtH = gh % 12 === a.h % 12, stimmtM = gm === a.m;
+      if (!richtig) {
+        if (!stimmtH || !stimmtM) { ok.click(); return true; }
+        tippeZahl(modus === "stunde" ? (a.h % 12) + 1 : (a.m / 5 + 1) % 12 || 12);
+        return true;
+      }
+      if (!stimmtH) {
+        if (modus !== "stunde") { modusKnoepfe.stunde.click(); return true; }
+        tippeZahl(a.h % 12 || 12);
+        return true;
+      }
+      if (!stimmtM) {
+        if (modus !== "minute") { modusKnoepfe.minute.click(); return true; }
+        tippeZahl(a.m / 5 || 12);
+        return true;
+      }
+      ok.click();
+      return true;
+    });
   },
 }, "fr");
 </script>

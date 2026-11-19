@@ -269,6 +269,7 @@ function eintippen(ctx, richtig, hinweis, loesungText) {
   ctx.schritte(LS.tippSchritte(richtig));
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Deine Antwort" });
   const tasten = LS.tastatur({
+    erwartet: () => richtig, // ZU1 a
     anzeige, maxStellen: 5,
     onOk(w) {
       if (w === richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(`Richtig: ${loesungText}`); return; }
@@ -407,6 +408,19 @@ function ausgleichen(ctx, a, titel) {
   const nochmal = el("button", { type: "button", class: "knopf hell klein", text: "↺ von vorn" });
   nochmal.addEventListener("click", () => { if (ctx.vorbei()) return; werte.splice(0, werte.length, ...a.werte); von = -1; zeichne(); });
   f.append(el("div", { class: "knopfzeile" }, nochmal));
+  // ZU1 a: richtig eine hohe Säule antippen, dann eine niedrige (steht eine nicht hohe gewählt, sie wieder abwählen);
+  // falsch eine nicht hohe Säule als erste antippen
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !box || !document.body.contains(box) || werte.every(x => x === werte[0])) return false;
+    let i;
+    if (!richtig) i = von === -1 ? werte.findIndex(x => x > 0 && x <= a.loesung) : -1;
+    else if (von === -1) i = werte.findIndex(x => x > a.loesung);
+    else i = werte[von] > a.loesung ? werte.findIndex(x => x < a.loesung) : von;
+    const s = i < 0 ? null : [...box.querySelectorAll(".saeule")].find(x => Number(x.dataset.i) === i);
+    if (!s) return false;
+    s.click();
+    return true;
+  });
 }
 </script>
 </body>

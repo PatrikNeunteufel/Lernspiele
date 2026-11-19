@@ -522,6 +522,11 @@ Vorgabe Patrik 2026-10-31.
 - Hinweis „Einzahl?“, wenn im sichtbaren Text die Zahl 1 bei einem Verb in der Mehrzahl steht („1 werden
   gegessen“, „Es kommen 1 dazu“, „1 Stück kosten“) — zum Nachsehen, kein Fehler;
 - jede Stufe lädt und lässt sich durchspielen;
+- je Stufe eine geführte Runde (Entscheid ZP1 a, LERN_Session48): Statt Zufallsklicks spielen die Züge des Rahmens
+  (`LS.pruefung.zug`, Abschnitt 4.2 `ctx.testZug`, ZU1 a) jede Aufgabe mit einem falschen und dann richtigen Handgriffen
+  bis zum Lösen, auch in späteren Schritten. Alle Prüfungen dieser Liste laufen mit; ihre Funde stehen mit „geführt:“
+  davor. Bleibt eine Aufgabe ohne Zug stehen, meldet sie „Zug“ — bis alle Spiele ihre Züge haben ein Hinweis, danach ein
+  Fehler (`ZUG_PFLICHT`). Die Übersicht am Ende nennt die ganz durchgespielten Stufen und die Spiele ohne Zug;
 - kein NaN, undefined oder null im sichtbaren Text;
 - die Generatoren mit `pruefeAufgabe`;
 - Hinweise, die die Lösung verraten;

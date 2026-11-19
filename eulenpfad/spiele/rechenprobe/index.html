@@ -286,6 +286,7 @@ const HINWEIS_STEMPEL_ENDZIFFER = "Vergleiche deine Endziffer mit der letzten Zi
 function knoepfe(ctx, ort, { optionen, richtig, gilt = w => w === richtig, inhalt = String, hinweis, loesungText, weiter, klasse = "" }) {
   const box = el("div", { class: `wahl ${klasse}` });
   let fertig = false;
+  const paare = []; // ZU1 a: [Knopf, Wert] für den Testzug
   for (const wert of optionen) {
     const k = el("button", { type: "button", class: "wahl-knopf" });
     const i = inhalt(wert);
@@ -298,8 +299,18 @@ function knoepfe(ctx, ort, { optionen, richtig, gilt = w => w === richtig, inhal
       if (ctx.vorbei()) fertig = true;
     });
     box.append(k);
+    paare.push([k, wert]);
   }
   ort.append(box);
+  // ZU1 a: richtig = eine geltende Antwort antippen (zuerst richtig), falsch = eine nicht geltende, noch nicht gewählte
+  ctx.testZug(soll => {
+    if (fertig || ctx.vorbei() || !document.body.contains(box)) return false;
+    const frei = paare.filter(([k, w]) => gilt(w) === soll && !k.classList.contains("gewaehlt"));
+    const paar = frei.find(([, w]) => w === richtig) || frei[0];
+    if (!paar) return false;
+    paar[0].click();
+    return true;
+  });
   return box;
 }
 
@@ -434,6 +445,7 @@ LS.spiel({
       }
       ctx.notizblock(gross);
       const tasten = LS.tastatur({
+        erwartet: pr.wert, // ZU1 a
         anzeige, maxStellen: 7,
         onOk(w) {
           if (ctx.vorbei()) return;

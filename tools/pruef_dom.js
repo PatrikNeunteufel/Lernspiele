@@ -233,7 +233,10 @@ class Element extends Knoten {
   getTotalLength() { return 0; }
   getPointAtLength() { return { x: 0, y: 0 }; }
   getScreenCTM() { return { inverse: () => ({}) }; }
-  createSVGPoint() { return { x: 0, y: 0, matrixTransform() { return { x: 0, y: 0 }; } }; }
+  // Ohne Bildschirm sind Bildschirm- und SVG-Koordinaten dieselben (Umrechnung = Identität): Ein Zug, der eine Stelle
+  // in Bildschirmpunkte umrechnet und dort tippt, landet wieder an dieser Stelle (ZU1 a, Zahlenstrahl-Pfeil;
+  // vorher war jeder Punkt (0, 0))
+  createSVGPoint() { return { x: 0, y: 0, matrixTransform() { return { x: this.x, y: this.y }; } }; }
   setPointerCapture() {}
   releasePointerCapture() {}
 }
@@ -254,7 +257,7 @@ function neuerStil() {
 
 function neuesEreignis(type, opt = {}) {
   return {
-    type, bubbles: !!opt.bubbles, key: opt.key, clientX: 0, clientY: 0, pointerId: 1, button: 0, target: null, currentTarget: null,
+    type, bubbles: !!opt.bubbles, key: opt.key, clientX: opt.clientX ?? 0, clientY: opt.clientY ?? 0, pointerId: 1, // Lage wie im Browser aus opt (ZU1 a) button: 0, target: null, currentTarget: null,
     defaultPrevented: false, __gestoppt: false,
     preventDefault() { this.defaultPrevented = true; },
     stopPropagation() { this.__gestoppt = true; },

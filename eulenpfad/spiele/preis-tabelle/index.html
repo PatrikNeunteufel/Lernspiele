@@ -374,6 +374,14 @@ LS.spiel({
         knoepfe[i] = k;
         return k;
       }));
+      // ZU1 a: richtig = den falschen Preis antippen, falsch = einen stimmenden, noch nicht gewählten
+      ctx.testZug(richtig => {
+        if (fertig) return false;
+        const k = knoepfe.find((b, i) => b && (i === a.luecke) === richtig && !b.classList.contains("gewaehlt"));
+        if (!k || !document.body.contains(k)) return false;
+        k.click();
+        return true;
+      });
       f.append(el("div", { class: "frage", text: "Ein Preis in der Tabelle ist falsch. Tipp ihn an!" }));
       notizen();
       kopfZusammen(f);
@@ -462,6 +470,7 @@ LS.spiel({
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Antwort" });
     f.append(anzeige);
     const tasten = LS.tastatur({
+      erwartet: () => (istGeld && !inRappen ? a.loesung / 100 : a.loesung), // ZU1 a: wie onOk vergleicht
       anzeige, maxStellen: inRappen ? 6 : 4,
       onAenderung: z => { if (z !== null && istGeld) anzeige.textContent = zeige(z); },
       onOk(z) {

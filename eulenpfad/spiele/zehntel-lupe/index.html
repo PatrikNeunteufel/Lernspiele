@@ -331,6 +331,7 @@ function eintippen(ctx, richtig, hinweis, loesungText) {
   ctx.schritte(LS.tippSchritte(richtig / 1000));
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:6px", "aria-label": "Deine Zahl" });
   const tasten = LS.tastatur({
+    erwartet: () => richtig / 1000, // ZU1 a
     anzeige, maxStellen: 3, dezimal: true, nachkomma: 3,
     onOk(w) {
       if (Math.round(w * 1000) === richtig) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
@@ -393,6 +394,16 @@ function setzen(ctx, a, p) {
     if (ctx.vorbei()) { ebene = a.ebenen; zeichne(true); }
   }
   zeichne(false);
+  // ZU1 a: ein Handgriff für Werkzeuge — auf der offenen Ebene das Stück (zuletzt den Strich) des Ziels antippen;
+  // falsch das Feld daneben. SVG-Rechtecke haben kein click(), darum ein Klick-Ereignis wie vom Finger.
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(lupe)) return false;
+    const i = weg[ebene].i;
+    const feld = lupe.children[ebene]?.querySelectorAll("rect.feld")[richtig ? i : i === 0 ? 1 : i - 1];
+    if (!feld) return false;
+    feld.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 function ablesen(ctx, a, p) {

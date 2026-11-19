@@ -286,6 +286,14 @@ LS.spiel({
         tafel.append(k);
       }
       f.append(LS.restHoehe(tafel)); // Zellgrösse nach der restlichen Höhe (--rest-h, LERN_Session45)
+      // ZU1 a: richtig das Feld der gesuchten Zahl antippen, falsch das Feld daneben (Nachbar in der Zeile)
+      const feldIndex = [...Array(zeilen * 10).keys()].find(i => zahlIm(x.basis, Math.floor(i / 10), i % 10) === x.wert);
+      ctx.testZug(richtig => {
+        const knoepfe = tafel.querySelectorAll(".ht-feld");
+        if (ctx.vorbei() || feldIndex === undefined || !document.body.contains(tafel) || knoepfe[feldIndex].classList.contains("richtig")) return false;
+        knoepfe[richtig ? feldIndex : feldIndex % 10 ? feldIndex - 1 : feldIndex + 1].click();
+        return true;
+      });
       if (ctx.nr === 0) ctx.sag(x.art === "reihe" ? "Die gelben Zahlen gehören zu einer Reihe. Wo geht sie weiter?" : "Finde den Platz der Zahl auf der Tafel.");
       return;
     }
@@ -316,6 +324,7 @@ LS.spiel({
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Zahl" });
     f.append(anzeige);
     const tasten = LS.tastatur({
+      erwartet: () => x.wert, // ZU1 a
       anzeige, maxStellen: String(MAX[ctx.stufe]).length,
       onAenderung: w => { gesuchtEl.textContent = w === null ? "?" : zahlText(w); },
       onOk(w) {

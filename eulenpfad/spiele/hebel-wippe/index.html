@@ -439,6 +439,17 @@ LS.spiel({
   },
 });
 
+/** ZU1 a: Zug für die Platzknöpfe — richtig den Platz der Lösung antippen, falsch einen anderen freien. */
+function platzZug(ctx, svg, loesung) {
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(svg)) return false;
+    const knopf = [...svg.querySelectorAll(".wippe-platz")].find(k => (k.getAttribute("aria-label") === `Platz ${loesung}`) === richtig);
+    if (!knopf) return false;
+    knopf.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
+}
+
 /** Das Kind tippt den Platz an, auf den sein Klotz soll. */
 function platzAufgabe(ctx, a, w, regel) {
   const eigene = a.kind === "links" ? a.links : a.rechts, andere = a.kind === "links" ? a.rechts : a.links;
@@ -464,6 +475,7 @@ function platzAufgabe(ctx, a, w, regel) {
     ctx.falsch(`Auf Platz ${pl} sinkt jetzt ${seitenText(s)}. ${regel}`, loesungText);
     if (ctx.vorbei()) knoepfe.weg();
   });
+  platzZug(ctx, w.svg, a.loesung); // ZU1 a
   if (ctx.nr === 0) ctx.sag("Tippe auf einen Platz. Die Wippe zeigt dir, was passiert.");
 }
 
@@ -484,6 +496,7 @@ function gewichtAufgabe(ctx, a, w, regel) {
   const notiz = notizWippe(ctx, a);
   const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort in kg" });
   const tasten = LS.tastatur({
+    erwartet: () => a.loesung, // ZU1 a
     anzeige, maxStellen: 2,
     onOk(v) {
       neu.remove();
@@ -517,6 +530,7 @@ function stangeAufgabe(ctx, a, w) {
     const notiz = notizWippe(ctx, a);
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort in kg" });
     const tasten = LS.tastatur({
+      erwartet: () => a.loesung, // ZU1 a
       anzeige, maxStellen: 3,
       onOk(v) {
         pfeil.remove();
@@ -548,6 +562,7 @@ function stangeAufgabe(ctx, a, w) {
       ctx.falsch(`Auf Platz ${pl} ${a.kraft * pl < M ? "reicht deine Kraft nicht" : "hebst du den Stein zu stark"}. ${REGEL_STANGE}`, loesungText);
       if (ctx.vorbei()) knoepfe.weg();
     });
+    platzZug(ctx, w.svg, a.loesung); // ZU1 a
   }
   if (ctx.nr === 0) ctx.sag("Je weiter weg vom Drehpunkt du drückst, desto weniger Kraft brauchst du.");
 }

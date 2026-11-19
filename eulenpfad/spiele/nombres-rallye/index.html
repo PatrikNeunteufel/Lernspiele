@@ -244,6 +244,7 @@ LS.spielMitStimme({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Deine Antwort" });
       f.append(opt.einheit ? el("div", { class: "nr-zeile" }, anzeige, el("span", { class: "nr-einheit", text: opt.einheit })) : anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => opt.erwartet !== undefined ? opt.erwartet : soll, // ZU1 a: Preise in Franken (opt.erwartet), sonst soll
         anzeige, maxStellen: opt.maxStellen || 3, dezimal: !!opt.dezimal, nachkomma: 2,
         onAenderung: opt.formatiere ? z => { if (z !== null) anzeige.textContent = opt.formatiere(z); } : undefined,
         onOk(z) {
@@ -309,7 +310,7 @@ LS.spielMitStimme({
         return;
       }
       ctx.schritte(LS.tippSchritte(a.rp / 100));
-      eintippen(a.rp, loesung, hinweis, { dezimal: true, maxStellen: 2, einheit: "Fr.", gleich: z => Math.round(z * 100) === a.rp, lob: `Richtig: ${loesung}` });
+      eintippen(a.rp, loesung, hinweis, { dezimal: true, maxStellen: 2, einheit: "Fr.", gleich: z => Math.round(z * 100) === a.rp, erwartet: a.rp / 100, lob: `Richtig: ${loesung}` });
       return;
     }
 

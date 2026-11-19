@@ -122,6 +122,12 @@ function strahlZeichnen(a, onTipp) {
     svg.append(g);
   };
   svg.setzePfeil = setzePfeil;
+  // ZU1 a: Bildschirmpunkt der Stelle w auf dem Strahl, damit der Zug dort antippen kann wie ein Kind
+  svg.punktFuer = (w) => {
+    const pt = svg.createSVGPoint();
+    pt.x = xVon(w); pt.y = y;
+    return pt.matrixTransform(svg.getScreenCTM());
+  };
   if (onTipp) {
     svg.addEventListener("pointerdown", (e) => {
       const pt = svg.createSVGPoint();
@@ -188,6 +194,23 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) { fertig = true; ok.disabled = true; svg.zeigeLoesung(a.ziel); }
       });
       ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)}` }), el("div", { class: "knopfzeile" }, ok));
+      // ZU1 a: ein Handgriff für Werkzeuge — richtig: auf die Stelle der Zahl tippen, steht der Pfeil dort, OK;
+      // falsch: einen Strichabstand daneben tippen (ausserhalb der Toleranz) und OK.
+      const tippe = (w) => {
+        const p = svg.punktFuer(w);
+        svg.dispatchEvent(new PointerEvent("pointerdown", { clientX: p.x, clientY: p.y, bubbles: true }));
+      };
+      ctx.testZug(richtig => {
+        if (fertig || !document.body.contains(ok)) return false;
+        if (!richtig) {
+          tippe(a.ziel - a.schritt > a.von ? a.ziel - a.schritt : a.ziel + a.schritt);
+          ok.click();
+          return true;
+        }
+        if (gewaehlt === null || Math.abs(gewaehlt - a.ziel) > a.toleranz) tippe(a.ziel);
+        else ok.click();
+        return true;
+      });
     } else {
       const loesung = `Der Pfeil zeigt etwa auf ${zahlText(a.ziel)}.`;
       ctx.loesung(loesung);
@@ -197,6 +220,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Deine Zahl" });
       ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)} · ungefähr genügt` }), anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => a.ziel, // ZU1 a
         anzeige, maxStellen: 7,
         onOk(w) {
           if (Math.abs(w - a.ziel) <= a.toleranz) {
@@ -211,6 +235,16 @@ LS.spiel({
         },
       });
       ctx.flaeche.append(tasten.element);
+      // ZU1 a: Der falsche Zug der Tastatur (ziel + 1) läge in der Toleranz und gälte als richtig. Darum tippt dieser Zug
+      // falsch eine Zahl einen Strichabstand daneben (ausserhalb der Toleranz); richtig übernimmt die Tastatur.
+      ctx.testZug(richtig => {
+        if (richtig || tasten.gesperrt || !document.body.contains(tasten.element)) return false;
+        const knopf = t => [...tasten.element.querySelectorAll("button")].find(b => b.textContent === t);
+        knopf("✕").click();
+        for (const z of String(a.ziel - a.schritt >= 0 ? a.ziel - a.schritt : a.ziel + a.schritt)) knopf(z).click();
+        knopf("OK ✓").click();
+        return true;
+      });
     }
     if (ctx.nr === 0) ctx.sag("Schau zuerst, wie viel ein Strich ist.");
   },

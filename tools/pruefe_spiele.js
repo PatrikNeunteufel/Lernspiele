@@ -8,6 +8,11 @@
 // aufgabeErzeugen(stufe) und pruefeAufgabe(aufgabe, stufe) an, werden zusätzlich viele
 // Zufallsaufgaben fachlich geprüft (pruefeAufgabe liefert eine Liste von Mängeln).
 //
+// Dazu je Spiel und Stufe eine geführte Runde (Entscheid ZP1 a, LERN_Session48): die Züge des Rahmens
+// (LS.pruefung.zug, ZU1 a) spielen jede Aufgabe mit einem falschen und dann richtigen Handgriffen zu Ende, auch in
+// späteren Schritten, die Zufallsklicks selten erreichen. Funde stehen mit „geführt:“ davor; bleibt eine Aufgabe ohne
+// Zug stehen, ist das bis zum Ende der Zug-Pakete ein Hinweis (ZUG_PFLICHT).
+//
 // Danach als Kind: je Spiel mit Inhaltslisten im Katalog jede Liste einzeln freigegeben (--kind=0 schaltet ab).
 //
 // Aufruf: node tools/pruefe_spiele.js [spiel-id …] [--runden=3] [--aufgaben=3000] [--seed=1] [--maxKlicks=8000] [--kind=0]
@@ -30,7 +35,10 @@ const VERDAECHTIG = /\bNaN\b|\bundefined\b|\bnull\b|\bInfinity\b|\[object /;
 // Nicht gemeldet: „für 1 Stück herausfinden“ (Infinitiv) und „liegen 1 Fr. 50 Rp.“ (mehr als 1 Fr.).
 const EINZAHL = /(?<![\d.,'’])(?<!für )\b1 (?:[A-ZÄÖÜ][\wäöüß]* )?(?:sind|haben|[a-zäöü]+en)\b|\b(?:haben|liegen|kommen|stehen|sitzen|fliegen|schwimmen|werden|gehen|laufen|wohnen|spielen|fahren|bleiben|fehlen|hängen|wachsen|passen|kosten)\s1\b(?![\d.,'’])(?! Fr\. \d)/;
 
-const opt = { runden: 3, aufgaben: 3000, seed: 1, maxKlicks: 8000 };
+const opt = { runden: 3, aufgaben: 3000, seed: 1, maxKlicks: 8000, gefuehrt: 1 }; // --gefuehrt=0: ohne geführte Runde
+// ZP1 a: Eine Aufgabe, die in der geführten Runde ohne Zug stehen bleibt, ist ein Fehler, sobald alle Spiele ihre Züge
+// haben (Zug-Pakete, LERN_Session48); bis dahin ein Hinweis, damit der volle Lauf aussagekräftig bleibt.
+const ZUG_PFLICHT = false;
 const nurSpiele = [];
 for (const a of process.argv.slice(2)) {
   const m = a.match(/^--(\w+)=(\d+)$/);
@@ -43,8 +51,11 @@ const { skripte, abweichungen, fingerabdrueckeVon } = require("./listen_fingerab
 // als Quelltext in den Treiber gegeben
 const GEOMETRIE = `const { pruefeFeier, pruefeFeierBild } = (${require("./feier_geometrie").feierPruefungen.toString()})();`;
 // Treiber im Kontext: Runden spielen, bis opt.runden protokolliert sind oder die Klicks ausgehen.
+// gefuehrt (Entscheid ZP1 a, LERN_Session48): statt Zufallsklicks die Züge des Rahmens (LS.pruefung.zug, ZU1 a) — je
+// Aufgabe ein falscher Handgriff, dann richtige bis zum Lösen; dazwischen nur Weiter-Knöpfe. So kommt jede Aufgabe in
+// jeden späteren Schritt, den der Zufall selten trifft. Bleibt eine Aufgabe ohne Zug stehen, meldet er „Zug“.
 const TREIBER = `
-(function treiber(runden, maxKlicks, endlos) {
+(function treiber(runden, maxKlicks, endlos, gefuehrt = false) {
   ${GEOMETRIE}
   const buehne = document.querySelector(".buehne");
   const versteckt = e => !!e && (e.hidden === true || versteckt(e.parentNode));
@@ -124,7 +135,12 @@ const TREIBER = `
     return s;
   };
   const bildAufgabe = new Map(); // Bilder der Aufgabe je Nummer, beim Stellen aufgenommen
+  // Geführt (ZP1 a): welche Aufgabe gerade steht, welche gelöst ist, für welche der falsche Handgriff schon kam
+  // Die erste Aufgabe (Nummer 0) steht schon, bevor der Treiber den Haken setzt
+  let gestelltNr = 0, richtigNr = -1, falschFuer = -1, zuegeJe = 0, flaecheJetzt = null;
   LS.pruefung.haken = (art, a) => {
+    if (art === "gestellt") { gestelltNr = a.nr; zuegeJe = 0; flaecheJetzt = a.flaeche; }
+    if (art === "richtig" || (art === "falsch" && a.aufgeloest)) richtigNr = a.nr; // gelöst oder Lösung gezeigt
     if (art === "gestellt" && a.flaeche) bildAufgabe.set(a.nr, aufgabeBilder(a.flaeche));
     if (art === "gestellt") {
       if (a.nr === 0) serien = {};
@@ -266,6 +282,36 @@ const TREIBER = `
     if (!knoepfe.length) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "keine Knöpfe mehr"); break; } continue; }
     // Weiter- und Nochmal-Knöpfe bevorzugen, damit die Runde vorankommt; selten eine Testhilfe.
     const vor = knoepfe.filter(b => /Weiter|Nochmal|Prüfen|OK|Ergebnis/.test(b.textContent));
+    if (gefuehrt) {
+      // ZP1 a: je Aufgabe zuerst ein falscher Handgriff, dann richtige; der Klick des Zugs ist nicht bekannt (geklickt leer)
+      geklickt = null;
+      let getan = false;
+      if (falschFuer !== gestelltNr && richtigNr !== gestelltNr) { falschFuer = gestelltNr; getan = LS.pruefung.zug(false); }
+      if (!getan && richtigNr !== gestelltNr) getan = LS.pruefung.zug(true);
+      if (getan) {
+        klicks++;
+        if (++zuegeJe > 80) { melde("Zug", "Aufgabe " + (gestelltNr + 1) + " nach 80 Zügen nicht gelöst — ein Zug bewirkt nichts?", "zug-endlos"); break; }
+        __uhr.weiter(2000);
+        pruefeText("nach einem Zug");
+        const jetzt = buehne.textContent;
+        ohneFortschritt = jetzt === letzterText ? ohneFortschritt + 1 : 0;
+        letzterText = jetzt;
+        continue;
+      }
+      if (richtigNr !== gestelltNr) {
+        const aufgabe = (flaecheJetzt ? aufgabenText(flaecheJetzt) : "").replace(/ +/g, " ").trim().slice(0, 60);
+        melde("Zug", "Aufgabe " + (gestelltNr + 1) + " bleibt stehen: kein Zug meldet einen Handgriff (ctx.testZug oder opt.erwartet fehlt)" + (aufgabe ? " «" + aufgabe + "»" : ""), "zug-fehlt");
+        break;
+      }
+      // gelöst: nur weiter zur nächsten Aufgabe (nicht „OK“ der gesperrten Tastatur)
+      const weiter = knoepfe.find(b => /Weiter|Nochmal|Ergebnis/.test(b.textContent));
+      if (!weiter) { __uhr.weiter(2000); if (++ohneFortschritt > 50) { melde("Hänger", "nach dem Lösen kein Weiter (Knöpfe: " + knoepfe.map(b => b.textContent.trim().slice(0, 15)).join(" | ").slice(0, 200) + "; Runden " + protokoll().length + ")"); break; } continue; }
+      weiter.click();
+      klicks++;
+      __uhr.weiter(2000);
+      pruefeText("nach Klick auf «" + weiter.textContent.trim().slice(0, 20) + "»");
+      continue;
+    }
     const hilfe = buehne.querySelectorAll(".testhilfe button");
     const k = hilfe.length && Math.random() < 0.03 ? hilfe[Math.floor(Math.random() * hilfe.length)]
       : vor.length && Math.random() < 0.4 ? vor[Math.floor(Math.random() * vor.length)] : knoepfe[Math.floor(Math.random() * knoepfe.length)];
@@ -419,8 +465,9 @@ function rahmenKlassenImStil(html, reserviert) {
  * Testhilfen (🔑, ⏭) werden mitgeprüft. Mit 'liste' (Schlüssel "<spiel>/<liste>" der Quellen) als
  * Kind, für das nur dieses Spiel und nur diese Listen freigegeben sind (Entscheid L4 a); bietet das
  * Spiel die Stufe dann nicht an, ist das kein Fehler (ergebnis.angeboten = false).
+ * gefuehrt (ZP1 a): eine Runde mit den Zügen des Rahmens statt Zufallsklicks, ohne Generator und Stilprüfung.
  */
-function pruefe(id, stufe, liste = null, endlos = false, mix = false) {
+function pruefe(id, stufe, liste = null, endlos = false, mix = false, gefuehrt = false) {
   const seitenPfad = path.join(SPIELE_DIR, id, "index.html");
   const html = fs.readFileSync(seitenPfad, "utf8");
   const body = (html.match(/<body[^>]*>([\s\S]*)<\/body>/) || [, html])[1].replace(/<script[\s\S]*?<\/script>/g, "");
@@ -456,6 +503,12 @@ function pruefe(id, stufe, liste = null, endlos = false, mix = false) {
       const t = lauf(MIX_TREIBER, "mix-treiber", 60000)(12, opt.maxKlicks, endlos);
       Object.assign(ergebnis, { angeboten: t.geht, runden: t.ergebnisse, klicks: t.klicks });
       for (const f of t.funde) (/^Hänger/.test(f.art) ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
+      return mitAusnahmen();
+    }
+    if (gefuehrt) {
+      const t = lauf(TREIBER, "treiber-gefuehrt", 60000)(1, opt.maxKlicks, false, true);
+      Object.assign(ergebnis, { runden: t.runden, klicks: t.klicks });
+      for (const f of t.funde) (/^(Hänger|Hinweis)/.test(f.art) || (f.art === "Zug" && !ZUG_PFLICHT) ? ergebnis.hinweise : ergebnis.fehler).push(`${f.art}: ${f.text}`);
       return mitAusnahmen();
     }
     if (!liste && stufe === STUFEN[0]) for (const k of rahmenKlassenImStil(html, lauf("LS.RAHMEN_KLASSEN.reserviert", "klassen", 1000)))
@@ -545,11 +598,22 @@ try {
   }
 }
 const ohneTipp = new Map(); // Spiel → Stufen ohne ctx.tipp (Übersicht am Ende, LERN_Session9)
+// ZP1 a: Stufen, die die geführte Runde ganz durchspielt, und Spiele mit einer Aufgabe ohne Zug (Übersicht am Ende)
+let gefuehrtGanz = 0;
+const ohneZug = new Set();
 console.log(`Prüfe ${ids.length} Spiele × ${STUFEN.length} Stufen (je ${opt.runden} Runden, ${opt.aufgaben} Generator-Aufgaben, Startwert ${opt.seed})\n`);
 for (const id of ids) {
   for (const stufe of STUFEN) {
     const e = pruefe(id, stufe);
     if (e.runden && !e.mitTipp) ohneTipp.set(id, [...(ohneTipp.get(id) || []), stufe]);
+    // ZP1 a: dazu eine geführte Runde; ihre Funde mit „geführt:“ davor
+    if (opt.gefuehrt && e.angeboten && e.runden) {
+      const g = pruefe(id, stufe, null, false, false, true);
+      e.fehler.push(...g.fehler.map(f => "geführt: " + f));
+      e.hinweise.push(...g.hinweise.map(h => "geführt: " + h));
+      if (!g.fehler.length && !g.hinweise.some(h => /^Zug/.test(h))) gefuehrtGanz++;
+      else if (g.hinweise.some(h => /^Zug/.test(h))) ohneZug.add(id);
+    }
     const gen = e.generator ? ` · Generator ${e.generator.anzahl}${e.generator.mitPruefung ? " fachlich" : ""}` : "";
     const zeichen = e.fehler.length ? "✗" : e.hinweise.length ? "~" : "✓";
     console.log(`${zeichen} ${id.padEnd(22)} ${stufe}  Runden ${e.runden ?? "-"} · Klicks ${e.klicks ?? "-"}${gen}`);
@@ -1061,6 +1125,9 @@ if (ohneTipp.size) {
   console.log(`\nOhne Tipps (ctx.tipp): ${ohneTipp.size} Spiel${ohneTipp.size === 1 ? "" : "e"}`);
   for (const [id, st] of ohneTipp) console.log(`    ${id.padEnd(22)} ${st.length === STUFEN.length ? "alle Stufen" : st.join(" ")}`);
 }
+// ZP1 a: geführte Runden — wie viele Stufen ganz durchgespielt, welche Spiele noch eine Aufgabe ohne Zug haben
+console.log(`\nGeführt (ZP1 a): ${gefuehrtGanz} Stufen ganz durchgespielt; ${ohneZug.size} Spiele mit einer Aufgabe ohne Zug` +
+  `${ohneZug.size ? (ZUG_PFLICHT ? " (Fehler)" : " (noch Hinweis, Zug-Pakete laufen)") + ": " + [...ohneZug].join(", ") : ""}`);
 Promise.all([...spaeter, ...spaeterSpeicher, ...spaeterEmpfehlungen]).then(() => {
   console.log(`\n${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`);
   require("./testausgabe.js").merke("pruefe_spiele", `${fehlerZahl ? fehlerZahl + " Fehler" : "Keine Fehler"}.`); // HK1 a

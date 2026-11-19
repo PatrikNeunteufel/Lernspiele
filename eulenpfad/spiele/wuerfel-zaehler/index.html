@@ -511,6 +511,7 @@ function zeigeVergleich(ctx, a, wz, p) {
     const anzeige = el("div", { class: "anzeige leer", "aria-label": "Wie viele mehr" });
     wahl.replaceWith(anzeige);
     const tasten = LS.tastatur({
+      erwartet: d, // ZU1 a: gehört fest zu dieser Tastatur
       anzeige, maxStellen: 2,
       onOk(w) {
         if (ctx.vorbei()) return;
@@ -538,6 +539,15 @@ function zeigeVergleich(ctx, a, wz, p) {
     });
     wahl.append(k);
   }
+  // ZU1 a: Schritt 1 für Werkzeuge — richtig den passenden Knopf, falsch den ersten anderen, noch nicht gewählten
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(wahl)) return false;
+    const i = VERGLEICH.findIndex((o, j) => (o === a.ergebnis) === richtig && !wahl.children[j].disabled
+      && !wahl.children[j].classList.contains("gewaehlt"));
+    if (i < 0) return false;
+    wahl.children[i].click();
+    return true;
+  });
 }
 
 /** s4: rechts Würfel setzen, bis beide Gebäude gleich viele haben. */
@@ -601,6 +611,26 @@ function zeigeBauen(ctx, a, wz) {
   });
   wz.append(el("div", { class: "wz-knoepfe" }, zurueck, fertig));
   zeichne();
+  // ZU1 a: ein Handgriff für Werkzeuge — richtig: fehlen Würfel, einen setzen (erstes freie Feld), sind es zu viele,
+  // ↩, sonst ✔ Fertig; falsch: ✔ Fertig, solange die Zahl nicht stimmt.
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(fertig)) return false;
+    const wb = anzahl(rechts);
+    if (!richtig) {
+      if (wb === wa) return false;
+      fertig.click();
+      return true;
+    }
+    if (wb < wa) {
+      const k = [...knoepfe.values()].find(b => !b.disabled);
+      if (!k) return false;
+      k.click();
+    } else if (wb > wa) {
+      if (zurueck.disabled) return false;
+      zurueck.click();
+    } else fertig.click();
+    return true;
+  });
 }
 
 /** s5, s6: Wie viele Würfel fehlen, bis die Kiste voll ist? */
@@ -624,6 +654,7 @@ function zeigeKiste(ctx, a, wz, p) {
   const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Würfel" });
   wz.append(anzeige);
   const tasten = LS.tastatur({
+    erwartet: () => a.fehlen, // ZU1 a
     anzeige, maxStellen: 2,
     onOk(w) {
       if (ctx.vorbei()) return;

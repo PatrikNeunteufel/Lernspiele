@@ -203,6 +203,8 @@ LS.spiel({
     ctx.flaeche.append(mauer, el("div", { class: "hinweis-klein frage", text: "Tipp auf einen leeren Stein, dann die Zahl eintippen." }), anzeige);
 
     const tasten = LS.tastatur({
+      // ZU1 a: der Wert des gewählten Steins; nach einem richtigen wählt die Mauer den nächsten selbst
+      erwartet: () => { if (!aktiv) return null; const [r, i] = aktiv.split(",").map(Number); return w[r][i]; },
       anzeige, maxStellen: 7,
       onOk(eingabe) {
         if (!aktiv) { ctx.sag("Tipp zuerst auf einen leeren Stein.", "hinweis"); return; }

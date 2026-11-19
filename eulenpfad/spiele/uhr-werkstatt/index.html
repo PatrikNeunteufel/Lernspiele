@@ -273,11 +273,13 @@ LS.spiel({
     const zeitSchritte = (hh, mm) => LS.tippSchritte(hh * 100 + mm);
 
     /** Uhrzeit oder Minutenzahl eintippen; istRichtig(zahl) prüft die Eingabe. */
-    const eingabe = (istRichtig, hinweis, loesungText, alsMinuten = false) => {
+    // ZU1 a: erwartet = die Eingabe als Ziffern (7:45 als 745, Minuten als Zahl), für den Zug der Tastatur
+    const eingabe = (istRichtig, hinweis, loesungText, alsMinuten = false, erwartet = undefined) => {
       ctx.loesung(loesungText);
       const anzeige = el("div", { class: "anzeige leer", "aria-label": alsMinuten ? "Minuten" : "Uhrzeit" });
       ctx.flaeche.append(alsMinuten ? el("div", { class: "ergebnis-zeile" }, anzeige, el("span", { class: "einheit", text: "min" })) : anzeige);
       const tasten = LS.tastatur({
+        erwartet, // ZU1 a
         anzeige, maxStellen: alsMinuten ? 3 : 4,
         onAenderung: z => { if (z !== null && !alsMinuten) { const t = zeitAusZiffern(z); anzeige.textContent = t ? digital(t.h, t.m) : String(z); } },
         onOk(z) {
@@ -307,6 +309,7 @@ LS.spiel({
       ctx.loesung(loesungText);
       ctx.schritte(1);
       const box = el("div", { class: "optionen" });
+      const paare = []; // ZU1 a: Knopf und Option für den Zug
       for (const o of mische(optionen)) {
         const k = el("button", { type: "button", class: "option" });
         darstellen(k, o);
@@ -318,8 +321,17 @@ LS.spiel({
           if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
         });
         box.append(k);
+        paare.push([k, o]);
       }
       ctx.flaeche.append(box);
+      // ZU1 a: ein Handgriff für Werkzeuge — richtig die passende Option antippen, falsch die erste andere
+      ctx.testZug(richtig => {
+        if (fertig || !document.body.contains(box)) return false;
+        const p = paare.find(([, o]) => istRichtig(o) === richtig);
+        if (!p) return false;
+        p[0].click();
+        return true;
+      });
     };
 
     const zeigerHinweis = "Schau zuerst auf den kurzen Zeiger (Stunden), dann auf den langen blauen (Minuten). Jede Zahl auf dem Rand sind 5 Minuten.";
@@ -345,6 +357,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => h * 100 + m, // ZU1 a
         anzeige, maxStellen: 4,
         onAenderung: z => { if (z !== null) { const t = zeitAusZiffern(z); anzeige.textContent = t ? digital(t.h, t.m) : String(z); } },
         onOk(z) {
@@ -363,14 +376,14 @@ LS.spiel({
       zeitstrahl(digital(t0.h, t0.m), digital(t1.h, t1.m));
       ctx.schritte(LS.tippSchritte(a.dauer));
       eingabe(z => z === a.dauer, "Rechne zuerst bis zur nächsten vollen Stunde, dann die ganzen Stunden, dann den Rest. 1 h = 60 min.",
-        `Von ${digital(t0.h, t0.m)} bis ${digital(t1.h, t1.m)} sind es ${a.dauer} min (${minText(a.dauer)}).`, true);
+        `Von ${digital(t0.h, t0.m)} bis ${digital(t1.h, t1.m)} sind es ${a.dauer} min (${minText(a.dauer)}).`, true, a.dauer);
     } else if (art === "rueckwaerts") {
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "frage", html: `Der Film dauert <b>${minText(a.dauer)}</b> und endet um <b>${digital(t1.h, t1.m)}</b>. Wann hat er begonnen?` }));
       zeitstrahl("?", digital(t1.h, t1.m));
       ctx.schritte(zeitSchritte(t0.h, t0.m));
       eingabe(z => gleicheZeit(z, t0), "Rechne rückwärts: zuerst die Stunden weg, dann die Minuten.",
-        `${digital(t1.h, t1.m)} − ${minText(a.dauer)} = ${digital(t0.h, t0.m)}`);
+        `${digital(t1.h, t1.m)} − ${minText(a.dauer)} = ${digital(t0.h, t0.m)}`, false, t0.h * 100 + t0.m);
     } else if (art === "dauerGenau") {
       const t0 = alsZeit(a.start), t1 = alsZeit(a.ende);
       ctx.flaeche.append(el("div", { class: "digital", text: digital(t0.h, t0.m) }),
@@ -378,7 +391,7 @@ LS.spiel({
       zeitstrahl(digital(t0.h, t0.m), "?");
       ctx.schritte(zeitSchritte(t1.h, t1.m));
       eingabe(z => gleicheZeit(z, t1), "60 Minuten sind 1 Stunde. Rechne zuerst bis zur vollen Stunde, dann den Rest.",
-        `${digital(t0.h, t0.m)} + ${a.dauer} min = ${digital(t1.h, t1.m)}`);
+        `${digital(t0.h, t0.m)} + ${a.dauer} min = ${digital(t1.h, t1.m)}`, false, t1.h * 100 + t1.m);
     } else if (art === "lesen24") {
       ctx.flaeche.append(el("div", { class: "frage", text: `Es ist ${a.tageszeit}. Wie spät ist es? Tipp die Zeit ein, z. B. 1 5 4 0 für 15:40.` }));
       ctx.flaeche.append(LS.restHoehe(uhr(h, m, "uhr-gross")));
@@ -386,7 +399,7 @@ LS.spiel({
       eingabe(z => gleicheZeit(z, { h: a.h24, m }), z => {
         const t = zeitAusZiffern(z);
         return t && t.m === m && t.h === h ? `Die Minuten stimmen. Aber es ist ${a.tageszeit} — wie zählt man da die Stunden?` : zeigerHinweis;
-      }, `Es ist ${digital(a.h24, m)}.`);
+      }, `Es ist ${digital(a.h24, m)}.`, false, a.h24 * 100 + m);
     } else {
       // Zeitdauer: Startzeit digital, plus Minuten — Ergebnis eintippen (24-Stunden-Zählung, z. B. 15:20)
       const start = zufall(7, 17) * 60 + zufall(0, 11) * 5;
@@ -402,6 +415,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Uhrzeit" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => t1.h * 100 + t1.m, // ZU1 a
         anzeige, maxStellen: 4,
         onAenderung: z => { if (z !== null) { const t = zeitAusZiffern(z); anzeige.textContent = t ? digital(t.h, t.m) : String(z); } },
         onOk(z) {

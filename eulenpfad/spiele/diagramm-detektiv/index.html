@@ -510,6 +510,7 @@ function diagramm(a, werte, opt = {}) {
       band.setAttribute("class", "band");
       band.setAttribute("x", x0); band.setAttribute("width", spalte);
       band.setAttribute("y", Y(v) - (Y(0) - Y(raster)) / 2); band.setAttribute("height", Y(0) - Y(raster));
+      band.setAttribute("data-wert", v); // ZU1 a: der Zug findet das Band zu einer Höhe
       band.addEventListener("click", () => opt.onTipp(v));
       svg.append(band);
     }
@@ -601,6 +602,22 @@ LS.spiel({
         if (ctx.vorbei()) svg.setzeSaeule(a.loesung, "geloest");
       });
       antwort.append(el("div", { class: "knopfzeile" }, pruefen));
+      // ZU1 a: richtig die Höhe der Lösung antippen, dann «Prüfen»; falsch eine andere Höhe antippen (steht schon eine
+      // falsche, «Prüfen»)
+      let geloest = false;
+      ctx.testZug(richtig => {
+        if (geloest || ctx.vorbei() || !document.body.contains(pruefen)) return false;
+        const baender = [...f.querySelectorAll(".diagramm .band")];
+        const band = baender.find(b => (Number(b.getAttribute("data-wert")) === a.loesung) === richtig);
+        if (gewaehlt !== null && (gewaehlt === a.loesung) === richtig) {
+          if (richtig) geloest = true;
+          pruefen.click();
+          return true;
+        }
+        if (!band) return false;
+        band.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        return true;
+      });
       if (ctx.nr === 0) ctx.sag("Tipp in die leere Spalte, dann auf «Prüfen». Du kannst die Höhe vorher noch ändern.");
       ctx.schritte(2); // Höhe antippen und «Prüfen»
       return;
@@ -661,6 +678,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer dd-anzeige", "aria-label": "Antwort" });
       if (notiz) { notiz.classList.add("nz-spalte"); antwort.append(el("div", { class: "nz-antwort" }, notiz, anzeige)); } else antwort.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => a.loesung, // ZU1 a
         anzeige, maxStellen: 3,
         onOk(z) {
           if (z === a.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }

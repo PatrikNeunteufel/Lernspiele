@@ -103,6 +103,33 @@ function geldKnopf(g) {
   return k;
 }
 
+/**
+ * ZU1 a: Zug zum Geldlegen. Richtig: ein Stück zu viel aus der Kasse zurücknehmen, sonst ein fehlendes Stück der
+ * kürzesten Zerlegung 'ziel' legen, und liegt sie ganz, «Bezahlen»/«Herausgeben». Falsch: den Knopf drücken, solange
+ * es noch nicht stimmt (zu früh bezahlt), sonst ein Stück zu viel legen.
+ */
+function legenZug(ctx, { ziel, gelegt, kasse, vorrat, ok, fertig }) {
+  const text = rp => GELD.find(g => g.rp === rp).text;
+  const knopf = (box, rp) => [...box.children].find(k => k.getAttribute("aria-label") === text(rp));
+  ctx.testZug(richtig => {
+    if (fertig() || !document.body.contains(ok)) return false;
+    const fehlt = ziel.slice(), zuViel = [];
+    for (const rp of gelegt) { const i = fehlt.indexOf(rp); if (i < 0) zuViel.push(rp); else fehlt.splice(i, 1); }
+    const stimmt = !fehlt.length && !zuViel.length;
+    if (!richtig) {
+      if (!stimmt) { ok.click(); return true; }
+      const k = knopf(vorrat, ziel[ziel.length - 1]);
+      if (!k) return false;
+      k.click();
+      return true;
+    }
+    const k = zuViel.length ? knopf(kasse, zuViel[0]) : fehlt.length ? knopf(vorrat, fehlt[0]) : ok;
+    if (!k) return false;
+    k.click();
+    return true;
+  });
+}
+
 /** Betrag mit möglichst wenigen Stücken (für „zählen“-Aufgaben und Lösungstexte). */
 function zerlegen(rp, erlaubt) {
   const stuecke = [];
@@ -235,6 +262,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Betrag" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => (mitRappen ? soll : soll / 100), // ZU1 a: wie onOk umrechnet
         anzeige, maxStellen: mitRappen ? 6 : 4,
         onAenderung: z => { if (z !== null) anzeige.textContent = betrag(mitRappen ? z : z * 100); },
         onOk(z) {
@@ -285,6 +313,7 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
       });
       ctx.flaeche.append(kasse, vorrat, el("div", { class: "knopfzeile" }, ok));
+      legenZug(ctx, { ziel: zerlegen(soll, erlaubt).map(g => g.rp), gelegt, kasse, vorrat, ok, fertig: () => fertig }); // ZU1 a
       if (ctx.nr === 0) ctx.sag("Tipp auf Münzen und Noten. Nochmal tippen in der Kasse nimmt sie zurück.");
       return;
     }
@@ -358,6 +387,7 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
       });
       ctx.flaeche.append(kasse, vorrat, el("div", { class: "knopfzeile" }, ok));
+      legenZug(ctx, { ziel: kuerzest.map(g => g.rp), gelegt, kasse, vorrat, ok, fertig: () => fertig }); // ZU1 a
       if (ctx.nr === 0) ctx.sag("Nochmal tippen in der Kasse nimmt ein Stück zurück.");
       return;
     }
@@ -384,6 +414,7 @@ LS.spiel({
       const anzeige = el("div", { class: "anzeige leer", "aria-label": "Anzahl" });
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
+        erwartet: () => auf.loesung, // ZU1 a
         anzeige, maxStellen: 2,
         onOk(z) {
           if (z === auf.loesung) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }

@@ -2869,3 +2869,29 @@
   quer 88 px (Stand 2), Fahrplan-Rechner s2 78 px, Quader-Volumen s6 58 px, Flächen-Pixel s6 41 px, Komma-Messband s6
   41 px und kleinere — für den Rest LERN-55 vorgemerkt.
 - Tests: Skripte „Keine Fehler.“, Eulenpfad die 26 Spiele „Keine Fehler.“
+- Geführte Runde in `tools/pruefe_spiele.js` (Entscheid ZP1 a): je Spiel und Stufe zusätzlich eine Runde mit den Zügen
+  des Rahmens statt Zufallsklicks — je Aufgabe ein falscher, dann richtige Handgriffe bis zum Lösen, auch in späteren
+  Schritten; alle Prüfungen laufen mit, Funde mit „geführt:“ davor. Bleibt eine Aufgabe ohne Zug stehen („Zug“), ist das
+  bis zum Ende der Zug-Pakete ein Hinweis (`ZUG_PFLICHT`), danach ein Fehler; Übersicht am Ende; `--gefuehrt=0` schaltet
+  ab. Kostet kaum Zeit (sechs Spiele: 42 s ohne, 40 s mit). rahmen.md 8.
+- Ersatz-DOM `tools/pruef_dom.js`: Ereignisse übernehmen `clientX`/`clientY` aus dem Konstruktor (vorher immer 0), SVG-Punkte
+  rechnen ohne Bildschirm als Identität um (vorher immer (0, 0)); nutzt nur der Zahlenstrahl-Pfeil.
+- Zug-Pakete, Paket 2: die 26 Spiele mit Zifferntastatur und eigenen Knöpfen nennen `opt.erwartet` und melden
+  `ctx.testZug` für ihre eigenen Lösungsschritte: Schoggi-Brüche (bruch-rechteck), Dezimal-Rutsche (dezimal-rutsche),
+  Daten-Detektiv (diagramm-detektiv; Bänder tragen `data-wert`), Möglichkeiten-Finder (glace-kombinator), Hebel-Wippe
+  (hebel-wippe), Hundertertafel-Detektiv (hundertertafel), Kiosk-Kasse (kiosk-kasse), Malkreuz (malkreuz),
+  Mittelwert-Türme (mittelwert-waage), Nombres-Rallye (nombres-rallye), Platzhalter-Geschichten (platzhalter-geschichten), Preis-Tabelle
+  (preis-tabelle), Prozent-Brücke (prozent-bruecke), Punkte-Schieber (punkte-schieber), Quelle heure? (quelle-heure),
+  Probe-Stempel (rechenprobe), Runden-Rutsche (runden-rutsche), Sachaufgaben-Kompass (sachaufgaben-kompass), Tabellen-Post
+  (tabellen-post), Taschengeld-Planer (taschengeld-planer), Uhr-Werkstatt (uhr-werkstatt), Würfel-Zähler
+  (wuerfel-zaehler), Zahlen-Baukasten (zahlen-baukasten), Zahlenmauer-Baumeister (zahlenmauer), Zahlenstrahl-Pfeil
+  (zahlenstrahl-pfeil; der falsche Zug der Tastatur, Wert + 1, läge in der Toleranz — das Spiel meldet dafür einen eigenen
+  falschen Zug), Zehntel-Lupe (zehntel-lupe). Spiellogik, Texte und Aussehen unverändert.
+- Messung mit `--schritte` (die 26 Spiele, s1–s6, Handy, drei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende
+  gespielt. Neu sichtbare Überläufe der Aufgabe für den Rest LERN-55: Möglichkeiten-Finder s6 163 px (Stand 20), s4 103,
+  s3 77; Probe-Stempel s5 147, s6 127, s4 88, s3 76; Würfel-Zähler s3 138 (ab der Tastatur); Platzhalter-Geschichten s6
+  102; Hebel-Wippe s5 65; Daten-Detektiv s4/s5 63; Taschengeld-Planer s3 50; Uhr-Werkstatt s6 36; Zehntel-Lupe s5 31.
+- Geführt neu gemeldet, ein Hinweis: Mittelwert-Türme s5 „Hinweis verrät … «5»“ — die 5 ist die Anzahl Werte, Fehlalarm
+  der bestehenden Prüfung (die Zufallsrunde traf die Aufgabe nicht).
+- Tests: Skripte „Keine Fehler.“, Eulenpfad die 26 Spiele „Keine Fehler.“ („Geführt (ZP1 a): 150 Stufen ganz
+  durchgespielt“, Zahlenstrahl-Pfeil nach der Berichtigung im Ersatz-DOM „6 Stufen ganz durchgespielt“)

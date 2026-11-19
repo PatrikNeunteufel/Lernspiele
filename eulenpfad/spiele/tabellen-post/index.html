@@ -246,6 +246,26 @@ function einsortieren(ctx, zahl) {
     },
   }));
   ctx.flaeche.append(ziffern);
+  // ZU1 a: ein Handgriff für Werkzeuge über die Knöpfe — richtig: das erste falsche Fach antippen und die richtige
+  // Ziffer tippen (oder leeren), sind alle richtig, OK; falsch: ins erste Fach der Zahl eine falsche Ziffer, dann OK.
+  const taste = t => [...ziffern.querySelectorAll("button")].find(b => b.textContent === t);
+  ctx.testZug(richtig => {
+    if (gesperrt || !document.body.contains(ziffern)) return false;
+    if (!richtig) {
+      const i = spalten.findIndex(st => STELLEN.indexOf(st) >= ersteStelle);
+      faecher[spalten[i].k].click();
+      taste(String((soll[spalten[i].k] + 1) % 10)).click();
+      taste("OK ✓").click();
+      return true;
+    }
+    const i = spalten.findIndex(st => wert[st.k] !== (STELLEN.indexOf(st) < ersteStelle ? undefined : String(soll[st.k])));
+    if (i < 0) { taste("OK ✓").click(); return true; }
+    const st = spalten[i];
+    faecher[st.k].click();
+    if (STELLEN.indexOf(st) < ersteStelle) taste("⌫").click();
+    else taste(String(soll[st.k])).click();
+    return true;
+  });
   ctx.sag(ctx.nr === 0 ? "Tipp auf ein Fach und dann auf eine Ziffer. Es geht automatisch ein Fach weiter." : "Wohin gehören die Ziffern?");
 }
 
@@ -271,6 +291,7 @@ function ablesen(ctx, zahl) {
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:16px", "aria-label": "Deine Zahl" });
   ctx.flaeche.append(anzeige);
   const tasten = LS.tastatur({
+    erwartet: () => zahl, // ZU1 a
     anzeige,
     maxStellen: 7,
     onOk(w) {

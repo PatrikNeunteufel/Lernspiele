@@ -374,7 +374,7 @@ function rechnungEl(terme, ops, ...rest) {
  * Feld setzt es zurück. pruefe(z, n) liefert "richtig", "kuerzen" (richtig, aber noch nicht gekürzt)
  * oder einen Hinweis-Text.
  */
-function bruchEingabe(ctx, { nenner = null, pruefe, loesungText, kuerzenText = "Richtig gerechnet! Kürze noch so weit wie möglich." }) {
+function bruchEingabe(ctx, { nenner = null, pruefe, loesungText, kuerzenText = "Richtig gerechnet! Kürze noch so weit wie möglich.", ziel }) {
   const fz = el("span", { class: "feld aktiv", text: "?" });
   const fn = el("span", { class: nenner ? "feld fest" : "feld", text: nenner ? String(nenner) : "?" });
   const bild = el("span", { class: "bruch eingabe", "aria-label": "Deine Antwort" },
@@ -385,6 +385,8 @@ function bruchEingabe(ctx, { nenner = null, pruefe, loesungText, kuerzenText = "
   const anzeige = el("div", { class: "anzeige" }); // nicht angezeigt; die Felder zeigen die Ziffern
   let tasten = null;
   tasten = LS.tastatur({
+    // ZU1 a: ziel = [Zähler, Nenner] der Lösung; im Zählerfeld der Zähler, im Nennerfeld der Nenner
+    erwartet: () => (aktiv === fz ? ziel[0] : ziel[1]),
     anzeige, maxStellen: 3,
     onAenderung(w) {
       if (!tasten) return;
@@ -524,7 +526,7 @@ LS.spiel({
       ctx.serie("zeichen", op);
       const klasse = i => (op === "+" ? (i < z1 ? "a" : i < z1 + z2 ? "b" : null) : (i < z1 - z2 ? "a" : i < z1 ? "weg" : null));
       const eingabe = bruchEingabe(ctx, {
-        nenner: n, loesungText,
+        nenner: n, loesungText, ziel: a.ergebnis, // ziel: Zug ZU1 a
         pruefe: z => (z === a.ergebnis[0] ? (ctx.richtig(`Richtig: ${loesungText}`), "richtig")
           : op === "+" ? "Die Stückchen sind gleich gross. Zähle die gefärbten Stückchen beider Farben zusammen." : "Die Stückchen sind gleich gross. Zähle, wie viele gefärbte übrig bleiben."),
       });
@@ -546,7 +548,7 @@ LS.spiel({
         hinweis = "Zähle nur die dicken Spalten: Wie viele davon sind gefärbt?";
       }
       const eingabe = bruchEingabe(ctx, {
-        nenner: a.nenner, loesungText,
+        nenner: a.nenner, loesungText, ziel: a.ergebnis, // ziel: Zug ZU1 a
         pruefe: x => (x === a.ergebnis[0] ? (ctx.richtig(`Richtig: ${loesungText}`), "richtig") : hinweis),
       });
       ctx.loesung(loesungText);
@@ -569,7 +571,7 @@ LS.spiel({
       const loesungText = weg(a.terme, a.ops, a.N);
       ctx.serie("zeichen", a.ops.join(""));
       const eingabe = bruchEingabe(ctx, {
-        loesungText,
+        loesungText, ziel: a.ergebnis, // ziel: Zug ZU1 a
         pruefe: (z, n) => pruefeErgebnis(ctx, a, z, n, { gekuerzt: p.gekuerzt, bild: p.bild, lob: lobFuer(loesungText, a.ergebnis) }),
       });
       ctx.loesung(loesungText);
@@ -581,7 +583,7 @@ LS.spiel({
     } else if (a.art === "kuerzen") {
       const loesungText = `${bText(...a.bruch)} = ${bText(...a.ergebnis)}`;
       const eingabe = bruchEingabe(ctx, {
-        loesungText, kuerzenText: "Gut gekürzt! Es geht aber noch weiter.",
+        loesungText, kuerzenText: "Gut gekürzt! Es geht aber noch weiter.", ziel: a.ergebnis, // ziel: Zug ZU1 a
         pruefe: (z, n) => {
           if (n === 0) return "Der Nenner ist nie 0.";
           if (!gleichWert(z, n, ...a.bruch)) return "Teile Zähler und Nenner durch dieselbe Zahl, dann bleibt der Bruch gleich gross.";
@@ -609,7 +611,7 @@ LS.spiel({
       const loesungText = `${weg(a.terme, a.ops, a.N)} — die Lücke ist ${bText(...a.ergebnis)}`;
       ctx.serie("zeichen", op);
       const eingabe = bruchEingabe(ctx, {
-        nenner: d, loesungText,
+        nenner: d, loesungText, ziel: a.ergebnis, // ziel: Zug ZU1 a
         pruefe: x => (x === a.ergebnis[0] ? (ctx.richtig(`Richtig: ${loesungText}`), "richtig")
           : `Mache ${bText(za, na)} und ${bText(...a.summe)} gleichnamig. Was fehlt ${op === "+" ? "bis zum Ergebnis" : "dazwischen"}? Dann erweitere oder kürze auf ${d}.`),
       });

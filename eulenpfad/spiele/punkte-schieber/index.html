@@ -201,6 +201,57 @@ function okZeile(ctx, beiOk, mitZurueck) {
 
 const istAufgegeben = ctx => !!ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen):not(.hell)");
 
+/**
+ * ZU1 a: Testzug für die Punkte-Tabelle t mit OK-Knopf ok und Zielverteilung ziel.
+ * Legen — richtig: Punkt wegnehmen, wo zu viele liegen, dazulegen, wo zu wenige, sonst OK; falsch: OK, solange es
+ * nicht stimmt, sonst einen Punkt zu viel legen.
+ * Schieben (start, von, nach) — richtig: Punkt bei von hochheben, bei nach ablegen, OK; ist etwas anderes verschoben,
+ * „Neu anfangen“ bzw. den gehobenen Punkt wieder absetzen; falsch: OK, solange es nicht stimmt, sonst den gehobenen
+ * Punkt in ein falsches Feld legen.
+ */
+function zugTabelle(ctx, t, ok, ziel, schieben) {
+  const gleich = (p, q) => SPALTEN.every(st => p[st.k] === q[st.k]);
+  ctx.testZug(richtig => {
+    if (ok.disabled || !document.body.contains(ok)) return false;
+    const p = t.punkte;
+    if (!schieben) {
+      if (!richtig) {
+        if (!gleich(p, ziel)) { ok.click(); return true; }
+        const st = SPALTEN.find(s => p[s.k] < MAX_PUNKTE);
+        if (!st) return false;
+        t.felder[st.k].click();
+        return true;
+      }
+      const mehr = SPALTEN.find(st => p[st.k] > ziel[st.k]);
+      if (mehr) { t.felder[mehr.k].querySelector(".punkt").click(); return true; }
+      const weniger = SPALTEN.find(st => p[st.k] < ziel[st.k]);
+      if (weniger) { t.felder[weniger.k].click(); return true; }
+      ok.click();
+      return true;
+    }
+    const { start, von, nach } = schieben;
+    const knopf = t.tab.querySelector(".punkt.gehoben");
+    const gehoben = knopf ? SPALTEN.find(st => t.felder[st.k].contains(knopf)) : null;
+    if (!richtig) {
+      if (!gehoben && !gleich(p, ziel)) { ok.click(); return true; }
+      if (!gehoben) return false;
+      const st = SPALTEN.find(s => s !== gehoben && s !== nach && p[s.k] < MAX_PUNKTE);
+      if (!st) return false;
+      t.felder[st.k].click();
+      return true;
+    }
+    if (gehoben) {
+      if (gehoben === von && gleich(p, start)) t.felder[nach.k].click();
+      else knopf.click(); // absetzen
+      return true;
+    }
+    if (gleich(p, ziel)) { ok.click(); return true; }
+    if (gleich(p, start)) { t.felder[von.k].querySelector(".punkt").click(); return true; }
+    ok.parentElement.querySelector(".knopf.hell").click(); // Neu anfangen
+    return true;
+  });
+}
+
 function punkteText(p) { return SPALTEN.filter(st => p[st.k]).map(st => `${p[st.k]} ${st.k}`).join(", "); }
 
 // ---------- Aufgabenarten ----------
@@ -224,6 +275,7 @@ function legen(ctx) {
     ctx.falsch(`Bei den ${LS.dativ(falsch)} (${falsch.k}) stimmt die Anzahl Punkte noch nicht.`, loesung);
     if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
   });
+  zugTabelle(ctx, t, ok, ziel); // ZU1 a
   if (ctx.nr === 0) ctx.sag("Tipp in ein Feld, um einen Punkt zu legen. Tipp auf einen Punkt, um ihn wegzunehmen.");
 }
 
@@ -240,6 +292,7 @@ function lesen(ctx) {
   const anzeige = el("div", { class: "anzeige leer", style: "margin-top:14px", "aria-label": "Deine Zahl" });
   ctx.flaeche.append(anzeige);
   const tasten = LS.tastatur({
+    erwartet: zahl, // ZU1 a
     anzeige, maxStellen: 7,
     onOk(w) {
       if (w === zahl) { tasten.gesperrt = true; anzeige.classList.add("richtig"); ctx.richtig(); return; }
@@ -278,6 +331,7 @@ function verschiebeNachVorgabe(ctx) {
       ctx.falsch(`Nimm genau einen Punkt bei ${von.k} und leg ihn bei ${nach.k} ab. Mit „Neu anfangen“ ist alles wieder wie am Anfang.`, loesung);
       if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
     }, () => t.zuruecksetzen());
+    zugTabelle(ctx, t, ok, ziel, { start, von, nach }); // ZU1 a
     if (ctx.nr <= 2) ctx.sag("Tipp auf einen Punkt, um ihn hochzuheben. Dann tipp auf das Feld, wo er hin soll.");
     return;
   }
@@ -315,6 +369,11 @@ function verschiebeZumZiel(ctx) {
     ctx.falsch(hinweis, loesung);
     if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
   }, () => t.zuruecksetzen());
+  // ZU1 a: Ziel ist der Zug, den die Lösung nennt
+  const ziel = kopie(start);
+  ziel[von.k]--;
+  ziel[nach.k]++;
+  zugTabelle(ctx, t, ok, ziel, { start, von, nach });
   if (ctx.nr <= 1) ctx.sag("Tipp: Ein Punkt von H nach T macht die Zahl um 900 grösser (1000 − 100).");
 }
 
@@ -356,6 +415,7 @@ function mitAnzahlPunkten(ctx) {
     ctx.falsch(hinweis, loesung);
     if (istAufgegeben(ctx)) { t.sperren(); ok.disabled = true; }
   });
+  zugTabelle(ctx, t, ok, zerlege(v.loesung)); // ZU1 a
 }
 
 const ABLAUF = {
