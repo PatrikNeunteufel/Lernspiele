@@ -412,6 +412,21 @@ const SPIEL = {
       if (ctx.vorbei()) tasten.gesperrt = true;
     });
     f.append(tasten.element);
+    // ZU1 a: richtig — passt der Anfang nicht, ⌫, sonst den nächsten Buchstaben, ist alles da, OK; falsch — stehen
+    // falsche Buchstaben, OK, sonst einen Buchstaben, der hier nicht kommt
+    const taste = text => [...tasten.element.children].find(b => b.textContent === text);
+    ctx.testZug(richtig => {
+      if (tasten.gesperrt || ctx.vorbei() || !document.body.contains(tasten.element)) return false;
+      const ist = anzeige.textContent;
+      if (!richtig) {
+        if (ist && ist !== w.gr) taste("OK ✓").click();
+        else if (ist.length < 3) taste(TASTEN.find(z => z !== w.gr[ist.length])).click();
+        else return false;
+        return true;
+      }
+      taste(!w.gr.startsWith(ist) ? "⌫" : ist === w.gr ? "OK ✓" : w.gr[ist.length]).click();
+      return true;
+    });
     sprich(w.anzeige, ctx.uhrWarten());
   },
 };

@@ -215,6 +215,21 @@ LS.spiel({
       ctx.falsch(teile.join(" "), loesung);
     });
     f.append(el("div", { class: "kj-pruefen" }, pruefen));
+    // ZU1 a: richtig die erste Lücke umschalten, die noch nicht stimmt, sonst „Prüfen“; falsch „Prüfen“ mit einem
+    // Satz, der noch nicht stimmt (stimmt er schon, vorher ein Komma an eine Stelle, wo keines hingehört)
+    const stimmtNicht = () => luecken.filter((l, i) => l.classList.contains("gesetzt") !== a.kommas.includes(i));
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(pruefen)) return false;
+      const offen = stimmtNicht();
+      if (richtig) { (offen[0] || pruefen).click(); return true; }
+      if (!offen.length) {
+        const ohne = luecken.find((l, i) => !a.kommas.includes(i));
+        if (!ohne) return false;
+        ohne.click();
+      }
+      pruefen.click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag(`Tippe auf die kleinen Striche zwischen den Wörtern.${ohneFrei(ctx.stufe) ? " Ein Satz kann auch ganz ohne Komma richtig sein!" : ""}`);
   },
 });

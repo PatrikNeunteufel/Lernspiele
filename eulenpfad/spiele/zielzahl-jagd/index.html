@@ -267,6 +267,25 @@ LS.spiel({
     }
 
     start();
+    // ZU1 a: richtig den Lösungsweg a.weg Tipp für Tipp (Karte, Zeichen, Karte); weicht der Stand ab, die gewählte
+    // Karte abwählen oder „↺ Von vorn“. Falsch: ein Rechenzeichen vor der ersten Karte (nur ein Hinweis)
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(kartenBox)) return false;
+      const kk = [...kartenBox.children], zz = [...zeichenBox.children];
+      if (!richtig) {
+        if (erste !== null || !zz.length) return false;
+        zz[0].click();
+        return true;
+      }
+      const gemacht = [...wegListe.children].map(li => li.textContent);
+      if (gemacht.some((s, i) => s !== a.weg[i]) || gemacht.length >= a.weg.length) { neu.click(); return true; }
+      const [x, z, y] = a.weg[gemacht.length].split(" ");
+      if (erste === null) { kk[karten.findIndex(k => k.w === Number(x))].click(); return true; }
+      if (karten[erste].w !== Number(x) || (op !== null && op !== z)) { kk[erste].click(); return true; }
+      if (op === null) { zz[p.ops.indexOf(z)].click(); return true; }
+      kk[karten.findIndex((k, i) => i !== erste && k.w === Number(y))].click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag(p.alle ? "Diesmal müssen alle Karten in die Rechnung." : "Tipp: Karte, Rechenzeichen, Karte. Mit ↺ fängst du neu an.");
   },
 });

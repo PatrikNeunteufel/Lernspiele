@@ -294,6 +294,19 @@ LS.spiel({
     fuelle(a.vorher, false);
     f.append(auftrag, raster);
     const da = () => f.contains(raster); // Die Aufgabe kann neu gezogen worden sein (Wiederholungsregel).
+    // ZU1 a: Zug für Werkzeuge. Zuerst „▶ Los!“ antippen (nur richtig; einen falschen Handgriff gibt es da nicht), dann
+    // warten (true ohne Tippen), bis das veränderte Bild da ist; danach antwortet antwortZug(richtig).
+    let antwortZug = null;
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !da()) return false;
+      const los = f.querySelector(".los-knopf");
+      if (los) {
+        if (!richtig) return false;
+        los.click();
+        return true;
+      }
+      return antwortZug ? antwortZug(richtig) : richtig;
+    });
     // Erst wenn das Kind bereit ist: ▶ Los, 3-2-1 — dann zeigen, zudecken, verändert aufdecken (Wunsch Patrik).
     // Die Uhr startet erst mit dem veränderten Bild: vorher kann das Kind nichts tun (F1 a, LERN_Session9).
     LS.losGehts(ctx, raster, uhrLos => {
@@ -327,6 +340,14 @@ LS.spiel({
         }
         f.append(box);
         LS.kurztasten(box); // nur die Wahl „Was fehlt?“; die Plätze im Bild bleiben zum Antippen
+        // ZU1 a: richtig das fehlende Ding wählen, falsch ein anderes, noch nicht gewähltes
+        antwortZug = richtig => {
+          if (fertig) return false;
+          const i = a.optionen.findIndex((o, j) => (o === a.richtig) === richtig && !box.children[j].classList.contains("gewaehlt"));
+          if (i < 0) return false;
+          box.children[i].click();
+          return true;
+        };
         return;
       }
       // Antwort durch Antippen der Plätze
@@ -346,6 +367,13 @@ LS.spiel({
         ctx.falsch(HINWEIS[a.art], loesung);
         if (ctx.vorbei()) for (const j of a.ziele) raster.children[j].classList.add("richtig");
       });
+      // ZU1 a: richtig den nächsten veränderten Platz antippen, falsch einen Platz, der gleich geblieben ist
+      antwortZug = richtig => {
+        const i = richtig ? a.ziele.find(j => !getroffen.has(j)) : a.nachher.findIndex((x, j) => !a.ziele.includes(j));
+        if (i === undefined || i < 0) return false;
+        raster.children[i].click();
+        return true;
+      };
     }, (s.zeit + ZUDECKEN) * 1000);
     }, { uhr: false });
   },

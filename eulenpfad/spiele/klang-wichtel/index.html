@@ -425,9 +425,26 @@ function legen(ctx, a) {
     ctx.falsch(gelegt.length !== a.folge.length ? "Hör nochmal: Wie viele Klänge sind es? Zähle mit den Fingern."
       : "Fast! Ein Zeichen passt noch nicht. Hör nochmal genau hin.", loesungText);
   });
+  const zeichenKnoepfe = { [w1]: knopf(w1), [w2]: knopf(w2) };
   f.append(schrift,
-    el("div", { class: "knopfzeile legen-knoepfe" }, knopf(w1), knopf(w2)),
+    el("div", { class: "knopfzeile legen-knoepfe" }, zeichenKnoepfe[w1], zeichenKnoepfe[w2]),
     el("div", { class: "knopfzeile legen-knoepfe" }, weg, fertig));
+  // ZU1 a: richtig das nächste Zeichen legen (ein falsches zuerst mit ⌫ wegnehmen), am Schluss „✓“;
+  // falsch „✓“, solange die Klangschrift noch nicht stimmt
+  ctx.testZug(gut => {
+    if (ctx.vorbei() || !document.body.contains(fertig)) return false;
+    const stimmt = gelegt.join("-") === a.richtig;
+    if (!gut) {
+      if (stimmt) return false;
+      fertig.click();
+      return true;
+    }
+    const anfangGut = gelegt.every((w, i) => w === a.folge[i]);
+    if (stimmt) fertig.click();
+    else if (!anfangGut || gelegt.length >= a.folge.length) weg.click();
+    else zeichenKnoepfe[a.folge[gelegt.length]].click();
+    return true;
+  });
 }
 </script>
 </body>

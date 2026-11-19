@@ -203,6 +203,16 @@ function paareSpielen(ctx, a) {
   });
   box.append(...knoepfe);
   ctx.flaeche.append(box);
+  // ZU1 a: richtig — ist eine Karte gewählt, ihren Reimpartner antippen, sonst die erste freie Karte; falsch — ist
+  // eine Karte gewählt, eine freie, die sich nicht darauf reimt, sonst kein falscher Handgriff
+  ctx.testZug(richtig => {
+    if (fertig || !document.body.contains(box)) return false;
+    const frei = a.karten.map((k, i) => [k, knoepfe[i]]).filter(([, kn]) => !kn.classList.contains("gefunden") && kn !== gewaehlt?.knopf);
+    const ziel = gewaehlt ? frei.find(([k]) => reimen(k, gewaehlt.k) === richtig) : richtig ? frei[0] : null;
+    if (!ziel) return false;
+    ziel[1].click();
+    return true;
+  });
 }
 
 // Tipps vor dem Antworten (ctx.tipp, LERN_Session9): kurz und anschaulich (1. Klasse), nie ein Wort nennen.

@@ -249,7 +249,16 @@ LS.spiel({
       nacht.append(gelegt);
       const box = el("div", { class: "optionen" });
       let pos = 0;
-      for (const item of mische(a.reihe)) {
+      const gemischt = mische(a.reihe);
+      // ZU1 a: richtig das nächste Bild der Reihe antippen, falsch ein anderes, noch nicht gelegtes
+      ctx.testZug(gut => {
+        if (fertig || !document.body.contains(box)) return false;
+        const i = gemischt.findIndex((item, j) => (item === a.reihe[pos]) === gut && !box.children[j].classList.contains("gewaehlt"));
+        if (i < 0) return false;
+        box.children[i].click();
+        return true;
+      });
+      for (const item of gemischt) {
         const k = el("button", { type: "button", class: "option" + (a.mond ? " mond" : "") });
         a.planeten ? k.append(planetKnopfInhalt(item)) : k.append(item);
         k.addEventListener("click", () => {
@@ -284,6 +293,14 @@ LS.spiel({
       }
       ctx.flaeche.append(box);
       LS.kurztasten(box);
+      // ZU1 a: richtig die passende Antwort antippen, falsch die erste andere
+      ctx.testZug(gut => {
+        if (fertig || !document.body.contains(box)) return false;
+        const i = a.optionen.findIndex(o => (o === a.richtig) === gut);
+        if (i < 0) return false;
+        box.children[i].click();
+        return true;
+      });
     }
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
   },

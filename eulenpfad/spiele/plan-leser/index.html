@@ -588,6 +588,14 @@ LS.spiel({
         });
         bild.insertBefore(r, unter);
       }
+      // ZU1 a: richtig das gesuchte Feld antippen, falsch das Feld daneben (SVG: Klick-Ereignis wie vom Finger)
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || !document.body.contains(bild)) return false;
+        const r = bild.querySelectorAll("rect.plan-feld")[richtig ? a.richtig : a.richtig === 0 ? 1 : a.richtig - 1];
+        if (!r) return false;
+        r.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        return true;
+      });
     } else {
       const kurz = ["zaehlen", "strecke", "weglaenge", "abbiegen"].includes(a.art); // Zahlen und links/rechts: drei in einer Reihe
       const box = LS.auswahl(ctx, { optionen: a.optionen, richtig: a.richtig, inhalt, hinweis: HINWEIS[a.art], loesung, breite: a.art === "beschreiben" ? 300 : kurz ? 96 : 150 });

@@ -187,6 +187,14 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      // ZU1 a: richtig die passende Antwort antippen, falsch eine andere
+      ctx.testZug(gut => {
+        if (fertig || !document.body.contains(box)) return false;
+        const k = [...box.children].find(b => (b.textContent === richtig) === gut);
+        if (!k) return false;
+        k.click();
+        return true;
+      });
       LS.kurztasten(box);
     };
 
@@ -232,6 +240,14 @@ LS.spiel({
         kacheln.append(k);
       }
       ctx.flaeche.append(ablage, kacheln);
+      // ZU1 a: richtig die nächste passende Kachel antippen, falsch eine freie Kachel mit einem anderen Buchstaben
+      ctx.testZug(richtig => {
+        if (fertig || !document.body.contains(kacheln)) return false;
+        const k = [...kacheln.children].find(x => !x.disabled && (x.textContent === ziel[pos]) === richtig);
+        if (!k) return false;
+        k.click();
+        return true;
+      });
       // Buchstaben sind selbst die Taste; gelegte Kacheln sind disabled, so nimmt der zweite gleiche Buchstabe die nächste.
       LS.kurztasten(kacheln);
     }

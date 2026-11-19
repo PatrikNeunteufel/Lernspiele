@@ -724,6 +724,13 @@ function zeigeSchluessel(ctx, a) {
     knoepfe.append(k);
   }
   zeige();
+  // ZU1 a: je Frage richtig die passende Antwort (Ja oder Nein) antippen, falsch die andere
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(knoepfe)) return false;
+    const ja = a.fragen[nr].antwort === richtig;
+    knoepfe.children[ja ? 0 : 1].click();
+    return true;
+  });
 }
 
 function zeigeMerkmale(ctx, a) {
@@ -772,6 +779,15 @@ function zeigeTeilTippen(ctx, a) {
       if (ctx.vorbei()) fertig = true;
     });
   }
+  // ZU1 a: richtig einen Teil der gesuchten Gruppe antippen, falsch einen Teil einer anderen Gruppe
+  // (SVG: Klick-Ereignis wie vom Finger)
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+    const e = [...svg.querySelectorAll(".pb-teil")].find(x => (x.getAttribute("data-gruppe") === a.richtig) === richtig);
+    if (!e) return false;
+    e.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 function zeigeFunktion(ctx, a) {

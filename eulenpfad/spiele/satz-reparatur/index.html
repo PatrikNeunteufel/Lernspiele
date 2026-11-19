@@ -216,6 +216,16 @@ LS.spiel({
       }
     });
     ctx.flaeche.append(el("div", { class: "knopfzeile" }, ok));
+    // ZU1 a: richtig — ein Wort, dessen Gross/Klein nicht stimmt, antippen, sonst ein Kästchen mit einem nicht
+    // erlaubten Zeichen weiterschalten, stimmt alles, „Fertig“; falsch — „Fertig“, solange etwas nicht stimmt
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(ok)) return false;
+      const w = zustand.find(x => x.gross !== (x.soll[0] !== x.soll[0].toLowerCase()));
+      const z = zustand.find(x => x.ende && !x.erlaubt.includes(x.zeichen));
+      if (!richtig) { if (!w && !z) return false; ok.click(); return true; }
+      (w ? w.knopf : z ? z.zeichenKnopf : ok).click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag("Tipp auf die Wörter, die gross geschrieben werden. Dann das Kästchen am Ende für das Satzzeichen.");
   },
 });

@@ -408,6 +408,22 @@ function legen(ctx, a) {
     ctx.falsch(hinweis, loesungText);
   });
   f.append(el("div", { class: "fertig-zeile" }, fertig));
+  // Zug für die Werkzeuge (ZU1 a): richtig ein Teil färben (zu wenige) oder entfärben (zu viele), sonst „Fertig“;
+  // falsch „Fertig“, solange die Anzahl noch nicht stimmt
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(fertig)) return false;
+    const k = gefaerbt();
+    if (!richtig) {
+      if (k === a.ziel) return false;
+      fertig.click();
+      return true;
+    }
+    if (k === a.ziel) { fertig.click(); return true; }
+    const t = [...svg.querySelectorAll(".teil")].find(x => x.classList.contains("voll") === k > a.ziel);
+    if (!t) return false;
+    t.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 </script>
 </body>

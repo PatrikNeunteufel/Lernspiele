@@ -196,10 +196,12 @@ const svgEl = (tag, attr = {}) => { const e = document.createElementNS(SVGNS, ta
 function rasterEl(waehleEcke) {
   const B = RAND_L + RASTER.b * Z + 6, H = RAND_O + RASTER.h * Z + 6;
   const svg = svgEl("svg", { class: "labor", viewBox: `0 0 ${B} ${H}`, role: "img", "aria-label": `Raster ${RASTER.b} mal ${RASTER.h} Häuschen` });
+  const zellen = []; // zellen[h - 1][b - 1] für den Zug (ZU1 a)
   for (let r = 0; r < RASTER.h; r++) for (let c = 0; c < RASTER.b; c++) {
     const z = svgEl("rect", { class: "zelle", x: RAND_L + c * Z, y: RAND_O + r * Z, width: Z, height: Z });
     z.addEventListener("click", () => waehleEcke(c + 1, r + 1));
     svg.append(z);
+    (zellen[r] ||= [])[c] = z;
   }
   const rechteck = svgEl("rect", { class: "rechteck", x: RAND_L, y: RAND_O, width: 0, height: 0 });
   const breite = svgEl("text", { class: "mass", x: RAND_L, y: RAND_O - 9, "text-anchor": "middle" });
@@ -211,7 +213,9 @@ function rasterEl(waehleEcke) {
     breite.setAttribute("x", RAND_L + b * Z / 2); breite.textContent = `${b} cm`;
     hoehe.setAttribute("y", RAND_O + h * Z / 2 + 6); hoehe.textContent = `${h} cm`;
   };
-  return { svg, zeige };
+  // ZU1 a: Häuschen (b, h) antippen wie ein Kind
+  const tippe = (b, h) => zellen[h - 1][b - 1].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  return { svg, zeige, tippe };
 }
 
 // ---------- Hinweise (verraten die Lösung nicht) ----------
@@ -352,6 +356,25 @@ LS.spiel({
     knoepfe.append(pruefen);
     f.append(knoepfe);
     if (buch) f.append(buch);
+
+    // ZU1 a: richtig — das nächste noch fehlende Lösungsrechteck antippen (Lage wie zeigeLoesung), steht es schon,
+    // „Prüfen“; falsch — steht ein falsches Rechteck, „Prüfen“, sonst ein Häuschen, das keine Lösung ist
+    const istLoes = (b, h) => loes.some(([x, y]) => x === Math.min(b, h) && y === Math.max(b, h));
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(pruefen)) return false;
+      if (!richtig) {
+        if (ist && !istLoes(ist.b, ist.h)) { pruefen.click(); return true; }
+        for (let h = 1; h <= RASTER.h; h++) for (let b = 1; b <= RASTER.b; b++) if (!istLoes(b, h)) { raster.tippe(b, h); return true; }
+        return false;
+      }
+      const ziel = loes.find(([x, y]) => !gefunden.some(([u, v]) => u === x && v === y));
+      if (!ziel) return false;
+      const [k, l] = ziel;
+      const [b, h] = k <= RASTER.h && l <= RASTER.b ? [l, k] : [k, l];
+      if (ist && Math.min(ist.b, ist.h) === k && Math.max(ist.b, ist.h) === l) pruefen.click();
+      else raster.tippe(b, h);
+      return true;
+    });
 
     if (ctx.nr === 0) {
       if (alle) ctx.sag("Baue ein Rechteck und tippe auf Prüfen. Gedreht zählt nicht als neues Rechteck.");

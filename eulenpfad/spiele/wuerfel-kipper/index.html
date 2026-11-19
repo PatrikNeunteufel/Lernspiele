@@ -485,6 +485,18 @@ function zielAufgabe(ctx, a, p) {
   neu.addEventListener("click", () => { if (!ctx.vorbei()) zurueck(); });
   zeile.append(neu);
   f.append(zeile);
+  // ZU1 a: richtig den nächsten Kipp des guten Wegs (a.gut), nach einem Abweg „↺ zum Start“; falsch ein Kipp neben den
+  // guten Weg, solange er noch nicht am Ziel endet (sonst liefe die Rückkehr zum Start verzögert mitten in die Lösung)
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(zeile)) return false;
+    const aufWeg = gefahren.every((d, i) => d === a.gut[i]);
+    const gut = a.gut[gefahren.length];
+    if (richtig) { (aufWeg && gut ? knoepfe[gut] : neu).click(); return true; }
+    const anders = [a.hr, a.vr].find(d => d !== gut && !knoepfe[d].disabled);
+    if (!aufWeg || !anders || gefahren.length + 1 >= a.nh + a.nv) return false;
+    knoepfe[anders].click();
+    return true;
+  });
   zeichne();
   if (ctx.nr === 0) ctx.sag("Es gibt mehrere kürzeste Wege. Nur auf manchen liegt am Ziel die richtige Zahl oben. Plane zuerst im Kopf!");
 }

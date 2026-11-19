@@ -503,6 +503,14 @@ LS.spiel({
         },
       });
       f.append(svg);
+      // ZU1 a: richtig den gesuchten Arm antippen, falsch einen anderen Arm der Rose (SVG: Klick-Ereignis wie vom Finger)
+      ctx.testZug(richtig => {
+        if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+        const arm = svg.arme[richtig ? a.ziel : a.dirs.find(i => i !== a.ziel)];
+        if (!arm) return false;
+        arm.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        return true;
+      });
       if (ctx.nr === 0) ctx.sag("Der Buchstabe N zeigt dir, wo Norden ist.");
       return;
     }
@@ -592,6 +600,12 @@ LS.spiel({
       if (ctx.vorbei()) { fertig = true; zeigeLoesung(); }
     });
     plan.felder[A.c + "," + A.r].classList.add("start");
+    // ZU1 a: richtig das Zielfeld antippen, falsch das Startfeld (es ist nie das Ziel)
+    ctx.testZug(richtig => {
+      if (fertig || ctx.vorbei() || !document.body.contains(plan)) return false;
+      plan.felder[richtig ? B.c + "," + B.r : A.c + "," + A.r].click();
+      return true;
+    });
     f.append(el("div", { class: "karten-zeile" }, plan, neben, seite));
     // 💡 in der Frage (data-tipp-ziel): sonst stand er rechts oben in der Spielfläche und machte Plan und Hinweis
     // darunter um seine Breite schmaler (LERN_Session46)

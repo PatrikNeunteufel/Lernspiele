@@ -159,6 +159,20 @@ LS.spiel({
       }
     });
     ctx.flaeche.append(el("div", { class: "knopfzeile" }, ok));
+    // ZU1 a: richtig einen fehlenden Strich setzen oder einen zu viel wegnehmen, sind alle richtig „Fertig ✓“;
+    // falsch „Fertig ✓“, solange Striche fehlen, sonst ein Strich an einer falschen Stelle
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(ok)) return false;
+      const fehlt = [...soll].find(s => !gesetzt.has(s));
+      const zuviel = [...gesetzt].find(s => !soll.has(s));
+      const offen = fehlt ?? zuviel;
+      if (richtig) { (offen === undefined ? ok : luecken[offen]).click(); return true; }
+      if (offen !== undefined) { ok.click(); return true; }
+      const falschStelle = Object.keys(luecken).map(Number).find(s => !soll.has(s));
+      if (falschStelle === undefined) return false;
+      luecken[falschStelle].click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag("Tipp genau zwischen zwei Buchstaben — dort erscheint ein Trennstrich.");
   },
 });

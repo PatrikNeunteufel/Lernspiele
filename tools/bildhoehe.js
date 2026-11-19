@@ -80,7 +80,7 @@ const ZIEHUNGEN = Math.max(1, Number(opt.ziehungen) || 1);
 // Auswertung (sie brauchen ctx.testZug oder opt.erwartet an der Tastatur).
 const SCHRITTE = !!opt.schritte;
 const ZUG_MS = 700;   // Wackeln, Fliegen und Hinweis sind dann vorbei
-const MAX_ZUEGE = 60; // Schutz vor einem Zug, der nichts bewirkt
+const MAX_ZUEGE = 200; // Schutz vor einem Zug, der nichts bewirkt; ein 9 × 9-Sudoku braucht bis gegen 100 (vorher 60)
 const PORT = Number(opt.port);
 const BROWSER = [
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -118,6 +118,11 @@ const MESSEN = (auftraege, css) => `
       setTimeout(async () => {
         try {
           const d = f.contentDocument, se = d.scrollingElement;
+          // Erst messen, wenn die Aufgabe steht: Text mit Buchstaben auf der Karte (nicht nur 🗣️). Unter Last war ein 9 × 9-
+          // Sudoku nach 1,5 s noch nicht gezeichnet und galt als „nicht zu Ende gespielt“ (LERN_Session48). Höchstens 10 s.
+          const steht = () => /\\p{L}{2}/u.test(d.querySelector(".karte")?.innerText || "");
+          for (let t = 0; !steht() && t < 10000; t += 250) await new Promise(r => setTimeout(r, 250));
+          if (!steht()) { __bh.erg.push({ ...a, art: a.text, fehler: "Aufgabe nach 11,5 s nicht gezeichnet" }); f.remove(); __bh.fertig++; fertig(); return; }
           // --text/--arten: nur Aufgaben mit diesem Text zählen — sonst neu laden (höchstens ${MAX_VERSUCHE}-mal je Ziehung)
           // Leerraum zusammengezogen wie im Feld text (LERN_Session45: Titel und Text stehen auf zwei Zeilen — ein
           // Muster „Der Igel Der Igel“ aus --json kam mit dem rohen innerText nie)

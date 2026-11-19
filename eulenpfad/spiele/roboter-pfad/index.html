@@ -461,6 +461,21 @@ function zeigeBefolgen(ctx, a, loesung) {
     } else zeichne();
   }
   zeichne();
+  // ZU1 a: richtig das Feld, auf dem der Roboter hält, antippen; falsch ein anderes freies, noch nicht markiertes Feld.
+  // Das Raster wird neu gezeichnet: Feld (x, y) je Zug aus der Reihenfolge der Kinder (Kopfzeile, dann je Reihe Rand + Felder).
+  const zelleBei = (x, y) => halter.firstChild?.children[a.feld.b + 1 + y * (a.feld.b + 1) + 1 + x];
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(halter)) return false;
+    let z = null;
+    if (richtig) z = zelleBei(a.ende.x, a.ende.y);
+    else for (let y = 0; y < a.feld.h && !z; y++) for (let x = 0; x < a.feld.b && !z; x++) {
+      const c = zelleBei(x, y);
+      if ((x !== a.ende.x || y !== a.ende.y) && c?.localName === "button" && !c.classList.contains("rp-falsch")) z = c;
+    }
+    if (!z || z.localName !== "button") return false;
+    z.click();
+    return true;
+  });
   if (ctx.nr === 0) ctx.sag("Das Dreieck zeigt, wohin der Roboter schaut.");
 }
 
@@ -534,7 +549,27 @@ function zeigeLegen(ctx, a, loesung) {
     knoepfe.los.disabled = !prog.length;
   }
   zeichne();
-  if (ctx.nr === 0) ctx.sag(mitWdh ? "Neu: „3×“ und dann „vor“ gibt eine Karte „3× vor“." : "Leg die Befehle der Reihe nach und lass den Roboter fahren!");
+  // ZU1 a: richtig — weicht das Programm vom kürzesten (a.loes) ab, ⌫; sonst die Wiederholung der nächsten Karte
+  // einstellen (n×), dann ihren Befehl; ist es vollständig, ▶. Falsch — ein Programm, das nicht stimmt, fahren
+  // lassen, ist es leer, einen anderen Befehl als den ersten legen.
+  const gleich = (t, u) => t.b === u.b && t.n === u.n;
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(befehle)) return false;
+    const passt = prog.every((t, i) => a.loes[i] && gleich(t, a.loes[i]));
+    if (!richtig) {
+      if (prog.length) { if (passt && prog.length === a.loes.length) return false; knoepfe.los.click(); return true; }
+      const b = ["V", "L", "R"].find(x => x !== a.loes[0].b);
+      knoepfe[b].click();
+      return true;
+    }
+    if (!passt) { knoepfe.weg.click(); return true; }
+    if (prog.length === a.loes.length) { knoepfe.los.click(); return true; }
+    const t = a.loes[prog.length];
+    if (mal !== t.n) knoepfe[t.n > 1 ? t.n : mal].click(); // n× einschalten oder die falsche Wiederholung aus
+    else knoepfe[t.b].click();
+    return true;
+  });
+  if (ctx.nr === 0) ctx.sag(mitWdh ?"Neu: „3×“ und dann „vor“ gibt eine Karte „3× vor“." : "Leg die Befehle der Reihe nach und lass den Roboter fahren!");
 }
 
 function zeigeFehler(ctx, a, loesung) {
@@ -561,6 +596,14 @@ function zeigeFehler(ctx, a, loesung) {
     box.append(kn);
   });
   ctx.flaeche.append(box);
+  // ZU1 a: richtig die falsche Karte antippen, falsch eine stimmende, noch nicht angetippte
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(box)) return false;
+    const kn = richtig ? box.children[a.fehlerAn] : [...box.children].find((x, i) => i !== a.fehlerAn && !x.classList.contains("rp-falsch"));
+    if (!kn) return false;
+    kn.click();
+    return true;
+  });
   if (ctx.nr === 0) ctx.sag("Die grünen Felder zeigen, wo der Roboter gefahren ist.");
 }
 

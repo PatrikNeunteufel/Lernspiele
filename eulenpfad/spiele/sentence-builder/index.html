@@ -181,6 +181,14 @@ LS.spiel({
     }
     ctx.flaeche.append(ablage, box);
     LS.kurztasten(box);
+    // ZU1 a: richtig die Karte, die als Nächste kommt, falsch eine andere, noch nicht gelegte
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(box)) return false;
+      const k = [...box.children].find(b => !b.classList.contains("gelegt") && (b.textContent === a.woerter[pos]) === richtig);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag(a.extra ? "Achtung: Eine Karte ist zu viel!" : "Tipp die Karten der Reihe nach an.");
   },
 });

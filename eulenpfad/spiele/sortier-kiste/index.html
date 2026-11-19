@@ -287,6 +287,14 @@ function zaehlKnoepfe(ctx, a, frage, loesung, lob) {
     box.append(k);
   }
   ctx.flaeche.append(box);
+  // ZU1 a: richtig die gezählte Anzahl, falsch eine andere, noch nicht gewählte
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(box)) return false;
+    const k = [...box.children].find((x, i) => (a.zahlen[i] === a.anzahl) === richtig && !x.classList.contains("gewaehlt"));
+    if (!k) return false;
+    k.click();
+    return true;
+  });
 }
 
 /** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): worauf schauen, wie zählen — kurz, nie Kiste oder Zahl. */
@@ -363,6 +371,14 @@ LS.spiel({
         wackeln(k);
         ctx.falsch(HINWEIS.regel, loesung);
       }));
+      // ZU1 a: richtig die Zielkiste antippen, falsch eine andere
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || !document.body.contains(reihe)) return false;
+        const x = kn.find((_, j) => (j === a.ziel) === richtig);
+        if (!x) return false;
+        x.k.click();
+        return true;
+      });
       return;
     }
 
@@ -419,6 +435,14 @@ LS.spiel({
       ctx.richtig(lob);
     });
     zeigeKarte();
+    // ZU1 a: richtig die Kiste der Form, die oben liegt, falsch eine andere; beim Zählen gilt der Zug der Zahlknöpfe
+    ctx.testZug(richtig => {
+      if (zaehlt || ctx.vorbei() || pos >= a.dinge.length || !document.body.contains(reihe)) return false;
+      const x = kisten.find(y => (y.w === wertVon(a.dinge[pos], a.regel)) === richtig);
+      if (!x) return false;
+      x.k.click();
+      return true;
+    });
   },
 });
 

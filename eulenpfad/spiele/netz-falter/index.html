@@ -409,6 +409,14 @@ function tippAufgabe(ctx, { netz, svgOpt, tippbar, richtig, hinweis, loesung }) 
       if (ctx.vorbei()) { fertig = true; flaechen[richtig].classList.add("geloest"); }
     });
   }
+  // ZU1 a: richtig die gesuchte Fläche antippen, falsch die erste andere antippbare (SVG: Klick-Ereignis wie vom Finger)
+  ctx.testZug(r => {
+    if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+    const i = r ? richtig : tippbar.find(j => j !== richtig);
+    if (i === undefined || !flaechen[i]) return false;
+    flaechen[i].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 LS.spiel({

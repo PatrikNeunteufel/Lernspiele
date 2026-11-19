@@ -298,6 +298,19 @@ LS.spiel({
       if (ctx.flaeche.querySelector(".knopfzeile .knopf:not(.gruen)")) fertig = true;
     });
     paar.append(el("div", { class: "knopfzeile" }, ok));
+    // ZU1 a: ein Handgriff für Werkzeuge — richtig: ein Feld zu viel wieder weiss, sonst ein fehlendes Feld färben,
+    // zuletzt „Fertig ✓“; falsch: ein antippbares Feld ausserhalb des Bildes färben
+    ctx.testZug(richtig => {
+      if (fertig || ctx.vorbei() || !document.body.contains(ok)) return false;
+      let k;
+      if (richtig) {
+        k = [...gesetzt].find(s => !a.ziel.has(s)) || [...a.ziel].find(s => !gesetzt.has(s));
+        if (!k) { ok.click(); return true; }
+      } else k = Object.keys(zellen).find(s => !zellen[s].disabled && !a.ziel.has(s) && !gesetzt.has(s));
+      if (!k) return false;
+      zellen[k].click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag("Tipp ein Feld an, um es zu färben. Nochmal tippen macht es wieder weiss.");
   },
 });

@@ -271,6 +271,14 @@ LS.spiel({
       koerbe.append(korb);
     }
     ctx.flaeche.append(koerbe);
+    // ZU1 a: richtig den Korb der Wortart des markierten Worts antippen, falsch einen anderen Korb
+    ctx.testZug(richtig => {
+      if (fertig || pos >= ziele.length || !document.body.contains(koerbe)) return false;
+      const korb = [...koerbe.children].find(x => (x.dataset.taste === ziele[pos].art) === richtig);
+      if (!korb) return false;
+      korb.click();
+      return true;
+    });
     LS.kurztasten(koerbe);
     if (ctx.nr === 0) ctx.sag(a.satz ? "Lies den Satz und tipp auf den richtigen Korb." : "Tipp auf den richtigen Korb.");
   },

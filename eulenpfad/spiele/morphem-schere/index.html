@@ -248,6 +248,20 @@ function schneiden(ctx, a, p) {
     teile.push(REGEL_SCHNEIDEN);
     ctx.falsch(teile.join(" "), loesung);
   });
+  // ZU1 a: richtig die erste Fuge umschalten, die noch nicht stimmt, sonst „Prüfen“; falsch „Prüfen“ mit Schnitten, die
+  // noch nicht stimmen (stimmen sie schon, vorher an einer falschen Stelle schneiden)
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(pruefen)) return false;
+    const offen = fugen.filter((x, i) => x.classList.contains("geschnitten") !== a.fugen.includes(i + 1));
+    if (richtig) { (offen[0] || pruefen).click(); return true; }
+    if (!offen.length) {
+      const daneben = fugen.find((x, i) => !a.fugen.includes(i + 1));
+      if (!daneben) return false;
+      daneben.click();
+    }
+    pruefen.click();
+    return true;
+  });
   if (ctx.nr === 0) ctx.sag("Tippe zwischen zwei Buchstaben, dann schneidet die Schere dort. Nochmals tippen klebt wieder zusammen.");
 }
 
@@ -268,6 +282,14 @@ function stammZeigen(ctx, a, p, loesung) {
   });
   f.append(frage, box);
   LS.kurztasten(box);
+  // ZU1 a: richtig den Stamm antippen, falsch den ersten anderen Teil
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(box)) return false;
+    const i = richtig ? a.stamm : a.teile.findIndex((t, j) => j !== a.stamm);
+    if (i < 0 || !box.children[i]) return false;
+    box.children[i].click();
+    return true;
+  });
 }
 
 /** e oder ä (eu oder äu) über den Stamm; je nach Stufe mit Regelkarte oder mit Begründung. */
@@ -309,6 +331,14 @@ function knoepfe(ctx, optionen, richtig, klasse, hinweis, loesung, beiRichtig) {
   }
   ctx.flaeche.append(box);
   LS.kurztasten(box); // e/ä: der Buchstabe selbst; verwandte Wörter: Grundreihe
+  // ZU1 a: richtig die richtige Wahl antippen, falsch eine andere, noch nicht falsch markierte
+  ctx.testZug(r => {
+    if (fertig || ctx.vorbei() || !document.body.contains(box)) return false;
+    const k = [...box.children].find(b => (b.textContent === richtig) === r && !b.classList.contains("falsch"));
+    if (!k) return false;
+    k.click();
+    return true;
+  });
 }
 
 /**

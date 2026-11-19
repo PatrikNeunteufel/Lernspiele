@@ -372,6 +372,30 @@ function legen(ctx, a, d, p) {
   });
   // Der Zugzähler steht in der Zeile der Knöpfe, nicht darüber (BH3 a)
   f.append(el("div", { class: "knopfzeile teiler-knoepfe" }, ...(zaehler ? [zaehler] : []), vonVorn, fertig));
+
+  // ZU1 a: richtig ein Ding von einem Behälter mit zu vielen auf einen mit zu wenigen legen (bei zwei Schritten erst
+  // anheben, dann den Teller antippen), am Schluss „✓“; falsch „✓“, solange es noch nicht gerecht ist
+  const zielVon = wo => (wo === -1 ? a.teller.reduce((s, n) => s + n, a.schale) - a.ziel * p.teller : a.ziel);
+  const orte = () => [...lage.teller.keys(), ...(p.schale ? [-1] : [])];
+  const behaelterEl = wo => tisch.children[wo === -1 ? lage.teller.length : wo];
+  ctx.testZug(gut => {
+    if (ctx.vorbei() || !document.body.contains(fertig)) return false;
+    const zuViel = orte().find(wo => anzahl(wo) > zielVon(wo));
+    if (!gut) {
+      if (zuViel === undefined) return false; // schon gerecht: kein falscher Handgriff, der nicht nur umlegt
+      fertig.click();
+      return true;
+    }
+    if (gehoben) {
+      const nach = orte().find(wo => wo !== gehoben.wo && anzahl(wo) < zielVon(wo));
+      if (nach === undefined) behaelterEl(gehoben.wo).querySelectorAll(".ding")[gehoben.i].click(); // wieder absetzen
+      else behaelterEl(nach).click();
+      return true;
+    }
+    if (zuViel === undefined) { fertig.click(); return true; }
+    behaelterEl(zuViel).querySelector(".ding").click();
+    return true;
+  });
 }
 </script>
 </body>

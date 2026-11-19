@@ -298,6 +298,7 @@ LS.spiel({
       const gelegt = el("div", { class: "reihe-gelegt" });
       const wahl = el("div", { class: `wahl ${a.liste}` });
       let pos = 0;
+      const reihenKnoepfe = []; // ZU1 a: [Monat oder Tag, Knopf]
       for (const i of mische(a.folge)) {
         const k = knopfFuer(a.liste, i, namen[i]);
         k.addEventListener("click", () => {
@@ -317,9 +318,18 @@ LS.spiel({
           if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
         });
         wahl.append(k);
+        reihenKnoepfe.push([i, k]);
       }
       ctx.flaeche.append(gelegt, wahl);
       LS.kurztasten(wahl);
+      // ZU1 a: richtig das nächste der Reihe antippen, falsch ein anderes, noch nicht gelegtes
+      ctx.testZug(gut => {
+        if (fertig || !document.body.contains(wahl)) return false;
+        const paar = reihenKnoepfe.find(([i, k]) => (i === a.folge[pos]) === gut && !k.classList.contains("gewaehlt"));
+        if (!paar) return false;
+        paar[1].click();
+        return true;
+      });
       return;
     }
 
@@ -340,6 +350,15 @@ LS.spiel({
     });
     ctx.flaeche.append(wahl);
     LS.kurztasten(wahl);
+    // ZU1 a: richtig die passende Antwort antippen, falsch die erste andere
+    const antworten = [...wahl.children];
+    ctx.testZug(gut => {
+      if (fertig || !document.body.contains(wahl)) return false;
+      const k = antworten.find((b, i) => (i === a.loesung) === gut);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Antwort.");
   },
 });

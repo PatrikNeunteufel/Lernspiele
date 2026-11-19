@@ -11,7 +11,7 @@
 // Dazu je Spiel und Stufe eine geführte Runde (Entscheid ZP1 a, LERN_Session48): die Züge des Rahmens
 // (LS.pruefung.zug, ZU1 a) spielen jede Aufgabe mit einem falschen und dann richtigen Handgriffen zu Ende, auch in
 // späteren Schritten, die Zufallsklicks selten erreichen. Funde stehen mit „geführt:“ davor; bleibt eine Aufgabe ohne
-// Zug stehen, ist das bis zum Ende der Zug-Pakete ein Hinweis (ZUG_PFLICHT).
+// Zug stehen, ist das ein Fehler (ZUG_PFLICHT, seit alle Spiele ihre Züge haben).
 //
 // Danach als Kind: je Spiel mit Inhaltslisten im Katalog jede Liste einzeln freigegeben (--kind=0 schaltet ab).
 //
@@ -37,8 +37,8 @@ const EINZAHL = /(?<![\d.,'’])(?<!für )\b1 (?:[A-ZÄÖÜ][\wäöüß]* )?(?:s
 
 const opt = { runden: 3, aufgaben: 3000, seed: 1, maxKlicks: 8000, gefuehrt: 1 }; // --gefuehrt=0: ohne geführte Runde
 // ZP1 a: Eine Aufgabe, die in der geführten Runde ohne Zug stehen bleibt, ist ein Fehler, sobald alle Spiele ihre Züge
-// haben (Zug-Pakete, LERN_Session48); bis dahin ein Hinweis, damit der volle Lauf aussagekräftig bleibt.
-const ZUG_PFLICHT = false;
+// haben (Zug-Pakete, LERN_Session48: seit Paket 3 alle 175).
+const ZUG_PFLICHT = true;
 const nurSpiele = [];
 for (const a of process.argv.slice(2)) {
   const m = a.match(/^--(\w+)=(\d+)$/);
@@ -137,9 +137,11 @@ const TREIBER = `
   const bildAufgabe = new Map(); // Bilder der Aufgabe je Nummer, beim Stellen aufgenommen
   // Geführt (ZP1 a): welche Aufgabe gerade steht, welche gelöst ist, für welche der falsche Handgriff schon kam
   // Die erste Aufgabe (Nummer 0) steht schon, bevor der Treiber den Haken setzt
-  let gestelltNr = 0, richtigNr = -1, falschFuer = -1, zuegeJe = 0, flaecheJetzt = null;
+  // (ihre Handgriffe kennt er darum nicht: Grenze der Züge dort grosszügig)
+  let gestelltNr = 0, richtigNr = -1, falschFuer = -1, zuegeJe = 0, flaecheJetzt = null, zugGrenze = 300;
   LS.pruefung.haken = (art, a) => {
-    if (art === "gestellt") { gestelltNr = a.nr; zuegeJe = 0; flaecheJetzt = a.flaeche; }
+    // Grenze der Züge je Aufgabe: dreimal die Handgriffe, die das Spiel nennt (ctx.schritte), mindestens 80
+    if (art === "gestellt") { gestelltNr = a.nr; zuegeJe = 0; flaecheJetzt = a.flaeche; zugGrenze = Math.max(80, 3 * (a.schritte || 0)); }
     if (art === "richtig" || (art === "falsch" && a.aufgeloest)) richtigNr = a.nr; // gelöst oder Lösung gezeigt
     if (art === "gestellt" && a.flaeche) bildAufgabe.set(a.nr, aufgabeBilder(a.flaeche));
     if (art === "gestellt") {
@@ -290,7 +292,7 @@ const TREIBER = `
       if (!getan && richtigNr !== gestelltNr) getan = LS.pruefung.zug(true);
       if (getan) {
         klicks++;
-        if (++zuegeJe > 80) { melde("Zug", "Aufgabe " + (gestelltNr + 1) + " nach 80 Zügen nicht gelöst — ein Zug bewirkt nichts?", "zug-endlos"); break; }
+        if (++zuegeJe > zugGrenze) { melde("Zug", "Aufgabe " + (gestelltNr + 1) + " nach " + zugGrenze + " Zügen nicht gelöst — ein Zug bewirkt nichts?", "zug-endlos"); break; }
         __uhr.weiter(2000);
         pruefeText("nach einem Zug");
         const jetzt = buehne.textContent;
@@ -611,8 +613,9 @@ for (const id of ids) {
       const g = pruefe(id, stufe, null, false, false, true);
       e.fehler.push(...g.fehler.map(f => "geführt: " + f));
       e.hinweise.push(...g.hinweise.map(h => "geführt: " + h));
-      if (!g.fehler.length && !g.hinweise.some(h => /^Zug/.test(h))) gefuehrtGanz++;
-      else if (g.hinweise.some(h => /^Zug/.test(h))) ohneZug.add(id);
+      const zugFund = [...g.fehler, ...g.hinweise].some(f => /^Zug/.test(f)); // Fehler oder Hinweis je nach ZUG_PFLICHT
+      if (zugFund) ohneZug.add(id);
+      else if (!g.fehler.length) gefuehrtGanz++;
     }
     const gen = e.generator ? ` · Generator ${e.generator.anzahl}${e.generator.mitPruefung ? " fachlich" : ""}` : "";
     const zeichen = e.fehler.length ? "✗" : e.hinweise.length ? "~" : "✓";

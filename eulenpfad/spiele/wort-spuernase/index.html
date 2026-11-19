@@ -241,6 +241,15 @@ LS.spiel({
           const neu = textEl(a, true, beimTipp);
           text.replaceWith(neu);
           text = neu;
+          // ZU1 a: richtig ein Wort des Hinweises antippen, falsch ein anderes, noch nicht falsch markiertes Wort
+          ctx.testZug(richtig => {
+            if (ctx.vorbei() || !document.body.contains(neu) || neu.querySelector(".wsn-tipp.richtig")) return false;
+            const w = [...neu.querySelectorAll(".wsn-tipp")].find(x => richtig ? x.classList.contains("wsn-hinweis")
+              : !x.classList.contains("wsn-hinweis") && !x.classList.contains("falsch"));
+            if (!w) return false;
+            w.click();
+            return true;
+          });
           ctx.sag("Richtig! Und welches Wort im Text hat es verraten?", "gut");
           return;
         }
@@ -250,6 +259,14 @@ LS.spiel({
       });
       wahl.append(k);
     }
+    // ZU1 a: Schritt 1 — richtig die passende Bedeutung antippen, falsch eine andere, noch nicht gewählte
+    ctx.testZug(richtig => {
+      if (bedeutungDa || ctx.vorbei() || !document.body.contains(wahl)) return false;
+      const k = [...wahl.children].find(x => richtig ? x.textContent === a.richtig : x.textContent !== a.richtig && !x.classList.contains("gewaehlt"));
+      if (!k) return false;
+      k.click();
+      return true;
+    });
   },
 });
 </script>

@@ -414,6 +414,14 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      // ZU1 a: richtig ein offenes Wort der Familie antippen, falsch eine noch nicht gewählte Falle
+      ctx.testZug(richtig => {
+        if (fertig || !document.body.contains(box)) return false;
+        const i = a.karten.findIndex((w, j) => !box.children[j].classList.contains("gewaehlt") && offen.has(w) === richtig);
+        if (i < 0) return false;
+        box.children[i].click();
+        return true;
+      });
     }
     if (ctx.nr === 0) ctx.sag(a.art === "alle" ? "Achtung, Fallen! Manche Wörter sehen nur ähnlich aus." : "Such den Wortstamm — er steckt in allen Wörtern der Familie.");
   },

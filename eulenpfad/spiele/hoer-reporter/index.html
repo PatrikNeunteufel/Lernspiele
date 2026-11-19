@@ -310,6 +310,24 @@ const SPIEL = {
       if (!LS.sprich(a.text, "de")) lesenStatt();
     });
 
+    // ZU1 a: vor den Fragen „Gelesen“ antippen oder, solange die Stimme vorliest, zuhören (nichts tippen; kein falscher
+    // Handgriff); danach je Frage richtig die passende Antwort, falsch eine andere, noch nicht gewählte
+    ctx.testZug(gut => {
+      if (ctx.vorbei() || !document.body.contains(hr)) return false;
+      if (!fragenDa) {
+        if (!gut) return false;
+        const gelesen = hr.querySelector(".hr-los .knopf");
+        if (gelesen) { gelesen.click(); return true; }
+        return modus === "hoeren";
+      }
+      const f = a.fragen[nrFrage];
+      const wahl = fragenBox.querySelector(".wahl");
+      const k = wahl && [...wahl.children].find((b, j) => (f.optionen[j] === f.richtig) === gut && !b.disabled && !b.classList.contains("gewaehlt"));
+      if (!k) return false;
+      k.click();
+      return true;
+    });
+
     // Vorlesen, sobald die Eule fertig ist (Lob der vorigen Aufgabe; ihr Satz würde sonst den Bericht abbrechen).
     // Danach Fragen zeigen und die Uhr starten.
     ctx.nachAnsage(() => {

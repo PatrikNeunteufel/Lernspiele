@@ -320,9 +320,11 @@ function lesetextNeu(ctx) {
 /** Schritt „Stelle antippen“: Die Spans werden Knöpfe (ausser 'ausser'); richtig ist der Index. */
 function zeilenTippen(ctx, zeilen, { richtig, ausser = null, hinweis, loesung, lob }) {
   let fertig = false;
+  const knoepfe = [];
   zeilen.forEach((s, i) => {
     if (i === ausser) return;
     const k = el("button", { type: "button", class: "gk-zeile" }, ...[...s.childNodes]);
+    knoepfe.push([i, k]);
     s.replaceWith(k);
     k.addEventListener("click", () => {
       if (fertig || k.classList.contains("gewaehlt")) return;
@@ -331,6 +333,14 @@ function zeilenTippen(ctx, zeilen, { richtig, ausser = null, hinweis, loesung, l
       ctx.falsch(hinweis, loesung);
       if (ctx.vorbei()) fertig = true;
     });
+  });
+  // ZU1 a: richtig die gesuchte Stelle antippen, falsch eine andere, noch nicht gewählte Zeile
+  ctx.testZug(gut => {
+    if (fertig) return false;
+    const paar = knoepfe.find(([i, k]) => document.body.contains(k) && (i === richtig) === gut && !k.classList.contains("gewaehlt"));
+    if (!paar) return false;
+    paar[1].click();
+    return true;
   });
 }
 
@@ -351,6 +361,14 @@ function wahlSchritt(ctx, wahl, { optionen, inhalt, richtig, hinweis, loesung, d
     });
     wahl.append(k);
   }
+  // ZU1 a: richtig die passende Antwort antippen, falsch eine andere, noch nicht gewählte
+  ctx.testZug(gut => {
+    if (fertig || !document.body.contains(wahl)) return false;
+    const i = optionen.findIndex((w, j) => (w === richtig) === gut && !wahl.children[j].classList.contains("gewaehlt"));
+    if (i < 0) return false;
+    wahl.children[i].click();
+    return true;
+  });
   LS.schriftEinpassen(wahl, ".wahl-knopf"); // lange Namen wie „Kurzgeschichte“ (WE2 a, LERN_Session47)
 }
 

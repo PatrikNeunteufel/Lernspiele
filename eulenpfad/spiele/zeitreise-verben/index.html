@@ -395,6 +395,15 @@ LS.spiel({
         box.append(k);
       }
       ctx.flaeche.append(box);
+      // ZU1 a: Schritt 1 — richtig die Zeitform des Satzes antippen, falsch eine andere, noch nicht gewählte
+      // (Schritt 2 meldet LS.auswahl in bildenAuswahl selbst)
+      ctx.testZug(richtig => {
+        if (weiter || ctx.vorbei() || !document.body.contains(box)) return false;
+        const i = a.erkennen.optionen.findIndex((z, j) => richtig ? z === a.quelle : z !== a.quelle && !box.children[j].classList.contains("gewaehlt"));
+        if (i < 0) return false;
+        box.children[i].click();
+        return true;
+      });
     }
     if (ctx.nr === 0) ctx.sag("Schau dir das Verb genau an — es ist gelb markiert.");
   },

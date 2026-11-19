@@ -395,6 +395,14 @@ function zeigeLeiter(ctx, a) {
       : (i < a.richtig ? "Das ist zu nah an heute. Es ist viel länger her." : "So lange ist es noch nicht her. Geh weiter hinunter."), loesung);
     if (ctx.vorbei()) fertig = true;
   }));
+  // Zug für die Werkzeuge (ZU1 a): richtig den gesuchten Abschnitt antippen, falsch einen anderen, noch nicht falschen
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+    const r = baender.find((b, i) => (i === a.richtig) === richtig && !b.classList.contains("falsch"));
+    if (!r) return false;
+    r.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 function zeigeZeitalter(ctx, a) {

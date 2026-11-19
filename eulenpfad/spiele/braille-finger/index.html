@@ -255,7 +255,7 @@ const REGEL_KT = "Die zweite Zehnerreihe ist wie die erste, nur kommt der Punkt 
 const REGEL_ALLE = "Erste Zehnerreihe: nur die oberen vier Punkte. Zweite: dazu der Punkt unten links. Dritte: dazu beide Punkte unten. Ein Buchstabe ist die Ausnahme.";
 
 /** Antippbare Zelle mit Prüfen-Knopf; pruefe(muster) gibt true zurück, wenn es weitergeht. */
-function setzFeld(ctx, pruefe) {
+function setzFeld(ctx, pruefe, ziel) {
   let gesetzt = new Set();
   let zelle;
   const ort = el("div");
@@ -284,6 +284,22 @@ function setzFeld(ctx, pruefe) {
     if (ctx.vorbei()) { pruefen.disabled = true; leeren.disabled = true; }
   });
   ctx.flaeche.append(ort, el("div", { class: "bf-knoepfe" }, leeren, pruefen));
+  // Zug für die Werkzeuge (ZU1 a): ziel() = Muster, das jetzt gesetzt sein soll. Richtig: einen Punkt antippen, der
+  // fehlt oder zu viel ist, sonst „Prüfen“; falsch: „Prüfen“, solange die Zelle noch nicht stimmt
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || pruefen.disabled || !document.body.contains(pruefen)) return false;
+    const soll = ziel();
+    if (soll == null) return false;
+    const p = PUNKTE.find(q => gesetzt.has(q) !== soll.includes(String(q)));
+    if (!richtig) {
+      if (p === undefined) return false;
+      pruefen.click();
+      return true;
+    }
+    if (p === undefined) pruefen.click();
+    else zelle.kreise[p].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 /** Tipps vor dem Antworten (ctx.tipp, LERN_Session9): wie man eine Zelle liest — nie Buchstabe oder Punkte der Lösung. */
@@ -403,7 +419,7 @@ LS.spiel({
         tafelNachFehler();
         ctx.falsch(m === gespiegelt(a.richtig) ? "Fast — die Zelle ist gespiegelt. Punkt 1, 2, 3 sind links." : "Noch nicht. Schau in der Tafel nach und vergleiche Punkt für Punkt.", loesung);
         return false;
-      });
+      }, () => a.richtig); // Ziel für den Zug (ZU1 a)
       return;
     }
     // schreiben: Buchstabe für Buchstabe
@@ -426,7 +442,7 @@ LS.spiel({
       }
       ctx.falsch(m === gespiegelt(a.richtig[pos]) ? "Fast — die Zelle ist gespiegelt. Punkt 1, 2, 3 sind links." : REGEL_ALLE, loesung);
       return false;
-    });
+    }, () => (pos < a.richtig.length ? a.richtig[pos] : null)); // Ziel für den Zug (ZU1 a)
   },
 });
 </script>

@@ -211,6 +211,14 @@ LS.spiel({
       wahl.append(k);
     }
     ctx.flaeche.append(wahl);
+    // ZU1 a: richtig das passende Zeichen antippen, falsch das erste andere
+    ctx.testZug(gut => {
+      if (fertig || !document.body.contains(wahl)) return false;
+      const k = [...wahl.children].find(b => (b.firstChild.textContent === richtig) === gut);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     LS.kurztasten(wahl); // < = > auf Y X C (erster Text des Knopfs ist das Zeichen)
     if (ctx.nr === 0) ctx.sag("Das Maul (die offene Seite) zeigt immer zur grösseren Zahl: 3 < 5.");
   },

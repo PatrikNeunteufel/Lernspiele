@@ -616,6 +616,14 @@ function ohrTippen(ctx, a, lw) {
     ctx.falsch(`Das ist ${nom(id)}. Such weiter!`, loesung);
     if (ctx.vorbei()) fertig = true;
   });
+  // ZU1 a: richtig das gesuchte Teil des Ohrs antippen, falsch das erste andere (SVG: Klick-Ereignis wie vom Finger)
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(b.svg)) return false;
+    const g = richtig ? b.teile.get(a.teil) : [...b.teile].find(([id]) => id !== a.teil)?.[1];
+    if (!g) return false;
+    g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
   if (ctx.nr === 0) ctx.sag("Das Ohr ist aufgeschnitten, der Schall kommt von links. Tipp im Bild auf das Teil, das ich sage!");
 }
 

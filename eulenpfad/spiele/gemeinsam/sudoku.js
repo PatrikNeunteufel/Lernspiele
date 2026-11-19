@@ -659,6 +659,27 @@ const SUDOKU = (() => {
       el("div", { class: "sd-spiel" }, brett, el("div", { class: "sd-steuerung" }, zahlen, werkzeuge)));
     LS.kurztasten(zahlen, zahlKnoepfe);
     zeichne();
+    // ZU1 a: ein Handgriff für Werkzeuge, mit den Knöpfen wie ein Kind. Richtig: Notizmodus aus, ein falsch gefülltes Feld
+    // wählen und leeren, sonst das erste leere Feld wählen und seine Zahl tippen. Falsch: ins gewählte leere Feld eine Zahl,
+    // die schon in seiner Zeile, Spalte oder seinem Gebiet steht (der Baustein meldet den Widerspruch, nichts ändert sich).
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(brett)) return false;
+      if (!richtig) {
+        if (gewaehlt < 0 || opt.vorgabe[gewaehlt] || werte[gewaehlt] || notizModus) return false;
+        const schonDa = new Set(r.vonFeld[gewaehlt].flatMap(u => r.einheiten[u].felder).map(k => werte[k]).filter(Boolean));
+        const v = [...schonDa][0];
+        if (!v) return false;
+        zahlKnoepfe[v - 1].click();
+        return true;
+      }
+      if (notizModus) { notizKnopf.click(); return true; }
+      const falschGefuellt = werte.findIndex((v, k) => v && !opt.vorgabe[k] && v !== opt.loesung[k]);
+      const ziel = falschGefuellt >= 0 ? falschGefuellt : werte.findIndex(v => !v);
+      if (ziel < 0) return false;
+      if (gewaehlt !== ziel) { felder[ziel].click(); return true; }
+      if (falschGefuellt >= 0) loeschKnopf.click(); else zahlKnoepfe[opt.loesung[ziel] - 1].click();
+      return true;
+    });
 
     function waehle(i) {
       if (ctx.vorbei() || opt.vorgabe[i]) return;

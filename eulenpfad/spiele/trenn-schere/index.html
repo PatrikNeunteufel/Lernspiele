@@ -229,6 +229,20 @@ function alleStellen(ctx, a, p) {
     ctx.falsch(teile.join(" "), loesung);
   });
   f.append(el("div", { class: "ts-zeile" }, pruefen));
+  // ZU1 a: ein Handgriff für Werkzeuge — richtig: einen falschen Trennstrich wegnehmen, sonst einen fehlenden setzen,
+  // zuletzt „Prüfen ✓“; falsch: einen Trennstrich an einer verbotenen Stelle setzen (gibt es keine, „Prüfen ✓“ zu früh)
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || fertig || !document.body.contains(pruefen)) return false;
+    const an = j => fugen[j].classList.contains("getrennt");
+    const erlaubt = j => a.stellen.includes(j + 1);
+    const suche = pruef => fugen.findIndex((x, k) => pruef(k));
+    let j = richtig ? suche(k => an(k) && !erlaubt(k)) : suche(k => !an(k) && !erlaubt(k));
+    if (richtig && j < 0) j = suche(k => !an(k) && erlaubt(k));
+    if (j >= 0) { fugen[j].click(); return true; }
+    if (!richtig && !fugen.some((x, k) => an(k) !== erlaubt(k))) return false; // schon alles richtig gesetzt
+    pruefen.click();
+    return true;
+  });
 }
 
 /** Zeilenende: so viel wie möglich auf diese Zeile — eine Fuge antippen oder das ganze Wort auf die neue Zeile. */
@@ -243,7 +257,7 @@ function zeilenende(ctx, a, p) {
   f.append(el("div", { class: "frage", html: "Wo trennst du? <b>Schreib so viel wie möglich auf diese Zeile.</b>" }));
   let fertig = false;
   const loesen = (lob) => { fertig = true; ctx.richtig(lob); };
-  const { karte } = wortKarte(a, (i, fuge) => {
+  const { karte, fugen } = wortKarte(a, (i, fuge) => {
     if (ctx.vorbei() || fertig || fuge.classList.contains("gewaehlt")) return;
     if (i === r) {
       fuge.classList.add("getrennt", "richtig");
@@ -268,6 +282,17 @@ function zeilenende(ctx, a, p) {
     ctx.falsch("Ein Teil des Wortes passt noch auf diese Zeile.", loesung);
   });
   f.append(el("div", { class: "ts-zeile" }, ganz));
+  // ZU1 a: richtig die Fuge nach r Buchstaben (ohne Trennstelle „Ganzes Wort“), falsch: lässt sich trennen,
+  // „Ganzes Wort“, sonst die erste noch nicht gewählte Fuge
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || fertig || !document.body.contains(ganz)) return false;
+    let k;
+    if (richtig) k = r ? fugen[r - 1] : ganz;
+    else k = r ? (ganz.classList.contains("falsch") ? null : ganz) : fugen.find(x => !x.classList.contains("gewaehlt"));
+    if (!k) return false;
+    k.click();
+    return true;
+  });
 }
 
 // ---------- Spiel ----------

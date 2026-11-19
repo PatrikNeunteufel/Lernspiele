@@ -225,6 +225,18 @@ LS.spiel({
     }
     zeichne();
     ctx.flaeche.append(tasten);
+    // ZU1 a: ein Handgriff für Werkzeuge — richtig: für einen Grossbuchstaben zuerst ⇧ (bei einem kleinen ⇧ wieder
+    // aus), dann die Taste des markierten Zeichens; falsch: eine andere Zeichentaste
+    ctx.testZug(richtig => {
+      if (fertig || ctx.vorbei() || !document.body.contains(tasten)) return false;
+      const soll = text[i], klein = soll.toLowerCase();
+      const grossSoll = soll !== klein;
+      if (richtig && grossSoll !== gross && soll.toUpperCase() !== klein) { shift[0].click(); return true; }
+      const k = [...tasten.querySelectorAll(".tt-taste")].find(t => t.dataset.z !== undefined && (t.dataset.z === klein) === richtig);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
 
     // Echte Tastatur: das Zeichen so, wie die Tastatur es liefert (⇧ macht dort selbst gross).
     function physisch(e) {

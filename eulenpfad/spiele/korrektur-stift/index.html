@@ -489,6 +489,30 @@ LS.spiel({
       });
       ctx.flaeche.append(el("div", { class: "ks-zeile" }, pruefen));
     }
+
+    // ZU1 a: richtig — ist eine Auswahl offen, die richtige Schreibweise wählen; sonst das nächste falsche Wort antippen,
+    // am Ende „✓ Prüfen“. Falsch: ein Wort antippen, bei dem alles stimmt (noch nicht angetippt).
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(box)) return false;
+      if (!richtig) {
+        const i = a.woerter.findIndex((w, j) => !w.fehler && !knoepfe[j].classList.contains("gepeilt"));
+        if (i < 0) return false;
+        knoepfe[i].click();
+        return true;
+      }
+      if (offen) {
+        const k = [...panel.querySelectorAll(".wahl-knopf")].find(b => b.textContent === offen.w.fehler.richtig);
+        if (!k) return false;
+        k.click();
+        return true;
+      }
+      const i = a.woerter.findIndex(w => w.fehler && !w.erledigt);
+      if (i >= 0) { knoepfe[i].click(); return true; }
+      const pruefen = [...ctx.flaeche.querySelectorAll("button")].find(b => b.textContent === "✓ Prüfen");
+      if (!pruefen) return false;
+      pruefen.click();
+      return true;
+    });
   },
 });
 </script>

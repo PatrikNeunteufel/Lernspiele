@@ -432,6 +432,22 @@ function daneben(g) {
 }
 
 /**
+ * Zug für die Werkzeuge (ZU1 a): eine Station im Bild antippen wie ein Kind. ziel() = richtige Station,
+ * zaehltNicht(id) = Station, deren Tipp kein Fehler ist (wird beim falschen Zug übersprungen).
+ */
+function stationsZug(ctx, b, istFertig, ziel, zaehltNicht = () => false) {
+  ctx.testZug(richtig => {
+    if (istFertig() || ctx.vorbei() || !document.body.contains(b.svg)) return false;
+    const z = ziel();
+    const id = richtig ? z : [...b.stationen.keys()].find(s => s !== z && !zaehltNicht(s));
+    const st = id && b.stationen.get(id);
+    if (!st) return false;
+    st.g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
+}
+
+/**
  * Stationen der Reihe nach antippen. weg: Ids in Reihenfolge; das Blutkörperchen wandert mit.
  * blut(id): Zustand des Bluts nach der Station; faerben: Gefässe beim Durchfliessen färben.
  */
@@ -458,6 +474,7 @@ function lotsen(ctx, b, start, weg, { hinweis, loesung, lob, blut, faerben }) {
       if (ctx.vorbei()) fertig = true;
     });
   }
+  stationsZug(ctx, b, () => fertig, () => weg[pos], id => id === (pos ? weg[pos - 1] : start)); // ZU1 a
 }
 
 const HINWEIS_PFEILE = "Folge den Pfeilen. Wohin fliesst das Blut von hier aus?";
@@ -543,6 +560,7 @@ LS.spiel({
         ctx.falsch(`Das ist ${ORGANE[id].nom}. Such weiter!`, o.loesung);
         if (ctx.vorbei()) fertig = true;
       });
+      stationsZug(ctx, b, () => fertig, () => a.organ); // ZU1 a
       return;
     }
 
@@ -631,6 +649,7 @@ LS.spiel({
         ctx.falsch("Schau auf die Pfeile: Wo kommt das Blut gerade her, und wohin fliesst es?", w.loesung);
         if (ctx.vorbei()) fertig = true;
       });
+      stationsZug(ctx, b, () => fertig, () => w.ziel); // ZU1 a
     }
   },
 });

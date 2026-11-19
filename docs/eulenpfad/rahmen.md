@@ -525,8 +525,10 @@ Vorgabe Patrik 2026-10-31.
 - je Stufe eine geführte Runde (Entscheid ZP1 a, LERN_Session48): Statt Zufallsklicks spielen die Züge des Rahmens
   (`LS.pruefung.zug`, Abschnitt 4.2 `ctx.testZug`, ZU1 a) jede Aufgabe mit einem falschen und dann richtigen Handgriffen
   bis zum Lösen, auch in späteren Schritten. Alle Prüfungen dieser Liste laufen mit; ihre Funde stehen mit „geführt:“
-  davor. Bleibt eine Aufgabe ohne Zug stehen, meldet sie „Zug“ — bis alle Spiele ihre Züge haben ein Hinweis, danach ein
-  Fehler (`ZUG_PFLICHT`). Die Übersicht am Ende nennt die ganz durchgespielten Stufen und die Spiele ohne Zug;
+  davor. Bleibt eine Aufgabe ohne Zug stehen, ist das ein Fehler „Zug“ (`ZUG_PFLICHT`, seit LERN_Session48 alle 175
+  Spiele mit Zügen): Ein neues Spiel oder eine neue Aufgabenart braucht ihren Zug (Abschnitt 4.2 `ctx.testZug`,
+  4.3 `opt.erwartet`). Die Grenze der Züge je Aufgabe ist das Dreifache von `ctx.schritte`, mindestens 80 (die erste
+  Aufgabe 300). Die Übersicht am Ende nennt die ganz durchgespielten Stufen und die Spiele ohne Zug;
 - kein NaN, undefined oder null im sichtbaren Text;
 - die Generatoren mit `pruefeAufgabe`;
 - Hinweise, die die Lösung verraten;
@@ -1130,7 +1132,9 @@ Entscheid BH1 a (LERN_Session13): Die ganze Aufgabe soll ohne Scrollen ins Bild 
   falschen Handgriff, danach je richtiger einer). Die Handgriffe kommen aus `LS.pruefung.zug(richtig)`: Auswahl,
   Reihenfolge und Körbe melden ihre selbst, die Tastatur mit `opt.erwartet`, eigene Knöpfe mit `ctx.testZug(fn)`
   (Abschnitt 4.2). „Spiele ohne Zug“ sind nur beim Laden gemessen; „nicht zu Ende gespielt“ heisst, ein späterer Schritt
-  meldet keinen Zug. Vorher sah die Messung nur den Anfang einer Aufgabe (LERN_Session46: Sachaufgaben-Kompass Schritt ③
+  meldet keinen Zug (höchstens 200 Züge je Ziehung). Gemessen wird erst, wenn die Aufgabe steht (Text mit Buchstaben auf
+  der Karte, bis 10 s nach dem Laden); sonst „Aufgabe nach 11,5 s nicht gezeichnet“ (LERN_Session48: unter Last war ein
+  9 × 9-Sudoku nach 1,5 s noch leer und galt als nicht zu Ende gespielt). Vorher sah die Messung nur den Anfang einer Aufgabe (LERN_Session46: Sachaufgaben-Kompass Schritt ③
   bis 255 px, Kakao-Weg-Ablage 641 px fielen erst mit eigenen Skripten auf); Zufallsklicks reichen nicht, sie lösen einen
   Schritt mit getippter Zahl fast nie (Zählung LERN_Session47: Kompass 0 von 102 Aufgaben, Sudokus 0 von 30).
 - **Messen:** `node tools/bildhoehe.js [Basis-URL] [spiel-id …]` (Vorgabe seit GR1 a die sichtbare Fläche: `handy-sicht`,

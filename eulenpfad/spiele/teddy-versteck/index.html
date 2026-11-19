@@ -500,6 +500,15 @@ LS.spiel({
       szene.append(k);
     });
     ctx.flaeche.append(szene);
+    // ZU1 a: richtig den Platz, an dem der Teddy ist, falsch den ersten anderen, noch nicht falsch getippten
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(szene)) return false;
+      const plaetze = szene.querySelectorAll(".platz");
+      const i = a.optionen.findIndex((o, j) => (j === a.ziel) === richtig && !plaetze[j].classList.contains("falsch"));
+      if (i < 0) return false;
+      plaetze[i].click();
+      return true;
+    });
   },
 });
 </script>

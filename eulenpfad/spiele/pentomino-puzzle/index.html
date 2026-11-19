@@ -541,6 +541,19 @@ function legen(ctx, a) {
   const naechstesOffenes = () => { for (let i = 0; i < n; i++) if (!gelegt.has(i)) return i; return null; };
   const voll = () => belegt.size === region.size;
 
+  /** Wohin das Teil in Lage t kommt, wenn das Feld (x, y) angetippt wird: so, dass es das Feld deckt, möglichst mit
+   *  seiner Mitte dort; null, wenn es nirgends passt. Eine Regel für tippe() und den Zug (ZU1 a). */
+  function wohin(t, x, y) {
+    const mx = t.reduce((s, z) => s + z[0], 0) / t.length, my = t.reduce((s, z) => s + z[1], 0) / t.length;
+    let beste = null;
+    for (const [qx, qy] of t) {
+      const felder = t.map(([a1, b1]) => [a1 + x - qx, b1 + y - qy]);
+      if (!felder.every(([fx, fy]) => region.has(fk(fx, fy)) && !belegt.has(fk(fx, fy)))) continue;
+      const d = (qx - mx) ** 2 + (qy - my) ** 2;
+      if (!beste || d < beste.d) beste = { felder, d };
+    }
+    return beste && beste.felder;
+  }
   function tippe(x, y) {
     if (fertig) return;
     const k = fk(x, y);
@@ -553,18 +566,10 @@ function legen(ctx, a) {
       return;
     }
     if (gewaehlt === null) { ctx.sag("Tipp zuerst unten ein Teil an.", "hinweis"); return; }
-    // Das Teil so legen, dass es das angetippte Feld deckt — möglichst mit seiner Mitte dort.
-    const t = lage[gewaehlt];
-    const mx = t.reduce((s, z) => s + z[0], 0) / t.length, my = t.reduce((s, z) => s + z[1], 0) / t.length;
-    let beste = null;
-    for (const [qx, qy] of t) {
-      const felder = t.map(([a1, b1]) => [a1 + x - qx, b1 + y - qy]);
-      if (!felder.every(([fx, fy]) => region.has(fk(fx, fy)) && !belegt.has(fk(fx, fy)))) continue;
-      const d = (qx - mx) ** 2 + (qy - my) ** 2;
-      if (!beste || d < beste.d) beste = { felder, d };
-    }
-    if (!beste) { ctx.sag("So passt das Teil hier nicht. Dreh oder spiegle es – oder probier eine andere Stelle.", "hinweis"); return; }
-    lege(gewaehlt, beste.felder);
+    // Das Teil so legen, dass es das angetippte Feld deckt — möglichst mit seiner Mitte dort (wohin, auch für den Zug)
+    const felder = wohin(lage[gewaehlt], x, y);
+    if (!felder) { ctx.sag("So passt das Teil hier nicht. Dreh oder spiegle es – oder probier eine andere Stelle.", "hinweis"); return; }
+    lege(gewaehlt, felder);
     LS.ton("huepf");
     gewaehlt = naechstesOffenes();
     zeichne();
@@ -603,6 +608,47 @@ function legen(ctx, a) {
     zeichne();
     if (voll()) { fertig = true; zeichne(); ctx.richtig("Jetzt passt alles!"); }
   }
+
+  // ZU1 a: ein Handgriff für Werkzeuge, wie ein Kind ihn macht. Richtig: den nächsten Platz der Lösung füllen —
+  // liegt dort (oder das passende Teil anderswo) falsch etwas, es antippen (zurück in den Vorrat); sonst das passende
+  // Teil unten wählen, mit ⟳/⇋ in die Lage des Platzes bringen und das Feld antippen, bei dem tippe() genau diesen
+  // Platz belegt. Falsch: „🧩 Ein Teil legen“ (zählt als Fehler, die Aufgabe bleibt lösbar).
+  const ortVon = felder => felder.map(z => z.join(",")).sort().join(" ");
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(brett)) return false;
+    if (!richtig) { tippKnopf.click(); return true; }
+    const liegtDa = platz => { const i = belegt.get(fk(...platz[0])); return i !== undefined && ortVon(gelegt.get(i)) === ortVon(platz); };
+    const platz = a.plaetze.find(pl => !liegtDa(pl));
+    if (!platz) return false;
+    const stoert = platz.map(([x, y]) => fk(x, y)).find(k => belegt.has(k));
+    if (stoert) { zellen[stoert].click(); return true; }
+    const form = formSchluessel(platz);
+    const i = [...Array(n).keys()].find(t => !gelegt.has(t) && formSchluessel(lage[t]) === form);
+    if (i === undefined) {
+      // Das passende Teil liegt anderswo falsch: es antippen
+      const gut = new Set(a.plaetze.filter(liegtDa).map(pl => belegt.get(fk(...pl[0]))));
+      const w = [...gelegt.keys()].find(t => !gut.has(t) && formSchluessel(lage[t]) === form);
+      if (w === undefined) return false;
+      zellen[fk(...gelegt.get(w)[0])].click();
+      return true;
+    }
+    if (gewaehlt !== i) {
+      const knopf = [...vorrat.children].find(b => b.getAttribute("aria-label") === `Teil ${i + 1}`);
+      if (!knopf) return false;
+      knopf.click();
+      return true;
+    }
+    if (schluessel(lage[i]) !== schluessel(platz)) {
+      let z = lage[i];
+      const durchDrehen = [1, 2, 3].some(() => schluessel(z = drehe(z)) === schluessel(platz));
+      (durchDrehen ? drehKnopf : spiegelKnopf).click();
+      return true;
+    }
+    const ziel = platz.find(([x, y]) => { const f = wohin(lage[i], x, y); return f && ortVon(f) === ortVon(platz); });
+    if (!ziel) return false;
+    zellen[fk(...ziel)].click();
+    return true;
+  });
 
   zeichne();
   if (ctx.nr === 0) ctx.sag("Tipp ein Teil an, dreh oder spiegle es und tipp dann ins Feld. Ein gelegtes Teil nimmst du mit Antippen wieder weg.");

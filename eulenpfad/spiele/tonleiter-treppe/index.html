@@ -302,6 +302,17 @@ function klaviaturSvg(opt) {
   return svg;
 }
 
+/**
+ * ZU1 a: ein Element der Treppe oder Klaviatur antippen wie mit dem Finger (SVG: Klick-Ereignis). attr/wert: das
+ * data-Attribut, das das Ziel nennt (über getAttribute, Attributwert-Selektoren gehen im Ersatz-DOM nicht).
+ */
+function tippeIn(wo, sel, attr, wert) {
+  const e = [...wo.querySelectorAll(sel)].find(x => x.getAttribute(attr) !== null && Number(x.getAttribute(attr)) === wert);
+  if (!e) return false;
+  e.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  return true;
+}
+
 const tonFolge = (midis, dauer = 0.5) => midis.map((m, i) => ({ midi: m, dauer: i === midis.length - 1 ? dauer * 1.6 : dauer }));
 // Vorspielen, sobald die Eule fertig ist (Lob, Vorlesen), und nur, wenn die Aufgabe noch steht.
 const spielen = (ctx, wurzel, folge) => ctx.nachAnsage(() => { if (document.body.contains(wurzel) && !ctx.vorbei()) NOTEN.spiele(folge); });
@@ -346,6 +357,12 @@ function zeichneSetzen(ctx, a) {
   ctx.flaeche.append(frage, el("div", { class: "unterzeile", text: `Tippe auf die ❓ — hier gibt es ${zahl}.` }), halter,
     el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => tonFolge(toene.map(t => t.midi), 0.45), "🔊 Treppe anhören")));
   zeichne();
+  // ZU1 a: richtig die nächste ❓ mit Halbtonschritt, falsch die erste offene ❓ mit Ganztonschritt
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(halter)) return false;
+    const i = toene.slice(1).findIndex((t, j) => !zustand[j] && soll.includes(j) === richtig);
+    return i >= 0 && tippeIn(halter, "g", "data-luecke", i);
+  });
 }
 
 /** Tonleiter auf der Klaviatur bauen: Ton für Ton antippen. */
@@ -389,6 +406,12 @@ function zeichneBauen(ctx, a, mitPlan) {
   if (mitPlan) ctx.flaeche.append(el("div", { class: "bauplan", text: `Bauplan ${l.muster === DUR ? "Dur" : "Moll"}: ${plan} (1 = Ganzton, ½ = Halbton)` }));
   ctx.flaeche.append(halter, el("div", { class: "hoer-zeile" }, NOTEN.hoerKnopf(ctx, () => tonFolge(toene.map(t => t.midi), 0.45), `🔊 ${l.name} anhören`)));
   zeichne();
+  // ZU1 a: richtig die Taste des nächsten Tons, falsch die Taste daneben (rechts, am oberen Rand links)
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || dran >= 8 || !document.body.contains(halter)) return false;
+    const m = toene[dran].midi;
+    return tippeIn(halter, "rect", "data-midi", richtig ? m : m < bis ? m + 1 : m - 1);
+  });
 }
 
 /**
@@ -522,6 +545,11 @@ LS.spiel({
       };
       f.append(el("div", { class: "frage", html: `Tippe die Taste <b>${was}</b> als die gelbe (${weissName(a.a)}).` }), halter);
       zeichne();
+      // ZU1 a: richtig die verlangte Taste, falsch die gelbe Taste selbst
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || fertig || !document.body.contains(halter)) return false;
+        return tippeIn(halter, "rect", "data-midi", richtig ? a.ziel : a.a);
+      });
     } else if (a.art === "bauen") {
       zeichneBauen(ctx, a, ctx.stufe === "s4");
     } else if (a.art === "vorzeichen") {

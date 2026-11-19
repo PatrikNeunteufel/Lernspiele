@@ -343,6 +343,21 @@ function duellAufgabe(ctx, a) {
     zuruecksetzen = { felder: e.zug ? [i, e.zug[0]] : [i] };
   }
   zeichne();
+  // ZU1 a: ein Handgriff für Werkzeuge. Richtig: das Feld eines Gewinnzugs (a.gut) wählen, dann seine Zahl. Falsch: ein
+  // erlaubter Zug, der nicht gewinnt — Feld und Zahl in einem Zug, weil die Werkzeuge nur einmal je Aufgabe falsch fragen.
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(brett)) return false;
+    if (richtig) {
+      const [gi, gv] = a.gut[0];
+      if (gewaehlt !== gi) felder[gi].click(); else knoepfe[gv - 1].click();
+      return true;
+    }
+    const schlecht = SUDOKU.duellZuege(r, werte).find(([i, v]) => !a.gut.some(([gi, gv]) => gi === i && gv === v));
+    if (!schlecht) return false;
+    if (gewaehlt !== schlecht[0]) felder[schlecht[0]].click();
+    knoepfe[schlecht[1] - 1].click();
+    return true;
+  });
   if (ctx.nr === 0) ctx.sag("Tipp auf ein leeres Feld, dann auf eine Zahl. Findest du den Zug, nach dem ich verliere?");
 }
 

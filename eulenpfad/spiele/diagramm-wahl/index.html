@@ -890,6 +890,14 @@ LS.spiel({
       const grundTipp = prozent ? "Der ganze Kreis sind 100 %. Die Hälfte des Kreises sind 50 %, ein Viertel 25 %."
         : "Zwei gleich grosse Teile füllen den Kreis: Jeder ist die Hälfte. Vier: Jeder ist ein Viertel. Acht: Jeder ist ein Achtel. Drei: Jeder ist ein Drittel.";
       if (tippen) {
+        // Zug für die Werkzeuge (ZU1 a): richtig den gesuchten Teil im Kreis antippen, falsch einen anderen, noch nicht falschen
+        ctx.testZug(richtig => {
+          if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+          const pfad = [...svg.querySelectorAll(".sektor")].find((p, i) => (i === a.i) === richtig && !p.classList.contains("falsch"));
+          if (!pfad) return false;
+          pfad.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          return true;
+        });
         ctx.schritte(1);
         ctx.tipp(["Stell dir vor, der Kreis ist ein Kuchen: Wie viele gleich grosse Stücke ergeben den gesuchten Teil?", grundTipp, "Vergleiche die Teile miteinander: Welcher ist genau so gross wie gesucht?"]);
         if (ctx.nr === 0) ctx.sag("Tipp direkt im Kreis auf den Teil.");

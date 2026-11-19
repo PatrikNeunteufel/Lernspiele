@@ -233,6 +233,14 @@ function stelleBenennen(ctx, zahl, knapp = false) {
     antworten.append(b);
   }
   ctx.flaeche.append(antworten);
+  // ZU1 a: richtig den Knopf der Stelle unter der Lupe, falsch den ersten anderen, noch nicht weggelegten
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(antworten)) return false;
+    const i = angebot.findIndex((st, j) => (st === ziel.st) === richtig && !antworten.children[j].classList.contains("weg"));
+    if (i < 0) return false;
+    antworten.children[i].click();
+    return true;
+  });
   LS.kurztasten(antworten); // Stellen E Z H T M, ZT und HT mit ⇧ (data-taste, der Text ist der Name)
 }
 
@@ -259,6 +267,14 @@ function zifferFinden(ctx, zahl, knapp = false) {
     ctx.falsch(knapp ? "Diese nicht. Zähl nochmal von rechts!" : `Die ${d.z} steht bei den ${LS.dativ(d.st)}. Zähl nochmal von rechts!`,
       loesung);
     if (ctx.flaeche.querySelector(".knopfzeile")) fertig = true;
+  });
+  // ZU1 a: richtig die Ziffer an der genannten Stelle, falsch die erste Ziffer an einer anderen Stelle
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(ziffern[0])) return false;
+    const i = liste.findIndex(d => (d === ziel) === richtig);
+    if (i < 0) return false;
+    ziffern[i].click();
+    return true;
   });
   // Verschiedene Ziffern sind selbst die Taste. Kommen gleiche vor (Stufe 6), zählt hier der Platz: Die Taste 0 nähme
   // immer die erste 0. Dann nennt data-taste den Platz, und es gilt die Grundreihe von links nach rechts.

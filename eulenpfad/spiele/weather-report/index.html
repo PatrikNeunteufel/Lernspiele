@@ -467,6 +467,14 @@ function zweiFragen(ctx, a) {
     }
     teil.append(box);
     ctx.flaeche.append(teil);
+    // ZU1 a: je Frage richtig die passende Antwort antippen, falsch eine andere, noch nicht gewählte
+    ctx.testZug(richtig => {
+      if (fertig || box.classList.contains("fertig") || !document.body.contains(box)) return false;
+      const i2 = q.optionen.findIndex((o, j) => richtig ? o === q.richtig : o !== q.richtig && !box.children[j].classList.contains("gewaehlt"));
+      if (i2 < 0) return false;
+      box.children[i2].click();
+      return true;
+    });
   };
   zeige(0);
 }
@@ -513,6 +521,14 @@ const SPIEL = {
       const links = el("div", { class: "wr-links" }, ...f.querySelectorAll(":scope > .wr-radio, :scope > .wr-hoer, :scope > .frage, :scope > .wr-de"));
       links.querySelector(".frage").setAttribute("data-tipp-ziel", "");
       f.append(el("div", { class: "wr-weg" }, links, plan));
+      // ZU1 a: richtig das Haus am Ziel antippen, falsch ein anderes, noch nicht falsch markiertes
+      ctx.testZug(richtig => {
+        if (fertig || !document.body.contains(plan)) return false;
+        const k = richtig ? zielKnopf : [...plan.querySelectorAll(".wr-haus")].find(x => x !== zielKnopf && !x.classList.contains("falsch"));
+        if (!k) return false;
+        k.click();
+        return true;
+      });
       return;
     }
 

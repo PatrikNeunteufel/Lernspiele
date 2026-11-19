@@ -233,6 +233,14 @@ function wortWahl(ctx, a, frageHtml, hinweis, loesung) {
     satz.append(k);
   });
   f.append(satz);
+  // ZU1 a: richtig das gesuchte Wort, falsch das erste andere, noch nicht falsch getippte
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(satz)) return false;
+    const i = a.woerter.findIndex((w, j) => (j === a.richtig) === richtig && !satz.children[j].classList.contains("falsch"));
+    if (i < 0) return false;
+    satz.children[i].click();
+    return true;
+  });
 }
 
 /** Stufe 1: das Verb im Satz finden. */
@@ -320,6 +328,20 @@ function faecher(ctx, a, p) {
     }
     ctx.falsch(teile.join(" "), loesung);
   });
+  // ZU1 a: ein Handgriff für Werkzeuge — richtig: ein Fächerblatt zu viel wieder weg, sonst ein fehlendes wählen,
+  // zuletzt „Prüfen ✓“; falsch: ein Blatt wählen, das das Verb nicht braucht (gibt es keins, „Prüfen ✓“ zu früh)
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || fertig1 || !document.body.contains(pruefen)) return false;
+    const an = i => blaetter[i].classList.contains("gewaehlt");
+    const braucht = i => v.fragen.includes(p.angebot[i]);
+    const suche = pruef => blaetter.findIndex((b, i) => pruef(i));
+    let i = richtig ? suche(k => an(k) && !braucht(k)) : suche(k => !an(k) && !braucht(k));
+    if (richtig && i < 0) i = suche(k => !an(k) && braucht(k));
+    if (i >= 0) { blaetter[i].click(); return true; }
+    if (!richtig && !blaetter.some((b, k) => an(k) !== braucht(k))) return false; // schon alles richtig gewählt
+    pruefen.click();
+    return true;
+  });
 }
 
 function satzBauen(ctx, a, p, luecken, loesung) {
@@ -365,6 +387,15 @@ function satzBauen(ctx, a, p, luecken, loesung) {
   }
   f.append(karten);
   zeige();
+  // ZU1 a: richtig die Karte für die Lücke, die dran ist, falsch eine Karte mit anderem Text
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || pos >= lueckenEl.length || !document.body.contains(karten)) return false;
+    const soll = lueckenEl[pos].t.text;
+    const k = [...karten.children].find(x => (x.textContent === soll) === richtig);
+    if (!k) return false;
+    k.click();
+    return true;
+  });
 }
 
 // ---------- Spiel ----------

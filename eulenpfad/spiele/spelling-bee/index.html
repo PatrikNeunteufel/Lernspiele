@@ -190,6 +190,14 @@ const SPIEL = {
     ctx.flaeche.append(felder, kacheln);
     // Buchstaben sind selbst die Taste; gelegte Kacheln sind disabled, so nimmt das zweite p die zweite p-Kachel.
     LS.kurztasten(kacheln);
+    // ZU1 a: richtig eine freie Kachel mit dem nächsten Buchstaben, falsch eine freie mit einem anderen
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(kacheln)) return false;
+      const k = [...kacheln.children].find(x => !x.disabled && (x.textContent === ziel[pos]) === richtig);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     LS.sprich(ziel, "en", "", ctx.uhrWarten());
     if (ctx.nr === 0) ctx.sag("Tipp die Buchstaben der Reihe nach an. Mit 🔊 hörst du das Wort nochmal.");
   },

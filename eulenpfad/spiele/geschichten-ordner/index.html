@@ -308,6 +308,7 @@ LS.spiel({
       wahl.style.setProperty("--wahl-breite", "720px");
       go.append(schritt, frage, wahl);
       let fertig = false;
+      const satzKnoepfe = []; // ZU1 a: [fremd?, Knopf]
       for (const satz of mische([...saetze, a.ablenker])) {
         const k = el("button", { type: "button", class: "wahl-knopf", text: satz });
         k.addEventListener("click", () => {
@@ -328,7 +329,16 @@ LS.spiel({
           ordnen(a.schritte, s => s.satz, s => s.satz, loesung);
         });
         wahl.append(k);
+        satzKnoepfe.push([satz === a.ablenker, k]);
       }
+      // ZU1 a: richtig den fremden Satz antippen, falsch einen Satz der Geschichte, der noch nicht gewählt ist
+      ctx.testZug(gut => {
+        if (fertig || ctx.vorbei() || !document.body.contains(wahl)) return false;
+        const paar = satzKnoepfe.find(([r, k]) => r === gut && !k.classList.contains("gewaehlt"));
+        if (!paar) return false;
+        paar[1].click();
+        return true;
+      });
     } else if (a.art === "luecken") {
       // Drei Sätze ohne Zeitwort, gemischt; unter jedem die drei Zeitwörter zur Wahl.
       const loesung = a.luecken.map(l => `${l.wort} ${l.nach}`).join(" · ");
@@ -342,6 +352,7 @@ LS.spiel({
       go.append(el("div", { class: "frage", text: "Welches Zeitwort passt in die Lücke: Zuerst, Dann oder Am Schluss?" }));
       let offen = a.luecken.length;
       const karten = [];
+      const lueckenWahl = []; // ZU1 a: [Lücke, ihre Knöpfe]
       for (const l of mische(a.luecken)) {
         const wort = el("span", { class: "go-lueckenwort", text: "___" });
         const karte = el("div", { class: "go-luecke" }, el("p", { class: "go-luecke-satz" }, wort, " " + l.nach));
@@ -369,8 +380,20 @@ LS.spiel({
         }
         karte.append(wahl);
         karten.push(karte);
+        lueckenWahl.push([l, wahl]);
         go.append(karte);
       }
+      // ZU1 a: in der ersten offenen Lücke richtig das passende Zeitwort, falsch ein anderes, noch nicht gewähltes
+      ctx.testZug(gut => {
+        if (ctx.vorbei()) return false;
+        const offeneLuecke = lueckenWahl.find(([, w]) => document.body.contains(w) && !w.children[0].disabled);
+        if (!offeneLuecke) return false;
+        const [l, w] = offeneLuecke;
+        const i = LUECKEN.findIndex((z, j) => (z === l.wort) === gut && !w.children[j].classList.contains("gewaehlt"));
+        if (i < 0) return false;
+        w.children[i].click();
+        return true;
+      });
     }
   },
 });

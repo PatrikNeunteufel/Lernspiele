@@ -401,6 +401,28 @@ LS.spiel({
       if (ctx.flaeche.querySelector(".knopfzeile button.knopf:not(.gruen)")) { gesperrt = true; ok.disabled = true; }
     });
 
+    // ZU1 a: richtig die Fächer von links nach der ersten Lösung füllen (falsche Karte im Fach zurückholen, sonst die
+    // passende Karte vom Stapel), stimmt alles „OK ✓“; falsch: sind alle Fächer voll und falsch „OK ✓“, sonst eine Karte
+    // mit einer anderen Ziffer ins nächste freie Fach
+    const soll = String(richtig[0]);
+    ctx.testZug(gut => {
+      if (gesperrt || !document.body.contains(ok)) return false;
+      const ist = plaetze.map(p => p.firstChild?.textContent);
+      const vomStapel = z => kartenKnoepfe.find(k => k.parentElement === stapel && (k.textContent === z) === gut);
+      if (!gut) {
+        if (ist.every(Boolean)) { if (ist.join("") === soll) return false; ok.click(); return true; }
+        const k = vomStapel(soll[ist.findIndex(z => !z)]);
+        if (!k) return false;
+        k.click();
+        return true;
+      }
+      const i = ist.findIndex((z, j) => z !== soll[j]);
+      if (i < 0) { ok.click(); return true; }
+      const k = ist[i] ? plaetze[i].firstChild : vomStapel(soll[i]);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     ctx.sag(ctx.nr === 0 ? "Tipp eine Karte an, dann rutscht sie ins nächste freie Fach. Nochmal tippen holt sie zurück." : "Neue Karten, neue Vorgabe!");
   },
 });

@@ -238,6 +238,15 @@ LS.spiel({
       zeile.append(knopf);
     }
     ctx.flaeche.append(zeile);
+    // Zug für die Werkzeuge (ZU1 a): richtig das falsch geschriebene Wort antippen, falsch ein richtiges; danach
+    // meldet LS.auswahl den Zug für die Schreibweise selbst
+    ctx.testZug(richtig => {
+      if (gefunden || ctx.vorbei() || !document.body.contains(zeile)) return false;
+      const i = a.woerter.findIndex((w, j) => !!w.fehler === richtig && !zeile.children[j].classList.contains("gepeilt"));
+      if (i < 0) return false;
+      zeile.children[i].click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag("Lies den Satz genau. Nur ein Wort ist falsch geschrieben.");
   },
 });

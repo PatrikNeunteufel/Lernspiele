@@ -260,6 +260,15 @@ LS.spiel({
         });
         himmel.append(k);
       }
+      // ZU1 a: richtig den Platz der passenden Tageszeit, falsch den ersten anderen, noch nicht gewählten
+      ctx.testZug(richtig => {
+        if (fertig || ctx.vorbei() || !document.body.contains(himmel)) return false;
+        const knoepfe = himmel.querySelectorAll(".tl-platz");
+        const i = a.optionen.findIndex((z, j) => (z === a.richtig) === richtig && !knoepfe[j].classList.contains("gewaehlt"));
+        if (i < 0) return false;
+        knoepfe[i].click();
+        return true;
+      });
       f.append(LS.restHoehe(himmel)); // Grösse nach der restlichen Höhe (--rest-h, LERN_Session46)
       return;
     }
@@ -318,6 +327,14 @@ LS.spiel({
       woche.append(k);
     });
     f.append(woche);
+    // ZU1 a: richtig den gesuchten Tag, falsch den ersten anderen, noch nicht gewählten
+    ctx.testZug(richtig => {
+      if (fertig || ctx.vorbei() || !document.body.contains(woche)) return false;
+      const i = a.plan.findIndex((b, j) => (j === a.richtig) === richtig && !woche.children[j].classList.contains("gewaehlt"));
+      if (i < 0) return false;
+      woche.children[i].click();
+      return true;
+    });
   },
 });
 </script>

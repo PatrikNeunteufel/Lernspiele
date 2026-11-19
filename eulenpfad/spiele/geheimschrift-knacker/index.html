@@ -441,6 +441,18 @@ LS.spiel({
       if (ctx.vorbei()) eingabe.gesperrt = true;
     });
     f.append(el("div", { class: "gk-feld" }, wortkarte, hilfeOrt, eingabe.slots, eingabe.element));
+    // ZU1 a: wie LS.tastatur ein Zug für das ganze Wort — löschen, Buchstaben tippen, OK; falsch mit dem ersten
+    // Buchstaben einen Schritt weiter
+    ctx.testZug(gut => {
+      if (eingabe.gesperrt || !document.body.contains(eingabe.element)) return false;
+      const wort = gut ? a.loesung : ABC[(ABC.indexOf(a.loesung[0]) + 1) % 26] + a.loesung.slice(1);
+      const knoepfe = [...eingabe.element.children];
+      const weg = knoepfe.find(k => k.classList.contains("gk-weg"));
+      for (let i = 0; i < a.loesung.length; i++) weg.click();
+      for (const c of wort) knoepfe.find(k => k.textContent === c).click();
+      knoepfe.find(k => k.classList.contains("gk-ok")).click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag(knacken ? "Tipp: Probier zuerst den ersten Buchstaben mit verschiedenen Schlüsseln."
       : zurueck ? "Entschlüsseln heisst: zurück im Alphabet." : "Verschlüsseln heisst: weiter im Alphabet.");
   },

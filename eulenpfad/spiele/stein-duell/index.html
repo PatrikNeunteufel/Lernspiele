@@ -361,6 +361,22 @@ function zugAufgabe(ctx, a) {
     nehmen.disabled = true;
   });
   zeige();
+  // ZU1 a: ein Zug für Werkzeuge wie bei der Tastatur (Wert samt OK): die Steine eines Zugs antippen, dann „Nehmen“ —
+  // richtig ein Zug, nach dem die Eule verliert (istRichtig), falsch ein erlaubter Zug, nach dem sie gewinnen kann
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(nehmen) || steine.flat().every(s => s.disabled)) return false;
+    const ziel = richtig ? gut.slice().sort((x, y) => x[1] - y[1])[0]
+      : zuege(st).filter(z => !istRichtig(st, z)).sort((x, y) => x[1] - y[1])[0];
+    if (!ziel) return false;
+    const [r, m] = ziel;
+    for (let t = 0; t < 60; t++) {
+      if (!zuruecksetzen && reihe === r && gewaehlt.size === m) { nehmen.click(); return true; }
+      if (zuruecksetzen || reihe !== r) steine[r][0].click();
+      else if (gewaehlt.size > m) steine[r][[...gewaehlt][0]].click();
+      else steine[r][steine[r].findIndex((s, j) => !gewaehlt.has(j))].click();
+    }
+    return false;
+  });
   if (ctx.nr === 0) ctx.sag("Tippe die Steine an, die du nehmen willst. Dann tippe auf „Nehmen“.");
 }
 

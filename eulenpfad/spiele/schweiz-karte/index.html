@@ -224,9 +224,11 @@ LS.spiel({
     };
     const zeigeZiel = () => { const z = flaechen.get(ziel) || svg.querySelector(".ziel"); if (z) faerbe(z, "richtig"); };
 
+    const tippbar = []; // [Ziel, Element mit dem Klick] für den Zug (ZU1 a)
     for (const [g, pfad] of pfade) {
       const daten = auswahlGebiete.find(x => x.d === g.d) || KANTONE.find(x => x.d === g.d) || g;
       if (auswahlGebiete.length) pfad.addEventListener("click", () => (daten === ziel ? richtigGetippt(pfad) : falschGetippt(daten, pfad)));
+      if (auswahlGebiete.length) tippbar.push([daten, pfad]);
       if (p.art === "erkennen" && daten === ziel) faerbe(pfad, "markiert");
       flaechen.set(daten, pfad);
     }
@@ -239,6 +241,7 @@ LS.spiel({
         const treffer = svgEl("circle", { cx: o.x, cy: o.y, r: 6, class: "treffer" });
         treffer.addEventListener("click", () => (o === ziel ? richtigGetippt(sichtbar) : falschGetippt(o, sichtbar)));
         g.append(treffer);
+        tippbar.push([o, treffer]);
       }
       svg.append(g);
     }
@@ -263,6 +266,14 @@ LS.spiel({
       return;
     }
     ctx.schritte(1);
+    // ZU1 a: richtig das gesuchte Gebiet oder den gesuchten Punkt antippen, falsch das erste andere
+    ctx.testZug(richtig => {
+      if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+      const t = tippbar.find(([d]) => (d === ziel) === richtig);
+      if (!t) return false;
+      t[1].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag(p.ansicht === "sg" ? "Das ist der Kanton St. Gallen. Wo liegt der Wahlkreis?" : "Das ist die Schweiz. Such genau — es stehen keine Namen dran.");
   },
 });

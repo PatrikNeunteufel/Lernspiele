@@ -341,6 +341,20 @@ function alleTeiler(ctx, a) {
     ctx.falsch(hinweis, loesungText);
   });
   f.append(box, el("div", { class: "fertig-zeile" }, fertig));
+  // ZU1 a: ein Handgriff für Werkzeuge — richtig: ein Kärtchen ohne Teiler wieder weg, sonst einen fehlenden Teiler
+  // antippen, zuletzt „Fertig ✓“; falsch: ein Kärtchen antippen, das kein Teiler ist
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(fertig)) return false;
+    const chips = [...box.querySelectorAll(".teiler-chip")];
+    const istTeiler = c => a.zahl % Number(c.dataset.wert) === 0;
+    const an = c => c.classList.contains("an");
+    const c = richtig ? chips.find(x => an(x) && !istTeiler(x)) || chips.find(x => !an(x) && istTeiler(x))
+      : chips.find(x => !an(x) && !istTeiler(x));
+    if (c) { c.click(); return true; }
+    if (!richtig) return false;
+    fertig.click();
+    return true;
+  });
 }
 </script>
 </body>

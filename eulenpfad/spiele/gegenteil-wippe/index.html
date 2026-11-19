@@ -330,6 +330,14 @@ function bildWahl(ctx, knoepfe, richtig, hinweis, loesung, lob, beiRichtig) {
     ctx.falsch(hinweis, loesung);
     if (ctx.vorbei()) { fertig = true; knoepfe[richtig].classList.add("richtig"); }
   }));
+  // ZU1 a: richtig das gesuchte Bild antippen, falsch ein anderes, noch nicht gewähltes
+  ctx.testZug(gut => {
+    if (fertig || ctx.vorbei()) return false;
+    const i = knoepfe.findIndex((k, j) => (j === richtig) === gut && !k.classList.contains("gewaehlt") && document.body.contains(k));
+    if (i < 0) return false;
+    knoepfe[i].click();
+    return true;
+  });
 }
 
 const LOB = ["Richtig! ⚖️", "Genau! ⚖️", "Super gemacht!", "Stimmt! ⚖️"];
@@ -460,6 +468,14 @@ LS.spiel({
         ctx.falsch(HINWEIS.ordnen, loesung);
         if (ctx.vorbei()) for (; pos < a.folge.length; pos++) nummer(knoepfe[a.optionen.indexOf(a.folge[pos])], pos + 1);
       }));
+      // ZU1 a: richtig das nächste Bild der Reihe antippen, falsch ein anderes, noch nicht gesetztes
+      ctx.testZug(gut => {
+        if (ctx.vorbei() || pos >= a.folge.length || !document.body.contains(knoepfe[0])) return false;
+        const i = knoepfe.findIndex((k, j) => (a.optionen[j] === a.folge[pos]) === gut && !k.classList.contains("gesetzt"));
+        if (i < 0) return false;
+        knoepfe[i].click();
+        return true;
+      });
       return;
     }
 

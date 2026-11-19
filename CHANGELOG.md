@@ -2902,3 +2902,50 @@
 - Tests: Skripte „Keine Fehler.“, Eulenpfad zahlenstrahl-pfeil einmaleins-blitz quader-volumen kiosk-kasse „Keine
   Fehler.“; Messung mit `--schritte` Zahlenstrahl-Pfeil (s1–s6, Handy, drei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht
   zu Ende gespielt, in jeder Seite ein falscher Handgriff.
+- Zug-Pakete, Paket 3 (ZU1 a, LERN-55): die 73 übrigen Spiele mit eigenen Knöpfen melden `ctx.testZug` für jeden eigenen
+  Lösungsschritt (richtig wie ein Kind antippt, falsch ein anderer Knopf, ein zu frühes „Prüfen“ oder ein erlaubter,
+  nicht lösender Zug; geht keiner, `false`): Auge-Entdecker (auge-entdecker), Begriffs-Geodreieck (begriffs-geodreieck),
+  Bionik-Paare (bionik-paare), Blutkreislauf-Lotse (blutkreislauf-lotse), Braille-Finger (braille-finger),
+  Bruch-Pizzeria (bruch-werkstatt), Calendrier (calendrier), Diagramm-Wahl (diagramm-wahl), Erdzeit-Leiter
+  (erdzeit-leiter), Fehler-Lupe (fehler-lupe), Figuren-Spiegel (figuren-spiegel), Finger-Zähler (finger-zaehler),
+  Gattungs-Kenner (gattungs-kenner), Gedicht-Baukasten (gedicht-baukasten), Gefühle-Radar (gefuehle-radar),
+  Gegenteil-Wippe (gegenteil-wippe), Geheimschrift-Knacker (geheimschrift-knacker), Gerecht-Teiler (gerecht-teiler),
+  Geschichten-Ordner (geschichten-ordner), Himmels-Forscher (himmels-forscher), Hör-Geschichte (hoer-geschichte),
+  Hör-Reporter (hoer-reporter), Jahreskreis-Ordner (jahreskreis), Klang-Wichtel (klang-wichtel), König in der Falle
+  (koenig-falle), Komma-Jagd (komma-jagd), Kompass-Spiel (kompass), Koordinaten-Schatzsuche (koordinaten-schatz),
+  Korrektur-Stift (korrektur-stift), Lärm-Wächter (laerm-waechter), Merk-Blick (merk-blick), Morphem-Schere
+  (morphem-schere), Netz-Falter (netz-falter), Pentomino-Puzzle (pentomino-puzzle), Pflanzen-Bestimmer
+  (pflanzen-bestimmer), Plan-Leser (plan-leser), Rechteck-Labor (rechteck-labor), Rede-Zeichen (rede-zeichen),
+  Regel-Lücke (regel-luecke), Reim-Paare (reim-paare), Rhythmus-Diktat (rhythmus-diktat), Roboter-Pfad (roboter-pfad),
+  Satz-Reparatur (satz-reparatur), Schweiz-Karten-Suche (schweiz-karte), Sentence-Builder (sentence-builder),
+  Son-Lauscher (son-lauscher), Sortier-Kiste (sortier-kiste), Spelling-Bee (spelling-bee), Spiegel-Raster
+  (spiegel-raster), Stein-Duell (stein-duell), Steine fangen (steine-fangen), Stellen-Detektiv (stellen-detektiv),
+  Stimmt immer? (stimmt-immer), Tageslauf-Sonne (tageslauf-sonne), Teddy-Versteck (teddy-versteck), Teiler-Spürnase
+  (teiler-detektiv), Tipp-Trainer (tipp-trainer), Tonleiter-Treppe (tonleiter-treppe), Trenn-Schere (trenn-schere),
+  Verben-Fächer (verben-faecher), Vergleichs-Krokodil (vergleichs-krokodil), Wassertropfen-Reise (wassertropfen-reise),
+  Weather-Report (weather-report), Wörter-Trenner (woerter-trenner), English Word-Match (word-match), Wort-Spürnase
+  (wort-spuernase), Wortarten-Probe (wortarten-probe), Wortarten-Sortierer (wortarten-sortierer), Wortfamilien-Baum
+  (wortfamilien-baum), Würfel-Kipper (wuerfel-kipper), Zeitreise-Verben (zeitreise-verben), Zielzahl-Jagd
+  (zielzahl-jagd), Ziffernkarten (ziffernkarten). Spiellogik, Texte und Aussehen unverändert; Pentomino-Puzzle: die
+  Lege-Regel steht jetzt einmal (`wohin`), für Tippen und Zug.
+- Sudoku-Baustein `spiele/gemeinsam/sudoku.js`: `SUDOKU.spiel` meldet den Zug selbst (richtig: Notizen aus, falsch
+  gefülltes Feld leeren, sonst das erste leere Feld und seine Zahl; falsch: eine Zahl, die schon in Zeile, Spalte oder
+  Gebiet steht) für Zahlen-Sudoku (zahlen-sudoku), Bilder-Sudoku (bilder-sudoku), Gebiets-Sudoku (gebiets-sudoku),
+  Vergleichs-Sudoku (vergleichs-sudoku), Käfig-Sudoku (kaefig-sudoku); Sudoku-Duell (sudoku-duell) eigener Zug (richtig
+  ein Gewinnzug, falsch ein erlaubter, der nicht gewinnt).
+- Damit haben alle 175 Spiele ihre Züge: `ZUG_PFLICHT` in `tools/pruefe_spiele.js` ist an, eine Aufgabe ohne Zug ist ein
+  Fehler. Grenze der Züge je Aufgabe dreimal `ctx.schritte`, mindestens 80, die erste Aufgabe 300 (vorher fest 80; ein 9
+  × 9-Sudoku braucht bis gegen 100); Übersicht zählt Zug-Funde auch als Fehler. `tools/bildhoehe.js`: höchstens 200
+  statt 60 Züge je Ziehung; gemessen wird erst, wenn die Aufgabe steht (bis 10 s, sonst „Aufgabe nach 11,5 s nicht
+  gezeichnet“) — unter Last waren Sudokus, Figuren-Spiegel s6 und Plan-Leser s3 nach 1,5 s noch leer und galten als
+  nicht zu Ende gespielt. rahmen.md 8 und 20.
+- Messung mit `--schritte` je Teil (s1–s6, Handy, drei Ziehungen; Sudokus und Figuren-Spiegel nachgemessen mit dem
+  berichtigten Werkzeug): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende gespielt. Neu sichtbare Überläufe der Aufgabe für
+  den Rest LERN-55, die grössten: Weather-Report s6 259 px, Braille-Finger s5 250, Verben-Fächer s2 192, Hör-Geschichte
+  s6 176, Stimmt immer? s6 175, Rede-Zeichen s4 147, Wortarten-Probe s6 143, Figuren-Spiegel s6 121, Hör-Reporter s1 107,
+  Plan-Leser s6 97.
+- Geführt neu gemeldet, ein Hinweis: Himmels-Forscher s1 „Merkmal «art» kam trotz Serienbremse 4-mal hintereinander
+  («zuOderAb»)“ — vorgemerkt.
+- Tests: Skripte „Keine Fehler.“; Eulenpfad je Teil die eigenen Spiele „Keine Fehler.“; über alle Spiele gekürzt (eine
+  Runde, 10 Generator-Aufgaben, ohne Kind, Endlos und Tab): „Geführt (ZP1 a): 1050 Stufen ganz durchgespielt; 0 Spiele
+  mit einer Aufgabe ohne Zug“, „Keine Fehler.“; pentomino-puzzle nach dem Umbau „Keine Fehler.“

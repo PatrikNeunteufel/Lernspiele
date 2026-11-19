@@ -150,11 +150,13 @@ function koordinaten(onTipp) {
   svg.innerHTML = inhalt;
   const ebene = document.createElementNS(SVG, "g");
   svg.append(ebene);
+  svg.punkte = {}; // ZU1 a: Gitterpunkte für den Zug der Werkzeuge
   if (onTipp) {
     for (let x = 0; x <= N; x++) for (let y = 0; y <= N; y++) {
       const c = document.createElementNS(SVG, "circle");
       c.setAttribute("class", "punkt-ziel"); c.setAttribute("cx", X(x)); c.setAttribute("cy", Y(y)); c.setAttribute("r", s / 2.2);
       c.addEventListener("click", () => onTipp(x, y));
+      svg.punkte[x + "," + y] = c;
       svg.append(c);
     }
   }
@@ -211,6 +213,16 @@ LS.spiel({
     if (STUFE[ctx.stufe].length > 1) ctx.serie("art", art);
     if (art !== "ergaenzen") ctx.tipp(tippsFuer(art)); // Tipps vor dem Antworten (ctx.tipp, LERN_Session9)
     let fertig = false;
+    // ZU1 a: Züge für Werkzeuge. Punkt: richtig den gesuchten Gitterpunkt (ziel() gibt [x, y], beim Zeichnen die nächste
+    // Ecke), falsch den Punkt links daneben (bei x = 0 rechts) — SVG-Kreise: Klick-Ereignis wie vom Finger.
+    const punktZug = (svg, ziel) => ctx.testZug(richtig => {
+      if (fertig || ctx.vorbei() || !document.body.contains(svg)) return false;
+      const [x, y] = ziel();
+      const c = svg.punkte[(richtig ? x : x === 0 ? 1 : x - 1) + "," + y];
+      if (!c) return false;
+      c.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      return true;
+    });
 
     const auswahl = (optionen, richtig, hinweis, loesungText) => {
       ctx.loesung(loesungText);
@@ -229,6 +241,14 @@ LS.spiel({
       }
       ctx.flaeche.append(box);
       LS.kurztasten(box);
+      // ZU1 a: richtig die richtige Antwort antippen, falsch die erste andere
+      ctx.testZug(r => {
+        if (fertig || ctx.vorbei() || !document.body.contains(box)) return false;
+        const k = [...box.querySelectorAll(".option")].find(b => (b.textContent === richtig) === r);
+        if (!k) return false;
+        k.click();
+        return true;
+      });
     };
 
     if (art === "tafelSetzen") {
@@ -245,6 +265,13 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; t.felder[ziel].classList.add("treffer"); }
       });
       ctx.flaeche.append(t);
+      // ZU1 a: richtig das Feld des Schatzes antippen, falsch das Feld mit vertauschten Ziffern (sonst das daneben)
+      ctx.testZug(richtig => {
+        if (fertig || ctx.vorbei() || !document.body.contains(t)) return false;
+        const vertauscht = (ziel % 10) * 10 + Math.floor(ziel / 10);
+        t.felder[richtig ? ziel : vertauscht !== ziel ? vertauscht : (ziel + 1) % 100].click();
+        return true;
+      });
     } else if (art === "tafelLesen") {
       const ziel = zufall(0, 99);
       ctx.flaeche.append(el("div", { class: "frage", text: "Welche Koordinaten hat der Schatz?" }));
@@ -269,6 +296,7 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; punktMarke(svg, x, y); }
       });
       ctx.flaeche.append(svg);
+      punktZug(svg, () => [x, y]);
     } else if (art === "punktLesen") {
       const x = zufall(1, N), y = zufall(1, N);
       ctx.flaeche.append(el("div", { class: "frage", text: "Wo liegt der Schatz?" }));
@@ -300,6 +328,7 @@ LS.spiel({
       polygon(svg, ecken, "figur");
       ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--ks-beschriftung)">${"ABCD"[i]}</text>`));
       ctx.flaeche.append(svg);
+      punktZug(svg, () => neu[welche]);
     } else if (art === "vektor") {
       // Nur das Bild A' einer Ecke ist gegeben; die Verschiebung muss man selbst abzählen.
       const ecken = figurErzeugen(N, N);
@@ -323,6 +352,7 @@ LS.spiel({
       ecken.forEach(([a, b], i) => svg.zeichne(`<text x="${svg.X(a) - 10}" y="${svg.Y(b) - 6}" style="font-size:13px;fill:var(--ks-beschriftung)">${"ABCD"[i]}</text>`));
       svg.zeichne(`<circle class="gesetzt" cx="${svg.X(neu[0][0])}" cy="${svg.Y(neu[0][1])}" r="5"/><text x="${svg.X(neu[0][0]) - 12}" y="${svg.Y(neu[0][1]) - 6}" style="font-size:13px;fill:var(--ks-beschriftung-neu)">A'</text>`);
       ctx.flaeche.append(svg);
+      punktZug(svg, () => neu[welche]);
     } else if (art === "ergaenzen") {
       // Drei Ecken sind gezeichnet, die vierte (D) fehlt.
       const { art: form, ecken } = viereckErzeugen();
@@ -344,6 +374,7 @@ LS.spiel({
       svg.zeichne(`<polyline class="figur" style="fill:none" points="${[a, b, c].map(([x, y]) => `${svg.X(x)},${svg.Y(y)}`).join(" ")}"/>`);
       [a, b, c].forEach(([x, y], i) => svg.zeichne(`<circle class="gesetzt" cx="${svg.X(x)}" cy="${svg.Y(y)}" r="5"/><text x="${svg.X(x) - 12}" y="${svg.Y(y) - 6}" style="font-size:13px;fill:var(--ks-beschriftung)">${"ABC"[i]}</text>`));
       ctx.flaeche.append(svg);
+      punktZug(svg, () => [zx, zy]);
     } else {
       // zeichnen: Ecken der Reihe nach setzen
       const ecken = figurErzeugen(N, N);
@@ -366,6 +397,7 @@ LS.spiel({
         if (ctx.flaeche.querySelector(".knopfzeile")) { fertig = true; polygon(svg, ecken, "figur-neu"); }
       });
       ctx.flaeche.append(svg);
+      punktZug(svg, () => ecken[pos]);
     }
     if (ctx.nr === 0) ctx.sag(ctx.stufe <= "s2" ? "E = Einer (Spalten oben), Z = Zehner (Zeilen links)." : "Zuerst x nach rechts, dann y nach oben.");
   },

@@ -276,6 +276,15 @@ function erkennen(ctx, a) {
     ctx.falsch(teile.join(" "), loesung);
   });
   f.append(el("div", { class: "rz-pruefen" }, pruefen));
+  // ZU1 a: richtig — ein Wort, dessen Wahl noch nicht stimmt, antippen, stimmt alles, „Prüfen“; falsch — „Prüfen“,
+  // solange die Wahl nicht stimmt
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(pruefen)) return false;
+    const k = knoepfe.find((x, i) => x.classList.contains("gewaehlt") !== rede.includes(i));
+    if (!richtig) { if (!k) return false; pruefen.click(); return true; }
+    (k || pruefen).click();
+    return true;
+  });
 }
 
 /** Stufen 2–6: Zeichen in die Lücken setzen. Erst eine Lücke antippen, dann die Zeichen. */
@@ -309,6 +318,7 @@ function zeichenSetzen(ctx, a, p) {
   }
 
   const tasten = el("div", { class: "rz-tasten" });
+  const taste = {}; // Zeichen → Taste, für den Zug (ZU1 a)
   for (const z of p.tasten) {
     const t = el("button", { type: "button", class: "rz-taste", text: z, "aria-label": `Zeichen ${z}` });
     t.addEventListener("click", () => {
@@ -318,6 +328,7 @@ function zeichenSetzen(ctx, a, p) {
       zeige();
     });
     tasten.append(t);
+    taste[z] = t;
   }
   const weg = el("button", { type: "button", class: "rz-taste weg", text: "⌫", "aria-label": "Letztes Zeichen der Lücke löschen" });
   weg.addEventListener("click", () => { if (!ctx.vorbei()) { inhalt[aktiv] = inhalt[aktiv].slice(0, -1); zeige(); } });
@@ -348,6 +359,18 @@ function zeichenSetzen(ctx, a, p) {
   });
   f.append(el("div", { class: "rz-pruefen" }, pruefen));
   zeige();
+  // ZU1 a: richtig — die erste Lücke, die noch nicht stimmt, antippen, dann ihr nächstes Zeichen setzen (passt der
+  // Anfang nicht, ⌫); stimmt alles, „Prüfen“. Falsch — „Prüfen“, solange etwas fehlt.
+  ctx.testZug(richtig => {
+    if (ctx.vorbei() || !document.body.contains(pruefen)) return false;
+    const i = a.luecken.findIndex((l, j) => inhalt[j] !== l);
+    if (!richtig) { if (i < 0) return false; pruefen.click(); return true; }
+    if (i < 0) pruefen.click();
+    else if (aktiv !== i) luecken[i].click();
+    else if (a.luecken[i].startsWith(inhalt[i])) taste[a.luecken[i][inhalt[i].length]].click();
+    else weg.click();
+    return true;
+  });
 }
 
 /**

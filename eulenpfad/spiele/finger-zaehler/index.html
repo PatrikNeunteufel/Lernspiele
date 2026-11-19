@@ -372,6 +372,26 @@ LS.spiel({
       // Vorlage und eigene Hände; breit und quer nebeneinander (fz-paar, BH3 a)
       f.append(el("div", { class: "fz-paar" }, vorlage, feld), el("div", { class: "knopfzeile" }, fertig));
       zeichne();
+      // Zug für die Werkzeuge (ZU1 a): richtig einen Finger aufklappen (zu wenige) oder einklappen (zu viele) über
+      // seine Tippfläche, sonst „✓ Fertig“; falsch „✓ Fertig“, solange die Zahl noch nicht stimmt
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || !document.body.contains(fertig)) return false;
+        const n = anzahl(finger);
+        if (n === ziel || !richtig) {
+          if (n === ziel && !richtig) return false;
+          fertig.click();
+          return true;
+        }
+        const auf = n < ziel;
+        const h = finger.findIndex(fs => (auf ? fs.length < 5 : fs.length > 0));
+        if (h < 0) return false;
+        const x = [0, 1, 2, 3, 4].find(i => finger[h].includes(i) !== auf);
+        const g = feld.firstElementChild?.children[h];
+        const r = g && g.querySelectorAll(".fz-tipp")[x === 0 ? 4 : 4 - x];
+        if (!r) return false;
+        r.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        return true;
+      });
       return;
     }
 

@@ -227,6 +227,14 @@ LS.spiel({
     }
     ctx.flaeche.append(optionen);
     LS.kurztasten(optionen);
+    // ZU1 a: richtig die richtige Schreibweise antippen, falsch die andere (die Aufgabe bleibt lösbar)
+    ctx.testZug(richtig => {
+      if (fertig || !document.body.contains(optionen)) return false;
+      const k = [...optionen.children].find(b => (b.textContent === a.richtig) === richtig);
+      if (!k) return false;
+      k.click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag("Tipp auf die richtige Schreibweise.");
   },
 });

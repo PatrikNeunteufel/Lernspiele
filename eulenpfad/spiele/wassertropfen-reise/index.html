@@ -463,6 +463,14 @@ function zeigeBegriffPfeil(ctx, a) {
       if (ctx.vorbei()) fertig = true;
     });
   }
+  // ZU1 a: richtig den gesuchten Pfeil antippen, falsch einen anderen, noch nicht falsch markierten
+  ctx.testZug(richtig => {
+    if (fertig || !document.body.contains(g.svg)) return false;
+    const w = VORGAENGE.find(x => richtig ? x.id === v.id : x.id !== v.id && !g.pfeile[x.id].g.classList.contains("falsch"));
+    if (!w) return false;
+    g.pfeile[w.id].g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 /** Nummern an den Pfeilen; die Begriffe in der Reihenfolge der Nummern antippen. */
@@ -507,6 +515,14 @@ function zeigeSchicht(ctx, a) {
       if (ctx.vorbei()) { fertig = true; SCHICHTEN.forEach(beschrifte); }
     });
   }
+  // ZU1 a: richtig die gesuchte Schicht antippen, falsch eine andere, noch nicht falsch markierte
+  ctx.testZug(richtig => {
+    if (fertig || !document.body.contains(g.svg)) return false;
+    const s = SCHICHTEN.find(x => richtig ? x.id === q.richtig : x.id !== q.richtig && !g.schichten[x.id].classList.contains("falsch"));
+    if (!s) return false;
+    g.schichten[s.id].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 function zeigeKlaer(ctx, a) {

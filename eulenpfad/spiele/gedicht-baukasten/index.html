@@ -322,15 +322,28 @@ LS.spiel({
       const loesung = `Der ${ORDNUNG[a.vers].replace(/n$/, "")} Vers${mehrere ? ` der ${ORDNUNG[a.strophe]} Strophe` : ""} heisst: ${a.richtig}`;
       ctx.loesung(loesung);
       ctx.schritte(1); // den Vers antippen
+      const versKnoepfe = []; // ZU1 a: [richtig?, Knopf]
       f.append(gedichtKasten(a, {
-        vers: (v, j, i) => el("button", { type: "button", class: "gedicht-vers", text: v, onclick: e => {
-          if (ctx.vorbei()) return;
-          const k = e.currentTarget;
-          if (j === a.strophe && i === a.vers) { k.classList.add("richtig"); ctx.richtig(); return; }
-          k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
-          ctx.falsch(HINWEIS.vers, loesung);
-        } }),
+        vers: (v, j, i) => {
+          const knopf = el("button", { type: "button", class: "gedicht-vers", text: v, onclick: e => {
+            if (ctx.vorbei()) return;
+            const k = e.currentTarget;
+            if (j === a.strophe && i === a.vers) { k.classList.add("richtig"); ctx.richtig(); return; }
+            k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch");
+            ctx.falsch(HINWEIS.vers, loesung);
+          } });
+          versKnoepfe.push([j === a.strophe && i === a.vers, knopf]);
+          return knopf;
+        },
       }));
+      // ZU1 a: richtig den gesuchten Vers antippen, falsch einen anderen Vers
+      ctx.testZug(gut => {
+        if (ctx.vorbei()) return false;
+        const paar = versKnoepfe.find(([r, k]) => r === gut && document.body.contains(k));
+        if (!paar) return false;
+        paar[1].click();
+        return true;
+      });
       return;
     }
     if (a.art === "ordnen") {

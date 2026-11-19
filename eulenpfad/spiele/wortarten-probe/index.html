@@ -252,6 +252,7 @@ LS.spiel({
     wahl.style.setProperty("--wahl-breite", p.liste ? "180px" : "200px");
     wp.append(befunde, wahl);
 
+    let ziel = null; // ZU1 a: Knopf, der im laufenden Schritt stimmt
     const fehler = (k, hinweis) => {
       k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
       ctx.falsch(hinweis, loesung);
@@ -271,10 +272,11 @@ LS.spiel({
       frage.textContent = `Welche Partikel ist ${name} hier?`;
       wahl.textContent = "";
       for (const art of mische(Object.keys(PARTIKELN))) {
-        knopf(PARTIKELN[art], "", k => {
+        const kk = knopf(PARTIKELN[art], "", k => {
           if (art === a.partikelArt) { k.classList.add("richtig"); return ctx.richtig(`Genau: ${name} ist eine ${PARTIKELN[art]}.`); }
           fehler(k, "Verbindet das Wort zwei Sätze? Oder steht es vor einem Nomen und sagt, wo, wann oder wie? Sonst ist es eine andere.");
         });
+        if (art === a.partikelArt) ziel = kk; // ZU1 a
       }
       LS.kurztasten(wahl);
     };
@@ -285,19 +287,20 @@ LS.spiel({
       frage.textContent = `Welche Wortart ist ${name} hier?`;
       wahl.textContent = "";
       for (const wa of a.wortarten) {
-        knopf(WORTARTEN[wa], "", k => {
+        const kk = knopf(WORTARTEN[wa], "", k => {
           if (wa !== a.wortart) return fehler(k, BEDEUTUNG[a.probe]);
           k.classList.add("richtig");
           if (a.partikelArt) { LS.ton("tipp"); befunde.append(el("li", { class: "gut", text: `✓ ${name} ist eine Partikel.` })); return schrittPartikel(); }
           ctx.richtig(waehle(["Richtig geprüft!", "Die Probe hat es verraten!", "Sauber bestimmt!"]));
         });
+        if (wa === a.wortart) ziel = kk; // ZU1 a
       }
       LS.kurztasten(wahl);
     };
 
     // Schritt 1: die Probe wählen.
     for (const probe of p.proben) {
-      knopf(PROBEN[probe].name, PROBEN[probe].frage, k => {
+      const kk = knopf(PROBEN[probe].name, PROBEN[probe].frage, k => {
         if (probe === a.probe) {
           k.classList.add("richtig");
           LS.ton("tipp");
@@ -309,8 +312,17 @@ LS.spiel({
           ? `Achtung, Falle! Wie wird ${name} in diesem Satz gebraucht? Achte auf die Wörter rundherum und auf die Schreibung.`
           : "Diese Probe klappt hier nicht. Probier eine andere.");
       });
+      if (probe === a.probe) ziel = kk; // ZU1 a
     }
     LS.kurztasten(wahl); // je Schritt neu: die alten Knöpfe sind dann aus dem DOM
+    // ZU1 a: in jedem Schritt richtig den Knopf, der stimmt (ziel), falsch einen anderen, noch nicht gewählten
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(ziel) || ziel.classList.contains("richtig")) return false;
+      const k = richtig ? ziel : [...wahl.children].find(x => x !== ziel && !x.disabled && !x.classList.contains("gewaehlt"));
+      if (!k) return false;
+      k.click();
+      return true;
+    });
   },
 });
 </script>

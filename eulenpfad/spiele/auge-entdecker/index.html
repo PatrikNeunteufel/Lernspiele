@@ -475,6 +475,15 @@ function tippAufgabe(ctx, a) {
     ctx.falsch(`Das ist ${nom(id)}. Such weiter!`, loesung);
     if (ctx.vorbei()) fertig = true;
   });
+  // Zug für die Werkzeuge (ZU1 a): richtig das gesuchte Teil antippen, falsch ein anderes
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(b.svg)) return false;
+    const id = richtig ? a.ziel : [...b.teile.keys()].find(t => t !== a.ziel);
+    const g = id && b.teile.get(id);
+    if (!g) return false;
+    g.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return true;
+  });
 }
 
 /** Ein Teil leuchtet, der Name wird gewählt. */

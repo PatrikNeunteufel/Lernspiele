@@ -499,6 +499,14 @@ const SPIEL = {
       });
       f.append(monat.element);
       kalenderDaneben(f);
+      // Zug für die Werkzeuge (ZU1 a): richtig den gehörten Tag antippen, falsch den Tag daneben
+      ctx.testZug(richtig => {
+        if (fertig || ctx.vorbei() || !document.body.contains(monat.element)) return false;
+        const z = monat.zellen[richtig ? a.t - 1 : (a.t === 1 ? 1 : a.t - 2)];
+        if (!z) return false;
+        z.click();
+        return true;
+      });
       return;
     }
     const box = LS.auswahl(ctx, {

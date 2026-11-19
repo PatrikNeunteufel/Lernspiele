@@ -675,6 +675,27 @@ LS.spiel({
       });
       f.append(el("div", { class: "geo-knoepfe" }, fertig));
     }
+    // Zug für die Werkzeuge (ZU1 a): ein Ziel antippen wie ein Kind (Hörer liegt auf der Trefferfläche).
+    // Eins: richtig ein gesuchtes Ziel, falsch ein anderes, noch nicht oranges. Mehrere: richtig fehlende wählen,
+    // falsche zurücknehmen, dann „Fertig“; falsch „Fertig“, solange die Wahl noch nicht stimmt.
+    const tippe = i => { gruppen[i].lastChild.dispatchEvent(new MouseEvent("click", { bubbles: true })); return true; };
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(svg)) return false;
+      if (!mehrere) {
+        const i = gruppen.findIndex((g, j) => a.richtig.includes(j) === richtig && !g.classList.contains("falsch"));
+        return i >= 0 && tippe(i);
+      }
+      const fehlt = a.richtig.find(i => !gewaehlt.has(i));
+      const zuViel = [...gewaehlt].find(i => !a.richtig.includes(i));
+      const stimmt = fehlt === undefined && zuViel === undefined;
+      const fertig = f.querySelector(".geo-knoepfe button");
+      if (!richtig) { if (stimmt || !fertig) return false; fertig.click(); return true; }
+      if (fehlt !== undefined) return tippe(fehlt);
+      if (zuViel !== undefined) return tippe(zuViel);
+      if (!fertig) return false;
+      fertig.click();
+      return true;
+    });
     if (ctx.nr === 0) ctx.sag(mehrere ? "Es können mehrere sein. Tippe nochmals, um eine Wahl zurückzunehmen." : "Tippe direkt auf die Linie oder den Punkt.");
   },
 });

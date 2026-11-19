@@ -440,6 +440,14 @@ const ZEICHNE = {
       wahl.append(k);
     }
     ctx.flaeche.append(wahl);
+    // ZU1 a: richtig die Stimmung antippen, falsch ein anderes, noch nicht gewähltes Gefühl
+    ctx.testZug(gut => {
+      if (ctx.vorbei() || !document.body.contains(wahl)) return false;
+      const i = a.optionen.findIndex((id, j) => (id === a.gefuehl) === gut && !wahl.children[j].classList.contains("gewaehlt"));
+      if (i < 0) return false;
+      wahl.children[i].click();
+      return true;
+    });
   },
 
   paar(ctx, a, gs) {

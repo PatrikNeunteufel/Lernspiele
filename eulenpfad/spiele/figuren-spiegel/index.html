@@ -291,6 +291,16 @@ LS.spiel({
       }
     };
     stelle();
+    // Zug für die Werkzeuge (ZU1 a): in der gerade gestellten Frage richtig die passende Antwort, falsch eine andere,
+    // noch nicht gewählte
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || i >= a.fragen.length || !document.body.contains(wahl)) return false;
+      const f = a.fragen[i];
+      const k = [...wahl.children].find((b, j) => (f.optionen[j] === f.richtig) === richtig && !b.disabled && !b.classList.contains("gewaehlt"));
+      if (!k) return false;
+      k.click();
+      return true;
+    });
   },
 });
 </script>

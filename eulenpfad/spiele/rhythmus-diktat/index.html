@@ -354,6 +354,23 @@ LS.spiel({
       diktat, wahl);
     LS.kurztasten(wahl); // nur die Notenkarten, nicht Hören, Meine Karten, Zurück
     zeichne();
+    // ZU1 a: richtig — liegt eine falsche Karte, „⌫ Zurück“, sonst die nächste Karte des Rhythmus; falsch — eine
+    // andere Karte, die noch in den Takt passt
+    ctx.testZug(richtig => {
+      if (ctx.vorbei() || !document.body.contains(wahl)) return false;
+      const n = gelegt.length;
+      if (richtig) {
+        if (gelegt.some((k, i) => k !== ziel[i])) { zurueck.click(); return true; }
+        const knopf = knoepfe[ziel[n]];
+        if (!knopf || knopf.disabled) return false;
+        knopf.click();
+        return true;
+      }
+      const knopf = Object.entries(knoepfe).find(([k, b]) => k !== ziel[n] && !b.disabled)?.[1];
+      if (!knopf) return false;
+      knopf.click();
+      return true;
+    });
     // Vorspielen, sobald die Eule fertig ist (Lob, Vorlesen); ctx.nachAnsage lässt eine neu gezogene Fassung weg.
     ctx.nachAnsage(() => { if (document.body.contains(diktat) && !ctx.vorbei()) NOTEN.spiele(vorspiel()); });
   },

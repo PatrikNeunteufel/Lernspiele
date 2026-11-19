@@ -218,6 +218,19 @@ function finden(ctx, a, arten) {
     feld.append(knopf);
   }
   ctx.flaeche.append(feld);
+  // Zug für die Werkzeuge (ZU1 a): richtig eine Karte zum angefangenen Paar (oder eine neue), falsch eine Karte einer
+  // anderen Art von einem anderen Vorbild, wenn schon eine gewählt ist (sonst kein falscher Handgriff möglich)
+  ctx.testZug(richtig => {
+    if (fertig || ctx.vorbei() || !document.body.contains(feld)) return false;
+    const offen = karten.filter(k => !k.knopf.classList.contains("gefunden") && !gewaehlt.includes(k));
+    const p = gewaehlt[0]?.p;
+    const freieArt = k => !gewaehlt.some(x => x.x === k.x);
+    const ziel = richtig ? (p ? offen.find(k => k.p === p && freieArt(k)) : offen[0])
+      : p && offen.find(k => k.p !== p && freieArt(k));
+    if (!ziel) return false;
+    ziel.knopf.click();
+    return true;
+  });
 }
 
 /** Texte bzw. Karten, die der Reihe nach richtig sind (für Prüfskripte). */

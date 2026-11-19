@@ -749,6 +749,30 @@ LS.spiel({
         beiRichtig: () => ansicht.marke(loesungPunkte, "go-frei"),
       });
       box.classList.add("go-zahlen");
+    } else {
+      // ZU1 a: ein Handgriff für Werkzeuge — einen Punkt des Bretts antippen (SVG: Klick-Ereignis wie vom Finger).
+      // Richtig der erste Lösungspunkt (beim Fang in 2 je Schritt neu), falsch: bei „Gefahr“ ein anderer eigener
+      // Stein, sonst ein erlaubter Punkt, der nichts fängt und nicht zur Lösung gehört. Während die Eule zeigt oder
+      // antwortet (gesperrt), wartet der Zug nur.
+      ctx.testZug(richtig => {
+        if (ctx.vorbei() || !noch()) return false;
+        if (gesperrt) return true;
+        let i;
+        if (richtig) i = loesungPunkte[0];
+        else if (a.art === "gefahr") i = brett.findIndex((f, j) => f === SCHWARZ && !a.richtig.includes(j));
+        else {
+          const gut = a.art === "retten" ? rettungsZuege(brett, n) : loesungPunkte;
+          i = brett.findIndex((f, j) => {
+            if (f !== LEER || gut.includes(j)) return false;
+            const r = setze(brett, n, j, SCHWARZ, vorher);
+            return r && !r.gefangen.length;
+          });
+        }
+        const ziel = i >= 0 && ansicht.svg.querySelectorAll("rect.go-ziel")[i];
+        if (!ziel) return false;
+        ziel.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        return true;
+      });
     }
     if (ctx.nr === 0) ctx.sag(a.art === "zaehlen" ? "Freiheiten sind die freien Punkte neben einem Stein." : "Du spielst Schwarz ⚫, ich spiele Weiss ⚪.");
   },
