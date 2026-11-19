@@ -42,7 +42,22 @@
     .wp-wahl { gap: 5px; }
     .wp-wahl .wahl-knopf { min-height: 46px; font-size: 18px; padding: 3px 8px; line-height: 1.15; }
     .wp-wahl .wahl-knopf small { font-size: 13px; }
+    /* BH3 a: Name und Frage der Probe in einer Zeile, wo sie passen (bricht sonst wie bisher um) */
+    .wp-wahl .wahl-knopf { flex-direction: row; flex-wrap: wrap; align-items: baseline; align-content: center; column-gap: 6px; min-height: 42px; }
+    .wp-wahl { gap: 4px; }
+    /* BH3 a: der Schritt („1. Probe wählen“) steht links in der Zeile der Frage statt in einer eigenen Zeile */
+    .wp-schritt { float: left; margin: 3px 6px 0 0; font-size: 13px; }
+    .wp .frage { text-align: left; }
+    .wp .satz { padding: 4px 10px; line-height: 1.3; }
+    .wp-liste { line-height: 1.25; margin-bottom: 6px; }
+    .wp .frage { margin-bottom: 2px; }
+    .wp .satz { margin-bottom: 6px; }
+    .wp-befunde { margin-bottom: 6px; }
+    .wp-befunde li { padding: 3px 8px; margin-bottom: 3px; }
   }
+  /* BH3 a: Eine Probe, die nicht klappt, steht als Befund unter dem Satz (✗ …); ihr Knopf fällt weg, statt blass
+     stehen zu bleiben — so bleiben nach einem Fehler alle Proben im Bild (s6 vorher 81 px darunter) */
+  .wp-wahl.wp-proben .wahl-knopf.gewaehlt { display: none; }
 </style>
 </head>
 <body>
@@ -248,7 +263,7 @@ LS.spiel({
     wp.append(schritt, frage, el("div", { class: "satz" }, a.vor, el("span", { class: "wp-ziel", text: a.wort }), a.nach));
     if (p.liste) wp.append(el("div", { class: "wp-liste" }, el("b", { text: "📋 Pronomenliste: " }), PROBE_PRONOMEN.join(", ")));
     const befunde = el("ul", { class: "wp-befunde", "aria-live": "polite" });
-    const wahl = el("div", { class: "wahl wp-wahl" });
+    const wahl = el("div", { class: "wahl wp-wahl wp-proben" }); // BH3 a: wp-proben nur in Schritt 1
     wahl.style.setProperty("--wahl-breite", p.liste ? "180px" : "200px");
     wp.append(befunde, wahl);
 
@@ -286,6 +301,10 @@ LS.spiel({
       schritt.textContent = "2. Was zeigt die Probe?";
       frage.textContent = `Welche Wortart ist ${name} hier?`;
       wahl.textContent = "";
+      // BH3 a: Ab hier zählt der Befund, nicht mehr die Liste; die kurzen Wortarten passen zu zweit in eine Zeile
+      wp.querySelector(".wp-liste")?.remove();
+      wahl.style.setProperty("--wahl-breite", "130px");
+      wahl.classList.remove("wp-proben");
       for (const wa of a.wortarten) {
         const kk = knopf(WORTARTEN[wa], "", k => {
           if (wa !== a.wortart) return fehler(k, BEDEUTUNG[a.probe]);

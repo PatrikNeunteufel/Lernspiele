@@ -19,6 +19,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { STUMM_ARG, stummSchalten } = require("./stumm"); // Ton aus (LERN_Session48)
 
 const argumente = process.argv.slice(2);
 const BASIS = (argumente.find(a => !a.startsWith("--")) || "http://localhost:8765").replace(/\/$/, "");
@@ -544,7 +545,7 @@ async function main() {
   fs.mkdirSync(ZIEL, { recursive: true });
   const profil = fs.mkdtempSync(path.join(os.tmpdir(), "eulenpfad-bilder-"));
   const browser = spawn(BROWSER, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profil}`,
-    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "--force-color-profile=srgb", "about:blank"], { stdio: "ignore" });
+    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "--force-color-profile=srgb", STUMM_ARG, "about:blank"], { stdio: "ignore" });
   try {
     let version = null;
     for (let i = 0; i < 50 && !version; i++) {
@@ -565,6 +566,7 @@ async function main() {
     };
     await send("Page.enable");
     await send("Runtime.enable");
+    await stummSchalten(send);
     await gehe("/eulenpfad/index.html");
     for (const f of Object.keys(FASSUNGEN).filter(f => !NUR_FASSUNG || f === NUR_FASSUNG)) {
       fassung = f;

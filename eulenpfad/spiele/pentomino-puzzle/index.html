@@ -42,6 +42,12 @@
     .werkzeug { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .werkzeug .knopf { min-height: 48px; padding: 6px 8px; font-size: 17px; }
   }
+  /* BH3 a: Handy mit Browserleisten — die vier Werkzeugknöpfe in einer Reihe (zweizeilig beschriftet) statt 2 × 2; beim
+     Legen (s4/s5) ragte die Aufgabe sonst 29 px unter den Rand, das Brett stand schon an seiner Untergrenze 44 px */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .werkzeug { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .werkzeug .knopf { padding: 4px 3px; font-size: 13px; line-height: 1.15; min-height: 46px; }
+  }
   @media (min-width: 900px) and (orientation: landscape) {
     .pp:has(> .brett) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 28px; align-items: start; align-content: start; }
     .pp:has(> .brett) > * { grid-column: 2; }

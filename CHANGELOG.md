@@ -2975,3 +2975,47 @@
 - Tests: Messung mit `--schritte` weather-report glace-kombinator hoer-geschichte zielzahl-jagd fehler-lupe stimmt-immer
   (s3–s6, Handy, zwei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht zu Ende gespielt, getrennte Liste nach dem Lösen mit
   acht Seiten.
+- Überläufe in späteren Schritten behoben (BH3 a, LERN-55), 52 Spiele in vier Paketen, nur die Seite je Spiel (Grafik
+  nach `--rest-h`, Teile nebeneinander, Erledigtes kompakt, engere Abstände auf dem Handy):
+  - Deutsch und Lesen: Verben-Fächer (verben-faecher; nach dem Fächer Regelkarte und erste Frage weg, der Fächer eine
+  Zeile; s2 199 px, s4 157, dazu 2 px seitlich → 0), Wortarten-Probe (wortarten-probe; eine Probe, die nicht klappt,
+  verliert ihren Knopf, ihr Befund bleibt; s6 143 → 0), Rede-Zeichen (rede-zeichen; „Prüfen ✓“ bei den Tasten, der
+  zweite Teil der Frage auf schmalen und niedrigen Bildern nur noch in Blase und Hilfe; s5 130 → 0), Morphem-Schere
+  (morphem-schere; 95 → 0), Regel-Lücke (regel-luecke), Wörter-Brücke (parallelwort-bruecke; L0 26 → 0), Figuren-Spiegel
+  (figuren-spiegel; gelöste Fragen je eine Zeile, Antippen zeigt sie ganz; 101 → 0), Fehler-Lupe (fehler-lupe;
+  Wortknöpfe 42 px auf dem Handy; s6 92 px, nach dem Lösen 98 → 0, der reparierte Satz steht im Bild),
+  Platzhalter-Geschichten (platzhalter-geschichten; 127 → 0), Hör-Geschichte (hoer-geschichte; das Buch wird mit den
+  Fragen eine Zeile; s6 135 → 0), Hör-Reporter (hoer-reporter; ebenso, die Vorschau „Darauf achtest du:“ fällt mit den
+  Fragen weg, `LS.schriftEinpassen` für die Antworten; 73 → 0), Kulturen-Koffer (kulturen-koffer; Rätsel zu dritt, auf
+  dem Handy Bild links neben Text, Karte und Quellen; s6 115, s5 19, s3 25 → 0), Lärm-Wächter (laerm-waechter).
+  - Rechnen: Fahrplan-Rechner (fahrplan-rechner; Anzeige einzeilig, Legende neben dem Fahrplan, quer die Anzeige der
+  Abfahrtstafel über die ganze Breite; s6 117 → 0), Stein-Duell (stein-duell), Speicher-Leiter (speicher-leiter),
+  Kompass-Spiel (kompass; Frage neben dem Plan; bis 112 → 0), Masse-Umwandler (masse-umwandler), Hebel-Wippe
+  (hebel-wippe), Quelle heure? (quelle-heure; Uhren nach `--rest-h`, Zeiger-Knöpfe nebeneinander), Taschengeld-Planer
+  (taschengeld-planer; „✓ im Korb“ als Schild), Flächen-Pixel (flaechen-pixel), Geheimschrift-Knacker
+  (geheimschrift-knacker; Scheibe ab 160 px), Kiosk-Kasse (kiosk-kasse), Zehner-Ergänzer (zehner-ergaenzer; „+ ?“
+  überdeckte die Frage), Zehntel-Lupe (zehntel-lupe; Strahlen ab 280 statt 400 px, Zahlen grösser gezeichnet).
+  - Gemischt: Braille-Finger (braille-finger; Zelle neben Buchstabe und Knöpfen, Tafel je Zehnerreihe eine Zeile; s5 250 →
+  0), Würfel-Zähler (wuerfel-zaehler; 134 → 0), Stimmt immer? (stimmt-immer; drei Figuren in einer Reihe), Probe-Stempel
+  (rechenprobe; Robo neben der Rechnung, Probe und Anzeige in einer Zeile; bis 147 → 0), Himmels-Forscher
+  (himmels-forscher), Würfelbau-Blick (wuerfelbau-blick), Sachaufgaben-Kompass (sachaufgaben-kompass),
+  Rechentrick-Detektiv (rechentrick-detektiv; quer Tastatur rechts), Möglichkeiten-Finder (glace-kombinator),
+  Roboter-Pfad (roboter-pfad; Antipp-Felder ab 41 px), Runden-Rutsche (runden-rutsche), Pentomino-Puzzle
+  (pentomino-puzzle; Werkzeuge in einer Reihe). In Würfel-Zähler, Probe-Stempel und Sachaufgaben-Kompass sagt die Eule
+  beim nächsten Schritt kurz „Genau! …“, sonst stand der Fehlerhinweis des vorigen Schritts bis fünf Zeilen weiter
+  (Entscheid EU1 a: die Sätze bleiben).
+  - Kleine Fälle: Quader-Volumen (quader-volumen; s6 Körper ab 60 %), Daten-Detektiv (diagramm-detektiv; Frage und Anzeige
+  neben dem Diagramm), Rechen-Maschine (rechen-maschine), Finger-Zähler (finger-zaehler), Rhythmus-Leser
+  (rhythmus-leser), Mittelwert-Türme (mittelwert-waage), Diagramm-Wahl (diagramm-wahl), Preis-Tabelle (preis-tabelle),
+  Muster-Fortsetzer (muster-fortsetzer), Kakao-Weg (kakao-weg), Sortier-Kiste (sortier-kiste), Instrumenten-Kenner
+  (instrumente), Erdzeit-Leiter (erdzeit-leiter), Zahlen-Waage (zahlen-waage; lange Terme mittig über dem Balkenende; s6
+  20 px seitlich → 0).
+- Ton aus in den Werkzeugen mit Chrome (Wunsch Patrik): neu `tools/stumm.js` — `--mute-audio` für Klänge, dazu jede
+  Äusserung der Stimme mit Lautstärke 0 (unter Windows spricht `speechSynthesis` an `--mute-audio` vorbei); gesprochen
+  wird weiter, Ereignisse und Dauer bleiben gleich. In `tools/bildhoehe.js`, `bilder_aufnehmen.js`, `kontrast.js`,
+  `anleitung_bilder.js`.
+- Tests: je Paket `bildhoehe.js --schritte` (s1–s6, Handy-, Tablet-, Quer- und Laptop-Sicht, drei Ziehungen) ohne
+  Aufgabe über dem Rand, seitlich 0, 0 Spiele ohne Zug, 0 Seiten nicht zu Ende gespielt; Nachmessung aller 52 (Handy und
+  quer, zwei Ziehungen; vorher 98 Seiten in 50 Spielen): 2 Seiten (Kulturen-Koffer s5 10 px, Sachaufgaben-Kompass s2 3
+  px), beide danach behoben (Kulturen-Koffer fünf Sichten, sechs Ziehungen: 0); `pruefe_spiele.js` aller 52 „Keine
+  Fehler.“ (je Paket und nach den letzten Änderungen); Skripte „Keine Fehler.“.

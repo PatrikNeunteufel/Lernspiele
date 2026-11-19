@@ -65,6 +65,19 @@
     .rp-befehle { gap: 6px 8px; margin-bottom: 0; }
     .rp-wenn { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 14px; font-size: 17px; line-height: 1.35; padding: 4px 10px; margin-bottom: 6px; }
     .rp-wenn > div:first-child { flex-basis: 100%; text-align: center; }
+    /* BH3 a: gelegte Karten schmaler und das gezeigte Raster bis 216 px — mit vielen Karten (Wiederholen, s5/s6) ragte
+       „Bring den Roboter zum Stern“ gegen Ende bis 89 px unter den Rand */
+    .rp-ansicht .rp-raster { min-width: 216px; }
+    .rp-programm { gap: 4px; }
+    .rp-programm .rp-karte { min-width: 38px; padding: 2px 4px; font-size: 18px; border-width: 2px; }
+    .rp-programm .rp-karte b { font-size: 13px; }
+    .rp-programm .rp-karte small { font-size: 11px; }
+    /* vorgegebenes Programm (Wo hält der Roboter?): Bild und Wort nebeneinander, die Karte wird halb so hoch — mit dem
+       langen Hinweis nach einem Fehler ragte s5 sonst 17 px unter den Rand */
+    .rp-programm.vorgabe { min-height: 0; padding: 3px; }
+    .rp-programm.vorgabe .rp-karte { flex-direction: row; gap: 3px; }
+    /* Raster zum Antippen: Felder mindestens 41 px (mit Fuge 44 px Abstand) statt 44 px */
+    .rp-raster:has(button.rp-zelle) { max-width: max(calc(20px + var(--b, 6) * 44px), min(400px, var(--rest-h, 400px))); }
   }
   /* Breit und quer: Raster links, Auftrag, Programm und Befehle rechts */
   @media (min-width: 900px) and (orientation: landscape) {

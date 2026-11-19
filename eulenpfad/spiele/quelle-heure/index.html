@@ -27,10 +27,29 @@
      1366 × 650 blieb die Uhr bei 160 px, obwohl 71 px frei waren, auf dem Handy 375 × 660 ragte s5 14 px über. */
   .uhr-gross { display: block; width: max(160px, min(300px, 76vw, var(--rest-h, 300px))); margin: 0 auto 10px; }
   .qh-uhren .wahl-knopf svg { width: 100%; max-width: 130px; display: block; margin: 0 auto; }
+  /* BH3 a: Mit dem langen Hinweis nach einem Fehler ragten die vier Uhren zur Wahl auf dem Handy bis 54 px (s5, mit
+     „am Tag“/„in der Nacht“) unter den Rand (LERN_Session48). Hoch stehen sie in zwei Reihen: jede Uhr ist so gross,
+     wie die halbe restliche Höhe abzüglich Rand und Beschriftung zulässt (--rest-h von LS.restHoehe), mindestens
+     100 px. */
+  @media (max-width: 560px) {
+    .qh-uhren .wahl-knopf svg { max-width: max(100px, min(130px, calc((var(--rest-h, 400px) - 60px) / 2))); }
+    .qh-uhren.qh-mit-tag .wahl-knopf svg { max-width: max(100px, min(130px, calc((var(--rest-h, 400px) - 96px) / 2))); }
+  }
   .qh-uhren .wahl-knopf { min-height: 0; padding: 8px; }
   .qh-saetze .wahl-knopf { font-size: clamp(16px, 4vw, 21px); font-weight: 800; min-height: 64px; }
   /* Handy: vier Sätze unter der Uhr ragten in Stufe 5 bis 23 px unter den Rand (LERN_Session43) */
   @media (max-width: 560px) { .qh-saetze .wahl-knopf { min-height: 54px; } }
+  /* BH3 a: nach einem Fehler (Hinweis drei Zeilen) ragten sie mit der Uhr an ihrer Untergrenze (160 px) noch 14 px
+     unter den Rand (s2, s3, LERN_Session48) — auf 375 × 660 Sätze 46 px hoch und enger */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .qh-saetze { gap: 4px; }
+    .qh-saetze .wahl-knopf { min-height: 42px; padding-block: 2px; }
+    .uhr-gross + .qh-tag { margin: -8px 0 4px; } /* „am Tag“ unter der Uhr (s5, bis 10 px darunter) */
+    /* Uhr stellen (s3, bis 14 px darunter): die zwei Zeiger-Knöpfe nebeneinander statt untereinander */
+    /* div. und button.: die Grundregeln stehen weiter unten */
+    div.qh-modus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 6px; }
+    div.qh-modus button { min-height: 44px; padding: 4px 8px; font-size: 15px; line-height: 1.2; }
+  }
   .qh-tag { display: block; text-align: center; font-size: 15px; font-weight: 800; color: var(--text-leise); }
   .qh-modus { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 0 auto 10px; }
   .qh-modus button { border: 3px solid var(--rand); border-radius: 14px; background: var(--k-feld); padding: 10px 14px; font-family: inherit;
@@ -340,6 +359,8 @@ LS.spielMitStimme({
         beiRichtig: nachher,
       });
       box.classList.add("qh-uhren");
+      if (mittag) box.classList.add("qh-mit-tag");
+      LS.restHoehe(box); // BH3 a: Uhren zur Wahl nach der restlichen Höhe (--rest-h)
       return;
     }
 

@@ -24,6 +24,20 @@
   .nz-zeile label { display: inline-flex; align-items: center; gap: 6px; }
   .nz-zeile .zw-notiz { font-size: 17px; min-height: 34px; padding: 2px 4px; }
   .familie { text-align: center; color: var(--text-leise); font-weight: 700; margin-bottom: 6px; }
+  /* BH3 a: Auf dem Handy ragte s6 nach einem Fehler (Hinweis lang, Treppe kommt dazu) bis 56 px unter den Rand
+     (LERN_Session48, Subtraktion mit zwei Notizen). Treppe auf einer Zeile, Rechnung kleiner, Notizen nebeneinander
+     mit dem Text über dem Feld. */
+  @media (max-width: 560px) {
+    .familie { margin-bottom: 2px; font-size: 15px; }
+    .treppe { flex-wrap: nowrap; gap: 2px; margin-bottom: 6px; }
+    .stufe-t b { padding: 4px 8px; font-size: 16px; }
+    .pfeil-t { font-size: 11px; padding: 0 1px 6px; }
+    .rechnung { font-size: 26px; margin: 2px 0 8px; line-height: 1.25; }
+    .nz-zeile { flex-wrap: nowrap; align-items: flex-end; gap: 10px; margin: -2px 0 8px; font-size: 14px; }
+    .nz-zeile label { display: inline-grid; grid-template-columns: auto auto; align-items: center; justify-content: center; gap: 2px 4px; line-height: 1.15; }
+    .nz-zeile label > span:first-child { grid-column: 1 / -1; text-align: center; }
+    .nz-zeile .zw-notiz { min-height: 32px; width: calc(6ch + 14px); }
+  }
 </style>
 </head>
 <body>

@@ -20,7 +20,6 @@
     display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px;
     font-size: clamp(26px, 7vw, 40px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 4px 0 8px; color: var(--text);
   }
-  .pg-gleichung.erledigt { font-size: clamp(20px, 5vw, 28px); color: var(--text-leise); }
   .pg-luecke {
     display: inline-flex; align-items: center; justify-content: center; min-width: 2.2em; min-height: 1.45em; padding: 0 .3em;
     border: 4px dashed var(--deko-4); border-radius: 12px; background: var(--anzeige); color: var(--text); transition: border-color .2s, background .2s;
@@ -47,6 +46,19 @@
     .pg-bilder .plus { font-size: 22px; margin: 0 3px; }
     /* Lange Geschichten (s6, Schritt 1 von 4) ragten bis 32 px unter den Rand: Zeilen und Abstände enger */
     .pg-geschichte { line-height: 1.38; padding: 8px 12px; }
+    /* BH3 a: lange Geschichten mit zwei Lücken (s6) eine Spur kleiner */
+    .pg-geschichte { font-size: 17px; line-height: 1.32; }
+    .pg-weg { font-size: 17px; margin-bottom: 4px; }
+    /* BH3 a: Rechnung wählen (s6, Schritt 2) mit dem Hinweis nach einem Fehler noch 15 px darunter: Knöpfe niedriger */
+    .pg-wahl.wahl { gap: 6px; }
+    .pg-wahl .wahl-knopf { min-height: 48px; }
+    /* BH3 a: Ausrechnen (s6, Schritt 2 von 4) mit langer Geschichte und Hinweis: Gleichung, Zeilen und Tastatur enger */
+    .pg > .pg-geschichte { line-height: 1.28; padding: 6px 10px; margin-bottom: 6px; } /* .pg >: schlägt den Block für niedrige Bildschirme weiter unten */
+    .pg-gleichung { font-size: 24px; margin: 0 0 2px; }
+    .pg-weg { font-size: 16px; margin-bottom: 2px; }
+    .pg > .auftrag { font-size: 17px; margin-bottom: 4px; }
+    .pg-schritt { margin-bottom: 2px; }
+    .pg-bereich > .tastatur { gap: 6px; margin-top: 8px; }
     .pg-gleichung { margin: 2px 0 4px; }
     .pg > .auftrag { margin-bottom: 6px; line-height: 1.25; }
     .pg-schritt { font-size: 14px; line-height: 1.2; }
@@ -614,7 +626,7 @@ function lueckenLoesen(ctx, a, pg) {
       beginne("umkehr", "Mit welcher Rechnung findest du die Zahl in der Lücke?");
       tipp(tippsUmkehr(t));
       wahlKnoepfe(t.umkehrOptionen, o => o.text === t.umkehrText, o => hinweisUmkehr(o, t), () => {
-        gleichungen.append(el("div", { class: "pg-weg", text: `✓ Rechne: ${t.umkehrText}` }));
+        gleichungen.append(el("div", { class: "pg-weg pg-rechne", text: `✓ Rechne: ${t.umkehrText}` }));
         weiter();
       });
     };
@@ -638,8 +650,10 @@ function lueckenLoesen(ctx, a, pg) {
           const probe = `Probe: ${gleichungText(t.g, zahlText(t.loesung))} ✓`;
           if (letzter) return ctx.richtig(`${waehle(LOB)} ${probe}`);
           LS.ton("tipp");
+          // BH3 a: Erledigtes in einer Zeile — die Probe zeigt die gelöste Gleichung; Gleichung und Rechnung
+          // darüber fallen weg (s6 ragte mit zwei Lücken bis 127 px unter den Rand)
+          gleichungen.querySelectorAll(".pg-gleichung, .pg-rechne").forEach(z => z.remove());
           gleichungen.append(el("div", { class: "pg-weg", text: probe }));
-          gleichungen.querySelectorAll(".pg-gleichung").forEach(z => z.classList.add("erledigt"));
           teilLoesen(i + 1);
         },
       });

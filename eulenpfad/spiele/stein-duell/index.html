@@ -30,6 +30,16 @@
   .nehmen-zeile { display: flex; justify-content: center; margin: 6px 0 4px; }
   .nehmen-zeile .knopf { min-width: 180px; }
   .eule-antwort { text-align: center; min-height: 28px; font-weight: 800; color: var(--deko-1-schrift); font-size: clamp(17px, 3.8vw, 20px); }
+  /* BH3 a: „Wer soll anfangen?“ mit 18 Steinen ragte nach einem Fehler (Hinweis vier Zeilen) bis 30 px unter den Rand
+     (LERN_Session48). Handy: die zwei Antworten nebeneinander statt untereinander, Steine enger. */
+  @media (max-width: 560px) {
+    .wahl:has(> .wahl-knopf:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .wahl:has(> .wahl-knopf:nth-child(2):last-child) .wahl-knopf { font-size: 17px; padding: 6px 6px; min-height: 0; line-height: 1.2; }
+    .reihen { gap: 8px; margin: 4px 0 8px; }
+    /* Steine etwas kleiner: mehrere Reihen (s6 bis 50 px darunter, eine Reihe mit sieben Steinen brach um) stehen je
+       auf einer Zeile, ein grosser Haufen (s4, 18 Steine) braucht eine Zeile weniger */
+    .reihe-steine { gap: 4px; max-width: none; }
+    .stein { width: 36px; height: 36px; }  }
 </style>
 </head>
 <body>

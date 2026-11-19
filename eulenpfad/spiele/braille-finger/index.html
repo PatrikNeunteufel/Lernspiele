@@ -22,6 +22,17 @@
      Laptop 8 px unter den Rand (LERN_Session43). Seit LERN_Session45 aus --rest-h (LS.restHoehe misst die Höhe, die die
      Aufgabe übrig lässt) statt geschätzt 100vh − 470px */
   .bf-setzen { width: clamp(150px, min(46vw, var(--rest-h, 315px) * 2 / 3), 210px); margin: 0 auto 10px; touch-action: manipulation; }
+  /* BH3 a: Zelle zum Setzen neben Buchstabe und Knöpfen statt darunter — mit der Tafel nach einem Fehler ragte Stufe 5
+     auf dem Handy 250 px unter den Rand. Untergrenze 110 px (bis 820 px Bildhöhe 100 px): Punkte bleiben fingergross */
+  .bf-setz { display: flex; justify-content: center; align-items: center; gap: 12px; }
+  .bf-setz .bf-setzen { width: clamp(110px, min(46vw, var(--rest-h, 315px) * 2 / 3), 210px); margin: 0; }
+  .bf-setz-seite { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .bf-setz-seite .bf-buchstabe { margin: 0; }
+  .bf-setz-seite .bf-knoepfe { flex-direction: column; gap: 12px; }
+  /* BH3 a: Lesen — Zelle neben den Antworten (.wahl in einer Reihe: margin-inline 0, rahmen.md 20) */
+  .bf-lese { display: flex; justify-content: center; align-items: center; gap: 14px; }
+  .bf-lese .bf-gross { margin: 0; flex: none; }
+  .bf-lese .wahl { flex: 1 1 auto; max-width: 360px; margin-inline: 0; }
   .bf-setzen circle { cursor: pointer; }
   .bf-setzen circle.voll { fill: var(--deko-5); stroke: var(--deko-5); }
   .bf-klein { width: clamp(40px, 11vw, 54px); }
@@ -51,6 +62,20 @@
   .bf-tafel .bf-zelle circle { stroke-width: 4; }
   .bf-tafel figcaption { font-weight: 900; font-size: 15px; }
   .bf-regel { width: 100%; text-align: center; font-size: 14px; font-weight: 700; color: var(--text-leise); }
+  /* BH3 a: bis 820 px Bildhöhe Tafel enger (Zellen, Buchstaben, Regel) — sie erscheint nach einem Fehler über der Aufgabe */
+  @media (max-height: 820px) {
+    /* je Zehnerreihe eine Zeile (die Regel spricht von Zehnerreihen), u–z unter a–f */
+    .bf-tafel { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px 4px; padding: 4px 6px; margin-bottom: 8px; }
+    .bf-tafel .bf-zelle { width: clamp(20px, 5.4vw, 28px); }
+    .bf-tafel figcaption { font-size: 13px; line-height: 1; }
+    .bf-regel { grid-column: 1 / -1; font-size: 13px; line-height: 1.2; }
+    .frage { margin-bottom: 6px; }
+    .bf-setz .bf-setzen { width: clamp(100px, min(46vw, var(--rest-h, 315px) * 2 / 3), 210px); }
+    .bf-setz-seite { gap: 6px; }
+    .bf-setz-seite .bf-buchstabe { font-size: clamp(48px, 12vw, 84px); line-height: 1; }
+    .bf-setz-seite .bf-knoepfe { gap: 8px; }
+    .bf-setz-seite .bf-knoepfe button { min-height: 46px; }
+  }
 </style>
 </head>
 <body>
@@ -255,7 +280,7 @@ const REGEL_KT = "Die zweite Zehnerreihe ist wie die erste, nur kommt der Punkt 
 const REGEL_ALLE = "Erste Zehnerreihe: nur die oberen vier Punkte. Zweite: dazu der Punkt unten links. Dritte: dazu beide Punkte unten. Ein Buchstabe ist die Ausnahme.";
 
 /** Antippbare Zelle mit Prüfen-Knopf; pruefe(muster) gibt true zurück, wenn es weitergeht. */
-function setzFeld(ctx, pruefe, ziel) {
+function setzFeld(ctx, pruefe, ziel, kopf = null) {
   let gesetzt = new Set();
   let zelle;
   const ort = el("div");
@@ -283,7 +308,9 @@ function setzFeld(ctx, pruefe, ziel) {
     if (pruefe(muster([...gesetzt].map(String)))) { gesetzt = new Set(); zeichne(); }
     if (ctx.vorbei()) { pruefen.disabled = true; leeren.disabled = true; }
   });
-  ctx.flaeche.append(ort, el("div", { class: "bf-knoepfe" }, leeren, pruefen));
+  // BH3 a: Zelle links, rechts daneben der Buchstabe (kopf) und die Knöpfe untereinander
+  ctx.flaeche.append(el("div", { class: "bf-setz" }, ort,
+    el("div", { class: "bf-setz-seite" }, ...(kopf ? [kopf] : []), el("div", { class: "bf-knoepfe" }, leeren, pruefen))));
   // Zug für die Werkzeuge (ZU1 a): ziel() = Muster, das jetzt gesetzt sein soll. Richtig: einen Punkt antippen, der
   // fehlt oder zu viel ist, sonst „Prüfen“; falsch: „Prüfen“, solange die Zelle noch nicht stimmt
   ctx.testZug(richtig => {
@@ -386,6 +413,12 @@ LS.spiel({
         },
       });
       box.querySelectorAll(".wahl-knopf").forEach(k => k.classList.add("bf-wahl"));
+      // BH3 a: Zelle links, Antworten rechts daneben — mit der Tafel nach einem Fehler ragte Stufe 4 auf dem Handy 93 px
+      // unter den Rand
+      const zelle = f.querySelector(":scope > .bf-gross");
+      const reihe = el("div", { class: "bf-lese" });
+      zelle.replaceWith(reihe);
+      reihe.append(zelle, box);
       return;
     }
     if (a.art === "finden") {
@@ -413,13 +446,13 @@ LS.spiel({
       const loesung = `${a.b}: Punkte ${punkteText(a.richtig)}`;
       ctx.loesung(loesung);
       ctx.schritte(a.richtig.length + 1);
-      f.append(el("div", { class: "frage", html: "Tippe die Punkte für diesen <b>Buchstaben</b>:" }), el("div", { class: "bf-buchstabe", text: a.b }));
+      f.append(el("div", { class: "frage", html: "Tippe die Punkte für diesen <b>Buchstaben</b>:" }));
       setzFeld(ctx, m => {
         if (m === a.richtig) { ctx.richtig(`Richtig: ${loesung}`); return false; }
         tafelNachFehler();
         ctx.falsch(m === gespiegelt(a.richtig) ? "Fast — die Zelle ist gespiegelt. Punkt 1, 2, 3 sind links." : "Noch nicht. Schau in der Tafel nach und vergleiche Punkt für Punkt.", loesung);
         return false;
-      }, () => a.richtig); // Ziel für den Zug (ZU1 a)
+      }, () => a.richtig, el("div", { class: "bf-buchstabe", text: a.b })); // Ziel für den Zug (ZU1 a); Buchstabe neben der Zelle (BH3 a)
       return;
     }
     // schreiben: Buchstabe für Buchstabe

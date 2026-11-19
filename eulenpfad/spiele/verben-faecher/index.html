@@ -24,6 +24,22 @@
   .vf-griff { display: block; width: max-content; max-width: 100%; margin: -4px auto 16px; padding: 8px 26px; border-radius: 0 0 30px 30px;
     background: var(--deko-6-grund); color: var(--auf-deko-6); font-size: clamp(24px, 6vw, 34px); font-weight: 900; position: relative; z-index: 1; }
   .vf-zeile { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
+  /* BH3 a: Ist der Fächer gelöst, steht er für den Satz nur noch als eine Zeile da (Verb, dann seine Fragen);
+     die Regelkarte und die erste Frage fallen weg — die Regel steht bei einem Fehler ohnehin in der Blase. */
+  .vf-huelle.erledigt { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin: 0 auto 10px; max-width: 640px; }
+  .vf-huelle.erledigt .vf-faecher { display: contents; }
+  .vf-huelle.erledigt .vf-blatt { flex: 0 0 auto; max-width: none; min-height: 0; padding: 4px 10px; border-radius: 12px; transform: none !important;
+    box-shadow: none; font-size: 15px; cursor: default; }
+  .vf-huelle.erledigt .vf-blatt:not(.richtig) { display: none; }
+  .vf-huelle.erledigt .vf-griff { order: -1; margin: 0; padding: 4px 14px; border-radius: 14px; font-size: 20px; }
+  /* BH3 a: Ab sechs Lücken und Karten (s4, s6) enger, damit Satz und Karten auf dem Handy zugleich im Bild stehen */
+  @media (max-width: 560px) {
+    .vf-faecher { padding: 0 18px; } /* BH3 a: fünf Blätter (s4, s6) ragten gedreht 2 px seitlich hinaus */
+    .satz { gap: 6px 6px; margin-bottom: 10px; }
+    .satz .vf-luecke { min-width: 70px; padding: 2px 4px; }
+    .vf-karten { gap: 8px; }
+    .vf-karte { min-height: 48px; padding: 4px 10px; }
+  }
 
   /* Satz mit Lücken; unter jeder Lücke steht ihre Frage. */
   .satz { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 8px 10px; max-width: 760px; margin: 0 auto 14px;
@@ -284,7 +300,8 @@ function faecher(ctx, a, p) {
   ctx.loesung(loesung);
   ctx.schritte(v.fragen.length + 1 + luecken.length);
   ctx.serie("fragen", v.schluessel);
-  if (p.karte) f.append(el("div", { class: "regelkarte" }, el("b", { text: "So geht der Fächer" }), REGELN[p.karte]));
+  const regel = p.karte ? el("div", { class: "regelkarte" }, el("b", { text: "So geht der Fächer" }), REGELN[p.karte]) : null;
+  if (regel) f.append(regel);
   const frage = el("div", { class: "frage", html: `Welche Fragen braucht das Verb <b>${v.inf}</b>?` });
   const faecherEl = el("div", { class: "vf-faecher" });
   const n = p.angebot.length;
@@ -305,7 +322,8 @@ function faecher(ctx, a, p) {
   let fertig1 = false;
   const pruefen = el("button", { type: "button", class: "knopf gruen", text: "Prüfen ✓" });
   const zeile = el("div", { class: "vf-zeile" }, pruefen);
-  f.append(frage, faecherEl, griff, zeile);
+  const huelle = el("div", { class: "vf-huelle" }, faecherEl, griff); // BH3 a: wird nach dem Fächer eine Zeile
+  f.append(frage, huelle, zeile);
   pruefen.addEventListener("click", () => {
     if (ctx.vorbei() || fertig1) return;
     const gewaehlt = p.angebot.filter((q, i) => blaetter[i].classList.contains("gewaehlt"));
@@ -315,6 +333,10 @@ function faecher(ctx, a, p) {
       fertig1 = true;
       blaetter.forEach(b => b.classList.toggle("richtig", b.classList.contains("gewaehlt")));
       zeile.remove();
+      // BH3 a: Erledigtes kompakt — Regelkarte und erste Frage weg, Fächer als eine Zeile
+      regel?.remove();
+      frage.remove();
+      huelle.classList.add("erledigt");
       LS.ton("tipp");
       satzBauen(ctx, a, p, luecken, loesung);
       return;

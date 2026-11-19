@@ -62,6 +62,24 @@
     div:has(> .tastatur) > .wippe { margin-bottom: 0; }
     div:has(> .tastatur) > .frage { margin-bottom: 2px; }
     div:has(> .tastatur) > .wippe-legende { margin-bottom: 2px; }
+    /* BH3 a: Mit dem langen Hinweis nach einem Fehler ragte das Eintippen auf 375 × 660 bis 55 px (Stange, s5) und
+       44 px (Wippe mit Klötzen, s6) unter den Rand (LERN_Session48). Die Anzeige steht rechts neben der Wippe, die
+       Notizen darunter über die ganze Breite; die Wippe nimmt die übrige Breite. */
+    div:has(> .tastatur):has(> .wippe) { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: row dense;
+      column-gap: 6px; align-items: center; }
+    div:has(> .tastatur):has(> .wippe) > * { grid-column: 1 / -1; }
+    div:has(> .tastatur):has(> .wippe) > .tastatur { margin-inline: 0; }
+    div:has(> .tastatur) > .wippe { grid-column: 1; grid-row: span 2; }
+    div:has(> .tastatur) > .hw-eingabe { display: contents; }
+    div:has(> .tastatur) > .hw-eingabe > .hw-notizen { grid-column: 1 / -1; margin: 0; row-gap: 2px; }
+    div:has(> .tastatur) > .hw-eingabe .zw-notiz { min-height: 28px; padding-block: 0; }
+    div:has(> .tastatur) > .anzeige, div:has(> .tastatur) > .hw-eingabe > .anzeige { grid-column: 2; min-width: 80px; padding-inline: 4px; }
+    /* 80 px (nicht 96): so bleibt die Wippe über 100 px hoch (H1 a, sonst „geschrumpft“, LERN_Session48) */
+    /* Eine Notiz allein (Stange: nur der Stein) steht über der Anzeige */
+    div:has(> .tastatur) > .hw-eingabe > .hw-notizen:has(> .hw-seite:only-child > .zw-notiz:only-of-type) { grid-column: 2; margin: 0 0 4px; }
+    div:has(> .tastatur) > .wippe-legende { font-size: 14px; line-height: 1.2; }
+    div:has(> .tastatur) > .frage { font-size: 17px; line-height: 1.25; }
+    div:has(> .tastatur) > .auftrag { font-size: 16px; line-height: 1.2; margin-bottom: 2px; }
   }
 </style>
 </head>

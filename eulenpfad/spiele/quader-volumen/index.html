@@ -67,6 +67,20 @@
     .qv-bild { margin-bottom: 2px; }
     .qv-ergebnis .anzeige { min-height: 48px; font-size: 30px; line-height: 1.1; }
     .qv-ergebnis.mit-notiz .anzeige { min-height: 48px; }
+    /* Nach dem Hinweis (BH3 a): s3 und s5 ragten bis 13 px unter den Rand, der Körper steht schon an seiner Untergrenze
+       (Masse 12 px) — Frage, Abstände, Anzeige und Notizfelder enger */
+    .qv .frage { line-height: 1.15; margin-bottom: 0; }
+    .qv-bild { margin-bottom: 0; }
+    .qv-ergebnis .anzeige, .qv-ergebnis.mit-notiz .anzeige { min-height: 44px; }
+    .qv-ergebnis.mit-notiz .qv-notizen { row-gap: 0; }
+    .qv-ergebnis.mit-notiz .qv-notizen .zw-notiz { min-height: 26px; }
+    /* Zwei Körper nebeneinander (s4 „Wie viele kleine Quader“): Namen mit Notiz zweizeilig enger, Name näher am Körper */
+    .qv-bild:has(> .qv-geb + .qv-geb) .qv-name { line-height: 1.25; }
+    .qv-bild:has(> .qv-geb + .qv-geb) > .qv-geb { gap: 0; }
+    /* Zwei Quader zusammen (s6, BH3 a): Die Masse stehen in der Legende, nicht am Körper — er darf darum bis auf 60 %
+       seiner Zeichnung schrumpfen (vorher 80 %); mit Legende und Notizen ragte die Aufgabe nach dem Hinweis bis 41 px
+       unter den Rand */
+    .qv-bild:has(+ .qv-legende) svg.qv-nach-hoehe { max-height: max(calc(var(--vb-h) * .6px), min(192px, var(--rest-h, 192px))); }
   }
   /* Schmal (unabhängig von der Höhe): Anzeige mit Notizen schmaler, Notizen und Einheit kleiner — „Grundfläche 9 · 10 = ✏️
      cm² [?] cm³“ (s3) lief auf 375 px seitlich bis 4 px über, auch mit voller Höhe 375 × 812 (LERN_Session46) */

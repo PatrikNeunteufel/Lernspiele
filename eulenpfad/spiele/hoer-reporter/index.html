@@ -33,6 +33,20 @@
   .hr-erledigt li { padding: 4px 10px; margin: 0 0 4px; border-radius: 10px; background: var(--gut-hell); }
   .hr-wahl .wahl-knopf { font-size: clamp(16px, 3.6vw, 21px); font-weight: 800; }
   .hr-los { display: flex; justify-content: center; margin: 0 0 12px; }
+  /* BH3 a: Sind die Fragen da, stehen Titel und 🔊 in einer Zeile und die Vorschau geht weg (sie wiederholt die
+     gestellte Frage, wie in der Hör-Geschichte); der Text, wenn er sichtbar ist, scrollt im eigenen Feld
+     (LS.lesetext). Auf dem Handy jede gelöste Frage auf einer Zeile (Antippen zeigt sie ganz) — s6 ragte bis 73 px
+     unter den Rand. */
+  .hr.mit-fragen .hr-kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; margin: 0 0 10px; }
+  .hr.mit-fragen .hr-titel { margin: 0; }
+  .hr.mit-fragen .hr-hoer { margin: 0; min-height: 46px; padding: 6px 16px; }
+  @media (max-width: 560px), (max-height: 700px) {
+    .hr-erledigt li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 3px 8px; margin-bottom: 3px; cursor: pointer; }
+    .hr-erledigt li.offen { white-space: normal; }
+    .hr .frage { margin: 2px 0 8px; line-height: 1.25; }
+    .hr-text { padding: 8px 12px; margin-bottom: 8px; }
+    .hr-wahl { gap: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -219,9 +233,11 @@ const SPIEL = {
     const textBox = el("div", { class: "hr-text", hidden: "", text: a.text });
     const erledigt = el("ul", { class: "hr-erledigt" });
     const fragenBox = el("div", { class: "hr-fragen" });
-    hr.append(auftrag, titel, ohr, hoer);
+    const kopf = el("div", { class: "hr-kopf" }, titel, ohr, hoer); // BH3 a: mit den Fragen eine Zeile
+    hr.append(auftrag, kopf);
+    let vorschau = null;
     if (p.vorher) {
-      const vorschau = el("ol", { class: "hr-vorschau" }, el("b", { text: "Darauf achtest du:" }));
+      vorschau = el("ol", { class: "hr-vorschau" }, el("b", { text: "Darauf achtest du:" }));
       for (const f of a.fragen) vorschau.append(el("li", { text: f.frage }));
       hr.append(vorschau);
     }
@@ -237,6 +253,8 @@ const SPIEL = {
       fragenDa = true;
       ohr.classList.remove("spricht");
       ohr.remove();
+      vorschau?.remove(); // BH3 a
+      hr.classList.add("mit-fragen");
       auftrag.textContent = a.fragen.length > 1 ? "❓ Beantworte die Fragen." : "❓ Beantworte die Frage.";
       zeigeFrage();
     };
@@ -259,7 +277,9 @@ const SPIEL = {
             sperren();
             if (nrFrage === a.fragen.length - 1) return ctx.richtig(waehle(["Super zugehört!", "Ein echter Reporter-Profi!", "Alles richtig — gut zugehört!"]));
             LS.ton("tipp");
-            erledigt.append(el("li", { text: `✓ ${f.frage} ${f.richtig}` }));
+            const li = el("li", { text: `✓ ${f.frage} ${f.richtig}` });
+            li.addEventListener("click", () => li.classList.toggle("offen")); // BH3 a: auf dem Handy eine Zeile, Antippen zeigt sie ganz
+            erledigt.append(li);
             nrFrage++;
             zeigeFrage();
             return;
@@ -272,6 +292,7 @@ const SPIEL = {
       }
       fragenBox.append(wahl);
       LS.kurztasten(wahl);
+      LS.schriftEinpassen(wahl, ".wahl-knopf"); // BH3 a: lange Wörter („am Donnerstagnachmittag“) ragten auf dem Tablet hinaus
     };
 
     // Ohne Stimme (oder Ton aus): Bericht lesen statt hören. Die Uhr startet, wenn das Kind „Gelesen“ tippt.
@@ -285,8 +306,9 @@ const SPIEL = {
       const tonAus = LS.lies("ton", true) === false;
       hr.insertBefore(el("p", { class: "hr-ohne", text: tonAus
         ? "🔇 Der Ton ist aus. Lies den Bericht darum leise und genau durch — oder schalte oben den Ton ein."
-        : "📖 Dieses Gerät hat keine deutsche Stimme. Lies den Bericht darum leise und genau durch." }), hoer);
+        : "📖 Dieses Gerät hat keine deutsche Stimme. Lies den Bericht darum leise und genau durch." }), kopf);
       textBox.hidden = false;
+      LS.lesetext(textBox); // BH3 a: der Text scrollt im eigenen Feld
       if (fragenDa) return;
       auftrag.textContent = "📖 Lies den Bericht genau.";
       hoer.disabled = true;
@@ -305,6 +327,7 @@ const SPIEL = {
       if (modus === "lesen") {
         textBox.hidden = !textBox.hidden;
         hoer.textContent = textBox.hidden ? "📖 Text zeigen" : "🙈 Text verbergen";
+        if (!textBox.hidden) LS.lesetext(textBox); // BH3 a
         return;
       }
       if (!LS.sprich(a.text, "de")) lesenStatt();

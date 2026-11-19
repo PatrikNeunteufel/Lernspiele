@@ -43,6 +43,11 @@
      Aufgabe (s5, s6) bis 38 px unter den Rand — Anzeige niedriger, Tastatur näher (LERN-55, LERN_Session46) */
   @media (max-width: 560px) {
     div:has(> .lupe) > .lupe { margin-bottom: 4px; }
+    /* BH3 a: Mit dem langen Hinweis nach einem Fehler ragte das Ablesen mit drei Strahlen (s5) bis 31 px unter den Rand
+       (LERN_Session48). Die Strahlen dürfen schmaler werden als die Karte (Untergrenze 280 statt 400 px), die Zahlen im
+       Strahl sind dafür grösser gezeichnet — bei 280 px gleich gross wie vorher bei voller Breite (rund 12 px). */
+    .lupe .lupe-strahl { width: max(min(280px, 100%), min(100%, calc(var(--rest-h, 368px) * var(--lupe-verh, 1.9)))); }
+    .lupe-strahl text { font-size: 30px; }
     /* OK neben der Dezimaltaste ist schmal: „OK ✓“ brach in zwei Zeilen, die unterste Reihe wurde 62 statt 46 px hoch */
     div:has(> .lupe) > .tastatur .ok { white-space: nowrap; padding-inline: 2px; font-size: 18px; }
   }

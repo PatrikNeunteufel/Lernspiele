@@ -31,6 +31,14 @@
   .wort.gefunden { background: var(--marker); box-shadow: 0 0 0 4px var(--marker-strich); }
   .wort.repariert { background: var(--gut-hell); box-shadow: 0 0 0 4px var(--gut); }
   .frage { text-align: center; font-weight: 800; font-size: clamp(18px, 4vw, 22px); margin: 4px 0 10px; }
+  /* BH3 a: Auf dem Handy kleinere Wortknöpfe und engere Reihen — zwei lange Sätze (s6) brauchten sieben Reihen, und
+     Schreibweisen samt repariertem Satz ragten bis 98 px unter den Rand */
+  @media (max-width: 560px) {
+    .satz { gap: 6px; margin: 4px 0 10px; }
+    .wort { min-height: 42px; padding: 3px 9px; font-size: 20px; }
+    .frage { margin: 2px 0 6px; }
+    .regelkarte { padding: 6px 12px; font-size: 16px; margin-bottom: 8px; }
+  }
 </style>
 </head>
 <body>

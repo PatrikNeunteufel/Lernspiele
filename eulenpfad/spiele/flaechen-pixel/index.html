@@ -24,6 +24,14 @@
     .raster ~ .frage, .frage:has(+ .raster) { font-size: 18px; line-height: 1.2; margin: 2px 0 4px; }
     .frage + .raster { margin-bottom: 6px; }
     .raster ~ .anzeige { min-height: 48px; font-size: 30px; line-height: 1.1; }
+    /* BH3 a: Mit dem langen Hinweis nach einem Fehler ragte die Aufgabe trotzdem bis 41 px (s6) unter den Rand
+       (LERN_Session48) — das Raster steht an seiner Untergrenze. Die Anzeige steht rechts neben dem Raster, das Raster
+       nimmt die übrige Breite. */
+    div:has(> .frage + .raster + .anzeige) { display: grid; grid-template-columns: minmax(0, 1fr) 76px; column-gap: 8px; align-items: center; }
+    div:has(> .frage + .raster + .anzeige) > * { grid-column: 1 / -1; }
+    div:has(> .frage + .raster + .anzeige) > .raster { grid-column: 1; margin: 0; }
+    div:has(> .frage + .raster + .anzeige) > .anzeige { grid-column: 2; min-width: 0; padding-inline: 4px; }
+    div:has(> .frage + .raster + .anzeige) > .tastatur { margin-inline: 0; }
   }
 </style>
 </head>

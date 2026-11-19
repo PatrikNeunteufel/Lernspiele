@@ -83,6 +83,23 @@
     div:has(> .gl-bau) > .auftrag { margin-bottom: 6px; }
     .gl-gefunden { margin-top: 2px; }
   }
+  /* BH3 a: Gefundenes kleiner (Erledigtes kompakter), auf dem Handy und bis 820 px Bildhöhe — mit vielen Funden ragte
+     „Finde alle Glace!“ (s4, zehn Becher) gegen Ende 103 px, Kleider-Sets (s2) 42 px, bei 1024 × 768 22 px unter den Rand */
+  /* BH3 a: unter 700 px Bildhöhe die Glace im Bau etwas kleiner (Cornet mit vier Kugeln, s5 Laptop 7 px darüber) */
+  @media (max-height: 700px) {
+    .gl-bau .gl-kugel { width: 34px; height: 34px; font-size: 16px; }
+  }
+  @media (max-width: 560px), (max-height: 820px) {
+    .gl-gefunden { gap: 4px 6px; }
+    .gl-gefunden > * { padding: 3px; }
+    .gl-gefunden .gl-kugel { width: 30px; height: 30px; font-size: 14px; border-width: 2px; }
+    .gl-gefunden .gl-becher .gl-unten { width: 48px; height: 16px; border-radius: 0 0 12px 12px; margin-top: -4px; }
+    .gl-gefunden .gl-turm .gl-unten { border-left-width: 13px; border-right-width: 13px; border-top-width: 24px; margin-top: -3px; }
+    .gl-gefunden .gl-turm .gl-kugel + .gl-kugel { margin-bottom: -6px; }
+    .gl-gefunden .gl-becher .gl-kugel + .gl-kugel { margin-left: -4px; }
+    .gl-gefunden .gl-platz { min-width: 44px; min-height: 44px; font-size: 20px; }
+    .gl-gefunden .gl-set { font-size: 24px; }
+  }
   /* Handy mit Browserleisten (375×660, LERN_Session46): Finden mit zwei Gruppen zu drei Stücken (s2) ragte 97 px unter
      den Rand, weil je Gruppe nur zwei Knöpfe nebeneinander standen — jetzt drei; Zähler, Funde und Bau enger */
   @media (max-width: 560px) and (max-height: 700px) {

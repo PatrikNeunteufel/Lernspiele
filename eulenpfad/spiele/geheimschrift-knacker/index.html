@@ -75,6 +75,14 @@
     .gk-feld:has(.gk-slots > :nth-child(7)) { column-gap: 8px; }
     .gk-tasten { grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: none; }
     .gk-tasten button.gk-ok { grid-column: span 3; }
+    /* BH3 a: Mit dem langen Hinweis nach einem Fehler ragte die Aufgabe trotzdem bis 36 px (s6) unter den Rand
+       (LERN_Session48), die Scheibe stand an der Untergrenze 190 px. Sie darf bis 160 px schmal werden (Buchstaben
+       rund 12 px), die Tasten 42 statt 44 px hoch, Legende enger. */
+    .gk-scheibe { width: clamp(160px, var(--rest-h, 260px), 300px); }
+    .gk-tasten button { min-height: 42px; }
+    .gk-legende { font-size: 12px; margin: 0; }
+    .gk-feld .gk-slots span { height: 40px; }
+    .frage { font-size: 17px; line-height: 1.25; }
     /* Schlüssel knacken (s5): die vier Schlüssel in einer Reihe, 🔑 neben der Zahl (vorher zwei Reihen, 57 px darunter) */
     .wahl:has(.wahl-knopf .bild) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; --bild-links-gr: 24px; }
     /* 🔑 neben der Zahl: Baustein bildLinks "eng" (R5 a); vier schmale Knöpfe in einer Reihe brauchen weniger Rand */

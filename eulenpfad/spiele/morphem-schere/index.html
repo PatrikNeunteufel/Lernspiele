@@ -300,14 +300,18 @@ function eaAufgabe(ctx, a, p) {
   ctx.schritte(a.gruende ? 2 : 1);
   ctx.serie("antwort", /^ä/i.test(a.richtig) ? "ä" : "e");
   if (p.ea.regel) f.append(el("div", { class: "regelkarte" }, el("b", { text: "Stammregel" }), REGEL_EA));
-  f.append(el("div", { class: "frage", text: "Welche Schreibweise ist richtig? Denk an den Stamm." }));
+  const frage1 = el("div", { class: "frage", text: "Welche Schreibweise ist richtig? Denk an den Stamm." });
+  f.append(frage1);
   const luecke = el("span", { class: "luecke", text: "?" });
   f.append(el("div", { class: "lueckenwort", "aria-label": "Wort mit Lücke" }, a.vor, luecke, a.nach));
   const hinweisEa = p.knapp ? "Denk an ein verwandtes Wort." : REGEL_EA;
-  knoepfe(ctx, mische([a.richtig, a.falsch]), a.richtig, "", hinweisEa, loesung, () => {
+  const wahl1 = knoepfe(ctx, mische([a.richtig, a.falsch]), a.richtig, "", hinweisEa, loesung, () => {
     luecke.textContent = a.richtig;
     luecke.classList.add("richtig");
     if (!a.gruende) { ctx.richtig(`Richtig: ${loesung}`); return; }
+    // BH3 a: Die Schreibweise steht jetzt grün im Wort; erste Frage und ihre Knöpfe machen der Begründung Platz
+    frage1.remove();
+    wahl1.remove();
     f.append(el("div", { class: "frage", html: "<b>Woher weisst du das?</b> Welches Wort ist verwandt?" }));
     knoepfe(ctx, a.gruende, a.verwandt || KEIN, "wort", p.knapp ? "Welches Wort hat denselben Stamm?" : "Das verwandte Wort hat denselben Stamm und dieselbe Bedeutung, nur mit a oder au. Gibt es kein solches Wort, bleibt es beim e.", loesung, () => ctx.richtig(`Richtig: ${loesung}`));
   });
@@ -339,6 +343,7 @@ function knoepfe(ctx, optionen, richtig, klasse, hinweis, loesung, beiRichtig) {
     k.click();
     return true;
   });
+  return box; // BH3 a: der Aufrufer räumt erledigte Knöpfe weg
 }
 
 /**

@@ -15,6 +15,17 @@
   .stimmt-beispiele .wahl-knopf { font-size: clamp(16px, 3.8vw, 21px); font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; overflow-wrap: anywhere; }
   .stimmt-beispiele.zahlen { --wahl-breite: 220px; }
   .stimmt-beispiele svg { width: 100%; max-width: 150px; height: auto; display: block; margin: 0 auto 4px; }
+  /* BH3 a: auf dem Handy und unter 700 px Bildhöhe die drei Figuren zur Wahl in einer Reihe statt 2 + 1, Aussage und
+     Frage enger — im zweiten Schritt ragte die Aufgabe auf dem Handy bis 176 px unter den Rand */
+  @media (max-width: 560px), (max-height: 700px) {
+    .aussage-karte { padding: 10px 12px; margin-bottom: 8px; }
+    .aussage-karte .auftrag { line-height: 1.3; }
+    .stimmt-frage { margin: 4px 0; }
+    .stimmt-beispiele:not(.zahlen) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .stimmt-beispiele:not(.zahlen) .wahl-knopf { padding: 6px 4px; }
+    .stimmt-beispiele svg { max-width: min(150px, 100%); }
+    .stimmt-beispiele small { line-height: 1.15; }
+  }
   .stimmt-figur { fill: color-mix(in srgb, var(--deko-2) 18%, var(--k-feld)); stroke: var(--deko-2); stroke-width: 3; stroke-linejoin: round; }
   .stimmt-diagonale { stroke: var(--deko-5); stroke-width: 2.5; stroke-dasharray: 6 4; }
   .stimmt-kreis { fill: none; stroke: var(--deko-6); stroke-width: 3; }

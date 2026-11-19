@@ -18,6 +18,7 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { STUMM_ARG, stummSchalten } = require("./stumm"); // Ton aus (LERN_Session48)
 
 // maus: Gerät mit Maus — dort zeigt der Rahmen die Tastenmarken und gibt Knöpfen Platz dafür (TM1 a, spiel.js ktPlatz).
 // Chrome ohne Fenster meldet für alle Rahmen eine Maus; auf Geräten ohne nimmt die Messung Marken und Platz wieder weg
@@ -252,7 +253,7 @@ async function main() {
     "--no-first-run", "--no-default-browser-check", "--hide-scrollbars",
     // Stimme ohne Antippen erlauben: sonst meldete die Eule „Stimme hat nicht gesprochen (not-allowed)“, eine Blase
     // rund 64 px höher als die gewöhnliche — Überlauf, den es auf einem Gerät nicht gibt (LERN_Session43)
-    "--autoplay-policy=no-user-gesture-required", "about:blank"], { stdio: "ignore" });
+    "--autoplay-policy=no-user-gesture-required", STUMM_ARG, "about:blank"], { stdio: "ignore" });
   try {
     let version = null;
     for (let i = 0; i < 50 && !version; i++) {
@@ -270,6 +271,7 @@ async function main() {
       }
     };
     await send("Runtime.enable");
+    await stummSchalten(send);
     // Startseite bereit, sobald LS und SPIELE da sind (bis 20 s); sonst klare Meldung statt „LS is not defined“
     // (LERN_Session43: der Server war beendet, die Messung brach mit dieser Meldung ab)
     try { await fetch(BASIS + "/eulenpfad/index.html"); }

@@ -55,9 +55,20 @@
   /* Untergrenze 180 px breit (135 hoch; vorher 240): Platz für den Hinweis nach einem Fehler (LERN_Session47) */
   .lw-karte.lw-inline + .lw-bildfeld, .lw-bildfeld.lw-benennen { width: max(180px, min(100%, 480px, calc(var(--rest-h, 270px) * 4 / 3))); }
   @media (max-width: 560px) {
-    .lw:has(> .lw-inline) ~ .wahl .wahl-knopf { min-height: 52px; }
-    .lw:has(> .lw-inline) > .frage { margin-bottom: 6px; }
-    .lw-karte.lw-inline { padding: 8px 12px; line-height: 1.3; margin-bottom: 8px; }
+    /* BH3 a: Antworten 46 statt 52 px, Frage und Karte enger — der Hinweis nach einem Fehler (was das falsche Teil tut,
+       wo das gesuchte liegt) liess die Antworten noch 14 px unter den Rand ragen (s5), das Bild stand schon an der
+       Untergrenze */
+    .lw:has(> .lw-inline) ~ .wahl { gap: 8px; }
+    .lw:has(> .lw-inline) ~ .wahl .wahl-knopf { min-height: 46px; }
+    .lw:has(> .lw-inline) > .frage { margin: 0 0 4px; line-height: 1.2; }
+    .lw-karte.lw-inline { padding: 6px 10px; line-height: 1.3; margin-bottom: 6px; }
+    .lw-karte.lw-inline + .lw-bildfeld { margin-bottom: 6px; }
+    /* BH3 a: Karte nur mit Bild (Phänomen, s6) flacher, Erklärungen enger — mit dem Hinweis ragten sie 24 px unter den Rand */
+    .lw-karte.lw-nurbild { padding: 2px 8px; margin-bottom: 8px; }
+    .lw-karte.lw-nurbild .lw-bild { font-size: 36px; }
+    .lw:has(> .lw-nurbild) > .frage { margin: 2px 0 6px; font-size: 18px; line-height: 1.25; }
+    .lw .wahl.lw-erklaerung { gap: 6px; }
+    .lw .wahl.lw-erklaerung .wahl-knopf { padding: 6px 10px; line-height: 1.25; }
     /* „Was schützt deine Ohren?“ (s3): Körbe flacher, Karte enger — mit dem Hinweis nach einem Fehler ragten zwei Reihen
        Körbe bis 61 px über den Rand (LERN-55, LERN_Session47). Zu zweit, nicht zu dritt: in 106 px passte
        „Lärmschutzwand“ nicht (120 px) */
@@ -680,7 +691,7 @@ function schwingt(ctx, a, lw) {
 function phaenomen(ctx, a, lw) {
   const p = PHAENOMENE[a.i];
   ctx.tipp(["Überleg zuerst: Woher kommt der Schall, und wohin geht er weiter?", p.tipp, PRINZIP[p.art]]);
-  lw.append(el("div", { class: "frage", text: p.frage }), el("div", { class: "lw-karte" }, el("span", { class: "lw-bild", text: p.bild })));
+  lw.append(el("div", { class: "frage", text: p.frage }), el("div", { class: "lw-karte lw-nurbild" }, el("span", { class: "lw-bild", text: p.bild }))); // BH3 a: lw-nurbild
   const box = LS.auswahl(ctx, {
     optionen: a.optionen, richtig: a.richtig, loesung: a.richtig,
     hinweis: "Das passt nicht. Überleg: Was macht der Schall hier — prallt er ab, wird er gesammelt oder geschluckt?",

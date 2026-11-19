@@ -31,6 +31,15 @@
     .optionen:has(> :nth-child(7)) .option { padding: 6px 4px; }
     .optionen:has(> :nth-child(7)) .option:not(.mond) { font-size: 17px; }
   }
+  /* BH3 a: gelegte Planeten enger, damit alle acht in zwei Zeilen passen — gegen Ende ragte „Ordne die Planeten“ (s5)
+     auf dem Handy 83 px unter den Rand */
+  @media (max-width: 560px), (max-height: 700px) {
+    .nacht { padding: 10px; margin-bottom: 10px; }
+    .nacht .frage { margin-bottom: 8px; }
+    .reihe { gap: 4px; min-height: 44px; margin-bottom: 4px; }
+    .reihe span, .sonne { font-size: 30px; }
+    .reihe .planet { font-size: 14px; padding: 4px 8px; }
+  }
 </style>
 </head>
 <body>

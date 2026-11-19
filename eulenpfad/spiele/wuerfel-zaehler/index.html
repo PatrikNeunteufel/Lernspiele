@@ -12,12 +12,15 @@
   .wz-bau { display: flex; justify-content: center; align-items: flex-end; flex-wrap: wrap; gap: 10px 16px; margin: 0 auto 12px; }
   .wz-geb { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .wz-geb svg { display: block; max-width: min(100%, 42vw); height: auto; }
+  /* BH3 a: Gebäude mit Bauplan nach der restlichen Höhe (--rest-h), Breite über das Seitenverhältnis (--wz-v) */
+  .wz-rest { display: block; }
+  .wz-geb .wz-rest svg { width: max(min(76px, 100%), min(100%, var(--wz-b), var(--rest-h, 999px) * var(--wz-v))); }
   .wz-name { font-weight: 800; font-size: clamp(15px, 3.4vw, 18px); color: var(--text-leise); }
   .wz-mass { text-align: center; font-weight: 700; color: var(--text-leise); font-size: clamp(14px, 3.2vw, 17px); margin: 0 0 10px; }
   .wz-planbox { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 4px; }
   .wz-plan-titel { font-size: 13px; font-weight: 800; color: var(--text-leise); }
   .wz-plan { display: grid; gap: 2px; }
-  .wz-plan span { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--rand);
+  .wz-plan span { width: var(--wz-zelle, 26px); height: var(--wz-zelle, 26px); display: flex; align-items: center; justify-content: center; border: 2px solid var(--rand);
     border-radius: 6px; font-weight: 900; font-size: 16px; background: var(--karte); }
   .wz-plan span.voll { background: var(--hinweis-hell); border-color: var(--deko-4); }
   .wz-vorne { width: 100%; height: 4px; border-radius: 2px; background: var(--text-leise); margin-top: 2px; }
@@ -47,6 +50,13 @@
     .wz-wahl .wahl-knopf { padding-inline: 4px; line-height: 1.15; }
     .wz-wahl .wahl-knopf .bild { font-size: 30px; }
   }
+  /* BH3 a: breit und quer die Zifferntastatur rechts neben der Aufgabe wie im Rahmen (stil.css (2)) — sie steht hier in
+     .wz, nicht direkt in der Spielfläche; mit Bauplan (s3) ragte Schritt 2 bei 1024 × 768 bis 77 px unter den Rand */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .wz:has(> .tastatur) { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 24px; align-items: start; }
+    .wz:has(> .tastatur) > * { grid-column: 1; }
+    .wz:has(> .tastatur) > .tastatur { grid-column: 2; grid-row: 1 / span 12; margin-top: 0; }
+  }
   /* Kiste füllen (s5) mit Zifferntastatur: Anzeige niedriger, Tastatur näher — ragte auf dem Handy bis 31 px, auf dem
      Laptop 9 px unter den Rand (LERN-55, LERN_Session46) */
   @media (max-width: 560px), (max-height: 700px) {
@@ -54,6 +64,12 @@
     .wz-mass { margin-bottom: 6px; }
     .wz .frage { margin-bottom: 6px; }
     .wz-bau { margin-bottom: 6px; }
+    .wz-plan { --wz-zelle: 23px; } /* BH3 a: Bauplan enger */
+    .wz-knoepfe { margin-top: 6px; } /* BH3 a: Bauen (s4) 4 px über dem Rand */
+    .wz-plan span { font-size: 15px; }
+    .wz-geb { gap: 2px; }
+    .wz-planbox { margin-top: 0; gap: 1px; }
+    .wz-plan-titel { line-height: 1.1; }
   }
 </style>
 </head>
@@ -448,10 +464,19 @@ function bauSvg(g, { farbe = "var(--deko-6)", u = 30 } = {}) {
   return el("span", { class: "wz-svg", html: `<svg viewBox="0 0 ${w.toFixed(1)} ${h.toFixed(1)}" width="${Math.round(w)}" height="${Math.round(h)}" aria-hidden="true">${teile.join("")}</svg>` });
 }
 
+/** BH3 a: Bild eines Gebäudes (span.wz-svg) nach der restlichen Höhe (--rest-h), Breite über das Seitenverhältnis. */
+function nachRestHoehe(s) {
+  const svg = s.querySelector("svg");
+  s.classList.add("wz-rest");
+  s.style.setProperty("--wz-b", svg.getAttribute("width") + "px");
+  s.style.setProperty("--wz-v", String(svg.getAttribute("width") / svg.getAttribute("height")));
+  LS.restHoehe(s);
+}
+
 /** Bauplan: Raster mit Höhenzahlen, hinten oben, vorne unten (Balken). */
 function bauplanEl(g) {
   const raster = el("div", { class: "wz-plan" });
-  raster.style.gridTemplateColumns = `repeat(${g.n}, 26px)`;
+  raster.style.gridTemplateColumns = `repeat(${g.n}, var(--wz-zelle, 26px))`; // BH3 a: Zellgrösse aus dem Stil
   for (let r = g.m - 1; r >= 0; r--) for (let c = 0; c < g.n; c++) {
     const h = hoehe(g, c, r);
     raster.append(el("span", { class: h ? "voll" : "leer", text: h ? String(h) : "" }));
@@ -482,6 +507,8 @@ function zeigeVergleich(ctx, a, wz, p) {
   const frage = el("div", { class: "frage", text: "Wo sind mehr Würfel?" });
   wz.append(frage, el("div", { class: "wz-bau" },
     gebKarte(a.links, "⬅️ Links", { bauplan: p.bauplan }), gebKarte(a.rechts, "➡️ Rechts", { bauplan: p.bauplan })));
+  // BH3 a: mit Bauplan (s3) Gebäude nach der restlichen Höhe — mit Zifferntastatur in Schritt 2 ragte s3 sonst über den Rand
+  if (p.bauplan) wz.querySelectorAll(".wz-svg").forEach(nachRestHoehe);
   if (a.art === "quader") ctx.tipp(["Zähl zuerst eine Schicht: breit mal tief.", "Dann mal die Höhe: so viele Schichten liegen aufeinander.", "Du siehst nur die Würfel aussen. Die innen zählen auch!"]);
   else if (ctx.stufe === "s1") ctx.tipp(["Zähl die Würfel auf jeder Seite, einen nach dem anderen.", "Tipp mit dem Finger auf jeden Würfel, damit du keinen zweimal zählst.", `Links ${saeulenText(saeulen(a.links))}, rechts ${saeulenText(saeulen(a.rechts))}.`]);
   else if (ctx.stufe === "s2") ctx.tipp(["Zähle Säule für Säule.", "Die Würfel ganz hinten sind weiter oben gezeichnet. Sie zählen auch.", `Links ${saeulenText(saeulen(a.links))}, rechts ${saeulenText(saeulen(a.rechts))}. Wie hoch ist jede?`]);
@@ -531,6 +558,8 @@ function zeigeVergleich(ctx, a, wz, p) {
         k.classList.add("richtig");
         if (a.ergebnis === "gleich") return ctx.richtig("Genau, gleich viele!");
         LS.ton("tipp");
+        // BH3 a: ein Hinweis aus Schritt 1 stand sonst über Schritt 2 weiter (bis fünf Zeilen, 134 px über dem Rand)
+        ctx.sag("Genau! Wie viele Würfel mehr?", "gut");
         return schrittZahl();
       }
       k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
@@ -651,6 +680,7 @@ function zeigeKiste(ctx, a, wz, p) {
       el("label", {}, el("span", { text: "schon drin:" }), LS.notizFeld({ breite: 2, label: "Notiz: so viele Würfel sind schon drin" }))));
   wz.append(el("div", { class: "frage", text: "Wie viele Würfel fehlen, bis die Kiste voll ist?" }), bau,
     el("div", { class: "wz-mass", text: `Die Kiste ist ${k.n} Würfel breit, ${k.m} Würfel tief und ${k.kiste} Würfel hoch.` }));
+  bau.querySelectorAll(".wz-svg").forEach(nachRestHoehe); // BH3 a: Kiste nach der restlichen Höhe (s5/s6 8 px darüber)
   const anzeige = el("div", { class: "anzeige leer", "aria-label": "Fehlende Würfel" });
   wz.append(anzeige);
   const tasten = LS.tastatur({

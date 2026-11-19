@@ -25,6 +25,16 @@
     .wuerfel-wahl .wahl-knopf { min-height: 80px; }
     .ansichten { margin-bottom: 8px; }
     .regel { margin-bottom: 6px; }
+    /* BH3 a: Bauplan (s5) links, Regel rechts daneben, Gebäude zur Wahl niedriger — nach einem Fehler ragte „Welches
+       Gebäude passt zu diesem Bauplan?“ auf dem Handy 81 px unter den Rand */
+    /* BH3 a: vier Ansichten oder Pläne zur Wahl in einer Reihe statt 3 + 1 (s2 „von oben“ ragte 25 px unter den Rand) */
+    .wuerfel-wahl.wb-raster:has(> :nth-child(4)):not(:has(> :nth-child(5))) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .wuerfel-wahl.wb-raster .wahl-knopf { padding-inline: 4px; }
+    .wb-planreihe { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+    .wb-planreihe .ansichten { margin: 0; flex: none; }
+    .wb-planreihe .regel { margin: 0; text-align: left; max-width: 190px; }
+    .wb-planreihe ~ .wuerfel-wahl .wahl-knopf svg { max-height: max(70px, 12vh); }
+    .wb-planreihe ~ .wuerfel-wahl .wahl-knopf { min-height: 70px; padding-block: 4px; }
   }
 </style>
 </head>
@@ -480,6 +490,13 @@ LS.spiel({
     }
     const istBau = ["planZuBau", "dreiAnsichten"].includes(a.art);
     if (istBau) ctx.flaeche.append(el("div", { class: "regel", text: "Bei jedem Gebäude ist vorne unten links, rechts unten rechts." }));
+    // BH3 a: Bauplan und Regel nebeneinander (Anordnung im Stil, nur Handy)
+    if (a.art === "planZuBau") {
+      const [plan, regel] = [...ctx.flaeche.querySelectorAll(":scope > .ansichten, :scope > .regel")];
+      const reihe = el("div", { class: "wb-planreihe" });
+      plan.replaceWith(reihe);
+      reihe.append(plan, regel);
+    }
     const box = LS.auswahl(ctx, {
       optionen: a.optionen.map((_, i) => i), richtig: a.richtig, breite: istBau ? 140 : 90,
       inhalt: i => (istBau ? bauSvg({ ...a, plan: a.optionen[i] }, false)
@@ -498,6 +515,7 @@ LS.spiel({
       }[a.art],
     });
     box.classList.add("wuerfel-wahl");
+    if (!istBau) box.classList.add("wb-raster"); // BH3 a: Ansichten und Pläne auf dem Handy in einer Reihe
   },
 });
 </script>

@@ -46,6 +46,29 @@
   .hg-wahl.bilder .wahl-knopf .bild { font-size: clamp(40px, 10vw, 54px); }
   .hg-fragen .ablage { margin-bottom: 10px; }
   .hg-los { display: flex; justify-content: center; margin: 0 0 12px; }
+  /* BH3 a: Sind die Fragen da, wird das Buch eine Zeile (Titel und 🔊 nebeneinander); der Text, wenn er sichtbar ist,
+     scrollt im eigenen Feld (LS.lesetext). Auf dem Handy dazu jede gelöste Frage auf einer Zeile (Antippen zeigt sie
+     ganz) und niedrigere Bildknöpfe — mit zwei gelösten Fragen ragten die Antworten bis 135 px unter den Rand (s6). */
+  .hg.mit-fragen .hg-buch { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; padding: 8px 12px; margin-bottom: 10px; }
+  .hg.mit-fragen .hg-titel { margin: 0; }
+  .hg.mit-fragen .hg-hoer { margin: 0; min-height: 46px; padding: 6px 16px; }
+  .hg.mit-fragen .hg-text { flex: 1 0 100%; margin-top: 4px; }
+  @media (max-width: 560px), (max-height: 700px) {
+    .hg-erledigt li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 3px 8px; margin-bottom: 3px; cursor: pointer; }
+    .hg-erledigt li.offen { white-space: normal; }
+    .hg .frage { margin: 2px 0 8px; line-height: 1.25; }
+    .hg-wahl.bilder .wahl-knopf { min-height: 80px; }
+    .hg-wahl.bilder .wahl-knopf .bild { font-size: 38px; }
+    .hg-wahl { gap: 6px; }
+    /* BH3 a: mit den Fragen das Buch ohne Rahmen, Titel kleiner; „Frage 3 von 4“ links in der Zeile der Frage */
+    .hg.mit-fragen .hg-buch { padding: 2px 4px; border: none; box-shadow: none; background: none; margin-bottom: 6px; }
+    .hg.mit-fragen .hg-buch::after { display: none; }
+    .hg.mit-fragen .hg-titel { font-size: 16px; padding-right: 0; }
+    .hg.mit-fragen > .auftrag { margin-bottom: 4px; }
+    .hg-nr { float: left; margin: 2px 8px 0 0; font-size: 13px; }
+    .hg .frage { text-align: left; font-size: 18px; }
+    .hg-fragen .wahl, .hg-fragen .ablage { clear: both; }
+  }
 </style>
 </head>
 <body>
@@ -287,6 +310,7 @@ const SPIEL = {
       ohr.classList.remove("spricht");
       ohr.remove();
       vorschau?.remove();
+      hg.classList.add("mit-fragen"); // BH3 a: Buch als eine Zeile
       auftrag.textContent = a.fragen.length > 1 ? "❓ Beantworte die Fragen." : "❓ Beantworte die Frage.";
       zeigeFrage();
     };
@@ -323,7 +347,9 @@ const SPIEL = {
             sperren();
             if (nrFrage === a.fragen.length - 1) return ctx.richtig(waehle(LOB));
             LS.ton("tipp");
-            erledigt.append(el("li", { text: `✓ ${f.frage} ${text}` }));
+            const li = el("li", { text: `✓ ${f.frage} ${text}` });
+            li.addEventListener("click", () => li.classList.toggle("offen")); // BH3 a: auf dem Handy eine Zeile, Antippen zeigt sie ganz
+            erledigt.append(li);
             nrFrage++;
             zeigeFrage();
             return;
@@ -354,6 +380,7 @@ const SPIEL = {
         ? "🔇 Der Ton ist aus. Lies die Geschichte darum leise und genau durch — oder schalte oben den Ton ein."
         : "📖 Dieses Gerät hat keine deutsche Stimme. Lies die Geschichte darum leise und genau durch." }), buch);
       textBox.hidden = false;
+      LS.lesetext(textBox); // BH3 a: der Text scrollt im eigenen Feld
       if (fragenDa) return;
       auftrag.textContent = "📖 Lies die Geschichte genau.";
       hoer.disabled = true;
@@ -372,6 +399,7 @@ const SPIEL = {
       if (modus === "lesen") {
         textBox.hidden = !textBox.hidden;
         hoer.textContent = textBox.hidden ? "📖 Text zeigen" : "🙈 Text verbergen";
+        if (!textBox.hidden) LS.lesetext(textBox); // BH3 a: Höhe nach dem Platz neben den Fragen neu rechnen
         return;
       }
       if (!LS.sprich(a.text, "de")) lesenStatt();

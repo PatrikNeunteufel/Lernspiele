@@ -54,6 +54,10 @@
     .pt-kopf:not(:has(.nz-zeile)) .titel { align-self: end; max-width: none; }
     .pt-kopf:not(:has(.nz-zeile)) .frage { align-self: start; font-size: 16px; line-height: 1.3; }
     .pt-kopf ~ .anzeige { min-height: 48px; font-size: 30px; line-height: 1.1; }
+    /* Mit Notizzeile (BH3 a): Frage unter der Tabelle ragte nach dem Hinweis bis 13 px unter den Rand — Frage kleiner,
+       Notizfeld flacher */
+    .pt-kopf:has(.nz-zeile) .frage { font-size: 16px; line-height: 1.2; }
+    .werte tr.nz-zeile .zw-notiz { min-height: 28px; padding-block: 0; }
   }
 </style>
 </head>

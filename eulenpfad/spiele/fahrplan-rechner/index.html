@@ -23,7 +23,9 @@
   .fahrplan caption { font-weight: 800; color: var(--deko-2-schrift); padding-bottom: 4px; }
   .fahrplan.tafel th { text-align: left; }
   .fp-legende { text-align: center; font-size: 14px; color: var(--text-leise); font-weight: 700; margin: -6px 0 8px; }
-  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 520px; margin: 0 auto; }
+  /* width (BH3 a): quer steht die Zeile in der Spalte neben der Tastatur und schrumpfte dort auf ihren Inhalt — die
+     Anzeige der Abfahrtstafel („? min“) war nur rund 70 px breit */
+  .ergebnis-zeile { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 520px; margin: 0 auto; }
   .ergebnis-zeile .anzeige { flex: 1; }
   .anzeige.fr-dauer.leer::after { content: "? h ? min"; }
   .ergebnis-zeile .einheit { font-size: clamp(26px, 6vw, 38px); font-weight: 900; color: var(--knopf); min-width: 1.6em; }
@@ -58,6 +60,29 @@
     .fahrplan .zw-notiz, .nz-legende .zw-notiz { min-height: 24px; }
     .fp-legende { margin: -2px 0 4px; }
     .ergebnis-zeile > .fr-beispiel { flex: 0 1 8.5em; margin: 0; text-align: left; font-size: 14px; line-height: 1.25; }
+    /* BH3 a: Mit dem langen Hinweis nach einem Fehler ragte die Reise mit drei Abschnitten (s6) bis 117 px unter den
+       Rand (LERN_Session48); eine falsche Dauer wie „13 h 59 min“ brach in der Anzeige in zwei Zeilen um. Anzeige
+       einzeilig und niedriger, Fahrplan mit kleinerer Schrift und engeren Zeilen, Legende enger. */
+    .ergebnis-zeile .anzeige { min-height: 42px; font-size: 26px; white-space: nowrap; padding-block: 0; }
+    .fahrplan { font-size: 14px; }
+    .fahrplan th, .fahrplan td { padding-block: 1px; line-height: 1.15; }
+    .fahrplan td.mittel { font-size: 1.1em; padding: 0 4px; }
+    .fahrplan .zw-notiz, .nz-legende .zw-notiz { min-height: 19px; font-size: 13px; padding: 0 2px; border-width: 1.5px; }
+    .fahrplan .zw-notiz::placeholder, .nz-legende .zw-notiz::placeholder { font-size: 12px; }
+    .fp-legende { margin: -4px 0 2px; font-size: 13px; line-height: 1.2; }
+    .fahrplan td.mittel { line-height: 1; padding-inline: 2px; }
+    .fahrplan th, .fahrplan td { padding-inline: 4px; }
+    /* Legende rechts neben dem Fahrplan statt in einer Zeile darunter */
+    div:has(> .fp-rahmen + .fp-legende) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 6px; align-items: center; }
+    div:has(> .fp-rahmen + .fp-legende) > * { grid-column: 1 / -1; }
+    div:has(> .fp-rahmen + .fp-legende) > .fp-rahmen { grid-column: 1; }
+    div:has(> .fp-rahmen + .fp-legende) > .fp-rahmen > .fahrplan { margin: 0 0 6px; }
+    div:has(> .fp-rahmen + .fp-legende) > .fp-legende { grid-column: 2; margin: 0 0 6px; text-align: left; font-size: 12px; }
+    div:has(> .fp-rahmen + .fp-legende) > .tastatur { margin-inline: 0; }
+    .fp-legende .fp-trenner { display: none; }
+    .fp-legende .nz-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; margin-top: 6px; white-space: normal; }
+    .fp-legende .nz-legende .zw-notiz { min-height: 22px; font-size: 13px; padding: 0 2px; }
+    .frage { font-size: 17px; line-height: 1.25; margin-bottom: 4px; }
   }
   /* Tablet hoch: lange Fahrpläne mit Zifferntastatur ragten bis 39 px über den Rand (LERN_Session46) — Zeilen, Anzeige
      und Abstände enger */
@@ -66,6 +91,11 @@
     .fahrplan th, .fahrplan td { padding-block: 3px; }
     .ergebnis-zeile .anzeige { min-height: 64px; padding-block: 0; line-height: 1.15; }
     .ergebnis-zeile > .fr-beispiel { margin: 2px 0 4px; }
+    /* BH3 a: Reise über drei Abschnitte (s3, s6) ragte nach einem Fehler auf 768 × 950 noch bis 30 px über den Rand
+       (LERN_Session48) — das Beispiel steht rechts neben der Anzeige statt darunter */
+    .ergebnis-zeile:has(> .fr-beispiel):not(:has(> .nz-zeile)) { flex-wrap: nowrap; }
+    .fahrplan th, .fahrplan td { padding-block: 2px; }
+    .ergebnis-zeile:not(:has(> .nz-zeile)) > .fr-beispiel { flex: 0 1 10em; margin: 0; text-align: left; line-height: 1.25; }
   }
   .nz-legende { white-space: nowrap; }
   .nz-legende .zw-notiz { font-size: 15px; min-height: 28px; padding: 0 3px; }
@@ -649,7 +679,8 @@ LS.spiel({
     const nz = notizPlan(a);
     const mitNotiz = (nz.teilzeit || nz.felder.length > 0) && ctx.notizen(Number(ctx.stufe.slice(1)) >= 2);
     aufgabeZeigen(a, ctx.flaeche, mitNotiz && nz.teilzeit);
-    if (mitNotiz && nz.legende) ctx.flaeche.querySelector(".fp-legende")?.append(" · ",
+    // BH3 a: Trenner als eigenes Element, damit ihn das Handy ausblenden kann (Legende rechts neben dem Fahrplan)
+    if (mitNotiz && nz.legende) ctx.flaeche.querySelector(".fp-legende")?.append(el("span", { class: "fp-trenner", text: " · " }),
       el("label", { class: "nz-legende" }, `${nz.legende} `, LS.notizFeld({ breite: 4, label: nz.legende })));
     const notiz = mitNotiz && nz.felder.length ? el("div", { class: "nz-zeile" },
       ...nz.felder.map(n => el("label", {}, el("span", { text: n }), LS.notizFeld({ breite: 4, label: n })))) : null;

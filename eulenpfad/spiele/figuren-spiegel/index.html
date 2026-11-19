@@ -26,6 +26,17 @@
     .fs .wahl { gap: 8px; }
     .fs .wahl-knopf.fs-antwort { min-height: 54px; padding: 8px 12px; }
   }
+  /* BH3 a: Auf dem Handy steht jede gelöste Frage auf einer Zeile (Antippen zeigt sie ganz), die Figuren enger, die
+     Antworten niedriger — mit zwei gelösten Fragen ragten die Antworten bis 101 px unter den Rand (s6) */
+  @media (max-width: 560px) {
+    .fs-erledigt li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 3px 8px; margin-bottom: 3px; cursor: pointer; }
+    .fs-erledigt li.offen { white-space: normal; }
+    .fs-figuren { font-size: 14px; }
+    .fs-figuren span { margin: 0 3px 3px 0; padding: 0 6px; }
+    .fs .wahl-knopf.fs-antwort { min-height: 46px; padding: 6px 12px; }
+    .fs .wahl { gap: 6px; }
+    .fs .frage { font-size: 17px; line-height: 1.25; }
+  }
   @media (min-width: 900px) and (orientation: landscape) {
     .fs { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
     .fs .sachtext { margin-top: 0; }
@@ -278,7 +289,9 @@ LS.spiel({
             i++;
             if (i === a.fragen.length) return ctx.richtig(waehle(LOB));
             LS.ton("tipp");
-            erledigt.append(el("li", { text: `✓ ${f.frage} — ${f.richtig}` }));
+            const li = el("li", { text: `✓ ${f.frage} — ${f.richtig}` });
+            li.addEventListener("click", () => li.classList.toggle("offen")); // BH3 a: auf dem Handy eine Zeile, Antippen zeigt sie ganz
+            erledigt.append(li);
             stelle();
             LS.lesetext(szene); // die Liste der gelösten Fragen wächst: Höhe der Szene neu rechnen
             return;

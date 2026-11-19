@@ -21,6 +21,12 @@
   .wb-wahl.wb-bilder .wahl-knopf { min-height: 92px; }
   .wb-wahl.wb-bilder .wahl-knopf .bild { font-size: clamp(42px, 10vw, 58px); }
   .wb-wahl .wahl-knopf { font-size: clamp(18px, 4vw, 23px); }
+  /* BH3 a: Auf dem Handy drei Bilder je Zeile statt zwei (fünf Bilder in drei Reihen ragten mit dem Satz bis 26 px
+     unter den Rand, s6); !important, weil LS.auswahl die Breite am Element setzt */
+  @media (max-width: 560px) {
+    .wb-wahl.wb-bilder { --wahl-breite: 96px !important; }
+    .wb-wahl.wb-bilder .wahl-knopf { min-height: 84px; }
+  }
 </style>
 </head>
 <body>

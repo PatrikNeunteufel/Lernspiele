@@ -50,6 +50,25 @@
     .kasse { min-height: 64px; padding: 6px; margin-bottom: 8px; }
     .vorrat { gap: 8px; margin-bottom: 8px; }
   }
+  /* BH3 a: Geld legen (s4, s2) ragte nach einem falschen Bezahlen und mehreren gelegten Stücken bis 96 px unter den Rand
+     (LERN_Session48: Kasse in zwei Reihen, Vorrat in drei). Handy: Artikel mit Preis links neben der Frage (der Preis
+     steht in der Frage noch einmal; nur ein Artikel ohne Notizen — mit Notizen bliebe der Frage kein Platz), Geld in der Kasse kleiner (zoom statt transform, damit es auch weniger Platz
+     braucht), Vorrat enger. */
+  @media (max-width: 560px) {
+    div:has(> .theke:not(:has(> :nth-child(2))) + .frage + .kasse) { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; }
+    div:has(> .theke:not(:has(> :nth-child(2))) + .frage + .kasse) > * { grid-column: 1 / -1; }
+    div:has(> .theke:not(:has(> :nth-child(2))) + .frage + .kasse) > .theke { grid-column: 1; margin: 0; }
+    div:has(> .theke:not(:has(> :nth-child(2))) + .frage + .kasse) > .frage { grid-column: 2; margin: 0; text-align: left; font-size: 19px; }
+    div:has(> .theke:not(:has(> :nth-child(2))) + .frage + .kasse) > .kasse { margin-top: 8px; }
+    .kasse { gap: 4px; }
+    .kasse .geld { transform: none; zoom: .7; }
+    .vorrat { gap: 6px; }
+    /* Rückgeld legen (s6) mit vielen Stücken in der Kasse: bis 18 px darunter — der Vorrat etwas kleiner */
+    .vorrat .geld { zoom: .9; }
+    /* Rückgeld (s6, bis 13 px darunter): die Note in der Frage kleiner */
+    .frage .geld.note { zoom: .8; vertical-align: middle; }
+    .theke:has(> .nz-zeile) .artikel .bild { font-size: 28px; }
+  }
 </style>
 </head>
 <body>

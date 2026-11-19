@@ -79,6 +79,34 @@
     .kompass-seite.lang .wahl { gap: 4px; } /* Weg beschreiben mit langen Namen: bis 5 px über dem Rand (LERN_Session46) */
     .kompass-seite.lang .wahl-knopf { font-size: 17px; line-height: 1.2; min-height: 46px; padding: 3px 10px; }
     .kompass-seite .wahl-knopf { min-height: 54px; }
+    /* BH3 a: Mit dem langen Hinweis nach einem Fehler (bis acht Zeilen) ragte „In welcher Richtung liegt …?“ mit acht
+       Antworten (s4) bis 104 px unter den Rand, auf gedrehter Karte (s5, s6) bis 44 px (LERN_Session48). Die Frage
+       steht rechts neben dem Plan unter dem Nordpfeil (oder der kleinen Rose), nur die Antworten darunter; diese enger. */
+    div:has(> .nur-sehen > .kompass-seite) { grid-template-columns: minmax(0, 1fr) 120px; }
+    .nur-sehen > .kompass-seite { display: contents; }
+    .nur-sehen:has(> .kompass-seite) > .plan { grid-row: 1 / span 3; align-self: start; }
+    .nur-sehen:has(> .kompass-seite) > .nordpfeil { grid-row: 1; align-self: start; width: 48px; }
+    .nur-sehen:has(> .kompass-seite) > .rose.klein { grid-row: 1; align-self: start; }
+    div:has(> .nur-sehen > .kompass-seite) > .achtung { grid-row: 2; width: auto; margin: 2px 0 0; font-size: 13px; line-height: 1.2; }
+    .nur-sehen > .kompass-seite > .frage { grid-column: 2; grid-row: 3; align-self: start; margin: 4px 0 0;
+      font-size: 15px; line-height: 1.25; text-align: left; }
+    .nur-sehen > .kompass-seite > .wahl { grid-column: 1 / -1; grid-row: 4; margin: 4px 0 0; min-width: 0; gap: 4px 6px; }
+    .nur-sehen > .kompass-seite:not(.lang) .wahl-knopf { min-height: 42px; font-size: 17px; padding: 2px; }
+    /* Weg beschreiben (s4 bis 37 px darunter): die Frage ebenso neben dem Plan, die langen Antworten enger */
+    .nur-sehen > .kompass-seite.lang .wahl-knopf { min-height: 40px; font-size: 16px; line-height: 1.2; padding: 2px 8px; }
+    /* Plan zum Antippen auf gedrehter Karte (s5, s6): Der Hinweis nach einem Fehler hat bis zehn Zeilen, die Aufgabe ragte
+       bis 112 px unter den Rand (LERN_Session48). Der Satz „Die Karte ist gedreht“ steht rechts neben dem Plan unter dem
+       Nordpfeil statt in einer Zeile darüber, die Frage darunter enger; der Plan darf bis 210 px schmal werden. */
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) { display: grid; grid-template-columns: minmax(0, 1fr) 92px; column-gap: 10px; align-items: start; }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > * { grid-column: 1 / -1; }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > .karten-zeile { display: contents; }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > .karten-zeile > .plan { grid-column: 1; grid-row: 1 / span 2;
+      width: max(min(210px, 100%), min(420px, 100%, var(--rest-h, 420px))); }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > .karten-zeile > .nordpfeil,
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > .karten-zeile > .rose.klein { grid-column: 2; grid-row: 1; align-self: end; justify-self: center; }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > .achtung { grid-column: 2; grid-row: 2; margin: 6px 0 0; font-size: 14px; line-height: 1.25; }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) > .karten-zeile > .kompass-seite { grid-column: 1 / -1; grid-row: 3; margin-top: 6px; }
+    div:has(> .achtung + .karten-zeile:not(.nur-sehen)) .kompass-seite .frage { font-size: 16px; line-height: 1.25; }
   }
   @media (min-width: 900px) and (orientation: landscape) {
     .karten-zeile { flex-wrap: nowrap; align-items: center; gap: 16px; }

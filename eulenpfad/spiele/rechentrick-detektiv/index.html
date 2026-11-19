@@ -11,6 +11,15 @@
   .rechnung { text-align: center; font-size: clamp(28px, 7vw, 52px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 0 0 14px; }
   .rechnung.klein { font-size: clamp(24px, 5.6vw, 40px); margin: 18px 0 10px; }
   .wahl-knopf { font-variant-numeric: tabular-nums; }
+  /* BH3 a: breit und quer in Schritt 2 die Zifferntastatur rechts neben Rechnung und Anzeige wie im Rahmen (stil.css (2));
+     sie steht hier in einem eigenen Behälter — bei 1024 × 768 ragte Schritt 2 sonst 44 px unter den Rand */
+  @media (min-width: 900px) and (orientation: landscape) {
+    .rt-schritt2:has(> .tastatur) { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 24px; align-items: start; }
+    .rt-schritt2:has(> .tastatur) > * { grid-column: 1; }
+    .rt-schritt2:has(> .tastatur) > .tastatur { grid-column: 2; grid-row: 1 / span 4; margin-top: 0; }
+  }
+  /* BH3 a: Handy — Rechnung in Schritt 2 mit weniger Abstand (s6 mit Notizen 4 px über dem Rand) */
+  @media (max-width: 560px) { .rechnung.klein { margin: 8px 0 6px; } }
   .rt-notizen { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: -4px 0 8px; font-size: 15px; font-weight: 800; color: var(--text-leise); }
 </style>
 </head>
@@ -427,7 +436,7 @@ LS.spiel({
     ctx.flaeche.append(
       el("div", { class: "auftrag", text: "Welche Aufgabe gibt dasselbe — und ist leichter?" }),
       el("div", { class: "rechnung", text: x.links }));
-    const schritt2 = el("div");
+    const schritt2 = el("div", { class: "rt-schritt2" }); // Anordnung breit und quer im Stil (BH3 a)
 
     // Schritt 1 wählen; richtig heisst hier „weiter zu Schritt 2“, erst das Ausrechnen schliesst die Aufgabe.
     const box = LS.auswahl({ ...ctx, richtig: () => rechnen() }, {

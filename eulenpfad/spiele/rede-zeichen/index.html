@@ -43,13 +43,35 @@
     background: var(--k-feld); color: var(--text); box-shadow: 0 5px 0 var(--rand), 0 7px 14px rgba(45, 48, 71, .1); cursor: pointer; }
   .rz-taste.weg { font-size: 26px; background: var(--hinweis-hell); }
   .rz-pruefen { display: flex; justify-content: center; }
-  /* Handy: Schema, Satz über drei Zeilen, Tasten und Prüfen ganz im Bild (LERN-55, s5 vorher 31 px darunter) */
-  @media (max-width: 560px) {
+  /* Handy: Schema, Satz über drei Zeilen, Tasten und Prüfen ganz im Bild (LERN-55, s5 vorher 31 px darunter).
+     BH3 a: auch unter 700 px Höhe (Laptop 1366 × 650 vorher 28 px darunter) */
+  @media (max-width: 560px), (max-height: 700px) {
     .rz-schema { margin-bottom: 8px; }
     .frage { margin-bottom: 8px; }
     .satz { row-gap: 8px; margin-bottom: 10px; }
     .rz-tasten { gap: 8px; margin-bottom: 10px; }
     .rz-taste { min-height: 50px; min-width: 52px; }
+    /* BH3 a: Schema und Frage enger; „SCHEMA“ steht links neben der ersten Zeile. Wie es geht (Lücke antippen, dann
+       die Zeichen), sagen Blase und Hilfe — auf dem Handy zeigt die Frage nur noch den Auftrag. Mit einem langen Satz
+       und der Regel in der Blase ragte die Aufgabe bis 130 px unter den Rand (s5). */
+    .rz-schema { padding: 4px 10px; }
+    .rz-schema > b { font-size: 12px; float: left; margin: 6px 8px 0 0; }
+    .rz-zeile { font-size: 15px; margin: 2px 0; }
+    .rz-zeile .rz-b, .rz-zeile .rz-r { padding: 0 6px; }
+    .frage { font-size: 16px; line-height: 1.25; }
+    .frage .rz-wie { display: none; }
+    .rz-taste { min-height: 46px; }
+    .rz-schema, .frage { margin-bottom: 6px; }
+    .satz { font-size: 19px; margin-bottom: 8px; }
+  }
+  /* BH3 a: „Prüfen ✓“ in der letzten Reihe der Zeichen statt in einer eigenen Zeile, Lücken flacher — auf dem Handy
+     und auf niedrigen Bildschirmen (quer 1024 × 768 vorher bis 18 px darunter) */
+  @media (max-width: 560px), (max-height: 820px) {
+    .rz-unten { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 0 auto 10px; max-width: 560px; }
+    .rz-unten .rz-tasten { display: contents; }
+    .rz-unten .rz-pruefen .knopf { min-height: 46px; padding: 4px 16px; }
+    .satz { row-gap: 6px; }
+    .satz .rz-luecke { height: 1.5em; }
   }
 </style>
 </head>
@@ -295,7 +317,8 @@ function zeichenSetzen(ctx, a, p) {
   const voll = a.luecken.map((l, i) => (l ? i : -1)).filter(i => i >= 0);
   ctx.schritte(voll.length + a.luecken.join("").length + 1 - (a.luecken[0] ? 1 : 0));
   if (p.schema) f.append(schemaKarte(p.schema));
-  f.append(el("div", { class: "frage", text: "Setze die Zeichen der direkten Rede: erst eine Lücke antippen, dann die Zeichen." }));
+  // BH3 a: der zweite Teil (wie es geht) steht auch in Blase und Hilfe und fällt auf dem Handy weg
+  f.append(el("div", { class: "frage" }, "Setze die Zeichen der direkten Rede", el("span", { class: "rz-wie", text: ": erst eine Lücke antippen, dann die Zeichen" }), "."));
 
   const inhalt = a.luecken.map(() => "");
   let aktiv = 0;
@@ -333,7 +356,8 @@ function zeichenSetzen(ctx, a, p) {
   const weg = el("button", { type: "button", class: "rz-taste weg", text: "⌫", "aria-label": "Letztes Zeichen der Lücke löschen" });
   weg.addEventListener("click", () => { if (!ctx.vorbei()) { inhalt[aktiv] = inhalt[aktiv].slice(0, -1); zeige(); } });
   tasten.append(weg);
-  f.append(tasten);
+  const unten = el("div", { class: "rz-unten" }, tasten); // BH3 a: Tasten und „Prüfen ✓“ in einem Block
+  f.append(unten);
   LS.kurztasten(tasten); // die Zeichen auf ihren festen Tasten, ⌫ auf der Rücktaste; die Lücken bleiben zum Antippen
 
   const regel = REGEL[a.art];
@@ -357,7 +381,7 @@ function zeichenSetzen(ctx, a, p) {
     ctx.falsch(teile.join(" "), loesung);
     if (ctx.vorbei()) zeige();
   });
-  f.append(el("div", { class: "rz-pruefen" }, pruefen));
+  unten.append(el("div", { class: "rz-pruefen" }, pruefen));
   zeige();
   // ZU1 a: richtig — die erste Lücke, die noch nicht stimmt, antippen, dann ihr nächstes Zeichen setzen (passt der
   // Anfang nicht, ⌫); stimmt alles, „Prüfen“. Falsch — „Prüfen“, solange etwas fehlt.

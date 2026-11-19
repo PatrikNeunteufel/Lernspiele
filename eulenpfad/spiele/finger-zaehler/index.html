@@ -46,6 +46,22 @@
   .fz-beides { display: flex; align-items: center; gap: 10px; }
   .fz-wahl .wahl-knopf .fz-ziffer { font-size: 40px; }
   .fz-wahl .wahl-knopf .fz-haende { max-width: 180px; margin: 0; }
+  /* Handy mit Browserleisten (BH3 a): drei Hände-Knöpfe untereinander ragten nach dem Hinweis 17 px unter den Rand —
+     die Hände im Knopf etwas kleiner (160 statt 180 px breit, die Finger bleiben gut zählbar) */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .fz-wahl .wahl-knopf .fz-haende { max-width: 160px; }
+    /* Steht als Ziel ein Würfelbild oder Zehnerfeld statt der Ziffer, ragte es bis 41 px unter den Rand: Ziel kleiner,
+       Abstände zu den Knöpfen enger */
+    .fz-ziel { margin-bottom: 6px; }
+    .fz-ziel .fz-wuerfel.gross { width: 76px; height: 76px; gap: 4px; padding: 7px; }
+    .fz-ziel .fz-zehner.gross { grid-template-columns: repeat(5, 18px); gap: 4px; }
+    .fz-wahl:has(.fz-haende) { gap: 6px; }
+  }
+  /* Schmal (BH3 a, WE1 a): drei Zehnerfelder nebeneinander ragten seitlich aus ihren Knöpfen (114 px in 105) —
+     Punkte und Abstände im Knopf etwas kleiner */
+  @media (max-width: 560px) {
+    .fz-wahl .wahl-knopf .fz-zehner:not(.gross) { grid-template-columns: repeat(5, 13px); gap: 3px; padding: 4px; }
+  }
 </style>
 </head>
 <body>

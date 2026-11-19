@@ -25,6 +25,7 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { STUMM_ARG, stummSchalten } = require("./stumm"); // Ton aus (LERN_Session48)
 
 const WURZEL = path.join(__dirname, "..");
 const opt = { modus: "hell", stufen: "wahl,s1,s2,s3,s4,s5,s6", apps: "eulenpfad,lernsteig", json: null, port: "9335", streng: false };
@@ -259,7 +260,7 @@ async function main() {
   if (!BROWSER) throw new Error("Weder Chrome noch Edge gefunden.");
   const profil = fs.mkdtempSync(path.join(os.tmpdir(), "lernspiele-kontrast-"));
   const browser = spawn(BROWSER, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profil}`,
-    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "about:blank"], { stdio: "ignore" });
+    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", STUMM_ARG, "about:blank"], { stdio: "ignore" });
   const modi = String(opt.modus).split(",");
   let funde = 0;
   try {
@@ -279,6 +280,7 @@ async function main() {
       }
     };
     await send("Runtime.enable");
+    await stummSchalten(send);
     await send("Page.navigate", { url: BASIS + "/eulenpfad/index.html" });
     await warte(2500);
     const abweichung = await js(GEGENPROBE);

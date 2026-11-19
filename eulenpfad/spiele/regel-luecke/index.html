@@ -59,6 +59,16 @@
   .option:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--rand); }
   .option.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .option.richtig { background: var(--gut-hell); }
+
+  /* BH3 a: Auf dem Handy enger — nach einem Fehler steht die Regel ganz in der Blase, die Knöpfe ragten bis 20 px
+     unter den Rand (s3) */
+  @media (max-width: 560px), (max-height: 700px) {
+    .regelkarte { padding: 6px 12px; font-size: 16px; margin-bottom: 8px; }
+    .regelkarte b { font-size: 13px; }
+    .bild-gross { font-size: 48px; }
+    .lueckenwort { margin: 4px 0 12px; }
+    .option { min-height: 64px; }
+  }
 </style>
 </head>
 <body>

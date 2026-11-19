@@ -19,6 +19,7 @@ const { spawn } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { STUMM_ARG, stummSchalten } = require("./stumm"); // Ton aus (LERN_Session48)
 
 const WURZEL = path.join(__dirname, "..");
 const opt = { modus: "hell,dunkel", breite: "1024", hoehe: "768", voll: false, vorher: "", warte: "1500", ziel: ".temp/bilder", klasse: "3", port: "9336" };
@@ -73,7 +74,7 @@ async function main() {
   if (!BROWSER) throw new Error("Weder Chrome noch Edge gefunden.");
   const profil = fs.mkdtempSync(path.join(os.tmpdir(), "lernspiele-bilder-"));
   const browser = spawn(BROWSER, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profil}`,
-    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", "about:blank"], { stdio: "ignore" });
+    "--no-first-run", "--no-default-browser-check", "--hide-scrollbars", STUMM_ARG, "about:blank"], { stdio: "ignore" });
   const ziel = path.resolve(WURZEL, opt.ziel);
   fs.mkdirSync(ziel, { recursive: true });
   const dateien = [];
@@ -95,6 +96,7 @@ async function main() {
     };
     await send("Runtime.enable");
     await send("Page.enable");
+    await stummSchalten(send);
     await lade(BASIS + "/eulenpfad/index.html");
     await warte(800);
     const spiele = await js(`

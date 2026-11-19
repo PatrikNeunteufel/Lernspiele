@@ -29,6 +29,14 @@
   .ziel small { display: block; font-size: 14px; color: var(--text-leise); font-weight: 700; }
   .ziel.falsch { background: var(--hinweis-hell); animation: wackeln .4s; }
   .ziel.richtig { background: var(--gut-hell); }
+  .rr-anzeige { margin-top: 10px; }
+  /* BH3 a: unter 700 px Bildhöhe Zahl, Auftrag und Anzeige enger — mit dem langen Hinweis nach einem Fehler (s5) ragte
+     die Aufgabe auf dem Handy 29 px unter den Rand */
+  @media (max-height: 700px) {
+    .zahl-gross { line-height: 1.05; margin-bottom: 2px; }
+    .auf { font-size: clamp(18px, 4vw, 26px); line-height: 1.25; margin-bottom: 2px; }
+    .rr-anzeige { margin-top: 4px; }
+  }
 </style>
 </head>
 <body>
@@ -217,7 +225,7 @@ LS.spiel({
         return true;
       });
     } else {
-      const anzeige = el("div", { class: "anzeige leer", style: "margin-top:10px", "aria-label": "Gerundete Zahl" });
+      const anzeige = el("div", { class: "anzeige leer rr-anzeige", "aria-label": "Gerundete Zahl" }); // Abstand im Stil (BH3 a)
       ctx.flaeche.append(anzeige);
       const tasten = LS.tastatur({
         erwartet: a.loesung, // ZU1 a

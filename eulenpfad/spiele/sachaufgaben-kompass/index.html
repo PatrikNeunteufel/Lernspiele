@@ -110,8 +110,12 @@
     div:has(> .kompass-angaben) > .kompass-schritt { font-size: 14px; line-height: 1.25; margin: 0 0 2px; }
     div:has(> .kompass-angaben) > .frage { margin-bottom: 4px; }
     .kompass-antwort { gap: 6px; margin: 4px 0; }
-    .kompass-text { line-height: 1.4; font-size: 16px; margin-bottom: 6px; }
+    .kompass-text { line-height: 1.35; font-size: 16px; margin-bottom: 6px; } /* BH3 a: 1.35 statt 1.4 — s2 nach einem Fehler sonst 3 px darüber (LERN_Session48) */
     .kompass-text .angabe { margin-block: 1px; line-height: 1.4; }
+    /* BH3 a: geprüfte Angaben sind nicht mehr antippbar — ohne 40-px-Mindesthöhe wird der Text im zweiten Schritt
+       niedriger (s3 mit langem Text ragte sonst bis 32 px unter den Rand) */
+    .kompass-text button.angabe:disabled { min-height: 0; }
+    .kompass-angaben { row-gap: 2px; margin-bottom: 2px; } /* BH3 a: Ergebnis-Schritt s6 mit Notizen 3 px darüber */
     .frage { margin: 2px 0 6px; line-height: 1.3; }
     .kompass-schritt { margin: 2px 0 4px; }
     .kompass-weg, .kompass-zusammenhang { gap: 6px; }
@@ -903,6 +907,7 @@ LS.spiel({
         if (!fehlt && !zuviel) {
           knoepfe.forEach((k, i) => { k.disabled = true; k.classList.remove("gewaehlt"); k.classList.add(a.angaben[i].noetig ? "richtig" : "unnoetig"); });
           LS.ton("tipp");
+          ctx.sag("Genau, weiter!", "gut"); // BH3 a (eine Zeile): sonst stand der Hinweis zur Auswahl weiter
           weiter();
           return;
         }
@@ -941,7 +946,8 @@ LS.spiel({
         if (i.klein) k.append(el("small", { text: i.klein }));
         k.addEventListener("click", () => {
           if (fertig || ctx.vorbei() || k.classList.contains("gewaehlt")) return;
-          if (o === richtig) { fertig = true; k.classList.add("richtig"); LS.ton("tipp"); setTimeout(weiter, 400); return; }
+          // BH3 a: ein Hinweis aus diesem Schritt stand sonst über dem nächsten weiter (bis vier Zeilen, s2 40 px über dem Rand)
+          if (o === richtig) { fertig = true; k.classList.add("richtig"); LS.ton("tipp"); ctx.sag("Genau, weiter!", "gut"); setTimeout(weiter, 400); return; }
           k.classList.remove("falsch"); void k.offsetWidth; k.classList.add("falsch", "gewaehlt");
           ctx.falsch(hinweis, loesungText);
           if (ctx.vorbei()) fertig = true;

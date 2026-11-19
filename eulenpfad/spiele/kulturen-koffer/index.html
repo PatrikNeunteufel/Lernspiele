@@ -39,11 +39,37 @@
   @media (max-width: 560px) and (max-height: 700px) {
     .kk-karte { padding: 8px 12px; margin-bottom: 8px; font-size: 17px; line-height: 1.35; }
     .kk-karte .kk-bild { font-size: 34px; }
+    /* BH3 a: Bild links neben dem Text statt darüber — mit dem Hinweis nach einem Fehler ragten die Quellen (s5)
+       noch 10 px unter den Rand (LERN_Session48) */
+    .kk-karte:has(.kk-bild) { display: flex; align-items: center; gap: 10px; text-align: left; }
+    .kk-karte .kk-bild { flex: none; margin: 0; }
+    /* BH3 a: Zuordnen (s3, Körbe) ebenso — Bild links neben dem Namen; mit einer langen Beschreibung der Kultur im
+       Hinweis ragten die Körbe sonst bis 25 px unter den Rand (LERN_Session48) */
+    .korb-karte:has(> .bild) { display: flex; align-items: center; gap: 12px; padding: 6px 18px; margin-bottom: 12px; }
+    .korb-karte > .bild { font-size: 52px; flex: none; }
     .kk > .frage, .kk > .auftrag { font-size: 17px; line-height: 1.25; margin: 2px 0 8px; }
     .wahl.kk-quellen { gap: 6px; }
     .wahl.kk-quellen .wahl-knopf { padding: 4px 6px; }
     .wahl.kk-quellen .wahl-knopf .bild { font-size: 26px; }
     .wahl.kk-quellen .wahl-knopf small { line-height: 1.2; }
+    /* BH3 a: Bild links neben dem Namen, die Erklärung darunter über die ganze Breite — mit einem Fundstück über drei
+       Zeilen und dem Hinweis nach einem Fehler ragten die Quellen (s5) sonst bis 19 px unter den Rand (LERN_Session48) */
+    .wahl.kk-quellen .wahl-knopf { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center;
+      align-content: center; column-gap: 6px; row-gap: 2px; }
+    .wahl.kk-quellen .wahl-knopf > small { flex-basis: 100%; }
+  }
+  /* BH3 a: Rätsel (s6) auf dem Handy — die fünf Kulturen zu dritt in einer Reihe, Hinweise und „Nächster Hinweis“
+     enger; mit dem Hinweis nach einem Fehler ragten die Kulturen bis 115 px unter den Rand. !important, weil
+     LS.auswahl die Breite am Element setzt. */
+  @media (max-width: 560px) {
+    .kk > .frage { font-size: 17px; line-height: 1.25; margin: 2px 0 8px; }
+    .kk-hinweise { padding: 6px 10px 6px 30px; margin-bottom: 8px; font-size: 16px; line-height: 1.3; }
+    .kk-hinweise li { margin: 2px 0; }
+    .kk-weiter-zeile { margin-bottom: 8px; }
+    .kk-weiter-zeile .knopf { min-height: 44px; padding: 4px 14px; }
+    .wahl.kk-raetsel { --wahl-breite: 96px !important; gap: 6px; }
+    .wahl.kk-raetsel .wahl-knopf { min-height: 70px; padding: 4px; font-size: 15px; line-height: 1.15; }
+    .wahl.kk-raetsel .wahl-knopf .bild { font-size: 28px; }
   }
 </style>
 </head>
@@ -506,13 +532,14 @@ LS.spiel({
     zeile.append(weiter);
     kk.append(liste, zeile);
     zeige();
-    LS.auswahl(ctx, {
+    const raetselWahl = LS.auswahl(ctx, {
       optionen: a.optionen, richtig: r.kultur, breite: 150,
       inhalt: korbInhalt,
       hinweis: id => { zeige(); return `${K[id].name}: ${K[id].kurz}. Das passt nicht zu allen Hinweisen. Lies den nächsten.`; },
       loesung,
       lob: `Richtig geraten: ${k.name}!`, erklaerung: `${k.leute} ${k.kurz}.`,
     });
+    raetselWahl.classList.add("kk-raetsel"); // BH3 a: auf dem Handy drei Kulturen je Reihe
     if (ctx.nr === 0) ctx.sag("Lies die Hinweise. Welche Kultur bin ich? Du darfst jederzeit raten.");
   },
 });

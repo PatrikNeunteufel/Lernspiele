@@ -84,6 +84,22 @@
     /* zweizeilig („nach / Runde 1“), sonst passen zwei Felder nicht in eine Zeile */
     .weiche .w-notizen label > span { max-width: 4.6em; line-height: 1.1; text-align: right; }
   }
+  /* Handy mit Browserleisten (BH3 a): Die Weiche der Königsstufe ragte nach dem Hinweis bis 22 px unter den Rand —
+     Kästen, Frage, Notizfelder und Abstände der Weiche enger */
+  @media (max-width: 560px) and (max-height: 700px) {
+    .auftrag:has(+ .weiche) { margin-bottom: 4px; }
+    .weiche { row-gap: 2px; margin: 0 0 4px; }
+    .weiche .m-kasten { padding: 2px 10px; }
+    .weiche > .w-frage { font-size: 16px; line-height: 1.2; padding: 3px 8px; }
+    .weiche .w-runden { line-height: 1.15; }
+    .weiche .w-notizen .zw-notiz { min-height: 32px; padding-block: 0; }
+    /* Kette mit vier Kästen und Notizen (rückwärts, s6): drei Reihen ragten nach dem Hinweis zur Probe bis 22 px unter
+       den Rand — Kästen, Pfeile mit Notiz und Abstände der Kette flacher */
+    .maschine { row-gap: 2px; margin: 2px 0 4px; }
+    .maschine .m-kasten { padding-block: 1px; }
+    .m-pfeil-notiz .m-pfeil { line-height: 1; }
+    .m-pfeil-notiz .zw-notiz { min-height: 28px; padding-block: 0; }
+  }
 </style>
 </head>
 <body>
