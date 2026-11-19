@@ -2895,3 +2895,10 @@
   der bestehenden Prüfung (die Zufallsrunde traf die Aufgabe nicht).
 - Tests: Skripte „Keine Fehler.“, Eulenpfad die 26 Spiele „Keine Fehler.“ („Geführt (ZP1 a): 150 Stufen ganz
   durchgespielt“, Zahlenstrahl-Pfeil nach der Berichtigung im Ersatz-DOM „6 Stufen ganz durchgespielt“)
+- Falscher Zug der Tastatur (Entscheid ZF1 a): `LS.tastatur` nimmt `opt.erwartetFalsch` (Zahl, Text oder Funktion; leer =
+  kein falscher Handgriff möglich) für Spiele, in denen Wert + 1 noch gilt (Toleranz, mehrere Lösungen); ohne die Angabe
+  wie bisher Wert + 1. Zahlenstrahl-Pfeil (zahlenstrahl-pfeil) nennt einen Strich daneben und braucht seinen eigenen
+  falschen Zug nicht mehr (er drückte die Tasten über ihre Beschriftung). rahmen.md 4.3.
+- Tests: Skripte „Keine Fehler.“, Eulenpfad zahlenstrahl-pfeil einmaleins-blitz quader-volumen kiosk-kasse „Keine
+  Fehler.“; Messung mit `--schritte` Zahlenstrahl-Pfeil (s1–s6, Handy, drei Ziehungen): 0 Spiele ohne Zug, 0 Seiten nicht
+  zu Ende gespielt, in jeder Seite ein falscher Handgriff.

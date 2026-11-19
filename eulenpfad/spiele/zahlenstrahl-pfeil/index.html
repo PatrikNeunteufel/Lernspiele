@@ -221,6 +221,8 @@ LS.spiel({
       ctx.flaeche.append(svg, el("div", { class: "hinweis-klein", text: `Ein Strich = ${zahlText(a.schritt)} · ungefähr genügt` }), anzeige);
       const tasten = LS.tastatur({
         erwartet: () => a.ziel, // ZU1 a
+        // ZF1 a: ziel + 1 läge in der Toleranz und gälte als richtig; falsch ist ein Strich daneben (ausserhalb der Toleranz)
+        erwartetFalsch: () => (a.ziel - a.schritt >= 0 ? a.ziel - a.schritt : a.ziel + a.schritt),
         anzeige, maxStellen: 7,
         onOk(w) {
           if (Math.abs(w - a.ziel) <= a.toleranz) {
@@ -235,16 +237,6 @@ LS.spiel({
         },
       });
       ctx.flaeche.append(tasten.element);
-      // ZU1 a: Der falsche Zug der Tastatur (ziel + 1) läge in der Toleranz und gälte als richtig. Darum tippt dieser Zug
-      // falsch eine Zahl einen Strichabstand daneben (ausserhalb der Toleranz); richtig übernimmt die Tastatur.
-      ctx.testZug(richtig => {
-        if (richtig || tasten.gesperrt || !document.body.contains(tasten.element)) return false;
-        const knopf = t => [...tasten.element.querySelectorAll("button")].find(b => b.textContent === t);
-        knopf("✕").click();
-        for (const z of String(a.ziel - a.schritt >= 0 ? a.ziel - a.schritt : a.ziel + a.schritt)) knopf(z).click();
-        knopf("OK ✓").click();
-        return true;
-      });
     }
     if (ctx.nr === 0) ctx.sag("Schau zuerst, wie viel ein Strich ist.");
   },

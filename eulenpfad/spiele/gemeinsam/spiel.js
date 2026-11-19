@@ -1929,12 +1929,16 @@ const LS = (() => {
     t.addEventListener("mousedown", e => { if (e.target.closest("button") && notizImFokus()) e.preventDefault(); });
 
     // ZU1 a: Mit opt.erwartet (Zahl, Text wie „3.0“ oder Funktion, die eins davon gibt) tippt der Zug den Wert samt OK
-    // ein, falsch einen um 1 grösseren; ohne erwartet kennt die Tastatur keinen Zug.
+    // ein, falsch opt.erwartetFalsch (gleiche Form; ZF1 a, für Spiele, in denen Wert + 1 noch gilt: Toleranz, mehrere
+    // Lösungen) oder sonst einen um 1 grösseren; ohne erwartet kennt die Tastatur keinen Zug.
+    const wertVon = o => (typeof o === "function" ? o() : o);
     zugMelden(richtig => {
       if (opt.erwartet === undefined || api.gesperrt || !zugImBild(t)) return false;
-      const w = typeof opt.erwartet === "function" ? opt.erwartet() : opt.erwartet;
+      const w = wertVon(opt.erwartet);
       if (w === null || w === undefined || w === "") return false;
-      const s = richtig ? String(w) : String(Number(w) + 1);
+      const f = richtig || opt.erwartetFalsch === undefined ? null : wertVon(opt.erwartetFalsch);
+      if (!richtig && opt.erwartetFalsch !== undefined && (f === null || f === undefined || f === "")) return false; // kein falscher möglich
+      const s = richtig ? String(w) : f !== null ? String(f) : String(Number(w) + 1);
       api.leeren();
       for (const z of s) if (z === "." || z === ",") api.zeichen(); else if (/[0-9]/.test(z)) api.tippe(z);
       api.ok();
