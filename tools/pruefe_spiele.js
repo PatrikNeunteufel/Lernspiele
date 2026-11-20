@@ -741,8 +741,9 @@ if (opt.endlosMessen !== 0) {
   for (const p of dateien) {
     const rel = path.relative(APP, p);
     if (ERLAUBT.includes(rel)) continue;
-    if (fs.readFileSync(p, "utf8").includes("unterstuetzen.html")) {
-      console.log(`    FEHLER  ${rel}: verlinkt die Beitragsseite — nur Verwaltung und Anleitung für Erwachsene dürfen das`);
+    const inhalt = fs.readFileSync(p, "utf8");
+    if (inhalt.includes("unterstuetzen.html") || inhalt.includes("RUECKMELDUNG")) {
+      console.log(`    FEHLER  ${rel}: verlinkt Beitragsseite oder Rückmeldung — nur Verwaltung und Anleitung für Erwachsene dürfen das`);
       fehlerZahl++;
     }
   }

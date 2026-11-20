@@ -10,9 +10,18 @@
 
 const UNTERSTUETZEN = Object.freeze([
   { id: "kaffee", bild: "☕", name: "Einen Kaffee spendieren", text: "Einmalig oder regelmässig, über die Seite des Anbieters.", url: "" },
-  { id: "github", bild: "💜", name: "GitHub Sponsors", text: "Für alle mit einem GitHub-Konto.", url: "" },
+  { id: "github", bild: "💜", name: "GitHub Sponsors", text: "Einmalig oder monatlich, für alle mit einem GitHub-Konto.", url: "https://github.com/sponsors/patrikneunteufel" },
   { id: "qr", bild: "🏦", name: "Banküberweisung", text: "QR-Rechnung zum Scannen mit der Banking-App, ohne Zahlungsdienst.", url: "", qr: true },
 ]);
+
+/* Rückmeldung (Wunsch Patrik, LERN_Session49): Aufsicht und Erwachsene sollen sagen können, ob ihnen die Reihe gefällt —
+   öffentlich auf GitHub, nur für Erwachsene verlinkt wie die Beiträge (Verwaltung, Anleitung für Erwachsene, Portal).
+   Fehler in einer Aufgabe gehen weiter über „🙋 Melden“ (M1 a), nicht hierhin. url leer: kein Hinweis. */
+const RUECKMELDUNG = Object.freeze({
+  url: "https://github.com/patrikneunteufel/Lernspiele/discussions",
+  titel: "💬 Gefällt Ihnen Eulenpfad?",
+  text: "Hinterlassen Sie eine Rückmeldung auf GitHub — das hilft, die Spiele besser zu machen. Bitte keine Namen von Kindern; Fehler in einer Aufgabe melden Sie besser mit „🙋 Melden“ im Spiel.",
+});
 
 /** Die eingerichteten Möglichkeiten (url gesetzt). */
 const unterstuetzenAktiv = () => UNTERSTUETZEN.filter(u => u.url);

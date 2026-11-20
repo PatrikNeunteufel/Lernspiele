@@ -534,6 +534,12 @@ function zeichneVerwaltung(box, neu) {
     seite.append(block({ "data-block": "standard" },
       zeile(knopf("↺ Alles auf Standard", () => { LS.einstellungenZuruecksetzen(); neu(); })),
       el("p", { class: "leise-text", style: "margin:6px 0 0", text: "Setzt alle Einstellungen oben zurück, auch die je Spiel." }),
+      // Rückmeldung auf GitHub (LERN_Session49): nur hier für die Aufsicht, nie in Tabs der Kinder
+      typeof RUECKMELDUNG === "object" && RUECKMELDUNG.url
+        ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("b", { text: RUECKMELDUNG.titel + " " }),
+          document.createTextNode(RUECKMELDUNG.text + " "),
+          el("a", { href: RUECKMELDUNG.url, target: "_blank", rel: "noopener", text: "Zur Rückmeldung auf GitHub" }))
+        : null,
       // Freiwillige Beiträge (LERN-50): nur hier für die Aufsicht und nur, wenn ein Link eingetragen ist
       typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length
         ? el("p", { class: "leise-text", style: "margin-top:14px" }, el("a", { href: "../portal/unterstuetzen.html", text: "☕ Eulenpfad unterstützen" }),

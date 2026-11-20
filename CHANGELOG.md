@@ -3029,3 +3029,14 @@
   Fehler.“.
 - Voller Eulenpfad-Lauf auf `f6aea34` vor dem Push „Keine Fehler.“ (3361 s, „Geführt (ZP1 a): 1050 Stufen ganz
   durchgespielt; 0 Spiele mit einer Aufgabe ohne Zug“).
+
+## 2026-11-20 — LERN_Session49
+- Entscheidvorlage BZ1 Aufrufe zählen: `docs/entscheid_besucherzahlen.md` (a Cloudflare vor eigener Domain, b Zählpixel
+  eines Dienstes, c eigener Meldungsserver; Umzug der Browserdaten bei neuer Domain), offen.
+- GitHub Sponsors eingetragen (LERN-50): `portal/unterstuetzen.js` `github` mit Link, `.github/FUNDING.yml`. Rückmeldung
+  für Erwachsene „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (`RUECKMELDUNG`): Portal-Fusszeile,
+  Anleitung für Erwachsene, Verwaltung → Einstellungen; `tools/pruefe_spiele.js` prüft auch `RUECKMELDUNG` ausserhalb
+  dieser Stellen. Sponsors-Profil und Discussions richtet Patrik vor dem Push ein
+  (`docs/anleitung_freiwillige_beitraege.md` Abschnitt 6).
+- Tests: Skripte „Keine Fehler.“; Eulenpfad zehner-ergaenzer „Keine Fehler.“ (läuft die Prüfung der Beitragslinks mit);
+  im Browser Portal, Beitragsseite, Anleitung und Verwaltung als Test-Aufsicht ohne Konsolenfehler.

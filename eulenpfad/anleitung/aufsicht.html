@@ -580,6 +580,12 @@
       nicht weitergeben; „Schlüssel auf diesem Gerät vergessen“ entfernt ihn vom Gerät.</p>
   </section>
 
+  <!-- Rückmeldung (LERN_Session49): Text und Link aus portal/unterstuetzen.js (RUECKMELDUNG) -->
+  <section id="rueckmeldung" hidden>
+    <h2 id="rueckmeldung-titel"></h2>
+    <p><span id="rueckmeldung-text"></span> <a id="rueckmeldung-link" target="_blank" rel="noopener">Zur Rückmeldung auf GitHub</a></p>
+  </section>
+
   <!-- Freiwillige Beiträge (LERN-50): erscheint erst, wenn in portal/unterstuetzen.js ein Link eingetragen ist -->
   <section id="unterstuetzen" hidden>
     <h2>☕ Eulenpfad unterstützen</h2>
@@ -616,6 +622,12 @@ if (new URLSearchParams(location.search).get("von") === "app") {
 }
 </script>
 <script src="../../portal/unterstuetzen.js"></script>
-<script>if (typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length) document.getElementById("unterstuetzen").hidden = false;</script>
+<script>if (typeof unterstuetzenAktiv === "function" && unterstuetzenAktiv().length) document.getElementById("unterstuetzen").hidden = false;
+if (typeof RUECKMELDUNG === "object" && RUECKMELDUNG.url) {
+  document.getElementById("rueckmeldung-titel").textContent = RUECKMELDUNG.titel;
+  document.getElementById("rueckmeldung-text").textContent = RUECKMELDUNG.text;
+  document.getElementById("rueckmeldung-link").href = RUECKMELDUNG.url;
+  document.getElementById("rueckmeldung").hidden = false;
+}</script>
 </body>
 </html>

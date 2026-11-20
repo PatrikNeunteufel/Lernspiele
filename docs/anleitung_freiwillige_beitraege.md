@@ -90,3 +90,25 @@ Beitragsseite verlinkt (Gegenprobe mit einer Probedatei, danach gelöscht).
 4. Link bzw. Pfad in `portal/unterstuetzen.js` bei `url` eintragen.
 5. Lokal prüfen (Portal öffnen, Link sichtbar, führt zur richtigen Seite), dann committen und pushen — GitHub Pages
    veröffentlicht von selbst.
+
+## 6. GitHub Sponsors und Rückmeldung (LERN_Session49, Wunsch Patrik)
+
+Eingetragen, **noch nicht aktiv bei GitHub** (Abfrage 20.11.2026: `github.com/sponsors/patrikneunteufel` leitet auf
+das Profil weiter, `…/Lernspiele/discussions` antwortet 404):
+
+- `portal/unterstuetzen.js`: `github` mit `url: "https://github.com/sponsors/patrikneunteufel"`; damit erscheinen
+  Portal-Fusszeile, Beitragsseite, Anleitung für Erwachsene und Verwaltung → Einstellungen.
+- `.github/FUNDING.yml` (`github: patrikneunteufel`): Sponsor-Knopf auf der Repo-Seite; geht nicht online (nicht in
+  Pages).
+- `RUECKMELDUNG` in derselben Datei: „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions, für Erwachsene an
+  denselben Stellen (das Testskript prüft auch diesen Namen). Fehler in einer Aufgabe gehen weiter über „🙋 Melden“.
+
+**Was Patrik bei GitHub einrichtet, bevor gepusht wird** (sonst gehen tote Links online):
+
+1. Sponsors-Profil: github.com/sponsors/accounts → „Join the waitlist“ bzw. „Get started“ beim persönlichen Konto,
+   Profiltext (Abschnitt 5, Schritt 2), Stufen (einmalig und monatlich), Stripe Connect mit Bankkonto in der Schweiz,
+   Steuerformular W-8BEN; dann auf die Freigabe durch GitHub warten. Abschnitt 3 (Steuern, Impressum, Name) vorher.
+2. Discussions einschalten: Repo → Settings → General → Features → Discussions; eine Kategorie „Rückmeldungen“ anlegen
+   (Vorschlag), im Begrüssungsbeitrag: keine Namen, Fotos oder Lernstände von Kindern.
+3. Beide Links im Browser öffnen, dann pushen.
+
