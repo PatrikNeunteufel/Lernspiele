@@ -100,7 +100,8 @@ das Profil weiter, `…/Lernspiele/discussions` antwortet 404):
   Portal-Fusszeile, Beitragsseite, Anleitung für Erwachsene und Verwaltung → Einstellungen.
 - `.github/FUNDING.yml` (`github: patrikneunteufel`): Sponsor-Knopf auf der Repo-Seite; geht nicht online (nicht in
   Pages).
-- `RUECKMELDUNG` in derselben Datei: „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions, für Erwachsene an
+- `RUECKMELDUNG` in derselben Datei: „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (Entscheid RM1 a,
+  20.11.2026: Discussions statt Issues), für Erwachsene an
   denselben Stellen (das Testskript prüft auch diesen Namen). Fehler in einer Aufgabe gehen weiter über „🙋 Melden“.
 
 **Stand 20.11.2026:** Sponsors-Profil mit Stripe eingerichtet und eingereicht; GitHub meldet „pending approval“ und

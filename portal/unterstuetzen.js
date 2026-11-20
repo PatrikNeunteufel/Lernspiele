@@ -16,7 +16,8 @@ const UNTERSTUETZEN = Object.freeze([
 
 /* Rückmeldung (Wunsch Patrik, LERN_Session49): Aufsicht und Erwachsene sollen sagen können, ob ihnen die Reihe gefällt —
    öffentlich auf GitHub, nur für Erwachsene verlinkt wie die Beiträge (Verwaltung, Anleitung für Erwachsene, Portal).
-   Fehler in einer Aufgabe gehen weiter über „🙋 Melden“ (M1 a), nicht hierhin. url leer: kein Hinweis. */
+   Fehler in einer Aufgabe gehen weiter über „🙋 Melden“ (M1 a), nicht hierhin. url leer: kein Hinweis.
+   Ziel GitHub Discussions statt Issues (Entscheid RM1 a, 2026-11-20): Issues bleiben die Arbeitsliste der Entwicklung. */
 const RUECKMELDUNG = Object.freeze({
   url: "https://github.com/patrikneunteufel/Lernspiele/discussions",
   titel: "💬 Gefällt Ihnen Eulenpfad?",

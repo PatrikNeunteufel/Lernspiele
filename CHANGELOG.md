@@ -3034,7 +3034,7 @@
 - Entscheidvorlage BZ1 Aufrufe zählen: `docs/entscheid_besucherzahlen.md` (a Cloudflare vor eigener Domain, b Zählpixel
   eines Dienstes, c eigener Meldungsserver; Umzug der Browserdaten bei neuer Domain), offen.
 - GitHub Sponsors eingetragen (LERN-50): `portal/unterstuetzen.js` `github` mit Link, `.github/FUNDING.yml`. Rückmeldung
-  für Erwachsene „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (`RUECKMELDUNG`): Portal-Fusszeile,
+  für Erwachsene „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (`RUECKMELDUNG`, Entscheid RM1 a): Portal-Fusszeile,
   Anleitung für Erwachsene, Verwaltung → Einstellungen; `tools/pruefe_spiele.js` prüft auch `RUECKMELDUNG` ausserhalb
   dieser Stellen. Sponsors-Profil und Discussions richtet Patrik vor dem Push ein
   (`docs/anleitung_freiwillige_beitraege.md` Abschnitt 6).
