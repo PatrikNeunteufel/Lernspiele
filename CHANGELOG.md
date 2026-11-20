@@ -3036,8 +3036,10 @@
 - GitHub Sponsors eingetragen (LERN-50): `portal/unterstuetzen.js` `github` mit Link, `.github/FUNDING.yml`. Rückmeldung
   für Erwachsene „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (`RUECKMELDUNG`, Entscheid RM1 a): Portal-Fusszeile,
   Anleitung für Erwachsene, Verwaltung → Einstellungen; `tools/pruefe_spiele.js` prüft auch `RUECKMELDUNG` ausserhalb
-  dieser Stellen. Ko-fi (`kaffee`) und neu Patreon mit den Konten aus PruneCopy, auch in `FUNDING.yml`.
-  Sponsors-Profil und Discussions richtet Patrik vor dem Push ein
-  (`docs/anleitung_freiwillige_beitraege.md` Abschnitt 6).
+  dieser Stellen. Ko-fi (`kaffee`) und neu Patreon mit den Konten aus PruneCopy, auch in `FUNDING.yml`; deren Seiten
+  nennen künftig beide Projekte (Entscheid KP1 a).
+  GitHub Sponsors bleibt ausgeblendet (`url: ""`, in `FUNDING.yml` auskommentiert), bis GitHub das eingereichte
+  Profil freigibt (`docs/anleitung_freiwillige_beitraege.md` Abschnitt 6). Texte für die Profile:
+  `docs/profiltexte_beitraege.md`.
 - Tests: Skripte „Keine Fehler.“; Eulenpfad zehner-ergaenzer „Keine Fehler.“ (läuft die Prüfung der Beitragslinks mit);
   im Browser Portal, Beitragsseite, Anleitung und Verwaltung als Test-Aufsicht ohne Konsolenfehler.

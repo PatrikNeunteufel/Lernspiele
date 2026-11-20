@@ -104,19 +104,27 @@ das Profil weiter, `…/Lernspiele/discussions` antwortet 404):
   CLI). `kaffee` zeigt auf `ko-fi.com/prunecopy`, neuer Eintrag `patreon` auf `patreon.com/PruneCopy` (Seitentitel am
   20.11.2026: „Patrik Neunteufel | Patreon“; Ko-fi lieferte HTTP 403, Seite nicht gelesen). Gebühren von Patreon sind
   in Abschnitt 2 nicht nachgeprüft.
+- **Entscheid KP1 a (20.11.2026):** Konten behalten, Seiten allgemein halten — Titel und Profiltext auf Ko-fi und
+  Patreon nennen die Person und beide Projekte (PruneCopy und die Reihe Eulenpfad → Lernsteig → Gratwanderung), damit
+  Spendende aus Eulenpfad sehen, dass sie richtig sind. Adressen bleiben (README von PruneCopy verlinkt sie). Umstellen
+  macht Patrik auf den Seiten der Anbieter.
 - `RUECKMELDUNG` in derselben Datei: „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (Entscheid RM1 a,
   20.11.2026: Discussions statt Issues), für Erwachsene an
   denselben Stellen (das Testskript prüft auch diesen Namen). Fehler in einer Aufgabe gehen weiter über „🙋 Melden“.
 
 **Stand 20.11.2026:** Sponsors-Profil mit Stripe eingerichtet und eingereicht; GitHub meldet „pending approval“ und
-schickt eine E-Mail, sobald es freigegeben ist. Discussions noch nicht eingeschaltet.
+schickt eine E-Mail, sobald es freigegeben ist. Bis dahin ist Sponsors **ausgeblendet** (Wunsch Patrik): `github` in
+`portal/unterstuetzen.js` mit `url: ""`, in `.github/FUNDING.yml` auskommentiert. Ko-fi, Patreon und Discussions sind
+eingeschaltet; damit darf gepusht werden. **Nach der Freigabe:** in `unterstuetzen.js` die Adresse aus dem Kommentar bei
+`url` eintragen, in `FUNDING.yml` das `#` vor `github:` entfernen, Link prüfen, pushen.
 
-**Was Patrik bei GitHub einrichtet, bevor gepusht wird** (sonst gehen tote Links online):
+Texte für die Profile: [profiltexte_beitraege.md](profiltexte_beitraege.md).
+
+**Was Patrik bei GitHub einrichtet** (erledigt bis auf die Freigabe):
 
 1. Sponsors-Profil: github.com/sponsors/accounts → „Join the waitlist“ bzw. „Get started“ beim persönlichen Konto,
    Profiltext (Abschnitt 5, Schritt 2), Stufen (einmalig und monatlich), Stripe Connect mit Bankkonto in der Schweiz,
    Steuerformular W-8BEN; dann auf die Freigabe durch GitHub warten. Abschnitt 3 (Steuern, Impressum, Name) vorher.
 2. Discussions einschalten: Repo → Settings → General → Features → Discussions; eine Kategorie „Rückmeldungen“ anlegen
    (Vorschlag), im Begrüssungsbeitrag: keine Namen, Fotos oder Lernstände von Kindern.
-3. Beide Links im Browser öffnen, dann pushen.
-
+3. Links im Browser öffnen, dann pushen.

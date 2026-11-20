@@ -10,7 +10,9 @@
 
 const UNTERSTUETZEN = Object.freeze([
   { id: "kaffee", bild: "☕", name: "Einen Kaffee spendieren", text: "Einmalig oder regelmässig, über Ko-fi.", url: "https://ko-fi.com/prunecopy" },
-  { id: "github", bild: "💜", name: "GitHub Sponsors", text: "Einmalig oder monatlich, für alle mit einem GitHub-Konto.", url: "https://github.com/sponsors/patrikneunteufel" },
+  // Ausgeblendet bis zur Freigabe des Profils durch GitHub (eingereicht 2026-11-20); danach bei url eintragen:
+  // "https://github.com/sponsors/patrikneunteufel" — und in .github/FUNDING.yml das # vor github: entfernen
+  { id: "github", bild: "💜", name: "GitHub Sponsors", text: "Einmalig oder monatlich, für alle mit einem GitHub-Konto.", url: "" },
   { id: "patreon", bild: "🧡", name: "Patreon", text: "Monatlich, über Patreon.", url: "https://www.patreon.com/PruneCopy" },
   { id: "qr", bild: "🏦", name: "Banküberweisung", text: "QR-Rechnung zum Scannen mit der Banking-App, ohne Zahlungsdienst.", url: "", qr: true },
 ]);
