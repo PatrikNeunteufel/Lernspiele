@@ -9,8 +9,9 @@
    qr: url ist der Pfad zu einem Bild der Schweizer QR-Rechnung ohne Betrag, relativ zu portal/ (z. B. "qr-rechnung.png"). */
 
 const UNTERSTUETZEN = Object.freeze([
-  { id: "kaffee", bild: "☕", name: "Einen Kaffee spendieren", text: "Einmalig oder regelmässig, über die Seite des Anbieters.", url: "" },
+  { id: "kaffee", bild: "☕", name: "Einen Kaffee spendieren", text: "Einmalig oder regelmässig, über Ko-fi.", url: "https://ko-fi.com/prunecopy" },
   { id: "github", bild: "💜", name: "GitHub Sponsors", text: "Einmalig oder monatlich, für alle mit einem GitHub-Konto.", url: "https://github.com/sponsors/patrikneunteufel" },
+  { id: "patreon", bild: "🧡", name: "Patreon", text: "Monatlich, über Patreon.", url: "https://www.patreon.com/PruneCopy" },
   { id: "qr", bild: "🏦", name: "Banküberweisung", text: "QR-Rechnung zum Scannen mit der Banking-App, ohne Zahlungsdienst.", url: "", qr: true },
 ]);
 

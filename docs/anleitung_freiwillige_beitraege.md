@@ -98,8 +98,12 @@ das Profil weiter, `…/Lernspiele/discussions` antwortet 404):
 
 - `portal/unterstuetzen.js`: `github` mit `url: "https://github.com/sponsors/patrikneunteufel"`; damit erscheinen
   Portal-Fusszeile, Beitragsseite, Anleitung für Erwachsene und Verwaltung → Einstellungen.
-- `.github/FUNDING.yml` (`github: patrikneunteufel`): Sponsor-Knopf auf der Repo-Seite; geht nicht online (nicht in
-  Pages).
+- `.github/FUNDING.yml` (`github: patrikneunteufel`, `ko_fi: prunecopy`, `patreon: PruneCopy`): Sponsor-Knopf auf der
+  Repo-Seite; geht nicht online (nicht in Pages).
+- Ko-fi und Patreon (Wunsch Patrik, 20.11.2026): dieselben Konten wie im Repo PruneCopy (dort im README und in der
+  CLI). `kaffee` zeigt auf `ko-fi.com/prunecopy`, neuer Eintrag `patreon` auf `patreon.com/PruneCopy` (Seitentitel am
+  20.11.2026: „Patrik Neunteufel | Patreon“; Ko-fi lieferte HTTP 403, Seite nicht gelesen). Gebühren von Patreon sind
+  in Abschnitt 2 nicht nachgeprüft.
 - `RUECKMELDUNG` in derselben Datei: „💬 Gefällt Ihnen Eulenpfad?“ mit Link auf GitHub Discussions (Entscheid RM1 a,
   20.11.2026: Discussions statt Issues), für Erwachsene an
   denselben Stellen (das Testskript prüft auch diesen Namen). Fehler in einer Aufgabe gehen weiter über „🙋 Melden“.
